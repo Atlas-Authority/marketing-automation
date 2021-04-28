@@ -23,5 +23,5 @@ jobs:
           pull: true
           push: true
           build-args: |
-            git_sha=$GITHUB_SHA
+            git_sha=${{ env.GITHUB_SHA }}
           tags: ghcr.io/atlas-authority/marketing-automation:latest
