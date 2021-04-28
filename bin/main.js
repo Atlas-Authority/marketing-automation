@@ -38,7 +38,7 @@ argParser.failIfExtraOpts();
 const slack = new Slack();
 
 const version = process.env.GITSHA || readPackageUpSync()?.packageJson.version;
-await slack.postToSlack(`Starting Marketing Engine v${version}`);
+await slack.postToSlack(`Starting Marketing Engine [${version}]`);
 
 run({
 
