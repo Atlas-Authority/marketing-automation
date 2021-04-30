@@ -191,17 +191,17 @@ After running the engine, to test logic *after* the Scoring Engine runs, pass `-
          * They couldn't have upgraded.
          * Do nothing, just log this situation.
  
-       * If the chronologically first license is paid:
+       * Else if the chronologically first license is paid:
  
          * It's probably a renewal.
          * Evals after the first paid are probably QA or something.
          * Do nothing, just log this situation.
  
-       * If the first is an eval, and they have eventual paids:
+       * Else if the first is an eval, and they have eventual paids:
  
          * It's an upgrade.
  
-         * If there's an deal, update its addonLicenseId.
+         * If there's a deal, update its addonLicenseId.
          * Whether creating or updating:
            * Set amount based on `purchaseDetails.vendorAmount` if available
            * Set deal stage to Closed Won.
