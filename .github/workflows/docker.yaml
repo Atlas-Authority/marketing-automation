@@ -22,6 +22,4 @@ jobs:
           file: ./Dockerfile
           pull: true
           push: true
-          build-args: |
-            git_sha=${{ github.sha }}
           tags: ghcr.io/atlas-authority/marketing-automation:latest

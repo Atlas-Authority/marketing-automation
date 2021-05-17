@@ -1,4 +1,3 @@
-import { readPackageUpSync } from 'read-pkg-up';
 import CachedFileDownloader from "../lib/downloader/cached-file-downloader.js";
 import LiveDownloader from '../lib/downloader/live-downloader.js';
 import runEngine from "../lib/engine/engine.js";
@@ -37,8 +36,7 @@ argParser.failIfExtraOpts();
 
 const slack = new Slack();
 
-const version = process.env.GITSHA || readPackageUpSync()?.packageJson.version;
-await slack.postToSlack(`Starting Marketing Engine [${version}]`);
+await slack.postToSlack(`Starting Marketing Engine`);
 
 run({
 

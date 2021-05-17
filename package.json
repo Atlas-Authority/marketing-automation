@@ -20,8 +20,7 @@
     "lodash": "^4.17.20",
     "luxon": "^1.25.0",
     "mustache": "^4.2.0",
-    "node-fetch": "^2.6.1",
-    "read-pkg-up": "^8.0.0"
+    "node-fetch": "^2.6.1"
   },
   "devDependencies": {
     "@types/capitalize": "^2.0.0",
