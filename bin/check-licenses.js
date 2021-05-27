@@ -1,6 +1,7 @@
 import CachedFileDownloader from '../lib/downloader/cached-file-downloader.js';
 import { downloadInitialData } from '../lib/downloader/download-initial-data.js';
 import { buildContactsStructure } from '../lib/engine/contacts.js';
+import { olderThan90Days } from '../lib/engine/generate-deals.js';
 import * as datadir from '../lib/util/datadir.js';
 import * as logger from '../lib/util/logger.js';
 
@@ -50,6 +51,11 @@ function check(sen) {
 
   const foundMatch = matchedGroups.find(group => group.find(l => l.addonLicenseId === sen));
   if (foundMatch) {
+    if (foundMatch.every(l => olderThan90Days(l.start))) {
+      logger.info('Dev', sen, 'All matches > 90 days old');
+      return;
+    }
+
     const matches = foundMatch.filter(l => l.addonLicenseId !== sen);
     for (const otherLicense of matches) {
       logger.warn('Dev', sen, `Checking matched license ${otherLicense.addonLicenseId}`);
