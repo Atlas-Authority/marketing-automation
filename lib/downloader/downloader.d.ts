@@ -1,5 +1,6 @@
 interface Downloader {
   downloadFreeEmailProviders(): Promise<string[]>;
+  downloadAllTlds(): Promise<string[]>;
 
   downloadTransactions(): Promise<Transaction[]>;
 
