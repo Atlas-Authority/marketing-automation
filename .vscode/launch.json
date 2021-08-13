@@ -5,12 +5,12 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Main",
+      "name": "Run once",
       "request": "launch",
       "skipFiles": [
         "<node_internals>/**"
       ],
-      "program": "${workspaceFolder}/bin/main.js",
+      "program": "${workspaceFolder}/bin/run-once.js",
       "args": [
         "--downloader=cached",
         "--uploader=console-verbose",
