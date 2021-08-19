@@ -1,4 +1,5 @@
 import runEngine from "../lib/engine/engine.js";
+import zeroEmptyDealAmounts from "../lib/normalizations/zero-empty-deal-amounts.js";
 import { getCliOptions } from "../lib/util/cli.js";
 import config from "../lib/util/config.js";
 import { AttachableError, SimpleError } from '../lib/util/errors.js';
@@ -14,6 +15,7 @@ await slack.postToSlack(`Starting Marketing Engine`);
 await run({
 
   async normalizeData() {
+    await zeroEmptyDealAmounts({ downloader, uploader });
   },
 
   async work() {
