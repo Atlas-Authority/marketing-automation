@@ -1,5 +1,5 @@
 import CachedFileDownloader from '../lib/downloader/cached-file-downloader.js';
-import { downloadInitialData } from '../lib/downloader/download-initial-data.js';
+import { downloadAllData } from '../lib/downloader/download-initial-data.js';
 import { buildContactsStructure } from '../lib/engine/contacts.js';
 import { olderThan90Days } from '../lib/engine/generate-deals.js';
 import * as datadir from '../lib/util/datadir.js';
@@ -16,7 +16,7 @@ if (sens.length === 0 || !sens.every(sen => sen.length > 0)) {
   process.exit(1);
 }
 
-const data = await downloadInitialData({
+const data = await downloadAllData({
   downloader: new CachedFileDownloader()
 });
 

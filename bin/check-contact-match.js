@@ -1,5 +1,5 @@
 import CachedFileDownloader from '../lib/downloader/cached-file-downloader.js';
-import { downloadInitialData } from '../lib/downloader/download-initial-data.js';
+import { downloadAllData } from '../lib/downloader/download-initial-data.js';
 import * as datadir from '../lib/util/datadir.js';
 import * as logger from '../lib/util/logger.js';
 
@@ -10,7 +10,7 @@ if (!contactId) {
   process.exit(1);
 }
 
-const data = await downloadInitialData({
+const data = await downloadAllData({
   downloader: new CachedFileDownloader()
 });
 
