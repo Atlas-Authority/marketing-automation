@@ -11,7 +11,10 @@ const slack = new Slack();
 
 await slack.postToSlack(`Starting Marketing Engine`);
 
-run({
+await run({
+
+  async normalizeData() {
+  },
 
   async work() {
     await runEngine({
