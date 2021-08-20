@@ -168,7 +168,7 @@ After running the engine, to test logic *after* the Scoring Engine runs, pass `-
  
      For each group of associated licenses, compromising a series of related customer events:
  
-     * If any licenses have a tech contact that's in a mass-email domain or a partner domain, ignore this set of licenses.
+     * If all licenses have a tech contact that's in a mass-email domain or a partner domain, ignore this set of licenses.
  
      * If every license in this set is an Eval:
  
