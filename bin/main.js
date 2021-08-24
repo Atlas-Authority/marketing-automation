@@ -1,5 +1,4 @@
 import runEngine from "../lib/engine/engine.js";
-import normalizeData from "../lib/normalizations/normalize-data.js";
 import { getCliOptions } from "../lib/util/cli.js";
 import config from "../lib/util/config.js";
 import { AttachableError, SimpleError } from '../lib/util/errors.js';
@@ -11,8 +10,6 @@ const { downloader, uploader } = getCliOptions();
 const slack = new Slack();
 
 await slack.postToSlack(`Starting Marketing Engine`);
-
-await normalizeData({ downloader, uploader });
 
 await run({
 
