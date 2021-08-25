@@ -13,7 +13,7 @@ interface Deal {
     related_products: string;
     pipeline: string;
     dealstage: string;
-    amount: string;
+    amount: string | null;
   };
 }
 
