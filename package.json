@@ -17,7 +17,7 @@
     "dotenv": "^8.2.0",
     "email-providers": "^1.0.3",
     "flat": "^5.0.2",
-    "lodash": "^4.17.20",
+    "lodash": "^4.17.21",
     "luxon": "^1.25.0",
     "mustache": "^4.2.0",
     "node-fetch": "^2.6.1"
