@@ -4,6 +4,7 @@ interface Deal {
   properties: {
     aa_app: string;
     addonlicenseid: string;
+    transactionid: string;
     closedate: string;
     country: string;
     dealname: string;
