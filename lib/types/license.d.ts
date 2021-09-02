@@ -5,7 +5,7 @@ interface License {
   addonName: string,
   hosting: 'Server' | 'Cloud' | 'Data Center',
   lastUpdated: string,
-  licenseType: 'EVALUATION' | 'COMMERCIAL' | 'COMMUNITY' | 'ACADEMIC' | 'OPEN_SOURCE' | 'DEMONSTRATION',
+  licenseType: 'EVALUATION' | 'COMMERCIAL' | 'COMMUNITY' | 'ACADEMIC' | 'OPEN_SOURCE' | 'DEMONSTRATION' | 'INTERNAL USE',
   maintenanceStartDate: string,
   maintenanceEndDate: string,
   status: 'inactive' | 'active' | 'cancelled',
