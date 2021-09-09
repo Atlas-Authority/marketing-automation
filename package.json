@@ -5,7 +5,7 @@
   "main": "out/bin/main.js",
   "scripts": {
     "build": "tsc",
-    "test": "node --experimental-vm-modules node_modules/.bin/jest"
+    "test": "node --experimental-vm-modules node_modules/.bin/jest out"
   },
   "dependencies": {
     "@hubspot/api-client": "^3.2.6",
