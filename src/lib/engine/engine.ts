@@ -11,12 +11,10 @@ import { upsertContactsInHubspot } from "./upsert-contacts.js";
 import { upsertDealsInHubspot } from './upsert-deals.js';
 import zeroEmptyDealAmounts from './zero-empty-deal-amounts.js';
 
-/**
- * @param {object} options
- * @param {Downloader} options.downloader
- * @param {Uploader} options.uploader
- */
-export default async function runEngine({ downloader, uploader }) {
+export default async function runEngine({ downloader, uploader }: {
+  downloader: Downloader,
+  uploader: Uploader,
+}) {
   resetLogCount();
 
   logStep('Starting to download data');
@@ -111,10 +109,7 @@ const PREFIX = '\x1b[36m'; // light blue
 const RESET = '\x1b[0m';
 let step = 0;
 
-/**
- * @param {string} description
- */
-function logStep(description) {
+function logStep(description: string) {
   logger.info('Marketing Automation', `${PREFIX}Step ${++step}: ${description}${RESET}`);
 }
 
