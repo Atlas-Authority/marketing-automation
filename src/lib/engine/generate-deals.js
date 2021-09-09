@@ -273,6 +273,8 @@ class DealActionGenerator {
 
     }
 
+    let deal = licenseDeals.size > 0 ? [...licenseDeals][0] : null;
+
     switch (hosting) {
       case 'Server':
       case 'Data Center':
