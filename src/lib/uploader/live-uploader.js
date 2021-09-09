@@ -28,7 +28,7 @@ export default class LiveUploader {
         })),
       });
     }
-    catch (e) {
+    catch (/** @type {any} */ e) {
       throw new Error(e.response.body.message);
     }
   }
@@ -47,7 +47,7 @@ export default class LiveUploader {
         })),
       });
     }
-    catch (e) {
+    catch (/** @type {any} */ e) {
       throw new Error(e.response.body.message);
     }
   }
@@ -84,7 +84,7 @@ export default class LiveUploader {
 
         return createdContacts;
       }
-      catch (e) {
+      catch (/** @type {any} */ e) {
         throw new Error(e.response.body.message);
       }
     });
@@ -111,7 +111,7 @@ export default class LiveUploader {
         });
         logger.info('Live Uploader', 'Updated Contacts:', contacts.length);
       }
-      catch (e) {
+      catch (/** @type {any} */ e) {
         throw new Error(e.response.body.message);
       }
     });
@@ -144,7 +144,7 @@ export default class LiveUploader {
         });
         logger.info('Live Uploader', 'Updated Companies:', companies.length);
       }
-      catch (e) {
+      catch (/** @type {any} */ e) {
         throw new Error(e.response.body.message);
       }
     });
@@ -192,7 +192,7 @@ export default class LiveUploader {
 
         return createdDeals;
       }
-      catch (e) {
+      catch (/** @type {any} */ e) {
         throw new Error(e.response.body.message);
       }
     });
@@ -217,7 +217,7 @@ export default class LiveUploader {
 
         logger.info('Live Uploader', 'Updated Deals:', deals.length);
       }
-      catch (e) {
+      catch (/** @type {any} */ e) {
         throw new Error(e.response.body.message);
       }
     });
