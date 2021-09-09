@@ -3,7 +3,7 @@
     "checkJs": true,
     "allowJs": true,
     "module": "ESNext",
-    "target": "ES2020",
+    "target": "ESNext",
     "moduleResolution": "Node",
     "lib": [
       "ES2020"
