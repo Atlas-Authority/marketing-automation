@@ -12,7 +12,8 @@
 ## Running
 
 ```sh
-$ node src/bin/main.js --downloader=live --uploader=live
+$ npm run build
+$ node out/bin/main.js --downloader=live --uploader=live
 ```
 
 ## Development

@@ -3,3 +3,4 @@
 node_modules/
 *.cpuprofile
 /.vscode/launch.json
+/out/
