@@ -260,12 +260,45 @@ class DealActionGenerator {
 
       switch (event.type) {
         case 'eval':
+
+          switch (hosting) {
+            case 'Server':
+            case 'Data Center':
+              // If existing eval deal:
+              //   Update CloseDate
+              // Else:
+              //   Create Eval
+              break;
+            case 'Cloud':
+              // If no existing eval deal:
+              //   Create Eval
+              break;
+          }
+
           break;
         case 'purchase-l':
         case 'purchase-tx':
+
+          switch (hosting) {
+            case 'Server':
+            case 'Data Center':
+              break;
+            case 'Cloud':
+              break;
+          }
+
           break;
         case 'renewal':
         case 'upgrade':
+
+          switch (hosting) {
+            case 'Server':
+            case 'Data Center':
+              break;
+            case 'Cloud':
+              break;
+          }
+
           break;
         case 'refund':
           break;
