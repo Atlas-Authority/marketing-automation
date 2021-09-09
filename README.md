@@ -12,7 +12,7 @@
 ## Running
 
 ```sh
-$ node bin/main.js --downloader=live --uploader=live
+$ node src/bin/main.js --downloader=live --uploader=live
 ```
 
 ## Development
