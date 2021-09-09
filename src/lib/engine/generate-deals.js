@@ -261,7 +261,8 @@ class DealActionGenerator {
       switch (event.type) {
         case 'eval':
           break;
-        case 'purchase':
+        case 'purchase-l':
+        case 'purchase-tx':
           break;
         case 'renewal':
         case 'upgrade':
