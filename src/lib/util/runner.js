@@ -28,7 +28,7 @@ export default async function run({ work, failed }) {
       logger.info('Runner', `Finished successfully; waiting ${normalInterval} for next loop.`);
       setTimeout(run, parseTimeToMs(normalInterval));
     }
-    catch (e) {
+    catch (/** @type {any} */ e) {
       logger.error('Runner', 'Error:', e);
       errors.push(e);
 

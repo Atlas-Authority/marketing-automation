@@ -2,33 +2,20 @@ import { batchesOf } from "./helpers.js";
 
 export class ArgParser {
 
-  /** @type {{ [opt: string]: string }} */
-  #opts;
+  #opts: { [opt: string]: string };
 
-  /**
-   * @param {string[]} argv
-   */
-  constructor(argv) {
+  constructor(argv: string[]) {
     const args = argv.flatMap(s => s.split('='));
     this.#opts = Object.fromEntries(batchesOf(args, 2));
   }
 
-  /**
-   * @param {string} option
-   * @return {string | undefined}
-   */
-  get(option) {
+  get(option: string): string | undefined {
     const value = this.#opts[option];
     delete this.#opts[option];
     return value;
   }
 
-  /**
-   * @template T
-   * @param {string} option
-   * @param {{ [opt: string]: () => T }} choices
-   */
-  getChoiceOrFail(option, choices) {
+  getChoiceOrFail<T>(option: string, choices: { [opt: string]: () => T }) {
     const value = this.get(option);
     if (!value || !choices[value]) {
       console.log(`Error: ${option} must be ${Object.keys(choices)

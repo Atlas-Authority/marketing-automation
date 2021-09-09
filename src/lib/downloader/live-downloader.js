@@ -101,7 +101,7 @@ export default class LiveDownloader {
 
     let companies;
     try { companies = await this.hubspotClient.crm.companies.getAll(undefined, undefined, properties); }
-    catch (e) {
+    catch (/** @type {any} */ e) {
       throw new Error('Failed downloading companies: ' + e.response.body.message);
     }
 
@@ -139,7 +139,7 @@ export default class LiveDownloader {
 
     let deals;
     try { deals = await this.hubspotClient.crm.deals.getAll(undefined, undefined, properties, ['contact']); }
-    catch (e) {
+    catch (/** @type {any} */ e) {
       throw new Error('Failed downloading deals: ' + e.response.body.message);
     }
 
@@ -203,7 +203,7 @@ export default class LiveDownloader {
 
     let contacts;
     try { contacts = await this.hubspotClient.crm.contacts.getAll(undefined, undefined, properties, ['company']); }
-    catch (e) {
+    catch (/** @type {any} */e) {
       const body = e.response.body;
       if (
         (
