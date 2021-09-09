@@ -240,8 +240,7 @@ class DealActionGenerator {
           }
 
           break;
-        case 'purchase-l':
-        case 'purchase-tx':
+        case 'purchase':
 
           switch (hosting) {
             case 'Server':
@@ -510,14 +509,10 @@ type EvalEvent = {
   license: License,
 };
 
-type PurchaseTransactionEvent = {
-  type: 'purchase-tx',
-  transaction: Transaction,
-};
-
-type PurchaseLicenseEvent = {
-  type: 'purchase-l',
+type PurchaseEvent = {
+  type: 'purchase',
   licenseId: string,
+  transaction?: Transaction,
 };
 
 type RenewalEvent = {
@@ -529,8 +524,6 @@ type UpgradeEvent = {
   type: 'upgrade',
   transaction: Transaction,
 };
-
-type PurchaseEvent = PurchaseLicenseEvent | PurchaseTransactionEvent;
 
 type Event = RefundEvent | EvalEvent | PurchaseEvent | RenewalEvent | UpgradeEvent;
 
@@ -623,10 +616,10 @@ function interpretAsEvents(groups: LicenseContext[]) {
       (!isLicense(record) && record.purchaseDetails.saleType === 'New')
     ) {
       if (isLicense(record)) {
-        tempEvent.use({ type: 'purchase-l', licenseId: record.addonLicenseId });
+        tempEvent.use({ type: 'purchase', licenseId: record.addonLicenseId });
       }
       else {
-        tempEvent.use({ type: 'purchase-tx', transaction: record });
+        tempEvent.use({ type: 'purchase', licenseId: record.addonLicenseId, transaction: record });
       }
     }
     else if (!isLicense(record)) {
@@ -664,8 +657,7 @@ function interpretAsEvents(groups: LicenseContext[]) {
   for (const e of events) {
     switch (e.type) {
       case 'eval': console.dir({ type: e.type, id: e.license.addonLicenseId }, { breakLength: Infinity }); break;
-      case 'purchase-l': console.dir({ type: e.type, id: e.licenseId }, { breakLength: Infinity }); break;
-      case 'purchase-tx': console.dir({ type: e.type, id: e.transaction.addonLicenseId }, { breakLength: Infinity }); break;
+      case 'purchase': console.dir({ type: e.type, id: e.licenseId, tx: e.transaction?.transactionId }, { breakLength: Infinity }); break;
       case 'refund': console.dir({ type: e.type, id: e.refunded[0] }, { breakLength: Infinity }); break;
       case 'renewal': console.dir({ type: e.type, id: e.transaction.transactionId }, { breakLength: Infinity }); break;
       case 'upgrade': console.dir({ type: e.type, id: e.transaction.transactionId }, { breakLength: Infinity }); break;
