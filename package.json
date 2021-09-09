@@ -2,9 +2,11 @@
   "name": "atlas-contracts-deals-integration",
   "version": "1.4.2",
   "description": "",
-  "main": "bin/main.js",
+  "main": "out/bin/main.js",
   "scripts": {
-    "test": "node --experimental-vm-modules node_modules/.bin/jest"
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "test": "node --experimental-vm-modules node_modules/.bin/jest out"
   },
   "dependencies": {
     "@hubspot/api-client": "^3.2.6",

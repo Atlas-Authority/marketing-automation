@@ -8,9 +8,9 @@ import * as logger from './logger.js';
  * @param {string | Buffer} contents
  */
 export function writeFile(place, filename, contents) {
-  ensureDir(`../../data`);
-  ensureDir(`../../data/${place}`);
-  fs.writeFileSync(new URL(`../../data/${place}/${filename}`, import.meta.url), contents);
+  ensureDir(`../../../data`);
+  ensureDir(`../../../data/${place}`);
+  fs.writeFileSync(new URL(`../../../data/${place}/${filename}`, import.meta.url), contents);
 }
 
 /**
@@ -18,7 +18,7 @@ export function writeFile(place, filename, contents) {
  * @param {string} filename
  */
 export function readFile(place, filename) {
-  const dir = `../../data/${place}`;
+  const dir = `../../../data/${place}`;
 
   if (!fs.existsSync(new URL(dir, import.meta.url))) {
     logger.error('Dev', `Data directory doesn't exist yet. First run the engine with --downloader=live`);
@@ -41,7 +41,7 @@ export function readJsonFile(place, filename) {
  * @param {string} filename
  */
 export function pathExists(place, filename) {
-  const path = `../../data/${place}/${filename}`;
+  const path = `../../../data/${place}/${filename}`;
   return fs.existsSync(new URL(path, import.meta.url));
 }
 
