@@ -12,7 +12,7 @@
 ## Running
 
 ```sh
-$ npm run build
+$ npm run build  # or npm run watch
 $ node out/bin/main.js --downloader=live --uploader=live
 ```
 
