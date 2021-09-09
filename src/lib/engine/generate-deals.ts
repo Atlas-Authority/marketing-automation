@@ -7,12 +7,7 @@ import { saveForInspection } from '../util/inspection.js';
 import * as logger from '../util/logger.js';
 import { calculateTierFromLicenseContext } from './tiers.js';
 
-/**
- * @param {License} license
- * @param {Transaction[]} transactions
- * @returns {Omit<Deal['properties'], 'dealstage'>}
- */
-function dealPropertiesForLicense(license, transactions) {
+function dealPropertiesForLicense(license: License, transactions: Transaction[]): Omit<Deal['properties'], 'dealstage'> {
   const tiers = calculateTierFromLicenseContext({ license, transactions });
   const tier = Math.max(...tiers);
 
@@ -42,12 +37,7 @@ function dealPropertiesForLicense(license, transactions) {
   };
 }
 
-/**
- * @param {ContactsByEmail} contacts
- * @param {License} license
- * @returns {string[]}
- */
-function contactIdsForLicense(contacts, license) {
+function contactIdsForLicense(contacts: ContactsByEmail, license: License) {
   const techEmail = license.contactDetails.technicalContact.email;
   const billingEmail = license.contactDetails.billingContact?.email;
   const partnerEmail = license.partnerDetails?.billingContact?.email;
@@ -63,15 +53,13 @@ function contactIdsForLicense(contacts, license) {
   ].filter(isPresent));
 }
 
-/**
- * @param {object} data
- * @param {RelatedLicenseSet[]} data.allMatches
- * @param {Deal[]} data.initialDeals
- * @param {ContactsByEmail} data.contactsByEmail
- * @param {Set<string>} data.providerDomains
- * @param {Set<string>} data.partnerDomains
- */
-export function generateDeals(data) {
+export function generateDeals(data: {
+  allMatches: RelatedLicenseSet[],
+  initialDeals: Deal[],
+  contactsByEmail: ContactsByEmail,
+  providerDomains: Set<string>,
+  partnerDomains: Set<string>,
+}) {
   const { dealCreateActions, dealUpdateActions } = generateDealActions({
     matches: data.allMatches
       .filter(group =>
@@ -82,8 +70,7 @@ export function generateDeals(data) {
     partnerDomains: data.partnerDomains,
   });
 
-  /** @type {Omit<Deal, 'id'>[]} */
-  const dealsToCreate = dealCreateActions.map(({ license, transactions, dealstage, amount }) => {
+  const dealsToCreate: Omit<Deal, 'id'>[] = dealCreateActions.map(({ license, transactions, dealstage, amount }) => {
     const contactIds = contactIdsForLicense(data.contactsByEmail, license);
     const generatedProperties = dealPropertiesForLicense(license, transactions);
     const properties = {
@@ -94,21 +81,16 @@ export function generateDeals(data) {
     return { contactIds, properties };
   });
 
-  /** @type {DealUpdate[]} */
-  const dealsToUpdate = [];
+  const dealsToUpdate: DealUpdate[] = [];
 
-  /** @type {Array<{ contactId: string, dealId: string }>} */
-  const associationsToCreate = [];
-
-  /** @type {Array<{ contactId: string, dealId: string }>} */
-  const associationsToRemove = [];
+  const associationsToCreate: Array<{ contactId: string, dealId: string }> = [];
+  const associationsToRemove: Array<{ contactId: string, dealId: string }> = [];
 
   for (const { id, properties, license, transactions } of dealUpdateActions) {
     const oldDeal = data.initialDeals.find(oldDeal => oldDeal.id === id);
     assert.ok(oldDeal);
 
-    /** @type {DealUpdate} */
-    let newDeal;
+    let newDeal: DealUpdate;
 
     if (license) {
       // Start with deal->contact associations
@@ -139,7 +121,7 @@ export function generateDeals(data) {
     }
 
     for (const [key, val] of Object.entries(newDeal.properties)) {
-      const typedKey = /** @type {keyof Deal['properties']} */(key);
+      const typedKey = key as keyof Deal['properties'];
       if (val === oldDeal.properties[typedKey]) {
         delete newDeal.properties[typedKey];
       }
@@ -153,52 +135,39 @@ export function generateDeals(data) {
   return { dealsToCreate, dealsToUpdate, associationsToCreate, associationsToRemove };
 }
 
-/**
- * @typedef DealUpdateAction
- * @property {string} id
- * @property {License=} license
- * @property {Transaction[]} transactions
- * @property {object} properties
- * @property {Deal['properties']['addonlicenseid']} properties.addonlicenseid
- * @property {Deal['properties']['closedate']=} properties.closedate
- * @property {Deal['properties']['amount']=} properties.amount
- * @property {Deal['properties']['dealstage']=} properties.dealstage
- */
+type DealUpdateAction = {
+  id: string,
+  license?: License,
+  transactions: Transaction[],
+  properties: {
+    addonlicenseid: Deal['properties']['addonlicenseid'],
+    closedate?: Deal['properties']['closedate'],
+    amount?: Deal['properties']['amount'],
+    dealstage?: Deal['properties']['dealstage'],
+  },
+};
 
-/**
- * @typedef DealCreateAction
- * @property {DealStage} dealstage
- * @property {License} license
- * @property {Transaction[]} transactions
- * @property {string} amount
- */
+type DealCreateAction = {
+  dealstage: DealStage,
+  license: License,
+  transactions: Transaction[],
+  amount: string,
+};
 
 /** Generates deal actions based on match data */
 class DealActionGenerator {
 
-  /** @type {DealCreateAction[]} */
-  dealCreateActions = [];
+  dealCreateActions: DealCreateAction[] = [];
+  dealUpdateActions: DealUpdateAction[] = [];
 
-  /** @type {DealUpdateAction[]} */
-  dealUpdateActions = [];
+  ignoredLicenseSets: (License & { reason: string })[][] = [];
 
-  /** @type {(License & {reason:string})[][]} */
-  ignoredLicenseSets = [];
+  allTransactionDeals = new Map<string, Deal>();
+  allLicenseDeals = new Map<string, Deal>();
 
-  /**
-   * @param {Set<string>} providerDomains
-   * @param {Set<string>} partnerDomains
-   * @param {Deal[]} initialDeals
-   */
-  constructor(providerDomains, partnerDomains, initialDeals) {
+  constructor(private providerDomains: Set<string>, private partnerDomains: Set<string>, initialDeals: Deal[]) {
     this.providerDomains = providerDomains;
     this.partnerDomains = partnerDomains;
-
-    /** @type {Map<string, Deal>} */
-    this.allTransactionDeals = new Map();
-
-    /** @type {Map<string, Deal>} */
-    this.allLicenseDeals = new Map();
 
     for (const deal of initialDeals) {
       if (deal.properties.addonlicenseid) {
@@ -210,10 +179,7 @@ class DealActionGenerator {
     }
   }
 
-  /**
-   * @param {RelatedLicenseSet} groups
-   */
-  generateActionsForMatchedGroup(groups) {
+  generateActionsForMatchedGroup(groups: RelatedLicenseSet) {
     assert.ok(groups.length > 0);
 
     /** Licenses in this group */
@@ -229,15 +195,13 @@ class DealActionGenerator {
       return;
     }
 
-    /** @type {Set<Deal>} */
-    const licenseDeals = new Set();
+    const licenseDeals = new Set<Deal>();
     for (const license of licenses) {
       const deal = this.allLicenseDeals.get(license.addonLicenseId);
       if (deal) licenseDeals.add(deal);
     }
 
-    /** @type {Set<Deal>} */
-    const transactionDeals = new Set();
+    const transactionDeals = new Set<Deal>();
     for (const transaction of groups.flatMap(g => g.transactions)) {
       const deal = this.allTransactionDeals.get(transaction.transactionId);
       if (deal) transactionDeals.add(deal);
@@ -481,24 +445,18 @@ class DealActionGenerator {
 
   }
 
-  /**
-   * @param {string} reason
-   * @param {License[]} licenses
-   */
-  ignoreLicenses(reason, licenses) {
+  ignoreLicenses(reason: string, licenses: License[]) {
     this.ignoredLicenseSets.push(licenses.map(license => ({ reason, ...license })));
   }
 
 }
 
-/**
- * @param {object} data
- * @param {RelatedLicenseSet[]} data.matches
- * @param {Deal[]} data.initialDeals
- * @param {Set<string>} data.providerDomains
- * @param {Set<string>} data.partnerDomains
- */
-function generateDealActions(data) {
+function generateDealActions(data: {
+  matches: RelatedLicenseSet[],
+  initialDeals: Deal[],
+  providerDomains: Set<string>,
+  partnerDomains: Set<string>,
+}) {
   const generator = new DealActionGenerator(data.providerDomains, data.partnerDomains, data.initialDeals);
 
   for (const relatedLicenseIds of data.matches) {
@@ -515,106 +473,74 @@ function generateDealActions(data) {
 
 const NINETY_DAYS_AS_MS = (1000 * 60 * 60 * 24 * 90);
 
-/**
- * @param {License} license
- */
-function isFreeLicense(license) {
+function isFreeLicense(license: License) {
   return license.licenseType === 'EVALUATION' || license.licenseType === 'OPEN_SOURCE';
 }
 
-/**
- * @param {string} dateString
- */
-export function olderThan90Days(dateString) {
+export function olderThan90Days(dateString: string) {
   const now = Date.now();
   const then = new Date(dateString).getTime();
   return (now - then > NINETY_DAYS_AS_MS);
 }
 
 
-/**
- * @param {License[]} licenses
- * @param {Set<string>} providerDomains
- * @param {Set<string>} partnerDomains
- */
-function getBadDomains(licenses, providerDomains, partnerDomains) {
+function getBadDomains(licenses: License[], providerDomains: Set<string>, partnerDomains: Set<string>) {
   const domains = licenses.map(license => license.contactDetails.technicalContact.email.toLowerCase().split('@')[1]);
   return domains.filter(domain => partnerDomains.has(domain) || providerDomains.has(domain));
 }
 
-/**
- * @param {RelatedLicenseSet} groups
- */
-function hasEval(groups) {
+function hasEval(groups: RelatedLicenseSet) {
   return groups.some(g =>
     g.license.licenseType === 'EVALUATION');
 }
 
-/**
- * @param {RelatedLicenseSet} groups
- */
-function hasPurchase(groups) {
+function hasPurchase(groups: RelatedLicenseSet) {
   return groups.some(g =>
     g.transactions.some(tx =>
       tx.purchaseDetails.saleType === 'New'));
 }
 
-/**
- * @typedef RefundEvent
- * @property {'refund'} type
- * @property {string[]} refunded transaction IDs
- */
+type RefundEvent = {
+  type: 'refund',
+  refunded: string[], //  transaction IDs
+};
 
-/**
- * @typedef EvalEvent
- * @property {'eval'} type
- * @property {License} license
- */
+type EvalEvent = {
+  type: 'eval',
+  license: License,
+};
 
-/**
- * @typedef PurchaseTransactionEvent
- * @property {'purchase-tx'} type
- * @property {Transaction} transaction
- */
+type PurchaseTransactionEvent = {
+  type: 'purchase-tx',
+  transaction: Transaction,
+};
 
-/**
- * @typedef PurchaseLicenseEvent
- * @property {'purchase-l'} type
- * @property {string} licenseId
- */
+type PurchaseLicenseEvent = {
+  type: 'purchase-l',
+  licenseId: string,
+};
 
-/**
- * @typedef RenewalEvent
- * @property {'renewal'} type
- * @property {Transaction} transaction
- */
+type RenewalEvent = {
+  type: 'renewal',
+  transaction: Transaction,
+};
 
-/**
- * @typedef UpgradeEvent
- * @property {'upgrade'} type
- * @property {Transaction} transaction
- */
+type UpgradeEvent = {
+  type: 'upgrade',
+  transaction: Transaction,
+};
 
-/**
- * @typedef {PurchaseLicenseEvent | PurchaseTransactionEvent} PurchaseEvent
- */
+type PurchaseEvent = PurchaseLicenseEvent | PurchaseTransactionEvent;
 
-/**
- * @typedef {RefundEvent | EvalEvent | PurchaseEvent | RenewalEvent | UpgradeEvent} Event
- */
+type Event = RefundEvent | EvalEvent | PurchaseEvent | RenewalEvent | UpgradeEvent;
 
-/**
- * @param {LicenseContext[]} groups
- */
-function interpretAsEvents(groups) {
-  /** @type {Event[]} */
-  const events = [];
+function interpretAsEvents(groups: LicenseContext[]) {
+  const events: Event[] = [];
 
   const records = groups.flatMap(group => {
     let transactions = group.transactions;
 
-    /** @type {string[]} */
-    const refundedTxIds = [];
+    const refundedTxIds: string[] = [];
 
     // Try to create events out of refunds
     for (const transaction of transactions) {
@@ -667,8 +593,7 @@ function interpretAsEvents(groups) {
       }
     }
 
-    /** @type {(License | Transaction)[]} */
-    const records = [...transactions];
+    const records: (License | Transaction)[] = [...transactions];
 
     // Include the License unless it's based on a 'New' Transaction
     if (!transactions.some(t => t.purchaseDetails.saleType === 'New')) {
@@ -751,19 +676,11 @@ function interpretAsEvents(groups) {
   return events;
 }
 
-/**
- * @template {License | Transaction} T
- * @param {T} record
- * @returns {record is License}
- */
-function isLicense(record) {
+function isLicense(record: License | Transaction): record is License {
   return 'maintenanceStartDate' in record;
 }
 
-/**
- * @param {License} license
- */
-function isPaidLicense(license) {
+function isPaidLicense(license: License) {
   return (
     license.licenseType === 'ACADEMIC' ||
     license.licenseType === 'COMMERCIAL' ||
@@ -772,24 +689,15 @@ function isPaidLicense(license) {
   );
 }
 
-/**
- * @param {(License | Transaction)[]} records
- */
-function sortRecords(records) {
+function sortRecords(records: (License | Transaction)[]) {
 
-  /**
-   * @param {License | Transaction} record
-   */
-  function getDate(record) {
+  function getDate(record: License | Transaction) {
     return isLicense(record)
       ? record.maintenanceStartDate
       : record.purchaseDetails.maintenanceStartDate;
   }
 
-  /**
-   * @param {License | Transaction} record
-   */
-  function getLicenseType(record) {
+  function getLicenseType(record: License | Transaction) {
     return isLicense(record)
       ? record.licenseType
       : record.purchaseDetails.licenseType;
@@ -815,23 +723,14 @@ function sortRecords(records) {
 
 class TempEvent {
 
-  /** @type {EvalEvent | PurchaseEvent | undefined} */
-  event;
-
-  /** @type {number} */
+  event: EvalEvent | PurchaseEvent | undefined;
   insertIndex = -1;
 
-  /**
-   * @param {Event[]} events
-   */
-  constructor(events) {
+  constructor(private events: Event[]) {
     this.events = events;
   }
 
-  /**
-   * @param {EvalEvent | PurchaseEvent} event
-   */
-  use(event) {
+  use(event: EvalEvent | PurchaseEvent) {
     if (this.insertIndex === -1) {
       this.insertIndex = this.events.length;
     }
