@@ -451,7 +451,7 @@ function getBadDomains(licenses: License[], providerDomains: Set<string>, partne
 
 type RefundEvent = {
   type: 'refund',
-  refunded: string[], //  transaction IDs
+  refundedTxIds: string[],
 };
 
 type EvalEvent = {
@@ -530,7 +530,7 @@ function interpretAsEvents(groups: LicenseContext[]) {
         if (transactions.length === 0) {
           events.push({
             type: 'refund',
-            refunded: refundedTxIds,
+            refundedTxIds,
           });
         }
       }
@@ -608,7 +608,7 @@ function interpretAsEvents(groups: LicenseContext[]) {
     switch (e.type) {
       case 'eval': console.dir({ type: e.type, id: e.license.addonLicenseId }, { breakLength: Infinity }); break;
       case 'purchase': console.dir({ type: e.type, id: e.licenseId, tx: e.transaction?.transactionId }, { breakLength: Infinity }); break;
-      case 'refund': console.dir({ type: e.type, id: e.refunded[0] }, { breakLength: Infinity }); break;
+      case 'refund': console.dir({ type: e.type, id: e.refundedTxIds[0] }, { breakLength: Infinity }); break;
       case 'renewal': console.dir({ type: e.type, id: e.transaction.transactionId }, { breakLength: Infinity }); break;
       case 'upgrade': console.dir({ type: e.type, id: e.transaction.transactionId }, { breakLength: Infinity }); break;
     }
