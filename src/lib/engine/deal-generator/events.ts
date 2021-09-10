@@ -3,7 +3,7 @@ import { sorter } from "../../util/helpers.js";
 export type DealRelevantEvent = (
   { type: 'refund', refundedTxIds: string[] } |
   { type: 'eval', licenseIds: string[] } |
-  { type: 'purchase', licenseIds: string[], transactions: Transaction[] } |
+  { type: 'purchase', licenseIds: string[], transaction?: Transaction } |
   { type: 'renewal', transaction: Transaction } |
   { type: 'upgrade', transaction: Transaction }
 );
@@ -16,21 +16,19 @@ export class EventGenerator {
     const records = this.getRecords(groups);
     this.sortRecords(records);
 
-    const tempEvent = new TempEvent(this.events);
-
     for (const record of records) {
       if (isLicense(record)) {
         if (isEvalOrOpenSourceLicense(record)) {
-          tempEvent.use('eval', record.addonLicenseId);
+          this.events.push({ type: 'eval', licenseIds: [record.addonLicenseId] });
         }
         else if (isPaidLicense(record)) {
-          tempEvent.use('purchase', record.addonLicenseId);
+          this.events.push({ type: 'purchase', licenseIds: [record.addonLicenseId] });
         }
       }
       else if (isTransaction(record)) {
         switch (record.purchaseDetails.saleType) {
           case 'New':
-            tempEvent.use('purchase', record.addonLicenseId, record);
+            this.events.push({ type: 'purchase', licenseIds: [record.addonLicenseId], transaction: record });
             break;
           case 'Renewal':
             this.events.push({ type: 'renewal', transaction: record });
@@ -42,9 +40,43 @@ export class EventGenerator {
       }
     }
 
-    tempEvent.finalize();
+    this.normalizeEvalAndPurchaseEvents();
 
     return this.events;
+  }
+
+  /**
+   * Merge all evals into the following purchase.
+   * If it's all evals, just merge them into the last.
+   * Delete any trailing evals not followed by a purchase.
+   */
+  private normalizeEvalAndPurchaseEvents() {
+    if (this.events.length < 2) return;
+
+    let lastEval: { type: 'eval'; licenseIds: string[] } | null = null;
+
+    for (let i = 0; i < this.events.length; i++) {
+      const event = this.events[i];
+
+      if (event.type === 'eval') {
+        this.events.splice(i--, 1); // Pluck it out
+
+        if (lastEval) {
+          lastEval.licenseIds.push(...event.licenseIds);
+        }
+        else {
+          lastEval = event;
+        }
+      }
+      else if (event.type === 'purchase' && lastEval) {
+        event.licenseIds.unshift(...lastEval.licenseIds);
+        lastEval = null;
+      }
+    }
+
+    if (this.events.length === 0 && lastEval) {
+      this.events = [lastEval];
+    }
   }
 
   private getRecords(groups: LicenseContext[]) {
@@ -136,36 +168,6 @@ export class EventGenerator {
     return transactions;
   }
 
-}
-
-class TempEvent {
-
-  private insertIndex = -1;
-
-  private state: null | 'eval' | 'purchase' = null;
-  private licenseIds: string[] = [];
-  private transactions: Transaction[] = [];
-
-  constructor(private events: DealRelevantEvent[]) {
-    this.events = events;
-  }
-
-  use(type: 'eval' | 'purchase', licenseId: string, transaction?: Transaction) {
-    this.state = (this.state === 'purchase' ? 'purchase' : type);
-    this.licenseIds.push(licenseId);
-    if (transaction) this.transactions.push(transaction);
-    if (this.insertIndex === -1) this.insertIndex = this.events.length;
-  }
-
-  finalize() {
-    if (this.state) {
-      this.events.splice(this.insertIndex, 0, {
-        type: this.state,
-        licenseIds: this.licenseIds,
-        transactions: this.transactions,
-      });
-    }
-  }
 }
 
 function isEvalOrOpenSourceLicense(record: License) {
