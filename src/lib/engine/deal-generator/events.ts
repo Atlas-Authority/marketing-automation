@@ -2,8 +2,8 @@ import { sorter } from "../../util/helpers.js";
 
 export type DealRelevantEvent = (
   { type: 'refund', refundedTxIds: string[] } |
-  { type: 'eval', license: License } |
-  { type: 'purchase', licenseId: string, transaction?: Transaction } |
+  { type: 'eval', licenseIds: string[] } |
+  { type: 'purchase', licenseIds: string[], transactions: Transaction[] } |
   { type: 'renewal', transaction: Transaction } |
   { type: 'upgrade', transaction: Transaction }
 );
@@ -19,26 +19,19 @@ export class EventGenerator {
     const tempEvent = new TempEvent(this.events);
 
     for (const record of records) {
-      if (
-        tempEvent.event === undefined &&
-        isLicense(record) &&
-        isEvalOrOpenSourceLicense(record)
-      ) {
-        tempEvent.use({ type: 'eval', license: record });
-      }
-      else if (
-        (isLicense(record) && isPaidLicense(record)) ||
-        (isTransaction(record) && record.purchaseDetails.saleType === 'New')
-      ) {
-        if (isLicense(record)) {
-          tempEvent.use({ type: 'purchase', licenseId: record.addonLicenseId });
+      if (isLicense(record)) {
+        if (isEvalOrOpenSourceLicense(record)) {
+          tempEvent.use('eval', record.addonLicenseId);
         }
-        else {
-          tempEvent.use({ type: 'purchase', licenseId: record.addonLicenseId, transaction: record });
+        else if (isPaidLicense(record)) {
+          tempEvent.use('purchase', record.addonLicenseId);
         }
       }
       else if (isTransaction(record)) {
         switch (record.purchaseDetails.saleType) {
+          case 'New':
+            tempEvent.use('purchase', record.addonLicenseId, record);
+            break;
           case 'Renewal':
             this.events.push({ type: 'renewal', transaction: record });
             break;
@@ -147,23 +140,30 @@ export class EventGenerator {
 
 class TempEvent {
 
-  event: DealRelevantEvent | undefined;
   private insertIndex = -1;
+
+  private state: null | 'eval' | 'purchase' = null;
+  private licenseIds: string[] = [];
+  private transactions: Transaction[] = [];
 
   constructor(private events: DealRelevantEvent[]) {
     this.events = events;
   }
 
-  use(event: DealRelevantEvent) {
-    if (this.insertIndex === -1) {
-      this.insertIndex = this.events.length;
-    }
-    this.event = event;
+  use(type: 'eval' | 'purchase', licenseId: string, transaction?: Transaction) {
+    this.state = (this.state === 'purchase' ? 'purchase' : type);
+    this.licenseIds.push(licenseId);
+    if (transaction) this.transactions.push(transaction);
+    if (this.insertIndex === -1) this.insertIndex = this.events.length;
   }
 
   finalize() {
-    if (this.event) {
-      this.events.splice(this.insertIndex, 0, this.event);
+    if (this.state) {
+      this.events.splice(this.insertIndex, 0, {
+        type: this.state,
+        licenseIds: this.licenseIds,
+        transactions: this.transactions,
+      });
     }
   }
 }
