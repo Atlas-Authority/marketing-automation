@@ -31,7 +31,7 @@ export class EventGenerator {
       }
       else if (
         (isLicense(record) && isPaidLicense(record)) ||
-        (!isLicense(record) && record.purchaseDetails.saleType === 'New')
+        (isTransaction(record) && record.purchaseDetails.saleType === 'New')
       ) {
         if (isLicense(record)) {
           tempEvent.use({ type: 'purchase', licenseId: record.addonLicenseId });
@@ -40,7 +40,7 @@ export class EventGenerator {
           tempEvent.use({ type: 'purchase', licenseId: record.addonLicenseId, transaction: record });
         }
       }
-      else if (!isLicense(record)) {
+      else if (isTransaction(record)) {
         switch (record.purchaseDetails.saleType) {
           case 'Renewal':
             this.events.push({ type: 'renewal', transaction: record });
@@ -173,6 +173,10 @@ class TempEvent {
 
 function isLicense(record: License | Transaction): record is License {
   return 'maintenanceStartDate' in record;
+}
+
+function isTransaction(record: License | Transaction): record is Transaction {
+  return 'transactionId' in record;
 }
 
 function isPaidLicense(license: License) {
