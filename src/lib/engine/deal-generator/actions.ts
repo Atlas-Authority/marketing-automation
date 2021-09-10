@@ -11,7 +11,7 @@ export class ActionGenerator {
         this.allLicenseDeals.set(deal.properties.addonlicenseid, deal);
       }
       if (deal.properties.transactionid) {
-        this.allLicenseDeals.set(deal.properties.transactionid, deal);
+        this.allTransactionDeals.set(deal.properties.transactionid, deal);
       }
     }
   }
