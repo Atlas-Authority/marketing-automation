@@ -420,6 +420,11 @@ function generateDealActions(data: {
 }) {
   const generator = new DealActionGenerator(data.providerDomains, data.partnerDomains, data.initialDeals);
 
+  // Stages:
+  // 1. Sort and normalize licenses/transactions (event records)
+  // 2. Turn event records into deal-generating-relevant events
+  // 3. Match events up with deal state and generate actions
+
   for (const relatedLicenseIds of data.matches) {
     generator.generateActionsForMatchedGroup(relatedLicenseIds);
   }
