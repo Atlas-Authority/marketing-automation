@@ -190,6 +190,8 @@ class DealActionGenerator {
       .sort(sorter(l => l.maintenanceStartDate, 'ASC'))
     );
 
+    const events = interpretAsEvents(groups);
+
     const licenseDeals = new Set<Deal>();
     for (const license of licenses) {
       const deal = this.allLicenseDeals.get(license.addonLicenseId);
@@ -215,7 +217,7 @@ class DealActionGenerator {
     // Any         Closed Deal   All Txs Refunded   Update (CloseDate, Amount, Stage=Lost)
 
     const hosting = groups[0].license.hosting;
-    for (const event of interpretAsEvents(groups)) {
+    for (const event of events) {
 
       switch (event.type) {
         case 'eval':
