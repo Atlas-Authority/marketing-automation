@@ -22,10 +22,7 @@ export class EventGenerator {
       if (
         tempEvent.event === undefined &&
         isLicense(record) &&
-        (
-          record.licenseType === 'EVALUATION' ||
-          record.licenseType === 'OPEN_SOURCE'
-        )
+        isEvalOrOpenSourceLicense(record)
       ) {
         tempEvent.use({ type: 'eval', license: record });
       }
@@ -169,6 +166,13 @@ class TempEvent {
       this.events.splice(this.insertIndex, 0, this.event);
     }
   }
+}
+
+function isEvalOrOpenSourceLicense(record: License) {
+  return (
+    record.licenseType === 'EVALUATION' ||
+    record.licenseType === 'OPEN_SOURCE'
+  );
 }
 
 function isLicense(record: License | Transaction): record is License {
