@@ -5,7 +5,7 @@ type EvalEvent = { type: 'eval', license: License };
 type PurchaseEvent = { type: 'purchase', licenseId: string, transaction?: Transaction };
 type RenewalEvent = { type: 'renewal', transaction: Transaction };
 type UpgradeEvent = { type: 'upgrade', transaction: Transaction };
-type Event = RefundEvent | EvalEvent | PurchaseEvent | RenewalEvent | UpgradeEvent;
+export type Event = RefundEvent | EvalEvent | PurchaseEvent | RenewalEvent | UpgradeEvent;
 
 export class EventGenerator {
 
@@ -150,7 +150,7 @@ export class EventGenerator {
 class TempEvent {
 
   event: EvalEvent | PurchaseEvent | undefined;
-  insertIndex = -1;
+  private insertIndex = -1;
 
   constructor(private events: Event[]) {
     this.events = events;

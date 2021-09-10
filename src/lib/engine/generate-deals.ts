@@ -5,6 +5,7 @@ import config, { DealStage, Pipeline } from '../util/config.js';
 import { isPresent, sorter } from '../util/helpers.js';
 import { saveForInspection } from '../util/inspection.js';
 import * as logger from '../util/logger.js';
+import { ActionGenerator } from './deal-generator/actions.js';
 import { EventGenerator } from './deal-generator/events.js';
 import { calculateTierFromLicenseContext } from './tiers.js';
 
@@ -158,26 +159,15 @@ type DealCreateAction = {
 /** Generates deal actions based on match data */
 class DealActionGenerator {
 
+  actionGenerator: ActionGenerator;
+
   dealCreateActions: DealCreateAction[] = [];
   dealUpdateActions: DealUpdateAction[] = [];
 
   ignoredLicenseSets: (License & { reason: string })[][] = [];
 
-  allTransactionDeals = new Map<string, Deal>();
-  allLicenseDeals = new Map<string, Deal>();
-
   constructor(private providerDomains: Set<string>, private partnerDomains: Set<string>, initialDeals: Deal[]) {
-    this.providerDomains = providerDomains;
-    this.partnerDomains = partnerDomains;
-
-    for (const deal of initialDeals) {
-      if (deal.properties.addonlicenseid) {
-        this.allLicenseDeals.set(deal.properties.addonlicenseid, deal);
-      }
-      if (deal.properties.transactionid) {
-        this.allLicenseDeals.set(deal.properties.transactionid, deal);
-      }
-    }
+    this.actionGenerator = new ActionGenerator(initialDeals);
   }
 
   generateActionsForMatchedGroup(groups: RelatedLicenseSet) {
@@ -185,79 +175,12 @@ class DealActionGenerator {
     if (this.ignoring(groups)) return;
 
     const events = new EventGenerator().interpretAsEvents(groups);
+    const actions = this.actionGenerator.generateFrom(events, groups);
 
     const licenseDeals = new Set<Deal>();
     for (const license of groups.map(g => g.license)) {
-      const deal = this.allLicenseDeals.get(license.addonLicenseId);
+      const deal = this.actionGenerator.allLicenseDeals.get(license.addonLicenseId);
       if (deal) licenseDeals.add(deal);
-    }
-
-    const transactionDeals = new Set<Deal>();
-    for (const transaction of groups.flatMap(g => g.transactions)) {
-      const deal = this.allTransactionDeals.get(transaction.transactionId);
-      if (deal) transactionDeals.add(deal);
-    }
-
-    // Hosting     State         Event              Action
-    // ---------   -----------   ----------------   ----------------------------
-    // Server/DC   No Deal       Eval               Create Eval
-    // Server/DC   Eval Deal     Eval               Update Eval (CloseDate)
-    // Server/DC   No Deal       Purchase           Create Won (Amount)
-    // Server/DC   Eval Deal     Purchase           Close Won (Amount, CloseDate)
-    // Server/DC                 Renew/Up/Down      Create Won (Amount)
-    // Cloud       No Deal       Eval               Create Eval
-    // Cloud                     Purchase           Create or Update Closed Won (CloseDate)
-    // Cloud                     Renew/Up/Down      Create Won, (Amount)
-    // Any         Closed Deal   All Txs Refunded   Update (CloseDate, Amount, Stage=Lost)
-
-    const hosting = groups[0].license.hosting;
-    for (const event of events) {
-
-      switch (event.type) {
-        case 'eval':
-
-          switch (hosting) {
-            case 'Server':
-            case 'Data Center':
-              // If existing eval deal:
-              //   Update CloseDate
-              // Else:
-              //   Create Eval
-              break;
-            case 'Cloud':
-              // If no existing eval deal:
-              //   Create Eval
-              break;
-          }
-
-          break;
-        case 'purchase':
-
-          switch (hosting) {
-            case 'Server':
-            case 'Data Center':
-              break;
-            case 'Cloud':
-              break;
-          }
-
-          break;
-        case 'renewal':
-        case 'upgrade':
-
-          switch (hosting) {
-            case 'Server':
-            case 'Data Center':
-              break;
-            case 'Cloud':
-              break;
-          }
-
-          break;
-        case 'refund':
-          break;
-      }
-
     }
 
     let deal = licenseDeals.size > 0 ? [...licenseDeals][0] : null;
