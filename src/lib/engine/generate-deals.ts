@@ -184,14 +184,13 @@ class DealActionGenerator {
     assert.ok(groups.length > 0);
     if (this.ignoring(groups)) return;
 
+    const events = new EventGenerator().interpretAsEvents(groups);
+
     /** Licenses in this group */
     const licenses = (groups
       .map(g => g.license)
       .sort(sorter(l => l.maintenanceStartDate, 'ASC'))
     );
-
-    const eventGenerator = new EventGenerator();
-    const events = eventGenerator.interpretAsEvents(groups);
 
     const licenseDeals = new Set<Deal>();
     for (const license of licenses) {
