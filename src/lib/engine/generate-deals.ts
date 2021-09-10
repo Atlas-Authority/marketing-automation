@@ -182,19 +182,13 @@ class DealActionGenerator {
 
   generateActionsForMatchedGroup(groups: RelatedLicenseSet) {
     assert.ok(groups.length > 0);
+    if (this.ignoring(groups)) return;
 
     /** Licenses in this group */
     const licenses = (groups
       .map(g => g.license)
       .sort(sorter(l => l.maintenanceStartDate, 'ASC'))
     );
-
-    // If every license's tech contact domain is partner/mass-provider, ignore this license set
-    const badDomains = getBadDomains(licenses, this.providerDomains, this.partnerDomains);
-    if (badDomains.length === licenses.length) {
-      this.ignoreLicenses('bad-domains:' + _.uniq(badDomains).join(','), licenses);
-      return;
-    }
 
     const licenseDeals = new Set<Deal>();
     for (const license of licenses) {
@@ -406,6 +400,20 @@ class DealActionGenerator {
 
   }
 
+  /** Ignore if every license's tech contact domain is partner or mass-provider */
+  ignoring(groups: RelatedLicenseSet) {
+    const licenses = groups.map(g => g.license);
+    const domains = licenses.map(license => license.contactDetails.technicalContact.email.toLowerCase().split('@')[1]);
+    const badDomains = domains.filter(domain => this.partnerDomains.has(domain) || this.providerDomains.has(domain));
+
+    if (badDomains.length === licenses.length) {
+      this.ignoreLicenses('bad-domains:' + _.uniq(badDomains).join(','), licenses);
+      return true;
+    }
+
+    return false;
+  }
+
   ignoreLicenses(reason: string, licenses: License[]) {
     this.ignoredLicenseSets.push(licenses.map(license => ({ reason, ...license })));
   }
@@ -447,10 +455,4 @@ export function olderThan90Days(dateString: string) {
   const now = Date.now();
   const then = new Date(dateString).getTime();
   return (now - then > NINETY_DAYS_AS_MS);
-}
-
-
-function getBadDomains(licenses: License[], providerDomains: Set<string>, partnerDomains: Set<string>) {
-  const domains = licenses.map(license => license.contactDetails.technicalContact.email.toLowerCase().split('@')[1]);
-  return domains.filter(domain => partnerDomains.has(domain) || providerDomains.has(domain));
 }
