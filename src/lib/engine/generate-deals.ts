@@ -449,32 +449,11 @@ function getBadDomains(licenses: License[], providerDomains: Set<string>, partne
   return domains.filter(domain => partnerDomains.has(domain) || providerDomains.has(domain));
 }
 
-type RefundEvent = {
-  type: 'refund',
-  refundedTxIds: string[],
-};
-
-type EvalEvent = {
-  type: 'eval',
-  license: License,
-};
-
-type PurchaseEvent = {
-  type: 'purchase',
-  licenseId: string,
-  transaction?: Transaction,
-};
-
-type RenewalEvent = {
-  type: 'renewal',
-  transaction: Transaction,
-};
-
-type UpgradeEvent = {
-  type: 'upgrade',
-  transaction: Transaction,
-};
-
+type RefundEvent = { type: 'refund', refundedTxIds: string[] };
+type EvalEvent = { type: 'eval', license: License };
+type PurchaseEvent = { type: 'purchase', licenseId: string, transaction?: Transaction };
+type RenewalEvent = { type: 'renewal', transaction: Transaction };
+type UpgradeEvent = { type: 'upgrade', transaction: Transaction };
 type Event = RefundEvent | EvalEvent | PurchaseEvent | RenewalEvent | UpgradeEvent;
 
 function interpretAsEvents(groups: LicenseContext[]) {
