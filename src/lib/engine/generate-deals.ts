@@ -186,14 +186,8 @@ class DealActionGenerator {
 
     const events = new EventGenerator().interpretAsEvents(groups);
 
-    /** Licenses in this group */
-    const licenses = (groups
-      .map(g => g.license)
-      .sort(sorter(l => l.maintenanceStartDate, 'ASC'))
-    );
-
     const licenseDeals = new Set<Deal>();
-    for (const license of licenses) {
+    for (const license of groups.map(g => g.license)) {
       const deal = this.allLicenseDeals.get(license.addonLicenseId);
       if (deal) licenseDeals.add(deal);
     }
@@ -267,6 +261,12 @@ class DealActionGenerator {
     }
 
     let deal = licenseDeals.size > 0 ? [...licenseDeals][0] : null;
+
+    /** Licenses in this group */
+    const licenses = (groups
+      .map(g => g.license)
+      .sort(sorter(l => l.maintenanceStartDate, 'ASC'))
+    );
 
     if (licenses.every(l => isFreeLicense(l))) {
       // It's only evals
