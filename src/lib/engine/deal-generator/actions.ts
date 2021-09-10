@@ -1,4 +1,4 @@
-import { Event } from "./events.js";
+import { DealRelevantEvent } from "./events.js";
 
 export class ActionGenerator {
 
@@ -16,7 +16,7 @@ export class ActionGenerator {
     }
   }
 
-  generateFrom(events: Event[], groups: RelatedLicenseSet) {
+  generateFrom(events: DealRelevantEvent[], groups: RelatedLicenseSet) {
     const licenseDeals = new Set<Deal>();
     for (const license of groups.map(g => g.license)) {
       const deal = this.allLicenseDeals.get(license.addonLicenseId);

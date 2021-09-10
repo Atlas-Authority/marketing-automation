@@ -1,15 +1,16 @@
 import { sorter } from "../../util/helpers.js";
 
-type RefundEvent = { type: 'refund', refundedTxIds: string[] };
-type EvalEvent = { type: 'eval', license: License };
-type PurchaseEvent = { type: 'purchase', licenseId: string, transaction?: Transaction };
-type RenewalEvent = { type: 'renewal', transaction: Transaction };
-type UpgradeEvent = { type: 'upgrade', transaction: Transaction };
-export type Event = RefundEvent | EvalEvent | PurchaseEvent | RenewalEvent | UpgradeEvent;
+export type DealRelevantEvent = (
+  { type: 'refund', refundedTxIds: string[] } |
+  { type: 'eval', license: License } |
+  { type: 'purchase', licenseId: string, transaction?: Transaction } |
+  { type: 'renewal', transaction: Transaction } |
+  { type: 'upgrade', transaction: Transaction }
+);
 
 export class EventGenerator {
 
-  events: Event[] = [];
+  events: DealRelevantEvent[] = [];
 
   interpretAsEvents(groups: LicenseContext[]) {
     const records = this.getRecords(groups);
@@ -149,14 +150,14 @@ export class EventGenerator {
 
 class TempEvent {
 
-  event: EvalEvent | PurchaseEvent | undefined;
+  event: DealRelevantEvent | undefined;
   private insertIndex = -1;
 
-  constructor(private events: Event[]) {
+  constructor(private events: DealRelevantEvent[]) {
     this.events = events;
   }
 
-  use(event: EvalEvent | PurchaseEvent) {
+  use(event: DealRelevantEvent) {
     if (this.insertIndex === -1) {
       this.insertIndex = this.events.length;
     }
