@@ -5,7 +5,7 @@ import config, { DealStage, Pipeline } from '../util/config.js';
 import { isPresent, sorter } from '../util/helpers.js';
 import { saveForInspection } from '../util/inspection.js';
 import * as logger from '../util/logger.js';
-import { interpretAsEvents } from './deal-generator/events.js';
+import { EventGenerator } from './deal-generator/events.js';
 import { calculateTierFromLicenseContext } from './tiers.js';
 
 function dealPropertiesForLicense(license: License, transactions: Transaction[]): Omit<Deal['properties'], 'dealstage'> {
@@ -190,7 +190,8 @@ class DealActionGenerator {
       .sort(sorter(l => l.maintenanceStartDate, 'ASC'))
     );
 
-    const events = interpretAsEvents(groups);
+    const eventGenerator = new EventGenerator();
+    const events = eventGenerator.interpretAsEvents(groups);
 
     const licenseDeals = new Set<Deal>();
     for (const license of licenses) {
