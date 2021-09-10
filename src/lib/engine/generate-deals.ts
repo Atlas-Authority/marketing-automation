@@ -271,45 +271,6 @@ class DealActionGenerator {
 
     let deal = licenseDeals.size > 0 ? [...licenseDeals][0] : null;
 
-    switch (hosting) {
-      case 'Server':
-      case 'Data Center':
-        if (deal === null) {
-          if (hasPurchase(groups)) {
-            // TODO: Create Won (Amount)
-          }
-          else if (hasEval(groups)) {
-            // TODO: Create Eval
-          }
-        }
-        else if (deal.properties.dealstage === DealStage.EVAL) {
-          if (hasPurchase(groups)) {
-            // TODO: Close Won (Amount, CloseDate)
-          }
-          else if (hasEval(groups)) {
-            // TODO: Update Eval (CloseDate)
-          }
-        }
-
-        break;
-      case 'Cloud':
-        if (hasPurchase(groups)) {
-          if (deal === null) {
-            // TODO: Create Won (CloseDate)
-          }
-          else if (deal.properties.dealstage === DealStage.EVAL) {
-            // TODO: Close Won (CloseDate)
-          }
-        }
-        else if (hasEval(groups)) {
-          if (deal === null) {
-            // TODO: Create Eval
-          }
-        }
-
-        break;
-    }
-
     if (licenses.every(l => isFreeLicense(l))) {
       // It's only evals
       assert.ok(groups.flatMap(g => g.transactions).length === 0);
@@ -486,17 +447,6 @@ export function olderThan90Days(dateString: string) {
 function getBadDomains(licenses: License[], providerDomains: Set<string>, partnerDomains: Set<string>) {
   const domains = licenses.map(license => license.contactDetails.technicalContact.email.toLowerCase().split('@')[1]);
   return domains.filter(domain => partnerDomains.has(domain) || providerDomains.has(domain));
-}
-
-function hasEval(groups: RelatedLicenseSet) {
-  return groups.some(g =>
-    g.license.licenseType === 'EVALUATION');
-}
-
-function hasPurchase(groups: RelatedLicenseSet) {
-  return groups.some(g =>
-    g.transactions.some(tx =>
-      tx.purchaseDetails.saleType === 'New'));
 }
 
 type RefundEvent = {
