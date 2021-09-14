@@ -2,7 +2,7 @@ import csvStringify from 'csv-stringify/lib/es5/sync.js';
 import flatten from 'flat';
 import config from './config.js';
 import * as datadir from './datadir.js';
-import * as logger from './logger.js';
+import logger from './logger.js';
 
 /**
  * @param {string} filename

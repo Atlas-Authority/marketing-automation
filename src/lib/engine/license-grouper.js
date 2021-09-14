@@ -4,7 +4,7 @@ import * as util from 'util';
 import { fnOrCache } from '../util/fn-cache.js';
 import { sorter } from '../util/helpers.js';
 import { saveForInspection } from '../util/inspection.js';
-import * as logger from '../util/logger.js';
+import logger from '../util/logger.js';
 import { LicenseMatcher } from './license-matcher.js';
 
 

@@ -1,4 +1,4 @@
-import * as logger from '../util/logger.js';
+import logger from '../util/logger.js';
 
 /** @implements {Uploader} */
 export default class ConsoleUploader {

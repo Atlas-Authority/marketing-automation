@@ -3,7 +3,7 @@ import util from 'util';
 import { makeMultiProviderDomainsSet } from '../util/domains.js';
 import { AttachableError } from '../util/errors.js';
 import { isPresent } from '../util/helpers.js';
-import * as logger from '../util/logger.js';
+import logger from '../util/logger.js';
 
 /**
  * @typedef InitialData

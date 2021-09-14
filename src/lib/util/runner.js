@@ -1,5 +1,5 @@
 import config from './config.js';
-import * as logger from './logger.js';
+import logger from './logger.js';
 
 /**
  * @param {object} options

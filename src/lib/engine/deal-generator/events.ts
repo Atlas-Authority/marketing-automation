@@ -1,6 +1,6 @@
 import { sorter } from "../../util/helpers.js";
 import { abbrEventDetails } from "./actions.js";
-import * as logger from '../../util/logger.js';
+import logger from '../../util/logger.js';
 
 export type DealRelevantEvent = (
   { type: 'refund', refundedTxIds: string[] } |

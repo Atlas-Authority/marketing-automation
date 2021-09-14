@@ -1,6 +1,6 @@
 import fs from 'fs';
 import { URL } from 'url';
-import * as logger from './logger.js';
+import logger from './logger.js';
 
 /**
  * @param {'in' | 'out' | 'cache'} place

@@ -5,7 +5,7 @@ import { contactFromHubspot } from '../engine/contacts.js';
 import config, { Pipeline } from '../util/config.js';
 import * as datadir from '../util/datadir.js';
 import { AttachableError, SimpleError } from '../util/errors.js';
-import * as logger from '../util/logger.js';
+import logger from '../util/logger.js';
 
 
 /** @implements {Downloader} */

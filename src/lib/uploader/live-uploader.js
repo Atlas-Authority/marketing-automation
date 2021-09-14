@@ -4,7 +4,7 @@ import { contactToHubspotProperties } from '../engine/contacts.js';
 import config from '../util/config.js';
 import { batchesOf } from '../util/helpers.js';
 import { saveToJson } from '../util/inspection.js';
-import * as logger from '../util/logger.js';
+import logger from '../util/logger.js';
 
 
 /** @implements {Uploader} */

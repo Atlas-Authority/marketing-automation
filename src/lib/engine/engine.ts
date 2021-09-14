@@ -1,5 +1,5 @@
 import { downloadAllData } from '../downloader/download-initial-data.js';
-import * as logger from '../util/logger.js';
+import logger from '../util/logger.js';
 import { buildContactsStructure } from './contacts.js';
 import { generateContactUpdateActions } from './generate-contact-updates.js';
 import { generateContacts } from "./generate-contacts.js";

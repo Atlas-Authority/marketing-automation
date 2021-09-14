@@ -1,7 +1,7 @@
 import v8 from "v8";
 import config from './config.js';
 import * as datadir from './datadir.js';
-import * as logger from './logger.js';
+import logger from './logger.js';
 
 /**
  * @template T

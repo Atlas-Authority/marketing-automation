@@ -2,8 +2,6 @@ import util from 'util';
 import config from './config.js';
 
 let enabled = true;
-export function enable() { enabled = true; }
-export function disable() { enabled = false; }
 
 const great = '\x1b[32m';
 const nerve = '\x1b[43;30;1m';
@@ -19,6 +17,20 @@ enum LogLevel {
   Verbose,
 }
 
+class Logger {
+
+  enable() { enabled = true; }
+  disable() { enabled = false; }
+
+  info(prefix: string, ...args: any[]) { log(LogLevel.Info, prefix, ...args); }
+  verbose(prefix: string, ...args: any[]) { log(LogLevel.Verbose, prefix, ...args); }
+  warn(prefix: string, ...args: any[]) { log(LogLevel.Warn, prefix, ...args); }
+  error(prefix: string, ...args: any[]) { log(LogLevel.Error, prefix, ...args); }
+
+}
+
+export default new Logger();
+
 const configLogLevel = logLevelFromString(config.logLevel);
 
 function logLevelFromString(level: string) {
@@ -30,11 +42,6 @@ function logLevelFromString(level: string) {
     default: return LogLevel.Warn;
   }
 }
-
-export const info = log.bind(null, LogLevel.Info);
-export const verbose = log.bind(null, LogLevel.Verbose);
-export const warn = log.bind(null, LogLevel.Warn);
-export const error = log.bind(null, LogLevel.Error);
 
 const levelPrefixes = {
   [LogLevel.Info]: `${great}info${reset}`,

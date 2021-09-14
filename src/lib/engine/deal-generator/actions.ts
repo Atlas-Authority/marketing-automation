@@ -1,5 +1,5 @@
-import * as logger from '../../util/logger.js';
 import { isPresent } from "../../util/helpers.js";
+import logger from "../../util/logger.js";
 import { decisionMatrix } from "./decision-matrix.js";
 import { DealRelevantEvent } from "./events.js";
 

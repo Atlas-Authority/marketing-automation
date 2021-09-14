@@ -4,7 +4,7 @@ import mustache from 'mustache';
 import config, { DealStage, Pipeline } from '../util/config.js';
 import { isPresent, sorter } from '../util/helpers.js';
 import { saveForInspection } from '../util/inspection.js';
-import * as logger from '../util/logger.js';
+import logger from '../util/logger.js';
 import { ActionGenerator } from './deal-generator/actions.js';
 import { EventGenerator } from './deal-generator/events.js';
 import { calculateTierFromLicenseContext } from './tiers.js';

@@ -1,5 +1,5 @@
 import { DealStage, Pipeline } from '../util/config.js';
-import * as logger from '../util/logger.js';
+import logger from '../util/logger.js';
 
 /**
  * @param {object} options
