@@ -12,7 +12,7 @@ const reset = '\x1b[0m';
 const royal = '\x1b[35m';
 const relax = '\x1b[33;2m';
 
-export enum LogLevel {
+enum LogLevel {
   Error,
   Warn,
   Info,
@@ -21,7 +21,7 @@ export enum LogLevel {
 
 const configLogLevel = logLevelFromString(config.logLevel);
 
-export function logLevelFromString(level: string) {
+function logLevelFromString(level: string) {
   switch (level) {
     case 'error': return LogLevel.Error;
     case 'warn': return LogLevel.Warn;
@@ -75,7 +75,7 @@ function log(level: LogLevel, prefix: string, ...args: any[]) {
   }
 }
 
-export function formatted(data: unknown, prefixLength: number) {
+function formatted(data: unknown, prefixLength: number) {
   return util.inspect(data, {
     breakLength: (process.stdout.columns || 200) - prefixLength,
     colors: true,
