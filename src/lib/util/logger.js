@@ -1,6 +1,7 @@
 import util from 'util';
 
 export const info = log.bind(null, 'info');
+export const verbose = log.bind(null, 'verbose');
 export const warn = log.bind(null, 'warn');
 export const error = log.bind(null, 'error');
 
@@ -19,10 +20,11 @@ const levelPrefixes = {
   info: `${great}info${reset}`,
   warn: `${nerve}WARN${reset}`,
   error: `${scary}ERR!${reset}`,
+  verbose: `${great}....${reset}`,
 };
 
 /**
- * @param {'info' | 'warn' | 'error'} level
+ * @param {'verbose' | 'info' | 'warn' | 'error'} level
  * @param {string} prefix
  * @param  {...any} args
  */
@@ -61,7 +63,7 @@ function log(level, prefix, ...args) {
  * @param {unknown} data
  * @param {number} prefixLength
  */
-function formatted(data, prefixLength) {
+export function formatted(data, prefixLength) {
   return util.inspect(data, {
     breakLength: (process.stdout.columns || 200) - prefixLength,
     colors: true,

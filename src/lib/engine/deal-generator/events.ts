@@ -1,4 +1,6 @@
 import { sorter } from "../../util/helpers.js";
+import { abbrEventDetails } from "./actions.js";
+import * as logger from '../../util/logger.js';
 
 export type DealRelevantEvent = (
   { type: 'refund', refundedTxIds: string[] } |
@@ -41,6 +43,16 @@ export class EventGenerator {
     }
 
     this.normalizeEvalAndPurchaseEvents();
+
+    logger.verbose('Deal Actions', '----------------------------------------');
+    logger.verbose('Deal Actions', 'Records');
+    for (const record of records) {
+      logger.verbose('Deal Actions', abbrRecordDetails(record));
+    }
+    logger.verbose('Deal Actions', 'Events');
+    for (const e of this.events) {
+      logger.verbose('Deal Actions', abbrEventDetails(e))
+    }
 
     return this.events;
   }
@@ -168,6 +180,25 @@ export class EventGenerator {
     return transactions;
   }
 
+}
+
+function abbrRecordDetails(record: Transaction | License) {
+  return (isLicense(record)
+    ? {
+      hosting: record.hosting,
+      sen: record.addonLicenseId,
+      date: record.maintenanceStartDate,
+      type: record.licenseType,
+    }
+    : {
+      hosting: record.purchaseDetails.hosting,
+      sen: record.addonLicenseId,
+      date: record.purchaseDetails.maintenanceStartDate,
+      type: record.purchaseDetails.licenseType,
+      sale: record.purchaseDetails.saleType,
+      at: record.transactionId,
+      amt: record.purchaseDetails.vendorAmount,
+    });
 }
 
 function isEvalOrOpenSourceLicense(record: License) {

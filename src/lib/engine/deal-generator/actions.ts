@@ -75,7 +75,7 @@ export class ActionGenerator {
 
 }
 
-function abbrEventDetails(e: DealRelevantEvent) {
+export function abbrEventDetails(e: DealRelevantEvent) {
   switch (e.type) {
     case 'eval': return { type: e.type, id: e.licenseIds };
     case 'purchase': return { type: e.type, id: e.licenseIds, tx: e.transaction?.transactionId };
