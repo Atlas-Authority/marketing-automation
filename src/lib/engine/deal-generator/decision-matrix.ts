@@ -1,3 +1,4 @@
+import { DealStage } from "../../util/config.js";
 import { DealRelevantEvent } from "./events.js";
 
 const hosting = {
@@ -16,9 +17,9 @@ const event = {
 };
 
 const state = {
-  hasNothing: (event: DealRelevantEvent, deals: Deal[]) => true,
-  hasTrial: (event: DealRelevantEvent, deals: Deal[]) => true,
-  any: (_event: DealRelevantEvent, _deals: Deal[]) => true,
+  hasNothing: (deals: Deal[]) => deals.length === 0,
+  hasTrial: (deals: Deal[]) => deals.some(d => d.properties.dealstage === DealStage.EVAL),
+  any: (_deals: Deal[]) => true,
 };
 
 const outcome = {
@@ -32,7 +33,7 @@ const outcome = {
 type DecisionMatrix = [
   (groups: RelatedLicenseSet) => boolean,
   (event: DealRelevantEvent) => boolean,
-  (event: DealRelevantEvent, deals: Deal[]) => boolean,
+  (deals: Deal[]) => boolean,
   (event: DealRelevantEvent, deal: Deal | null) => unknown,
 ][];
 
