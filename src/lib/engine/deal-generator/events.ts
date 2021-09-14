@@ -44,7 +44,7 @@ export class EventGenerator {
 
     this.normalizeEvalAndPurchaseEvents();
 
-    logger.verbose('Deal Actions', '----------------------------------------');
+    logger.verbose('Deal Actions', '');
     logger.verbose('Deal Actions', 'Records');
     for (const record of records) {
       logger.verbose('Deal Actions', abbrRecordDetails(record));

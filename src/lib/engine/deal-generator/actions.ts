@@ -40,7 +40,7 @@ export class ActionGenerator {
       }
 
       if (!handled) {
-        logger.warn('Deal Actions', 'No action path for event', abbrEventDetails(event));
+        logger.verbose('Deal Actions', 'No action path for event', abbrEventDetails(event));
       }
     }
 
