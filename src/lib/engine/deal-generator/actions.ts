@@ -24,13 +24,25 @@ export class ActionGenerator {
 
     for (const event of events) {
       let handled = false;
+      const reasons = new Set<string>();
 
       for (const [checkHosting, checkEvent, checkState, runOutcome] of decisionMatrix) {
-        if (!checkHosting(groups)) continue;
-        if (!checkEvent(event)) continue;
+        const hosting = groups[0].license.hosting;
+        if (!checkHosting(hosting)) {
+          reasons.add(`hosting = ${hosting}`);
+          continue;
+        }
+
+        if (!checkEvent(event.type)) {
+          reasons.add(`event = ${event.type}`);
+          continue;
+        }
 
         const state = this.getState(event);
-        if (!checkState(state)) continue;
+        if (!checkState(state)) {
+          reasons.add(`deals = ${state.map(d => d.id).join(', ')}`);
+          continue;
+        }
 
         const action = runOutcome(event, state[0]);
         actions.push(action);
@@ -40,7 +52,11 @@ export class ActionGenerator {
       }
 
       if (!handled) {
-        logger.verbose('Deal Actions', 'No action path for event', abbrEventDetails(event));
+        logger.verbose('Deal Actions', 'No action path for event');
+        logger.verbose('Deal Actions', {
+          event: abbrEventDetails(event),
+          reasons,
+        });
       }
     }
 

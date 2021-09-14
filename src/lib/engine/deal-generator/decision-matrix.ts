@@ -2,18 +2,18 @@ import { DealStage } from "../../util/config.js";
 import { DealRelevantEvent } from "./events.js";
 
 const hosting = {
-  isServer: (groups: RelatedLicenseSet) => getHosting(groups) === 'Server',
-  isDataCenter: (groups: RelatedLicenseSet) => getHosting(groups) === 'Data Center',
-  isCloud: (groups: RelatedLicenseSet) => getHosting(groups) === 'Cloud',
-  isAny: (_groups: RelatedLicenseSet) => true,
+  isServer: (hosting: 'Server' | 'Data Center' | 'Cloud') => hosting === 'Server',
+  isDataCenter: (hosting: 'Server' | 'Data Center' | 'Cloud') => hosting === 'Data Center',
+  isCloud: (hosting: 'Server' | 'Data Center' | 'Cloud') => hosting === 'Cloud',
+  isAny: (_hosting: 'Server' | 'Data Center' | 'Cloud') => true,
 };
 
 const event = {
-  isNewTrial: (event: DealRelevantEvent) => event.type === 'eval',
-  isPurchase: (event: DealRelevantEvent) => event.type === 'purchase',
-  isaRenewal: (event: DealRelevantEvent) => event.type === 'renewal',
-  isUpgraded: (event: DealRelevantEvent) => event.type === 'upgrade',
-  isRefunded: (event: DealRelevantEvent) => event.type === 'refund',
+  isNewTrial: (type: DealRelevantEvent['type']) => type === 'eval',
+  isPurchase: (type: DealRelevantEvent['type']) => type === 'purchase',
+  isaRenewal: (type: DealRelevantEvent['type']) => type === 'renewal',
+  isUpgraded: (type: DealRelevantEvent['type']) => type === 'upgrade',
+  isRefunded: (type: DealRelevantEvent['type']) => type === 'refund',
 };
 
 const state = {
@@ -31,8 +31,8 @@ const outcome = {
 };
 
 type DecisionMatrix = [
-  (groups: RelatedLicenseSet) => boolean,
-  (event: DealRelevantEvent) => boolean,
+  (hosting: 'Server' | 'Data Center' | 'Cloud') => boolean,
+  (type: DealRelevantEvent['type']) => boolean,
   (deals: Deal[]) => boolean,
   (event: DealRelevantEvent, deal: Deal | null) => unknown,
 ][];
@@ -60,7 +60,3 @@ export const decisionMatrix: DecisionMatrix = [
 
   [hosting.isAny, event.isRefunded, state.any, outcome.closeLost],
 ];
-
-function getHosting(groups: RelatedLicenseSet) {
-  return groups[0].license.hosting;
-}
