@@ -24,7 +24,7 @@ export const ADDONKEY_TO_PLATFORM = Object.fromEntries(
 );
 
 export default {
-  logLevel: optional('LOGLEVEL')?.trim().toLowerCase() || 'warn',
+  logLevel: optional('LOGLEVEL')?.trim().toLowerCase() || 'info',
   mpac: {
     user: required('MPAC_USER'),
     pass: required('MPAC_PASS'),
