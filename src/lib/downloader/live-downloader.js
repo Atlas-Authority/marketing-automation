@@ -56,7 +56,7 @@ export default class LiveDownloader {
   async downloadLicensesWithoutDataInsights() {
     logger.info('Live Downloader', 'Starting to download Licenses Without Data Insights');
     /** @type {License[]} */
-    let json = await downloadMarketplaceData('/licenses/export?endDate=2018-7-1');
+    let json = await downloadMarketplaceData('/licenses/export?endDate=2018-07-01');
     logger.info('Live Downloader', 'Downloaded Licenses without-data-insights up to 2018-07-01');
 
     json.forEach(fixOdditiesInLicenses);
