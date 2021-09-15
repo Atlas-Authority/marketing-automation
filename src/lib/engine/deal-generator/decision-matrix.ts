@@ -1,25 +1,25 @@
 import { DealStage } from "../../util/config.js";
 import { DealRelevantEvent } from "./events.js";
 
-const hosting = {
-  isServer: (hosting: License['hosting']) => hosting === 'Server',
-  isDataCenter: (hosting: License['hosting']) => hosting === 'Data Center',
-  isCloud: (hosting: License['hosting']) => hosting === 'Cloud',
-  isAny: (_hosting: License['hosting']) => true,
+const hosting: { [name: string]: (hosting: License['hosting']) => boolean } = {
+  isServer: (hosting) => hosting === 'Server',
+  isDataCenter: (hosting) => hosting === 'Data Center',
+  isCloud: (hosting) => hosting === 'Cloud',
+  isAny: (_hosting) => true,
 };
 
-const event = {
-  isNewTrial: (type: DealRelevantEvent['type']) => type === 'eval',
-  isPurchase: (type: DealRelevantEvent['type']) => type === 'purchase',
-  isaRenewal: (type: DealRelevantEvent['type']) => type === 'renewal',
-  isUpgraded: (type: DealRelevantEvent['type']) => type === 'upgrade',
-  isRefunded: (type: DealRelevantEvent['type']) => type === 'refund',
+const event: { [name: string]: (type: DealRelevantEvent['type']) => boolean } = {
+  isNewTrial: (type) => type === 'eval',
+  isPurchase: (type) => type === 'purchase',
+  isaRenewal: (type) => type === 'renewal',
+  isUpgraded: (type) => type === 'upgrade',
+  isRefunded: (type) => type === 'refund',
 };
 
-const state = {
-  hasNothing: (deals: Deal[]) => deals.length === 0,
-  hasTrial: (deals: Deal[]) => deals.some(d => d.properties.dealstage === DealStage.EVAL),
-  any: (_deals: Deal[]) => true,
+const state: { [name: string]: (deals: Deal[]) => boolean } = {
+  hasNothing: (deals) => deals.length === 0,
+  hasTrial: (deals) => deals.some(d => d.properties.dealstage === DealStage.EVAL),
+  any: (_deals) => true,
 };
 
 const outcome: { [name: string]: Outcome } = {
