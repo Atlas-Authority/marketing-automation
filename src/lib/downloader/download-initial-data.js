@@ -99,8 +99,13 @@ function uniqLicenses(licenses) {
   const edgeCases = Object.values(groups).filter(ls => ls.length > 1);
   for (const dups of edgeCases) {
     assert.ok(dups
-      .map(({ attribution, evaluationOpportunitySize, ...dup }) => dup)
-      .every((dup, i, array) => util.isDeepStrictEqual(dup, array[0]))
+      .map(({
+        attribution, evaluationOpportunitySize,
+        parentProductBillingCycle, parentProductName,
+        installedOnSandbox, parentProductEdition,
+        ...dup }) => dup)
+      .every((dup, i, array) => util.isDeepStrictEqual(dup, array[0])),
+      util.inspect(dups, { colors: true, depth: null })
     );
 
     // Keep the first one with attributions
@@ -157,6 +162,11 @@ const licensesWithDataInsightsSchema = [
   ['every', license => isString(license?.contactDetails?.region)],
   ['every', license => isString(license?.hosting)],
   ['every', license => isString(license?.lastUpdated)],
+
+  ['every', license => isString(license?.parentProductBillingCycle)],
+  ['every', license => isString(license?.parentProductName)],
+  ['every', license => isString(license?.installedOnSandbox)],
+  ['every', license => isString(license?.parentProductEdition)],
 
   ['some', (/** @type {any} */ license) => isString(license?.evaluationLicense)],
   ['some', (/** @type {any} */ license) => isString(license?.daysToConvertEval)],

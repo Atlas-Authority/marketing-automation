@@ -52,6 +52,10 @@ interface License {
     campaignMedium?: string,
     campaignContent?: string,
   },
+  parentProductBillingCycle?: 'NA' | 'Pending' | 'ANNUAL' | 'MONTHLY',
+  parentProductName?: 'NA' | 'Pending' | 'Confluence' | 'Jira',
+  installedOnSandbox?: 'NA' | 'Pending' | 'No' | 'Yes',
+  parentProductEdition?: 'NA' | 'Pending' | 'Free' | 'Standard' | 'Premium' | 'Enterprise',
 }
 
 type LicenseContext = {
