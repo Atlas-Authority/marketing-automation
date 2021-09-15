@@ -1,6 +1,6 @@
 import { isPresent } from "../../util/helpers.js";
 import logger from "../../util/logger.js";
-import { decisionMatrix } from "./decision-matrix.js";
+import { decisionMatrix, Outcome } from "./decision-matrix.js";
 import { DealRelevantEvent } from "./events.js";
 
 export class ActionGenerator {
@@ -26,7 +26,7 @@ export class ActionGenerator {
       let handled = false;
       const reasons = new Set<string>();
 
-      for (const [checkHosting, checkEvent, checkState, runOutcome] of decisionMatrix) {
+      for (const [checkHosting, checkEvent, checkState, outcome] of decisionMatrix) {
         const hosting = groups[0].license.hosting;
         if (!checkHosting(hosting)) {
           reasons.add(`hosting = ${hosting}`);
@@ -46,7 +46,7 @@ export class ActionGenerator {
           continue;
         }
 
-        const action = runOutcome(event, state[0]);
+        const action = actionForOutcome(outcome, event, deal);
         actions.push(action);
 
         handled = true;
@@ -106,4 +106,7 @@ function getDeals(dealMap: Map<string, Deal>, ids: string[]) {
   return (ids
     .map(id => dealMap.get(id))
     .filter(isPresent));
+}
+
+function actionForOutcome(outcome: Outcome, event: DealRelevantEvent, deal: Deal | undefined) {
 }

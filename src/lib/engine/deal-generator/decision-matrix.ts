@@ -61,7 +61,7 @@ export const decisionMatrix: DecisionMatrix = [
   [hosting.isAny, event.isRefunded, state.hasNonLost, outcome.closeLost],
 ];
 
-type Outcome = (
+export type Outcome = (
   { type: 'create', stage: DealStage } |
   { type: 'close', stage: DealStage } |
   { type: 'update' }
