@@ -2,10 +2,10 @@ import { DealStage } from "../../util/config.js";
 import { DealRelevantEvent } from "./events.js";
 
 const hosting = {
-  isServer: (hosting: 'Server' | 'Data Center' | 'Cloud') => hosting === 'Server',
-  isDataCenter: (hosting: 'Server' | 'Data Center' | 'Cloud') => hosting === 'Data Center',
-  isCloud: (hosting: 'Server' | 'Data Center' | 'Cloud') => hosting === 'Cloud',
-  isAny: (_hosting: 'Server' | 'Data Center' | 'Cloud') => true,
+  isServer: (hosting: License['hosting']) => hosting === 'Server',
+  isDataCenter: (hosting: License['hosting']) => hosting === 'Data Center',
+  isCloud: (hosting: License['hosting']) => hosting === 'Cloud',
+  isAny: (_hosting: License['hosting']) => true,
 };
 
 const event = {
@@ -31,7 +31,7 @@ const outcome = {
 };
 
 type DecisionMatrix = [
-  (hosting: 'Server' | 'Data Center' | 'Cloud') => boolean,
+  (hosting: License['hosting']) => boolean,
   (type: DealRelevantEvent['type']) => boolean,
   (deals: Deal[]) => boolean,
   (event: DealRelevantEvent, deal: Deal | null) => unknown,
