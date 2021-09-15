@@ -43,6 +43,9 @@ export async function downloadAllData({ downloader }) {
     downloader.downloadAllTlds(),
   ]);
 
+  licensesWithDataInsights = licensesWithDataInsights.filter(filterLicensesWithTechEmail);
+  licensesWithoutDataInsights = licensesWithoutDataInsights.filter(filterLicensesWithTechEmail);
+
   verifyStructure('licenses_with_data_insights',
     licensesWithDataInsights,
     licensesWithDataInsightsSchema);
@@ -259,4 +262,15 @@ function makeEmailValidator(re) {
    */
   return (item) =>
     getEmails(item).every(e => re.test(e));
+}
+
+/**
+ * @param {License} license
+ */
+function filterLicensesWithTechEmail(license) {
+  if (!license.contactDetails.technicalContact?.email) {
+    logger.warn('Downloader', 'License does not have a tech contact email; will be skipped', license);
+    return false;
+  }
+  return true;
 }
