@@ -69,31 +69,25 @@ export class ActionGenerator {
     switch (event.type) {
       case 'eval':
         // There's only 0-1 evals
-        return this.getDeals(this.allLicenseDeals, event.licenseIds);
+        return getDeals(this.allLicenseDeals, event.licenseIds);
       case 'purchase':
         // There is either: nothing, 1 eval, or 1+ closeds
         // The purchases may have either license or transaction ids
         return [
-          ...this.getDeals(this.allLicenseDeals, event.licenseIds),
-          ...this.getDeals(this.allTransactionDeals,
+          ...getDeals(this.allLicenseDeals, event.licenseIds),
+          ...getDeals(this.allTransactionDeals,
             event.transaction
               ? [event.transaction.transactionId]
               : [])
         ];
       case 'refund':
         // May have 1+ closeds, or 1 eval, or nothing (e.g. all are new events)
-        return this.getDeals(this.allTransactionDeals, event.refundedTxIds);
+        return getDeals(this.allTransactionDeals, event.refundedTxIds);
       case 'renewal':
       case 'upgrade':
         // May have 1+ closeds, or 1 eval, or nothing (e.g. all are new events)
-        return this.getDeals(this.allTransactionDeals, [event.transaction.transactionId]);
+        return getDeals(this.allTransactionDeals, [event.transaction.transactionId]);
     }
-  }
-
-  private getDeals(dealMap: Map<string, Deal>, ids: string[]) {
-    return (ids
-      .map(id => dealMap.get(id))
-      .filter(isPresent));
   }
 
 }
@@ -106,4 +100,10 @@ export function abbrEventDetails(e: DealRelevantEvent) {
     case 'renewal': return { type: e.type, id: e.transaction.transactionId };
     case 'upgrade': return { type: e.type, id: e.transaction.transactionId };
   }
+}
+
+function getDeals(dealMap: Map<string, Deal>, ids: string[]) {
+  return (ids
+    .map(id => dealMap.get(id))
+    .filter(isPresent));
 }
