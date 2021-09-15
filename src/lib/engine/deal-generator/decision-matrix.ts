@@ -22,31 +22,24 @@ const state = {
   any: (_deals: Deal[]) => true,
 };
 
-const outcome = {
-  createTrial: (event: DealRelevantEvent, deal: Deal | null) => null,
-  updateCloseDate: (event: DealRelevantEvent, deal: Deal | null) => null,
-  createWon: (event: DealRelevantEvent, deal: Deal | null) => null,
-  closeWon: (event: DealRelevantEvent, deal: Deal | null) => null,
-  closeLost: (event: DealRelevantEvent, deal: Deal | null) => null,
+const outcome: { [name: string]: Outcome } = {
+  createTrial: { type: 'create', stage: DealStage.EVAL },
+  update: { type: 'update' },
+  createWon: { type: 'create', stage: DealStage.CLOSED_WON },
+  closeWon: { type: 'close', stage: DealStage.CLOSED_WON },
+  closeLost: { type: 'close', stage: DealStage.CLOSED_LOST },
 };
-
-type DecisionMatrix = [
-  (hosting: License['hosting']) => boolean,
-  (type: DealRelevantEvent['type']) => boolean,
-  (deals: Deal[]) => boolean,
-  (event: DealRelevantEvent, deal: Deal | null) => unknown,
-][];
 
 export const decisionMatrix: DecisionMatrix = [
   [hosting.isServer, event.isNewTrial, state.hasNothing, outcome.createTrial],
-  [hosting.isServer, event.isNewTrial, state.hasTrial, outcome.updateCloseDate],
+  [hosting.isServer, event.isNewTrial, state.hasTrial, outcome.update],
   [hosting.isServer, event.isPurchase, state.hasNothing, outcome.createWon],
   [hosting.isServer, event.isPurchase, state.hasTrial, outcome.closeWon],
   [hosting.isServer, event.isaRenewal, state.any, outcome.createWon],
   [hosting.isServer, event.isUpgraded, state.any, outcome.createWon],
 
   [hosting.isDataCenter, event.isNewTrial, state.hasNothing, outcome.createTrial],
-  [hosting.isDataCenter, event.isNewTrial, state.hasTrial, outcome.updateCloseDate],
+  [hosting.isDataCenter, event.isNewTrial, state.hasTrial, outcome.update],
   [hosting.isDataCenter, event.isPurchase, state.hasNothing, outcome.createWon],
   [hosting.isDataCenter, event.isPurchase, state.hasTrial, outcome.closeWon],
   [hosting.isDataCenter, event.isaRenewal, state.any, outcome.createWon],
@@ -60,3 +53,16 @@ export const decisionMatrix: DecisionMatrix = [
 
   [hosting.isAny, event.isRefunded, state.any, outcome.closeLost],
 ];
+
+type Outcome = (
+  { type: 'create', stage: DealStage } |
+  { type: 'close', stage: DealStage } |
+  { type: 'update' }
+);
+
+type DecisionMatrix = [
+  (hosting: License['hosting']) => boolean,
+  (type: DealRelevantEvent['type']) => boolean,
+  (deals: Deal[]) => boolean,
+  Outcome,
+][];
