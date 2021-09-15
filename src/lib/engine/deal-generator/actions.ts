@@ -1,3 +1,4 @@
+import assert from 'assert';
 import { isPresent } from "../../util/helpers.js";
 import logger from "../../util/logger.js";
 import { decisionMatrix, Outcome } from "./decision-matrix.js";
@@ -51,11 +52,11 @@ export class ActionGenerator {
       }
 
       if (action) {
+        logger.verbose('Deal Actions', 'Pushing action', action);
         actions.push(action);
       }
       else {
-        logger.verbose('Deal Actions', 'No action path for event');
-        logger.verbose('Deal Actions', {
+        logger.verbose('Deal Actions', 'No action path for event', {
           event: abbrEventDetails(event),
           reasons,
         });
@@ -108,8 +109,44 @@ function getDeals(dealMap: Map<string, Deal>, ids: string[]) {
     .filter(isPresent));
 }
 
-type Action = {};
+type Action = (
+  { type: 'update', deal: Deal, properties: Partial<Deal['properties']> } |
+  { type: 'create', properties: Deal['properties'] }
+);
 
 function actionForOutcome(outcome: Outcome, event: DealRelevantEvent, deal: Deal | undefined): Action {
+  switch (outcome.type) {
+    case 'create':
+      return {
+        type: 'create',
+        properties: {
+          ...dealPropertiesForEvent(event),
+          dealstage: outcome.stage,
+        }
+      };
+    case 'update':
+      assert.ok(deal);
+      return {
+        type: 'update',
+        deal,
+        properties: dealUpdatePropertiesForEvent(event, deal),
+      };
+    case 'close':
+      assert.ok(deal);
+      return {
+        type: 'update',
+        deal,
+        properties: {
+          dealstage: outcome.stage,
+        },
+      };
+  }
+}
 
+function dealPropertiesForEvent(event: DealRelevantEvent): Omit<Deal['properties'], 'dealstage'> {
+  throw new Error('Function not implemented.');
+}
+
+function dealUpdatePropertiesForEvent(event: DealRelevantEvent, deal: Deal): Partial<Deal['properties']> {
+  throw new Error('Function not implemented.');
 }
