@@ -1,40 +1,44 @@
 import { DealStage } from "../../util/config.js";
 import { DealRelevantEvent } from "./events.js";
 
-const hosting: { [name: string]: (hosting: License['hosting']) => boolean } = {
-  isServer: (hosting) => hosting === 'Server',
-  isDataCenter: (hosting) => hosting === 'Data Center',
-  isCloud: (hosting) => hosting === 'Cloud',
-  isAny: (_hosting) => true,
+const hosting = {
+  isServer: (hosting: License['hosting']) => hosting === 'Server',
+  isDataCenter: (hosting: License['hosting']) => hosting === 'Data Center',
+  isCloud: (hosting: License['hosting']) => hosting === 'Cloud',
+  isAny: (_hosting: License['hosting']) => true,
 };
 
-const event: { [name: string]: (type: DealRelevantEvent['type']) => boolean } = {
-  isNewTrial: (type) => type === 'eval',
-  isPurchase: (type) => type === 'purchase',
-  isaRenewal: (type) => type === 'renewal',
-  isUpgraded: (type) => type === 'upgrade',
-  isRefunded: (type) => type === 'refund',
+const event = {
+  isNewTrial: (type: DealRelevantEvent['type']) => type === 'eval',
+  isPurchase: (type: DealRelevantEvent['type']) => type === 'purchase',
+  isaRenewal: (type: DealRelevantEvent['type']) => type === 'renewal',
+  isUpgraded: (type: DealRelevantEvent['type']) => type === 'upgrade',
+  isRefunded: (type: DealRelevantEvent['type']) => type === 'refund',
 };
 
-const state: { [name: string]: (deals: Deal[]) => [boolean, Deal | undefined] } = {
-  hasNothing: (deals) => [deals.length === 0, undefined],
-  hasTrial: (deals) => {
+const state = {
+  hasNothing(deals: Deal[]): [boolean, Deal | undefined] {
+    return [deals.length === 0, undefined];
+  },
+  hasTrial(deals: Deal[]): [boolean, Deal | undefined] {
     const deal = deals.find(d => d.properties.dealstage === DealStage.EVAL);
     return [!!deal, deal];
   },
-  hasNonLost: (deals) => {
+  hasNonLost(deals: Deal[]): [boolean, Deal | undefined] {
     const deal = deals.find(d => d.properties.dealstage !== DealStage.CLOSED_LOST);
     return [!!deal, deal];
   },
-  any: (_deals) => [true, _deals[0]],
+  any(_deals: Deal[]): [boolean, Deal | undefined] {
+    return [true, _deals[0]];
+  },
 };
 
-const outcome: { [name: string]: Outcome } = {
-  createTrial: { type: 'create', stage: DealStage.EVAL },
-  createWon: { type: 'create', stage: DealStage.CLOSED_WON },
-  closeWon: { type: 'close', stage: DealStage.CLOSED_WON },
-  closeLost: { type: 'close', stage: DealStage.CLOSED_LOST },
-  update: { type: 'update' },
+const outcome = {
+  createTrial: { type: 'create', stage: DealStage.EVAL } as Outcome,
+  createWon: { type: 'create', stage: DealStage.CLOSED_WON } as Outcome,
+  closeWon: { type: 'close', stage: DealStage.CLOSED_WON } as Outcome,
+  closeLost: { type: 'close', stage: DealStage.CLOSED_LOST } as Outcome,
+  update: { type: 'update' } as Outcome,
 };
 
 export const decisionMatrix: DecisionMatrix = [
