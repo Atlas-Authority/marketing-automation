@@ -20,10 +20,10 @@ export class ActionGenerator {
   }
 
   generateFrom(events: DealRelevantEvent[], groups: RelatedLicenseSet) {
-    const actions = [];
+    const actions: Action[] = [];
 
     for (const event of events) {
-      let handled = false;
+      let action: Action | null = null;
       const reasons = new Set<string>();
 
       for (const [checkHosting, checkEvent, checkState, outcome] of decisionMatrix) {
@@ -46,14 +46,14 @@ export class ActionGenerator {
           continue;
         }
 
-        const action = actionForOutcome(outcome, event, deal);
-        actions.push(action);
-
-        handled = true;
+        action = actionForOutcome(outcome, event, deal);
         break;
       }
 
-      if (!handled) {
+      if (action) {
+        actions.push(action);
+      }
+      else {
         logger.verbose('Deal Actions', 'No action path for event');
         logger.verbose('Deal Actions', {
           event: abbrEventDetails(event),
@@ -108,5 +108,8 @@ function getDeals(dealMap: Map<string, Deal>, ids: string[]) {
     .filter(isPresent));
 }
 
-function actionForOutcome(outcome: Outcome, event: DealRelevantEvent, deal: Deal | undefined) {
+type Action = {};
+
+function actionForOutcome(outcome: Outcome, event: DealRelevantEvent, deal: Deal | undefined): Action {
+
 }
