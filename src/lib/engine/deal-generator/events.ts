@@ -2,12 +2,18 @@ import { sorter } from "../../util/helpers.js";
 import { abbrEventDetails } from "./actions.js";
 import logger from '../../util/logger.js';
 
+export type RefundEvent = { type: 'refund', refundedTxIds: string[] };
+export type EvalEvent = { type: 'eval', licenseIds: string[] };
+export type PurchaseEvent = { type: 'purchase', licenseIds: string[], transaction?: Transaction };
+export type RenewalEvent = { type: 'renewal', transaction: Transaction };
+export type UpgradeEvent = { type: 'upgrade', transaction: Transaction };
+
 export type DealRelevantEvent = (
-  { type: 'refund', refundedTxIds: string[] } |
-  { type: 'eval', licenseIds: string[] } |
-  { type: 'purchase', licenseIds: string[], transaction?: Transaction } |
-  { type: 'renewal', transaction: Transaction } |
-  { type: 'upgrade', transaction: Transaction }
+  RefundEvent |
+  EvalEvent |
+  PurchaseEvent |
+  RenewalEvent |
+  UpgradeEvent
 );
 
 export class EventGenerator {
@@ -65,7 +71,7 @@ export class EventGenerator {
   private normalizeEvalAndPurchaseEvents() {
     if (this.events.length < 2) return;
 
-    let lastEval: { type: 'eval'; licenseIds: string[] } | null = null;
+    let lastEval: EvalEvent | null = null;
 
     for (let i = 0; i < this.events.length; i++) {
       const event = this.events[i];
