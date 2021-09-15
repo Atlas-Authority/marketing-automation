@@ -19,6 +19,7 @@ const event: { [name: string]: (type: DealRelevantEvent['type']) => boolean } = 
 const state: { [name: string]: (deals: Deal[]) => boolean } = {
   hasNothing: (deals) => deals.length === 0,
   hasTrial: (deals) => deals.some(d => d.properties.dealstage === DealStage.EVAL),
+  hasNonLost: (deals) => deals.some(d => d.properties.dealstage !== DealStage.CLOSED_LOST),
   any: (_deals) => true,
 };
 
@@ -51,7 +52,7 @@ export const decisionMatrix: DecisionMatrix = [
   [hosting.isCloud, event.isaRenewal, state.any, outcome.createWon],
   [hosting.isCloud, event.isUpgraded, state.any, outcome.createWon],
 
-  [hosting.isAny, event.isRefunded, state.any, outcome.closeLost],
+  [hosting.isAny, event.isRefunded, state.hasNonLost, outcome.closeLost],
 ];
 
 type Outcome = (
