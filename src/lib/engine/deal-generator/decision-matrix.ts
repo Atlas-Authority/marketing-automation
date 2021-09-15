@@ -31,10 +31,10 @@ const state: { [name: string]: (deals: Deal[]) => [boolean, Deal | undefined] } 
 
 const outcome: { [name: string]: Outcome } = {
   createTrial: { type: 'create', stage: DealStage.EVAL },
-  update: { type: 'update' },
   createWon: { type: 'create', stage: DealStage.CLOSED_WON },
   closeWon: { type: 'close', stage: DealStage.CLOSED_WON },
   closeLost: { type: 'close', stage: DealStage.CLOSED_LOST },
+  update: { type: 'update' },
 };
 
 export const decisionMatrix: DecisionMatrix = [
