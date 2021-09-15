@@ -66,8 +66,11 @@ export class ActionGenerator {
   private getState(event: DealRelevantEvent) {
     switch (event.type) {
       case 'eval':
+        // There's only 0-1 evals
         return this.getDeals(this.allLicenseDeals, event.licenseIds);
       case 'purchase':
+        // There is either: nothing, 1 eval, or 1+ closeds
+        // The purchases may have either license or transaction ids
         return [
           ...this.getDeals(this.allLicenseDeals, event.licenseIds),
           ...this.getDeals(this.allTransactionDeals,
@@ -76,9 +79,11 @@ export class ActionGenerator {
               : [])
         ];
       case 'refund':
+        // May have 1+ closeds, or 1 eval, or nothing (e.g. all are new events)
         return this.getDeals(this.allTransactionDeals, event.refundedTxIds);
       case 'renewal':
       case 'upgrade':
+        // May have 1+ closeds, or 1 eval, or nothing (e.g. all are new events)
         return this.getDeals(this.allTransactionDeals, [event.transaction.transactionId]);
     }
   }
