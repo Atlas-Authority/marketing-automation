@@ -16,11 +16,17 @@ const event: { [name: string]: (type: DealRelevantEvent['type']) => boolean } = 
   isRefunded: (type) => type === 'refund',
 };
 
-const state: { [name: string]: (deals: Deal[]) => boolean } = {
-  hasNothing: (deals) => deals.length === 0,
-  hasTrial: (deals) => deals.some(d => d.properties.dealstage === DealStage.EVAL),
-  hasNonLost: (deals) => deals.some(d => d.properties.dealstage !== DealStage.CLOSED_LOST),
-  any: (_deals) => true,
+const state: { [name: string]: (deals: Deal[]) => [boolean, Deal | undefined] } = {
+  hasNothing: (deals) => [deals.length === 0, undefined],
+  hasTrial: (deals) => {
+    const deal = deals.find(d => d.properties.dealstage === DealStage.EVAL);
+    return [!!deal, deal];
+  },
+  hasNonLost: (deals) => {
+    const deal = deals.find(d => d.properties.dealstage !== DealStage.CLOSED_LOST);
+    return [!!deal, deal];
+  },
+  any: (_deals) => [true, _deals[0]],
 };
 
 const outcome: { [name: string]: Outcome } = {
@@ -64,6 +70,6 @@ type Outcome = (
 type DecisionMatrix = [
   (hosting: License['hosting']) => boolean,
   (type: DealRelevantEvent['type']) => boolean,
-  (deals: Deal[]) => boolean,
+  (deals: Deal[]) => [boolean, Deal | undefined],
   Outcome,
 ][];

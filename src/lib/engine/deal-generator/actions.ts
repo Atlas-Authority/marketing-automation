@@ -39,8 +39,10 @@ export class ActionGenerator {
         }
 
         const state = this.getState(event);
-        if (!checkState(state)) {
-          reasons.add(`deals = ${state.map(d => d.id).join(', ')}`);
+        const [passed, deal] = checkState(state);
+        if (!passed) {
+          reasons.add(`all deals = ${state.map(d => d.id).join(', ')}`);
+          reasons.add(`found deal = ${deal?.id}`);
           continue;
         }
 
