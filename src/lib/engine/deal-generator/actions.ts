@@ -1,7 +1,5 @@
-import assert from 'assert';
 import { DealStage } from '../../util/config.js';
 import { isPresent } from '../../util/helpers.js';
-import { Outcome } from "./decision-matrix.js";
 import { DealRelevantEvent, EvalEvent, PurchaseEvent, RefundEvent, RenewalEvent, UpgradeEvent } from "./events.js";
 
 export class ActionGenerator {
@@ -38,24 +36,10 @@ export class ActionGenerator {
     const deal = this.licenseDealFinder.getDeal(event.licenses);
     const latestLicense = event.licenses[event.licenses.length - 1];
     if (!deal) {
-      // makeCreateEvent(latestLicense, {dealstage: DealStage.EVAL})
-      return {
-        type: 'create',
-        properties: {
-          dealstage: DealStage.EVAL,
-          ...dealCreationPropertiesFromLicense(latestLicense),
-        },
-      };
+      return makeCreateAction(latestLicense, DealStage.EVAL);
     }
     else if (deal.properties.dealstage === DealStage.EVAL) {
-      // makeUpdateEvent(deal, latestLicense)
-      return {
-        type: 'update',
-        deal,
-        properties: {
-          dealUpdateProperties(deal, latestLicense),
-        },
-      };
+      return makeUpdateAction(deal, latestLicense, {});
     }
     else {
       return null;
@@ -74,12 +58,10 @@ export class ActionGenerator {
 
     const record = getLatestRecord(event);
     if (!deal) {
-      // makeCreateEvent(licenseOrTransaction, {dealstage: DealStage.CLOSED_WON})
-      return this.createPurchaseDeal(record);
+      return makeCreateAction(record, DealStage.CLOSED_WON);
     }
     else if (deal.properties.dealstage === DealStage.EVAL) {
-      // makeUpdateEvent(licenseOrTransaction, {dealstage: DealStage.CLOSED_WON})
-      return this.transitionToPurchased(deal, record);
+      return makeUpdateAction(deal, record, { dealstage: DealStage.CLOSED_WON });
     }
     else {
       return null;
@@ -87,30 +69,15 @@ export class ActionGenerator {
   }
 
   private actionForRenewal(event: RenewalEvent | UpgradeEvent): Action {
-    // makeCreateEvent(transaction, {dealstage: DealStage.CLOSED_WON})
-    return {
-      type: 'create',
-      properties: {
-        dealstage: DealStage.EVAL,
-        ...dealCreationPropertiesFromTransaction(event.transaction),
-      },
-    };
+    return makeCreateAction(event.transaction, DealStage.CLOSED_WON);
   }
 
   private actionForRefund(event: RefundEvent): Action[] {
-    // event.refundedTxs
     const deals = this.transactionDealFinder.getDeals(event.refundedTxs);
-    // makeUpdateEvent(transaction, {dealstage: DealStage.CLOSED_LOST})
     return (deals
       .filter(deal => deal.properties.dealstage !== DealStage.CLOSED_LOST)
       .map(deal => {
-        return {
-          type: 'update',
-          properties: {
-            dealstage: DealStage.CLOSED_LOST,
-            // also specify close-date if needed
-          },
-        } as Action;
+        return makeUpdateAction(deal, transaction, { dealstage: DealStage.CLOSED_LOST })
       })
     );
   }
@@ -122,43 +89,40 @@ type Action = (
   { type: 'create', properties: Deal['properties'] }
 );
 
-function actionForOutcome(outcome: Outcome, event: DealRelevantEvent, deal: Deal | undefined): Action {
-  switch (outcome.type) {
-    case 'create':
-      return {
-        type: 'create',
-        properties: {
-          ...dealPropertiesForEvent(event),
-          dealstage: outcome.stage,
-        }
-      };
-    case 'update':
-      assert.ok(deal);
-      return {
-        type: 'update',
-        deal,
-        properties: dealUpdatePropertiesForEvent(event, deal),
-      };
-    case 'close':
-      assert.ok(deal);
-      return {
-        type: 'update',
-        deal,
-        properties: {
-          dealstage: outcome.stage,
-        },
-      };
-  }
+function makeCreateAction(record: License | Transaction, dealStage: DealStage): Action {
+  // return {
+  //   type: 'create',
+  //   properties: {
+  //     dealstage: DealStage.EVAL,
+  //     ...dealCreationPropertiesFromLicense(latestLicense),
+  //   },
+  // };
+  // return {
+  //   type: 'create',
+  //   properties: {
+  //     dealstage: DealStage.CLOSED_WON,
+  //     ...dealCreationPropertiesFromTransaction(event.transaction),
+  //   },
+  // };
+  throw new Error('Function not implemented.');
 }
 
-function dealPropertiesForEvent(event: DealRelevantEvent): Omit<Deal['properties'], 'dealstage'> {
-  return {};
-  // throw new Error('Function not implemented.');
-}
-
-function dealUpdatePropertiesForEvent(event: DealRelevantEvent, deal: Deal): Partial<Deal['properties']> {
-  return {};
-  // throw new Error('Function not implemented.');
+function makeUpdateAction(deal: Deal, record: License | Transaction, properties: Partial<Deal['properties']>): Action {
+  // return {
+  //   type: 'update',
+  //   deal,
+  //   properties: {
+  //     dealUpdateProperties(deal, latestLicense),
+  //   },
+  // };
+  // return {
+  //   type: 'update',
+  //   properties: {
+  //     dealstage: DealStage.CLOSED_LOST,
+  //     // also specify close-date if needed
+  //   },
+  // } as Action;
+  throw new Error('Function not implemented.');
 }
 
 class DealFinder {
