@@ -1,8 +1,8 @@
 import { DealStage } from '../../util/config.js';
 import { sorter } from '../../util/helpers.js';
-import { DealFinder } from './deal-finder';
+import { DealFinder } from './deal-finder.js';
 import { DealRelevantEvent, EvalEvent, PurchaseEvent, RefundEvent, RenewalEvent, UpgradeEvent } from "./events.js";
-import * as propGenerators from './properties';
+import * as propGenerators from './properties.js';
 import { getDate, isLicense } from './records.js';
 
 export class ActionGenerator {
