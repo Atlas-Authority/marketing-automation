@@ -119,19 +119,18 @@ function getLatestRecord(event: PurchaseEvent): License | Transaction {
   return records.sort(sorter(getDate, 'DSC'))[0];
 }
 
-function dealCreationPropertiesFromLicense(record: License, dealstage: string): { aa_app: string; addonlicenseid: string; transactionid: string; closedate: string; country: string; dealname: string; deployment: string; license_tier: string; origin: string; related_products: string; pipeline: string; dealstage: string; amount: string; } {
+function dealCreationPropertiesFromLicense(record: License, dealstage: string): Deal['properties'] {
   throw new Error('Function not implemented.');
 }
 
-function dealCreationPropertiesFromTransaction(record: Transaction, dealstage: string): { aa_app: string; addonlicenseid: string; transactionid: string; closedate: string; country: string; dealname: string; deployment: string; license_tier: string; origin: string; related_products: string; pipeline: string; dealstage: string; amount: string; } {
+function dealCreationPropertiesFromTransaction(record: Transaction, dealstage: string): Deal['properties'] {
   throw new Error('Function not implemented.');
 }
 
-function dealUpdatePropertiesForLicense(deal: Deal, record: License): Partial<{ aa_app: string; addonlicenseid: string; transactionid: string; closedate: string; country: string; dealname: string; deployment: string; license_tier: string; origin: string; related_products: string; pipeline: string; dealstage: string; amount: string; }> {
+function dealUpdatePropertiesForLicense(deal: Deal, record: License): Partial<Deal['properties']> {
   throw new Error('Function not implemented.');
 }
 
-function dealUpdatePropertiesForTransaction(deal: Deal, record: Transaction): Partial<{ aa_app: string; addonlicenseid: string; transactionid: string; closedate: string; country: string; dealname: string; deployment: string; license_tier: string; origin: string; related_products: string; pipeline: string; dealstage: string; amount: string; }> {
+function dealUpdatePropertiesForTransaction(deal: Deal, record: Transaction): Partial<Deal['properties']> {
   throw new Error('Function not implemented.');
 }
-
