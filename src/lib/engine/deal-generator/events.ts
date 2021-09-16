@@ -1,7 +1,6 @@
 import assert from 'assert';
 import { sorter } from "../../util/helpers.js";
 import logger from '../../util/logger.js';
-import { abbrEventDetails } from "./actions.js";
 
 export type RefundEvent = { type: 'refund', refundedTxs: Transaction[] };
 export type EvalEvent = { type: 'eval', licenses: License[] };
@@ -191,25 +190,6 @@ export class EventGenerator {
 
 }
 
-function abbrRecordDetails(record: Transaction | License) {
-  return (isLicense(record)
-    ? {
-      hosting: record.hosting,
-      sen: record.addonLicenseId,
-      date: record.maintenanceStartDate,
-      type: record.licenseType,
-    }
-    : {
-      hosting: record.purchaseDetails.hosting,
-      sen: record.addonLicenseId,
-      date: record.purchaseDetails.maintenanceStartDate,
-      type: record.purchaseDetails.licenseType,
-      sale: record.purchaseDetails.saleType,
-      at: record.transactionId,
-      amt: record.purchaseDetails.vendorAmount,
-    });
-}
-
 function isEvalOrOpenSourceLicense(record: License) {
   return (
     record.licenseType === 'EVALUATION' ||
@@ -253,4 +233,33 @@ function getLicense(addonLicenseId: string, groups: LicenseContext[]) {
     .find(l => l.addonLicenseId === addonLicenseId));
   assert.ok(license);
   return license;
+}
+
+function abbrRecordDetails(record: Transaction | License) {
+  return (isLicense(record)
+    ? {
+      hosting: record.hosting,
+      sen: record.addonLicenseId,
+      date: record.maintenanceStartDate,
+      type: record.licenseType,
+    }
+    : {
+      hosting: record.purchaseDetails.hosting,
+      sen: record.addonLicenseId,
+      date: record.purchaseDetails.maintenanceStartDate,
+      type: record.purchaseDetails.licenseType,
+      sale: record.purchaseDetails.saleType,
+      at: record.transactionId,
+      amt: record.purchaseDetails.vendorAmount,
+    });
+}
+
+function abbrEventDetails(e: DealRelevantEvent) {
+  switch (e.type) {
+    case 'eval': return { type: e.type, ids: e.licenses.map(l => l.addonLicenseId) };
+    case 'purchase': return { type: e.type, ids: e.licenses.map(l => l.addonLicenseId), tx: e.transaction?.transactionId };
+    case 'refund': return { type: e.type, ids: e.refundedTxs.map(tx => tx.transactionId) };
+    case 'renewal': return { type: e.type, id: e.transaction.transactionId };
+    case 'upgrade': return { type: e.type, id: e.transaction.transactionId };
+  }
 }
