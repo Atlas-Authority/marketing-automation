@@ -1,5 +1,6 @@
 import { DealStage } from '../../util/config.js';
-import { isPresent, sorter } from '../../util/helpers.js';
+import { sorter } from '../../util/helpers.js';
+import { DealFinder } from './deal-finder';
 import { DealRelevantEvent, EvalEvent, PurchaseEvent, RefundEvent, RenewalEvent, UpgradeEvent } from "./events.js";
 import { getDate, isLicense } from './records.js';
 
@@ -134,31 +135,3 @@ function dealUpdatePropertiesForTransaction(deal: Deal, record: Transaction): Pa
   throw new Error('Function not implemented.');
 }
 
-class DealFinder {
-
-  deals = new Map<string, Deal>();
-
-  constructor(initialDeals: Deal[], keyfn: (deal: Deal) => string) {
-    for (const deal of initialDeals) {
-      const key = keyfn(deal);
-      if (key) this.deals.set(key, deal);
-    }
-  }
-
-  getDeal(records: (License | Transaction)[]) {
-    return this.getDeals(records).find(deal => deal);
-  }
-
-  getDeals(records: (License | Transaction)[]) {
-    return (records
-      .map(record => this.deals.get(this.idFor(record)))
-      .filter(isPresent));
-  }
-
-  idFor(record: License | Transaction): string {
-    return ('transactionId' in record
-      ? record.transactionId
-      : record.addonLicenseId);
-  }
-
-}
