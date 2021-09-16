@@ -1,6 +1,7 @@
 import { DealStage } from '../../util/config.js';
 import { isPresent, sorter } from '../../util/helpers.js';
-import { DealRelevantEvent, EvalEvent, getDate, isLicense, PurchaseEvent, RefundEvent, RenewalEvent, UpgradeEvent } from "./events.js";
+import { DealRelevantEvent, EvalEvent, PurchaseEvent, RefundEvent, RenewalEvent, UpgradeEvent } from "./events.js";
+import { getDate, isLicense } from './records.js';
 
 export class ActionGenerator {
 
