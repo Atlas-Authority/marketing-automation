@@ -1,10 +1,11 @@
+import assert from 'assert';
 import { sorter } from "../../util/helpers.js";
-import { abbrEventDetails } from "./actions.js";
 import logger from '../../util/logger.js';
+import { abbrEventDetails } from "./actions.js";
 
-export type RefundEvent = { type: 'refund', refundedTxIds: string[] };
-export type EvalEvent = { type: 'eval', licenseIds: string[] };
-export type PurchaseEvent = { type: 'purchase', licenseIds: string[], transaction?: Transaction };
+export type RefundEvent = { type: 'refund', refundedTxs: Transaction[] };
+export type EvalEvent = { type: 'eval', licenses: License[] };
+export type PurchaseEvent = { type: 'purchase', licenses: License[], transaction?: Transaction };
 export type RenewalEvent = { type: 'renewal', transaction: Transaction };
 export type UpgradeEvent = { type: 'upgrade', transaction: Transaction };
 
@@ -27,17 +28,19 @@ export class EventGenerator {
     for (const record of records) {
       if (isLicense(record)) {
         if (isEvalOrOpenSourceLicense(record)) {
-          this.events.push({ type: 'eval', licenseIds: [record.addonLicenseId] });
+          this.events.push({ type: 'eval', licenses: [record] });
         }
         else if (isPaidLicense(record)) {
-          this.events.push({ type: 'purchase', licenseIds: [record.addonLicenseId] });
+          this.events.push({ type: 'purchase', licenses: [record] });
         }
       }
       else if (isTransaction(record)) {
         switch (record.purchaseDetails.saleType) {
-          case 'New':
-            this.events.push({ type: 'purchase', licenseIds: [record.addonLicenseId], transaction: record });
+          case 'New': {
+            const license = getLicense(record.addonLicenseId, groups);
+            this.events.push({ type: 'purchase', licenses: [license], transaction: record });
             break;
+          }
           case 'Renewal':
             this.events.push({ type: 'renewal', transaction: record });
             break;
@@ -80,14 +83,14 @@ export class EventGenerator {
         this.events.splice(i--, 1); // Pluck it out
 
         if (lastEval) {
-          lastEval.licenseIds.push(...event.licenseIds);
+          lastEval.licenses.push(...event.licenses);
         }
         else {
           lastEval = event;
         }
       }
       else if (event.type === 'purchase' && lastEval) {
-        event.licenseIds.unshift(...lastEval.licenseIds);
+        event.licenses.unshift(...lastEval.licenses);
         lastEval = null;
       }
     }
@@ -130,7 +133,7 @@ export class EventGenerator {
   }
 
   private applyRefunds(transactions: Transaction[]) {
-    const refundedTxIds: string[] = [];
+    const refundedTxs: Transaction[] = [];
 
     // Handle refunds fully, either by applying or removing them
     for (const transaction of transactions) {
@@ -151,7 +154,7 @@ export class EventGenerator {
         );
 
         if (fullyRefundedTx) {
-          refundedTxIds.push(fullyRefundedTx.transactionId);
+          refundedTxs.push(fullyRefundedTx);
 
           // Remove it from the list
           transactions = transactions.filter(tx =>
@@ -177,7 +180,7 @@ export class EventGenerator {
         if (transactions.length === 0) {
           this.events.push({
             type: 'refund',
-            refundedTxIds,
+            refundedTxs,
           });
         }
       }
@@ -241,4 +244,13 @@ function getLicenseType(record: License | Transaction) {
   return isLicense(record)
     ? record.licenseType
     : record.purchaseDetails.licenseType;
+}
+
+function getLicense(addonLicenseId: string, groups: LicenseContext[]) {
+  const license = (groups
+    .map(g => g.license)
+    .sort(sorter(l => l.maintenanceStartDate, 'DSC'))
+    .find(l => l.addonLicenseId === addonLicenseId));
+  assert.ok(license);
+  return license;
 }

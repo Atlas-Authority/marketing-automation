@@ -108,9 +108,9 @@ export class ActionGenerator {
 
 export function abbrEventDetails(e: DealRelevantEvent) {
   switch (e.type) {
-    case 'eval': return { type: e.type, id: e.licenseIds };
-    case 'purchase': return { type: e.type, id: e.licenseIds, tx: e.transaction?.transactionId };
-    case 'refund': return { type: e.type, id: e.refundedTxIds[0] };
+    case 'eval': return { type: e.type, ids: e.licenses.map(l => l.addonLicenseId) };
+    case 'purchase': return { type: e.type, ids: e.licenses.map(l => l.addonLicenseId), tx: e.transaction?.transactionId };
+    case 'refund': return { type: e.type, id: e.refundedTxs[0].transactionId };
     case 'renewal': return { type: e.type, id: e.transaction.transactionId };
     case 'upgrade': return { type: e.type, id: e.transaction.transactionId };
   }
