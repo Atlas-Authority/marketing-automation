@@ -41,15 +41,14 @@ export class ActionGenerator {
   }
 
   private actionForEval(event: EvalEvent): Action {
-    const deal = getDeal(this.allLicenseDeals, event.licenseIds);
-    const latestLicenseId = event.licenseIds[event.licenseIds.length - 1];
-    const license = this.getLicense(latestLicenseId);
+    const deal = getDeal(this.allLicenseDeals, event.licenses);
+    const latestLicense = event.licenses[event.licenses.length - 1];
     if (deal) {
       return {
         type: 'update',
         deal,
         properties: {
-          dealUpdateProperties(deal, license),
+          dealUpdateProperties(deal, latestLicense),
         },
       };
     }
@@ -58,7 +57,7 @@ export class ActionGenerator {
         type: 'create',
         properties: {
           dealstage: DealStage.EVAL,
-          ...dealCreationPropertiesFromLicense(license),
+          ...dealCreationPropertiesFromLicense(latestLicense),
         },
       };
     }
@@ -67,10 +66,10 @@ export class ActionGenerator {
   private actionForPurchase(event: PurchaseEvent): Action | null {
     const deal = (
       // Either it is an eval or a purchase without a transaction,
-      getDeal(this.allLicenseDeals, event.licenseIds) ||
+      getDeal(this.allLicenseDeals, event.licenses) ||
       // or it exists with a transaction
       getDeal(this.allTransactionDeals, event.transaction
-        ? [event.transaction.transactionId]
+        ? [event.transaction]
         : [])
     );
 
@@ -97,11 +96,13 @@ export class ActionGenerator {
   }
 
   private actionForRefund(event: RefundEvent): Action | null {
-    return null;
-  }
-
-  private getLicense(latestLicenseId: string): License {
-    throw new Error('Method not implemented.');
+    // event.refundedTxs
+    const deals = getDealsFor(this.allTransactionDeals, event.refundedTxs);
+    return (deals
+      // filter to non-closed
+      // create update (set closed-lost)
+      // in update, also specify close-date if needed
+    );
   }
 
 }
