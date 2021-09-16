@@ -1,6 +1,6 @@
 import { DealStage } from '../../util/config.js';
 import { isPresent, sorter } from '../../util/helpers.js';
-import { DealRelevantEvent, EvalEvent, getDate, PurchaseEvent, RefundEvent, RenewalEvent, UpgradeEvent } from "./events.js";
+import { DealRelevantEvent, EvalEvent, getDate, isLicense, PurchaseEvent, RefundEvent, RenewalEvent, UpgradeEvent } from "./events.js";
 
 export class ActionGenerator {
 
@@ -77,7 +77,7 @@ export class ActionGenerator {
     return (deals
       .filter(deal => deal.properties.dealstage !== DealStage.CLOSED_LOST)
       .map(deal => {
-        return makeUpdateAction(deal, transaction, { dealstage: DealStage.CLOSED_LOST })
+        return makeUpdateAction(deal, null, { dealstage: DealStage.CLOSED_LOST })
       })
     );
   }
@@ -89,39 +89,47 @@ type Action = (
   { type: 'create', properties: Deal['properties'] }
 );
 
-function makeCreateAction(record: License | Transaction, dealStage: DealStage): Action {
-  // return {
-  //   type: 'create',
-  //   properties: {
-  //     dealstage: DealStage.EVAL,
-  //     ...dealCreationPropertiesFromLicense(latestLicense),
-  //   },
-  // };
-  // return {
-  //   type: 'create',
-  //   properties: {
-  //     dealstage: DealStage.CLOSED_WON,
-  //     ...dealCreationPropertiesFromTransaction(event.transaction),
-  //   },
-  // };
+function makeCreateAction(record: License | Transaction, dealstage: DealStage): Action {
+  return {
+    type: 'create',
+    properties: isLicense(record)
+      ? dealCreationPropertiesFromLicense(record, dealstage)
+      : dealCreationPropertiesFromTransaction(record, dealstage),
+  };
+}
+
+function makeUpdateAction(deal: Deal, record: License | Transaction | null, properties: Partial<Deal['properties']>): Action {
+  if (record) {
+    properties = {
+      ...properties,
+      ...(isLicense(record)
+        ? dealUpdatePropertiesForLicense(deal, record)
+        : dealUpdatePropertiesForTransaction(deal, record)
+      )
+    };
+  }
+  return { type: 'update', deal, properties };
+}
+
+function getLatestRecord(event: PurchaseEvent): License | Transaction {
+  const records: (License | Transaction)[] = [...event.licenses];
+  if (event.transaction) records.push(event.transaction);
+  return records.sort(sorter(getDate, 'DSC'))[0];
+}
+
+function dealCreationPropertiesFromLicense(record: License, dealstage: string): { aa_app: string; addonlicenseid: string; transactionid: string; closedate: string; country: string; dealname: string; deployment: string; license_tier: string; origin: string; related_products: string; pipeline: string; dealstage: string; amount: string; } {
   throw new Error('Function not implemented.');
 }
 
-function makeUpdateAction(deal: Deal, record: License | Transaction, properties: Partial<Deal['properties']>): Action {
-  // return {
-  //   type: 'update',
-  //   deal,
-  //   properties: {
-  //     dealUpdateProperties(deal, latestLicense),
-  //   },
-  // };
-  // return {
-  //   type: 'update',
-  //   properties: {
-  //     dealstage: DealStage.CLOSED_LOST,
-  //     // also specify close-date if needed
-  //   },
-  // } as Action;
+function dealCreationPropertiesFromTransaction(record: Transaction, dealstage: string): { aa_app: string; addonlicenseid: string; transactionid: string; closedate: string; country: string; dealname: string; deployment: string; license_tier: string; origin: string; related_products: string; pipeline: string; dealstage: string; amount: string; } {
+  throw new Error('Function not implemented.');
+}
+
+function dealUpdatePropertiesForLicense(deal: Deal, record: License): Partial<{ aa_app: string; addonlicenseid: string; transactionid: string; closedate: string; country: string; dealname: string; deployment: string; license_tier: string; origin: string; related_products: string; pipeline: string; dealstage: string; amount: string; }> {
+  throw new Error('Function not implemented.');
+}
+
+function dealUpdatePropertiesForTransaction(deal: Deal, record: Transaction): Partial<{ aa_app: string; addonlicenseid: string; transactionid: string; closedate: string; country: string; dealname: string; deployment: string; license_tier: string; origin: string; related_products: string; pipeline: string; dealstage: string; amount: string; }> {
   throw new Error('Function not implemented.');
 }
 
@@ -152,10 +160,4 @@ class DealFinder {
       : record.addonLicenseId);
   }
 
-}
-
-function getLatestRecord(event: PurchaseEvent): License | Transaction {
-  const records: (License | Transaction)[] = [...event.licenses];
-  if (event.transaction) records.push(event.transaction);
-  return records.sort(sorter(getDate, 'DSC'))[0];
 }

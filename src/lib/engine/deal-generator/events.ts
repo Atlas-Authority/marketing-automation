@@ -197,7 +197,7 @@ function isEvalOrOpenSourceLicense(record: License) {
   );
 }
 
-function isLicense(record: License | Transaction): record is License {
+export function isLicense(record: License | Transaction): record is License {
   return 'maintenanceStartDate' in record;
 }
 
