@@ -1,6 +1,6 @@
 import { DealStage } from '../../util/config.js';
-import { isPresent } from '../../util/helpers.js';
-import { DealRelevantEvent, EvalEvent, PurchaseEvent, RefundEvent, RenewalEvent, UpgradeEvent } from "./events.js";
+import { isPresent, sorter } from '../../util/helpers.js';
+import { DealRelevantEvent, EvalEvent, getDate, PurchaseEvent, RefundEvent, RenewalEvent, UpgradeEvent } from "./events.js";
 
 export class ActionGenerator {
 
@@ -50,7 +50,7 @@ export class ActionGenerator {
     const deal = (
       // Either it is an eval or a purchase without a transaction,
       this.licenseDealFinder.getDeal(event.licenses) ||
-      // or it exists with a transaction
+      // or it exists as a purchase with a transaction
       this.transactionDealFinder.getDeal(event.transaction
         ? [event.transaction]
         : [])
@@ -152,4 +152,10 @@ class DealFinder {
       : record.addonLicenseId);
   }
 
+}
+
+function getLatestRecord(event: PurchaseEvent): License | Transaction {
+  const records: (License | Transaction)[] = [...event.licenses];
+  if (event.transaction) records.push(event.transaction);
+  return records.sort(sorter(getDate, 'DSC'))[0];
 }

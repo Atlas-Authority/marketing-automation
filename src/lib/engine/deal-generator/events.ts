@@ -214,7 +214,7 @@ function isPaidLicense(license: License) {
   );
 }
 
-function getDate(record: License | Transaction) {
+export function getDate(record: License | Transaction) {
   return isLicense(record)
     ? record.maintenanceStartDate
     : record.purchaseDetails.maintenanceStartDate;
