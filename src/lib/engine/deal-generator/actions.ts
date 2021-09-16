@@ -15,22 +15,18 @@ export class ActionGenerator {
   }
 
   generateFrom(events: DealRelevantEvent[]) {
-    const actions: Action[] = [];
-    for (const event of events) {
-      const action = this.actionFor(event);
-      if (action) {
-        actions.push(action);
-      }
-    }
-    return actions;
+    return events.flatMap(event => this.actionsFor(event));
   }
 
-  private actionFor(event: DealRelevantEvent): Action | null {
+  private actionsFor(event: DealRelevantEvent): Action[] {
     switch (event.type) {
-      case 'eval': return this.actionForEval(event);
-      case 'purchase': return this.actionForPurchase(event);
-      case 'renewal': return this.actionForRenewal(event);
-      case 'upgrade': return this.actionForRenewal(event);
+      case 'eval': return [this.actionForEval(event)];
+      case 'purchase': {
+        const action = this.actionForPurchase(event);
+        return action ? [action] : [];
+      }
+      case 'renewal': return [this.actionForRenewal(event)];
+      case 'upgrade': return [this.actionForRenewal(event)];
       case 'refund': return this.actionForRefund(event);
     }
   }
@@ -95,14 +91,21 @@ export class ActionGenerator {
     };
   }
 
-  private actionForRefund(event: RefundEvent): Action | null {
+  private actionForRefund(event: RefundEvent): Action[] {
     // event.refundedTxs
     const deals = this.transactionDealFinder.getDeals(event.refundedTxs);
     // makeUpdateEvent(transaction, {dealstage: DealStage.CLOSED_LOST})
     return (deals
-      // filter to non-closed
-      // create update (set closed-lost)
-      // in update, also specify close-date if needed
+      .filter(deal => deal.properties.dealstage !== DealStage.CLOSED_LOST)
+      .map(deal => {
+        return {
+          type: 'update',
+          properties: {
+            dealstage: DealStage.CLOSED_LOST,
+            // also specify close-date if needed
+          },
+        } as Action;
+      })
     );
   }
 
