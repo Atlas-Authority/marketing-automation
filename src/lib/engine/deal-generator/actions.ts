@@ -39,6 +39,7 @@ export class ActionGenerator {
     const deal = this.licenseDealFinder.getDeal(event.licenses);
     const latestLicense = event.licenses[event.licenses.length - 1];
     if (deal) {
+      // makeUpdateEvent(deal, latestLicense)
       return {
         type: 'update',
         deal,
@@ -48,6 +49,7 @@ export class ActionGenerator {
       };
     }
     else {
+      // makeCreateEvent(latestLicense, {dealstage: DealStage.EVAL})
       return {
         type: 'create',
         properties: {
@@ -70,9 +72,11 @@ export class ActionGenerator {
 
     const record = getLatestRecord(event);
     if (!deal) {
+      // makeCreateEvent(licenseOrTransaction, {dealstage: DealStage.CLOSED_WON})
       return this.createPurchaseDeal(record);
     }
     else if (deal.properties.dealstage === DealStage.EVAL) {
+      // makeUpdateEvent(licenseOrTransaction, {dealstage: DealStage.CLOSED_WON})
       return this.transitionToPurchased(deal, record);
     }
     else {
@@ -81,6 +85,7 @@ export class ActionGenerator {
   }
 
   private actionForRenewal(event: RenewalEvent | UpgradeEvent): Action {
+    // makeCreateEvent(transaction, {dealstage: DealStage.CLOSED_WON})
     return {
       type: 'create',
       properties: {
@@ -93,6 +98,7 @@ export class ActionGenerator {
   private actionForRefund(event: RefundEvent): Action | null {
     // event.refundedTxs
     const deals = this.transactionDealFinder.getDeals(event.refundedTxs);
+    // makeUpdateEvent(transaction, {dealstage: DealStage.CLOSED_LOST})
     return (deals
       // filter to non-closed
       // create update (set closed-lost)
