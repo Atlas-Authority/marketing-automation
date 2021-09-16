@@ -6,18 +6,12 @@ import { DealRelevantEvent, EvalEvent, PurchaseEvent, RefundEvent, RenewalEvent,
 
 export class ActionGenerator {
 
-  allTransactionDeals = new Map<string, Deal>();
-  allLicenseDeals = new Map<string, Deal>();
+  licenseDealFinder: DealFinder;
+  transactionDealFinder: DealFinder;
 
   constructor(initialDeals: Deal[]) {
-    for (const deal of initialDeals) {
-      if (deal.properties.addonlicenseid) {
-        this.allLicenseDeals.set(deal.properties.addonlicenseid, deal);
-      }
-      if (deal.properties.transactionid) {
-        this.allTransactionDeals.set(deal.properties.transactionid, deal);
-      }
-    }
+    this.licenseDealFinder = new DealFinder(initialDeals, deal => deal.properties.addonlicenseid);
+    this.transactionDealFinder = new DealFinder(initialDeals, deal => deal.properties.transactionid);
   }
 
   generateFrom(events: DealRelevantEvent[]) {
@@ -42,7 +36,7 @@ export class ActionGenerator {
   }
 
   private actionForEval(event: EvalEvent): Action {
-    const deal = getDeal(this.allLicenseDeals, event.licenses.map(l => l.addonLicenseId));
+    const deal = this.licenseDealFinder.getDeal(event.licenses);
     const latestLicense = event.licenses[event.licenses.length - 1];
     if (deal) {
       return {
@@ -67,10 +61,10 @@ export class ActionGenerator {
   private actionForPurchase(event: PurchaseEvent): Action | null {
     const deal = (
       // Either it is an eval or a purchase without a transaction,
-      getDeal(this.allLicenseDeals, event.licenses.map(l => l.addonLicenseId)) ||
+      this.licenseDealFinder.getDeal(event.licenses) ||
       // or it exists with a transaction
-      getDeal(this.allTransactionDeals, event.transaction
-        ? [event.transaction.transactionId]
+      this.transactionDealFinder.getDeal(event.transaction
+        ? [event.transaction]
         : [])
     );
 
@@ -98,7 +92,7 @@ export class ActionGenerator {
 
   private actionForRefund(event: RefundEvent): Action | null {
     // event.refundedTxs
-    const deals = getDeals(this.allTransactionDeals, event.refundedTxs.map(tx => tx.transactionId));
+    const deals = this.transactionDealFinder.getDeals(event.refundedTxs);
     return (deals
       // filter to non-closed
       // create update (set closed-lost)
@@ -106,16 +100,6 @@ export class ActionGenerator {
     );
   }
 
-}
-
-function getDeal(dealMap: Map<string, Deal>, ids: string[]) {
-  return getDeals(dealMap, ids).find(deal => deal);
-}
-
-function getDeals(dealMap: Map<string, Deal>, ids: string[]) {
-  return (ids
-    .map(id => dealMap.get(id))
-    .filter(isPresent));
 }
 
 type Action = (
@@ -160,4 +144,33 @@ function dealPropertiesForEvent(event: DealRelevantEvent): Omit<Deal['properties
 function dealUpdatePropertiesForEvent(event: DealRelevantEvent, deal: Deal): Partial<Deal['properties']> {
   return {};
   // throw new Error('Function not implemented.');
+}
+
+class DealFinder {
+
+  deals = new Map<string, Deal>();
+
+  constructor(initialDeals: Deal[], keyfn: (deal: Deal) => string) {
+    for (const deal of initialDeals) {
+      const key = keyfn(deal);
+      if (key) this.deals.set(key, deal);
+    }
+  }
+
+  getDeal(records: (License | Transaction)[]) {
+    return this.getDeals(records).find(deal => deal);
+  }
+
+  getDeals(records: (License | Transaction)[]) {
+    return (records
+      .map(record => this.deals.get(this.idFor(record)))
+      .filter(isPresent));
+  }
+
+  idFor(record: License | Transaction): string {
+    return ('transactionId' in record
+      ? record.transactionId
+      : record.addonLicenseId);
+  }
+
 }
