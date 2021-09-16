@@ -1,8 +1,7 @@
 import assert from 'assert';
-import { isPresent } from "../../util/helpers.js";
-import logger from "../../util/logger.js";
-import { decisionMatrix, Outcome } from "./decision-matrix.js";
-import { DealRelevantEvent } from "./events.js";
+import { DealStage } from '../../util/config.js';
+import { Outcome } from "./decision-matrix.js";
+import { DealRelevantEvent, EvalEvent, PurchaseEvent, RefundEvent, RenewalEvent, UpgradeEvent } from "./events.js";
 
 export class ActionGenerator {
 
@@ -20,75 +19,89 @@ export class ActionGenerator {
     }
   }
 
-  generateFrom(events: DealRelevantEvent[], groups: RelatedLicenseSet) {
+  generateFrom(events: DealRelevantEvent[]) {
     const actions: Action[] = [];
-
     for (const event of events) {
-      let action: Action | null = null;
-      const reasons = new Set<string>();
-
-      for (const [checkHosting, checkEvent, checkState, outcome] of decisionMatrix) {
-        const hosting = groups[0].license.hosting;
-        if (!checkHosting(hosting)) {
-          reasons.add(`hosting = ${hosting}`);
-          continue;
-        }
-
-        if (!checkEvent(event.type)) {
-          reasons.add(`event = ${event.type}`);
-          continue;
-        }
-
-        const state = this.getState(event);
-        const [passed, deal] = checkState(state);
-        if (!passed) {
-          reasons.add(`all deals = ${state.map(d => d.id).join(', ')}`);
-          reasons.add(`found deal = ${deal?.id}`);
-          continue;
-        }
-
-        action = actionForOutcome(outcome, event, deal);
-        break;
-      }
-
+      const action = this.actionFor(event);
       if (action) {
-        logger.verbose('Deal Actions', 'Pushing action', action);
         actions.push(action);
       }
-      else {
-        logger.verbose('Deal Actions', 'No action path for event', {
-          event: abbrEventDetails(event),
-          reasons,
-        });
-      }
     }
-
     return actions;
   }
 
-  private getState(event: DealRelevantEvent) {
+  private actionFor(event: DealRelevantEvent): Action | null {
     switch (event.type) {
-      case 'eval':
-        // There's only 0-1 evals
-        return getDeals(this.allLicenseDeals, event.licenseIds);
-      case 'purchase':
-        // There is either: nothing, 1 eval, or 1+ closeds
-        // The purchases may have either license or transaction ids
-        return [
-          ...getDeals(this.allLicenseDeals, event.licenseIds),
-          ...getDeals(this.allTransactionDeals,
-            event.transaction
-              ? [event.transaction.transactionId]
-              : [])
-        ];
-      case 'refund':
-        // May have 1+ closeds, or 1 eval, or nothing (e.g. all are new events)
-        return getDeals(this.allTransactionDeals, event.refundedTxIds);
-      case 'renewal':
-      case 'upgrade':
-        // May have 1+ closeds, or 1 eval, or nothing (e.g. all are new events)
-        return getDeals(this.allTransactionDeals, [event.transaction.transactionId]);
+      case 'eval': return this.actionForEval(event);
+      case 'purchase': return this.actionForPurchase(event);
+      case 'renewal': return this.actionForRenewal(event);
+      case 'upgrade': return this.actionForRenewal(event);
+      case 'refund': return this.actionForRefund(event);
     }
+  }
+
+  private actionForEval(event: EvalEvent): Action {
+    const deal = getDeal(this.allLicenseDeals, event.licenseIds);
+    const latestLicenseId = event.licenseIds[event.licenseIds.length - 1];
+    const license = this.getLicense(latestLicenseId);
+    if (deal) {
+      return {
+        type: 'update',
+        deal,
+        properties: {
+          dealUpdateProperties(deal, license),
+        },
+      };
+    }
+    else {
+      return {
+        type: 'create',
+        properties: {
+          dealstage: DealStage.EVAL,
+          ...dealCreationPropertiesFromLicense(license),
+        },
+      };
+    }
+  }
+
+  private actionForPurchase(event: PurchaseEvent): Action | null {
+    const deal = (
+      // Either it is an eval or a purchase without a transaction,
+      getDeal(this.allLicenseDeals, event.licenseIds) ||
+      // or it exists with a transaction
+      getDeal(this.allTransactionDeals, event.transaction
+        ? [event.transaction.transactionId]
+        : [])
+    );
+
+    const record = getLatestRecord(event);
+    if (!deal) {
+      return this.createPurchaseDeal(record);
+    }
+    else if (deal.properties.dealstage === DealStage.EVAL) {
+      return this.transitionToPurchased(deal, record);
+    }
+    else {
+      return null;
+    }
+  }
+
+  private actionForRenewal(event: RenewalEvent | UpgradeEvent): Action {
+    return {
+      type: 'create',
+      properties: {
+        dealstage: DealStage.EVAL,
+        ...dealCreationPropertiesFromTransaction(event.transaction),
+      },
+    };
+  }
+
+  private actionForRefund(event: RefundEvent): Action | null {
+    return null;
+  }
+
+  private getLicense(latestLicenseId: string): License {
+    throw new Error('Method not implemented.');
   }
 
 }
@@ -103,10 +116,12 @@ export function abbrEventDetails(e: DealRelevantEvent) {
   }
 }
 
-function getDeals(dealMap: Map<string, Deal>, ids: string[]) {
-  return (ids
-    .map(id => dealMap.get(id))
-    .filter(isPresent));
+function getDeal(dealMap: Map<string, Deal>, ids: string[]) {
+  for (const id of ids) {
+    const deal = dealMap.get(id);
+    if (deal) return deal;
+  }
+  return null;
 }
 
 type Action = (
@@ -144,9 +159,11 @@ function actionForOutcome(outcome: Outcome, event: DealRelevantEvent, deal: Deal
 }
 
 function dealPropertiesForEvent(event: DealRelevantEvent): Omit<Deal['properties'], 'dealstage'> {
-  throw new Error('Function not implemented.');
+  return {};
+  // throw new Error('Function not implemented.');
 }
 
 function dealUpdatePropertiesForEvent(event: DealRelevantEvent, deal: Deal): Partial<Deal['properties']> {
-  throw new Error('Function not implemented.');
+  return {};
+  // throw new Error('Function not implemented.');
 }

@@ -175,7 +175,7 @@ class DealActionGenerator {
     if (this.ignoring(groups)) return;
 
     const events = new EventGenerator().interpretAsEvents(groups);
-    const actions = this.actionGenerator.generateFrom(events, groups);
+    const actions = this.actionGenerator.generateFrom(events);
 
     const licenseDeals = new Set<Deal>();
     for (const license of groups.map(g => g.license)) {
