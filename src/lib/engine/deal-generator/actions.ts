@@ -20,7 +20,10 @@ export class ActionGenerator {
 
   private actionsFor(event: DealRelevantEvent): Action[] {
     switch (event.type) {
-      case 'eval': return [this.actionForEval(event)];
+      case 'eval': {
+        const action = this.actionForEval(event);
+        return action ? [action] : [];
+      }
       case 'purchase': {
         const action = this.actionForPurchase(event);
         return action ? [action] : [];
@@ -31,10 +34,20 @@ export class ActionGenerator {
     }
   }
 
-  private actionForEval(event: EvalEvent): Action {
+  private actionForEval(event: EvalEvent): Action | null {
     const deal = this.licenseDealFinder.getDeal(event.licenses);
     const latestLicense = event.licenses[event.licenses.length - 1];
-    if (deal) {
+    if (!deal) {
+      // makeCreateEvent(latestLicense, {dealstage: DealStage.EVAL})
+      return {
+        type: 'create',
+        properties: {
+          dealstage: DealStage.EVAL,
+          ...dealCreationPropertiesFromLicense(latestLicense),
+        },
+      };
+    }
+    else if (deal.properties.dealstage === DealStage.EVAL) {
       // makeUpdateEvent(deal, latestLicense)
       return {
         type: 'update',
@@ -45,14 +58,7 @@ export class ActionGenerator {
       };
     }
     else {
-      // makeCreateEvent(latestLicense, {dealstage: DealStage.EVAL})
-      return {
-        type: 'create',
-        properties: {
-          dealstage: DealStage.EVAL,
-          ...dealCreationPropertiesFromLicense(latestLicense),
-        },
-      };
+      return null;
     }
   }
 
