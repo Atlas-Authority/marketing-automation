@@ -1,5 +1,6 @@
 import assert from 'assert';
 import { DealStage } from '../../util/config.js';
+import { isPresent } from '../../util/helpers.js';
 import { Outcome } from "./decision-matrix.js";
 import { DealRelevantEvent, EvalEvent, PurchaseEvent, RefundEvent, RenewalEvent, UpgradeEvent } from "./events.js";
 
@@ -41,7 +42,7 @@ export class ActionGenerator {
   }
 
   private actionForEval(event: EvalEvent): Action {
-    const deal = getDeal(this.allLicenseDeals, event.licenses);
+    const deal = getDeal(this.allLicenseDeals, event.licenses.map(l => l.addonLicenseId));
     const latestLicense = event.licenses[event.licenses.length - 1];
     if (deal) {
       return {
@@ -66,10 +67,10 @@ export class ActionGenerator {
   private actionForPurchase(event: PurchaseEvent): Action | null {
     const deal = (
       // Either it is an eval or a purchase without a transaction,
-      getDeal(this.allLicenseDeals, event.licenses) ||
+      getDeal(this.allLicenseDeals, event.licenses.map(l => l.addonLicenseId)) ||
       // or it exists with a transaction
       getDeal(this.allTransactionDeals, event.transaction
-        ? [event.transaction]
+        ? [event.transaction.transactionId]
         : [])
     );
 
@@ -97,7 +98,7 @@ export class ActionGenerator {
 
   private actionForRefund(event: RefundEvent): Action | null {
     // event.refundedTxs
-    const deals = getDealsFor(this.allTransactionDeals, event.refundedTxs);
+    const deals = getDeals(this.allTransactionDeals, event.refundedTxs.map(tx => tx.transactionId));
     return (deals
       // filter to non-closed
       // create update (set closed-lost)
@@ -108,11 +109,13 @@ export class ActionGenerator {
 }
 
 function getDeal(dealMap: Map<string, Deal>, ids: string[]) {
-  for (const id of ids) {
-    const deal = dealMap.get(id);
-    if (deal) return deal;
-  }
-  return null;
+  return getDeals(dealMap, ids).find(deal => deal);
+}
+
+function getDeals(dealMap: Map<string, Deal>, ids: string[]) {
+  return (ids
+    .map(id => dealMap.get(id))
+    .filter(isPresent));
 }
 
 type Action = (
