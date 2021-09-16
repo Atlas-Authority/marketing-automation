@@ -2,6 +2,7 @@ import { DealStage } from '../../util/config.js';
 import { sorter } from '../../util/helpers.js';
 import { DealFinder } from './deal-finder';
 import { DealRelevantEvent, EvalEvent, PurchaseEvent, RefundEvent, RenewalEvent, UpgradeEvent } from "./events.js";
+import * as propGenerators from './properties';
 import { getDate, isLicense } from './records.js';
 
 export class ActionGenerator {
@@ -95,8 +96,8 @@ function makeCreateAction(record: License | Transaction, dealstage: DealStage): 
   return {
     type: 'create',
     properties: isLicense(record)
-      ? dealCreationPropertiesFromLicense(record, dealstage)
-      : dealCreationPropertiesFromTransaction(record, dealstage),
+      ? propGenerators.dealCreationPropertiesFromLicense(record, dealstage)
+      : propGenerators.dealCreationPropertiesFromTransaction(record, dealstage),
   };
 }
 
@@ -105,8 +106,8 @@ function makeUpdateAction(deal: Deal, record: License | Transaction | null, prop
     properties = {
       ...properties,
       ...(isLicense(record)
-        ? dealUpdatePropertiesForLicense(deal, record)
-        : dealUpdatePropertiesForTransaction(deal, record)
+        ? propGenerators.dealUpdatePropertiesForLicense(deal, record)
+        : propGenerators.dealUpdatePropertiesForTransaction(deal, record)
       )
     };
   }
@@ -117,20 +118,4 @@ function getLatestRecord(event: PurchaseEvent): License | Transaction {
   const records: (License | Transaction)[] = [...event.licenses];
   if (event.transaction) records.push(event.transaction);
   return records.sort(sorter(getDate, 'DSC'))[0];
-}
-
-function dealCreationPropertiesFromLicense(record: License, dealstage: string): Deal['properties'] {
-  throw new Error('Function not implemented.');
-}
-
-function dealCreationPropertiesFromTransaction(record: Transaction, dealstage: string): Deal['properties'] {
-  throw new Error('Function not implemented.');
-}
-
-function dealUpdatePropertiesForLicense(deal: Deal, record: License): Partial<Deal['properties']> {
-  throw new Error('Function not implemented.');
-}
-
-function dealUpdatePropertiesForTransaction(deal: Deal, record: Transaction): Partial<Deal['properties']> {
-  throw new Error('Function not implemented.');
 }
