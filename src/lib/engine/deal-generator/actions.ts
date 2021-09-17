@@ -1,8 +1,8 @@
 import { DealStage } from '../../util/config.js';
-import { sorter } from '../../util/helpers.js';
+import { isPresent, sorter } from '../../util/helpers.js';
 import { DealFinder } from './deal-finder.js';
 import { DealRelevantEvent, EvalEvent, PurchaseEvent, RefundEvent, RenewalEvent, UpgradeEvent } from "./events.js";
-import { dealCreationProperties, dealUpdateProperties, getDate, isLicense } from './records.js';
+import { dealCreationProperties, dealUpdateProperties, getDate } from './records.js';
 
 export class ActionGenerator {
 
@@ -79,6 +79,7 @@ export class ActionGenerator {
       .map(deal => {
         return makeUpdateAction(deal, null, { dealstage: DealStage.CLOSED_LOST })
       })
+      .filter(isPresent)
     );
   }
 
@@ -96,18 +97,20 @@ function makeCreateAction(record: License | Transaction, dealstage: DealStage): 
   };
 }
 
-function makeUpdateAction(deal: Deal, record: License | Transaction | null, properties: Partial<Deal['properties']>): Action {
+function makeUpdateAction(deal: Deal, record: License | Transaction | null, properties: Partial<Deal['properties']>): Action | null {
+  const combinedProperties = (record
+    ? {
+      ...properties,
+      ...dealUpdateProperties(deal, record),
+    }
+    : properties
+  );
+  if (Object.keys(combinedProperties).length === 0) return null;
+
   return {
     type: 'update',
     deal,
-    properties: (
-      record
-        ? {
-          ...properties,
-          ...dealUpdateProperties(deal, record),
-        }
-        : properties
-    ),
+    properties: combinedProperties,
   };
 }
 
