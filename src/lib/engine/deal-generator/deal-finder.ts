@@ -1,4 +1,5 @@
 import { isPresent } from '../../util/helpers.js';
+import { isTransaction } from './records.js';
 
 export class DealFinder {
 
@@ -23,7 +24,7 @@ export class DealFinder {
   }
 
   getById(record: License | Transaction): Deal | undefined {
-    return ('transactionId' in record
+    return (isTransaction(record)
       ? this.transactionDeals.get(record.transactionId)
       : this.licenseDeals.get(record.addonLicenseId));
   }
