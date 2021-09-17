@@ -10,20 +10,16 @@ import config from "./config.js";
 export function getCliOptions() {
   const argParser = new ArgParser(process.argv.slice(2));
 
-  const downloader = argParser.getChoiceOrFail('--downloader',
-    ({
-      'live': () => new LiveDownloader(),
-      'cached': () => new CachedFileDownloader(),
-    }) as { [key: string]: () => Downloader }
-  );
+  const downloader = argParser.getChoiceOrFail<Downloader>('--downloader', {
+    'live': () => new LiveDownloader(),
+    'cached': () => new CachedFileDownloader(),
+  });
 
-  const uploader = argParser.getChoiceOrFail('--uploader',
-    ({
-      'live': () => new LiveUploader(),
-      'console-quiet': () => new ConsoleUploader({ verbose: false }),
-      'console-verbose': () => new ConsoleUploader({ verbose: true }),
-    }) as { [key: string]: () => Uploader }
-  );
+  const uploader = argParser.getChoiceOrFail<Uploader>('--uploader', {
+    'live': () => new LiveUploader(),
+    'console-quiet': () => new ConsoleUploader({ verbose: false }),
+    'console-verbose': () => new ConsoleUploader({ verbose: true }),
+  });
 
   const cachedFns = argParser.get('--cached-fns')?.split(',') || [];
   config.cache.fns = cachedFns;
