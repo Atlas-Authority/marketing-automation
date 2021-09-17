@@ -108,6 +108,15 @@ export function dealCreationProperties(record: License | Transaction, dealstage:
 export function dealUpdateProperties(deal: Deal, record: License | Transaction): Partial<Deal['properties']> {
   const properties: Partial<Deal['properties']> = {};
 
+  if (isTransaction(record)) {
+    if (deal.properties.transactionid !== record.transactionId) properties.transactionid = record.transactionId;
+    if (deal.properties.addonlicenseid !== '') properties.addonlicenseid = '';
+  }
+  else {
+    if (deal.properties.addonlicenseid !== record.addonLicenseId) properties.addonlicenseid = record.addonLicenseId;
+    if (deal.properties.transactionid !== '') properties.transactionid = '';
+  }
+
   const oldAmount = deal.properties.amount;
   const newAmount = (isTransaction(record) ? record.purchaseDetails.vendorAmount.toString() : oldAmount);
   if (newAmount !== oldAmount) properties.amount = newAmount;
