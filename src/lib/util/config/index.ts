@@ -7,6 +7,7 @@ export enum LogLevel {
   Warn,
   Info,
   Verbose,
+  Detailed,
 }
 
 export const ADDONKEY_TO_PLATFORM: { [addonKey: string]: string } = Object.fromEntries(
@@ -60,6 +61,7 @@ function logLevelFromString(level: string) {
     case 'warn': return LogLevel.Warn;
     case 'info': return LogLevel.Info;
     case 'verbose': return LogLevel.Verbose;
+    case 'detailed': return LogLevel.Detailed;
     default: return LogLevel.Warn;
   }
 }

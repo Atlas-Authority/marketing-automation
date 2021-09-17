@@ -54,14 +54,14 @@ export class EventGenerator {
 
     this.normalizeEvalAndPurchaseEvents();
 
-    logger.verbose('Deal Actions', '\n');
-    logger.verbose('Deal Actions', 'Records');
+    logger.detailed('Deal Actions', '\n');
+    logger.detailed('Deal Actions', 'Records');
     for (const record of records) {
-      logger.verbose('Deal Actions', abbrRecordDetails(record));
+      logger.detailed('Deal Actions', abbrRecordDetails(record));
     }
-    logger.verbose('Deal Actions', 'Events');
+    logger.detailed('Deal Actions', 'Events');
     for (const e of this.events) {
-      logger.verbose('Deal Actions', abbrEventDetails(e))
+      logger.detailed('Deal Actions', abbrEventDetails(e))
     }
 
     return this.events;

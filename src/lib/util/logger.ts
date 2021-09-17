@@ -15,20 +15,22 @@ class Logger {
   enable() { enabled = true; }
   disable() { enabled = false; }
 
+  error(prefix: string, ...args: any[]) { log(LogLevel.Error, prefix, ...args); }
+  warn(prefix: string, ...args: any[]) { log(LogLevel.Warn, prefix, ...args); }
   info(prefix: string, ...args: any[]) { log(LogLevel.Info, prefix, ...args); }
   verbose(prefix: string, ...args: any[]) { log(LogLevel.Verbose, prefix, ...args); }
-  warn(prefix: string, ...args: any[]) { log(LogLevel.Warn, prefix, ...args); }
-  error(prefix: string, ...args: any[]) { log(LogLevel.Error, prefix, ...args); }
+  detailed(prefix: string, ...args: any[]) { log(LogLevel.Detailed, prefix, ...args); }
 
 }
 
 export default new Logger();
 
 const levelPrefixes = {
-  [LogLevel.Info]: `${great}info${reset}`,
-  [LogLevel.Warn]: `${nerve}WARN${reset}`,
   [LogLevel.Error]: `${scary}ERR!${reset}`,
-  [LogLevel.Verbose]: `${great}....${reset}`,
+  [LogLevel.Warn]: `${nerve}WARN${reset}`,
+  [LogLevel.Info]: `${great}info${reset}`,
+  [LogLevel.Verbose]: `${great}verb${reset}`,
+  [LogLevel.Detailed]: `${great}....${reset}`,
 };
 
 function log(level: LogLevel, prefix: string, ...args: any[]) {
