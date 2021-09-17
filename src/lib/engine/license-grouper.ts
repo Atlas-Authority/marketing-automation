@@ -12,21 +12,17 @@ import { LicenseMatcher } from './license-matcher.js';
 // Cloud licenses do NOT have separate trial licenses; updated in place.
 
 
-/**
- * @param {object} data
- * @param {Transaction[]} data.transactions
- * @param {License[]} data.licenses
- * @param {Set<string>} data.providerDomains
- * @param {ContactsByEmail} data.contactsByEmail
- */
-export function matchIntoLikelyGroups(data) {
+export function matchIntoLikelyGroups(data: {
+  transactions: Transaction[],
+  licenses: License[],
+  providerDomains: Set<string>,
+  contactsByEmail: ContactsByEmail,
+}) {
   logger.info('Scoring Engine', 'Storing licenses/transactions by id');
-  /** @type {{ [addonLicenseId: string]: LicenseContext }} */
-  const itemsByAddonLicenseId = buildMappingStructure(data.contactsByEmail, data.transactions, data.licenses);
+  const itemsByAddonLicenseId: { [addonLicenseId: string]: LicenseContext } = buildMappingStructure(data.contactsByEmail, data.transactions, data.licenses);
 
   logger.info('Scoring Engine', 'Grouping licenses/transactions by hosting and addonKey');
-  /** @type {{ addonKey: string; hosting: string; group: License[] }[]} */
-  const productGroupings = groupMappingByProduct(itemsByAddonLicenseId);
+  const productGroupings: { addonKey: string; hosting: string; group: License[] }[] = groupMappingByProduct(itemsByAddonLicenseId);
 
   const { maybeMatches, unaccounted } = fnOrCache('scorer.dat', () => {
     const scorer = new LicenseMatcher(data.providerDomains, data.contactsByEmail);
@@ -51,8 +47,7 @@ export function matchIntoLikelyGroups(data) {
   );
 
   logger.info('Scoring Engine', 'Normalize license matches into groups over threshold');
-  /** @type {{ [addonLicenseId: string]: Set<string> }} */
-  const normalizedMatches = normalizeMatches(maybeMatches, 130);
+  const normalizedMatches: { [addonLicenseId: string]: Set<string> } = normalizeMatches(maybeMatches, 130);
 
   // Re-add non-matches as single-item sets
   for (const { item1, item2 } of maybeMatches) {
@@ -95,17 +90,10 @@ export function matchIntoLikelyGroups(data) {
   );
 }
 
-/**
- * @param {{ [key: string]: Contact }} contacts
- * @param {Transaction[]} transactions
- * @param {License[]} licenses
- */
-function buildMappingStructure(contacts, transactions, licenses) {
-  /** @type {{ [key: string]: { license: License, transactions: Transaction[], partnerLicense: boolean, partnerTransaction: boolean } }} */
-  const mapping = {};
+function buildMappingStructure(contacts: { [key: string]: Contact }, transactions: Transaction[], licenses: License[]) {
+  const mapping: { [key: string]: { license: License, transactions: Transaction[], partnerLicense: boolean, partnerTransaction: boolean } } = {};
 
-  /** @type {Transaction[]} */
-  const oddTransactions = [];
+  const oddTransactions: Transaction[] = [];
 
   for (const license of licenses) {
     const id = license.addonLicenseId;
@@ -140,8 +128,7 @@ function buildMappingStructure(contacts, transactions, licenses) {
     mapping[id].transactions.push(transaction);
   }
 
-  /** @type {{ [addonLicenseId: string]: { balance: number, tx: Transaction } }} */
-  const oddBalances = {};
+  const oddBalances: { [addonLicenseId: string]: { balance: number, tx: Transaction } } = {};
 
   for (const tx of oddTransactions) {
     if (!oddBalances[tx.addonLicenseId]) oddBalances[tx.addonLicenseId] = { balance: 0, tx };
@@ -168,12 +155,8 @@ function buildMappingStructure(contacts, transactions, licenses) {
   );
 }
 
-/**
- * @param {{ [key: string]: LicenseContext }} mapping
- */
-function groupMappingByProduct(mapping) {
-  /** @type {{ [addonKeyAndHosting: string]: { addonKey: string, hosting: string, group: License[] }}} */
-  const productMapping = {};
+function groupMappingByProduct(mapping: { [key: string]: LicenseContext }) {
+  const productMapping: { [addonKeyAndHosting: string]: { addonKey: string, hosting: string, group: License[] } } = {};
 
   for (const [id, { license }] of Object.entries(mapping)) {
     const addonKey = license.addonKey;
@@ -187,19 +170,13 @@ function groupMappingByProduct(mapping) {
   return Object.values(productMapping);
 }
 
-/**
- * Score how likely each license is connected to another license.
- * @param {{ addonKey: string; hosting: string; group: License[] }[]} productGroupings
- * @param {LicenseMatcher} scorer
- */
-function scoreLicenseMatches(productGroupings, scorer) {
+/** Score how likely each license is connected to another license. */
+function scoreLicenseMatches(productGroupings: { addonKey: string; hosting: string; group: License[] }[], scorer: LicenseMatcher) {
   logger.info('Scoring Engine', 'Preparing license-matching jobs within [addonKey + hosting] groups');
 
-  /** @type {{ score: number, item1: string, item2: string, reasons: string[] }[]} */
-  const maybeMatches = [];
+  const maybeMatches: { score: number, item1: string, item2: string, reasons: string[] }[] = [];
 
-  /** @type {Set<string>} */
-  const unaccounted = new Set();
+  const unaccounted: Set<string> = new Set();
 
   logger.info('Scoring Engine', 'Running license-similarity scoring');
   const startTime = process.hrtime.bigint();
@@ -241,10 +218,7 @@ function scoreLicenseMatches(productGroupings, scorer) {
   };
 }
 
-/**
- * @param {License} license
- */
-export function shorterLicenseInfo(license) {
+export function shorterLicenseInfo(license: License) {
   return {
     addonLicenseId: license.addonLicenseId,
 
@@ -268,13 +242,8 @@ export function shorterLicenseInfo(license) {
   };
 }
 
-/**
- * @param {{ score: number, item1: string, item2: string }[]} maybeMatches
- * @param {number} threshold
- */
-export function normalizeMatches(maybeMatches, threshold) {
-  /** @type {{ [id: string]: Set<string> }} */
-  const normalizedMatches = {};
+export function normalizeMatches(maybeMatches: { score: number, item1: string, item2: string }[], threshold: number) {
+  const normalizedMatches: { [id: string]: Set<string> } = {};
 
   for (const { item1, item2, score } of maybeMatches) {
     if (score < threshold) continue;
@@ -282,8 +251,7 @@ export function normalizeMatches(maybeMatches, threshold) {
     const set1 = normalizedMatches[item1];
     const set2 = normalizedMatches[item2];
 
-    /** @type {Set<string>} */
-    let list;
+    let list: Set<string>;
 
     if (set1 && set2) {
       if (set1 === set2) {
@@ -317,8 +285,7 @@ export function normalizeMatches(maybeMatches, threshold) {
     list.add(item2);
   }
 
-  /** @type {{ [id: string]: Set<string> }} */
-  const final = Object.create(null);
+  const final: { [id: string]: Set<string> } = Object.create(null);
 
   for (const bag of new Set(Object.values(normalizedMatches))) {
     for (const id of bag) {
@@ -333,11 +300,7 @@ export function normalizeMatches(maybeMatches, threshold) {
   return final;
 }
 
-/**
- * @param {License[]} allLicenses
- * @param {Transaction[]} allTransactions
- */
-function removeDuplicateTransactions(allLicenses, allTransactions) {
+function removeDuplicateTransactions(allLicenses: License[], allTransactions: Transaction[]) {
   const transactionsWithSameId = (
     Object.values(
       _.groupBy(allTransactions, t => [t.transactionId, t.addonKey, t.purchaseDetails.hosting, t.purchaseDetails.saleDate])
@@ -363,11 +326,7 @@ function removeDuplicateTransactions(allLicenses, allTransactions) {
   }
 }
 
-/**
- * @param {License | Transaction} a
- * @param {License | Transaction} b
- */
-function equalExceptIds(a, b) {
+function equalExceptIds(a: License | Transaction, b: License | Transaction) {
   if (a.licenseId == b.licenseId) return false;
   if (a.addonLicenseId == b.addonLicenseId) return false;
   const { addonLicenseId: ga1, licenseId: ga2, ...a1 } = a;
@@ -375,10 +334,7 @@ function equalExceptIds(a, b) {
   return util.isDeepStrictEqual(a1, b1);
 }
 
-/**
- * @param {bigint} ns
- */
-function timeAsMinutesSeconds(ns) {
+function timeAsMinutesSeconds(ns: bigint) {
   const total = Number(ns / 1_000_000_000n);
 
   const m = Math.floor(total / 60);

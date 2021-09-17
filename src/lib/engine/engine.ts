@@ -68,12 +68,10 @@ export default async function runEngine({ downloader, uploader }: {
     oldContacts: initialData.allContacts,
   });
 
-  /** @type {{ [email: string]: Contact }} */
-  const contactsByEmail = buildContactsStructure(verifiedContacts);
+  const contactsByEmail: { [email: string]: Contact } = buildContactsStructure(verifiedContacts);
 
   logStep('Running Scoring Engine');
-  /** @type {RelatedLicenseSet[]} */
-  const allMatches = matchIntoLikelyGroups({
+  const allMatches: RelatedLicenseSet[] = matchIntoLikelyGroups({
     transactions: initialData.allTransactions,
     licenses: initialData.allLicenses,
     providerDomains: initialData.providerDomains,

@@ -1,12 +1,7 @@
 import { DealStage, Pipeline } from '../util/config.js';
 import logger from '../util/logger.js';
 
-/**
- * @param {object} options
- * @param {Deal[]} options.deals
- * @param {Uploader} options.uploader
- */
-export default async function ({ deals, uploader }) {
+export default async function ({ deals, uploader }: { deals: Deal[], uploader: Uploader }) {
   logger.info('Zeroing Empty Deal Amounts', 'Setting Amount=0 on applicable Closed deals');
   const dealsToZero = deals.filter(deal =>
     deal.properties.pipeline === Pipeline.AtlassianMarketplace &&

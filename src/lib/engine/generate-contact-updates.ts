@@ -7,13 +7,8 @@ import { calculateTierFromLicenseContext } from './deal-generator/tiers.js';
 const PLATFORMS = _.uniq(Object.values(ADDONKEY_TO_PLATFORM));
 
 
-/**
- * @param {RelatedLicenseSet[]} allMatches
- * @param {ContactsByEmail} contactsByEmail
- */
-export function generateContactUpdateActions(allMatches, contactsByEmail) {
-  /** @type {Map<Contact, { events: Set<string>, products: Set<string>, hostings: Set<'Server' | 'Cloud' | 'Data Center'>, tiers: Set<number> }>} */
-  const contactUpdates = new Map();
+export function generateContactUpdateActions(allMatches: RelatedLicenseSet[], contactsByEmail: ContactsByEmail) {
+  const contactUpdates = new Map<Contact, { events: Set<string>, products: Set<string>, hostings: Set<'Server' | 'Cloud' | 'Data Center'>, tiers: Set<number> }>();
 
   for (const group of allMatches) {
     const contacts = _.uniq(group.map(m => contactsByEmail[m.license.contactDetails.technicalContact.email]));
@@ -58,12 +53,10 @@ export function generateContactUpdateActions(allMatches, contactsByEmail) {
     }
   }
 
-  /** @type {ContactUpdateAction[]} */
-  const contactUpdateActions = [];
+  const contactUpdateActions: ContactUpdateAction[] = [];
 
   for (const [contact, { hostings, products, tiers, events }] of contactUpdates) {
-    /** @type {'Server' | 'Cloud' | 'Data Center' | 'Multiple' | undefined} */
-    let deployment;
+    let deployment: 'Server' | 'Cloud' | 'Data Center' | 'Multiple' | undefined;
     [deployment] = hostings.size > 1 ? ['Multiple'] : hostings;
     assert.ok([null, 'Server', 'Cloud', 'Multiple', 'Data Center'].includes(deployment));
 

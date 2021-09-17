@@ -1,21 +1,15 @@
 import { updatedDiff } from 'deep-object-diff';
 
-/**
- * @param {object} data
- * @param {Uploader} data.uploader
- * @param {Contact[]} data.oldContacts
- * @param {GeneratedContact[]} data.newContacts
- * @returns {Promise<Contact[]>}
- */
-export async function upsertContactsInHubspot({ uploader, newContacts, oldContacts }) {
-  /** @type {Array<{ properties: GeneratedContact }>} */
-  const contactsToCreate = [];
+export async function upsertContactsInHubspot({ uploader, newContacts, oldContacts }: {
+  uploader: Uploader,
+  newContacts: GeneratedContact[],
+  oldContacts: Contact[],
+}): Promise<Contact[]> {
+  const contactsToCreate: Array<{ properties: GeneratedContact }> = [];
 
-  /** @type {Array<{ id: string, properties: Partial<GeneratedContact> }>} */
-  const contactsToUpdate = [];
+  const contactsToUpdate: Array<{ id: string, properties: Partial<GeneratedContact> }> = [];
 
-  /** @type {Contact[]} */
-  const existingContacts = [];
+  const existingContacts: Contact[] = [];
 
   for (const newContact of newContacts) {
     let oldContact = oldContacts.find(c => c.email === newContact.email);
@@ -23,8 +17,7 @@ export async function upsertContactsInHubspot({ uploader, newContacts, oldContac
     if (oldContact) {
       const { company_id, otherEmails, ...normalizedOldContact } = oldContact;
 
-      /** @type {Partial<GeneratedContact>} */
-      const delta = updatedDiff(normalizedOldContact, newContact);
+      const delta: Partial<GeneratedContact> = updatedDiff(normalizedOldContact, newContact);
 
       if (Object.keys(delta).length > 0) {
         contactsToUpdate.push({

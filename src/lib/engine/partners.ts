@@ -1,13 +1,11 @@
 import config from '../util/config.js';
 
-/**
- * @param {object} data
- * @param {License[]} data.licenses
- * @param {Transaction[]} data.transactions
- */
-export function identifyDomains(data) {
-  const partnerDomains = new Set();
-  const customerDomains = new Set();
+export function identifyDomains(data: {
+  licenses: License[],
+  transactions: Transaction[],
+}) {
+  const partnerDomains = new Set<string>();
+  const customerDomains = new Set<string>();
 
   for (const l of data.licenses) {
     maybeAddDomain(partnerDomains, l.partnerDetails?.billingContact.email);
@@ -34,14 +32,12 @@ export function identifyDomains(data) {
   };
 }
 
-/**
- * @param {object} data
- * @param {Uploader} data.uploader
- * @param {Contact[]} data.contacts
- * @param {Set<string>} data.partnerDomains
- * @param {Set<string>} data.customerDomains
- */
-export async function findAndFlagExternallyCreatedContacts({ uploader, contacts, partnerDomains, customerDomains }) {
+export async function findAndFlagExternallyCreatedContacts({ uploader, contacts, partnerDomains, customerDomains }: {
+  uploader: Uploader,
+  contacts: Contact[],
+  partnerDomains: Set<string>,
+  customerDomains: Set<string>,
+}) {
   // Only check contacts with no contact_type and with email
   const candidates = contacts.filter(c => c.contact_type === null && c.email);
 
@@ -58,15 +54,12 @@ export async function findAndFlagExternallyCreatedContacts({ uploader, contacts,
   })));
 }
 
-/**
- * @param {object} data
- * @param {Uploader} data.uploader
- * @param {GeneratedContact[]} data.contacts
- * @param {Company[]} data.companies
- */
-export async function findAndFlagPartnerCompanies({ uploader, contacts, companies }) {
-  /** @type {{ id: string, properties: { [key: string]: string } }[]} */
-  const companyUpdates = [];
+export async function findAndFlagPartnerCompanies({ uploader, contacts, companies }: {
+  uploader: Uploader,
+  contacts: GeneratedContact[],
+  companies: Company[],
+}) {
+  const companyUpdates: { id: string, properties: { [key: string]: string } }[] = [];
 
   for (const company of companies) {
     const members = contacts.filter(contact => contact.company_id === company.id);
@@ -90,15 +83,12 @@ export async function findAndFlagPartnerCompanies({ uploader, contacts, companie
   await uploader.updateAllCompanies(companyUpdates);
 }
 
-/**
- * @param {object} data
- * @param {GeneratedContact[]} data.contacts
- * @param {Contact[]} data.sourceContacts
- * @param {Set<string>} data.providerDomains
- */
-export function findAndFlagPartnersByDomain({ contacts, sourceContacts, providerDomains }) {
-  /** @type {Map<string, Contact[]>} */
-  const domainToContacts = new Map();
+export function findAndFlagPartnersByDomain({ contacts, sourceContacts, providerDomains }: {
+  contacts: GeneratedContact[],
+  sourceContacts: Contact[],
+  providerDomains: Set<string>,
+}) {
+  const domainToContacts = new Map<string, Contact[]>();
 
   for (const sc of sourceContacts) {
     if (!sc.email || !sc.contact_type) continue;
@@ -124,11 +114,7 @@ export function findAndFlagPartnersByDomain({ contacts, sourceContacts, provider
   }
 }
 
-/**
- * @param {Set<string>} set
- * @param {string | undefined} email
- */
-function maybeAddDomain(set, email) {
+function maybeAddDomain(set: Set<string>, email: string | undefined) {
   if (!email) return;
   const domain = email.split('@')[1];
   set.add(domain);

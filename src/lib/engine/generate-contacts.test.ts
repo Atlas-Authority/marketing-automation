@@ -1,4 +1,4 @@
-import { mergeContactProperties } from "./generate-contacts.js";
+import { mergeContactProperties, TmpContact } from "./generate-contacts.js";
 
 describe('updating latest contact properties', () => {
 
@@ -234,14 +234,10 @@ describe('updating latest contact properties', () => {
 
 });
 
-/**
- * @param {{ [key: string]: string | null }} props
- * @returns {import("./generate-contacts.js").TmpContact}
- */
-function fakeContact(props) {
+function fakeContact(props: { [key: string]: string | null }): TmpContact {
   return {
     updated: props.updated || '2021-04-01',
-    contact_type: /** @type {any} */(props.contact_type) || 'Customer',
+    contact_type: props.contact_type as any || 'Customer',
     country: props.country || 'country1',
     region: props.region || 'region1',
     hosting: props.hosting || 'hosting1',

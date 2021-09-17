@@ -1,17 +1,13 @@
 import _ from "lodash";
 
-/**
- * @param {object}                data
- * @param {Uploader}              data.uploader
- * @param {ContactUpdateAction[]} data.contactUpdateActions
- */
-export async function updateContactsInHubspotAgain({ uploader, contactUpdateActions }) {
-  /** @type {Array<{ id: string, properties: Partial<Contact> }>} */
-  const updates = [];
+export async function updateContactsInHubspotAgain({ uploader, contactUpdateActions }: {
+  uploader: Uploader,
+  contactUpdateActions: ContactUpdateAction[],
+}) {
+  const updates: Array<{ id: string, properties: Partial<Contact> }> = [];
 
   for (const action of contactUpdateActions) {
-    /** @type {Partial<GeneratedContact>} */
-    const properties = {};
+    const properties: Partial<GeneratedContact> = {};
 
     if (action.tier !== action.contact.license_tier) {
       action.contact.license_tier = action.tier;

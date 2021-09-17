@@ -1,12 +1,9 @@
 import { nonBlankString } from '../util/helpers.js';
 import assert from 'assert';
+import { SimplePublicObject } from '@hubspot/api-client/lib/codegen/crm/contacts/api';
 
-/**
- * @param {Contact[]} contacts
- */
-export function buildContactsStructure(contacts) {
-  /** @type {{ [key: string]: Contact }} */
-  const contactsByEmail = {};
+export function buildContactsStructure(contacts: Contact[]) {
+  const contactsByEmail: { [key: string]: Contact } = {};
 
   for (const contact of contacts) {
     for (const email of [contact.email, ...contact.otherEmails]) {
@@ -17,11 +14,7 @@ export function buildContactsStructure(contacts) {
   return contactsByEmail;
 }
 
-/**
- * @param {import('@hubspot/api-client').contactsModels.SimplePublicObject} contact
- * @returns {Contact}
- */
-export function contactFromHubspot(contact) {
+export function contactFromHubspot(contact: SimplePublicObject): Contact {
   let { related_products, license_tier, ...properties } = contact.properties;
 
   return {
@@ -38,8 +31,8 @@ export function contactFromHubspot(contact) {
     state: nonBlankString(properties['state']),
     last_mpac_event: properties['last_mpac_event'],
 
-    contact_type: /** @type {any} */(properties['contact_type']),
-    deployment: /** @type {any} */(properties['deployment']),
+    contact_type: properties['contact_type'] as any,
+    deployment: properties['deployment'] as any,
 
     related_products: related_products ? related_products.split(';') : [],
     license_tier: (typeof license_tier === 'string' && license_tier.length > 0)
@@ -54,13 +47,8 @@ export function contactFromHubspot(contact) {
   };
 }
 
-/**
- * @param {Partial<GeneratedContact>} contact
- * @returns {{ [key: string]: string }}
- */
-export function contactToHubspotProperties(contact) {
-  /** @type {{ [key: string]: string }} */
-  const props = {};
+export function contactToHubspotProperties(contact: Partial<GeneratedContact>): { [key: string]: string } {
+  const props: { [key: string]: string } = {};
 
   if ('contact_type' in contact) props.contact_type = contact.contact_type || '';
   if ('email' in contact) props.email = contact.email || '';

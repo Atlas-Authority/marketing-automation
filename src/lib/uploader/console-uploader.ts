@@ -1,7 +1,6 @@
 import logger from '../util/logger.js';
 
-/** @implements {Uploader} */
-export default class ConsoleUploader {
+export default class ConsoleUploader implements Uploader {
 
   verbose: boolean;
 

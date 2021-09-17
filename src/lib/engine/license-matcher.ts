@@ -2,22 +2,14 @@ import { SimilarityScorer } from './similarity-scorer.js';
 
 export class LicenseMatcher {
 
-  /**
-   * @param {Set<string>} providerDomains
-   * @param {{ [key: string]: Contact }} contacts
-   */
-  constructor(providerDomains, contacts) {
+  similarityScorer = new SimilarityScorer();
+
+  constructor(private providerDomains: Set<string>, private contacts: { [key: string]: Contact }) {
     this.providerDomains = providerDomains;
     this.contacts = contacts;
-    this.similarityScorer = new SimilarityScorer();
   }
 
-  /**
-   * @param {License}  license1
-   * @param {License}  license2
-   * @return { null | { item1: string, item2: string, score: number, reasons: string[] } }
-   */
-  score(license1, license2) {
+  score(license1: License, license2: License): null | { item1: string, item2: string, score: number, reasons: string[] } {
     const item1 = license1.addonLicenseId;
     const item2 = license2.addonLicenseId;
 
@@ -73,8 +65,7 @@ export class LicenseMatcher {
 
     let score = 0;
 
-    /** @type {string[]} */
-    const reasons = [];
+    const reasons: string[] = [];
 
     const [emailAddress1, domain1] = techEmail1.split('@');
     const [emailAddress2, domain2] = techEmail2.split('@');
@@ -147,25 +138,18 @@ export class LicenseMatcher {
 
 }
 
-/** @type {Map<string, number>} */
-const DATEDIFF_CACHE = new Map();
+const DATEDIFF_CACHE = new Map<string, number>();
 
-/**
- * @param {string} a1
- * @param {string} a2
- * @param {string} b1
- * @param {string} b2
- */
-function dateDiff(a1, a2, b1, b2) {
+function dateDiff(a1: string, a2: string, b1: string, b2: string) {
   if (!DATEDIFF_CACHE.has(a1)) DATEDIFF_CACHE.set(a1, new Date(a1).getTime());
   if (!DATEDIFF_CACHE.has(a2)) DATEDIFF_CACHE.set(a2, new Date(a2).getTime());
   if (!DATEDIFF_CACHE.has(b1)) DATEDIFF_CACHE.set(b1, new Date(b1).getTime());
   if (!DATEDIFF_CACHE.has(b2)) DATEDIFF_CACHE.set(b2, new Date(b2).getTime());
 
-  const d_a1 = /** @type {number} */(DATEDIFF_CACHE.get(a1));
-  const d_a2 = /** @type {number} */(DATEDIFF_CACHE.get(a2));
-  const d_b1 = /** @type {number} */(DATEDIFF_CACHE.get(b1));
-  const d_b2 = /** @type {number} */(DATEDIFF_CACHE.get(b2));
+  const d_a1 = DATEDIFF_CACHE.get(a1) as number;
+  const d_a2 = DATEDIFF_CACHE.get(a2) as number;
+  const d_b1 = DATEDIFF_CACHE.get(b1) as number;
+  const d_b2 = DATEDIFF_CACHE.get(b2) as number;
 
   if (d_a1 > d_b2) return (d_a1 - d_b2) / 1000 / 60 / 60 / 24;
   if (d_b1 > d_a2) return (d_b1 - d_a2) / 1000 / 60 / 60 / 24;

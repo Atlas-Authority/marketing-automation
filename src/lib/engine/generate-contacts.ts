@@ -2,15 +2,12 @@ import assert from 'assert';
 import capitalize from 'capitalize';
 import { nonBlankString, sorter } from '../util/helpers.js';
 
-/**
- * @param {object} data
- * @param {License[]} data.licenses
- * @param {Transaction[]} data.transactions
- * @param {Contact[]} data.initialContacts
- * @param {Set<string>} data.partnerDomains
- * @returns {GeneratedContact[]}
- */
-export function generateContacts({ licenses, transactions, initialContacts, partnerDomains }) {
+export function generateContacts({ licenses, transactions, initialContacts, partnerDomains }: {
+  licenses: License[],
+  transactions: Transaction[],
+  initialContacts: Contact[],
+  partnerDomains: Set<string>,
+}): GeneratedContact[] {
   const allContacts = normalizeContacts({ licenses, transactions, partnerDomains });
 
   const finalContacts = mergeDuplicateContacts(allContacts, initialContacts);
@@ -37,13 +34,8 @@ export function generateContacts({ licenses, transactions, initialContacts, part
   return finalContacts;
 }
 
-/**
- * @param {TmpContact[]} allContacts
- * @param {Contact[]} initialContacts
- */
-function mergeDuplicateContacts(allContacts, initialContacts) {
-  /** @type {Map<string, TmpContact[]>} */
-  const map = new Map();
+function mergeDuplicateContacts(allContacts: TmpContact[], initialContacts: Contact[]) {
+  const map = new Map<string, TmpContact[]>();
 
   for (const contact of allContacts) {
     if (!map.has(contact.email)) map.set(contact.email, []);
@@ -78,11 +70,7 @@ function mergeDuplicateContacts(allContacts, initialContacts) {
   return [...map.values()].map(([{ updated, ...cs }]) => cs);
 }
 
-/**
- * @param {string} primaryEmail
- * @param {TmpContact[]} contacts
- */
-export function mergeContactProperties(primaryEmail, contacts) {
+export function mergeContactProperties(primaryEmail: string, contacts: TmpContact[]) {
   contacts.sort(sorter(c => c.updated, 'DSC'));
 
   const ideal = contacts[0];
@@ -124,15 +112,12 @@ export function mergeContactProperties(primaryEmail, contacts) {
   }
 }
 
-/**
- * @param {object} param
- * @param {License[]} param.licenses
- * @param {Transaction[]} param.transactions
- * @param {Set<string>} param.partnerDomains
- */
-function normalizeContacts({ licenses, transactions, partnerDomains }) {
-  /** @type {TmpContact[]} */
-  const allContacts = [];
+function normalizeContacts({ licenses, transactions, partnerDomains }: {
+  licenses: License[],
+  transactions: Transaction[],
+  partnerDomains: Set<string>,
+}) {
+  const allContacts: TmpContact[] = [];
 
   for (const license of licenses) {
 
@@ -189,16 +174,13 @@ function normalizeContacts({ licenses, transactions, partnerDomains }) {
   return allContacts;
 }
 
-/**
- * @param {object} info
- * @param {string} info.email
- * @param {string=} info.name
- * @param {string=} info.phone
- * @param {string=} info.city
- * @param {string=} info.state
- * @param {Set<string>} partnerDomains
- */
-function mapCommonFields(info, partnerDomains) {
+function mapCommonFields(info: {
+  email: string,
+  name?: string,
+  phone?: string,
+  city?: string,
+  state?: string,
+}, partnerDomains: Set<string>) {
   let [firstName, ...lastNameGroup] = (info.name || ' ').split(' ');
   let lastName = lastNameGroup.filter(n => n).join(' ');
 
@@ -216,16 +198,13 @@ function mapCommonFields(info, partnerDomains) {
     city: nonBlankString(info.city ? capitalize.words(info.city) : null),
     state: nonBlankString(info.state ? capitalize.words(info.state) : null),
     company_id: null,
-    contact_type: /** @type {any} */(
+    contact_type: (
       partnerDomains.has(domain) ? 'Partner' : 'Customer'
-    ),
+    ) as any,
   };
 }
 
-/**
- * @param {License} license
- */
-function mapLicenseSpecificFields(license) {
+function mapLicenseSpecificFields(license: License) {
   return {
     country: capitalize.words(license.contactDetails.country),
     region: license.contactDetails.region,
@@ -234,10 +213,7 @@ function mapLicenseSpecificFields(license) {
   };
 }
 
-/**
- * @param {Transaction} transaction
- */
-function mapTransactionSpecificFields(transaction) {
+function mapTransactionSpecificFields(transaction: Transaction) {
   return {
     country: capitalize.words(transaction.customerDetails.country),
     region: transaction.customerDetails.region,
@@ -246,6 +222,4 @@ function mapTransactionSpecificFields(transaction) {
   };
 }
 
-/**
- * @typedef {GeneratedContact & { updated: string }} TmpContact
- */
+export type TmpContact = GeneratedContact & { updated: string };
