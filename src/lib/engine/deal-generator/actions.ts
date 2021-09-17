@@ -1,5 +1,5 @@
 import { Deal } from '../../types/deal.js';
-import { License } from '../../types/license.js';
+import { License, LicenseContext } from '../../types/license.js';
 import { Transaction } from '../../types/transaction.js';
 import { DealStage } from '../../util/config/index.js';
 import { isPresent, sorter } from '../../util/helpers.js';
@@ -36,10 +36,10 @@ export class ActionGenerator {
     const deal = this.dealFinder.getDeal(event.licenses);
     const latestLicense = event.licenses[event.licenses.length - 1];
     if (!deal) {
-      return makeCreateAction(latestLicense, DealStage.EVAL);
+      return makeCreateAction(event, latestLicense, DealStage.EVAL);
     }
     else if (deal.properties.dealstage === DealStage.EVAL) {
-      return makeUpdateAction(deal, latestLicense, {});
+      return makeUpdateAction(event, deal, latestLicense, {});
     }
     else {
       return null;
@@ -58,10 +58,10 @@ export class ActionGenerator {
 
     const record = getLatestRecord(event);
     if (!deal) {
-      return makeCreateAction(record, DealStage.CLOSED_WON);
+      return makeCreateAction(event, record, DealStage.CLOSED_WON);
     }
     else if (deal.properties.dealstage === DealStage.EVAL) {
-      return makeUpdateAction(deal, record, { dealstage: DealStage.CLOSED_WON });
+      return makeUpdateAction(event, deal, record, { dealstage: DealStage.CLOSED_WON });
     }
     else {
       return null;
@@ -69,7 +69,7 @@ export class ActionGenerator {
   }
 
   private actionForRenewal(event: RenewalEvent | UpgradeEvent): Action {
-    return makeCreateAction(event.transaction, DealStage.CLOSED_WON);
+    return makeCreateAction(event, event.transaction, DealStage.CLOSED_WON);
   }
 
   private actionForRefund(event: RefundEvent): Action[] {
@@ -77,7 +77,7 @@ export class ActionGenerator {
     return (deals
       .filter(deal => deal.properties.dealstage !== DealStage.CLOSED_LOST)
       .map(deal => {
-        return makeUpdateAction(deal, null, { dealstage: DealStage.CLOSED_LOST })
+        return makeUpdateAction(event, deal, null, { dealstage: DealStage.CLOSED_LOST })
       })
       .filter(isPresent)
     );
@@ -86,18 +86,19 @@ export class ActionGenerator {
 }
 
 type Action = (
-  { type: 'update', deal: Deal, properties: Partial<Deal['properties']> } |
-  { type: 'create', properties: Deal['properties'] }
+  { type: 'update', groups: LicenseContext[], deal: Deal, properties: Partial<Deal['properties']> } |
+  { type: 'create', groups: LicenseContext[], properties: Deal['properties'] }
 );
 
-function makeCreateAction(record: License | Transaction, dealstage: DealStage): Action {
+function makeCreateAction(event: DealRelevantEvent, record: License | Transaction, dealstage: DealStage): Action {
   return {
     type: 'create',
+    groups: event.groups,
     properties: dealCreationProperties(record, dealstage),
   };
 }
 
-function makeUpdateAction(deal: Deal, record: License | Transaction | null, properties: Partial<Deal['properties']>): Action | null {
+function makeUpdateAction(event: DealRelevantEvent, deal: Deal, record: License | Transaction | null, properties: Partial<Deal['properties']>): Action | null {
   const combinedProperties = (record ? dealUpdateProperties(deal, record) : {});
   Object.assign(combinedProperties, properties);
 
@@ -105,6 +106,7 @@ function makeUpdateAction(deal: Deal, record: License | Transaction | null, prop
 
   return {
     type: 'update',
+    groups: event.groups,
     deal,
     properties: combinedProperties,
   };
