@@ -2,6 +2,13 @@ import _ from 'lodash';
 import { optional, required } from './helpers.js';
 export { DealStage, Pipeline } from './dynamic-enums.js';
 
+export enum LogLevel {
+  Error,
+  Warn,
+  Info,
+  Verbose,
+}
+
 export const ADDONKEY_TO_PLATFORM: { [addonKey: string]: string } = Object.fromEntries(
   required('ADDONKEY_PLATFORMS')
     .split(',')
@@ -9,7 +16,7 @@ export const ADDONKEY_TO_PLATFORM: { [addonKey: string]: string } = Object.fromE
 );
 
 export default {
-  logLevel: optional('LOGLEVEL')?.trim().toLowerCase() || 'info',
+  logLevel: logLevelFromString(optional('LOGLEVEL')?.trim().toLowerCase() || 'info'),
   mpac: {
     user: required('MPAC_USER'),
     pass: required('MPAC_PASS'),
@@ -46,3 +53,13 @@ export default {
   isProduction: process.env.NODE_ENV === 'production',
   isTest: process.env.NODE_ENV === 'test',
 };
+
+function logLevelFromString(level: string) {
+  switch (level) {
+    case 'error': return LogLevel.Error;
+    case 'warn': return LogLevel.Warn;
+    case 'info': return LogLevel.Info;
+    case 'verbose': return LogLevel.Verbose;
+    default: return LogLevel.Warn;
+  }
+}

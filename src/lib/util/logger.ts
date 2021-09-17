@@ -1,5 +1,5 @@
 import util from 'util';
-import config from './config/index.js';
+import config, { LogLevel } from './config/index.js';
 
 let enabled = true;
 
@@ -9,13 +9,6 @@ const scary = '\x1b[40;31;1m';
 const reset = '\x1b[0m';
 const royal = '\x1b[35m';
 const relax = '\x1b[33;2m';
-
-enum LogLevel {
-  Error,
-  Warn,
-  Info,
-  Verbose,
-}
 
 class Logger {
 
@@ -31,18 +24,6 @@ class Logger {
 
 export default new Logger();
 
-const configLogLevel = logLevelFromString(config.logLevel);
-
-function logLevelFromString(level: string) {
-  switch (level) {
-    case 'error': return LogLevel.Error;
-    case 'warn': return LogLevel.Warn;
-    case 'info': return LogLevel.Info;
-    case 'verbose': return LogLevel.Verbose;
-    default: return LogLevel.Warn;
-  }
-}
-
 const levelPrefixes = {
   [LogLevel.Info]: `${great}info${reset}`,
   [LogLevel.Warn]: `${nerve}WARN${reset}`,
@@ -52,7 +33,7 @@ const levelPrefixes = {
 
 function log(level: LogLevel, prefix: string, ...args: any[]) {
   if (!enabled) return;
-  if (level > configLogLevel) return;
+  if (level > config.logLevel) return;
 
   const first = levelPrefixes[level];
   const styledPrefix = `${royal}${prefix}${reset}`;
