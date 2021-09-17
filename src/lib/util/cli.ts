@@ -5,7 +5,7 @@ import ConsoleUploader from "../uploader/console-uploader.js";
 import LiveUploader from "../uploader/live-uploader.js";
 import { Uploader } from "../uploader/uploader.js";
 import { ArgParser } from './arg-parser.js';
-import config from "./config/index.js";
+import config, { LogLevel } from "./config/index.js";
 
 export function getCliOptions() {
   const argParser = new ArgParser(process.argv.slice(2));
@@ -17,8 +17,7 @@ export function getCliOptions() {
 
   const uploader = argParser.getChoiceOrFail<Uploader>('--uploader', {
     'live': () => new LiveUploader(),
-    'console-quiet': () => new ConsoleUploader({ verbose: false }),
-    'console-verbose': () => new ConsoleUploader({ verbose: true }),
+    'console': () => new ConsoleUploader({ verbose: config.logLevel >= LogLevel.Verbose }),
   });
 
   const cachedFns = argParser.get('--cached-fns')?.split(',') || [];

@@ -20,7 +20,7 @@ $ node out/bin/main.js --downloader=live --uploader=live
 
 Running the engine live (steps above) will cache data locally in git-ignored `data` directory. After it's cached, you can use `--downloader=cached` for faster development and to avoid API calls.
 
-Instead of uploading to Hubspot, you can use `--uploader=console-verbose` to print data to console that would have been uploaded, or `console-quiet` to just show array counts.
+Instead of uploading to Hubspot, you can use `--uploader=console` with (ENV variable) `LOGLEVEL=verbose` to print data to console that would have been uploaded, or any other log level to just show array counts.
 
 After running the engine, to test logic *after* the Scoring Engine runs, pass `--cached-fns=scorer.dat` to reuse the most recently results of the Scoring Engine.
 
