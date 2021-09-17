@@ -1,5 +1,6 @@
 import { Company } from '../types/company.js';
 import { Contact, GeneratedContact } from '../types/contact.js';
+import { Deal, DealAssociationPair, DealUpdate } from '../types/deal.js';
 import logger from '../util/logger.js';
 import { Uploader } from './uploader.js';
 

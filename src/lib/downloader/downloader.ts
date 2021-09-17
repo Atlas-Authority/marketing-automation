@@ -1,5 +1,6 @@
 import { Company } from "../types/company.js";
 import { Contact } from "../types/contact.js";
+import { Deal } from "../types/deal.js";
 
 export interface Downloader {
   downloadFreeEmailProviders(): Promise<string[]>;

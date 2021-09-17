@@ -1,4 +1,4 @@
-interface Deal {
+export interface Deal {
   id: string;
   contactIds: string[];
   properties: {
@@ -18,12 +18,12 @@ interface Deal {
   };
 }
 
-interface DealUpdate {
+export interface DealUpdate {
   id: string;
   properties: Partial<Deal['properties']>;
 }
 
-interface DealAssociationPair {
+export interface DealAssociationPair {
   contactId: string;
   dealId: string;
 }

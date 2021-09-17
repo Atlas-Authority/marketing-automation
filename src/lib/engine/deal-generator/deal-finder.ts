@@ -1,3 +1,4 @@
+import { Deal } from '../../types/deal.js';
 import { isPresent } from '../../util/helpers.js';
 import { isTransaction } from './records.js';
 

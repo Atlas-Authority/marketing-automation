@@ -2,6 +2,7 @@ import * as assert from 'assert';
 import _ from 'lodash';
 import mustache from 'mustache';
 import { ContactsByEmail } from '../types/contact.js';
+import { Deal, DealUpdate } from '../types/deal.js';
 import config, { DealStage, Pipeline } from '../util/config.js';
 import { isPresent, sorter } from '../util/helpers.js';
 import { saveForInspection } from '../util/inspection.js';
