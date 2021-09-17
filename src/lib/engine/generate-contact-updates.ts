@@ -1,5 +1,6 @@
 import * as assert from 'assert';
 import _ from 'lodash';
+import { Contact, ContactsByEmail, ContactUpdateAction } from '../types/contact.js';
 import { ADDONKEY_TO_PLATFORM } from '../util/config.js';
 import { SimpleError } from '../util/errors.js';
 import { calculateTierFromLicenseContext } from './deal-generator/tiers.js';

@@ -1,6 +1,7 @@
 import * as assert from 'assert';
 import _ from 'lodash';
 import * as util from 'util';
+import { Contact, ContactsByEmail } from '../types/contact.js';
 import { fnOrCache } from '../util/fn-cache.js';
 import { sorter } from '../util/helpers.js';
 import { saveForInspection } from '../util/inspection.js';

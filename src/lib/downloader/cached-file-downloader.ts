@@ -1,4 +1,5 @@
 import { Company } from '../types/company.js';
+import { Contact } from '../types/contact.js';
 import * as datadir from '../util/datadir.js';
 import { Downloader } from './downloader.js';
 

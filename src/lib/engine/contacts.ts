@@ -1,6 +1,7 @@
 import { nonBlankString } from '../util/helpers.js';
 import assert from 'assert';
 import { SimplePublicObject } from '@hubspot/api-client/lib/codegen/crm/contacts/api';
+import { Contact, GeneratedContact } from '../types/contact.js';
 
 export function buildContactsStructure(contacts: Contact[]) {
   const contactsByEmail: { [key: string]: Contact } = {};

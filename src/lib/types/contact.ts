@@ -1,4 +1,4 @@
-interface GeneratedContact {
+export interface GeneratedContact {
   contact_type: 'Partner' | 'Customer';
   country: string;
   region: string;
@@ -17,12 +17,12 @@ interface GeneratedContact {
   last_mpac_event?: string;
 }
 
-interface Contact extends GeneratedContact {
+export interface Contact extends GeneratedContact {
   otherEmails: string[];
   hs_object_id: string;
 }
 
-interface ContactUpdateAction {
+export interface ContactUpdateAction {
   contact: Contact;
   deployment: 'Cloud' | 'Data Center' | 'Server' | 'Multiple' | null;
   related_products: string[];
@@ -30,6 +30,6 @@ interface ContactUpdateAction {
   event: string;
 }
 
-type ContactsByEmail = {
+export type ContactsByEmail = {
   [email: string]: Contact;
 };

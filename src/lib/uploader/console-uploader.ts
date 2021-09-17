@@ -1,4 +1,5 @@
 import { Company } from '../types/company.js';
+import { Contact, GeneratedContact } from '../types/contact.js';
 import logger from '../util/logger.js';
 import { Uploader } from './uploader.js';
 

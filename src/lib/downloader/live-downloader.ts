@@ -3,6 +3,7 @@ import { DateTime, Duration, Interval } from 'luxon';
 import fetch from 'node-fetch';
 import { contactFromHubspot } from '../engine/contacts.js';
 import { Company } from '../types/company.js';
+import { Contact } from '../types/contact.js';
 import config, { Pipeline } from '../util/config.js';
 import * as datadir from '../util/datadir.js';
 import { AttachableError, SimpleError } from '../util/errors.js';

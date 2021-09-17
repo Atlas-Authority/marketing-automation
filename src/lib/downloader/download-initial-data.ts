@@ -1,6 +1,7 @@
 import assert from 'assert';
 import util from 'util';
 import { Company } from '../types/company.js';
+import { Contact } from '../types/contact.js';
 import { makeMultiProviderDomainsSet } from '../util/domains.js';
 import { AttachableError } from '../util/errors.js';
 import { isPresent } from '../util/helpers.js';

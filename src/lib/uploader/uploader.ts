@@ -1,4 +1,5 @@
 import { Company } from "../types/company.js";
+import { Contact, GeneratedContact } from "../types/contact.js";
 
 export interface Uploader {
   createAllContacts(contacts: Array<{ properties: GeneratedContact }>): Promise<Contact[]>;

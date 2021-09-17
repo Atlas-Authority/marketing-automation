@@ -2,6 +2,7 @@ import * as hubspot from '@hubspot/api-client';
 import assert from 'assert';
 import { contactToHubspotProperties } from '../engine/contacts.js';
 import { Company } from '../types/company.js';
+import { Contact, GeneratedContact } from '../types/contact.js';
 import config from '../util/config.js';
 import { batchesOf } from '../util/helpers.js';
 import { saveToJson } from '../util/inspection.js';

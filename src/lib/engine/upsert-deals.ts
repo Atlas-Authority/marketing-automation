@@ -1,3 +1,4 @@
+import { Contact } from "../types/contact.js";
 import { Uploader } from "../uploader/uploader.js";
 
 export async function upsertDealsInHubspot({ uploader, dealDiffs, contacts }: {
