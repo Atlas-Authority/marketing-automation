@@ -2,13 +2,13 @@ import { isPresent } from '../../util/helpers.js';
 
 export class DealFinder {
 
-  deals = new Map<string, Deal>();
+  licenseDeals = new Map<string, Deal>();
+  transactionDeals = new Map<string, Deal>();
 
-  constructor(initialDeals: Deal[], keyfn: (deal: Deal) => string) {
+  constructor(initialDeals: Deal[]) {
     for (const deal of initialDeals) {
-      const key = keyfn(deal);
-      if (key)
-        this.deals.set(key, deal);
+      if (deal.properties.addonlicenseid) this.licenseDeals.set(deal.properties.addonlicenseid, deal);
+      if (deal.properties.transactionid) this.transactionDeals.set(deal.properties.transactionid, deal);
     }
   }
 
@@ -18,13 +18,14 @@ export class DealFinder {
 
   getDeals(records: (License | Transaction)[]) {
     return (records
-      .map(record => this.deals.get(this.idFor(record)))
+      .map(record => this.getById(record))
       .filter(isPresent));
   }
 
-  idFor(record: License | Transaction): string {
+  getById(record: License | Transaction): Deal | undefined {
     return ('transactionId' in record
-      ? record.transactionId
-      : record.addonLicenseId);
+      ? this.transactionDeals.get(record.transactionId)
+      : this.licenseDeals.get(record.addonLicenseId));
   }
+
 }

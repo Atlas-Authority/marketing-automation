@@ -6,12 +6,10 @@ import { dealCreationProperties, dealUpdateProperties, getDate, isLicense } from
 
 export class ActionGenerator {
 
-  licenseDealFinder: DealFinder;
-  transactionDealFinder: DealFinder;
+  dealFinder: DealFinder;
 
   constructor(initialDeals: Deal[]) {
-    this.licenseDealFinder = new DealFinder(initialDeals, deal => deal.properties.addonlicenseid);
-    this.transactionDealFinder = new DealFinder(initialDeals, deal => deal.properties.transactionid);
+    this.dealFinder = new DealFinder(initialDeals);
   }
 
   generateFrom(events: DealRelevantEvent[]) {
@@ -35,7 +33,7 @@ export class ActionGenerator {
   }
 
   private actionForEval(event: EvalEvent): Action | null {
-    const deal = this.licenseDealFinder.getDeal(event.licenses);
+    const deal = this.dealFinder.getDeal(event.licenses);
     const latestLicense = event.licenses[event.licenses.length - 1];
     if (!deal) {
       return makeCreateAction(latestLicense, DealStage.EVAL);
@@ -51,9 +49,9 @@ export class ActionGenerator {
   private actionForPurchase(event: PurchaseEvent): Action | null {
     const deal = (
       // Either it is an eval or a purchase without a transaction,
-      this.licenseDealFinder.getDeal(event.licenses) ||
+      this.dealFinder.getDeal(event.licenses) ||
       // or it exists as a purchase with a transaction
-      this.transactionDealFinder.getDeal(event.transaction
+      this.dealFinder.getDeal(event.transaction
         ? [event.transaction]
         : [])
     );
@@ -75,7 +73,7 @@ export class ActionGenerator {
   }
 
   private actionForRefund(event: RefundEvent): Action[] {
-    const deals = this.transactionDealFinder.getDeals(event.refundedTxs);
+    const deals = this.dealFinder.getDeals(event.refundedTxs);
     return (deals
       .filter(deal => deal.properties.dealstage !== DealStage.CLOSED_LOST)
       .map(deal => {
