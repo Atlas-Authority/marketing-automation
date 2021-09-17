@@ -1,4 +1,5 @@
 import { Deal } from '../../types/deal.js';
+import { Transaction } from '../../types/transaction.js';
 import { DealStage } from '../../util/config.js';
 import { isPresent, sorter } from '../../util/helpers.js';
 import { DealFinder } from './deal-finder.js';

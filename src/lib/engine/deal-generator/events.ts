@@ -1,3 +1,4 @@
+import { Transaction } from "../../types/transaction.js";
 import { sorter } from "../../util/helpers.js";
 import logger from '../../util/logger.js';
 import { abbrRecordDetails, getDate, getLicense, getLicenseType, isEvalOrOpenSourceLicense, isLicense, isPaidLicense, isTransaction } from "./records.js";

@@ -1,5 +1,6 @@
 import { Company } from '../types/company.js';
 import { Contact, GeneratedContact } from '../types/contact.js';
+import { Transaction } from '../types/transaction.js';
 import { Uploader } from '../uploader/uploader.js';
 import config from '../util/config.js';
 

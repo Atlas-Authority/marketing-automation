@@ -1,4 +1,4 @@
-interface Transaction {
+export interface Transaction {
   transactionId: string,
   addonLicenseId: string,
   licenseId: string,

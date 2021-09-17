@@ -1,6 +1,7 @@
 import assert from 'assert';
 import mustache from 'mustache';
 import { Deal } from '../../types/deal.js';
+import { Transaction } from '../../types/transaction.js';
 import config, { Pipeline } from '../../util/config.js';
 import { sorter } from "../../util/helpers.js";
 import { parseLicenseTier, parseTransactionTier, tierFromEvalOpportunity } from './tiers.js';
