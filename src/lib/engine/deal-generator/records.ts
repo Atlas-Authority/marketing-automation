@@ -108,9 +108,9 @@ export function dealCreationProperties(record: License | Transaction, dealstage:
 export function dealUpdateProperties(deal: Deal, record: License | Transaction): Partial<Deal['properties']> {
   const properties: Partial<Deal['properties']> = {};
 
-  const newAmount = (isTransaction(record) ? record.purchaseDetails.vendorAmount : NaN);
   const oldAmount = parseFloat(deal.properties.amount);
-  if (newAmount !== oldAmount && !isNaN(newAmount)) properties.amount = newAmount.toString();
+  const newAmount = (isTransaction(record) ? record.purchaseDetails.vendorAmount : oldAmount);
+  if (newAmount !== oldAmount) properties.amount = newAmount.toString();
 
   const oldCloseDate = deal.properties.closedate;
   const newCloseDate = getDate(record);
