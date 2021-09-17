@@ -65,18 +65,10 @@ export function abbrRecordDetails(record: Transaction | License) {
     });
 }
 
-export function dealCreationPropertiesFromLicense(record: License, dealstage: string): Deal['properties'] {
+export function dealCreationProperties(record: License | Transaction, dealstage: string): Deal['properties'] {
   throw new Error('Function not implemented.');
 }
 
-export function dealCreationPropertiesFromTransaction(record: Transaction, dealstage: string): Deal['properties'] {
-  throw new Error('Function not implemented.');
-}
-
-export function dealUpdatePropertiesForLicense(deal: Deal, record: License): Partial<Deal['properties']> {
-  throw new Error('Function not implemented.');
-}
-
-export function dealUpdatePropertiesForTransaction(deal: Deal, record: Transaction): Partial<Deal['properties']> {
+export function dealUpdateProperties(deal: Deal, record: License | Transaction): Partial<Deal['properties']> {
   throw new Error('Function not implemented.');
 }
