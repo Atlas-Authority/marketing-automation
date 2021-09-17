@@ -2,8 +2,7 @@ import { DealStage } from '../../util/config.js';
 import { sorter } from '../../util/helpers.js';
 import { DealFinder } from './deal-finder.js';
 import { DealRelevantEvent, EvalEvent, PurchaseEvent, RefundEvent, RenewalEvent, UpgradeEvent } from "./events.js";
-import * as propGenerators from './properties.js';
-import { getDate, isLicense } from './records.js';
+import { dealCreationPropertiesFromLicense, dealCreationPropertiesFromTransaction, dealUpdatePropertiesForLicense, dealUpdatePropertiesForTransaction, getDate, isLicense } from './records.js';
 
 export class ActionGenerator {
 
@@ -96,8 +95,8 @@ function makeCreateAction(record: License | Transaction, dealstage: DealStage): 
   return {
     type: 'create',
     properties: isLicense(record)
-      ? propGenerators.dealCreationPropertiesFromLicense(record, dealstage)
-      : propGenerators.dealCreationPropertiesFromTransaction(record, dealstage),
+      ? dealCreationPropertiesFromLicense(record, dealstage)
+      : dealCreationPropertiesFromTransaction(record, dealstage),
   };
 }
 
@@ -106,8 +105,8 @@ function makeUpdateAction(deal: Deal, record: License | Transaction | null, prop
     properties = {
       ...properties,
       ...(isLicense(record)
-        ? propGenerators.dealUpdatePropertiesForLicense(deal, record)
-        : propGenerators.dealUpdatePropertiesForTransaction(deal, record)
+        ? dealUpdatePropertiesForLicense(deal, record)
+        : dealUpdatePropertiesForTransaction(deal, record)
       )
     };
   }
