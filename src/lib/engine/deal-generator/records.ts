@@ -69,8 +69,9 @@ export function abbrRecordDetails(record: Transaction | License) {
 
 export function dealCreationProperties(record: License | Transaction, dealstage: string): Deal['properties'] {
   return {
-    addonlicenseid: record.addonLicenseId,
-    transactionid: '',
+    ...(isLicense(record)
+      ? { addonlicenseid: record.addonLicenseId, transactionid: '' }
+      : { transactionid: record.transactionId, addonlicenseid: '' }),
     closedate: (isLicense(record)
       ? record.maintenanceStartDate
       : record.purchaseDetails.maintenanceStartDate),
