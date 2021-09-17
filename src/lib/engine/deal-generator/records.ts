@@ -2,6 +2,7 @@ import assert from 'assert';
 import mustache from 'mustache';
 import config, { Pipeline } from '../../util/config.js';
 import { sorter } from "../../util/helpers.js";
+import { parseLicenseTier, parseTransactionTier, tierFromEvalOpportunity } from '../tiers.js';
 
 export function isEvalOrOpenSourceLicense(record: License) {
   return (
@@ -46,6 +47,16 @@ export function getLicense(addonLicenseId: string, groups: LicenseContext[]) {
     .find(l => l.addonLicenseId === addonLicenseId));
   assert.ok(license);
   return license;
+}
+
+function getTier(record: License | Transaction) {
+  return (isTransaction(record)
+    ? parseTransactionTier(record.purchaseDetails.tier)
+    : Math.max(
+      tierFromEvalOpportunity(record.evaluationOpportunitySize),
+      parseLicenseTier(record.tier)
+    )
+  );
 }
 
 export function abbrRecordDetails(record: Transaction | License) {
@@ -104,6 +115,10 @@ export function dealUpdateProperties(deal: Deal, record: License | Transaction):
   const oldCloseDate = deal.properties.closedate;
   const newCloseDate = getDate(record);
   if (newCloseDate !== oldCloseDate) properties.closedate = newCloseDate;
+
+  const oldTier = +deal.properties.license_tier;
+  const newTier = getTier(record);
+  if (newTier !== oldTier) properties.license_tier = newTier.toFixed();
 
   return properties;
 }
