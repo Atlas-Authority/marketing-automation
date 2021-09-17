@@ -1,6 +1,7 @@
 import assert from 'assert';
 import mustache from 'mustache';
 import { Deal } from '../../types/deal.js';
+import { License, LicenseContext } from '../../types/license.js';
 import { Transaction } from '../../types/transaction.js';
 import config, { Pipeline } from '../../util/config.js';
 import { sorter } from "../../util/helpers.js";

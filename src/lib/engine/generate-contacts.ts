@@ -1,6 +1,7 @@
 import assert from 'assert';
 import capitalize from 'capitalize';
 import { Contact, GeneratedContact } from '../types/contact.js';
+import { License } from '../types/license.js';
 import { Transaction } from '../types/transaction.js';
 import { nonBlankString, sorter } from '../util/helpers.js';
 

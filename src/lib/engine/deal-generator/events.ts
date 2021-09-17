@@ -1,3 +1,4 @@
+import { License, LicenseContext } from "../../types/license.js";
 import { Transaction } from "../../types/transaction.js";
 import { sorter } from "../../util/helpers.js";
 import logger from '../../util/logger.js';

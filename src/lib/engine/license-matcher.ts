@@ -1,4 +1,5 @@
 import { Contact } from '../types/contact.js';
+import { License } from '../types/license.js';
 import { SimilarityScorer } from './similarity-scorer.js';
 
 export class LicenseMatcher {

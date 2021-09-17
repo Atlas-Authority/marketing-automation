@@ -3,6 +3,7 @@ import { downloadAllData } from '../lib/downloader/download-initial-data.js';
 import { buildContactsStructure } from '../lib/engine/contacts.js';
 import { olderThan90Days } from '../lib/engine/generate-deals.js';
 import { shorterLicenseInfo } from '../lib/engine/license-grouper.js';
+import { License } from '../lib/types/license.js';
 import * as datadir from '../lib/util/datadir.js';
 import logger from '../lib/util/logger.js';
 

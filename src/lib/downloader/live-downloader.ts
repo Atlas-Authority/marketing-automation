@@ -5,6 +5,7 @@ import { contactFromHubspot } from '../engine/contacts.js';
 import { Company } from '../types/company.js';
 import { Contact } from '../types/contact.js';
 import { Deal } from '../types/deal.js';
+import { License } from '../types/license.js';
 import { Transaction } from '../types/transaction.js';
 import config, { Pipeline } from '../util/config.js';
 import * as datadir from '../util/datadir.js';

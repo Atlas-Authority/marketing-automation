@@ -1,4 +1,5 @@
 import { Deal } from '../../types/deal.js';
+import { License } from '../../types/license.js';
 import { Transaction } from '../../types/transaction.js';
 import { isPresent } from '../../util/helpers.js';
 import { isTransaction } from './records.js';

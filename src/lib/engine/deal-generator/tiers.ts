@@ -1,4 +1,5 @@
 import * as assert from 'assert';
+import { LicenseContext } from '../../types/license.js';
 
 export function calculateTierFromLicenseContext(ctx: LicenseContext) {
   return [

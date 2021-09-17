@@ -1,4 +1,6 @@
-interface License {
+import { Transaction } from "./transaction.js";
+
+export interface License {
   addonLicenseId: string,
   licenseId: string,
   addonKey: string,
@@ -58,10 +60,10 @@ interface License {
   parentProductEdition?: 'NA' | 'Pending' | 'Free' | 'Standard' | 'Premium' | 'Enterprise',
 }
 
-type LicenseContext = {
+export type LicenseContext = {
   license: License;
   transactions: Transaction[];
 };
 
 /** Related via the matching engine. */
-type RelatedLicenseSet = LicenseContext[];
+export type RelatedLicenseSet = LicenseContext[];
