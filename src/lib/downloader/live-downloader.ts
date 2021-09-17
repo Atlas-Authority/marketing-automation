@@ -8,17 +8,11 @@ import { AttachableError, SimpleError } from '../util/errors.js';
 import logger from '../util/logger.js';
 
 
-/** @implements {Downloader} */
-export default class LiveDownloader {
+export default class LiveDownloader implements Downloader {
 
-  constructor() {
-    this.hubspotClient = new hubspot.Client({ apiKey: config.hubspot.apiKey });
-  }
+  hubspotClient = new hubspot.Client({ apiKey: config.hubspot.apiKey });
 
-  /**
-   * @returns {Promise<string[]>}
-   */
-  async downloadFreeEmailProviders() {
+  async downloadFreeEmailProviders(): Promise<string[]> {
     const res = await fetch(`https://f.hubspotusercontent40.net/hubfs/2832391/Marketing/Lead-Capture/free-domains-1.csv`);
     const text = await res.text();
     const domains = text.split(',\n');
@@ -26,10 +20,7 @@ export default class LiveDownloader {
     return domains;
   }
 
-  /**
-   * @returns {Promise<string[]>}
-   */
-  async downloadAllTlds() {
+  async downloadAllTlds(): Promise<string[]> {
     const res = await fetch(`https://data.iana.org/TLD/tlds-alpha-by-domain.txt`);
     const text = await res.text();
     const tlds = text.trim().split('\n').splice(1).map(s => s.toLowerCase());
@@ -37,26 +28,18 @@ export default class LiveDownloader {
     return tlds;
   }
 
-  /**
-   * @returns {Promise<Transaction[]>}
-   */
-  async downloadTransactions() {
+  async downloadTransactions(): Promise<Transaction[]> {
     logger.info('Live Downloader', 'Starting to download Transactions');
-    /** @type {Transaction[]} */
-    const json = await downloadMarketplaceData('/sales/transactions/export');
+    const json: Transaction[] = await downloadMarketplaceData('/sales/transactions/export');
     logger.info('Live Downloader', 'Downloaded Transactions');
 
     save('transactions.json', json);
     return json;
   }
 
-  /**
-   * @returns {Promise<License[]>}
-   */
-  async downloadLicensesWithoutDataInsights() {
+  async downloadLicensesWithoutDataInsights(): Promise<License[]> {
     logger.info('Live Downloader', 'Starting to download Licenses Without Data Insights');
-    /** @type {License[]} */
-    let json = await downloadMarketplaceData('/licenses/export?endDate=2018-07-01');
+    let json: License[] = await downloadMarketplaceData('/licenses/export?endDate=2018-07-01');
     logger.info('Live Downloader', 'Downloaded Licenses without-data-insights up to 2018-07-01');
 
     json.forEach(fixOdditiesInLicenses);
@@ -64,21 +47,16 @@ export default class LiveDownloader {
     return json;
   }
 
-  /**
-   * @returns {Promise<License[]>}
-   */
-  async downloadLicensesWithDataInsights() {
+  async downloadLicensesWithDataInsights(): Promise<License[]> {
     logger.info('Live Downloader', 'Starting to download Licenses With Data Insights');
     const promises = generateDates().map(async ({ startDate, endDate }) => {
-      /** @type {License[]} */
-      const json = await downloadMarketplaceData(`/licenses/export?withDataInsights=true&startDate=${startDate}&endDate=${endDate}`);
+      const json: License[] = await downloadMarketplaceData(`/licenses/export?withDataInsights=true&startDate=${startDate}&endDate=${endDate}`);
       logger.info('Live Downloader', 'Downloaded Licenses with-data-insights for range:', startDate, endDate);
       return { date: `${startDate}-${endDate}`, json };
     });
 
     let licenses = await Promise.all(promises).then(results => {
-      /** @type {License[]} */
-      let array = [];
+      let array: License[] = [];
       for (const result of results) {
         array = array.concat(result.json);
       }
@@ -90,10 +68,7 @@ export default class LiveDownloader {
     return licenses;
   }
 
-  /**
-   * @returns {Promise<Company[]>}
-   */
-  async downloadAllCompanies() {
+  async downloadAllCompanies(): Promise<Company[]> {
     const properties = [
       'name',
       'type',
@@ -101,14 +76,14 @@ export default class LiveDownloader {
 
     let companies;
     try { companies = await this.hubspotClient.crm.companies.getAll(undefined, undefined, properties); }
-    catch (/** @type {any} */ e) {
+    catch (e: any) {
       throw new Error('Failed downloading companies: ' + e.response.body.message);
     }
 
     const adjustedCompanies = companies.map(result => ({
       id: result.id,
       name: result.properties.name,
-      type: /** @type {any} */ (result.properties.type),
+      type: result.properties.type as any,
     }));
 
     logger.info('Live Downloader', 'Downloaded Companies');
@@ -117,10 +92,7 @@ export default class LiveDownloader {
     return adjustedCompanies;
   }
 
-  /**
-   * @returns {Promise<Deal[]>}
-   */
-  async downloadAllDeals() {
+  async downloadAllDeals(): Promise<Deal[]> {
     const properties = [
       'closedate',
       'deployment',
@@ -139,7 +111,7 @@ export default class LiveDownloader {
 
     let deals;
     try { deals = await this.hubspotClient.crm.deals.getAll(undefined, undefined, properties, ['contact']); }
-    catch (/** @type {any} */ e) {
+    catch (e: any) {
       throw new Error('Failed downloading deals: ' + e.response.body.message);
     }
 
@@ -163,11 +135,11 @@ export default class LiveDownloader {
 
         return ({
           id: deal.id,
-          properties: /** @type {Deal['properties']} */({
+          properties: ({
             ...deal.properties,
             addonlicenseid,
             transactionid,
-          }),
+          } as Deal['properties']),
           contactIds: (deal.associations?.contacts.results
             .filter(result => result.type === 'deal_to_contact')
             .map(result => result.id)) || [],
@@ -179,10 +151,7 @@ export default class LiveDownloader {
     return adjustedDeals;
   }
 
-  /**
-   * @returns {Promise<Contact[]>}
-   */
-  async downloadAllContacts() {
+  async downloadAllContacts(): Promise<Contact[]> {
     const properties = [
       'email',
       'city',
@@ -203,7 +172,7 @@ export default class LiveDownloader {
 
     let contacts;
     try { contacts = await this.hubspotClient.crm.contacts.getAll(undefined, undefined, properties, ['company']); }
-    catch (/** @type {any} */e) {
+    catch (e: any) {
       const body = e.response.body;
       if (
         (
@@ -234,12 +203,7 @@ export default class LiveDownloader {
 }
 
 
-/**
- * @template T
- * @param {string} subpath
- * @return {Promise<T[]>}
- */
-async function downloadMarketplaceData(subpath) {
+async function downloadMarketplaceData<T>(subpath: string): Promise<T[]> {
   const res = await fetch(`https://marketplace.atlassian.com/rest/2/vendors/${config.mpac.sellerId}/reporting${subpath}`, {
     headers: {
       'Authorization': 'Basic ' + Buffer.from(config.mpac.user + ':' + config.mpac.pass).toString('base64'),
@@ -255,14 +219,11 @@ async function downloadMarketplaceData(subpath) {
     return json;
   }
   catch (e) {
-    throw new AttachableError('Probably invalid Marketplace JSON.', /** @type {string} */(text));
+    throw new AttachableError('Probably invalid Marketplace JSON.', text as string);
   }
 }
 
-/**
- * @param {License} license
- */
-function fixOdditiesInLicenses(license) {
+function fixOdditiesInLicenses(license: License) {
   normalizeLicenseNewlines(license.contactDetails.technicalContact, 'address1');
   normalizeLicenseNewlines(license.contactDetails.technicalContact, 'address2');
   normalizeLicenseNewlines(license.contactDetails.billingContact, 'address1');
@@ -279,25 +240,13 @@ function fixOdditiesInLicenses(license) {
   normalizeLicenseNullLiteral(license.contactDetails.billingContact, 'state');
 }
 
-/**
- * @template {{[key:string]:string}} T
- * @template {keyof T} K
- * @param {T | undefined} o
- * @param {K} key
- */
-const normalizeLicenseNewlines = (o, key) => {
+function normalizeLicenseNewlines<T extends { [key: string]: string }, K extends keyof T>(o: T | undefined, key: K) {
   if (o && typeof (o[key]) === 'string') {
-    o[key] = /** @type {T[K]} */(o[key].replace(/\r/g, ''));
+    o[key] = o[key].replace(/\r/g, '') as T[K];
   }
 }
 
-/**
- * @template {{[key:string]:string}} T
- * @template {keyof T} K
- * @param {T | undefined} o
- * @param {K} key
- */
-const normalizeLicenseNullLiteral = (o, key) => {
+function normalizeLicenseNullLiteral<T extends { [key: string]: string }, K extends keyof T>(o: T | undefined, key: K) {
   if (o && (o[key]) === 'null') {
     delete o[key];
   }
@@ -307,11 +256,7 @@ const normalizeLicenseNullLiteral = (o, key) => {
 
 // Helpers
 
-/**
- * @param {string} file
- * @param {unknown} data
- */
-function save(file, data) {
+function save(file: string, data: unknown) {
   if (config.isProduction) return;
 
   const content = JSON.stringify(data, null, 2);

@@ -7,17 +7,11 @@ import { saveToJson } from '../util/inspection.js';
 import logger from '../util/logger.js';
 
 
-/** @implements {Uploader} */
-export default class LiveUploader {
+export default class LiveUploader implements Uploader {
 
-  constructor() {
-    this.hubspotClient = new hubspot.Client({ apiKey: config.hubspot.apiKey });
-  }
+  hubspotClient = new hubspot.Client({ apiKey: config.hubspot.apiKey });
 
-  /**
-   * @param {DealAssociationPair[]} fromTos
-   */
-  async associateDealsWithContacts(fromTos) {
+  async associateDealsWithContacts(fromTos: DealAssociationPair[]) {
     try {
       logger.info('Live Uploader', 'Associating Deals->Contacts:', fromTos);
       await this.hubspotClient.crm.associations.batchApi.create('deal', 'contact', {
@@ -28,15 +22,12 @@ export default class LiveUploader {
         })),
       });
     }
-    catch (/** @type {any} */ e) {
+    catch (e: any) {
       throw new Error(e.response.body.message);
     }
   }
 
-  /**
-   * @param {DealAssociationPair[]} fromTos
-   */
-  async disassociateDealsFromContacts(fromTos) {
+  async disassociateDealsFromContacts(fromTos: DealAssociationPair[]) {
     try {
       logger.info('Live Uploader', 'Disassociating Deals->Contacts:', fromTos);
       await this.hubspotClient.crm.associations.batchApi.archive('deal', 'contact', {
@@ -47,16 +38,12 @@ export default class LiveUploader {
         })),
       });
     }
-    catch (/** @type {any} */ e) {
+    catch (e: any) {
       throw new Error(e.response.body.message);
     }
   }
 
-  /**
-   * @param {Array<{ properties: GeneratedContact }>} contacts
-   * @returns {Promise<Contact[]>}
-   */
-  async createAllContacts(contacts) {
+  async createAllContacts(contacts: Array<{ properties: GeneratedContact }>): Promise<Contact[]> {
     logger.info('Live Uploader', 'Creating Contacts:', contacts);
 
     const contactGroups = batchesOf(contacts, 10);
@@ -68,8 +55,7 @@ export default class LiveUploader {
           }))
         });
 
-        /** @type {Contact[]} */
-        const createdContacts = contacts.map(contact => {
+        const createdContacts: Contact[] = contacts.map(contact => {
           const result = results.body.results.find(result =>
             result.properties.email === contact.properties.email);
           assert.ok(result);
@@ -84,7 +70,7 @@ export default class LiveUploader {
 
         return createdContacts;
       }
-      catch (/** @type {any} */ e) {
+      catch (e: any) {
         throw new Error(e.response.body.message);
       }
     });
@@ -92,10 +78,7 @@ export default class LiveUploader {
     return contactResultGroups.flat(1);
   }
 
-  /**
-   * @param {Array<{ id: string; properties: Partial<GeneratedContact> }>} contacts
-   */
-  async updateAllContacts(contacts) {
+  async updateAllContacts(contacts: Array<{ id: string; properties: Partial<GeneratedContact> }>) {
     logger.info('Live Uploader', 'Updating Contacts:', contacts);
 
     const contactGroups = batchesOf(contacts, 10);
@@ -111,17 +94,14 @@ export default class LiveUploader {
         });
         logger.info('Live Uploader', 'Updated Contacts:', contacts.length);
       }
-      catch (/** @type {any} */ e) {
+      catch (e: any) {
         throw new Error(e.response.body.message);
       }
     });
     await Promise.all(promises);
   }
 
-  /**
-   * @param {Array<{ id: string; properties: Partial<Omit<Company, 'id'>> }>} companies
-   */
-  async updateAllCompanies(companies) {
+  async updateAllCompanies(companies: Array<{ id: string; properties: Partial<Omit<Company, 'id'>> }>) {
     logger.info('Live Uploader', 'Updating Companies:', companies);
 
     const companyGroups = batchesOf(companies, 10);
@@ -129,8 +109,7 @@ export default class LiveUploader {
       try {
         await this.hubspotClient.crm.companies.batchApi.update({
           inputs: companies.map(company => {
-            /** @type {{ [key: string]: string }} */
-            const properties = {};
+            const properties: { [key: string]: string } = {};
 
             for (const [key, val] of Object.entries(company.properties)) {
               if (val) properties[key] = val;
@@ -144,18 +123,14 @@ export default class LiveUploader {
         });
         logger.info('Live Uploader', 'Updated Companies:', companies.length);
       }
-      catch (/** @type {any} */ e) {
+      catch (e: any) {
         throw new Error(e.response.body.message);
       }
     });
     await Promise.all(promises);
   }
 
-  /**
-   * @param {Omit<Deal, 'id'>[]} deals
-   * @returns {Promise<Deal[]>}
-   */
-  async createAllDeals(deals) {
+  async createAllDeals(deals: Omit<Deal, 'id'>[]): Promise<Deal[]> {
     logger.info('Live Uploader', 'Creating Deals:', deals);
 
     const dealGroups = batchesOf(deals, 10);
@@ -178,8 +153,7 @@ export default class LiveUploader {
 
         saveToJson(`hubspot-create-deals-out-${i}.json`, results.body.results);
 
-        /** @type {Deal[]} */
-        const createdDeals = deals.map(deal => {
+        const createdDeals: Deal[] = deals.map(deal => {
           const result = results.body.results.find(result =>
             result.properties[config.hubspot.attrs.deal.addonLicenseId] === deal.properties.addonlicenseid ||
             result.properties[config.hubspot.attrs.deal.transactionId] === deal.properties.transactionid
@@ -192,7 +166,7 @@ export default class LiveUploader {
 
         return createdDeals;
       }
-      catch (/** @type {any} */ e) {
+      catch (e: any) {
         throw new Error(e.response.body.message);
       }
     });
@@ -200,10 +174,7 @@ export default class LiveUploader {
     return dealResultGroups.flat(1);
   }
 
-  /**
-   * @param {DealUpdate[]} deals
-   */
-  async updateAllDeals(deals) {
+  async updateAllDeals(deals: DealUpdate[]) {
     logger.info('Live Uploader', 'Updating Deals:', deals);
 
     const dealGroups = batchesOf(deals, 10);
@@ -217,7 +188,7 @@ export default class LiveUploader {
 
         logger.info('Live Uploader', 'Updated Deals:', deals.length);
       }
-      catch (/** @type {any} */ e) {
+      catch (e: any) {
         throw new Error(e.response.body.message);
       }
     });

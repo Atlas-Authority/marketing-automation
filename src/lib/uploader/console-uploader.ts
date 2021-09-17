@@ -3,19 +3,13 @@ import logger from '../util/logger.js';
 /** @implements {Uploader} */
 export default class ConsoleUploader {
 
-  /**
-   * @param {object}  options
-   * @param {boolean} options.verbose
-   */
-  constructor({ verbose }) {
+  verbose: boolean;
+
+  constructor({ verbose }: { verbose: boolean }) {
     this.verbose = verbose;
   }
 
-  /**
-   * @param {Array<{ properties: GeneratedContact }>} contacts
-   * @returns {Promise<Contact[]>}
-   */
-  async createAllContacts(contacts) {
+  async createAllContacts(contacts: Array<{ properties: GeneratedContact }>): Promise<Contact[]> {
     const createdContacts = contacts.map((contact, i) => ({
       ...contact.properties,
       otherEmails: [],
@@ -25,25 +19,15 @@ export default class ConsoleUploader {
     return createdContacts;
   }
 
-  /**
-   * @param {Array<{ id: string; properties: Partial<GeneratedContact> }>} contacts
-   */
-  async updateAllContacts(contacts) {
+  async updateAllContacts(contacts: Array<{ id: string; properties: Partial<GeneratedContact> }>) {
     this.fakeApiConsoleLog('Fake-updated contacts:', contacts);
   }
 
-  /**
-   * @param {Array<{ id: string; properties: Partial<Omit<Company, 'id'>> }>} companies
-   */
-  async updateAllCompanies(companies) {
+  async updateAllCompanies(companies: Array<{ id: string; properties: Partial<Omit<Company, 'id'>> }>) {
     this.fakeApiConsoleLog('Fake-updated companies:', companies);
   }
 
-  /**
-   * @param {Omit<Deal, 'id'>[]} deals
-   * @returns {Promise<Deal[]>}
-   */
-  async createAllDeals(deals) {
+  async createAllDeals(deals: Omit<Deal, 'id'>[]): Promise<Deal[]> {
     const createdDeals = deals.map((deal, i) => ({
       ...deal,
       id: (2000000000000 + i).toString(),
@@ -52,28 +36,19 @@ export default class ConsoleUploader {
     return createdDeals;
   }
 
-  /**
-   * @param {DealUpdate[]} deals
-   */
-  async updateAllDeals(deals) {
+  async updateAllDeals(deals: DealUpdate[]) {
     this.fakeApiConsoleLog('Fake-updated deals:', deals);
   }
 
-  /** @param {DealAssociationPair[]} fromTos */
-  async associateDealsWithContacts(fromTos) {
+  async associateDealsWithContacts(fromTos: DealAssociationPair[]) {
     this.fakeApiConsoleLog('Fake Associating Deals->Contacts:', fromTos);
   }
 
-  /** @param {DealAssociationPair[]} fromTos */
-  async disassociateDealsFromContacts(fromTos) {
+  async disassociateDealsFromContacts(fromTos: DealAssociationPair[]) {
     this.fakeApiConsoleLog('Fake Disassociating Deals->Contacts:', fromTos);
   }
 
-  /**
-   * @param {string} title
-   * @param {unknown[]} data
-   */
-  fakeApiConsoleLog(title, data) {
+  fakeApiConsoleLog(title: string, data: unknown[]) {
     logger.info('Fake Uploader', title, this.verbose ? data : data.length);
   }
 

@@ -5,22 +5,17 @@ import { AttachableError } from '../util/errors.js';
 import { isPresent } from '../util/helpers.js';
 import logger from '../util/logger.js';
 
-/**
- * @typedef InitialData
- * @property {Set<string>}   providerDomains
- * @property {License[]}     allLicenses
- * @property {Transaction[]} allTransactions
- * @property {Contact[]}     allContacts
- * @property {Deal[]}        allDeals
- * @property {Company[]}     allCompanies
- */
+type InitialData = {
+  providerDomains: Set<string>,
+  allLicenses: License[],
+  allTransactions: Transaction[],
+  allContacts: Contact[],
+  allDeals: Deal[],
+  allCompanies: Company[],
+};
 
-/**
- * @param {object} options
- * @param {Downloader} options.downloader
- * @return {Promise<InitialData>}
- */
-export async function downloadAllData({ downloader }) {
+
+export async function downloadAllData({ downloader }: { downloader: Downloader }): Promise<InitialData> {
   logger.info('Downloader', 'Starting downloads with API');
 
   let [
@@ -79,12 +74,8 @@ export async function downloadAllData({ downloader }) {
   };
 }
 
-/**
- * @param {License[]} licenses
- */
-function uniqLicenses(licenses) {
-  /** @type {{ [addonLicenseId: string]: License[] }} */
-  const groups = {};
+function uniqLicenses(licenses: License[]) {
+  const groups: { [addonLicenseId: string]: License[] } = {};
 
   for (const license of licenses) {
     if (!groups[license.addonLicenseId]) {
@@ -120,13 +111,7 @@ function uniqLicenses(licenses) {
   return fixed.map(ls => ls[0]);
 }
 
-/**
- * @template T
- * @param {string} name
- * @param {T[]} data
- * @param {Array<['every' | 'some', (license: T) => boolean]>} schema
- */
-function verifyStructure(name, data, schema) {
+function verifyStructure<T>(name: string, data: T[], schema: Array<['every' | 'some', (license: T) => boolean]>) {
   logger.info('Downloader', 'Verifying schema for:', name);
   for (const [howMany, getter] of schema) {
     if (!data[howMany](getter)) {
@@ -141,8 +126,7 @@ function verifyStructure(name, data, schema) {
   }
 }
 
-/** @type {Array<['every' | 'some', (license: License) => boolean]>} */
-const licensesWithDataInsightsSchema = [
+const licensesWithDataInsightsSchema: Array<['every' | 'some', (license: License) => boolean]> = [
   ['every', license => isString(license?.contactDetails?.technicalContact?.email)],
   ['some', license => isString(license?.contactDetails?.technicalContact?.name)],
   ['some', license => isString(license?.contactDetails?.technicalContact?.phone)],
@@ -168,15 +152,14 @@ const licensesWithDataInsightsSchema = [
   ['every', license => isString(license?.installedOnSandbox)],
   ['every', license => isString(license?.parentProductEdition)],
 
-  ['some', (/** @type {any} */ license) => isString(license?.evaluationLicense)],
-  ['some', (/** @type {any} */ license) => isString(license?.daysToConvertEval)],
-  ['some', (/** @type {any} */ license) => isString(license?.evaluationStartDate)],
-  ['some', (/** @type {any} */ license) => isString(license?.evaluationEndDate)],
-  ['some', (/** @type {any} */ license) => isString(license?.evaluationSaleDate)],
+  ['some', (license: any) => isString(license?.evaluationLicense)],
+  ['some', (license: any) => isString(license?.daysToConvertEval)],
+  ['some', (license: any) => isString(license?.evaluationStartDate)],
+  ['some', (license: any) => isString(license?.evaluationEndDate)],
+  ['some', (license: any) => isString(license?.evaluationSaleDate)],
 ];
 
-/** @type {Array<['every' | 'some', (license: License) => boolean]>} */
-const licensesWithoutDataInsightsSchema = [
+const licensesWithoutDataInsightsSchema: Array<['every' | 'some', (license: License) => boolean]> = [
   ['every', license => isString(license?.contactDetails?.technicalContact?.email)],
   ['some', license => isString(license?.contactDetails?.technicalContact?.name)],
   ['some', license => isString(license?.contactDetails?.technicalContact?.phone)],
@@ -197,15 +180,14 @@ const licensesWithoutDataInsightsSchema = [
   ['every', license => isString(license?.hosting)],
   ['every', license => isString(license?.lastUpdated)],
 
-  ['every', (/** @type {any} */ license) => isUndefined(license?.evaluationLicense)],
-  ['every', (/** @type {any} */ license) => isUndefined(license?.daysToConvertEval)],
-  ['every', (/** @type {any} */ license) => isUndefined(license?.evaluationStartDate)],
-  ['every', (/** @type {any} */ license) => isUndefined(license?.evaluationEndDate)],
-  ['every', (/** @type {any} */ license) => isUndefined(license?.evaluationSaleDate)],
+  ['every', (license: any) => isUndefined(license?.evaluationLicense)],
+  ['every', (license: any) => isUndefined(license?.daysToConvertEval)],
+  ['every', (license: any) => isUndefined(license?.evaluationStartDate)],
+  ['every', (license: any) => isUndefined(license?.evaluationEndDate)],
+  ['every', (license: any) => isUndefined(license?.evaluationSaleDate)],
 ];
 
-/** @type {Array<['every' | 'some', (transaction: Transaction) => boolean]>} */
-const transactionsSchema = [
+const transactionsSchema: Array<['every' | 'some', (transaction: Transaction) => boolean]> = [
   ['some', transaction => isString(transaction?.partnerDetails?.billingContact?.email)],
   ['some', transaction => isString(transaction?.partnerDetails?.billingContact?.name)],
 
@@ -221,32 +203,20 @@ const transactionsSchema = [
   ['every', transaction => isString(transaction?.purchaseDetails?.saleDate)],
 ];
 
-/**
- * @param {string | undefined} s
- */
-function isString(s) {
+function isString(s: string | undefined) {
   return typeof s === 'string' && s.length > 0;
 }
 
-/**
- * @param {any} s
- */
-function isUndefined(s) {
+function isUndefined(s: any) {
   return typeof s === 'undefined';
 }
 
-/**
- * @param {string[]} tlds
- */
-function makeEmailValidationRegex(tlds) {
+function makeEmailValidationRegex(tlds: string[]) {
   const re = new RegExp(`.+@.+\\.(${tlds.join('|')})`);
   return re;
 }
 
-/**
- * @param {Transaction | License} item
- */
-function getEmails(item) {
+function getEmails(item: Transaction | License) {
   if ('contactDetails' in item) {
     return [
       item.contactDetails.technicalContact.email,
@@ -263,21 +233,13 @@ function getEmails(item) {
   }
 }
 
-/**
- * @param {RegExp} re
- */
-function makeEmailValidator(re) {
-  /**
-   * @param {Transaction | License} item
-   */
-  return (item) =>
-    getEmails(item).every(e => re.test(e));
+function makeEmailValidator(re: RegExp) {
+  return (item: Transaction | License) => (
+    getEmails(item).every(e => re.test(e))
+  );
 }
 
-/**
- * @param {License} license
- */
-function filterLicensesWithTechEmail(license) {
+function filterLicensesWithTechEmail(license: License) {
   if (!license.contactDetails.technicalContact?.email) {
     logger.warn('Downloader', 'License does not have a tech contact email; will be skipped', license);
     return false;
