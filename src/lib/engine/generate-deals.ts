@@ -6,6 +6,7 @@ import { isPresent, sorter } from '../util/helpers.js';
 import { saveForInspection } from '../util/inspection.js';
 import logger from '../util/logger.js';
 import { ActionGenerator } from './deal-generator/actions.js';
+import { DealFinder } from './deal-generator/deal-finder.js';
 import { EventGenerator } from './deal-generator/events.js';
 import { calculateTierFromLicenseContext } from './tiers.js';
 
@@ -160,6 +161,7 @@ type DealCreateAction = {
 class DealActionGenerator {
 
   actionGenerator: ActionGenerator;
+  dealFinder: DealFinder;
 
   dealCreateActions: DealCreateAction[] = [];
   dealUpdateActions: DealUpdateAction[] = [];
@@ -167,7 +169,8 @@ class DealActionGenerator {
   ignoredLicenseSets: (License & { reason: string })[][] = [];
 
   constructor(private providerDomains: Set<string>, private partnerDomains: Set<string>, initialDeals: Deal[]) {
-    this.actionGenerator = new ActionGenerator(initialDeals);
+    this.dealFinder = new DealFinder(initialDeals);
+    this.actionGenerator = new ActionGenerator(this.dealFinder);
   }
 
   generateActionsForMatchedGroup(groups: RelatedLicenseSet) {
@@ -181,7 +184,7 @@ class DealActionGenerator {
 
     const licenseDeals = new Set<Deal>();
     for (const license of groups.map(g => g.license)) {
-      const deal = this.actionGenerator.dealFinder.getDeal([license]);
+      const deal = this.dealFinder.getDeal([license]);
       if (deal) licenseDeals.add(deal);
     }
 

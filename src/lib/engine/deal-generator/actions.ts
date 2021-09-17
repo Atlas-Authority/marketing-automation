@@ -6,10 +6,7 @@ import { dealCreationProperties, dealUpdateProperties, getDate } from './records
 
 export class ActionGenerator {
 
-  dealFinder: DealFinder;
-
-  constructor(initialDeals: Deal[]) {
-    this.dealFinder = new DealFinder(initialDeals);
+  constructor(private dealFinder: DealFinder) {
   }
 
   generateFrom(events: DealRelevantEvent[]) {
