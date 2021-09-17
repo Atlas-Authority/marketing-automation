@@ -4,6 +4,7 @@ import { makeMultiProviderDomainsSet } from '../util/domains.js';
 import { AttachableError } from '../util/errors.js';
 import { isPresent } from '../util/helpers.js';
 import logger from '../util/logger.js';
+import { Downloader } from './downloader.js';
 
 type InitialData = {
   providerDomains: Set<string>,

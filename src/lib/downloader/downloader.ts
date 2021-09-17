@@ -1,4 +1,4 @@
-interface Downloader {
+export interface Downloader {
   downloadFreeEmailProviders(): Promise<string[]>;
   downloadAllTlds(): Promise<string[]>;
 

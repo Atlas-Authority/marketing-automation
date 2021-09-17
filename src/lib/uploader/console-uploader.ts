@@ -1,4 +1,5 @@
 import logger from '../util/logger.js';
+import { Uploader } from './uploader.js';
 
 export default class ConsoleUploader implements Uploader {
 

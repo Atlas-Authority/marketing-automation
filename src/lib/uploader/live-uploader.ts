@@ -5,6 +5,7 @@ import config from '../util/config.js';
 import { batchesOf } from '../util/helpers.js';
 import { saveToJson } from '../util/inspection.js';
 import logger from '../util/logger.js';
+import { Uploader } from './uploader.js';
 
 
 export default class LiveUploader implements Uploader {

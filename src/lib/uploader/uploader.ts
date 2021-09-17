@@ -1,4 +1,4 @@
-interface Uploader {
+export interface Uploader {
   createAllContacts(contacts: Array<{ properties: GeneratedContact }>): Promise<Contact[]>;
   updateAllContacts(contacts: Array<{ id: string; properties: Partial<GeneratedContact> }>): Promise<void>;
 

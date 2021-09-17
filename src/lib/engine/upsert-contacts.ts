@@ -1,4 +1,5 @@
 import { updatedDiff } from 'deep-object-diff';
+import { Uploader } from '../uploader/uploader.js';
 
 export async function upsertContactsInHubspot({ uploader, newContacts, oldContacts }: {
   uploader: Uploader,

@@ -1,3 +1,4 @@
+import { Uploader } from '../uploader/uploader.js';
 import config from '../util/config.js';
 
 export function identifyDomains(data: {

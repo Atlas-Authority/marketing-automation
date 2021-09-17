@@ -6,6 +6,7 @@ import config, { Pipeline } from '../util/config.js';
 import * as datadir from '../util/datadir.js';
 import { AttachableError, SimpleError } from '../util/errors.js';
 import logger from '../util/logger.js';
+import { Downloader } from './downloader.js';
 
 
 export default class LiveDownloader implements Downloader {

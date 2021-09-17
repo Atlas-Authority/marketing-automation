@@ -1,3 +1,5 @@
+import { Uploader } from "../uploader/uploader.js";
+
 export async function upsertDealsInHubspot({ uploader, dealDiffs, contacts }: {
   uploader: Uploader,
   dealDiffs: {

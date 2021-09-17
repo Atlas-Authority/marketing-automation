@@ -1,3 +1,4 @@
+import { Uploader } from '../uploader/uploader.js';
 import { DealStage, Pipeline } from '../util/config.js';
 import logger from '../util/logger.js';
 

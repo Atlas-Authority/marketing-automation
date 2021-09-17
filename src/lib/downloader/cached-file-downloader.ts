@@ -1,4 +1,5 @@
 import * as datadir from '../util/datadir.js';
+import { Downloader } from './downloader.js';
 
 export default class CachedFileDownloader implements Downloader {
 
