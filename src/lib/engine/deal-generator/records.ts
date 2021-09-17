@@ -95,5 +95,11 @@ export function dealCreationProperties(record: License | Transaction, dealstage:
 }
 
 export function dealUpdateProperties(deal: Deal, record: License | Transaction): Partial<Deal['properties']> {
-  throw new Error('Function not implemented.');
+  const properties: Partial<Deal['properties']> = {};
+
+  const newAmount = (isTransaction(record) ? record.purchaseDetails.vendorAmount : NaN);
+  const oldAmount = parseFloat(deal.properties.amount);
+  if (newAmount !== oldAmount && !isNaN(newAmount)) properties.amount = newAmount.toString();
+
+  return properties;
 }
