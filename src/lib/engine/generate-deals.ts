@@ -8,10 +8,8 @@ import { Transaction } from '../types/transaction.js';
 import config, { DealStage, Pipeline } from '../util/config.js';
 import { isPresent, sorter } from '../util/helpers.js';
 import { saveForInspection } from '../util/inspection.js';
-import logger from '../util/logger.js';
 import { ActionGenerator } from './deal-generator/actions.js';
 import { DealFinder } from './deal-generator/deal-finder.js';
-import { EventGenerator } from './deal-generator/events.js';
 import { calculateTierFromLicenseContext } from './deal-generator/tiers.js';
 
 function dealPropertiesForLicense(license: License, transactions: Transaction[]): Omit<Deal['properties'], 'dealstage'> {
