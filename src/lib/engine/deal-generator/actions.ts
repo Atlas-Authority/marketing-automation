@@ -99,13 +99,18 @@ function makeCreateAction(record: License | Transaction, dealstage: DealStage): 
 }
 
 function makeUpdateAction(deal: Deal, record: License | Transaction | null, properties: Partial<Deal['properties']>): Action {
-  if (record) {
-    properties = {
-      ...properties,
-      ...dealUpdateProperties(deal, record),
-    };
-  }
-  return { type: 'update', deal, properties };
+  return {
+    type: 'update',
+    deal,
+    properties: (
+      record
+        ? {
+          ...properties,
+          ...dealUpdateProperties(deal, record),
+        }
+        : properties
+    ),
+  };
 }
 
 function getLatestRecord(event: PurchaseEvent): License | Transaction {
