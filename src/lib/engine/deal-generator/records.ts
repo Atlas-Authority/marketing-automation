@@ -101,5 +101,9 @@ export function dealUpdateProperties(deal: Deal, record: License | Transaction):
   const oldAmount = parseFloat(deal.properties.amount);
   if (newAmount !== oldAmount && !isNaN(newAmount)) properties.amount = newAmount.toString();
 
+  const oldCloseDate = deal.properties.closedate;
+  const newCloseDate = getDate(record);
+  if (newCloseDate !== oldCloseDate) properties.closedate = newCloseDate;
+
   return properties;
 }
