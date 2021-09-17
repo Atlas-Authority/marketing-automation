@@ -25,7 +25,10 @@ export class DealFinder {
 
   getById(record: License | Transaction): Deal | undefined {
     return (isTransaction(record)
-      ? this.transactionDeals.get(record.transactionId)
+      ? (
+        this.transactionDeals.get(record.transactionId) ||
+        this.licenseDeals.get(record.addonLicenseId)
+      )
       : this.licenseDeals.get(record.addonLicenseId));
   }
 
