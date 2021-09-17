@@ -1,20 +1,17 @@
 import config from './config.js';
 import logger from './logger.js';
 
-/**
- * @param {object} options
- * @param {() => Promise<void>} options.work                   Run in a loop with delays
- * @param {(errors: Error[]) => Promise<void>} options.failed  Run after enough failures
- */
-export default async function run({ work, failed }) {
+export default async function run({ work, failed }: {
+  work: () => Promise<void>,
+  failed: (errors: Error[]) => Promise<void>,
+}) {
   logger.info('Runner', 'Starting with options:', config.engine);
   const normalInterval = config.engine.runInterval;
   const errorInterval = config.engine.retryInterval;
   const errorTries = config.engine.retryTimes;
 
   logger.info('Runner', 'Running loop');
-  /** @type {Error[]} */
-  const errors = [];
+  const errors: Error[] = [];
   run();
 
   async function run() {
@@ -28,7 +25,7 @@ export default async function run({ work, failed }) {
       logger.info('Runner', `Finished successfully; waiting ${normalInterval} for next loop.`);
       setTimeout(run, parseTimeToMs(normalInterval));
     }
-    catch (/** @type {any} */ e) {
+    catch (e: any) {
       logger.error('Runner', 'Error:', e);
       errors.push(e);
 
@@ -47,10 +44,7 @@ export default async function run({ work, failed }) {
   }
 }
 
-/**
- * @param {string} str
- */
-function parseTimeToMs(str) {
+function parseTimeToMs(str: string) {
   const UNITS = {
     s: 1000,
     m: 1000 * 60,
@@ -62,7 +56,7 @@ function parseTimeToMs(str) {
     .map(([, amt, unit]) => {
       const key = unit.toLowerCase();
       return +amt * (key in UNITS
-        ? UNITS[/** @type {keyof UNITS} */(key)]
+        ? UNITS[key as keyof typeof UNITS]
         : 1);
     })
     .reduce(

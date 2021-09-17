@@ -3,13 +3,7 @@ import config from './config.js';
 import * as datadir from './datadir.js';
 import logger from './logger.js';
 
-/**
- * @template T
- * @param {string} filename
- * @param {() => T} fn
- * @returns {T}
- */
-export function fnOrCache(filename, fn) {
+export function fnOrCache<T>(filename: string, fn: () => T): T {
   if (config.isProduction || config.isTest) return fn();
 
   let live = !config.cache.fns.includes(filename);

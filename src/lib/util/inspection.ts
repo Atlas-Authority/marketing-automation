@@ -4,11 +4,7 @@ import config from './config.js';
 import * as datadir from './datadir.js';
 import logger from './logger.js';
 
-/**
- * @param {string} filename
- * @param {any[]} array
- */
-function saveArrayToCsv(filename, array) {
+function saveArrayToCsv(filename: string, array: any[]) {
   if (config.isProduction || config.isTest) return;
 
   if (array[0] instanceof Array) {
@@ -22,11 +18,7 @@ function saveArrayToCsv(filename, array) {
   logger.info('Dev', 'Saved data to:', filename);
 }
 
-/**
- * @param {string} filename
- * @param {unknown} object
- */
-export function saveToJson(filename, object) {
+export function saveToJson(filename: string, object: unknown) {
   if (config.isProduction || config.isTest) return;
 
   const out = JSON.stringify(object, null, 2);
@@ -34,12 +26,9 @@ export function saveToJson(filename, object) {
   logger.info('Dev', 'Saved data to:', filename);
 }
 
-/**
- * @param {string} filename
- * @param {unknown[]} array
- * @param {'json' | 'csv' | 'both'} formats
- */
-export function saveForInspection(filename, array, formats = 'both') {
+type OutputFormat = 'json' | 'csv' | 'both';
+
+export function saveForInspection(filename: string, array: unknown[], formats: OutputFormat = 'both') {
   if (formats !== 'csv') saveToJson(`${filename}.json`, array);
   if (formats !== 'json') saveArrayToCsv(`${filename}.csv`, array);
 }

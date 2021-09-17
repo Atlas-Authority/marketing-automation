@@ -1,19 +1,13 @@
 export class AttachableError extends Error {
-  /**
-   * @param {string} msg
-   * @param {string} attachment
-   */
-  constructor(msg, attachment) {
+  constructor(msg: string, public attachment: string) {
     super(msg);
     this.attachment = attachment;
   }
 }
 
 export class SimpleError extends Error {
-  /**
-   * @param {string} msg
-   */
-  constructor(msg) {
+  simple: boolean;
+  constructor(msg: string) {
     super(msg);
     this.simple = true;
   }

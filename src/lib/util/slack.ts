@@ -5,24 +5,14 @@ import logger from './logger.js';
 
 export default class Slack {
 
-  constructor() {
-    this.slackWebClient = new slack.WebClient(config.slack.apiToken);
-  }
+  slackWebClient = new slack.WebClient(config.slack.apiToken);
 
-  /**
-   * @param {string} text
-   */
-  async postErrorToSlack(text) {
+  async postErrorToSlack(text: string) {
     text = (config.slack.errorPrefix || '') + text;
     await this.postToSlack(text);
   }
 
-  /**
-   * @param {object} data
-   * @param {string} data.title
-   * @param {string} data.content
-   */
-  async postAttachmentToSlack({ title, content }) {
+  async postAttachmentToSlack({ title, content }: { title: string, content: string }) {
     logger.info('Slack', title, content);
 
     if (config.slack.errorChannelId) {
@@ -34,10 +24,7 @@ export default class Slack {
     }
   }
 
-  /**
-   * @param {string} text
-   */
-  async postToSlack(text) {
+  async postToSlack(text: string) {
     logger.info('Slack', text);
 
     if (config.slack.errorChannelId) {

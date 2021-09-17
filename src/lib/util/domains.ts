@@ -1,11 +1,8 @@
 import { emailBurnerList } from 'burner-email-providers';
 import allEmailProviders from 'email-providers';
 
-/**
- * A set of domains that host multiple unrelated email addresses
- * @param {string[]} freeDomains
- */
-export function makeMultiProviderDomainsSet(freeDomains) {
+/** A set of domains that host multiple unrelated email addresses */
+export function makeMultiProviderDomainsSet(freeDomains: string[]) {
   return new Set([
     ...emailBurnerList,
     ...allEmailProviders,
