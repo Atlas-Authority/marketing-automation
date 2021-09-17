@@ -1,5 +1,6 @@
 import CachedFileDownloader from '../lib/downloader/cached-file-downloader.js';
 import { downloadAllData } from '../lib/downloader/download-initial-data.js';
+import { shorterLicenseInfo } from '../lib/engine/license-grouper.js';
 import * as datadir from '../lib/util/datadir.js';
 import logger from '../lib/util/logger.js';
 
@@ -18,13 +19,11 @@ const contact = data.allContacts.find(c => c.hs_object_id === contactId);
 
 logger.info('Dev', contact);
 
-/** @type {ReturnType<import('../lib/engine/license-grouper.js').shorterLicenseInfo>[][]} */
-const matchedGroups = datadir.readJsonFile('out', 'matched-groups-all.json');
+const matchedGroups: ReturnType<typeof shorterLicenseInfo>[][] = datadir.readJsonFile('out', 'matched-groups-all.json');
 
 const groups = matchedGroups.filter(g => g.some(l => l.tech_email === contact?.email));
 
-/** @type {(keyof matchedGroups[0][0])[]} */
-const keys = ['company', 'tech_email', 'tech_name', 'tech_address', 'tech_city', 'tech_phone', 'tech_state', 'tech_zip', 'tech_country'];
+const keys: (keyof typeof matchedGroups[0][0])[] = ['company', 'tech_email', 'tech_name', 'tech_address', 'tech_city', 'tech_phone', 'tech_state', 'tech_zip', 'tech_country'];
 
 for (const group of groups) {
   const first = group[0];

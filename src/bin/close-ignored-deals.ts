@@ -11,8 +11,7 @@ const data = await downloadAllData({
 
 const uploader = new LiveUploader();
 
-/** @type {(License & {reason: string})[][]} */
-const ignored = datadir.readJsonFile('out', 'ignored.json');
+const ignored: (License & { reason: string })[][] = datadir.readJsonFile('out', 'ignored.json');
 
 const openDeals = data.allDeals.filter(deal => deal.properties.dealstage === DealStage.EVAL);
 

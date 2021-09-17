@@ -2,6 +2,7 @@ import CachedFileDownloader from '../lib/downloader/cached-file-downloader.js';
 import { downloadAllData } from '../lib/downloader/download-initial-data.js';
 import { buildContactsStructure } from '../lib/engine/contacts.js';
 import { olderThan90Days } from '../lib/engine/generate-deals.js';
+import { shorterLicenseInfo } from '../lib/engine/license-grouper.js';
 import * as datadir from '../lib/util/datadir.js';
 import logger from '../lib/util/logger.js';
 
@@ -22,21 +23,16 @@ const data = await downloadAllData({
 
 const contactsByEmail = buildContactsStructure(data.allContacts);
 
-/** @type {(License & {reason: string})[][]} */
-const ignored = datadir.readJsonFile('out', 'ignored.json');
+const ignored: (License & { reason: string })[][] = datadir.readJsonFile('out', 'ignored.json');
 
-/** @type {ReturnType<import('../lib/engine/license-grouper.js').shorterLicenseInfo>[][]} */
-const matchedGroups = datadir.readJsonFile('out', 'matched-groups-all.json');
+const matchedGroups: ReturnType<typeof shorterLicenseInfo>[][] = datadir.readJsonFile('out', 'matched-groups-all.json');
 
 for (const sen of sens) {
   check(sen);
 }
 
 
-/**
- * @param {string} sen
- */
-function check(sen) {
+function check(sen: string) {
   if (sen.startsWith('SEN-')) sen = sen.slice(4);
 
   const withWrongId = data.allLicenses.find(l => l.addonLicenseId !== sen && l.licenseId === 'SEN-' + sen);
@@ -69,10 +65,7 @@ function check(sen) {
   logger.error('Dev', sen, 'Status unsure');
 }
 
-/**
- * @param {string} sen
- */
-function checkSEN(sen) {
+function checkSEN(sen: string) {
   const foundDeal = data.allDeals.find(d => d.properties.addonlicenseid === sen);
   if (foundDeal) {
     logger.info('Dev', sen, 'Already has deal:', foundDeal.id);
