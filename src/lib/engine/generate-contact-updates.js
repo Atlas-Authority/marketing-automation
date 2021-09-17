@@ -2,7 +2,7 @@ import * as assert from 'assert';
 import _ from 'lodash';
 import { ADDONKEY_TO_PLATFORM } from '../util/config.js';
 import { SimpleError } from '../util/errors.js';
-import { calculateTierFromLicenseContext } from './tiers.js';
+import { calculateTierFromLicenseContext } from './deal-generator/tiers.js';
 
 const PLATFORMS = _.uniq(Object.values(ADDONKEY_TO_PLATFORM));
 

@@ -2,7 +2,7 @@ import assert from 'assert';
 import mustache from 'mustache';
 import config, { Pipeline } from '../../util/config.js';
 import { sorter } from "../../util/helpers.js";
-import { parseLicenseTier, parseTransactionTier, tierFromEvalOpportunity } from '../tiers.js';
+import { parseLicenseTier, parseTransactionTier, tierFromEvalOpportunity } from './tiers.js';
 
 export function isEvalOrOpenSourceLicense(record: License) {
   return (

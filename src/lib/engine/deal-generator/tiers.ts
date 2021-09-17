@@ -1,9 +1,6 @@
 import * as assert from 'assert';
 
-/**
- * @param {LicenseContext} ctx
- */
-export function calculateTierFromLicenseContext(ctx) {
+export function calculateTierFromLicenseContext(ctx: LicenseContext) {
   return [
     tierFromEvalOpportunity(ctx.license.evaluationOpportunitySize),
     parseLicenseTier(ctx.license.tier),
@@ -11,10 +8,7 @@ export function calculateTierFromLicenseContext(ctx) {
   ];
 }
 
-/**
- * @param {string | undefined} evaluationOpportunitySize
- */
-export function tierFromEvalOpportunity(evaluationOpportunitySize) {
+export function tierFromEvalOpportunity(evaluationOpportunitySize: string | undefined) {
   switch (evaluationOpportunitySize) {
     case 'Unlimited Users':
       return 10001;
@@ -30,10 +24,7 @@ export function tierFromEvalOpportunity(evaluationOpportunitySize) {
   }
 }
 
-/**
- * @param {string} tier
- */
-export function parseLicenseTier(tier) {
+export function parseLicenseTier(tier: string) {
   switch (tier) {
     case 'Unlimited Users':
       return 10001;
@@ -49,10 +40,7 @@ export function parseLicenseTier(tier) {
   return + m[1];
 }
 
-/**
- * @param {string} tier
- */
-export function parseTransactionTier(tier) {
+export function parseTransactionTier(tier: string) {
   if (tier === 'Unlimited Users') return 10001;
 
   let m;

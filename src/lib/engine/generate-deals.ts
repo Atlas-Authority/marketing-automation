@@ -8,7 +8,7 @@ import logger from '../util/logger.js';
 import { ActionGenerator } from './deal-generator/actions.js';
 import { DealFinder } from './deal-generator/deal-finder.js';
 import { EventGenerator } from './deal-generator/events.js';
-import { calculateTierFromLicenseContext } from './tiers.js';
+import { calculateTierFromLicenseContext } from './deal-generator/tiers.js';
 
 function dealPropertiesForLicense(license: License, transactions: Transaction[]): Omit<Deal['properties'], 'dealstage'> {
   const tiers = calculateTierFromLicenseContext({ license, transactions });
