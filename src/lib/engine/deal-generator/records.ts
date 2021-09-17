@@ -1,4 +1,6 @@
 import assert from 'assert';
+import mustache from 'mustache';
+import config, { Pipeline } from '../../util/config.js';
 import { sorter } from "../../util/helpers.js";
 
 export function isEvalOrOpenSourceLicense(record: License) {
@@ -66,7 +68,29 @@ export function abbrRecordDetails(record: Transaction | License) {
 }
 
 export function dealCreationProperties(record: License | Transaction, dealstage: string): Deal['properties'] {
-  throw new Error('Function not implemented.');
+  return {
+    addonlicenseid: record.addonLicenseId,
+    transactionid: '',
+    closedate: (isLicense(record)
+      ? record.maintenanceStartDate
+      : record.purchaseDetails.maintenanceStartDate),
+    deployment: (isLicense(record)
+      ? record.hosting
+      : record.purchaseDetails.hosting),
+    aa_app: record.addonKey,
+    license_tier: (isLicense(record)
+      ? record.tier
+      : record.purchaseDetails.tier),
+    country: (isLicense(record)
+      ? record.contactDetails.country
+      : record.customerDetails.country),
+    origin: config.constants.dealOrigin,
+    related_products: config.constants.dealRelatedProducts,
+    dealname: mustache.render(config.constants.dealDealName, { license: record }),
+    dealstage,
+    pipeline: Pipeline.AtlassianMarketplace,
+    amount: '',
+  };
 }
 
 export function dealUpdateProperties(deal: Deal, record: License | Transaction): Partial<Deal['properties']> {
