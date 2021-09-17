@@ -127,7 +127,7 @@ export function dealUpdateProperties(deal: Deal, record: License | Transaction):
 
   const oldTier = +deal.properties.license_tier;
   const newTier = getTier(record);
-  if (newTier !== oldTier) properties.license_tier = newTier.toFixed();
+  if (newTier > oldTier) properties.license_tier = newTier.toFixed();
 
   return properties;
 }
