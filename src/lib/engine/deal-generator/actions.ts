@@ -97,8 +97,8 @@ function makeCreateAction(record: License | Transaction, dealstage: DealStage): 
 function makeUpdateAction(deal: Deal, record: License | Transaction | null, properties: Partial<Deal['properties']>): Action | null {
   const combinedProperties = (record
     ? {
-      ...properties,
       ...dealUpdateProperties(deal, record),
+      ...properties,
     }
     : properties
   );
