@@ -1,3 +1,4 @@
+import { Company } from '../types/company.js';
 import { Uploader } from '../uploader/uploader.js';
 import config from '../util/config.js';
 
