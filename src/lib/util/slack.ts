@@ -1,5 +1,5 @@
 import slack from '@slack/web-api';
-import config from './config.js';
+import config from './config/index.js';
 import logger from './logger.js';
 
 

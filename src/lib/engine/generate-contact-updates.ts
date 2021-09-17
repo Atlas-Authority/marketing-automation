@@ -2,7 +2,7 @@ import * as assert from 'assert';
 import _ from 'lodash';
 import { Contact, ContactsByEmail, ContactUpdateAction } from '../types/contact.js';
 import { RelatedLicenseSet } from '../types/license.js';
-import { ADDONKEY_TO_PLATFORM } from '../util/config.js';
+import { ADDONKEY_TO_PLATFORM } from '../util/config/index.js';
 import { SimpleError } from '../util/errors.js';
 import { calculateTierFromLicenseContext } from './deal-generator/tiers.js';
 

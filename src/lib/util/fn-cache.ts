@@ -1,5 +1,5 @@
 import v8 from "v8";
-import config from './config.js';
+import config from './config/index.js';
 import * as datadir from './datadir.js';
 import logger from './logger.js';
 

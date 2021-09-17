@@ -1,23 +1,8 @@
-import assert from 'assert';
-import * as dotenv from 'dotenv';
 import _ from 'lodash';
+import { optional, required } from './helpers.js';
+export { DealStage, Pipeline } from './dynamic-enums.js';
 
-dotenv.config();
-
-/** @enum {string} */
-export const Pipeline = {
-  AtlassianMarketplace: required('HUBSPOT_PIPELINE_MPAC'),
-};
-
-/** @enum {string} */
-export const DealStage = {
-  EVAL: required('HUBSPOT_DEALSTAGE_EVAL'),
-  CLOSED_WON: required('HUBSPOT_DEALSTAGE_CLOSED_WON'),
-  CLOSED_LOST: required('HUBSPOT_DEALSTAGE_CLOSED_LOST'),
-};
-
-/** @type {{ [addonKey: string]: string }} */
-export const ADDONKEY_TO_PLATFORM = Object.fromEntries(
+export const ADDONKEY_TO_PLATFORM: { [addonKey: string]: string } = Object.fromEntries(
   required('ADDONKEY_PLATFORMS')
     .split(',')
     .map(kv => kv.split('='))
@@ -51,7 +36,7 @@ export default {
     partnerDomains: _.uniq(required('PARTNER_DOMAINS').split(/\s*,\s*/g)),
   },
   cache: {
-    fns: /** @type {string[]} */([]),
+    fns: [] as string[],
   },
   constants: {
     dealOrigin: required('DEAL_ORIGIN'),
@@ -61,19 +46,3 @@ export default {
   isProduction: process.env.NODE_ENV === 'production',
   isTest: process.env.NODE_ENV === 'test',
 };
-
-/**
- * @param {string} key
- */
-function required(key) {
-  const value = process.env[key];
-  assert.ok(value, `ENV key ${key} is required`);
-  return value;
-}
-
-/**
- * @param {string} key
- */
-function optional(key) {
-  return process.env[key];
-}

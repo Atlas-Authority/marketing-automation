@@ -1,7 +1,7 @@
 import { Deal } from '../../types/deal.js';
 import { License } from '../../types/license.js';
 import { Transaction } from '../../types/transaction.js';
-import { DealStage } from '../../util/config.js';
+import { DealStage } from '../../util/config/index.js';
 import { isPresent, sorter } from '../../util/helpers.js';
 import { DealFinder } from './deal-finder.js';
 import { DealRelevantEvent, EvalEvent, PurchaseEvent, RefundEvent, RenewalEvent, UpgradeEvent } from "./events.js";

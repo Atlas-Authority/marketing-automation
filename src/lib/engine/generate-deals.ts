@@ -5,7 +5,7 @@ import { ContactsByEmail } from '../types/contact.js';
 import { Deal, DealUpdate } from '../types/deal.js';
 import { License, RelatedLicenseSet } from '../types/license.js';
 import { Transaction } from '../types/transaction.js';
-import config, { DealStage, Pipeline } from '../util/config.js';
+import config, { DealStage, Pipeline } from '../util/config/index.js';
 import { isPresent, sorter } from '../util/helpers.js';
 import { saveForInspection } from '../util/inspection.js';
 import { ActionGenerator } from './deal-generator/actions.js';

@@ -5,7 +5,7 @@ import ConsoleUploader from "../uploader/console-uploader.js";
 import LiveUploader from "../uploader/live-uploader.js";
 import { Uploader } from "../uploader/uploader.js";
 import { ArgParser } from './arg-parser.js';
-import config from "./config.js";
+import config from "./config/index.js";
 
 export function getCliOptions() {
   const argParser = new ArgParser(process.argv.slice(2));

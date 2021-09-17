@@ -7,7 +7,7 @@ import { Contact } from '../types/contact.js';
 import { Deal } from '../types/deal.js';
 import { License } from '../types/license.js';
 import { Transaction } from '../types/transaction.js';
-import config, { Pipeline } from '../util/config.js';
+import config, { Pipeline } from '../util/config/index.js';
 import * as datadir from '../util/datadir.js';
 import { AttachableError, SimpleError } from '../util/errors.js';
 import logger from '../util/logger.js';

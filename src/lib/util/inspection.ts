@@ -1,6 +1,6 @@
 import csvStringify from 'csv-stringify/lib/es5/sync.js';
 import flatten from 'flat';
-import config from './config.js';
+import config from './config/index.js';
 import * as datadir from './datadir.js';
 import logger from './logger.js';
 

@@ -1,6 +1,6 @@
 import { Deal } from '../types/deal.js';
 import { Uploader } from '../uploader/uploader.js';
-import { DealStage, Pipeline } from '../util/config.js';
+import { DealStage, Pipeline } from '../util/config/index.js';
 import logger from '../util/logger.js';
 
 export default async function ({ deals, uploader }: { deals: Deal[], uploader: Uploader }) {

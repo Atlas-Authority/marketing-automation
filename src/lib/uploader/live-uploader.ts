@@ -4,7 +4,7 @@ import { contactToHubspotProperties } from '../engine/contacts.js';
 import { Company } from '../types/company.js';
 import { Contact, GeneratedContact } from '../types/contact.js';
 import { Deal, DealAssociationPair, DealUpdate } from '../types/deal.js';
-import config from '../util/config.js';
+import config from '../util/config/index.js';
 import { batchesOf } from '../util/helpers.js';
 import { saveToJson } from '../util/inspection.js';
 import logger from '../util/logger.js';
