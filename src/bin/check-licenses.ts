@@ -5,7 +5,7 @@ import { olderThan90Days } from '../lib/engine/generate-deals.js';
 import { shorterLicenseInfo } from '../lib/engine/license-grouper.js';
 import { License } from '../lib/types/license.js';
 import * as datadir from '../lib/util/datadir.js';
-import logger from '../lib/util/logger.js';
+import log from '../lib/util/logger.js';
 
 const args = process.argv.slice(2);
 
@@ -38,7 +38,7 @@ function check(sen: string) {
 
   const withWrongId = data.allLicenses.find(l => l.addonLicenseId !== sen && l.licenseId === 'SEN-' + sen);
   if (withWrongId) {
-    logger.warn('Dev', sen, `Using addonLicenseId (${withWrongId.addonLicenseId}) instead of licenseId`);
+    log.warn('Dev', sen, `Using addonLicenseId (${withWrongId.addonLicenseId}) instead of licenseId`);
     sen = withWrongId.addonLicenseId;
   }
 
@@ -49,13 +49,13 @@ function check(sen: string) {
   const foundMatch = matchedGroups.find(group => group.find(l => l.addonLicenseId === sen));
   if (foundMatch) {
     if (foundMatch.every(l => olderThan90Days(l.start))) {
-      logger.info('Dev', sen, 'All matches > 90 days old');
+      log.info('Dev', sen, 'All matches > 90 days old');
       return;
     }
 
     const matches = foundMatch.filter(l => l.addonLicenseId !== sen);
     for (const otherLicense of matches) {
-      logger.warn('Dev', sen, `Checking matched license ${otherLicense.addonLicenseId}`);
+      log.warn('Dev', sen, `Checking matched license ${otherLicense.addonLicenseId}`);
 
       if (checkSEN(otherLicense.addonLicenseId)) {
         return;
@@ -63,26 +63,26 @@ function check(sen: string) {
     }
   }
 
-  logger.error('Dev', sen, 'Status unsure');
+  log.error('Dev', sen, 'Status unsure');
 }
 
 function checkSEN(sen: string) {
   const foundDeal = data.allDeals.find(d => d.properties.addonlicenseid === sen);
   if (foundDeal) {
-    logger.info('Dev', sen, 'Already has deal:', foundDeal.id);
+    log.info('Dev', sen, 'Already has deal:', foundDeal.id);
     return true;
   }
 
   const foundIgnoreds = ignored.find(group => group.find(l => l.addonLicenseId === sen));
   if (foundIgnoreds) {
-    logger.info('Dev', sen, 'Licenses were ignored:', foundIgnoreds[0].reason, verbose ? foundIgnoreds : '');
+    log.info('Dev', sen, 'Licenses were ignored:', foundIgnoreds[0].reason, verbose ? foundIgnoreds : '');
     return true;
   }
 
   const ls = data.allLicenses.filter(l => l.addonLicenseId === sen);
   const cs = ls.map(l => contactsByEmail[l.contactDetails.technicalContact.email]);
   if (cs.some(c => c.contact_type === 'Partner')) {
-    logger.info('Dev', sen, 'Contact is Partner');
+    log.info('Dev', sen, 'Contact is Partner');
     return true;
   }
 

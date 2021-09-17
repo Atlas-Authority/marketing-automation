@@ -1,10 +1,10 @@
 import { Deal } from '../types/deal.js';
 import { Uploader } from '../uploader/uploader.js';
 import { DealStage, Pipeline } from '../util/config/index.js';
-import logger from '../util/logger.js';
+import log from '../util/logger.js';
 
 export default async function ({ deals, uploader }: { deals: Deal[], uploader: Uploader }) {
-  logger.info('Zeroing Empty Deal Amounts', 'Setting Amount=0 on applicable Closed deals');
+  log.info('Zeroing Empty Deal Amounts', 'Setting Amount=0 on applicable Closed deals');
   const dealsToZero = deals.filter(deal =>
     deal.properties.pipeline === Pipeline.AtlassianMarketplace &&
     (
@@ -22,7 +22,7 @@ export default async function ({ deals, uploader }: { deals: Deal[], uploader: U
     });
   }));
 
-  logger.info('Zeroing Empty Deal Amounts', 'Setting Amount=null on applicable Eval deals');
+  log.info('Zeroing Empty Deal Amounts', 'Setting Amount=null on applicable Eval deals');
   const dealsToNullify = deals.filter(deal =>
     deal.properties.pipeline === Pipeline.AtlassianMarketplace &&
     deal.properties.dealstage === DealStage.EVAL &&
@@ -37,5 +37,5 @@ export default async function ({ deals, uploader }: { deals: Deal[], uploader: U
     });
   }));
 
-  logger.info('Zeroing Empty Deal Amounts', 'Done');
+  log.info('Zeroing Empty Deal Amounts', 'Done');
 }

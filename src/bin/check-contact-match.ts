@@ -2,7 +2,7 @@ import CachedFileDownloader from '../lib/downloader/cached-file-downloader.js';
 import { downloadAllData } from '../lib/downloader/download-initial-data.js';
 import { shorterLicenseInfo } from '../lib/engine/license-grouper.js';
 import * as datadir from '../lib/util/datadir.js';
-import logger from '../lib/util/logger.js';
+import log from '../lib/util/logger.js';
 
 const [contactId] = process.argv.slice(2);
 
@@ -17,7 +17,7 @@ const data = await downloadAllData({
 
 const contact = data.allContacts.find(c => c.hs_object_id === contactId);
 
-logger.info('Dev', contact);
+log.info('Dev', contact);
 
 const matchedGroups: ReturnType<typeof shorterLicenseInfo>[][] = datadir.readJsonFile('out', 'matched-groups-all.json');
 
@@ -29,9 +29,9 @@ for (const group of groups) {
   const first = group[0];
   if (first) {
     for (const key of keys) {
-      logger.info(key, '');
+      log.info(key, '');
       for (const l of group) {
-        logger.info(key, l[key]);
+        log.info(key, l[key]);
       }
     }
   }

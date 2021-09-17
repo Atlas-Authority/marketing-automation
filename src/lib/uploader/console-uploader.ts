@@ -1,7 +1,7 @@
 import { Company } from '../types/company.js';
 import { Contact, GeneratedContact } from '../types/contact.js';
 import { Deal, DealAssociationPair, DealUpdate } from '../types/deal.js';
-import logger from '../util/logger.js';
+import log from '../util/logger.js';
 import { Uploader } from './uploader.js';
 
 export default class ConsoleUploader implements Uploader {
@@ -52,7 +52,7 @@ export default class ConsoleUploader implements Uploader {
   }
 
   fakeApiConsoleLog(title: string, data: unknown[]) {
-    logger.info('Fake Uploader', title, this.verbose ? data : data.length);
+    log.info('Fake Uploader', title, this.verbose ? data : data.length);
   }
 
 }

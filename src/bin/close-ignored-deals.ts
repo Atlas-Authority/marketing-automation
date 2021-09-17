@@ -4,7 +4,7 @@ import { License } from '../lib/types/license.js';
 import LiveUploader from '../lib/uploader/live-uploader.js';
 import { DealStage } from '../lib/util/config/index.js';
 import * as datadir from '../lib/util/datadir.js';
-import logger from '../lib/util/logger.js';
+import log from '../lib/util/logger.js';
 
 const data = await downloadAllData({
   downloader: new CachedFileDownloader()
@@ -34,7 +34,7 @@ const dealsToClose = (openDeals
   }))
 );
 
-logger.info('Deals', dealsToClose);
+log.info('Deals', dealsToClose);
 
 uploader.updateAllDeals(dealsToClose.map(row => ({
   id: row.id,

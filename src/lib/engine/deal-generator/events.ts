@@ -1,7 +1,7 @@
 import { License, LicenseContext } from "../../types/license.js";
 import { Transaction } from "../../types/transaction.js";
 import { sorter } from "../../util/helpers.js";
-import logger from '../../util/logger.js';
+import log from '../../util/logger.js';
 import { abbrRecordDetails, getDate, getLicense, getLicenseType, isEvalOrOpenSourceLicense, isLicense, isPaidLicense, isTransaction } from "./records.js";
 
 export type RefundEvent = { type: 'refund', refundedTxs: Transaction[] };
@@ -54,14 +54,14 @@ export class EventGenerator {
 
     this.normalizeEvalAndPurchaseEvents();
 
-    logger.detailed('Deal Actions', '\n');
-    logger.detailed('Deal Actions', 'Records');
+    log.detailed('Deal Actions', '\n');
+    log.detailed('Deal Actions', 'Records');
     for (const record of records) {
-      logger.detailed('Deal Actions', abbrRecordDetails(record));
+      log.detailed('Deal Actions', abbrRecordDetails(record));
     }
-    logger.detailed('Deal Actions', 'Events');
+    log.detailed('Deal Actions', 'Events');
     for (const e of this.events) {
-      logger.detailed('Deal Actions', abbrEventDetails(e))
+      log.detailed('Deal Actions', abbrEventDetails(e))
     }
 
     return this.events;

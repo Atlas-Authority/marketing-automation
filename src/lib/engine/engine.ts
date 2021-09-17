@@ -3,7 +3,7 @@ import { Downloader } from '../downloader/downloader.js';
 import { Contact } from '../types/contact.js';
 import { RelatedLicenseSet } from '../types/license.js';
 import { Uploader } from '../uploader/uploader.js';
-import logger from '../util/logger.js';
+import log from '../util/logger.js';
 import { buildContactsStructure } from './contacts.js';
 import { generateContactUpdateActions } from './generate-contact-updates.js';
 import { generateContacts } from "./generate-contacts.js";
@@ -112,7 +112,7 @@ const RESET = '\x1b[0m';
 let step = 0;
 
 function logStep(description: string) {
-  logger.info('Marketing Automation', `${PREFIX}Step ${++step}: ${description}${RESET}`);
+  log.info('Marketing Automation', `${PREFIX}Step ${++step}: ${description}${RESET}`);
 }
 
 function resetLogCount() {

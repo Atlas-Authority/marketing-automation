@@ -1,6 +1,6 @@
 import fs from 'fs';
 import { URL } from 'url';
-import logger from './logger.js';
+import log from './logger.js';
 
 type DataDirPlace = 'in' | 'out' | 'cache';
 
@@ -14,7 +14,7 @@ export function readFile(place: DataDirPlace, filename: string) {
   const dir = `../../../data/${place}`;
 
   if (!fs.existsSync(new URL(dir, import.meta.url))) {
-    logger.error('Dev', `Data directory doesn't exist yet. First run the engine with --downloader=live`);
+    log.error('Dev', `Data directory doesn't exist yet. First run the engine with --downloader=live`);
     process.exit(1);
   }
 

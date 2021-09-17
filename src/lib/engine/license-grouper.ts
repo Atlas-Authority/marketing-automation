@@ -7,7 +7,7 @@ import { Transaction } from '../types/transaction.js';
 import { fnOrCache } from '../util/fn-cache.js';
 import { sorter } from '../util/helpers.js';
 import { saveForInspection } from '../util/inspection.js';
-import logger from '../util/logger.js';
+import log from '../util/logger.js';
 import { LicenseMatcher } from './license-matcher.js';
 
 
@@ -21,10 +21,10 @@ export function matchIntoLikelyGroups(data: {
   providerDomains: Set<string>,
   contactsByEmail: ContactsByEmail,
 }) {
-  logger.info('Scoring Engine', 'Storing licenses/transactions by id');
+  log.info('Scoring Engine', 'Storing licenses/transactions by id');
   const itemsByAddonLicenseId: { [addonLicenseId: string]: LicenseContext } = buildMappingStructure(data.contactsByEmail, data.transactions, data.licenses);
 
-  logger.info('Scoring Engine', 'Grouping licenses/transactions by hosting and addonKey');
+  log.info('Scoring Engine', 'Grouping licenses/transactions by hosting and addonKey');
   const productGroupings: { addonKey: string; hosting: string; group: License[] }[] = groupMappingByProduct(itemsByAddonLicenseId);
 
   const { maybeMatches, unaccounted } = fnOrCache('scorer.dat', () => {
@@ -49,7 +49,7 @@ export function matchIntoLikelyGroups(data: {
     ])
   );
 
-  logger.info('Scoring Engine', 'Normalize license matches into groups over threshold');
+  log.info('Scoring Engine', 'Normalize license matches into groups over threshold');
   const normalizedMatches: { [addonLicenseId: string]: Set<string> } = normalizeMatches(maybeMatches, 130);
 
   // Re-add non-matches as single-item sets
@@ -83,7 +83,7 @@ export function matchIntoLikelyGroups(data: {
         )
       )));
 
-  logger.info('Scoring Engine', 'Done');
+  log.info('Scoring Engine', 'Done');
 
   return (
     Array.from(new Set(Object.values(normalizedMatches)))
@@ -143,7 +143,7 @@ function buildMappingStructure(contacts: { [key: string]: Contact }, transaction
     .map(({ tx }) => [tx.transactionId, tx.addonLicenseId]));
 
   if (badBalances.length > 0) {
-    logger.warn('Scoring Engine', "The following transactions have no accompanying licenses:",
+    log.warn('Scoring Engine', "The following transactions have no accompanying licenses:",
       badBalances.map(([transaction, license]) => ({ transaction, license })));
   }
 
@@ -175,17 +175,17 @@ function groupMappingByProduct(mapping: { [key: string]: LicenseContext }) {
 
 /** Score how likely each license is connected to another license. */
 function scoreLicenseMatches(productGroupings: { addonKey: string; hosting: string; group: License[] }[], scorer: LicenseMatcher) {
-  logger.info('Scoring Engine', 'Preparing license-matching jobs within [addonKey + hosting] groups');
+  log.info('Scoring Engine', 'Preparing license-matching jobs within [addonKey + hosting] groups');
 
   const maybeMatches: { score: number, item1: string, item2: string, reasons: string[] }[] = [];
 
   const unaccounted: Set<string> = new Set();
 
-  logger.info('Scoring Engine', 'Running license-similarity scoring');
+  log.info('Scoring Engine', 'Running license-similarity scoring');
   const startTime = process.hrtime.bigint();
 
   for (const { addonKey, hosting, group } of productGroupings) {
-    logger.info('Scoring Engine', `  Scoring [${addonKey}, ${hosting}]`);
+    log.info('Scoring Engine', `  Scoring [${addonKey}, ${hosting}]`);
 
     for (let i1 = 0; i1 < group.length; i1++) {
       for (let i2 = i1 + 1; i2 < group.length; i2++) {
@@ -208,7 +208,7 @@ function scoreLicenseMatches(productGroupings: { addonKey: string; hosting: stri
   }
 
   const endTime = process.hrtime.bigint();
-  logger.info('Scoring Engine', `Total time: ${timeAsMinutesSeconds(endTime - startTime)}`);
+  log.info('Scoring Engine', `Total time: ${timeAsMinutesSeconds(endTime - startTime)}`);
 
   for (const m of maybeMatches) {
     unaccounted.delete(m.item1);

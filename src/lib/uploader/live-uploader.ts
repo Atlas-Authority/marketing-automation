@@ -7,7 +7,7 @@ import { Deal, DealAssociationPair, DealUpdate } from '../types/deal.js';
 import config from '../util/config/index.js';
 import { batchesOf } from '../util/helpers.js';
 import { saveToJson } from '../util/inspection.js';
-import logger from '../util/logger.js';
+import log from '../util/logger.js';
 import { Uploader } from './uploader.js';
 
 
@@ -17,7 +17,7 @@ export default class LiveUploader implements Uploader {
 
   async associateDealsWithContacts(fromTos: DealAssociationPair[]) {
     try {
-      logger.info('Live Uploader', 'Associating Deals->Contacts:', fromTos);
+      log.info('Live Uploader', 'Associating Deals->Contacts:', fromTos);
       await this.hubspotClient.crm.associations.batchApi.create('deal', 'contact', {
         inputs: fromTos.map(({ dealId, contactId }) => ({
           from: { id: dealId },
@@ -33,7 +33,7 @@ export default class LiveUploader implements Uploader {
 
   async disassociateDealsFromContacts(fromTos: DealAssociationPair[]) {
     try {
-      logger.info('Live Uploader', 'Disassociating Deals->Contacts:', fromTos);
+      log.info('Live Uploader', 'Disassociating Deals->Contacts:', fromTos);
       await this.hubspotClient.crm.associations.batchApi.archive('deal', 'contact', {
         inputs: fromTos.map(({ dealId, contactId }) => ({
           from: { id: dealId },
@@ -48,7 +48,7 @@ export default class LiveUploader implements Uploader {
   }
 
   async createAllContacts(contacts: Array<{ properties: GeneratedContact }>): Promise<Contact[]> {
-    logger.info('Live Uploader', 'Creating Contacts:', contacts);
+    log.info('Live Uploader', 'Creating Contacts:', contacts);
 
     const contactGroups = batchesOf(contacts, 10);
     const promises = contactGroups.map(async (contacts) => {
@@ -70,7 +70,7 @@ export default class LiveUploader implements Uploader {
           };
         });
 
-        logger.info('Live Uploader', 'Created Contacts:', createdContacts);
+        log.info('Live Uploader', 'Created Contacts:', createdContacts);
 
         return createdContacts;
       }
@@ -83,7 +83,7 @@ export default class LiveUploader implements Uploader {
   }
 
   async updateAllContacts(contacts: Array<{ id: string; properties: Partial<GeneratedContact> }>) {
-    logger.info('Live Uploader', 'Updating Contacts:', contacts);
+    log.info('Live Uploader', 'Updating Contacts:', contacts);
 
     const contactGroups = batchesOf(contacts, 10);
     const promises = contactGroups.map(async (contacts) => {
@@ -96,7 +96,7 @@ export default class LiveUploader implements Uploader {
             };
           })
         });
-        logger.info('Live Uploader', 'Updated Contacts:', contacts.length);
+        log.info('Live Uploader', 'Updated Contacts:', contacts.length);
       }
       catch (e: any) {
         throw new Error(e.response.body.message);
@@ -106,7 +106,7 @@ export default class LiveUploader implements Uploader {
   }
 
   async updateAllCompanies(companies: Array<{ id: string; properties: Partial<Omit<Company, 'id'>> }>) {
-    logger.info('Live Uploader', 'Updating Companies:', companies);
+    log.info('Live Uploader', 'Updating Companies:', companies);
 
     const companyGroups = batchesOf(companies, 10);
     const promises = companyGroups.map(async (companies) => {
@@ -125,7 +125,7 @@ export default class LiveUploader implements Uploader {
             };
           })
         });
-        logger.info('Live Uploader', 'Updated Companies:', companies.length);
+        log.info('Live Uploader', 'Updated Companies:', companies.length);
       }
       catch (e: any) {
         throw new Error(e.response.body.message);
@@ -135,7 +135,7 @@ export default class LiveUploader implements Uploader {
   }
 
   async createAllDeals(deals: Omit<Deal, 'id'>[]): Promise<Deal[]> {
-    logger.info('Live Uploader', 'Creating Deals:', deals);
+    log.info('Live Uploader', 'Creating Deals:', deals);
 
     const dealGroups = batchesOf(deals, 10);
     const promises = dealGroups.map(async (deals, i) => {
@@ -166,7 +166,7 @@ export default class LiveUploader implements Uploader {
           return { ...deal, id: result.id };
         });
 
-        logger.info('Live Uploader', 'Created Deals:', createdDeals);
+        log.info('Live Uploader', 'Created Deals:', createdDeals);
 
         return createdDeals;
       }
@@ -179,7 +179,7 @@ export default class LiveUploader implements Uploader {
   }
 
   async updateAllDeals(deals: DealUpdate[]) {
-    logger.info('Live Uploader', 'Updating Deals:', deals);
+    log.info('Live Uploader', 'Updating Deals:', deals);
 
     const dealGroups = batchesOf(deals, 10);
     const promises = dealGroups.map(async (deals, i) => {
@@ -190,7 +190,7 @@ export default class LiveUploader implements Uploader {
 
         saveToJson(`hubspot-update-deals-out-${i}.json`, results.body.results);
 
-        logger.info('Live Uploader', 'Updated Deals:', deals.length);
+        log.info('Live Uploader', 'Updated Deals:', deals.length);
       }
       catch (e: any) {
         throw new Error(e.response.body.message);

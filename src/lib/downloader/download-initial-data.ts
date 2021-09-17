@@ -8,7 +8,7 @@ import { Transaction } from '../types/transaction.js';
 import { makeMultiProviderDomainsSet } from '../util/domains.js';
 import { AttachableError } from '../util/errors.js';
 import { isPresent } from '../util/helpers.js';
-import logger from '../util/logger.js';
+import log from '../util/logger.js';
 import { Downloader } from './downloader.js';
 
 type InitialData = {
@@ -22,7 +22,7 @@ type InitialData = {
 
 
 export async function downloadAllData({ downloader }: { downloader: Downloader }): Promise<InitialData> {
-  logger.info('Downloader', 'Starting downloads with API');
+  log.info('Downloader', 'Starting downloads with API');
 
   let [
     freeDomains,
@@ -59,7 +59,7 @@ export async function downloadAllData({ downloader }: { downloader: Downloader }
     allTransactions,
     transactionsSchema);
 
-  logger.info('Downloader', 'Done');
+  log.info('Downloader', 'Done');
 
   let allLicenses = uniqLicenses(licensesWithDataInsights.concat(licensesWithoutDataInsights));
 
@@ -118,7 +118,7 @@ function uniqLicenses(licenses: License[]) {
 }
 
 function verifyStructure<T>(name: string, data: T[], schema: Array<['every' | 'some', (license: T) => boolean]>) {
-  logger.info('Downloader', 'Verifying schema for:', name);
+  log.info('Downloader', 'Verifying schema for:', name);
   for (const [howMany, getter] of schema) {
     if (!data[howMany](getter)) {
       let errorData = data;
@@ -247,7 +247,7 @@ function makeEmailValidator(re: RegExp) {
 
 function filterLicensesWithTechEmail(license: License) {
   if (!license.contactDetails.technicalContact?.email) {
-    logger.warn('Downloader', 'License does not have a tech contact email; will be skipped', license);
+    log.warn('Downloader', 'License does not have a tech contact email; will be skipped', license);
     return false;
   }
   return true;

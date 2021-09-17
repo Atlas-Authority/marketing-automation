@@ -2,7 +2,7 @@ import csvStringify from 'csv-stringify/lib/es5/sync.js';
 import flatten from 'flat';
 import config from './config/index.js';
 import * as datadir from './datadir.js';
-import logger from './logger.js';
+import log from './logger.js';
 
 function saveArrayToCsv(filename: string, array: any[]) {
   if (config.isProduction || config.isTest) return;
@@ -15,7 +15,7 @@ function saveArrayToCsv(filename: string, array: any[]) {
 
   const out = csvStringify(array, { header: true });
   datadir.writeFile('out', filename, out);
-  logger.info('Dev', 'Saved data to:', filename);
+  log.info('Dev', 'Saved data to:', filename);
 }
 
 export function saveToJson(filename: string, object: unknown) {
@@ -23,7 +23,7 @@ export function saveToJson(filename: string, object: unknown) {
 
   const out = JSON.stringify(object, null, 2);
   datadir.writeFile('out', filename, out);
-  logger.info('Dev', 'Saved data to:', filename);
+  log.info('Dev', 'Saved data to:', filename);
 }
 
 type OutputFormat = 'json' | 'csv' | 'both';

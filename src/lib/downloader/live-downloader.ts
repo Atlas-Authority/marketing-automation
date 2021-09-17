@@ -10,7 +10,7 @@ import { Transaction } from '../types/transaction.js';
 import config, { Pipeline } from '../util/config/index.js';
 import * as datadir from '../util/datadir.js';
 import { AttachableError, SimpleError } from '../util/errors.js';
-import logger from '../util/logger.js';
+import log from '../util/logger.js';
 import { Downloader } from './downloader.js';
 
 
@@ -35,18 +35,18 @@ export default class LiveDownloader implements Downloader {
   }
 
   async downloadTransactions(): Promise<Transaction[]> {
-    logger.info('Live Downloader', 'Starting to download Transactions');
+    log.info('Live Downloader', 'Starting to download Transactions');
     const json: Transaction[] = await downloadMarketplaceData('/sales/transactions/export');
-    logger.info('Live Downloader', 'Downloaded Transactions');
+    log.info('Live Downloader', 'Downloaded Transactions');
 
     save('transactions.json', json);
     return json;
   }
 
   async downloadLicensesWithoutDataInsights(): Promise<License[]> {
-    logger.info('Live Downloader', 'Starting to download Licenses Without Data Insights');
+    log.info('Live Downloader', 'Starting to download Licenses Without Data Insights');
     let json: License[] = await downloadMarketplaceData('/licenses/export?endDate=2018-07-01');
-    logger.info('Live Downloader', 'Downloaded Licenses without-data-insights up to 2018-07-01');
+    log.info('Live Downloader', 'Downloaded Licenses without-data-insights up to 2018-07-01');
 
     json.forEach(fixOdditiesInLicenses);
     save('licenses-without.json', json);
@@ -54,10 +54,10 @@ export default class LiveDownloader implements Downloader {
   }
 
   async downloadLicensesWithDataInsights(): Promise<License[]> {
-    logger.info('Live Downloader', 'Starting to download Licenses With Data Insights');
+    log.info('Live Downloader', 'Starting to download Licenses With Data Insights');
     const promises = generateDates().map(async ({ startDate, endDate }) => {
       const json: License[] = await downloadMarketplaceData(`/licenses/export?withDataInsights=true&startDate=${startDate}&endDate=${endDate}`);
-      logger.info('Live Downloader', 'Downloaded Licenses with-data-insights for range:', startDate, endDate);
+      log.info('Live Downloader', 'Downloaded Licenses with-data-insights for range:', startDate, endDate);
       return { date: `${startDate}-${endDate}`, json };
     });
 
@@ -92,7 +92,7 @@ export default class LiveDownloader implements Downloader {
       type: result.properties.type as any,
     }));
 
-    logger.info('Live Downloader', 'Downloaded Companies');
+    log.info('Live Downloader', 'Downloaded Companies');
 
     save('companies.json', adjustedCompanies);
     return adjustedCompanies;
@@ -121,7 +121,7 @@ export default class LiveDownloader implements Downloader {
       throw new Error('Failed downloading deals: ' + e.response.body.message);
     }
 
-    logger.info('Live Downloader', 'Downloaded Deals');
+    log.info('Live Downloader', 'Downloaded Deals');
 
     save('deals-raw.json', deals);
 
@@ -198,7 +198,7 @@ export default class LiveDownloader implements Downloader {
       }
     }
 
-    logger.info('Live Downloader', 'Downloaded Contacts');
+    log.info('Live Downloader', 'Downloaded Contacts');
 
     const adjustedContacts = contacts.map(contactFromHubspot);
 
@@ -268,7 +268,7 @@ function save(file: string, data: unknown) {
   const content = JSON.stringify(data, null, 2);
   datadir.writeFile('in', file, content);
 
-  logger.info('Live Downloader', 'Saved', file);
+  log.info('Live Downloader', 'Saved', file);
 }
 
 function generateDates() {

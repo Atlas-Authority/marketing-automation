@@ -15,15 +15,16 @@ class Logger {
   enable() { enabled = true; }
   disable() { enabled = false; }
 
-  error(prefix: string, ...args: any[]) { log(LogLevel.Error, prefix, ...args); }
-  warn(prefix: string, ...args: any[]) { log(LogLevel.Warn, prefix, ...args); }
-  info(prefix: string, ...args: any[]) { log(LogLevel.Info, prefix, ...args); }
-  verbose(prefix: string, ...args: any[]) { log(LogLevel.Verbose, prefix, ...args); }
-  detailed(prefix: string, ...args: any[]) { log(LogLevel.Detailed, prefix, ...args); }
+  error(prefix: string, ...args: any[]) { print(LogLevel.Error, prefix, ...args); }
+  warn(prefix: string, ...args: any[]) { print(LogLevel.Warn, prefix, ...args); }
+  info(prefix: string, ...args: any[]) { print(LogLevel.Info, prefix, ...args); }
+  verbose(prefix: string, ...args: any[]) { print(LogLevel.Verbose, prefix, ...args); }
+  detailed(prefix: string, ...args: any[]) { print(LogLevel.Detailed, prefix, ...args); }
 
 }
 
-export default new Logger();
+const log = new Logger();
+export default log;
 
 const levelPrefixes = {
   [LogLevel.Error]: `${scary}ERR!${reset}`,
@@ -33,7 +34,7 @@ const levelPrefixes = {
   [LogLevel.Detailed]: `${great}....${reset}`,
 };
 
-function log(level: LogLevel, prefix: string, ...args: any[]) {
+function print(level: LogLevel, prefix: string, ...args: any[]) {
   if (!enabled) return;
   if (level > config.logLevel) return;
 
