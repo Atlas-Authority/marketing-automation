@@ -58,6 +58,12 @@ export interface License {
   parentProductName?: 'NA' | 'Pending' | 'Confluence' | 'Jira',
   installedOnSandbox?: 'NA' | 'Pending' | 'No' | 'Yes',
   parentProductEdition?: 'NA' | 'Pending' | 'Free' | 'Standard' | 'Premium' | 'Enterprise',
+
+  evaluationLicense?: string,
+  daysToConvertEval?: string,
+  evaluationStartDate?: string,
+  evaluationEndDate?: string,
+  evaluationSaleDate?: string,
 }
 
 export type LicenseContext = {

@@ -161,11 +161,11 @@ const licensesWithDataInsightsSchema: Array<['every' | 'some', (license: License
   ['every', license => isString(license?.installedOnSandbox)],
   ['every', license => isString(license?.parentProductEdition)],
 
-  ['some', (license: any) => isString(license?.evaluationLicense)],
-  ['some', (license: any) => isString(license?.daysToConvertEval)],
-  ['some', (license: any) => isString(license?.evaluationStartDate)],
-  ['some', (license: any) => isString(license?.evaluationEndDate)],
-  ['some', (license: any) => isString(license?.evaluationSaleDate)],
+  ['some', license => isString(license?.evaluationLicense)],
+  ['some', license => isString(license?.daysToConvertEval)],
+  ['some', license => isString(license?.evaluationStartDate)],
+  ['some', license => isString(license?.evaluationEndDate)],
+  ['some', license => isString(license?.evaluationSaleDate)],
 ];
 
 const licensesWithoutDataInsightsSchema: Array<['every' | 'some', (license: License) => boolean]> = [
@@ -189,11 +189,11 @@ const licensesWithoutDataInsightsSchema: Array<['every' | 'some', (license: Lice
   ['every', license => isString(license?.hosting)],
   ['every', license => isString(license?.lastUpdated)],
 
-  ['every', (license: any) => isUndefined(license?.evaluationLicense)],
-  ['every', (license: any) => isUndefined(license?.daysToConvertEval)],
-  ['every', (license: any) => isUndefined(license?.evaluationStartDate)],
-  ['every', (license: any) => isUndefined(license?.evaluationEndDate)],
-  ['every', (license: any) => isUndefined(license?.evaluationSaleDate)],
+  ['every', license => isUndefined(license?.evaluationLicense)],
+  ['every', license => isUndefined(license?.daysToConvertEval)],
+  ['every', license => isUndefined(license?.evaluationStartDate)],
+  ['every', license => isUndefined(license?.evaluationEndDate)],
+  ['every', license => isUndefined(license?.evaluationSaleDate)],
 ];
 
 const transactionsSchema: Array<['every' | 'some', (transaction: Transaction) => boolean]> = [
