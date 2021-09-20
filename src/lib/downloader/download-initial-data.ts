@@ -47,6 +47,9 @@ export async function downloadAllData({ downloader }: { downloader: Downloader }
   licensesWithDataInsights = licensesWithDataInsights.filter(filterLicensesWithTechEmail);
   licensesWithoutDataInsights = licensesWithoutDataInsights.filter(filterLicensesWithTechEmail);
 
+  licensesWithDataInsights.forEach(fixOdditiesInLicenses);
+  licensesWithoutDataInsights.forEach(fixOdditiesInLicenses);
+
   verifyStructure('licenses_with_data_insights',
     licensesWithDataInsights,
     licensesWithDataInsightsSchema);
@@ -255,4 +258,33 @@ function filterLicensesWithTechEmail(license: License) {
     return false;
   }
   return true;
+}
+
+function fixOdditiesInLicenses(license: License) {
+  normalizeLicenseNewlines(license.contactDetails.technicalContact, 'address1');
+  normalizeLicenseNewlines(license.contactDetails.technicalContact, 'address2');
+  normalizeLicenseNewlines(license.contactDetails.billingContact, 'address1');
+  normalizeLicenseNewlines(license.contactDetails.billingContact, 'address2');
+
+  normalizeLicenseNullLiteral(license.contactDetails.technicalContact, 'phone');
+  normalizeLicenseNullLiteral(license.contactDetails.technicalContact, 'address1');
+  normalizeLicenseNullLiteral(license.contactDetails.technicalContact, 'city');
+  normalizeLicenseNullLiteral(license.contactDetails.technicalContact, 'state');
+
+  normalizeLicenseNullLiteral(license.contactDetails.billingContact, 'phone');
+  normalizeLicenseNullLiteral(license.contactDetails.billingContact, 'address1');
+  normalizeLicenseNullLiteral(license.contactDetails.billingContact, 'city');
+  normalizeLicenseNullLiteral(license.contactDetails.billingContact, 'state');
+}
+
+function normalizeLicenseNewlines<T extends { [key: string]: string }, K extends keyof T>(o: T | undefined, key: K) {
+  if (o && typeof (o[key]) === 'string') {
+    o[key] = o[key].replace(/\r/g, '') as T[K];
+  }
+}
+
+function normalizeLicenseNullLiteral<T extends { [key: string]: string }, K extends keyof T>(o: T | undefined, key: K) {
+  if (o && (o[key]) === 'null') {
+    delete o[key];
+  }
 }

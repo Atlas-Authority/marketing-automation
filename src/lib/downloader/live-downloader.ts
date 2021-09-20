@@ -48,7 +48,6 @@ export default class LiveDownloader implements Downloader {
     let json: License[] = await downloadMarketplaceData('/licenses/export?endDate=2018-07-01');
     log.info('Live Downloader', 'Downloaded Licenses without-data-insights up to 2018-07-01');
 
-    json.forEach(fixOdditiesInLicenses);
     save('licenses-without.json', json);
     return json;
   }
@@ -60,9 +59,8 @@ export default class LiveDownloader implements Downloader {
       log.info('Live Downloader', 'Downloaded Licenses with-data-insights for range:', startDate, endDate);
       return json;
     });
-
     const licenses = (await Promise.all(promises)).flat();
-    licenses.forEach(fixOdditiesInLicenses);
+
     save('licenses-with.json', licenses);
     return licenses;
   }
@@ -219,35 +217,6 @@ async function downloadMarketplaceData<T>(subpath: string): Promise<T[]> {
   }
   catch (e) {
     throw new AttachableError('Probably invalid Marketplace JSON.', text as string);
-  }
-}
-
-function fixOdditiesInLicenses(license: License) {
-  normalizeLicenseNewlines(license.contactDetails.technicalContact, 'address1');
-  normalizeLicenseNewlines(license.contactDetails.technicalContact, 'address2');
-  normalizeLicenseNewlines(license.contactDetails.billingContact, 'address1');
-  normalizeLicenseNewlines(license.contactDetails.billingContact, 'address2');
-
-  normalizeLicenseNullLiteral(license.contactDetails.technicalContact, 'phone');
-  normalizeLicenseNullLiteral(license.contactDetails.technicalContact, 'address1');
-  normalizeLicenseNullLiteral(license.contactDetails.technicalContact, 'city');
-  normalizeLicenseNullLiteral(license.contactDetails.technicalContact, 'state');
-
-  normalizeLicenseNullLiteral(license.contactDetails.billingContact, 'phone');
-  normalizeLicenseNullLiteral(license.contactDetails.billingContact, 'address1');
-  normalizeLicenseNullLiteral(license.contactDetails.billingContact, 'city');
-  normalizeLicenseNullLiteral(license.contactDetails.billingContact, 'state');
-}
-
-function normalizeLicenseNewlines<T extends { [key: string]: string }, K extends keyof T>(o: T | undefined, key: K) {
-  if (o && typeof (o[key]) === 'string') {
-    o[key] = o[key].replace(/\r/g, '') as T[K];
-  }
-}
-
-function normalizeLicenseNullLiteral<T extends { [key: string]: string }, K extends keyof T>(o: T | undefined, key: K) {
-  if (o && (o[key]) === 'null') {
-    delete o[key];
   }
 }
 
