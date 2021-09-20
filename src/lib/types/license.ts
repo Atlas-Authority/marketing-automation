@@ -39,7 +39,7 @@ export interface License {
   },
   partnerDetails?: {
     partnerName: string,
-    partnerType: string,
+    partnerType?: string,
     billingContact: {
       email: string,
       name: string,

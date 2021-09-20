@@ -32,7 +32,7 @@ export interface Transaction {
   },
   partnerDetails?: {
     partnerName: string,
-    partnerType: string,
+    partnerType?: string,
     billingContact: {
       email: string,
       name: string,

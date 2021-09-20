@@ -136,25 +136,44 @@ function verifyStructure<T>(name: string, data: T[], schema: Array<['every' | 's
 }
 
 const licensesWithDataInsightsSchema: Array<['every' | 'some', (license: License) => boolean]> = [
+  ['every', license => isString(license?.addonLicenseId)],
+  ['every', license => isString(license?.licenseId)],
+  ['every', license => isString(license?.addonKey)],
+  ['every', license => isString(license?.addonName)],
+  ['every', license => isString(license?.hosting)],
+  ['every', license => isString(license?.lastUpdated)],
+  ['every', license => isString(license?.licenseType)],
+  ['every', license => isString(license?.maintenanceStartDate)],
+  ['every', license => isString(license?.maintenanceEndDate)],
+  ['every', license => isString(license?.status)],
+  ['every', license => isString(license?.tier)],
+
+  ['every', license => !!license?.contactDetails],
+  ['every', license => isString(license?.contactDetails?.company)],
+  ['every', license => isString(license?.contactDetails?.country)],
+  ['every', license => isString(license?.contactDetails?.region)],
+
+  ['every', license => !!license?.contactDetails?.technicalContact],
   ['every', license => isString(license?.contactDetails?.technicalContact?.email)],
   ['some', license => isString(license?.contactDetails?.technicalContact?.name)],
   ['some', license => isString(license?.contactDetails?.technicalContact?.phone)],
   ['some', license => isString(license?.contactDetails?.technicalContact?.city)],
   ['some', license => isString(license?.contactDetails?.technicalContact?.state)],
 
-  ['some', license => isString(license?.contactDetails?.billingContact?.email)],
-  ['some', license => isString(license?.contactDetails?.billingContact?.name)],
-  ['some', license => isString(license?.contactDetails?.billingContact?.phone)],
-  ['some', license => isString(license?.contactDetails?.billingContact?.city)],
-  ['some', license => isString(license?.contactDetails?.billingContact?.state)],
+  ['some', license => !!license?.contactDetails?.billingContact],
+  ['every', license => !license?.contactDetails?.billingContact || isString(license?.contactDetails?.billingContact.email)],
+  ['some', license => !license?.contactDetails?.billingContact || isString(license?.contactDetails?.billingContact.name)],
+  ['some', license => !license?.contactDetails?.billingContact || isString(license?.contactDetails?.billingContact.phone)],
+  ['some', license => !license?.contactDetails?.billingContact || isString(license?.contactDetails?.billingContact.city)],
+  ['some', license => !license?.contactDetails?.billingContact || isString(license?.contactDetails?.billingContact.state)],
 
-  ['some', license => isString(license?.partnerDetails?.billingContact?.email)],
-  ['some', license => isString(license?.partnerDetails?.billingContact?.name)],
+  ['some', transaction => !!transaction?.partnerDetails],
+  ['every', transaction => !transaction?.partnerDetails || isString(transaction?.partnerDetails?.partnerName)],
+  ['some', transaction => !transaction?.partnerDetails || isString(transaction?.partnerDetails?.partnerType)],
 
-  ['every', license => isString(license?.contactDetails?.country)],
-  ['every', license => isString(license?.contactDetails?.region)],
-  ['every', license => isString(license?.hosting)],
-  ['every', license => isString(license?.lastUpdated)],
+  ['some', license => !!license?.partnerDetails?.billingContact],
+  ['every', license => !license?.partnerDetails?.billingContact || isString(license?.partnerDetails?.billingContact.email)],
+  ['every', license => !license?.partnerDetails?.billingContact || isString(license?.partnerDetails?.billingContact.name)],
 
   ['every', license => isString(license?.parentProductBillingCycle)],
   ['every', license => isString(license?.parentProductName)],
@@ -169,25 +188,49 @@ const licensesWithDataInsightsSchema: Array<['every' | 'some', (license: License
 ];
 
 const licensesWithoutDataInsightsSchema: Array<['every' | 'some', (license: License) => boolean]> = [
+  ['every', license => isString(license?.addonLicenseId)],
+  ['every', license => isString(license?.licenseId)],
+  ['every', license => isString(license?.addonKey)],
+  ['every', license => isString(license?.addonName)],
+  ['every', license => isString(license?.hosting)],
+  ['every', license => isString(license?.lastUpdated)],
+  ['every', license => isString(license?.licenseType)],
+  ['every', license => isString(license?.maintenanceStartDate)],
+  ['every', license => isString(license?.maintenanceEndDate)],
+  ['every', license => isString(license?.status)],
+  ['every', license => isString(license?.tier)],
+
+  ['every', license => !!license?.contactDetails],
+  ['some', license => isString(license?.contactDetails?.company)],
+  ['every', license => isString(license?.contactDetails?.country)],
+  ['every', license => isString(license?.contactDetails?.region)],
+
+  ['every', license => !!license?.contactDetails?.technicalContact],
   ['every', license => isString(license?.contactDetails?.technicalContact?.email)],
   ['some', license => isString(license?.contactDetails?.technicalContact?.name)],
   ['some', license => isString(license?.contactDetails?.technicalContact?.phone)],
   ['some', license => isString(license?.contactDetails?.technicalContact?.city)],
   ['some', license => isString(license?.contactDetails?.technicalContact?.state)],
 
-  ['some', license => isString(license?.contactDetails?.billingContact?.email)],
-  ['some', license => isString(license?.contactDetails?.billingContact?.name)],
-  ['some', license => isString(license?.contactDetails?.billingContact?.phone)],
-  ['some', license => isString(license?.contactDetails?.billingContact?.city)],
-  ['some', license => isString(license?.contactDetails?.billingContact?.state)],
+  ['some', license => !!license?.contactDetails?.billingContact],
+  ['every', license => !license?.contactDetails?.billingContact || isString(license?.contactDetails?.billingContact.email)],
+  ['some', license => !license?.contactDetails?.billingContact || isString(license?.contactDetails?.billingContact.name)],
+  ['some', license => !license?.contactDetails?.billingContact || isString(license?.contactDetails?.billingContact.phone)],
+  ['some', license => !license?.contactDetails?.billingContact || isString(license?.contactDetails?.billingContact.city)],
+  ['some', license => !license?.contactDetails?.billingContact || isString(license?.contactDetails?.billingContact.state)],
 
-  ['some', license => isString(license?.partnerDetails?.billingContact?.email)],
-  ['some', license => isString(license?.partnerDetails?.billingContact?.name)],
+  ['some', transaction => !!transaction?.partnerDetails],
+  ['every', transaction => !transaction?.partnerDetails || isString(transaction?.partnerDetails?.partnerName)],
+  ['some', transaction => !transaction?.partnerDetails || isString(transaction?.partnerDetails?.partnerType)],
 
-  ['every', license => isString(license?.contactDetails?.country)],
-  ['every', license => isString(license?.contactDetails?.region)],
-  ['every', license => isString(license?.hosting)],
-  ['every', license => isString(license?.lastUpdated)],
+  ['some', license => !!license?.partnerDetails?.billingContact],
+  ['every', license => !license?.partnerDetails?.billingContact || isString(license?.partnerDetails?.billingContact.email)],
+  ['every', license => !license?.partnerDetails?.billingContact || isString(license?.partnerDetails?.billingContact.name)],
+
+  ['every', license => isUndefined(license?.parentProductBillingCycle)],
+  ['every', license => isUndefined(license?.parentProductName)],
+  ['every', license => isUndefined(license?.installedOnSandbox)],
+  ['every', license => isUndefined(license?.parentProductEdition)],
 
   ['every', license => isUndefined(license?.evaluationLicense)],
   ['every', license => isUndefined(license?.daysToConvertEval)],
@@ -197,23 +240,51 @@ const licensesWithoutDataInsightsSchema: Array<['every' | 'some', (license: Lice
 ];
 
 const transactionsSchema: Array<['every' | 'some', (transaction: Transaction) => boolean]> = [
-  ['some', transaction => isString(transaction?.partnerDetails?.billingContact?.email)],
-  ['some', transaction => isString(transaction?.partnerDetails?.billingContact?.name)],
+  ['every', transaction => isString(transaction?.transactionId)],
+  ['every', transaction => isString(transaction?.addonLicenseId)],
+  ['every', transaction => isString(transaction?.licenseId)],
+  ['every', transaction => isString(transaction?.addonKey)],
+  ['every', transaction => isString(transaction?.addonName)],
 
-  ['some', transaction => isString(transaction?.customerDetails?.billingContact?.email)],
-  ['some', transaction => isString(transaction?.customerDetails?.billingContact?.name)],
-
-  ['some', transaction => isString(transaction?.customerDetails?.technicalContact?.email)],
-  ['some', transaction => isString(transaction?.customerDetails?.technicalContact?.name)],
-
+  ['every', transaction => !!transaction?.customerDetails],
+  ['every', transaction => isString(transaction?.customerDetails?.company)],
   ['every', transaction => isString(transaction?.customerDetails?.country)],
   ['every', transaction => isString(transaction?.customerDetails?.region)],
-  ['every', transaction => isString(transaction?.purchaseDetails?.hosting)],
+
+  ['every', transaction => !!transaction?.customerDetails.technicalContact],
+  ['every', transaction => isString(transaction?.customerDetails?.technicalContact?.email)],
+  ['some', transaction => isString(transaction?.customerDetails?.technicalContact?.name)],
+
+  ['every', transaction => !!transaction?.customerDetails.billingContact],
+  ['every', transaction => isString(transaction?.customerDetails?.billingContact?.email)],
+  ['some', transaction => isString(transaction?.customerDetails?.billingContact?.name)],
+
   ['every', transaction => isString(transaction?.purchaseDetails?.saleDate)],
+  ['every', transaction => isString(transaction?.purchaseDetails?.tier)],
+  ['every', transaction => isString(transaction?.purchaseDetails?.licenseType)],
+  ['every', transaction => isString(transaction?.purchaseDetails?.hosting)],
+  ['every', transaction => isString(transaction?.purchaseDetails?.billingPeriod)],
+  ['every', transaction => isNumber(transaction?.purchaseDetails?.purchasePrice)],
+  ['every', transaction => isNumber(transaction?.purchaseDetails?.vendorAmount)],
+  ['every', transaction => isString(transaction?.purchaseDetails?.saleType)],
+  ['every', transaction => isString(transaction?.purchaseDetails?.maintenanceStartDate)],
+  ['every', transaction => isString(transaction?.purchaseDetails?.maintenanceEndDate)],
+
+  ['some', transaction => !!transaction?.partnerDetails],
+  ['every', transaction => !transaction?.partnerDetails || isString(transaction?.partnerDetails?.partnerName)],
+  ['some', transaction => !transaction?.partnerDetails || isString(transaction?.partnerDetails?.partnerType)],
+
+  ['every', transaction => !transaction?.partnerDetails || !!transaction?.partnerDetails?.billingContact],
+  ['every', transaction => !transaction?.partnerDetails || isString(transaction?.partnerDetails?.billingContact?.email)],
+  ['every', transaction => !transaction?.partnerDetails || isString(transaction?.partnerDetails?.billingContact?.name)],
 ];
 
 function isString(s: string | undefined) {
   return typeof s === 'string' && s.length > 0;
+}
+
+function isNumber(s: number | undefined) {
+  return typeof s === 'number';
 }
 
 function isUndefined(s: any) {
