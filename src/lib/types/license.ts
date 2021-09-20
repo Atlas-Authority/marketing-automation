@@ -1,4 +1,15 @@
-import { Transaction } from "./transaction.js";
+import { PartnerDetails, Transaction } from "./transaction.js";
+
+type LicenseContact = {
+  email: string,
+  name?: string,
+  phone?: string,
+  address1?: string,
+  address2?: string,
+  city?: string,
+  state?: string,
+  postcode?: string,
+};
 
 export interface License {
   addonLicenseId: string,
@@ -16,35 +27,10 @@ export interface License {
     company?: string,
     country: string,
     region: string,
-    technicalContact: {
-      email: string,
-      name?: string,
-      phone?: string,
-      address1?: string,
-      address2?: string,
-      city?: string,
-      state?: string,
-      postcode?: string,
-    },
-    billingContact?: {
-      email: string,
-      name?: string,
-      phone?: string,
-      address1?: string,
-      address2?: string,
-      city?: string,
-      state?: string,
-      postcode?: string,
-    },
+    technicalContact: LicenseContact,
+    billingContact?: LicenseContact,
   },
-  partnerDetails?: {
-    partnerName: string,
-    partnerType?: string,
-    billingContact: {
-      email: string,
-      name: string,
-    },
-  },
+  partnerDetails?: PartnerDetails,
   evaluationOpportunitySize?: string,
   attribution?: {
     channel: string,

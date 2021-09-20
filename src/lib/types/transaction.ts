@@ -1,3 +1,17 @@
+type TransactionContact = {
+  email: string;
+  name?: string;
+};
+
+export type PartnerDetails = {
+  partnerName: string;
+  partnerType?: string;
+  billingContact: {
+    email: string;
+    name: string;
+  };
+};
+
 export interface Transaction {
   transactionId: string,
   addonLicenseId: string,
@@ -9,14 +23,8 @@ export interface Transaction {
     company: string,
     country: string,
     region: string,
-    technicalContact: {
-      email: string,
-      name?: string
-    },
-    billingContact?: {
-      email: string,
-      name?: string
-    }
+    technicalContact: TransactionContact,
+    billingContact?: TransactionContact
   },
   purchaseDetails: {
     saleDate: string,
@@ -30,12 +38,5 @@ export interface Transaction {
     maintenanceStartDate: string,
     maintenanceEndDate: string,
   },
-  partnerDetails?: {
-    partnerName: string,
-    partnerType?: string,
-    billingContact: {
-      email: string,
-      name: string,
-    },
-  },
+  partnerDetails?: PartnerDetails,
 }
