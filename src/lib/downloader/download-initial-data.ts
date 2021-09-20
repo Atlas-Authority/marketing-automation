@@ -240,9 +240,13 @@ function getEmails(item: Transaction | License) {
 }
 
 function makeEmailValidator(re: RegExp) {
-  return (item: Transaction | License) => (
-    getEmails(item).every(e => re.test(e))
-  );
+  return (item: Transaction | License) => {
+    if (!getEmails(item).every(e => re.test(e))) {
+      log.warn('Downloader', 'License/Transaction has invalid email(s); will be skipped', item);
+      return false;
+    }
+    return true;
+  };
 }
 
 function filterLicensesWithTechEmail(license: License) {
