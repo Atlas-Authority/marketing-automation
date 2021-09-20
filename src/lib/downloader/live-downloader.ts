@@ -54,7 +54,7 @@ export default class LiveDownloader implements Downloader {
 
   async downloadLicensesWithDataInsights(): Promise<License[]> {
     log.info('Live Downloader', 'Starting to download Licenses With Data Insights');
-    const promises = generateDates().map(async ({ startDate, endDate }) => {
+    const promises = dataInsightDateRanges().map(async ({ startDate, endDate }) => {
       const json: License[] = await downloadMarketplaceData(`/licenses/export?withDataInsights=true&startDate=${startDate}&endDate=${endDate}`);
       log.info('Live Downloader', 'Downloaded Licenses with-data-insights for range:', startDate, endDate);
       return json;
@@ -233,7 +233,7 @@ function save(file: string, data: unknown) {
   log.info('Live Downloader', 'Saved', file);
 }
 
-function generateDates() {
+function dataInsightDateRanges() {
   return Interval.fromDateTimes(
     DateTime.local(2018, 7, 1),
     DateTime.local()
