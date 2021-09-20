@@ -58,17 +58,10 @@ export default class LiveDownloader implements Downloader {
     const promises = generateDates().map(async ({ startDate, endDate }) => {
       const json: License[] = await downloadMarketplaceData(`/licenses/export?withDataInsights=true&startDate=${startDate}&endDate=${endDate}`);
       log.info('Live Downloader', 'Downloaded Licenses with-data-insights for range:', startDate, endDate);
-      return { date: `${startDate}-${endDate}`, json };
+      return json;
     });
 
-    let licenses = await Promise.all(promises).then(results => {
-      let array: License[] = [];
-      for (const result of results) {
-        array = array.concat(result.json);
-      }
-      return array;
-    });
-
+    const licenses = (await Promise.all(promises)).flat();
     licenses.forEach(fixOdditiesInLicenses);
     save('licenses-with.json', licenses);
     return licenses;
