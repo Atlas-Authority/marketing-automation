@@ -1,7 +1,6 @@
 import slack from '@slack/web-api';
 import config from './config/index.js';
-import logger from './logger.js';
-
+import log from './logger.js';
 
 export default class Slack {
 
@@ -13,7 +12,7 @@ export default class Slack {
   }
 
   async postAttachmentToSlack({ title, content }: { title: string, content: string }) {
-    logger.info('Slack', title, content);
+    log.info('Slack', title, content);
 
     if (config.slack.errorChannelId) {
       await this.slackWebClient.files.upload({
@@ -25,7 +24,7 @@ export default class Slack {
   }
 
   async postToSlack(text: string) {
-    logger.info('Slack', text);
+    log.info('Slack', text);
 
     if (config.slack.errorChannelId) {
       await this.slackWebClient.chat.postMessage({
