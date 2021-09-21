@@ -3,7 +3,7 @@ import { getCliOptions } from "../lib/util/cli.js";
 import config from "../lib/util/config/index.js";
 import { AttachableError, SimpleError } from '../lib/util/errors.js';
 import run from '../lib/util/runner.js';
-import Slack from "../lib/util/slack.js";
+import Slack from "../lib/services/slack.js";
 
 const { downloader, uploader } = getCliOptions();
 
