@@ -8,8 +8,10 @@ import { Transaction } from '../types/transaction.js';
 import config, { DealStage, Pipeline } from '../util/config/index.js';
 import { isPresent, sorter } from '../util/helpers.js';
 import { saveForInspection } from '../util/inspection.js';
+import log from '../util/logger.js';
 import { ActionGenerator } from './deal-generator/actions.js';
 import { DealFinder } from './deal-generator/deal-finder.js';
+import { EventGenerator } from './deal-generator/events.js';
 import { calculateTierFromLicenseContext } from './deal-generator/tiers.js';
 
 function dealPropertiesForLicense(license: License, transactions: Transaction[]): Omit<Deal['properties'], 'dealstage'> {
@@ -179,9 +181,9 @@ class DealActionGenerator {
     assert.ok(groups.length > 0);
     if (this.ignoring(groups)) return;
 
-    // const events = new EventGenerator().interpretAsEvents(groups);
-    // const actions = this.actionGenerator.generateFrom(events);
-    // logger.detailed('Deal Actions', 'Generated deal actions', actions);
+    const events = new EventGenerator().interpretAsEvents(groups);
+    const actions = this.actionGenerator.generateFrom(events);
+    log.detailed('Deal Actions', 'Generated deal actions', actions);
 
     const licenseDeals = new Set<Deal>();
     for (const license of groups.map(g => g.license)) {
