@@ -1,5 +1,6 @@
 import assert from 'assert';
 import util from 'util';
+import { isLicense } from '../engine/deal-generator/records.js';
 import { Company } from '../types/company.js';
 import { Contact } from '../types/contact.js';
 import { Deal } from '../types/deal.js';
@@ -316,7 +317,12 @@ function getEmails(item: Transaction | License) {
 function makeEmailValidator(re: RegExp) {
   return (item: Transaction | License) => {
     if (!getEmails(item).every(e => re.test(e))) {
-      log.warn('Downloader', 'License/Transaction has invalid email(s); will be skipped', item);
+      if (isLicense(item)) {
+        log.warn('Downloader', 'License has invalid email(s); will be skipped', item.addonLicenseId);
+      }
+      else {
+        log.warn('Downloader', 'Transaction has invalid email(s); will be skipped', item.transactionId);
+      }
       return false;
     }
     return true;
@@ -325,7 +331,7 @@ function makeEmailValidator(re: RegExp) {
 
 function filterLicensesWithTechEmail(license: License) {
   if (!license.contactDetails.technicalContact?.email) {
-    log.warn('Downloader', 'License does not have a tech contact email; will be skipped', license);
+    log.warn('Downloader', 'License does not have a tech contact email; will be skipped', license.addonLicenseId);
     return false;
   }
   return true;
