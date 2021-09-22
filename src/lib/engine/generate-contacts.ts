@@ -37,7 +37,7 @@ export function generateContacts({ licenses, transactions, initialContacts, part
   return finalContacts;
 }
 
-function mergeDuplicateContacts(generatedContacts: TmpContact[], initialContacts: Contact[]) {
+function mergeDuplicateContacts(generatedContacts: TmpContact[], initialContacts: Contact[]): GeneratedContact[] {
   const map = new Map<string, TmpContact[]>();
 
   for (const contact of generatedContacts) {
