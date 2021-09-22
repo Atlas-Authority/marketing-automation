@@ -5,7 +5,7 @@ import { ContactsByEmail } from '../types/contact.js';
 import { Deal, DealUpdate } from '../types/deal.js';
 import { License, RelatedLicenseSet } from '../types/license.js';
 import { Transaction } from '../types/transaction.js';
-import config, { DealStage, Pipeline } from '../util/config/index.js';
+import config, { Pipeline } from '../util/config/index.js';
 import { isPresent, sorter } from '../util/helpers.js';
 import { saveForInspection } from '../util/inspection.js';
 import log from '../util/logger.js';
@@ -144,25 +144,6 @@ export function generateDeals(data: {
   return { dealsToCreate, dealsToUpdate, associationsToCreate, associationsToRemove };
 }
 
-type DealUpdateAction = {
-  id: string,
-  license?: License,
-  transactions: Transaction[],
-  properties: {
-    addonlicenseid: Deal['properties']['addonlicenseid'],
-    closedate?: Deal['properties']['closedate'],
-    amount?: Deal['properties']['amount'],
-    dealstage?: Deal['properties']['dealstage'],
-  },
-};
-
-type DealCreateAction = {
-  dealstage: DealStage,
-  license: License,
-  transactions: Transaction[],
-  amount: string,
-};
-
 /** Generates deal actions based on match data */
 class DealActionGenerator {
 
@@ -241,10 +222,6 @@ function generateDealActions(data: {
 }
 
 const NINETY_DAYS_AS_MS = (1000 * 60 * 60 * 24 * 90);
-
-function isFreeLicense(license: License) {
-  return license.licenseType === 'EVALUATION' || license.licenseType === 'OPEN_SOURCE';
-}
 
 export function olderThan90Days(dateString: string) {
   const now = Date.now();
