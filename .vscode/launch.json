@@ -10,9 +10,6 @@
       "skipFiles": [
         "<node_internals>/**"
       ],
-      "env": {
-        "LOGLEVEL": "verbose"
-      },
       "program": "${workspaceFolder}/src/bin/run-once.ts",
       "args": [
         "--downloader=cached",
@@ -30,9 +27,6 @@
       "skipFiles": [
         "<node_internals>/**"
       ],
-      "env": {
-        "LOGLEVEL": "verbose"
-      },
       "program": "${workspaceFolder}/src/bin/run-once.ts",
       "args": [
         "--downloader=cached",

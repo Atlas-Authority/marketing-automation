@@ -17,7 +17,7 @@ export const ADDONKEY_TO_PLATFORM: { [addonKey: string]: string } = Object.fromE
 );
 
 export default {
-  logLevel: logLevelFromString(optional('LOGLEVEL')?.trim().toLowerCase() || 'info'),
+  logLevel: logLevelFromString(optional('LOGLEVEL')?.trim().toLowerCase() || 'verbose'),
   mpac: {
     user: required('MPAC_USER'),
     pass: required('MPAC_PASS'),
