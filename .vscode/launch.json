@@ -5,23 +5,6 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Run cached-download",
-      "request": "launch",
-      "skipFiles": [
-        "<node_internals>/**"
-      ],
-      "program": "${workspaceFolder}/src/bin/run-once.ts",
-      "args": [
-        "--downloader=cached",
-        "--uploader=console",
-      ],
-      "type": "pwa-node",
-      "outFiles": [
-        "${workspaceFolder}/out/**/*.js",
-        "!**/node_modules/**"
-      ]
-    },
-    {
       "name": "Run cached-download/scorer",
       "request": "launch",
       "skipFiles": [
@@ -32,6 +15,23 @@
         "--downloader=cached",
         "--uploader=console",
         "--cached-fns=scorer.dat",
+      ],
+      "type": "pwa-node",
+      "outFiles": [
+        "${workspaceFolder}/out/**/*.js",
+        "!**/node_modules/**"
+      ]
+    },
+    {
+      "name": "Run cached-download",
+      "request": "launch",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "program": "${workspaceFolder}/src/bin/run-once.ts",
+      "args": [
+        "--downloader=cached",
+        "--uploader=console",
       ],
       "type": "pwa-node",
       "outFiles": [
