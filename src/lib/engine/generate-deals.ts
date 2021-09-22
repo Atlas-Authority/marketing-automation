@@ -77,13 +77,15 @@ export function generateDeals(data: {
     partnerDomains: data.partnerDomains,
   });
 
-  const dealsToCreate: Omit<Deal, 'id'>[] = dealCreateActions.map(({ license, transactions, dealstage, amount }) => {
+  const dealsToCreate: Omit<Deal, 'id'>[] = dealCreateActions.map(({ groups, properties }) => {
+    // TODO: We probably actually want to use *all* of these groups.
+    const { license, transactions } = groups[0];
+
     const contactIds = contactIdsForLicense(data.contactsByEmail, license);
     const generatedProperties = dealPropertiesForLicense(license, transactions);
-    const properties = {
+    properties = {
       ...generatedProperties,
-      amount,
-      dealstage,
+      ...properties,
     };
     return { contactIds, properties };
   });
