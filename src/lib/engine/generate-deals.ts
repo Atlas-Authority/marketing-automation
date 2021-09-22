@@ -3,7 +3,7 @@ import _ from 'lodash';
 import mustache from 'mustache';
 import { ContactsByEmail } from '../types/contact.js';
 import { Deal, DealUpdate } from '../types/deal.js';
-import { License, RelatedLicenseSet } from '../types/license.js';
+import { License, LicenseContext, RelatedLicenseSet } from '../types/license.js';
 import { Transaction } from '../types/transaction.js';
 import config, { Pipeline } from '../util/config/index.js';
 import { isPresent, sorter } from '../util/helpers.js';
@@ -12,6 +12,7 @@ import log from '../util/logger.js';
 import { ActionGenerator, CreateDealAction, UpdateDealAction } from './deal-generator/actions.js';
 import { DealFinder } from './deal-generator/deal-finder.js';
 import { EventGenerator } from './deal-generator/events.js';
+import { getEmails } from './deal-generator/records.js';
 import { calculateTierFromLicenseContext } from './deal-generator/tiers.js';
 
 function dealPropertiesForLicense(license: License, transactions: Transaction[]): Omit<Deal['properties'], 'dealstage'> {
@@ -44,20 +45,15 @@ function dealPropertiesForLicense(license: License, transactions: Transaction[])
   };
 }
 
-function contactIdsForLicense(contacts: ContactsByEmail, license: License) {
-  const techEmail = license.contactDetails.technicalContact.email;
-  const billingEmail = license.contactDetails.billingContact?.email;
-  const partnerEmail = license.partnerDetails?.billingContact?.email;
-
-  const techContact = contacts[techEmail];
-  const billingContact = billingEmail ? contacts[billingEmail] : undefined;
-  const partnerContact = partnerEmail ? contacts[partnerEmail] : undefined;
-
-  return _.uniq([
-    techContact?.hs_object_id,
-    billingContact?.hs_object_id,
-    partnerContact?.hs_object_id,
-  ].filter(isPresent));
+function contactIdsFor(contacts: ContactsByEmail, groups: LicenseContext[]) {
+  return (_.uniq(
+    groups
+      .flatMap(group => [group.license, ...group.transactions])
+      .flatMap(getEmails)
+  )
+    .map(email => contacts[email])
+    .filter(isPresent)
+    .map(c => c.hs_object_id));
 }
 
 export function generateDeals(data: {
@@ -81,7 +77,7 @@ export function generateDeals(data: {
     // TODO: We probably actually want to use *all* of these groups.
     const { license, transactions } = groups[0];
 
-    const contactIds = contactIdsForLicense(data.contactsByEmail, license);
+    const contactIds = contactIdsFor(data.contactsByEmail, groups);
     const generatedProperties = dealPropertiesForLicense(license, transactions);
     properties = {
       ...generatedProperties,
@@ -105,7 +101,7 @@ export function generateDeals(data: {
       // Start with deal->contact associations
 
       const oldAssociatedContactIds = oldDeal['contactIds'];
-      const newAssociatedContactIds = contactIdsForLicense(data.contactsByEmail, license);
+      const newAssociatedContactIds = contactIdsFor(data.contactsByEmail, groups);
       assert.ok(newAssociatedContactIds);
 
       const creatingAssociatedContactIds = newAssociatedContactIds.filter(id => !oldAssociatedContactIds.includes(id));
