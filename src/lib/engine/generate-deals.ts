@@ -95,9 +95,9 @@ export function generateDeals(data: {
   const associationsToCreate: Array<{ contactId: string, dealId: string }> = [];
   const associationsToRemove: Array<{ contactId: string, dealId: string }> = [];
 
-  for (const { id, properties, license, transactions } of dealUpdateActions) {
-    const oldDeal = data.initialDeals.find(oldDeal => oldDeal.id === id);
-    assert.ok(oldDeal);
+  for (const { deal: oldDeal, properties, groups } of dealUpdateActions) {
+    // TODO: We probably actually want to use *all* of these groups.
+    const { license, transactions } = groups[0];
 
     let newDeal: DealUpdate;
 
@@ -118,7 +118,7 @@ export function generateDeals(data: {
 
       const generatedProperties = dealPropertiesForLicense(license, transactions);
       newDeal = {
-        id,
+        id: oldDeal.id,
         properties: {
           ...generatedProperties,
           ...properties,
@@ -126,7 +126,7 @@ export function generateDeals(data: {
       };
     }
     else {
-      newDeal = { id, properties };
+      newDeal = { id: oldDeal.id, properties };
     }
 
     for (const [key, val] of Object.entries(newDeal.properties)) {
