@@ -9,7 +9,7 @@ import config, { DealStage, Pipeline } from '../util/config/index.js';
 import { isPresent, sorter } from '../util/helpers.js';
 import { saveForInspection } from '../util/inspection.js';
 import log from '../util/logger.js';
-import { ActionGenerator } from './deal-generator/actions.js';
+import { ActionGenerator, CreateDealAction, UpdateDealAction } from './deal-generator/actions.js';
 import { DealFinder } from './deal-generator/deal-finder.js';
 import { EventGenerator } from './deal-generator/events.js';
 import { calculateTierFromLicenseContext } from './deal-generator/tiers.js';
@@ -167,8 +167,8 @@ class DealActionGenerator {
   actionGenerator: ActionGenerator;
   dealFinder: DealFinder;
 
-  dealCreateActions: DealCreateAction[] = [];
-  dealUpdateActions: DealUpdateAction[] = [];
+  dealCreateActions: CreateDealAction[] = [];
+  dealUpdateActions: UpdateDealAction[] = [];
 
   ignoredLicenseSets: (License & { reason: string })[][] = [];
 
@@ -185,152 +185,12 @@ class DealActionGenerator {
     const actions = this.actionGenerator.generateFrom(events);
     log.detailed('Deal Actions', 'Generated deal actions', actions);
 
-    const licenseDeals = new Set<Deal>();
-    for (const license of groups.map(g => g.license)) {
-      const deal = this.dealFinder.getDeal([license]);
-      if (deal) licenseDeals.add(deal);
-    }
-
-    let deal = licenseDeals.size > 0 ? [...licenseDeals][0] : null;
-
-    /** Licenses in this group */
-    const licenses = (groups
-      .map(g => g.license)
-      .sort(sorter(l => l.maintenanceStartDate, 'ASC'))
-    );
-
-    if (licenses.every(l => isFreeLicense(l))) {
-      // It's only evals
-      assert.ok(groups.flatMap(g => g.transactions).length === 0);
-
-      const latestLicense = licenses[licenses.length - 1];
-
-      if (deal) {
-        // Deal exists, update it
-
-        if (latestLicense.status === 'active') {
-          const closeDate = (groups
-            .flatMap(tx => tx.transactions)
-            .map(tx => tx.purchaseDetails.saleDate)
-            .sort()[0] || latestLicense.maintenanceStartDate);
-
-          if (
-            closeDate !== deal.properties.closedate ||
-            latestLicense.addonLicenseId !== deal.properties.addonlicenseid
-          ) {
-            this.dealUpdateActions.push({
-              id: deal.id,
-              transactions: groups.flatMap(g => g.transactions),
-              properties: {
-                addonlicenseid: latestLicense.addonLicenseId,
-                closedate: closeDate,
-              },
-            });
-          }
-          else {
-            // Ignoring (not updating eval) because it already has the same close date
-            this.ignoreLicenses("eval-up-to-date", licenses);
-          }
-        }
-        else {
-          this.dealUpdateActions.push({
-            id: deal.id,
-            transactions: groups.flatMap(g => g.transactions),
-            properties: {
-              addonlicenseid: latestLicense.addonLicenseId,
-              dealstage: DealStage.CLOSED_LOST,
-            },
-          });
-        }
+    for (const action of actions) {
+      switch (action.type) {
+        case 'create': this.dealCreateActions.push(action); break;
+        case 'update': this.dealUpdateActions.push(action); break;
       }
-      else {
-        // No deal for them yet.
-
-        if (latestLicense.status === 'active') {
-          this.dealCreateActions.push({
-            dealstage: DealStage.EVAL,
-            transactions: groups.flatMap(g => g.transactions),
-            license: latestLicense,
-            amount: '0',
-          });
-        }
-        else {
-          // Ignoring (not creating eval) because it's inactive
-          this.ignoreLicenses("inactive-evals", licenses);
-        }
-      }
-
     }
-    else {
-      // Some (maybe all) are paid
-
-      const isFirstEval = isFreeLicense(licenses[0]);
-      const firstFoundPaid = licenses.find(l => !isFreeLicense(l));
-
-      /** Transactions for this deal */
-      const transactions = (groups
-        .flatMap(g => g.transactions)
-        .filter(tx => tx.purchaseDetails.saleType !== 'Refund')
-        .sort(sorter(tx => tx.purchaseDetails.saleDate))
-      );
-
-      let price = (transactions
-        .find(tx => tx) // just return first, if any exists
-        ?.purchaseDetails
-        .vendorAmount);
-
-      if (firstFoundPaid) {
-        if (isFirstEval) {
-          if (deal) {
-            this.dealUpdateActions.push({
-              id: deal.id,
-              license: firstFoundPaid,
-              transactions,
-              properties: {
-                addonlicenseid: firstFoundPaid.addonLicenseId,
-                dealstage: DealStage.CLOSED_WON,
-                ...(price && { amount: price.toFixed(2) }),
-              },
-            });
-          }
-          else {
-            this.dealCreateActions.push({
-              dealstage: DealStage.CLOSED_WON,
-              license: firstFoundPaid,
-              transactions,
-              amount: (price ?? 0).toFixed(2),
-            });
-          }
-        }
-        else {
-          if (deal) {
-            // Only close/update evals, leave closed deals alone
-            if (deal.properties.dealstage === DealStage.EVAL) {
-              this.dealUpdateActions.push({
-                id: deal.id,
-                license: firstFoundPaid,
-                transactions,
-                properties: {
-                  addonlicenseid: firstFoundPaid.addonLicenseId,
-                  dealstage: DealStage.CLOSED_WON,
-                  ...(price && { amount: price.toFixed(2) }),
-                },
-              });
-            }
-          }
-          else {
-            this.dealCreateActions.push({
-              dealstage: DealStage.CLOSED_WON,
-              license: firstFoundPaid,
-              transactions: transactions,
-              amount: (price ?? 0).toFixed(2),
-            });
-          }
-        }
-      }
-
-    }
-
   }
 
   /** Ignore if every license's tech contact domain is partner or mass-provider */
