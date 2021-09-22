@@ -11,9 +11,9 @@ export function generateContacts({ licenses, transactions, initialContacts, part
   initialContacts: Contact[],
   partnerDomains: Set<string>,
 }): GeneratedContact[] {
-  const allContacts = normalizeContacts({ licenses, transactions, partnerDomains });
+  const generatedContacts = normalizeContacts({ licenses, transactions, partnerDomains });
 
-  const finalContacts = mergeDuplicateContacts(allContacts, initialContacts);
+  const finalContacts = mergeDuplicateContacts(generatedContacts, initialContacts);
 
   assert.ok(finalContacts.every(c => (
     c.contact_type.length > 0 &&
@@ -37,10 +37,10 @@ export function generateContacts({ licenses, transactions, initialContacts, part
   return finalContacts;
 }
 
-function mergeDuplicateContacts(allContacts: TmpContact[], initialContacts: Contact[]) {
+function mergeDuplicateContacts(generatedContacts: TmpContact[], initialContacts: Contact[]) {
   const map = new Map<string, TmpContact[]>();
 
-  for (const contact of allContacts) {
+  for (const contact of generatedContacts) {
     if (!map.has(contact.email)) map.set(contact.email, []);
     map.get(contact.email)?.push(contact);
   }
@@ -120,26 +120,26 @@ function normalizeContacts({ licenses, transactions, partnerDomains }: {
   transactions: Transaction[],
   partnerDomains: Set<string>,
 }) {
-  const allContacts: TmpContact[] = [];
+  const generatedContacts: TmpContact[] = [];
 
   for (const license of licenses) {
 
     if (license.contactDetails.technicalContact.email) {
-      allContacts.push({
+      generatedContacts.push({
         ...mapCommonFields(license.contactDetails.technicalContact, partnerDomains),
         ...mapLicenseSpecificFields(license),
       });
     }
 
     if (license.contactDetails.billingContact?.email) {
-      allContacts.push({
+      generatedContacts.push({
         ...mapCommonFields(license.contactDetails.billingContact, partnerDomains),
         ...mapLicenseSpecificFields(license),
       });
     }
 
     if (license.partnerDetails?.billingContact.email) {
-      allContacts.push({
+      generatedContacts.push({
         ...mapCommonFields(license.partnerDetails.billingContact, partnerDomains),
         ...mapLicenseSpecificFields(license),
         contact_type: 'Partner',
@@ -151,21 +151,21 @@ function normalizeContacts({ licenses, transactions, partnerDomains }: {
   for (const transaction of transactions) {
 
     if (transaction.customerDetails.technicalContact.email) {
-      allContacts.push({
+      generatedContacts.push({
         ...mapCommonFields(transaction.customerDetails.technicalContact, partnerDomains),
         ...mapTransactionSpecificFields(transaction),
       });
     }
 
     if (transaction.customerDetails.billingContact?.email) {
-      allContacts.push({
+      generatedContacts.push({
         ...mapCommonFields(transaction.customerDetails.billingContact, partnerDomains),
         ...mapTransactionSpecificFields(transaction),
       });
     }
 
     if (transaction.partnerDetails?.billingContact.email) {
-      allContacts.push({
+      generatedContacts.push({
         ...mapCommonFields(transaction.partnerDetails.billingContact, partnerDomains),
         ...mapTransactionSpecificFields(transaction),
         contact_type: 'Partner',
@@ -174,7 +174,7 @@ function normalizeContacts({ licenses, transactions, partnerDomains }: {
 
   }
 
-  return allContacts;
+  return generatedContacts;
 }
 
 function mapCommonFields(info: {
