@@ -40,26 +40,36 @@ export function generateContacts({ licenses, transactions, initialContacts, part
 function mergeDuplicateContacts(generatedContacts: TmpContact[], initialContacts: Contact[]): GeneratedContact[] {
   const map = new Map<string, TmpContact[]>();
 
+  // Merge all generated contacts into an array.
   for (const contact of generatedContacts) {
     if (!map.has(contact.email)) map.set(contact.email, []);
     map.get(contact.email)?.push(contact);
   }
 
+  // Merge secondary-email contact arrays into primary-email contact arrays.
+  // Primary/secondary emails are only available in HubSpot contacts.
+  // For any contact this loop skips, it means there's no HubSpot contact.
   for (const { email, otherEmails } of initialContacts) {
+    // Only deal with HubSpot contacts that have secondary emails.
     if (otherEmails.length === 0) continue;
 
-    const primarySet = map.get(email);
-    if (primarySet) {
-      for (const other of otherEmails) {
-        const otherSet = map.get(other);
-        if (otherSet) {
-          map.delete(other);
-          primarySet.push(...otherSet);
-        }
+    // If we didn't generate a contact with the primary-email, create an empty list now.
+    // This can happen if the customer only used secondary-email for licenses/transactions.
+    let primarySet = map.get(email);
+    if (!primarySet) map.set(email, primarySet = []);
+
+    for (const other of otherEmails) {
+      const otherSet = map.get(other);
+      if (otherSet) {
+        map.delete(other);
+        primarySet.push(...otherSet);
       }
     }
-    else {
-      assert.ok(otherEmails.every(other => !map.has(other)));
+
+    // We didn't end up adding any, so remove it.
+    // (There's probably a much better way to write this function.)
+    if (primarySet.length === 0) {
+      map.delete(email);
     }
   }
 
