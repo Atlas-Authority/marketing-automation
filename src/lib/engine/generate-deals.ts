@@ -15,7 +15,10 @@ import { EventGenerator } from './deal-generator/events.js';
 import { getEmails } from './deal-generator/records.js';
 import { calculateTierFromLicenseContext } from './deal-generator/tiers.js';
 
-function dealPropertiesForLicense(license: License, transactions: Transaction[]): Omit<Deal['properties'], 'dealstage'> {
+function dealPropertiesFor(groups: LicenseContext[]): Omit<Deal['properties'], 'dealstage'> {
+  // TODO: use all the groups
+  const { license, transactions } = groups[0];
+
   const tiers = calculateTierFromLicenseContext({ license, transactions });
   const tier = Math.max(...tiers);
 
@@ -74,11 +77,8 @@ export function generateDeals(data: {
   });
 
   const dealsToCreate: Omit<Deal, 'id'>[] = dealCreateActions.map(({ groups, properties }) => {
-    // TODO: We probably actually want to use *all* of these groups.
-    const { license, transactions } = groups[0];
-
     const contactIds = contactIdsFor(data.contactsByEmail, groups);
-    const generatedProperties = dealPropertiesForLicense(license, transactions);
+    const generatedProperties = dealPropertiesFor(groups);
     properties = {
       ...generatedProperties,
       ...properties,
@@ -92,9 +92,6 @@ export function generateDeals(data: {
   const associationsToRemove: Array<{ contactId: string, dealId: string }> = [];
 
   for (const { deal: oldDeal, properties, groups } of dealUpdateActions) {
-    // TODO: We probably actually want to use *all* of these groups.
-    const { license, transactions } = groups[0];
-
     // Start with deal->contact associations
 
     const oldAssociatedContactIds = oldDeal['contactIds'];
@@ -109,7 +106,7 @@ export function generateDeals(data: {
 
     // Now deal with deal
 
-    const generatedProperties = dealPropertiesForLicense(license, transactions);
+    const generatedProperties = dealPropertiesFor(groups);
     const newDeal: DealUpdate = {
       id: oldDeal.id,
       properties: {
