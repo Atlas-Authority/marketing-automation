@@ -95,35 +95,28 @@ export function generateDeals(data: {
     // TODO: We probably actually want to use *all* of these groups.
     const { license, transactions } = groups[0];
 
-    let newDeal: DealUpdate;
+    // Start with deal->contact associations
 
-    if (license) {
-      // Start with deal->contact associations
+    const oldAssociatedContactIds = oldDeal['contactIds'];
+    const newAssociatedContactIds = contactIdsFor(data.contactsByEmail, groups);
+    assert.ok(newAssociatedContactIds);
 
-      const oldAssociatedContactIds = oldDeal['contactIds'];
-      const newAssociatedContactIds = contactIdsFor(data.contactsByEmail, groups);
-      assert.ok(newAssociatedContactIds);
+    const creatingAssociatedContactIds = newAssociatedContactIds.filter(id => !oldAssociatedContactIds.includes(id));
+    const removingAssociatedContactIds = oldAssociatedContactIds.filter(id => !newAssociatedContactIds.includes(id));
 
-      const creatingAssociatedContactIds = newAssociatedContactIds.filter(id => !oldAssociatedContactIds.includes(id));
-      const removingAssociatedContactIds = oldAssociatedContactIds.filter(id => !newAssociatedContactIds.includes(id));
+    if (creatingAssociatedContactIds.length > 0) associationsToCreate.push(...creatingAssociatedContactIds.map(contactId => ({ contactId, dealId: oldDeal.id })));
+    if (removingAssociatedContactIds.length > 0) associationsToRemove.push(...removingAssociatedContactIds.map(contactId => ({ contactId, dealId: oldDeal.id })));
 
-      if (creatingAssociatedContactIds.length > 0) associationsToCreate.push(...creatingAssociatedContactIds.map(contactId => ({ contactId, dealId: oldDeal.id })));
-      if (removingAssociatedContactIds.length > 0) associationsToRemove.push(...removingAssociatedContactIds.map(contactId => ({ contactId, dealId: oldDeal.id })));
+    // Now deal with deal
 
-      // Now deal with deal
-
-      const generatedProperties = dealPropertiesForLicense(license, transactions);
-      newDeal = {
-        id: oldDeal.id,
-        properties: {
-          ...generatedProperties,
-          ...properties,
-        },
-      };
-    }
-    else {
-      newDeal = { id: oldDeal.id, properties };
-    }
+    const generatedProperties = dealPropertiesForLicense(license, transactions);
+    const newDeal: DealUpdate = {
+      id: oldDeal.id,
+      properties: {
+        ...generatedProperties,
+        ...properties,
+      },
+    };
 
     for (const [key, val] of Object.entries(newDeal.properties)) {
       const typedKey = key as keyof Deal['properties'];
