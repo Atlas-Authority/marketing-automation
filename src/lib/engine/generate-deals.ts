@@ -1,52 +1,15 @@
 import * as assert from 'assert';
 import _ from 'lodash';
-import mustache from 'mustache';
 import { ContactsByEmail } from '../types/contact.js';
 import { Deal, DealUpdate } from '../types/deal.js';
 import { License, LicenseContext, RelatedLicenseSet } from '../types/license.js';
-import { Transaction } from '../types/transaction.js';
-import config, { Pipeline } from '../util/config/index.js';
-import { isPresent, sorter } from '../util/helpers.js';
+import { isPresent } from '../util/helpers.js';
 import { saveForInspection } from '../util/inspection.js';
 import log from '../util/logger.js';
 import { ActionGenerator, CreateDealAction, UpdateDealAction } from './deal-generator/actions.js';
 import { DealFinder } from './deal-generator/deal-finder.js';
 import { EventGenerator } from './deal-generator/events.js';
 import { getEmails } from './deal-generator/records.js';
-import { calculateTierFromLicenseContext } from './deal-generator/tiers.js';
-
-function dealPropertiesFor(groups: LicenseContext[]): Omit<Deal['properties'], 'dealstage'> {
-  // TODO: use all the groups
-  const { license, transactions } = groups[0];
-
-  const tiers = calculateTierFromLicenseContext({ license, transactions });
-  const tier = Math.max(...tiers);
-
-  const firstPaidTransaction = (
-    transactions
-      .sort(sorter(tx => tx.purchaseDetails.saleDate, 'ASC'))
-      .find(tx => tx.purchaseDetails.saleType !== 'Refund')
-  );
-
-  const amount = firstPaidTransaction?.purchaseDetails.vendorAmount ?? 0;
-
-  return {
-    addonlicenseid: license.addonLicenseId,
-    transactionid: '',
-    closedate: (
-      transactions.map(tx => tx.purchaseDetails.saleDate).sort()[0]
-      || license.maintenanceStartDate),
-    deployment: license.hosting,
-    aa_app: license.addonKey,
-    license_tier: tier.toFixed(),
-    country: license.contactDetails.country,
-    origin: config.constants.dealOrigin,
-    related_products: config.constants.dealRelatedProducts,
-    dealname: mustache.render(config.constants.dealDealName, { license }),
-    pipeline: Pipeline.AtlassianMarketplace,
-    amount: amount.toString(),
-  };
-}
 
 function contactIdsFor(contacts: ContactsByEmail, groups: LicenseContext[]) {
   return (_.uniq(
