@@ -26,8 +26,14 @@ export class ActionGenerator {
         const action = this.actionForPurchase(event);
         return action ? [action] : [];
       }
-      case 'renewal': return [this.actionForRenewal(event)];
-      case 'upgrade': return [this.actionForRenewal(event)];
+      case 'renewal': {
+        const action = this.actionForRenewal(event);
+        return action ? [action] : [];
+      }
+      case 'upgrade': {
+        const action = this.actionForRenewal(event);
+        return action ? [action] : [];
+      }
       case 'refund': return this.actionsForRefund(event);
     }
   }
@@ -68,7 +74,11 @@ export class ActionGenerator {
     }
   }
 
-  private actionForRenewal(event: RenewalEvent | UpgradeEvent): Action {
+  private actionForRenewal(event: RenewalEvent | UpgradeEvent): Action | null {
+    const deal = this.dealFinder.getDeal([event.transaction]);
+    if (deal) {
+      return null;
+    }
     return makeCreateAction(event, event.transaction, DealStage.CLOSED_WON);
   }
 
