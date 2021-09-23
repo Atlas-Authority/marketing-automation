@@ -24,7 +24,7 @@ export interface License {
   status: 'inactive' | 'active' | 'cancelled',
   tier: string,
   contactDetails: {
-    company?: string,
+    company: string,
     country: string,
     region: string,
     technicalContact: LicenseContact,
