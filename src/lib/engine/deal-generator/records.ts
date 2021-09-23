@@ -118,9 +118,7 @@ export function dealCreationProperties(record: License | Transaction, dealstage:
       ? record.hosting
       : record.purchaseDetails.hosting),
     aa_app: record.addonKey,
-    license_tier: (isLicense(record)
-      ? record.tier
-      : record.purchaseDetails.tier),
+    license_tier: getTier(record).toFixed(),
     country: (isLicense(record)
       ? record.contactDetails.country
       : record.customerDetails.country),
