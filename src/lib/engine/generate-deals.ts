@@ -78,11 +78,6 @@ export function generateDeals(data: {
 
   const dealsToCreate: Omit<Deal, 'id'>[] = dealCreateActions.map(({ groups, properties }) => {
     const contactIds = contactIdsFor(data.contactsByEmail, groups);
-    const generatedProperties = dealPropertiesFor(groups);
-    properties = {
-      ...generatedProperties,
-      ...properties,
-    };
     return { contactIds, properties };
   });
 
