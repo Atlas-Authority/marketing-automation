@@ -101,13 +101,9 @@ export function generateDeals(data: {
 
     // Now deal with deal
 
-    const generatedProperties = dealPropertiesFor(groups);
     const newDeal: DealUpdate = {
       id: oldDeal.id,
-      properties: {
-        ...generatedProperties,
-        ...properties,
-      },
+      properties,
     };
 
     for (const [key, val] of Object.entries(newDeal.properties)) {
