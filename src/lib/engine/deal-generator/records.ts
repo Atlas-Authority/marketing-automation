@@ -127,7 +127,9 @@ export function dealCreationProperties(record: License | Transaction, dealstage:
     dealname: mustache.render(config.constants.dealDealName, dealNameTemplateProperties),
     dealstage,
     pipeline: Pipeline.AtlassianMarketplace,
-    amount: '',
+    amount: (isLicense(record)
+      ? ''
+      : record.purchaseDetails.vendorAmount.toString()),
   };
 }
 
