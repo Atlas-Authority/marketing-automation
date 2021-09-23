@@ -85,10 +85,20 @@ export class ActionGenerator {
 
 }
 
-type Action = (
-  { type: 'update', groups: LicenseContext[], deal: Deal, properties: Partial<Deal['properties']> } |
-  { type: 'create', groups: LicenseContext[], properties: Deal['properties'] }
-);
+export type CreateDealAction = {
+  type: 'create';
+  groups: LicenseContext[];
+  properties: Deal['properties'];
+};
+
+export type UpdateDealAction = {
+  type: 'update';
+  groups: LicenseContext[];
+  deal: Deal;
+  properties: Partial<Deal['properties']>;
+};
+
+export type Action = CreateDealAction | UpdateDealAction;
 
 function makeCreateAction(event: DealRelevantEvent, record: License | Transaction, dealstage: DealStage): Action {
   return {

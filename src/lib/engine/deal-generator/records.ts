@@ -4,7 +4,7 @@ import { Deal } from '../../types/deal.js';
 import { License, LicenseContext } from '../../types/license.js';
 import { Transaction } from '../../types/transaction.js';
 import config, { Pipeline } from '../../util/config/index.js';
-import { sorter } from "../../util/helpers.js";
+import { isPresent, sorter } from "../../util/helpers.js";
 import { parseLicenseTier, parseTransactionTier, tierFromEvalOpportunity } from './tiers.js';
 
 export function isEvalOrOpenSourceLicense(record: License) {
@@ -133,4 +133,21 @@ export function dealUpdateProperties(deal: Deal, record: License | Transaction):
   if (newTier > oldTier) properties.license_tier = newTier.toFixed();
 
   return properties;
+}
+
+export function getEmails(item: Transaction | License) {
+  if ('contactDetails' in item) {
+    return [
+      item.contactDetails.technicalContact.email,
+      item.contactDetails.billingContact?.email,
+      item.partnerDetails?.billingContact.email,
+    ].filter(isPresent);
+  }
+  else {
+    return [
+      item.customerDetails.technicalContact.email,
+      item.customerDetails.billingContact?.email,
+      item.partnerDetails?.billingContact.email,
+    ].filter(isPresent);
+  }
 }
