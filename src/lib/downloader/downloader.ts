@@ -4,16 +4,21 @@ import { Deal } from "../types/deal.js";
 import { License } from "../types/license.js";
 import { Transaction } from "../types/transaction.js";
 
+export interface DownloadLogger {
+  prepare(count: number): void;
+  tick(moreInfo?: string): void;
+}
+
 export interface Downloader {
-  downloadFreeEmailProviders(): Promise<string[]>;
-  downloadAllTlds(): Promise<string[]>;
+  downloadFreeEmailProviders(downloadLogger: DownloadLogger): Promise<string[]>;
+  downloadAllTlds(downloadLogger: DownloadLogger): Promise<string[]>;
 
-  downloadTransactions(): Promise<Transaction[]>;
+  downloadTransactions(downloadLogger: DownloadLogger): Promise<Transaction[]>;
 
-  downloadLicensesWithoutDataInsights(): Promise<License[]>;
-  downloadLicensesWithDataInsights(): Promise<License[]>;
+  downloadLicensesWithoutDataInsights(downloadLogger: DownloadLogger): Promise<License[]>;
+  downloadLicensesWithDataInsights(downloadLogger: DownloadLogger): Promise<License[]>;
 
-  downloadAllDeals(): Promise<Deal[]>;
-  downloadAllContacts(): Promise<Contact[]>;
-  downloadAllCompanies(): Promise<Company[]>;
+  downloadAllDeals(downloadLogger: DownloadLogger): Promise<Deal[]>;
+  downloadAllContacts(downloadLogger: DownloadLogger): Promise<Contact[]>;
+  downloadAllCompanies(downloadLogger: DownloadLogger): Promise<Company[]>;
 }

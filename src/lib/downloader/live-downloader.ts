@@ -11,52 +11,57 @@ import config, { Pipeline } from '../util/config/index.js';
 import * as datadir from '../util/datadir.js';
 import { AttachableError, SimpleError } from '../util/errors.js';
 import log from '../util/logger.js';
-import { Downloader } from './downloader.js';
+import { Downloader, DownloadLogger } from './downloader.js';
 
 
 export default class LiveDownloader implements Downloader {
 
   hubspotClient = new hubspot.Client({ apiKey: config.hubspot.apiKey });
 
-  async downloadFreeEmailProviders(): Promise<string[]> {
+  async downloadFreeEmailProviders(downloadLogger: DownloadLogger): Promise<string[]> {
+    downloadLogger.prepare(1);
     const res = await fetch(`https://f.hubspotusercontent40.net/hubfs/2832391/Marketing/Lead-Capture/free-domains-1.csv`);
     const text = await res.text();
+    downloadLogger.tick();
     const domains = text.split(',\n');
     save('domains.json', domains);
     return domains;
   }
 
-  async downloadAllTlds(): Promise<string[]> {
+  async downloadAllTlds(downloadLogger: DownloadLogger): Promise<string[]> {
+    downloadLogger.prepare(1);
     const res = await fetch(`https://data.iana.org/TLD/tlds-alpha-by-domain.txt`);
     const text = await res.text();
+    downloadLogger.tick();
     const tlds = text.trim().split('\n').splice(1).map(s => s.toLowerCase());
     save('tlds.json', tlds);
     return tlds;
   }
 
-  async downloadTransactions(): Promise<Transaction[]> {
-    log.info('Live Downloader', 'Starting to download Transactions');
+  async downloadTransactions(downloadLogger: DownloadLogger): Promise<Transaction[]> {
+    downloadLogger.prepare(1);
     const json: Transaction[] = await downloadMarketplaceData('/sales/transactions/export');
-    log.info('Live Downloader', 'Downloaded Transactions');
+    downloadLogger.tick();
 
     save('transactions.json', json);
     return json;
   }
 
-  async downloadLicensesWithoutDataInsights(): Promise<License[]> {
-    log.info('Live Downloader', 'Starting to download Licenses Without Data Insights');
+  async downloadLicensesWithoutDataInsights(downloadLogger: DownloadLogger): Promise<License[]> {
+    downloadLogger.prepare(1);
     let json: License[] = await downloadMarketplaceData('/licenses/export?endDate=2018-07-01');
-    log.info('Live Downloader', 'Downloaded Licenses without-data-insights up to 2018-07-01');
+    downloadLogger.tick();
 
     save('licenses-without.json', json);
     return json;
   }
 
-  async downloadLicensesWithDataInsights(): Promise<License[]> {
-    log.info('Live Downloader', 'Starting to download Licenses With Data Insights');
-    const promises = dataInsightDateRanges().map(async ({ startDate, endDate }) => {
+  async downloadLicensesWithDataInsights(downloadLogger: DownloadLogger): Promise<License[]> {
+    const dates = dataInsightDateRanges();
+    downloadLogger.prepare(dates.length);
+    const promises = dates.map(async ({ startDate, endDate }) => {
       const json: License[] = await downloadMarketplaceData(`/licenses/export?withDataInsights=true&startDate=${startDate}&endDate=${endDate}`);
-      log.info('Live Downloader', 'Downloaded Licenses with-data-insights for range:', startDate, endDate);
+      downloadLogger.tick(`${startDate}-${endDate}`);
       return json;
     });
     const licenses = (await Promise.all(promises)).flat();
@@ -65,7 +70,8 @@ export default class LiveDownloader implements Downloader {
     return licenses;
   }
 
-  async downloadAllCompanies(): Promise<Company[]> {
+  async downloadAllCompanies(downloadLogger: DownloadLogger): Promise<Company[]> {
+    downloadLogger.prepare(1);
     const properties = [
       'name',
       'type',
@@ -77,19 +83,20 @@ export default class LiveDownloader implements Downloader {
       throw new Error('Failed downloading companies: ' + e.response.body.message);
     }
 
+    downloadLogger.tick();
+
     const adjustedCompanies = companies.map(result => ({
       id: result.id,
       name: result.properties.name,
       type: result.properties.type as any,
     }));
 
-    log.info('Live Downloader', 'Downloaded Companies');
-
     save('companies.json', adjustedCompanies);
     return adjustedCompanies;
   }
 
-  async downloadAllDeals(): Promise<Deal[]> {
+  async downloadAllDeals(downloadLogger: DownloadLogger): Promise<Deal[]> {
+    downloadLogger.prepare(1);
     const properties = [
       'closedate',
       'deployment',
@@ -112,7 +119,7 @@ export default class LiveDownloader implements Downloader {
       throw new Error('Failed downloading deals: ' + e.response.body.message);
     }
 
-    log.info('Live Downloader', 'Downloaded Deals');
+    downloadLogger.tick();
 
     save('deals-raw.json', deals);
 
@@ -148,7 +155,8 @@ export default class LiveDownloader implements Downloader {
     return adjustedDeals;
   }
 
-  async downloadAllContacts(): Promise<Contact[]> {
+  async downloadAllContacts(downloadLogger: DownloadLogger): Promise<Contact[]> {
+    downloadLogger.prepare(1);
     const properties = [
       'email',
       'city',
@@ -189,7 +197,7 @@ export default class LiveDownloader implements Downloader {
       }
     }
 
-    log.info('Live Downloader', 'Downloaded Contacts');
+    downloadLogger.tick();
 
     const adjustedContacts = contacts.map(contactFromHubspot);
 
@@ -229,8 +237,6 @@ function save(file: string, data: unknown) {
 
   const content = JSON.stringify(data, null, 2);
   datadir.writeFile('in', file, content);
-
-  log.info('Live Downloader', 'Saved', file);
 }
 
 function dataInsightDateRanges() {

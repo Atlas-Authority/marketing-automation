@@ -4,40 +4,64 @@ import { Deal } from '../types/deal.js';
 import { License } from '../types/license.js';
 import { Transaction } from '../types/transaction.js';
 import * as datadir from '../util/datadir.js';
-import { Downloader } from './downloader.js';
+import { Downloader, DownloadLogger } from './downloader.js';
 
 export default class CachedFileDownloader implements Downloader {
 
-  async downloadFreeEmailProviders(): Promise<string[]> {
-    return datadir.readJsonFile('in', 'domains.json');
+  async downloadFreeEmailProviders(downloadLogger: DownloadLogger): Promise<string[]> {
+    downloadLogger.prepare(1);
+    const data = datadir.readJsonFile('in', 'domains.json');
+    downloadLogger.tick();
+    return data;
   }
 
-  async downloadAllTlds(): Promise<string[]> {
-    return datadir.readJsonFile('in', 'tlds.json');
+  async downloadAllTlds(downloadLogger: DownloadLogger): Promise<string[]> {
+    downloadLogger.prepare(1);
+    const data = datadir.readJsonFile('in', 'tlds.json');
+    downloadLogger.tick();
+    return data;
   }
 
-  async downloadTransactions(): Promise<Transaction[]> {
-    return datadir.readJsonFile('in', 'transactions.json');
+  async downloadTransactions(downloadLogger: DownloadLogger): Promise<Transaction[]> {
+    downloadLogger.prepare(1);
+    const data = datadir.readJsonFile('in', 'transactions.json');
+    downloadLogger.tick();
+    return data;
   }
 
-  async downloadLicensesWithoutDataInsights(): Promise<License[]> {
-    return datadir.readJsonFile('in', 'licenses-without.json');
+  async downloadLicensesWithoutDataInsights(downloadLogger: DownloadLogger): Promise<License[]> {
+    downloadLogger.prepare(1);
+    const data = datadir.readJsonFile('in', 'licenses-without.json');
+    downloadLogger.tick();
+    return data;
   }
 
-  async downloadLicensesWithDataInsights(): Promise<License[]> {
-    return datadir.readJsonFile('in', 'licenses-with.json');
+  async downloadLicensesWithDataInsights(downloadLogger: DownloadLogger): Promise<License[]> {
+    downloadLogger.prepare(1);
+    const data = datadir.readJsonFile('in', 'licenses-with.json');
+    downloadLogger.tick();
+    return data;
   }
 
-  async downloadAllDeals(): Promise<Deal[]> {
-    return datadir.readJsonFile('in', 'deals.json');
+  async downloadAllDeals(downloadLogger: DownloadLogger): Promise<Deal[]> {
+    downloadLogger.prepare(1);
+    const data = datadir.readJsonFile('in', 'deals.json');
+    downloadLogger.tick();
+    return data;
   }
 
-  async downloadAllCompanies(): Promise<Company[]> {
-    return datadir.readJsonFile('in', 'companies.json');
+  async downloadAllCompanies(downloadLogger: DownloadLogger): Promise<Company[]> {
+    downloadLogger.prepare(1);
+    const data = datadir.readJsonFile('in', 'companies.json');
+    downloadLogger.tick();
+    return data;
   }
 
-  async downloadAllContacts(): Promise<Contact[]> {
-    return datadir.readJsonFile('in', 'contacts.json');
+  async downloadAllContacts(downloadLogger: DownloadLogger): Promise<Contact[]> {
+    downloadLogger.prepare(1);
+    const data = datadir.readJsonFile('in', 'contacts.json');
+    downloadLogger.tick();
+    return data;
   }
 
 }

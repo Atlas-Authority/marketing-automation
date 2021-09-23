@@ -9,6 +9,7 @@ import { Transaction } from '../types/transaction.js';
 import { makeMultiProviderDomainsSet } from '../util/domains.js';
 import { AttachableError } from '../util/errors.js';
 import log from '../util/logger.js';
+import { MultiDownloadLogger } from './download-logger.js';
 import { Downloader } from './downloader.js';
 
 type InitialData = {
@@ -24,6 +25,8 @@ type InitialData = {
 export async function downloadAllData({ downloader }: { downloader: Downloader }): Promise<InitialData> {
   log.info('Downloader', 'Starting downloads with API');
 
+  const multiDownloadLogger = new MultiDownloadLogger();
+
   let [
     freeDomains,
     licensesWithDataInsights,
@@ -34,15 +37,17 @@ export async function downloadAllData({ downloader }: { downloader: Downloader }
     allCompanies,
     allTlds,
   ] = await Promise.all([
-    downloader.downloadFreeEmailProviders(),
-    downloader.downloadLicensesWithDataInsights(),
-    downloader.downloadLicensesWithoutDataInsights(),
-    downloader.downloadTransactions(),
-    downloader.downloadAllContacts(),
-    downloader.downloadAllDeals(),
-    downloader.downloadAllCompanies(),
-    downloader.downloadAllTlds(),
+    downloader.downloadFreeEmailProviders(multiDownloadLogger.makeDownloadLogger('Free Email Providers')),
+    downloader.downloadLicensesWithDataInsights(multiDownloadLogger.makeDownloadLogger('Licenses With Data Insights')),
+    downloader.downloadLicensesWithoutDataInsights(multiDownloadLogger.makeDownloadLogger('Licenses Without Data Insights')),
+    downloader.downloadTransactions(multiDownloadLogger.makeDownloadLogger('Transactions')),
+    downloader.downloadAllContacts(multiDownloadLogger.makeDownloadLogger('Contacts')),
+    downloader.downloadAllDeals(multiDownloadLogger.makeDownloadLogger('Deals')),
+    downloader.downloadAllCompanies(multiDownloadLogger.makeDownloadLogger('Companies')),
+    downloader.downloadAllTlds(multiDownloadLogger.makeDownloadLogger('Tlds')),
   ]);
+
+  multiDownloadLogger.done();
 
   licensesWithDataInsights = licensesWithDataInsights.filter(filterLicensesWithTechEmail);
   licensesWithoutDataInsights = licensesWithoutDataInsights.filter(filterLicensesWithTechEmail);
