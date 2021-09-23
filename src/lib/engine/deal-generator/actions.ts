@@ -28,7 +28,7 @@ export class ActionGenerator {
       }
       case 'renewal': return [this.actionForRenewal(event)];
       case 'upgrade': return [this.actionForRenewal(event)];
-      case 'refund': return this.actionForRefund(event);
+      case 'refund': return this.actionsForRefund(event);
     }
   }
 
@@ -72,7 +72,7 @@ export class ActionGenerator {
     return makeCreateAction(event, event.transaction, DealStage.CLOSED_WON);
   }
 
-  private actionForRefund(event: RefundEvent): Action[] {
+  private actionsForRefund(event: RefundEvent): Action[] {
     const deals = this.dealFinder.getDeals(event.refundedTxs);
     return (deals
       .filter(deal => deal.properties.dealstage !== DealStage.CLOSED_LOST)
