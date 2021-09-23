@@ -318,10 +318,10 @@ function makeEmailValidator(re: RegExp) {
   return (item: Transaction | License) => {
     if (!getEmails(item).every(e => re.test(e))) {
       if (isLicense(item)) {
-        log.warn('Downloader', 'License has invalid email(s); will be skipped', item.addonLicenseId);
+        log.warn('Downloader', 'License has invalid email(s); will be skipped:', item.addonLicenseId);
       }
       else {
-        log.warn('Downloader', 'Transaction has invalid email(s); will be skipped', item.transactionId);
+        log.warn('Downloader', 'Transaction has invalid email(s); will be skipped:', item.transactionId);
       }
       return false;
     }
