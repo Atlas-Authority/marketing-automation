@@ -149,7 +149,7 @@ const licensesWithDataInsightsSchema: Array<['every' | 'some', (license: License
   ['every', license => isNonBlankString(license?.tier)],
 
   ['every', license => !!license?.contactDetails],
-  ['every', license => isNonBlankString(license?.contactDetails?.company)],
+  ['every', license => isString(license?.contactDetails?.company)],
   ['every', license => isNonBlankString(license?.contactDetails?.country)],
   ['every', license => isNonBlankString(license?.contactDetails?.region)],
 
@@ -281,6 +281,10 @@ const transactionsSchema: Array<['every' | 'some', (transaction: Transaction) =>
 
 function isNonBlankString(s: string | undefined) {
   return typeof s === 'string' && s.trim().length > 0;
+}
+
+function isString(s: string | undefined) {
+  return typeof s === 'string';
 }
 
 function isNumber(s: number | undefined) {
