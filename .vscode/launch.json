@@ -10,14 +10,12 @@
       "skipFiles": [
         "<node_internals>/**"
       ],
-      "env": {
-        "LOGLEVEL": "info"
-      },
       "program": "${workspaceFolder}/src/bin/run-once.ts",
       "args": [
         "--downloader=cached",
         "--uploader=console",
         "--cached-fns=scorer.dat",
+        "--loglevel=info",
       ],
       "type": "pwa-node",
       "outFiles": [

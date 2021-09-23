@@ -10,6 +10,14 @@ import config, { LogLevel } from "./config/index.js";
 export function getCliOptions() {
   const argParser = new ArgParser(process.argv.slice(2));
 
+  const logLevelString = argParser.get('--loglevel');
+  if (logLevelString) {
+    const logLevel = logLevelFromString(logLevelString.trim().toLowerCase());
+    if (logLevel !== null) {
+      config.logLevel = logLevel;
+    }
+  }
+
   const downloader = argParser.getChoiceOrFail<Downloader>('--downloader', {
     'live': () => new LiveDownloader(),
     'cached': () => new CachedFileDownloader(),
@@ -29,4 +37,15 @@ export function getCliOptions() {
     downloader,
     uploader,
   };
+}
+
+function logLevelFromString(level: string) {
+  switch (level) {
+    case 'error': return LogLevel.Error;
+    case 'warn': return LogLevel.Warn;
+    case 'info': return LogLevel.Info;
+    case 'verbose': return LogLevel.Verbose;
+    case 'detailed': return LogLevel.Detailed;
+    default: return null;
+  }
 }

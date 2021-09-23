@@ -17,7 +17,7 @@ export const ADDONKEY_TO_PLATFORM: { [addonKey: string]: string } = Object.fromE
 );
 
 export default {
-  logLevel: logLevelFromString(optional('LOGLEVEL')?.trim().toLowerCase() || 'verbose'),
+  logLevel: LogLevel.Verbose,
   mpac: {
     user: required('MPAC_USER'),
     pass: required('MPAC_PASS'),
@@ -54,14 +54,3 @@ export default {
   isProduction: process.env.NODE_ENV === 'production',
   isTest: process.env.NODE_ENV === 'test',
 };
-
-function logLevelFromString(level: string) {
-  switch (level) {
-    case 'error': return LogLevel.Error;
-    case 'warn': return LogLevel.Warn;
-    case 'info': return LogLevel.Info;
-    case 'verbose': return LogLevel.Verbose;
-    case 'detailed': return LogLevel.Detailed;
-    default: return LogLevel.Warn;
-  }
-}
