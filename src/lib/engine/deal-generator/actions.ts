@@ -3,6 +3,7 @@ import { License, LicenseContext } from '../../types/license.js';
 import { Transaction } from '../../types/transaction.js';
 import { DealStage } from '../../util/config/index.js';
 import { isPresent, sorter } from '../../util/helpers.js';
+import log from '../../util/logger.js';
 import { DealFinder } from './deal-finder.js';
 import { DealRelevantEvent, EvalEvent, PurchaseEvent, RefundEvent, RenewalEvent, UpgradeEvent } from "./events.js";
 import { dealCreationProperties, dealUpdateProperties, getDate } from './records.js';
@@ -48,6 +49,7 @@ export class ActionGenerator {
       return makeUpdateAction(event, deal, latestLicense, {});
     }
     else {
+      log.detailed('Deal Actions', 'No action: Deal already exists and is not eval:', deal.id, deal.properties.dealstage);
       return null;
     }
   }
@@ -70,6 +72,7 @@ export class ActionGenerator {
       return makeUpdateAction(event, deal, record, { dealstage: DealStage.CLOSED_WON });
     }
     else {
+      log.detailed('Deal Actions', 'No action: Deal already exists and is not eval:', deal.id, deal.properties.dealstage);
       return null;
     }
   }
@@ -77,6 +80,7 @@ export class ActionGenerator {
   private actionForRenewal(event: RenewalEvent | UpgradeEvent): Action | null {
     const deal = this.dealFinder.getDeal([event.transaction]);
     if (deal) {
+      log.detailed('Deal Actions', 'No action: Deal already exists for this transaction');
       return null;
     }
     return makeCreateAction(event, event.transaction, DealStage.CLOSED_WON);
@@ -122,7 +126,10 @@ function makeUpdateAction(event: DealRelevantEvent, deal: Deal, record: License 
   const combinedProperties = (record ? dealUpdateProperties(deal, record) : {});
   Object.assign(combinedProperties, properties);
 
-  if (Object.keys(combinedProperties).length === 0) return null;
+  if (Object.keys(combinedProperties).length === 0) {
+    log.detailed('Deal Actions', 'No action: No properties to update for:', deal.id);
+    return null;
+  }
 
   return {
     type: 'update',
