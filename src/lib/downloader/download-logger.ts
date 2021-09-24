@@ -24,7 +24,7 @@ export class MultiDownloadLogger {
     else {
       return {
         prepare(count: number) {
-          log.info('Live Downloader', `Downloading ${name} (${count} calls)`);
+          log.info('Live Downloader', `Downloading ${name} (${count} call${count === 1 ? '' : 's'})`);
         },
         tick(moreInfo?: string) {
           moreInfo = moreInfo ? ` (${moreInfo})` : '';
