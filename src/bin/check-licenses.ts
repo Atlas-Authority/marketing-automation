@@ -4,7 +4,9 @@ import { buildContactsStructure } from '../lib/engine/contacts.js';
 import { olderThan90Days } from '../lib/engine/generate-deals.js';
 import { shorterLicenseInfo } from '../lib/engine/license-grouper.js';
 import { License } from '../lib/types/license.js';
+import { Transaction } from '../lib/types/transaction.js';
 import * as datadir from '../lib/util/datadir.js';
+import * as fs from 'fs';
 import log from '../lib/util/logger.js';
 
 const args = process.argv.slice(2);
@@ -12,10 +14,15 @@ const args = process.argv.slice(2);
 const verbose = (args[0] === '--verbose');
 if (verbose) args.shift();
 
-const sens = args;
+let sens = args;
 if (sens.length === 0 || !sens.every(sen => sen.length > 0)) {
-  console.log('Usage: node bin/check-licenses.js [--verbose] <SEN-L12345ABCDE>...');
+  console.log('Usage: node bin/check-licenses.js [--verbose] <SEN-L12345ABCDE>... | <transactions.json>');
   process.exit(1);
+}
+
+if (sens.length === 1 && sens[0].endsWith('.json')) {
+  const ts: Transaction[] = JSON.parse(fs.readFileSync(sens[0], 'utf8'));
+  sens = ts.map(t => t.addonLicenseId);
 }
 
 const data = await downloadAllData({
