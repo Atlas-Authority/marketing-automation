@@ -6,7 +6,7 @@ import { DownloadLogger } from './downloader.js';
 export class MultiDownloadLogger {
 
   multibar = new MultiBar({
-    format: `${colors.cyan('{bar}')} | {name}`,
+    format: `${colors.cyan('[{bar}]')} {name}`,
   }, Presets.rect);
 
   makeDownloadLogger(name: string): DownloadLogger {
