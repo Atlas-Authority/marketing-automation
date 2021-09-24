@@ -203,6 +203,10 @@ function scoreLicenseMatches(productGroupings: { addonKey: string; hosting: stri
             maybeMatches.push(result);
           }
         }
+        else {
+          unaccounted.add(license1.addonLicenseId);
+          unaccounted.add(license2.addonLicenseId);
+        }
       }
     }
   }
