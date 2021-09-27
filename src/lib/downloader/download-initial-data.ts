@@ -8,8 +8,8 @@ import { License } from '../types/license.js';
 import { Transaction } from '../types/transaction.js';
 import { makeMultiProviderDomainsSet } from '../util/domains.js';
 import { AttachableError } from '../util/errors.js';
-import log from '../util/log/logger.js';
-import { MultiDownloadLogger } from '../util/log/download-logger.js';
+import log from '../log/logger.js';
+import { MultiDownloadLogger } from '../log/download-logger.js';
 import { Downloader } from './downloader.js';
 
 type InitialData = {

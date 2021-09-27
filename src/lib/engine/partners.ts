@@ -3,7 +3,7 @@ import { Contact, GeneratedContact } from '../types/contact.js';
 import { License } from '../types/license.js';
 import { Transaction } from '../types/transaction.js';
 import { Uploader } from '../uploader/uploader.js';
-import config from '../util/config/index.js';
+import config from '../config/index.js';
 
 export function identifyDomains(data: {
   licenses: License[],

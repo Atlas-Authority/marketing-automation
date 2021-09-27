@@ -2,9 +2,9 @@ import CachedFileDownloader from '../lib/downloader/cached-file-downloader.js';
 import { downloadAllData } from '../lib/downloader/download-initial-data.js';
 import { License } from '../lib/types/license.js';
 import LiveUploader from '../lib/uploader/live-uploader.js';
-import { DealStage } from '../lib/util/config/index.js';
-import * as datadir from '../lib/util/cache/datadir.js';
-import log from '../lib/util/log/logger.js';
+import { DealStage } from '../lib/config/index.js';
+import * as datadir from '../lib/cache/datadir.js';
+import log from '../lib/log/logger.js';
 
 const data = await downloadAllData({
   downloader: new CachedFileDownloader()

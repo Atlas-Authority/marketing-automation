@@ -7,10 +7,10 @@ import { Contact } from '../types/contact.js';
 import { Deal } from '../types/deal.js';
 import { License } from '../types/license.js';
 import { Transaction } from '../types/transaction.js';
-import config, { Pipeline } from '../util/config/index.js';
-import * as datadir from '../util/cache/datadir.js';
+import config, { Pipeline } from '../config/index.js';
+import * as datadir from '../cache/datadir.js';
 import { AttachableError, SimpleError } from '../util/errors.js';
-import log from '../util/log/logger.js';
+import log from '../log/logger.js';
 import { Downloader, DownloadLogger } from './downloader.js';
 
 

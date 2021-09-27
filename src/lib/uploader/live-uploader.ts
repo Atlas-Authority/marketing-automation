@@ -4,10 +4,10 @@ import { contactToHubspotProperties } from '../engine/contacts.js';
 import { Company } from '../types/company.js';
 import { Contact, GeneratedContact } from '../types/contact.js';
 import { Deal, DealAssociationPair, DealUpdate } from '../types/deal.js';
-import config from '../util/config/index.js';
+import config from '../config/index.js';
 import { batchesOf } from '../util/helpers.js';
-import { saveToJson } from '../util/cache/inspection.js';
-import log from '../util/log/logger.js';
+import { saveToJson } from '../cache/inspection.js';
+import log from '../log/logger.js';
 import { Uploader } from './uploader.js';
 
 

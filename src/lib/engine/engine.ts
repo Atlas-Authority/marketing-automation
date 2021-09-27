@@ -3,7 +3,7 @@ import { Downloader } from '../downloader/downloader.js';
 import { Contact } from '../types/contact.js';
 import { RelatedLicenseSet } from '../types/license.js';
 import { Uploader } from '../uploader/uploader.js';
-import log from '../util/log/logger.js';
+import log from '../log/logger.js';
 import { buildContactsStructure } from './contacts.js';
 import { generateContactUpdateActions } from './generate-contact-updates.js';
 import { generateContacts } from "./generate-contacts.js";

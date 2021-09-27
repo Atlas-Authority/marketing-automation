@@ -5,13 +5,13 @@ import log from '../log/logger.js';
 type DataDirPlace = 'in' | 'out' | 'cache';
 
 export function writeFile(place: DataDirPlace, filename: string, contents: string | Buffer) {
-  ensureDir(`../../../../data`);
-  ensureDir(`../../../../data/${place}`);
-  fs.writeFileSync(new URL(`../../../../data/${place}/${filename}`, import.meta.url), contents);
+  ensureDir(`../../../data`);
+  ensureDir(`../../../data/${place}`);
+  fs.writeFileSync(new URL(`../../../data/${place}/${filename}`, import.meta.url), contents);
 }
 
 export function readFile(place: DataDirPlace, filename: string) {
-  const dir = `../../../../data/${place}`;
+  const dir = `../../../data/${place}`;
 
   if (!fs.existsSync(new URL(dir, import.meta.url))) {
     log.error('Dev', `Data directory doesn't exist yet. First run the engine with --downloader=live`);
@@ -26,7 +26,7 @@ export function readJsonFile(place: DataDirPlace, filename: string) {
 }
 
 export function pathExists(place: DataDirPlace, filename: string) {
-  const path = `../../../../data/${place}/${filename}`;
+  const path = `../../../data/${place}/${filename}`;
   return fs.existsSync(new URL(path, import.meta.url));
 }
 
