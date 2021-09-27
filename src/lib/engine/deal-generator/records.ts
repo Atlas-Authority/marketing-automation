@@ -3,7 +3,7 @@ import mustache from 'mustache';
 import { Deal } from '../../types/deal.js';
 import { License, LicenseContext } from '../../types/license.js';
 import { DealNameTemplateProperties, Transaction } from '../../types/transaction.js';
-import config, { Pipeline } from '../../util/config/index.js';
+import config, { DealStage, Pipeline } from '../../util/config/index.js';
 import { isPresent, sorter } from "../../util/helpers.js";
 import { parseLicenseTier, parseTransactionTier, tierFromEvalOpportunity } from './tiers.js';
 
@@ -127,9 +127,11 @@ export function dealCreationProperties(record: License | Transaction, dealstage:
     dealname: mustache.render(config.constants.dealDealName, dealNameTemplateProperties),
     dealstage,
     pipeline: Pipeline.AtlassianMarketplace,
-    amount: (isLicense(record)
+    amount: (dealstage === DealStage.EVAL
       ? ''
-      : record.purchaseDetails.vendorAmount.toString()),
+      : isLicense(record)
+        ? '0'
+        : record.purchaseDetails.vendorAmount.toString()),
   };
 }
 
