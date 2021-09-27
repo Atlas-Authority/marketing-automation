@@ -49,6 +49,8 @@ export async function downloadAllData({ downloader }: { downloader: Downloader }
 
   multiDownloadLogger.done();
 
+  log.info('Downloader', 'Done');
+
   licensesWithDataInsights = licensesWithDataInsights.filter(filterLicensesWithTechEmail);
   licensesWithoutDataInsights = licensesWithoutDataInsights.filter(filterLicensesWithTechEmail);
 
@@ -66,8 +68,6 @@ export async function downloadAllData({ downloader }: { downloader: Downloader }
   verifyStructure('transactions',
     allTransactions,
     transactionsSchema);
-
-  log.info('Downloader', 'Done');
 
   let allLicenses = uniqLicenses(licensesWithDataInsights.concat(licensesWithoutDataInsights));
 
