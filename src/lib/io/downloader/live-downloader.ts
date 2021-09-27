@@ -1,16 +1,15 @@
 import * as hubspot from '@hubspot/api-client';
 import { DateTime, Duration, Interval } from 'luxon';
 import fetch from 'node-fetch';
+import * as datadir from '../../cache/datadir.js';
+import config, { Pipeline } from '../../config/index.js';
 import { contactFromHubspot } from '../../engine/contacts.js';
 import { Company } from '../../types/company.js';
 import { Contact } from '../../types/contact.js';
 import { Deal } from '../../types/deal.js';
 import { License } from '../../types/license.js';
 import { Transaction } from '../../types/transaction.js';
-import config, { Pipeline } from '../../config/index.js';
-import * as datadir from '../../cache/datadir.js';
 import { AttachableError, SimpleError } from '../../util/errors.js';
-import log from '../../log/logger.js';
 import { Downloader, DownloadLogger } from './downloader.js';
 
 

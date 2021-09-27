@@ -1,13 +1,13 @@
 import * as hubspot from '@hubspot/api-client';
 import assert from 'assert';
+import { saveToJson } from '../../cache/inspection.js';
+import config from '../../config/index.js';
 import { contactToHubspotProperties } from '../../engine/contacts.js';
+import log from '../../log/logger.js';
 import { Company } from '../../types/company.js';
 import { Contact, GeneratedContact } from '../../types/contact.js';
 import { Deal, DealAssociationPair, DealUpdate } from '../../types/deal.js';
-import config from '../../config/index.js';
 import { batchesOf } from '../../util/helpers.js';
-import { saveToJson } from '../../cache/inspection.js';
-import log from '../../log/logger.js';
 import { Uploader } from './uploader.js';
 
 
