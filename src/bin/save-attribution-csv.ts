@@ -1,7 +1,7 @@
 import CachedFileDownloader from '../lib/downloader/cached-file-downloader.js';
 import { downloadAllData } from '../lib/downloader/download-initial-data.js';
 import { isPresent, sorter } from '../lib/util/helpers.js';
-import { saveForInspection } from '../lib/util/inspection.js';
+import { saveForInspection } from '../lib/util/cache/inspection.js';
 
 const data = await downloadAllData({
   downloader: new CachedFileDownloader()

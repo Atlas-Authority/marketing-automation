@@ -5,7 +5,7 @@ import { olderThan90Days } from '../lib/engine/generate-deals.js';
 import { shorterLicenseInfo } from '../lib/engine/license-grouper.js';
 import { License } from '../lib/types/license.js';
 import { Transaction } from '../lib/types/transaction.js';
-import * as datadir from '../lib/util/datadir.js';
+import * as datadir from '../lib/util/cache/datadir.js';
 import * as fs from 'fs';
 import log from '../lib/util/logger.js';
 

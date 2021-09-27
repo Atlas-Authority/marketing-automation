@@ -3,7 +3,7 @@ import { Contact } from '../types/contact.js';
 import { Deal } from '../types/deal.js';
 import { License } from '../types/license.js';
 import { Transaction } from '../types/transaction.js';
-import * as datadir from '../util/datadir.js';
+import * as datadir from '../util/cache/datadir.js';
 import { Downloader, DownloadLogger } from './downloader.js';
 
 export default class CachedFileDownloader implements Downloader {

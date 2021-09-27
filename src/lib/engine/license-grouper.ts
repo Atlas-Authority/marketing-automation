@@ -4,9 +4,9 @@ import * as util from 'util';
 import { Contact, ContactsByEmail } from '../types/contact.js';
 import { License, LicenseContext } from '../types/license.js';
 import { Transaction } from '../types/transaction.js';
-import { fnOrCache } from '../util/fn-cache.js';
+import { fnOrCache } from '../util/cache/fn-cache.js';
 import { sorter } from '../util/helpers.js';
-import { saveForInspection } from '../util/inspection.js';
+import { saveForInspection } from '../util/cache/inspection.js';
 import log from '../util/logger.js';
 import { LicenseMatcher } from './license-matcher.js';
 

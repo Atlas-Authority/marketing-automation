@@ -3,7 +3,7 @@ import { downloadAllData } from '../lib/downloader/download-initial-data.js';
 import { License } from '../lib/types/license.js';
 import LiveUploader from '../lib/uploader/live-uploader.js';
 import { DealStage } from '../lib/util/config/index.js';
-import * as datadir from '../lib/util/datadir.js';
+import * as datadir from '../lib/util/cache/datadir.js';
 import log from '../lib/util/logger.js';
 
 const data = await downloadAllData({
