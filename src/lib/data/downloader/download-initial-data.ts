@@ -1,15 +1,15 @@
 import assert from 'assert';
 import util from 'util';
-import { getEmails, isLicense } from '../engine/deal-generator/records.js';
-import { Company } from '../types/company.js';
-import { Contact } from '../types/contact.js';
-import { Deal } from '../types/deal.js';
-import { License } from '../types/license.js';
-import { Transaction } from '../types/transaction.js';
-import { makeMultiProviderDomainsSet } from '../util/domains.js';
-import { AttachableError } from '../util/errors.js';
-import log from '../log/logger.js';
-import { MultiDownloadLogger } from '../log/download-logger.js';
+import { getEmails, isLicense } from '../../engine/deal-generator/records.js';
+import { Company } from '../../types/company.js';
+import { Contact } from '../../types/contact.js';
+import { Deal } from '../../types/deal.js';
+import { License } from '../../types/license.js';
+import { Transaction } from '../../types/transaction.js';
+import { makeMultiProviderDomainsSet } from '../../util/domains.js';
+import { AttachableError } from '../../util/errors.js';
+import log from '../../log/logger.js';
+import { MultiDownloadLogger } from '../../log/download-logger.js';
 import { Downloader } from './downloader.js';
 
 type InitialData = {

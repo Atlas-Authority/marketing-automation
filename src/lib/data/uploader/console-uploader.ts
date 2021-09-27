@@ -1,7 +1,7 @@
-import { Company } from '../types/company.js';
-import { Contact, GeneratedContact } from '../types/contact.js';
-import { Deal, DealAssociationPair, DealUpdate } from '../types/deal.js';
-import log from '../log/logger.js';
+import { Company } from '../../types/company.js';
+import { Contact, GeneratedContact } from '../../types/contact.js';
+import { Deal, DealAssociationPair, DealUpdate } from '../../types/deal.js';
+import log from '../../log/logger.js';
 import { Uploader } from './uploader.js';
 
 export default class ConsoleUploader implements Uploader {

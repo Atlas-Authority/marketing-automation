@@ -1,9 +1,9 @@
-import CachedFileDownloader from "../downloader/cached-file-downloader.js";
-import { Downloader } from "../downloader/downloader.js";
-import LiveDownloader from '../downloader/live-downloader.js';
-import ConsoleUploader from "../uploader/console-uploader.js";
-import LiveUploader from "../uploader/live-uploader.js";
-import { Uploader } from "../uploader/uploader.js";
+import CachedFileDownloader from "../data/downloader/cached-file-downloader.js";
+import { Downloader } from "../data/downloader/downloader.js";
+import LiveDownloader from '../data/downloader/live-downloader.js';
+import ConsoleUploader from "../data/uploader/console-uploader.js";
+import LiveUploader from "../data/uploader/live-uploader.js";
+import { Uploader } from "../data/uploader/uploader.js";
 import config, { LogLevel } from "../config/index.js";
 import { ArgParser } from './arg-parser.js';
 

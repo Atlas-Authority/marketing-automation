@@ -1,8 +1,8 @@
-import { Company } from "../types/company.js";
-import { Contact } from "../types/contact.js";
-import { Deal } from "../types/deal.js";
-import { License } from "../types/license.js";
-import { Transaction } from "../types/transaction.js";
+import { Company } from "../../types/company.js";
+import { Contact } from "../../types/contact.js";
+import { Deal } from "../../types/deal.js";
+import { License } from "../../types/license.js";
+import { Transaction } from "../../types/transaction.js";
 
 export interface DownloadLogger {
   prepare(count: number): void;

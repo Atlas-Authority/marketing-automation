@@ -1,6 +1,6 @@
 import _ from "lodash";
 import { Contact, ContactUpdateAction, GeneratedContact } from "../types/contact.js";
-import { Uploader } from "../uploader/uploader.js";
+import { Uploader } from "../data/uploader/uploader.js";
 
 export async function updateContactsInHubspotAgain({ uploader, contactUpdateActions }: {
   uploader: Uploader,

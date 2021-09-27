@@ -1,5 +1,5 @@
-import CachedFileDownloader from '../lib/downloader/cached-file-downloader.js';
-import { downloadAllData } from '../lib/downloader/download-initial-data.js';
+import CachedFileDownloader from '../lib/data/downloader/cached-file-downloader.js';
+import { downloadAllData } from '../lib/data/downloader/download-initial-data.js';
 import { isPresent, sorter } from '../lib/util/helpers.js';
 import { saveForInspection } from '../lib/cache/inspection.js';
 
