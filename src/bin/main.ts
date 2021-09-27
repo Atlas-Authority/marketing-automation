@@ -1,5 +1,5 @@
 import runEngine from "../lib/engine/engine.js";
-import { getCliOptions } from "../lib/util/cli.js";
+import { getCliOptions } from "../lib/util/cli/index.js";
 import config from "../lib/util/config/index.js";
 import { AttachableError, SimpleError } from '../lib/util/errors.js';
 import run from '../lib/util/runner.js';
