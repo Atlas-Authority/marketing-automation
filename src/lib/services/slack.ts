@@ -1,6 +1,6 @@
 import slack from '@slack/web-api';
 import config from '../util/config/index.js';
-import log from '../util/logger.js';
+import log from '../util/log/logger.js';
 
 export default class Slack {
 

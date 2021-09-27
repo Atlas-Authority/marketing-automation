@@ -1,7 +1,7 @@
 import { License, LicenseContext } from "../../types/license.js";
 import { Transaction } from "../../types/transaction.js";
 import { sorter } from "../../util/helpers.js";
-import log from '../../util/logger.js';
+import log from '../../util/log/logger.js';
 import { abbrRecordDetails, getDate, getLicense, getLicenseType, isEvalOrOpenSourceLicense, isLicense, isPaidLicense, isTransaction } from "./records.js";
 
 export type RefundEvent = { type: 'refund', groups: LicenseContext[], refundedTxs: Transaction[] };

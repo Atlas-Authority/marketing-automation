@@ -1,6 +1,6 @@
 import fs from 'fs';
 import { URL } from 'url';
-import log from '../logger.js';
+import log from '../log/logger.js';
 
 type DataDirPlace = 'in' | 'out' | 'cache';
 

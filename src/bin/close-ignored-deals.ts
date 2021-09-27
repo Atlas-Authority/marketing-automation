@@ -4,7 +4,7 @@ import { License } from '../lib/types/license.js';
 import LiveUploader from '../lib/uploader/live-uploader.js';
 import { DealStage } from '../lib/util/config/index.js';
 import * as datadir from '../lib/util/cache/datadir.js';
-import log from '../lib/util/logger.js';
+import log from '../lib/util/log/logger.js';
 
 const data = await downloadAllData({
   downloader: new CachedFileDownloader()

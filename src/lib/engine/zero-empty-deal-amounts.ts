@@ -1,7 +1,7 @@
 import { Deal } from '../types/deal.js';
 import { Uploader } from '../uploader/uploader.js';
 import { DealStage, Pipeline } from '../util/config/index.js';
-import log from '../util/logger.js';
+import log from '../util/log/logger.js';
 
 export default async function ({ deals, uploader }: { deals: Deal[], uploader: Uploader }) {
   log.info('Zeroing Empty Deal Amounts', 'Setting Amount=0 on applicable Closed deals');

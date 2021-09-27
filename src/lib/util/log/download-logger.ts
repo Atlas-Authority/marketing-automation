@@ -1,7 +1,7 @@
 import { MultiBar, Presets } from 'cli-progress';
 import colors from 'colors';
-import log from '../util/logger.js';
-import { DownloadLogger } from './downloader.js';
+import log from './logger.js';
+import { DownloadLogger } from '../../downloader/downloader.js';
 
 export class MultiDownloadLogger {
 

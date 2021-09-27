@@ -7,7 +7,7 @@ import { Transaction } from '../types/transaction.js';
 import { fnOrCache } from '../util/cache/fn-cache.js';
 import { sorter } from '../util/helpers.js';
 import { saveForInspection } from '../util/cache/inspection.js';
-import log from '../util/logger.js';
+import log from '../util/log/logger.js';
 import { LicenseMatcher } from './license-matcher.js';
 
 

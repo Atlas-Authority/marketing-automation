@@ -7,7 +7,7 @@ import { License } from '../lib/types/license.js';
 import { Transaction } from '../lib/types/transaction.js';
 import * as datadir from '../lib/util/cache/datadir.js';
 import * as fs from 'fs';
-import log from '../lib/util/logger.js';
+import log from '../lib/util/log/logger.js';
 
 const args = process.argv.slice(2);
 

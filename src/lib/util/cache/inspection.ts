@@ -2,7 +2,7 @@ import csvStringify from 'csv-stringify/lib/es5/sync.js';
 import flatten from 'flat';
 import config from '../config/index.js';
 import * as datadir from './datadir.js';
-import log from '../logger.js';
+import log from '../log/logger.js';
 
 function saveArrayToCsv(filename: string, array: any[]) {
   if (config.isProduction || config.isTest) return;

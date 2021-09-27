@@ -1,5 +1,5 @@
 import config from './config/index.js';
-import log from './logger.js';
+import log from './log/logger.js';
 
 export default async function run({ work, failed }: {
   work: () => Promise<void>,

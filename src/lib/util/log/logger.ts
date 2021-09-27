@@ -1,5 +1,5 @@
 import util from 'util';
-import config, { LogLevel } from './config/index.js';
+import config, { LogLevel } from '../config/index.js';
 
 let enabled = true;
 

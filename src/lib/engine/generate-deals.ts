@@ -5,7 +5,7 @@ import { Deal, DealUpdate } from '../types/deal.js';
 import { License, LicenseContext, RelatedLicenseSet } from '../types/license.js';
 import { isPresent } from '../util/helpers.js';
 import { saveForInspection } from '../util/cache/inspection.js';
-import log from '../util/logger.js';
+import log from '../util/log/logger.js';
 import { ActionGenerator, CreateDealAction, UpdateDealAction } from './deal-generator/actions.js';
 import { DealFinder } from './deal-generator/deal-finder.js';
 import { EventGenerator } from './deal-generator/events.js';

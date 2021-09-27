@@ -7,7 +7,7 @@ import { Deal, DealAssociationPair, DealUpdate } from '../types/deal.js';
 import config from '../util/config/index.js';
 import { batchesOf } from '../util/helpers.js';
 import { saveToJson } from '../util/cache/inspection.js';
-import log from '../util/logger.js';
+import log from '../util/log/logger.js';
 import { Uploader } from './uploader.js';
 
 
