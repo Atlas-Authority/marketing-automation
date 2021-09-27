@@ -1,6 +1,6 @@
 import { Contact } from "../types/contact.js";
 import { Deal, DealAssociationPair, DealUpdate } from "../types/deal.js";
-import { Uploader } from "../data/uploader/uploader.js";
+import { Uploader } from "../io/uploader/uploader.js";
 
 export async function upsertDealsInHubspot({ uploader, dealDiffs, contacts }: {
   uploader: Uploader,

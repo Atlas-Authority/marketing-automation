@@ -1,8 +1,8 @@
-import { downloadAllData } from '../data/downloader/download-initial-data.js';
-import { Downloader } from '../data/downloader/downloader.js';
+import { downloadAllData } from '../io/downloader/download-initial-data.js';
+import { Downloader } from '../io/downloader/downloader.js';
 import { Contact } from '../types/contact.js';
 import { RelatedLicenseSet } from '../types/license.js';
-import { Uploader } from '../data/uploader/uploader.js';
+import { Uploader } from '../io/uploader/uploader.js';
 import log from '../log/logger.js';
 import { buildContactsStructure } from './contacts.js';
 import { generateContactUpdateActions } from './generate-contact-updates.js';

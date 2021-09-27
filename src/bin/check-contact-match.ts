@@ -1,5 +1,5 @@
-import CachedFileDownloader from '../lib/data/downloader/cached-file-downloader.js';
-import { downloadAllData } from '../lib/data/downloader/download-initial-data.js';
+import CachedFileDownloader from '../lib/io/downloader/cached-file-downloader.js';
+import { downloadAllData } from '../lib/io/downloader/download-initial-data.js';
 import { shorterLicenseInfo } from '../lib/engine/license-grouper.js';
 import * as datadir from '../lib/cache/datadir.js';
 import log from '../lib/log/logger.js';

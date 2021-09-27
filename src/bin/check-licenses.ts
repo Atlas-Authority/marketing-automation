@@ -1,5 +1,5 @@
-import CachedFileDownloader from '../lib/data/downloader/cached-file-downloader.js';
-import { downloadAllData } from '../lib/data/downloader/download-initial-data.js';
+import CachedFileDownloader from '../lib/io/downloader/cached-file-downloader.js';
+import { downloadAllData } from '../lib/io/downloader/download-initial-data.js';
 import { buildContactsStructure } from '../lib/engine/contacts.js';
 import { olderThan90Days } from '../lib/engine/generate-deals.js';
 import { shorterLicenseInfo } from '../lib/engine/license-grouper.js';

@@ -2,7 +2,7 @@ import { Company } from '../types/company.js';
 import { Contact, GeneratedContact } from '../types/contact.js';
 import { License } from '../types/license.js';
 import { Transaction } from '../types/transaction.js';
-import { Uploader } from '../data/uploader/uploader.js';
+import { Uploader } from '../io/uploader/uploader.js';
 import config from '../config/index.js';
 
 export function identifyDomains(data: {

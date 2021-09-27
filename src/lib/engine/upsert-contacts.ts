@@ -1,6 +1,6 @@
 import { updatedDiff } from 'deep-object-diff';
 import { Contact, GeneratedContact } from '../types/contact.js';
-import { Uploader } from '../data/uploader/uploader.js';
+import { Uploader } from '../io/uploader/uploader.js';
 
 export async function upsertContactsInHubspot({ uploader, newContacts, oldContacts }: {
   uploader: Uploader,

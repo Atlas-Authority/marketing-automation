@@ -1,5 +1,5 @@
 import { Deal } from '../types/deal.js';
-import { Uploader } from '../data/uploader/uploader.js';
+import { Uploader } from '../io/uploader/uploader.js';
 import { DealStage, Pipeline } from '../config/index.js';
 import log from '../log/logger.js';
 
