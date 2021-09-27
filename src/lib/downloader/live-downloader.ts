@@ -216,12 +216,9 @@ async function downloadMarketplaceData<T>(subpath: string): Promise<T[]> {
   });
 
   let text;
-  let json;
-
   try {
     text = await res.text();
-    json = JSON.parse(text);
-    return json;
+    return JSON.parse(text);
   }
   catch (e) {
     throw new AttachableError('Probably invalid Marketplace JSON.', text as string);
