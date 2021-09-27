@@ -180,10 +180,10 @@ const licensesWithDataInsightsSchema: Array<['every' | 'some', (license: License
   ['every', license => !license?.partnerDetails?.billingContact || isNonBlankString(license?.partnerDetails?.billingContact.email)],
   ['every', license => !license?.partnerDetails?.billingContact || isNonBlankString(license?.partnerDetails?.billingContact.name)],
 
-  ['every', license => isNonBlankString(license?.parentProductBillingCycle)],
-  ['every', license => isNonBlankString(license?.parentProductName)],
-  ['every', license => isNonBlankString(license?.installedOnSandbox)],
-  ['every', license => isNonBlankString(license?.parentProductEdition)],
+  ['some', license => isNonBlankString(license?.parentProductBillingCycle)],
+  ['some', license => isNonBlankString(license?.parentProductName)],
+  ['some', license => isNonBlankString(license?.installedOnSandbox)],
+  ['some', license => isNonBlankString(license?.parentProductEdition)],
 
   ['some', license => isNonBlankString(license?.evaluationLicense)],
   ['some', license => isNonBlankString(license?.daysToConvertEval)],
