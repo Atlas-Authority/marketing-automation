@@ -2,8 +2,7 @@ import * as datadir from '../../cache/datadir.js';
 import { Company } from '../../types/company.js';
 import { Contact } from '../../types/contact.js';
 import { Deal } from '../../types/deal.js';
-import { License } from '../../types/license.js';
-import { Transaction } from '../../types/transaction.js';
+import { RawLicense, RawTransaction } from '../../types/marketplace.js';
 import { Downloader, DownloadLogger } from './downloader.js';
 
 export default class CachedFileDownloader implements Downloader {
@@ -22,21 +21,21 @@ export default class CachedFileDownloader implements Downloader {
     return data;
   }
 
-  async downloadTransactions(downloadLogger: DownloadLogger): Promise<Transaction[]> {
+  async downloadTransactions(downloadLogger: DownloadLogger): Promise<RawTransaction[]> {
     downloadLogger.prepare(1);
     const data = datadir.readJsonFile('in', 'transactions.json');
     downloadLogger.tick();
     return data;
   }
 
-  async downloadLicensesWithoutDataInsights(downloadLogger: DownloadLogger): Promise<License[]> {
+  async downloadLicensesWithoutDataInsights(downloadLogger: DownloadLogger): Promise<RawLicense[]> {
     downloadLogger.prepare(1);
     const data = datadir.readJsonFile('in', 'licenses-without.json');
     downloadLogger.tick();
     return data;
   }
 
-  async downloadLicensesWithDataInsights(downloadLogger: DownloadLogger): Promise<License[]> {
+  async downloadLicensesWithDataInsights(downloadLogger: DownloadLogger): Promise<RawLicense[]> {
     downloadLogger.prepare(1);
     const data = datadir.readJsonFile('in', 'licenses-with.json');
     downloadLogger.tick();

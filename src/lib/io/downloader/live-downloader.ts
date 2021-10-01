@@ -7,8 +7,7 @@ import { contactFromHubspot } from '../../engine/contacts.js';
 import { Company } from '../../types/company.js';
 import { Contact } from '../../types/contact.js';
 import { Deal } from '../../types/deal.js';
-import { License } from '../../types/license.js';
-import { Transaction } from '../../types/transaction.js';
+import { RawLicense, RawTransaction } from '../../types/marketplace.js';
 import { AttachableError, SimpleError } from '../../util/errors.js';
 import { Downloader, DownloadLogger } from './downloader.js';
 
@@ -37,29 +36,29 @@ export default class LiveDownloader implements Downloader {
     return tlds;
   }
 
-  async downloadTransactions(downloadLogger: DownloadLogger): Promise<Transaction[]> {
+  async downloadTransactions(downloadLogger: DownloadLogger): Promise<RawTransaction[]> {
     downloadLogger.prepare(1);
-    const json: Transaction[] = await downloadMarketplaceData('/sales/transactions/export');
+    const json: RawTransaction[] = await downloadMarketplaceData('/sales/transactions/export');
     downloadLogger.tick();
 
     save('transactions.json', json);
     return json;
   }
 
-  async downloadLicensesWithoutDataInsights(downloadLogger: DownloadLogger): Promise<License[]> {
+  async downloadLicensesWithoutDataInsights(downloadLogger: DownloadLogger): Promise<RawLicense[]> {
     downloadLogger.prepare(1);
-    let json: License[] = await downloadMarketplaceData('/licenses/export?endDate=2018-07-01');
+    let json: RawLicense[] = await downloadMarketplaceData('/licenses/export?endDate=2018-07-01');
     downloadLogger.tick();
 
     save('licenses-without.json', json);
     return json;
   }
 
-  async downloadLicensesWithDataInsights(downloadLogger: DownloadLogger): Promise<License[]> {
+  async downloadLicensesWithDataInsights(downloadLogger: DownloadLogger): Promise<RawLicense[]> {
     const dates = dataInsightDateRanges();
     downloadLogger.prepare(dates.length);
     const promises = dates.map(async ({ startDate, endDate }) => {
-      const json: License[] = await downloadMarketplaceData(`/licenses/export?withDataInsights=true&startDate=${startDate}&endDate=${endDate}`);
+      const json: RawLicense[] = await downloadMarketplaceData(`/licenses/export?withDataInsights=true&startDate=${startDate}&endDate=${endDate}`);
       downloadLogger.tick(`${startDate}-${endDate}`);
       return json;
     });
