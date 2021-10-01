@@ -3,7 +3,7 @@ type RawTransactionContact = {
   name?: string;
 };
 
-type PartnerDetails = {
+type RawPartnerDetails = {
   partnerName: string;
   partnerType?: string;
   billingContact: {
@@ -38,7 +38,7 @@ export interface RawTransaction {
     maintenanceStartDate: string,
     maintenanceEndDate: string,
   },
-  partnerDetails?: PartnerDetails,
+  partnerDetails?: RawPartnerDetails,
 }
 
 type RawLicenseContact = {
@@ -70,7 +70,7 @@ export interface RawLicense {
   hosting: 'Server' | 'Cloud' | 'Data Center',
   maintenanceStartDate: string,
   maintenanceEndDate: string,
-  partnerDetails?: PartnerDetails,
+  partnerDetails?: RawPartnerDetails,
   status: 'inactive' | 'active' | 'cancelled',
 
   evaluationOpportunitySize?: string,
