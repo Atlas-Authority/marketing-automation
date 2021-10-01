@@ -11,8 +11,8 @@ export class DealFinder {
 
   constructor(initialDeals: Deal[]) {
     for (const deal of initialDeals) {
-      if (deal.properties.addonlicenseid) this.licenseDeals.set(deal.properties.addonlicenseid, deal);
-      if (deal.properties.transactionid) this.transactionDeals.set(deal.properties.transactionid, deal);
+      if (deal.properties.addonLicenseId) this.licenseDeals.set(deal.properties.addonLicenseId, deal);
+      if (deal.properties.transactionId) this.transactionDeals.set(deal.properties.transactionId, deal);
     }
   }
 

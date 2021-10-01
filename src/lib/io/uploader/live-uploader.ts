@@ -144,11 +144,11 @@ export default class LiveUploader implements Uploader {
 
         const results = await this.hubspotClient.crm.deals.batchApi.create({
           inputs: deals.map(({ properties }) => {
-            const { addonlicenseid, transactionid, ...rest } = properties;
+            const { addonLicenseId, transactionId, ...rest } = properties;
             return {
               properties: {
-                [config.hubspot.attrs.deal.addonLicenseId]: addonlicenseid,
-                [config.hubspot.attrs.deal.transactionId]: transactionid,
+                [config.hubspot.attrs.deal.addonLicenseId]: addonLicenseId,
+                [config.hubspot.attrs.deal.transactionId]: transactionId,
                 ...rest,
               },
             };
@@ -159,8 +159,8 @@ export default class LiveUploader implements Uploader {
 
         const createdDeals: Deal[] = deals.map(deal => {
           const result = results.body.results.find(result =>
-            result.properties[config.hubspot.attrs.deal.addonLicenseId] === deal.properties.addonlicenseid ||
-            result.properties[config.hubspot.attrs.deal.transactionId] === deal.properties.transactionid
+            result.properties[config.hubspot.attrs.deal.addonLicenseId] === deal.properties.addonLicenseId ||
+            result.properties[config.hubspot.attrs.deal.transactionId] === deal.properties.transactionId
           );
           assert.ok(result);
           return { ...deal, id: result.id };

@@ -129,8 +129,8 @@ export default class LiveDownloader implements Downloader {
         delete deal.properties.createdate;
         deal.properties.closedate = deal.properties.closedate.substr(0, 10);
 
-        const addonlicenseid = deal.properties[config.hubspot.attrs.deal.addonLicenseId] || '';
-        const transactionid = deal.properties[config.hubspot.attrs.deal.transactionId] || '';
+        const addonLicenseId = deal.properties[config.hubspot.attrs.deal.addonLicenseId] || '';
+        const transactionId = deal.properties[config.hubspot.attrs.deal.transactionId] || '';
 
         delete deal.properties[config.hubspot.attrs.deal.addonLicenseId];
         delete deal.properties[config.hubspot.attrs.deal.transactionId];
@@ -139,8 +139,8 @@ export default class LiveDownloader implements Downloader {
           id: deal.id,
           properties: ({
             ...deal.properties,
-            addonlicenseid,
-            transactionid,
+            addonLicenseId,
+            transactionId,
           } as Deal['properties']),
           contactIds: (deal.associations?.contacts.results
             .filter(result => result.type === 'deal_to_contact')

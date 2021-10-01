@@ -74,7 +74,7 @@ function check(sen: string) {
 }
 
 function checkSEN(sen: string) {
-  const foundDeal = data.allDeals.find(d => d.properties.addonlicenseid === sen);
+  const foundDeal = data.allDeals.find(d => d.properties.addonLicenseId === sen);
   if (foundDeal) {
     log.info('Dev', sen, 'Already has deal:', foundDeal.id);
     return true;

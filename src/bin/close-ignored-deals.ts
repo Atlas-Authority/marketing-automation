@@ -21,7 +21,7 @@ const dealsToClose = (openDeals
     deal,
     ignoredGroup: ignored.filter(group =>
       group.some(row =>
-        row.addonLicenseId === deal.properties.addonlicenseid))[0],
+        row.addonLicenseId === deal.properties.addonLicenseId))[0],
   }))
   .filter(({ ignoredGroup }) => ignoredGroup)
   .map(({ deal, ignoredGroup }) => ({

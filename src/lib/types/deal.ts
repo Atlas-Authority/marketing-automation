@@ -3,8 +3,8 @@ export interface Deal {
   contactIds: string[];
   properties: {
     aa_app: string;
-    addonlicenseid: string;
-    transactionid: string;
+    addonLicenseId: string;
+    transactionId: string;
     closedate: string;
     country: string;
     dealname: string;

@@ -109,8 +109,8 @@ export function dealCreationProperties(record: License | Transaction, dealstage:
 
   return {
     ...(isLicense(record)
-      ? { addonlicenseid: record.addonLicenseId, transactionid: '' }
-      : { transactionid: record.transactionId, addonlicenseid: '' }),
+      ? { addonLicenseId: record.addonLicenseId, transactionId: '' }
+      : { transactionId: record.transactionId, addonLicenseId: '' }),
     closedate: (isLicense(record)
       ? record.maintenanceStartDate
       : record.purchaseDetails.maintenanceStartDate),
@@ -139,12 +139,12 @@ export function dealUpdateProperties(deal: Deal, record: License | Transaction):
   const properties: Partial<Deal['properties']> = {};
 
   if (isTransaction(record)) {
-    if (deal.properties.transactionid !== record.transactionId) properties.transactionid = record.transactionId;
-    if (deal.properties.addonlicenseid !== '') properties.addonlicenseid = '';
+    if (deal.properties.transactionId !== record.transactionId) properties.transactionId = record.transactionId;
+    if (deal.properties.addonLicenseId !== '') properties.addonLicenseId = '';
   }
   else {
-    if (deal.properties.addonlicenseid !== record.addonLicenseId) properties.addonlicenseid = record.addonLicenseId;
-    if (deal.properties.transactionid !== '') properties.transactionid = '';
+    if (deal.properties.addonLicenseId !== record.addonLicenseId) properties.addonLicenseId = record.addonLicenseId;
+    if (deal.properties.transactionId !== '') properties.transactionId = '';
   }
 
   const oldAmount = deal.properties.amount;
