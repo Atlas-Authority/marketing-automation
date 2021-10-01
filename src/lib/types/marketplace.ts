@@ -72,7 +72,9 @@ export interface RawLicense {
   maintenanceEndDate: string,
   partnerDetails?: PartnerDetails,
   status: 'inactive' | 'active' | 'cancelled',
+
   evaluationOpportunitySize?: string,
+
   attribution?: {
     channel: string,
     referrerDomain?: string,

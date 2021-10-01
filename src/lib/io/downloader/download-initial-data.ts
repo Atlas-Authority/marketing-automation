@@ -186,6 +186,15 @@ const licensesWithDataInsightsSchema: Array<['every' | 'some', (license: License
   ['every', license => !license?.partnerDetails?.billingContact || isNonBlankString(license?.partnerDetails?.billingContact.email)],
   ['every', license => !license?.partnerDetails?.billingContact || isNonBlankString(license?.partnerDetails?.billingContact.name)],
 
+  ['every', license => isNonBlankString(license?.evaluationOpportunitySize)],
+  ['some', license => !!license?.attribution],
+  ['every', license => !license?.attribution || isNonBlankString(license?.attribution?.channel)],
+  ['some', license => !license?.attribution || isNonBlankString(license?.attribution?.referrerDomain)],
+  ['some', license => !license?.attribution || isNonBlankString(license?.attribution?.campaignName)],
+  ['some', license => !license?.attribution || isNonBlankString(license?.attribution?.campaignSource)],
+  ['some', license => !license?.attribution || isNonBlankString(license?.attribution?.campaignMedium)],
+  ['some', license => !license?.attribution || isNonBlankString(license?.attribution?.campaignContent)],
+
   ['some', license => isNonBlankString(license?.parentProductBillingCycle)],
   ['some', license => isNonBlankString(license?.parentProductName)],
   ['some', license => isNonBlankString(license?.installedOnSandbox)],
@@ -264,6 +273,9 @@ const licensesWithoutDataInsightsSchema: Array<['every' | 'some', (license: Lice
   ['some', license => !!license?.partnerDetails?.billingContact],
   ['every', license => !license?.partnerDetails?.billingContact || isNonBlankString(license?.partnerDetails?.billingContact.email)],
   ['every', license => !license?.partnerDetails?.billingContact || isNonBlankString(license?.partnerDetails?.billingContact.name)],
+
+  ['every', license => isUndefined(license?.evaluationOpportunitySize)],
+  ['every', license => !license?.attribution],
 
   ['every', license => isUndefined(license?.parentProductBillingCycle)],
   ['every', license => isUndefined(license?.parentProductName)],
