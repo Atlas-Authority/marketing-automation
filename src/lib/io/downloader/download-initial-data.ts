@@ -125,10 +125,16 @@ function uniqLicenses(licenses: License[]) {
   return fixed.map(ls => ls[0]);
 }
 
-function verifyStructure<T>(name: string, data: T[], schema: Array<['every' | 'some', (license: T) => boolean]>) {
+function verifyStructure<T>(name: string, data: T[], schema: Array<['every' | 'some', (item: T) => boolean]>) {
   log.info('Downloader', 'Verifying schema for:', name);
   for (const [howMany, getter] of schema) {
-    if (!data[howMany](getter)) {
+    const test: (items: T[]) => boolean = (
+      howMany === 'every'
+        ? items => items.every(getter)
+        : items => items.some(getter) && !items.every(getter)
+    );
+
+    if (!test(data)) {
       let errorData = data;
 
       if (howMany === 'every') {
