@@ -190,6 +190,18 @@ const licensesWithDataInsightsSchema: Array<['every' | 'some', (license: License
   ['some', license => isNonBlankString(license?.parentProductName)],
   ['some', license => isNonBlankString(license?.installedOnSandbox)],
   ['some', license => isNonBlankString(license?.parentProductEdition)],
+  ['every', license =>
+    (
+      isUndefined(license?.parentProductBillingCycle) &&
+      isUndefined(license?.parentProductName) &&
+      isUndefined(license?.installedOnSandbox) &&
+      isUndefined(license?.parentProductEdition)
+    ) || (
+      isNonBlankString(license?.parentProductBillingCycle) &&
+      isNonBlankString(license?.parentProductName) &&
+      isNonBlankString(license?.installedOnSandbox) &&
+      isNonBlankString(license?.parentProductEdition)
+    )],
 
   ['some', license => isNonBlankString(license?.evaluationLicense)],
   ['some', license => isNonBlankString(license?.daysToConvertEval)],
