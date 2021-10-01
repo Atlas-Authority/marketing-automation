@@ -196,6 +196,21 @@ const licensesWithDataInsightsSchema: Array<['every' | 'some', (license: License
   ['some', license => isNonBlankString(license?.evaluationStartDate)],
   ['some', license => isNonBlankString(license?.evaluationEndDate)],
   ['some', license => isNonBlankString(license?.evaluationSaleDate)],
+  ['every', license =>
+    (
+      isUndefined(license?.evaluationLicense) &&
+      isUndefined(license?.daysToConvertEval) &&
+      isUndefined(license?.evaluationStartDate) &&
+      isUndefined(license?.evaluationEndDate) &&
+      isUndefined(license?.evaluationSaleDate)
+    ) || (
+      isNonBlankString(license?.evaluationLicense) &&
+      isNonBlankString(license?.daysToConvertEval) &&
+      isNonBlankString(license?.evaluationStartDate) &&
+      isNonBlankString(license?.evaluationEndDate) &&
+      isNonBlankString(license?.evaluationSaleDate)
+    )
+  ],
 ];
 
 const licensesWithoutDataInsightsSchema: Array<['every' | 'some', (license: License) => boolean]> = [
