@@ -203,12 +203,10 @@ const licensesWithDataInsightsSchema: Array<['every' | 'some', (license: RawLice
   ['some', license => isNonBlankString(license?.parentProductEdition)],
   ['every', license =>
     (
-      isUndefined(license?.parentProductBillingCycle) &&
       isUndefined(license?.parentProductName) &&
       isUndefined(license?.installedOnSandbox) &&
       isUndefined(license?.parentProductEdition)
     ) || (
-      isNonBlankString(license?.parentProductBillingCycle) &&
       isNonBlankString(license?.parentProductName) &&
       isNonBlankString(license?.installedOnSandbox) &&
       isNonBlankString(license?.parentProductEdition)
