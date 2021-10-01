@@ -1,4 +1,4 @@
-type TransactionContact = {
+type RawTransactionContact = {
   email: string;
   name?: string;
 };
@@ -12,7 +12,7 @@ export type PartnerDetails = {
   };
 };
 
-export interface Transaction {
+interface RawTransaction {
   transactionId: string,
   addonLicenseId: string,
   licenseId: string,
@@ -23,8 +23,8 @@ export interface Transaction {
     company: string,
     country: string,
     region: string,
-    technicalContact: TransactionContact,
-    billingContact?: TransactionContact
+    technicalContact: RawTransactionContact,
+    billingContact?: RawTransactionContact
   },
   purchaseDetails: {
     saleDate: string,
@@ -40,6 +40,8 @@ export interface Transaction {
   },
   partnerDetails?: PartnerDetails,
 }
+
+export type Transaction = RawTransaction;
 
 export interface DealNameTemplateProperties {
   addonKey: string,

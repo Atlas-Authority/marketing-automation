@@ -1,6 +1,6 @@
 import { PartnerDetails, Transaction } from "./transaction.js";
 
-type LicenseContact = {
+type RawLicenseContact = {
   email: string,
   name?: string,
   phone?: string,
@@ -11,7 +11,7 @@ type LicenseContact = {
   postcode?: string,
 };
 
-export interface License {
+interface RawLicense {
   addonLicenseId: string,
   licenseId: string,
   addonKey: string,
@@ -27,8 +27,8 @@ export interface License {
     company: string,
     country: string,
     region: string,
-    technicalContact: LicenseContact,
-    billingContact?: LicenseContact,
+    technicalContact: RawLicenseContact,
+    billingContact?: RawLicenseContact,
   },
   partnerDetails?: PartnerDetails,
   evaluationOpportunitySize?: string,
@@ -40,6 +40,7 @@ export interface License {
     campaignMedium?: string,
     campaignContent?: string,
   },
+
   parentProductBillingCycle?: 'NA' | 'Pending' | 'ANNUAL' | 'MONTHLY',
   parentProductName?: 'NA' | 'Pending' | 'Confluence' | 'Jira',
   installedOnSandbox?: 'NA' | 'Pending' | 'No' | 'Yes',
@@ -51,6 +52,8 @@ export interface License {
   evaluationEndDate?: string,
   evaluationSaleDate?: string,
 }
+
+export type License = RawLicense;
 
 export type LicenseContext = {
   license: License;
