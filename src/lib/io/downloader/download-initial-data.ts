@@ -1,15 +1,16 @@
 import assert from 'assert';
 import util from 'util';
-import { getEmails, isLicense } from '../../engine/deal-generator/records.js';
 import { MultiDownloadLogger } from '../../log/download-logger.js';
 import log from '../../log/logger.js';
 import { Company } from '../../types/company.js';
 import { Contact } from '../../types/contact.js';
 import { Deal } from '../../types/deal.js';
 import { License } from '../../types/license.js';
+import { RawLicense, RawTransaction } from '../../types/marketplace.js';
 import { Transaction } from '../../types/transaction.js';
 import { makeMultiProviderDomainsSet } from '../../util/domains.js';
 import { AttachableError } from '../../util/errors.js';
+import { isPresent } from '../../util/helpers.js';
 import { Downloader } from './downloader.js';
 
 type InitialData = {
@@ -75,21 +76,22 @@ export async function downloadAllData({ downloader }: { downloader: Downloader }
 
   const emailRe = makeEmailValidationRegex(allTlds);
   const hasValidEmails = makeEmailValidator(emailRe);
+
   allTransactions = allTransactions.filter(hasValidEmails);
   allLicenses = allLicenses.filter(hasValidEmails);
 
   return {
     providerDomains,
-    allLicenses,
-    allTransactions,
+    allLicenses: allLicenses.map(normalizeLicense),
+    allTransactions: allTransactions.map(normalizeTransaction),
     allContacts,
     allDeals,
     allCompanies,
   };
 }
 
-function uniqLicenses(licenses: License[]) {
-  const groups: { [addonLicenseId: string]: License[] } = {};
+function uniqLicenses(licenses: RawLicense[]) {
+  const groups: { [addonLicenseId: string]: RawLicense[] } = {};
 
   for (const license of licenses) {
     if (!groups[license.addonLicenseId]) {
@@ -146,7 +148,7 @@ function verifyStructure<T>(name: string, data: T[], schema: Array<['every' | 's
   }
 }
 
-const licensesWithDataInsightsSchema: Array<['every' | 'some', (license: License) => boolean]> = [
+const licensesWithDataInsightsSchema: Array<['every' | 'some', (license: RawLicense) => boolean]> = [
   ['every', license => isNonBlankString(license?.addonLicenseId)],
   ['every', license => isNonBlankString(license?.licenseId)],
   ['every', license => isNonBlankString(license?.addonKey)],
@@ -234,7 +236,7 @@ const licensesWithDataInsightsSchema: Array<['every' | 'some', (license: License
   ],
 ];
 
-const licensesWithoutDataInsightsSchema: Array<['every' | 'some', (license: License) => boolean]> = [
+const licensesWithoutDataInsightsSchema: Array<['every' | 'some', (license: RawLicense) => boolean]> = [
   ['every', license => isNonBlankString(license?.addonLicenseId)],
   ['every', license => isNonBlankString(license?.licenseId)],
   ['every', license => isNonBlankString(license?.addonKey)],
@@ -289,7 +291,7 @@ const licensesWithoutDataInsightsSchema: Array<['every' | 'some', (license: Lice
   ['every', license => isUndefined(license?.evaluationSaleDate)],
 ];
 
-const transactionsSchema: Array<['every' | 'some', (transaction: Transaction) => boolean]> = [
+const transactionsSchema: Array<['every' | 'some', (transaction: RawTransaction) => boolean]> = [
   ['every', transaction => isNonBlankString(transaction?.transactionId)],
   ['every', transaction => isNonBlankString(transaction?.addonLicenseId)],
   ['every', transaction => isNonBlankString(transaction?.licenseId)],
@@ -350,10 +352,31 @@ function makeEmailValidationRegex(tlds: string[]) {
   return re;
 }
 
+function isRawTransaction(item: RawTransaction | RawLicense): item is RawTransaction {
+  return 'transactionId' in item;
+}
+
+function getEmails(item: RawTransaction | RawLicense) {
+  if (!isRawTransaction(item)) {
+    return [
+      item.contactDetails.technicalContact.email,
+      item.contactDetails.billingContact?.email,
+      item.partnerDetails?.billingContact.email,
+    ].filter(isPresent);
+  }
+  else {
+    return [
+      item.customerDetails.technicalContact.email,
+      item.customerDetails.billingContact?.email,
+      item.partnerDetails?.billingContact.email,
+    ].filter(isPresent);
+  }
+}
+
 function makeEmailValidator(re: RegExp) {
-  return (item: Transaction | License) => {
+  return (item: RawTransaction | RawLicense) => {
     if (!getEmails(item).every(e => re.test(e))) {
-      if (isLicense(item)) {
+      if (!isRawTransaction(item)) {
         log.warn('Downloader', 'License has invalid email(s); will be skipped:', item.addonLicenseId);
       }
       else {
@@ -365,7 +388,7 @@ function makeEmailValidator(re: RegExp) {
   };
 }
 
-function filterLicensesWithTechEmail(license: License) {
+function filterLicensesWithTechEmail(license: RawLicense) {
   if (!license.contactDetails.technicalContact?.email) {
     log.warn('Downloader', 'License does not have a tech contact email; will be skipped', license.addonLicenseId);
     return false;
@@ -373,7 +396,7 @@ function filterLicensesWithTechEmail(license: License) {
   return true;
 }
 
-function fixOdditiesInLicenses(license: License) {
+function fixOdditiesInLicenses(license: RawLicense) {
   normalizeLicenseNewlines(license.contactDetails.technicalContact, 'address1');
   normalizeLicenseNewlines(license.contactDetails.technicalContact, 'address2');
   normalizeLicenseNewlines(license.contactDetails.billingContact, 'address1');
@@ -400,4 +423,12 @@ function normalizeLicenseNullLiteral<T extends { [key: string]: string }, K exte
   if (o && (o[key]) === 'null') {
     delete o[key];
   }
+}
+
+function normalizeLicense(license: RawLicense): License {
+  return license;
+}
+
+function normalizeTransaction(transaction: RawTransaction): Transaction {
+  return transaction;
 }
