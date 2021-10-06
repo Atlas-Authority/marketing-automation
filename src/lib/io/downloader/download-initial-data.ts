@@ -197,20 +197,10 @@ const licensesWithDataInsightsSchema: Array<['every' | 'some', (license: RawLice
   ['some', license => !license?.attribution || isNonBlankString(license?.attribution?.campaignMedium)],
   ['some', license => !license?.attribution || isNonBlankString(license?.attribution?.campaignContent)],
 
-  ['some', license => isNonBlankString(license?.parentProductBillingCycle)],
-  ['some', license => isNonBlankString(license?.parentProductName)],
-  ['some', license => isNonBlankString(license?.installedOnSandbox)],
-  ['some', license => isNonBlankString(license?.parentProductEdition)],
-  ['every', license =>
-    (
-      isUndefined(license?.parentProductName) &&
-      isUndefined(license?.installedOnSandbox) &&
-      isUndefined(license?.parentProductEdition)
-    ) || (
-      isNonBlankString(license?.parentProductName) &&
-      isNonBlankString(license?.installedOnSandbox) &&
-      isNonBlankString(license?.parentProductEdition)
-    )],
+  ['every', license => isNonBlankString(license?.parentProductBillingCycle)],
+  ['every', license => isNonBlankString(license?.parentProductName)],
+  ['every', license => isNonBlankString(license?.installedOnSandbox)],
+  ['every', license => isNonBlankString(license?.parentProductEdition)],
 
   ['some', license => isNonBlankString(license?.evaluationLicense)],
   ['some', license => isNonBlankString(license?.daysToConvertEval)],
