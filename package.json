@@ -9,7 +9,7 @@
     "start": "env TS_NODE_TRANSPILE_ONLY=true TS_NODE_FILES=true node --loader ts-node/esm src/bin/run-once.ts",
     "download": "env TS_NODE_TRANSPILE_ONLY=true TS_NODE_FILES=true node --loader ts-node/esm src/bin/download.ts",
     "explain": "env TS_NODE_TRANSPILE_ONLY=true TS_NODE_FILES=true node --loader ts-node/esm src/bin/check-licenses.ts",
-    "test": "node --experimental-vm-modules node_modules/.bin/jest out"
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js out"
   },
   "dependencies": {
     "@hubspot/api-client": "^3.2.6",
