@@ -27,3 +27,8 @@ export interface DealAssociationPair {
   contactId: string;
   dealId: string;
 }
+
+export interface DealCompanyAssociationPair {
+  companyId: string;
+  dealId: string;
+}

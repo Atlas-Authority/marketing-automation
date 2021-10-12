@@ -1,6 +1,6 @@
 import { Company } from '../../types/company.js';
 import { Contact, GeneratedContact } from '../../types/contact.js';
-import { Deal, DealAssociationPair, DealUpdate } from '../../types/deal.js';
+import { Deal, DealAssociationPair, DealCompanyAssociationPair, DealUpdate } from '../../types/deal.js';
 import log from '../../log/logger.js';
 import { Uploader } from './uploader.js';
 
@@ -49,6 +49,14 @@ export default class ConsoleUploader implements Uploader {
 
   async disassociateDealsFromContacts(fromTos: DealAssociationPair[]) {
     this.fakeApiConsoleLog('Fake Disassociating Deals->Contacts:', fromTos);
+  }
+
+  async associateDealsWithCompanies(fromTos: DealCompanyAssociationPair[]) {
+    this.fakeApiConsoleLog('Fake Associating Deals->Companies:', fromTos);
+  }
+
+  async disassociateDealsFromCompanies(fromTos: DealCompanyAssociationPair[]) {
+    this.fakeApiConsoleLog('Fake Disassociating Deals->Companies:', fromTos);
   }
 
   fakeApiConsoleLog(title: string, data: unknown[]) {

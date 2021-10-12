@@ -6,7 +6,7 @@ import { contactToHubspotProperties } from '../../engine/contacts.js';
 import log from '../../log/logger.js';
 import { Company } from '../../types/company.js';
 import { Contact, GeneratedContact } from '../../types/contact.js';
-import { Deal, DealAssociationPair, DealUpdate } from '../../types/deal.js';
+import { Deal, DealAssociationPair, DealCompanyAssociationPair, DealUpdate } from '../../types/deal.js';
 import { batchesOf } from '../../util/helpers.js';
 import { Uploader } from './uploader.js';
 
@@ -39,6 +39,38 @@ export default class LiveUploader implements Uploader {
           from: { id: dealId },
           to: { id: contactId },
           type: 'deal_to_contact',
+        })),
+      });
+    }
+    catch (e: any) {
+      throw new Error(e.response.body.message);
+    }
+  }
+
+  async associateDealsWithCompanies(fromTos: DealCompanyAssociationPair[]) {
+    try {
+      log.info('Live Uploader', 'Associating Deals->Companies:', fromTos);
+      await this.hubspotClient.crm.associations.batchApi.create('deal', 'company', {
+        inputs: fromTos.map(({ dealId, companyId }) => ({
+          from: { id: dealId },
+          to: { id: companyId },
+          type: 'deal_to_company',
+        })),
+      });
+    }
+    catch (e: any) {
+      throw new Error(e.response.body.message);
+    }
+  }
+
+  async disassociateDealsFromCompanies(fromTos: DealCompanyAssociationPair[]) {
+    try {
+      log.info('Live Uploader', 'Disassociating Deals->Companies:', fromTos);
+      await this.hubspotClient.crm.associations.batchApi.archive('deal', 'company', {
+        inputs: fromTos.map(({ dealId, companyId }) => ({
+          from: { id: dealId },
+          to: { id: companyId },
+          type: 'deal_to_company',
         })),
       });
     }
