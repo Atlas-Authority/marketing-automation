@@ -1,37 +1,31 @@
-import { Contact } from "../types/contact.js";
-import { Deal, DealAssociationPair, DealUpdate } from "../types/deal.js";
 import { Uploader } from "../io/uploader/uploader.js";
+import { Deal, DealAssociationPair, DealCompanyAssociationPair, DealUpdate } from "../types/deal.js";
 
-export async function upsertDealsInHubspot({ uploader, dealDiffs, contacts }: {
+export async function upsertDealsInHubspot({ uploader, dealDiffs }: {
   uploader: Uploader,
   dealDiffs: {
     dealsToCreate: Omit<Deal, "id">[],
     dealsToUpdate: DealUpdate[],
     associationsToCreate: DealAssociationPair[],
     associationsToRemove: DealAssociationPair[],
+    companyAssociationsToCreate: DealCompanyAssociationPair[],
+    companyAssociationsToRemove: DealCompanyAssociationPair[],
   },
-  contacts: Contact[],
 }) {
   await uploader.updateAllDeals(dealDiffs.dealsToUpdate);
   const createdDeals = await uploader.createAllDeals(dealDiffs.dealsToCreate);
 
-  const newAssociations: DealAssociationPair[] = createdDeals.flatMap(d =>
+  const newContactAssociations: DealAssociationPair[] = createdDeals.flatMap(d =>
     d.contactIds.map(id => ({ dealId: d.id, contactId: id }))
   );
 
-  const contactsById: { [id: string]: Contact } = Object.create(null);
-  for (const contact of contacts) {
-    contactsById[contact.hs_object_id] = contact;
-  }
-
-  await uploader.associateDealsWithContacts(sortCustomersBeforePartners(contactsById, newAssociations));
-  await uploader.associateDealsWithContacts(sortCustomersBeforePartners(contactsById, dealDiffs.associationsToCreate));
+  await uploader.associateDealsWithContacts([...newContactAssociations, ...dealDiffs.associationsToCreate]);
   await uploader.disassociateDealsFromContacts(dealDiffs.associationsToRemove);
-}
 
-function sortCustomersBeforePartners(contacts: { [id: string]: Contact }, associations: DealAssociationPair[]) {
-  return [
-    ...associations.filter(a => contacts[a.contactId].contact_type === 'Customer'),
-    ...associations.filter(a => contacts[a.contactId].contact_type === 'Partner'),
-  ];
+  const newCompanyAssociations: DealCompanyAssociationPair[] = createdDeals.flatMap(d =>
+    d.companyIds.map(id => ({ dealId: d.id, companyId: id }))
+  );
+
+  await uploader.associateDealsWithCompanies([...newCompanyAssociations, ...dealDiffs.companyAssociationsToCreate]);
+  await uploader.disassociateDealsFromCompanies(dealDiffs.companyAssociationsToRemove);
 }

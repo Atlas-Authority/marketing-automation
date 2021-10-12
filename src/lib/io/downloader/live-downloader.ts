@@ -112,7 +112,7 @@ export default class LiveDownloader implements Downloader {
     ];
 
     let deals;
-    try { deals = await this.hubspotClient.crm.deals.getAll(undefined, undefined, properties, ['contact']); }
+    try { deals = await this.hubspotClient.crm.deals.getAll(undefined, undefined, properties, ['contact', 'company']); }
     catch (e: any) {
       throw new Error('Failed downloading deals: ' + e.response.body.message);
     }
@@ -144,6 +144,9 @@ export default class LiveDownloader implements Downloader {
           } as Deal['properties']),
           contactIds: (deal.associations?.contacts.results
             .filter(result => result.type === 'deal_to_contact')
+            .map(result => result.id)) || [],
+          companyIds: (deal.associations?.companies?.results
+            .filter(result => result.type === 'deal_to_company')
             .map(result => result.id)) || [],
         });
       })

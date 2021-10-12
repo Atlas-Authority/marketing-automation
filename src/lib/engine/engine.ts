@@ -101,7 +101,6 @@ export default async function runEngine({ downloader, uploader }: {
   await upsertDealsInHubspot({
     uploader,
     dealDiffs,
-    contacts: verifiedContacts,
   });
 
   logStep('Done!');

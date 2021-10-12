@@ -1,9 +1,9 @@
 import * as assert from 'assert';
 import _ from 'lodash';
 import { ContactsByEmail } from '../types/contact.js';
-import { Deal, DealUpdate } from '../types/deal.js';
+import { Deal, DealAssociationPair, DealCompanyAssociationPair, DealUpdate } from '../types/deal.js';
 import { License, LicenseContext, RelatedLicenseSet } from '../types/license.js';
-import { isPresent } from '../util/helpers.js';
+import { isPresent, sorter } from '../util/helpers.js';
 import { saveForInspection } from '../cache/inspection.js';
 import log from '../log/logger.js';
 import { ActionGenerator, CreateDealAction, UpdateDealAction } from './deal-generator/actions.js';
@@ -11,15 +11,15 @@ import { DealFinder } from './deal-generator/deal-finder.js';
 import { EventGenerator } from './deal-generator/events.js';
 import { getEmails } from './deal-generator/records.js';
 
-function contactIdsFor(contacts: ContactsByEmail, groups: LicenseContext[]) {
+function contactsFor(contacts: ContactsByEmail, groups: LicenseContext[]) {
   return (_.uniq(
     groups
       .flatMap(group => [group.license, ...group.transactions])
       .flatMap(getEmails)
   )
     .map(email => contacts[email])
-    .filter(isPresent)
-    .map(c => c.hs_object_id));
+    .filter(isPresent))
+    .sort(sorter(c => c.contact_type === 'Customer' ? -1 : 0));
 }
 
 export function generateDeals(data: {
@@ -40,27 +40,44 @@ export function generateDeals(data: {
   });
 
   const dealsToCreate: Omit<Deal, 'id'>[] = dealCreateActions.map(({ groups, properties }) => {
-    const contactIds = contactIdsFor(data.contactsByEmail, groups);
-    return { contactIds, properties };
+    const contacts = contactsFor(data.contactsByEmail, groups);
+    const contactIds = contacts.map(c => c.hs_object_id);
+    const companyIds = contacts.filter(c => c.contact_type === 'Customer').map(c => c.company_id).filter(isPresent);
+    return { contactIds, properties, companyIds };
   });
 
   const dealsToUpdate: DealUpdate[] = [];
 
-  const associationsToCreate: Array<{ contactId: string, dealId: string }> = [];
-  const associationsToRemove: Array<{ contactId: string, dealId: string }> = [];
+  const associationsToCreate: DealAssociationPair[] = [];
+  const associationsToRemove: DealAssociationPair[] = [];
+
+  const companyAssociationsToCreate: DealCompanyAssociationPair[] = [];
+  const companyAssociationsToRemove: DealCompanyAssociationPair[] = [];
 
   for (const { deal: oldDeal, properties, groups } of dealUpdateActions) {
     // Start with deal->contact associations
 
-    const oldAssociatedContactIds = oldDeal['contactIds'];
-    const newAssociatedContactIds = contactIdsFor(data.contactsByEmail, groups);
-    assert.ok(newAssociatedContactIds);
+    const contacts = contactsFor(data.contactsByEmail, groups);
+
+    const oldAssociatedContactIds = oldDeal.contactIds;
+    const newAssociatedContactIds = contacts.map(c => c.hs_object_id);
 
     const creatingAssociatedContactIds = newAssociatedContactIds.filter(id => !oldAssociatedContactIds.includes(id));
     const removingAssociatedContactIds = oldAssociatedContactIds.filter(id => !newAssociatedContactIds.includes(id));
 
     if (creatingAssociatedContactIds.length > 0) associationsToCreate.push(...creatingAssociatedContactIds.map(contactId => ({ contactId, dealId: oldDeal.id })));
     if (removingAssociatedContactIds.length > 0) associationsToRemove.push(...removingAssociatedContactIds.map(contactId => ({ contactId, dealId: oldDeal.id })));
+
+    // Now deal with deal->company associations
+
+    const oldAssociatedCompanyIds = oldDeal.companyIds;
+    const newAssociatedCompanyIds = contacts.filter(c => c.contact_type === 'Customer').map(c => c.company_id).filter(isPresent);
+
+    const creatingAssociatedCompanyIds = newAssociatedCompanyIds.filter(id => !oldAssociatedCompanyIds.includes(id));
+    const removingAssociatedCompanyIds = oldAssociatedCompanyIds.filter(id => !newAssociatedCompanyIds.includes(id));
+
+    if (creatingAssociatedCompanyIds.length > 0) companyAssociationsToCreate.push(...creatingAssociatedCompanyIds.map(companyId => ({ companyId, dealId: oldDeal.id })));
+    if (removingAssociatedCompanyIds.length > 0) companyAssociationsToRemove.push(...removingAssociatedCompanyIds.map(companyId => ({ companyId, dealId: oldDeal.id })));
 
     // Now deal with deal
 
@@ -81,7 +98,11 @@ export function generateDeals(data: {
     }
   }
 
-  return { dealsToCreate, dealsToUpdate, associationsToCreate, associationsToRemove };
+  return {
+    dealsToCreate, dealsToUpdate,
+    associationsToCreate, associationsToRemove,
+    companyAssociationsToCreate, companyAssociationsToRemove,
+  };
 }
 
 /** Generates deal actions based on match data */
