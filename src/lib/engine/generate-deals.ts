@@ -1,6 +1,6 @@
 import * as assert from 'assert';
 import _ from 'lodash';
-import { ContactsByEmail } from '../types/contact.js';
+import { Contact, ContactsByEmail } from '../types/contact.js';
 import { Deal, DealAssociationPair, DealCompanyAssociationPair, DealUpdate } from '../types/deal.js';
 import { License, LicenseContext, RelatedLicenseSet } from '../types/license.js';
 import { isPresent, sorter } from '../util/helpers.js';
@@ -10,6 +10,8 @@ import { ActionGenerator, CreateDealAction, UpdateDealAction } from './deal-gene
 import { DealFinder } from './deal-generator/deal-finder.js';
 import { EventGenerator } from './deal-generator/events.js';
 import { getEmails } from './deal-generator/records.js';
+import { Uploader } from '../io/uploader/uploader.js';
+import { Company } from '../types/company.js';
 
 function contactsFor(contacts: ContactsByEmail, groups: LicenseContext[]) {
   return (_.uniq(
@@ -20,6 +22,34 @@ function contactsFor(contacts: ContactsByEmail, groups: LicenseContext[]) {
     .map(email => contacts[email])
     .filter(isPresent))
     .sort(sorter(c => c.contact_type === 'Customer' ? -1 : 0));
+}
+
+export async function backfillDealCompanies(input: {
+  allMatches: RelatedLicenseSet[],
+  deals: Deal[],
+  contacts: Contact[],
+  uploader: Uploader,
+}) {
+  const assocations: DealCompanyAssociationPair[] = [];
+
+  for (const deal of input.deals) {
+    const contacts = deal.contactIds.map(id => {
+      const contact = input.contacts.find(c => c.hs_object_id === id);
+      assert.ok(contact);
+      return contact;
+    });
+
+    const customers = contacts.filter(c => c.contact_type === 'Customer');
+    const companyIds = customers.map(customer => customer.company_id).filter(isPresent);
+
+    for (const companyId of companyIds) {
+      assocations.push({ dealId: deal.id, companyId });
+    }
+  }
+
+  if (assocations.length > 0) {
+    input.uploader.associateDealsWithCompanies(assocations);
+  }
 }
 
 export function generateDeals(data: {

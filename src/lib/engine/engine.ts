@@ -7,7 +7,7 @@ import log from '../log/logger.js';
 import { buildContactsStructure } from './contacts.js';
 import { generateContactUpdateActions } from './generate-contact-updates.js';
 import { generateContacts } from "./generate-contacts.js";
-import { generateDeals } from './generate-deals.js';
+import { backfillDealCompanies, generateDeals } from './generate-deals.js';
 import { matchIntoLikelyGroups } from './license-grouper.js';
 import { findAndFlagExternallyCreatedContacts, findAndFlagPartnerCompanies, findAndFlagPartnersByDomain, identifyDomains } from './partners.js';
 import { updateContactsInHubspotAgain } from './upsert-contact-updates.js';
@@ -87,6 +87,14 @@ export default async function runEngine({ downloader, uploader }: {
 
   logStep('Updating contacts in Hubspot');
   await updateContactsInHubspotAgain({ uploader, contactUpdateActions });
+
+  logStep('Backfill deal companies');
+  await backfillDealCompanies({
+    allMatches,
+    deals: initialData.allDeals,
+    contacts: verifiedContacts,
+    uploader,
+  });
 
   logStep('Generating deals');
   const dealDiffs = generateDeals({
