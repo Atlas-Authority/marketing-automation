@@ -41,6 +41,13 @@ export async function upsertContactsInHubspot({ uploader, newContacts, oldContac
     }
   }
 
+  for (const oldContact of oldContacts) {
+    const found = existingContacts.find(c => c.hs_object_id === oldContact.hs_object_id);
+    if (!found) {
+      existingContacts.push(oldContact);
+    }
+  }
+
   await uploader.updateAllContacts(contactsToUpdate);
   const createdContacts = await uploader.createAllContacts(contactsToCreate);
 
