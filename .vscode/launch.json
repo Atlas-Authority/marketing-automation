@@ -42,7 +42,7 @@
     },
     {
       "name": "Downloader",
-      "program": "${workspaceFolder}/src/bin/download.js",
+      "program": "${workspaceFolder}/src/bin/download.ts",
       "request": "launch",
       "skipFiles": [
         "<node_internals>/**"
