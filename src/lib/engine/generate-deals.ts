@@ -40,10 +40,13 @@ export async function backfillDealCompanies(input: {
     });
 
     const customers = contacts.filter(c => c.contact_type === 'Customer');
-    const companyIds = customers.map(customer => customer.company_id).filter(isPresent);
+    const newCompanyIds = customers.map(customer => customer.company_id).filter(isPresent);
 
-    for (const companyId of companyIds) {
-      assocations.push({ dealId: deal.id, companyId });
+    for (const companyId of newCompanyIds) {
+      if (!deal.companyIds.includes(companyId)) {
+        deal.companyIds.push(companyId);
+        assocations.push({ dealId: deal.id, companyId });
+      }
     }
   }
 
