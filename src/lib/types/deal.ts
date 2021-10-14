@@ -1,6 +1,7 @@
 export interface Deal {
   id: string;
   contactIds: string[];
+  companyIds: string[];
   properties: {
     aa_app: string;
     addonLicenseId: string;
@@ -25,5 +26,10 @@ export interface DealUpdate {
 
 export interface DealAssociationPair {
   contactId: string;
+  dealId: string;
+}
+
+export interface DealCompanyAssociationPair {
+  companyId: string;
   dealId: string;
 }
