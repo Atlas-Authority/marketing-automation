@@ -218,7 +218,19 @@ export default class LiveUploader implements Uploader {
       try {
         saveToJson(`hubspot-update-deals-in-${i}.json`, deals);
 
-        const results = await this.hubspotClient.crm.deals.batchApi.update({ inputs: deals });
+        const results = await this.hubspotClient.crm.deals.batchApi.update({
+          inputs: deals.map(({ properties, id }) => {
+            const { addonLicenseId, transactionId, ...rest } = properties;
+            return {
+              id,
+              properties: {
+                [config.hubspot.attrs.deal.addonLicenseId]: addonLicenseId,
+                [config.hubspot.attrs.deal.transactionId]: transactionId,
+                ...rest,
+              },
+            };
+          }),
+        });
 
         saveToJson(`hubspot-update-deals-out-${i}.json`, results.body.results);
 
