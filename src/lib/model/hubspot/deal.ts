@@ -6,6 +6,9 @@ import { Company } from "./company.js";
 import { Contact } from "./contact.js";
 import config from "../../config/index.js";
 
+const addonLicenseIdKey = config.hubspot.attrs.deal.addonLicenseId;
+const transactionIdKey = config.hubspot.attrs.deal.transactionId;
+
 type DealProps = {
   relatedProducts: string;
   aaApp: string;
@@ -42,8 +45,8 @@ class DealManager extends HubspotEntityManager<DealProps, Deal, SimplePublicObje
   override apiProperties: string[] = [
     'closedate',
     'deployment',
-    config.hubspot.attrs.deal.addonLicenseId,
-    config.hubspot.attrs.deal.transactionId,
+    addonLicenseIdKey,
+    transactionIdKey,
     'aa_app',
     'license_tier',
     'country',
@@ -59,8 +62,8 @@ class DealManager extends HubspotEntityManager<DealProps, Deal, SimplePublicObje
     return {
       relatedProducts: data.related_products,
       aaApp: data.aa_app,
-      addonLicenseId: data[config.hubspot.attrs.deal.addonLicenseId],
-      transactionId: data[config.hubspot.attrs.deal.transactionId],
+      addonLicenseId: data[addonLicenseIdKey],
+      transactionId: data[transactionIdKey],
       closeDate: data.closedate.substr(0, 10),
       country: data.country,
       dealName: data.dealname,
@@ -76,8 +79,8 @@ class DealManager extends HubspotEntityManager<DealProps, Deal, SimplePublicObje
   override toAPI: HubspotPropertyTransformers = {
     related_products: relatedProducts => relatedProducts,
     aa_app: aaApp => aaApp,
-    [config.hubspot.attrs.deal.addonLicenseId]: addonLicenseId => addonLicenseId || '',
-    [config.hubspot.attrs.deal.transactionId]: transactionId => transactionId || '',
+    [addonLicenseIdKey]: addonLicenseId => addonLicenseId || '',
+    [transactionIdKey]: transactionId => transactionId || '',
     closedate: closeDate => closeDate,
     country: country => country,
     dealname: dealName => dealName,
