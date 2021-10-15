@@ -12,6 +12,8 @@ export class Company extends HubspotEntity<CompanyProps> {
 
 class CompanyManager extends HubspotEntityManager<CompanyProps, Company, SimplePublicObject> {
 
+  override Entity = Company;
+
   override kind: HubspotEntityKind = 'company';
 
   override associations: [keyof Company, HubspotEntityKind][] = [];

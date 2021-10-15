@@ -28,6 +28,7 @@ export abstract class HubspotEntityManager<
 
   constructor(private client: hubspot.Client) { }
 
+  abstract Entity: new (id: string | null, props: P) => E;
   abstract kind: HubspotEntityKind;
   abstract associations: [keyof E, HubspotEntityKind][];
 
@@ -49,6 +50,17 @@ export abstract class HubspotEntityManager<
       associations = this.associations.map(a => a[1]);
     }
     const data = await this.api().getAll(undefined, undefined, this.apiProperties, associations);
+    const entities = data.map(raw => {
+      const props = this.fromAPI(raw.properties);
+      const entity = new this.Entity(raw.id, props);
+
+      // for (const [container, other] of this.associations) {
+      //   entity[container];
+      // }
+
+      return entity;
+    });
+    return entities;
   }
 
 }

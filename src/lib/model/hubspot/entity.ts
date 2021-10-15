@@ -1,21 +1,14 @@
 import { HubspotInputObject } from "./manager.js";
 
-type HubspotEntityCtorOptions<T> = { props: T } | HubspotInputObject;
-
 export abstract class HubspotEntity<T extends { [key: string]: any }> {
 
   id?: string;
   props: T;
   newProps: Partial<T>;
 
-  constructor(options: HubspotEntityCtorOptions<T>) {
-    if ('id' in options) {
-      this.id = options.id;
-      this.props = this.fromAPI(options.props as HubspotInputObject['properties']);
-    }
-    else {
-      this.props = options.props;
-    }
+  constructor(id: string | null, props: T) {
+    if (id) this.id = id;
+    this.props = props;
     this.newProps = {};
   }
 
