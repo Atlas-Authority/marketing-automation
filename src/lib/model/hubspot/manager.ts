@@ -1,4 +1,5 @@
 import * as hubspot from '@hubspot/api-client';
+import * as assert from 'assert';
 import { HubspotEntity } from "./entity.js";
 
 export type HubspotInputObject = {
@@ -75,7 +76,7 @@ export abstract class HubspotEntityManager<
     const toUpdate = toSync.filter(e => e.id !== undefined);
 
     if (toCreate.length > 0) {
-      this.api().batchApi.create({
+      const results = this.api().batchApi.create({
         inputs: toCreate.map(e => {
           e.applyUpdates();
           // const props = this.toAPI(e.newProps);
@@ -88,6 +89,26 @@ export abstract class HubspotEntityManager<
           // };
         })
       })
+    }
+
+    if (toUpdate.length > 0) {
+      const results = this.api().batchApi.update({
+        inputs: toUpdate.map(e => {
+          const id = e.id;
+          assert.ok(id);
+
+          const properties: { [key: string]: string } = {};
+          for (const [k, v] of Object.entries(e.newProps)) {
+            const fn = this.toAPI[k];
+            const [newKey, newVal] = fn(v);
+            properties[newKey] = newVal;
+          }
+
+          e.applyUpdates();
+
+          return { id, properties };
+        })
+      });
     }
 
   }
