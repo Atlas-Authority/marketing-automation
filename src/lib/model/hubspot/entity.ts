@@ -1,8 +1,8 @@
 export abstract class HubspotEntity<T extends { [key: string]: any }> {
 
   id?: string;
-  props: T;
-  newProps: Partial<T>;
+  private props: T;
+  private newProps: Partial<T>;
 
   constructor(id: string | null, props: T) {
     if (id) this.id = id;
@@ -11,6 +11,11 @@ export abstract class HubspotEntity<T extends { [key: string]: any }> {
   }
 
   set<K extends keyof T>(key: K, val: T[K]) {
+    if (this.id === undefined) {
+      this.props[key] = val;
+      return;
+    }
+
     const oldVal = this.props[key];
     if (oldVal === val) {
       delete this.newProps[key];
@@ -20,8 +25,19 @@ export abstract class HubspotEntity<T extends { [key: string]: any }> {
     }
   }
 
+  get<K extends keyof T>(key: K): T[K] | undefined {
+    if (this.id === undefined) return this.props[key];
+    if (key in this.newProps) return this.newProps[key];
+    return this.props[key];
+  }
+
   hasChanges() {
-    return Object.keys(this.newProps).length > 0;
+    return this.id === undefined || Object.keys(this.newProps).length > 0;
+  }
+
+  getChanges() {
+    if (this.id === undefined) return this.props;
+    return this.newProps;
   }
 
   applyUpdates() {

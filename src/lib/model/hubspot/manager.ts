@@ -81,15 +81,10 @@ export abstract class HubspotEntityManager<
       for (const entities of groups) {
         const results = this.api().batchApi.create({
           inputs: entities.map(e => {
+            const properties = this.getChangedProperties(e);
             e.applyUpdates();
-            // const props = this.toAPI(e.newProps);
 
-            // const onlyProps = Object.fromEntries(Object.entries(props)
-            //   .filter(([k, v]) => v !== undefined));
-
-            // return {
-            //   properties: onlyProps,
-            // };
+            return { properties };
           })
         });
       }
@@ -103,13 +98,7 @@ export abstract class HubspotEntityManager<
             const id = e.id;
             assert.ok(id);
 
-            const properties: { [key: string]: string } = {};
-            for (const [k, v] of Object.entries(e.newProps)) {
-              const fn = this.toAPI[k];
-              const [newKey, newVal] = fn(v);
-              properties[newKey] = newVal;
-            }
-
+            const properties = this.getChangedProperties(e);
             e.applyUpdates();
 
             return { id, properties };
@@ -118,6 +107,16 @@ export abstract class HubspotEntityManager<
       }
     }
 
+  }
+
+  private getChangedProperties(e: E) {
+    const properties: { [key: string]: string } = {};
+    for (const [k, v] of Object.entries(e.getChanges())) {
+      const fn = this.toAPI[k];
+      const [newKey, newVal] = fn(v);
+      properties[newKey] = newVal;
+    }
+    return properties;
   }
 
 }
