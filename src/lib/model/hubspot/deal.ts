@@ -7,16 +7,16 @@ import { Contact } from "./contact.js";
 import config from "../../config/index.js";
 
 type DealProps = {
-  related_products: string;
-  aa_app: string;
+  relatedProducts: string;
+  aaApp: string;
   addonLicenseId: string | null;
   transactionId: string | null;
-  closedate: string;
+  closeDate: string;
   country: string;
-  dealname: string;
+  dealName: string;
   origin: 'MPAC Lead';
   deployment: 'Server' | 'Cloud' | 'Data Center';
-  license_tier: number;
+  licenseTier: number;
   pipeline: Pipeline;
   dealstage: DealStage;
   amount: number | null;
@@ -56,16 +56,16 @@ class DealManager extends HubspotEntityManager<DealProps, Deal, SimplePublicObje
 
   override fromAPI(data: SimplePublicObject['properties']): DealProps {
     return {
-      related_products: data.related_products,
-      aa_app: data.aa_app,
+      relatedProducts: data.related_products,
+      aaApp: data.aa_app,
       addonLicenseId: data[config.hubspot.attrs.deal.addonLicenseId],
       transactionId: data[config.hubspot.attrs.deal.transactionId],
-      closedate: data.closedate,
+      closeDate: data.closedate,
       country: data.country,
-      dealname: data.dealname,
+      dealName: data.dealname,
       origin: data.origin as DealProps['origin'],
       deployment: data.deployment as DealProps['deployment'],
-      license_tier: +data.license_tier,
+      licenseTier: +data.license_tier,
       pipeline: data.pipeline,
       dealstage: data.dealstage,
       amount: data.amount === '' ? null : +data.amount,
@@ -74,16 +74,16 @@ class DealManager extends HubspotEntityManager<DealProps, Deal, SimplePublicObje
 
   override toAPI(props: DealProps) {
     return {
-      related_products: props.related_products,
-      aa_app: props.aa_app,
+      related_products: props.relatedProducts,
+      aa_app: props.aaApp,
       [config.hubspot.attrs.deal.addonLicenseId]: props.addonLicenseId || '',
       [config.hubspot.attrs.deal.transactionId]: props.transactionId || '',
-      closedate: props.closedate,
+      closedate: props.closeDate,
       country: props.country,
-      dealname: props.dealname,
+      dealname: props.dealName,
       origin: props.origin,
       deployment: props.deployment,
-      license_tier: props.license_tier.toFixed(),
+      license_tier: props.licenseTier.toFixed(),
       pipeline: props.pipeline,
       dealstage: props.dealstage,
       amount: props.amount?.toString() ?? '',
