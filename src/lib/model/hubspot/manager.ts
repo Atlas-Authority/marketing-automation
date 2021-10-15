@@ -34,19 +34,19 @@ export abstract class HubspotEntityManager<
 
   constructor(private client: hubspot.Client) { }
 
-  abstract Entity: new (id: string | null, props: P) => E;
-  abstract kind: HubspotEntityKind;
-  abstract associations: [keyof E, HubspotEntityKind][];
+  protected abstract Entity: new (id: string | null, props: P) => E;
+  protected abstract kind: HubspotEntityKind;
+  protected abstract associations: [keyof E, HubspotEntityKind][];
 
-  abstract apiProperties: string[];
-  abstract fromAPI(data: I['properties']): P;
-  abstract toAPI: HubspotPropertyTransformers<P>;
+  protected abstract apiProperties: string[];
+  protected abstract fromAPI(data: I['properties']): P;
+  protected abstract toAPI: HubspotPropertyTransformers<P>;
 
-  abstract identifiers: (keyof P)[];
+  protected abstract identifiers: (keyof P)[];
 
-  entities: E[] = [];
+  protected entities: E[] = [];
 
-  api() {
+  private api() {
     switch (this.kind) {
       case 'deal': return this.client.crm.deals;
       case 'company': return this.client.crm.companies;
@@ -54,7 +54,7 @@ export abstract class HubspotEntityManager<
     }
   }
 
-  async downloadAllEntities() {
+  public async downloadAllEntities() {
     let associations: undefined | string[];
     if (this.associations.length > 0) {
       associations = this.associations.map(a => a[1]);
@@ -64,8 +64,9 @@ export abstract class HubspotEntityManager<
       const props = this.fromAPI(raw.properties);
       const entity = new this.Entity(raw.id, props);
 
+      // raw.associations
       // for (const [container, other] of this.associations) {
-      //   entity[container];
+      //   entity[container].push();
       // }
 
       return entity;
@@ -73,7 +74,7 @@ export abstract class HubspotEntityManager<
     this.entities = entities;
   }
 
-  async syncUpAllEntities() {
+  public async syncUpAllEntities() {
     const toSync = this.entities.filter(e => e.hasChanges());
     const toCreate = toSync.filter(e => e.id === undefined);
     const toUpdate = toSync.filter(e => e.id !== undefined);
