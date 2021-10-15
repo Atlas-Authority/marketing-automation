@@ -36,6 +36,8 @@ export abstract class HubspotEntityManager<
   abstract fromAPI(data: I['properties']): P;
   abstract toAPI(props: P): I['properties'];
 
+  entities: E[] = [];
+
   api() {
     switch (this.kind) {
       case 'deal': return this.client.crm.deals;
@@ -60,7 +62,7 @@ export abstract class HubspotEntityManager<
 
       return entity;
     });
-    return entities;
+    this.entities = entities;
   }
 
 }
