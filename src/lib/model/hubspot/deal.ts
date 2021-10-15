@@ -60,7 +60,7 @@ class DealManager extends HubspotEntityManager<DealProps, Deal, SimplePublicObje
       aaApp: data.aa_app,
       addonLicenseId: data[config.hubspot.attrs.deal.addonLicenseId],
       transactionId: data[config.hubspot.attrs.deal.transactionId],
-      closeDate: data.closedate,
+      closeDate: data.closedate.substr(0, 10),
       country: data.country,
       dealName: data.dealname,
       origin: data.origin as DealProps['origin'],
