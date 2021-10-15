@@ -76,20 +76,20 @@ class DealManager extends HubspotEntityManager<DealProps, Deal, SimplePublicObje
     };
   }
 
-  override toAPI: HubspotPropertyTransformers = {
-    related_products: relatedProducts => relatedProducts,
-    aa_app: aaApp => aaApp,
-    [addonLicenseIdKey]: addonLicenseId => addonLicenseId || '',
-    [transactionIdKey]: transactionId => transactionId || '',
-    closedate: closeDate => closeDate,
-    country: country => country,
-    dealname: dealName => dealName,
-    origin: origin => origin,
-    deployment: deployment => deployment,
-    license_tier: licenseTier => licenseTier.toFixed(),
-    pipeline: pipeline => pipeline,
-    dealstage: dealstage => dealstage,
-    amount: amount => amount?.toString() ?? '',
+  override toAPI: HubspotPropertyTransformers<DealProps> = {
+    relatedProducts: relatedProducts => ['related_products', relatedProducts],
+    aaApp: aaApp => ['aa_app', aaApp],
+    addonLicenseId: addonLicenseId => [addonLicenseIdKey, addonLicenseId || ''],
+    transactionId: transactionId => [transactionIdKey, transactionId || ''],
+    closeDate: closeDate => ['closedate', closeDate],
+    country: country => ['country', country],
+    dealName: dealName => ['dealname', dealName],
+    origin: origin => ['origin', origin],
+    deployment: deployment => ['deployment', deployment],
+    licenseTier: licenseTier => ['license_tier', licenseTier.toFixed()],
+    pipeline: pipeline => ['pipeline', pipeline],
+    dealstage: dealstage => ['dealstage', dealstage],
+    amount: amount => ['amount', amount?.toString() ?? ''],
   };
 
 }

@@ -29,9 +29,9 @@ class CompanyManager extends HubspotEntityManager<CompanyProps, Company, SimpleP
     };
   }
 
-  override toAPI: HubspotPropertyTransformers = {
-    name: name => name,
-    type: type => type === 'Partner' ? 'PARTNER' : '',
+  override toAPI: HubspotPropertyTransformers<CompanyProps> = {
+    name: name => ['name', name],
+    type: type => ['type', type === 'Partner' ? 'PARTNER' : ''],
   };
 
 }

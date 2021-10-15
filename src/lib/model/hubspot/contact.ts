@@ -83,27 +83,27 @@ class ContactManager extends HubspotEntityManager<ContactProps, Contact, SimpleP
     };
   }
 
-  override toAPI: HubspotPropertyTransformers = {
-    contact_type: contactType => contactType,
+  override toAPI: HubspotPropertyTransformers<ContactProps> = {
+    contactType: contactType => ['contact_type', contactType],
 
-    email: email => email,
-    hosting: hosting => hosting,
-    country: country => country,
-    region: region => region,
+    email: email => ['email', email],
+    hosting: hosting => ['hosting', hosting],
+    country: country => ['country', country],
+    region: region => ['region', region],
 
-    firstname: firstName => firstName?.trim() || '',
-    lastname: lastName => lastName?.trim() || '',
-    phone: phone => phone?.trim() || '',
-    city: city => city?.trim() || '',
-    state: state => state?.trim() || '',
+    firstName: firstName => ['firstname', firstName?.trim() || ''],
+    lastName: lastName => ['lastname', lastName?.trim() || ''],
+    phone: phone => ['phone', phone?.trim() || ''],
+    city: city => ['city', city?.trim() || ''],
+    state: state => ['state', state?.trim() || ''],
 
-    related_products: relatedProducts => relatedProducts.join(';'),
-    license_tier: licenseTier => licenseTier?.toFixed() ?? '',
-    deployment: deployment => deployment,
-    last_mpac_event: lastMpacEvent => lastMpacEvent,
+    relatedProducts: relatedProducts => ['related_products', relatedProducts.join(';')],
+    licenseTier: licenseTier => ['license_tier', licenseTier?.toFixed() ?? ''],
+    deployment: deployment => ['deployment', deployment],
+    lastMpacEvent: lastMpacEvent => ['last_mpac_event', lastMpacEvent],
 
     // Never sync'd up
-    otherEmails: () => '',
+    otherEmails: () => ['', ''],
   };
 
 }
