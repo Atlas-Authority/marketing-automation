@@ -20,8 +20,10 @@ type ContactProps = {
   deployment: 'Cloud' | 'Data Center' | 'Server' | 'Multiple';
 
   relatedProducts: string[];
-  licenseTier: number;
+  licenseTier: number | null;
   lastMpacEvent: string;
+
+  otherEmails: string[];
 };
 
 export class Contact extends HubspotEntity<ContactProps> {
@@ -73,9 +75,11 @@ class ContactManager extends HubspotEntityManager<ContactProps, Contact, SimpleP
       state: data.state || '',
 
       relatedProducts: data.related_products ? data.related_products.split(';') : [],
-      licenseTier: +data.license_tier,
+      licenseTier: data.license_tier === '' ? null : +data.license_tier,
       deployment: data.deployment as ContactProps['deployment'],
       lastMpacEvent: data.last_mpac_event,
+
+      otherEmails: data.hs_additional_emails?.split(';') || [],
     };
   }
 
@@ -95,7 +99,7 @@ class ContactManager extends HubspotEntityManager<ContactProps, Contact, SimpleP
       state: props.state?.trim() || '',
 
       related_products: props.relatedProducts.join(';'),
-      license_tier: props.licenseTier.toFixed(),
+      license_tier: props.licenseTier?.toFixed() ?? '',
       deployment: props.deployment,
       last_mpac_event: props.lastMpacEvent,
     };
