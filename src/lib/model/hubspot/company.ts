@@ -1,6 +1,6 @@
 import { SimplePublicObject } from "@hubspot/api-client/lib/codegen/crm/companies/api";
 import { HubspotEntity } from "./entity.js";
-import { HubspotEntityKind, HubspotEntityManager } from "./manager.js";
+import { HubspotEntityKind, HubspotEntityManager, HubspotPropertyTransformers } from "./manager.js";
 
 type CompanyProps = {
   name: string;
@@ -29,11 +29,9 @@ class CompanyManager extends HubspotEntityManager<CompanyProps, Company, SimpleP
     };
   }
 
-  override toAPI(props: Partial<CompanyProps>): Partial<SimplePublicObject['properties']> {
-    return {
-      name: props.name,
-      type: props.type === 'Partner' ? 'PARTNER' : '',
-    };
-  }
+  override toAPI: HubspotPropertyTransformers = {
+    name: name => name,
+    type: type => type === 'Partner' ? 'PARTNER' : '',
+  };
 
 }

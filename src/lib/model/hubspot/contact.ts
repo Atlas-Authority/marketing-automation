@@ -1,7 +1,7 @@
 import { SimplePublicObject } from "@hubspot/api-client/lib/codegen/crm/contacts/api";
 import { Company } from "./company.js";
 import { HubspotEntity } from "./entity.js";
-import { HubspotEntityKind, HubspotEntityManager } from "./manager.js";
+import { HubspotEntityKind, HubspotEntityManager, HubspotPropertyTransformers } from "./manager.js";
 
 type ContactProps = {
   email: string;
@@ -83,26 +83,27 @@ class ContactManager extends HubspotEntityManager<ContactProps, Contact, SimpleP
     };
   }
 
-  override toAPI(props: Partial<ContactProps>): Partial<SimplePublicObject['properties']> {
-    return {
-      contact_type: props.contactType,
+  override toAPI: HubspotPropertyTransformers = {
+    contact_type: contactType => contactType,
 
-      email: props.email,
-      hosting: props.hosting,
-      country: props.country,
-      region: props.region,
+    email: email => email,
+    hosting: hosting => hosting,
+    country: country => country,
+    region: region => region,
 
-      firstname: props.firstName?.trim() || '',
-      lastname: props.lastName?.trim() || '',
-      phone: props.phone?.trim() || '',
-      city: props.city?.trim() || '',
-      state: props.state?.trim() || '',
+    firstname: firstName => firstName?.trim() || '',
+    lastname: lastName => lastName?.trim() || '',
+    phone: phone => phone?.trim() || '',
+    city: city => city?.trim() || '',
+    state: state => state?.trim() || '',
 
-      related_products: props.relatedProducts.join(';'),
-      license_tier: props.licenseTier?.toFixed() ?? '',
-      deployment: props.deployment,
-      last_mpac_event: props.lastMpacEvent,
-    };
-  }
+    related_products: relatedProducts => relatedProducts.join(';'),
+    license_tier: licenseTier => licenseTier?.toFixed() ?? '',
+    deployment: deployment => deployment,
+    last_mpac_event: lastMpacEvent => lastMpacEvent,
+
+    // Never sync'd up
+    otherEmails: () => '',
+  };
 
 }

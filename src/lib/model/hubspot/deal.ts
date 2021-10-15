@@ -1,7 +1,7 @@
 import { DealStage, Pipeline } from "../../config/dynamic-enums.js";
 import { SimplePublicObject } from "@hubspot/api-client/lib/codegen/crm/companies/api";
 import { HubspotEntity } from "./entity.js";
-import { HubspotEntityKind, HubspotEntityManager } from "./manager.js";
+import { HubspotEntityKind, HubspotEntityManager, HubspotPropertyTransformers } from "./manager.js";
 import { Company } from "./company.js";
 import { Contact } from "./contact.js";
 import config from "../../config/index.js";
@@ -73,22 +73,20 @@ class DealManager extends HubspotEntityManager<DealProps, Deal, SimplePublicObje
     };
   }
 
-  override toAPI(props: Partial<DealProps>): Partial<SimplePublicObject['properties']> {
-    return {
-      related_products: props.relatedProducts,
-      aa_app: props.aaApp,
-      [config.hubspot.attrs.deal.addonLicenseId]: props.addonLicenseId || '',
-      [config.hubspot.attrs.deal.transactionId]: props.transactionId || '',
-      closedate: props.closeDate,
-      country: props.country,
-      dealname: props.dealName,
-      origin: props.origin,
-      deployment: props.deployment,
-      license_tier: props.licenseTier.toFixed(),
-      pipeline: props.pipeline,
-      dealstage: props.dealstage,
-      amount: props.amount?.toString() ?? '',
-    };
-  }
+  override toAPI: HubspotPropertyTransformers = {
+    related_products: relatedProducts => relatedProducts,
+    aa_app: aaApp => aaApp,
+    [config.hubspot.attrs.deal.addonLicenseId]: addonLicenseId => addonLicenseId || '',
+    [config.hubspot.attrs.deal.transactionId]: transactionId => transactionId || '',
+    closedate: closeDate => closeDate,
+    country: country => country,
+    dealname: dealName => dealName,
+    origin: origin => origin,
+    deployment: deployment => deployment,
+    license_tier: licenseTier => licenseTier.toFixed(),
+    pipeline: pipeline => pipeline,
+    dealstage: dealstage => dealstage,
+    amount: amount => amount?.toString() ?? '',
+  };
 
 }

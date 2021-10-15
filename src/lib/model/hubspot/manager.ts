@@ -20,6 +20,10 @@ export type HubspotInputObject = {
 
 export type HubspotEntityKind = 'deal' | 'contact' | 'company';
 
+export type HubspotPropertyTransformers = {
+  [key: string]: (prop: any) => string
+};
+
 export abstract class HubspotEntityManager<
   P extends { [key: string]: any },
   E extends HubspotEntity<P>,
@@ -34,7 +38,7 @@ export abstract class HubspotEntityManager<
 
   abstract apiProperties: string[];
   abstract fromAPI(data: I['properties']): P;
-  abstract toAPI(props: Partial<P>): Partial<I['properties']>;
+  abstract toAPI: HubspotPropertyTransformers;
 
   entities: E[] = [];
 
