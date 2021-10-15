@@ -31,6 +31,7 @@ export class Deal extends HubspotEntity<DealProps> {
 
 class DealManager extends HubspotEntityManager<DealProps, Deal, SimplePublicObject> {
 
+  override Entity = Deal;
   override kind: HubspotEntityKind = "deal";
 
   override associations: [keyof Deal, HubspotEntityKind][] = [
