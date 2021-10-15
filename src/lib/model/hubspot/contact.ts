@@ -32,7 +32,7 @@ export class Contact extends HubspotEntity<ContactProps> {
 
 }
 
-class ContactManager extends HubspotEntityManager<ContactProps, Contact, SimplePublicObject> {
+export class ContactManager extends HubspotEntityManager<ContactProps, Contact, SimplePublicObject> {
 
   override Entity = Contact;
   override kind: HubspotEntityKind = 'contact';

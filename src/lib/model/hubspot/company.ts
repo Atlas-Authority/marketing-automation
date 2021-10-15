@@ -10,7 +10,7 @@ type CompanyProps = {
 export class Company extends HubspotEntity<CompanyProps> {
 }
 
-class CompanyManager extends HubspotEntityManager<CompanyProps, Company, SimplePublicObject> {
+export class CompanyManager extends HubspotEntityManager<CompanyProps, Company, SimplePublicObject> {
 
   override Entity = Company;
   override kind: HubspotEntityKind = 'company';

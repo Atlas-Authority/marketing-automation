@@ -32,7 +32,7 @@ export class Deal extends HubspotEntity<DealProps> {
 
 }
 
-class DealManager extends HubspotEntityManager<DealProps, Deal, SimplePublicObject> {
+export class DealManager extends HubspotEntityManager<DealProps, Deal, SimplePublicObject> {
 
   override Entity = Deal;
   override kind: HubspotEntityKind = "deal";
