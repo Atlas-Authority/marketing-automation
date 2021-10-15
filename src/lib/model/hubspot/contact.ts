@@ -83,7 +83,7 @@ class ContactManager extends HubspotEntityManager<ContactProps, Contact, SimpleP
     };
   }
 
-  override toAPI(props: ContactProps) {
+  override toAPI(props: Partial<ContactProps>): Partial<SimplePublicObject['properties']> {
     return {
       contact_type: props.contactType,
 

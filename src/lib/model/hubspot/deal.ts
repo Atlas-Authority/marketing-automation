@@ -73,7 +73,7 @@ class DealManager extends HubspotEntityManager<DealProps, Deal, SimplePublicObje
     };
   }
 
-  override toAPI(props: DealProps) {
+  override toAPI(props: Partial<DealProps>): Partial<SimplePublicObject['properties']> {
     return {
       related_products: props.relatedProducts,
       aa_app: props.aaApp,

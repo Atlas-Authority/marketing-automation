@@ -34,7 +34,7 @@ export abstract class HubspotEntityManager<
 
   abstract apiProperties: string[];
   abstract fromAPI(data: I['properties']): P;
-  abstract toAPI(props: P): I['properties'];
+  abstract toAPI(props: Partial<P>): Partial<I['properties']>;
 
   entities: E[] = [];
 
@@ -63,6 +63,29 @@ export abstract class HubspotEntityManager<
       return entity;
     });
     this.entities = entities;
+  }
+
+  async syncUpAllEntities() {
+    const toSync = this.entities.filter(e => e.hasChanges());
+    const toCreate = toSync.filter(e => e.id === undefined);
+    const toUpdate = toSync.filter(e => e.id !== undefined);
+
+    if (toCreate.length > 0) {
+      this.api().batchApi.create({
+        inputs: toCreate.map(e => {
+          e.applyUpdates();
+          // const props = this.toAPI(e.newProps);
+
+          // const onlyProps = Object.fromEntries(Object.entries(props)
+          //   .filter(([k, v]) => v !== undefined));
+
+          // return {
+          //   properties: onlyProps,
+          // };
+        })
+      })
+    }
+
   }
 
 }

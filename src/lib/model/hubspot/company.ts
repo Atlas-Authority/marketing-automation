@@ -29,7 +29,7 @@ class CompanyManager extends HubspotEntityManager<CompanyProps, Company, SimpleP
     };
   }
 
-  override toAPI(props: CompanyProps) {
+  override toAPI(props: Partial<CompanyProps>): Partial<SimplePublicObject['properties']> {
     return {
       name: props.name,
       type: props.type === 'Partner' ? 'PARTNER' : '',

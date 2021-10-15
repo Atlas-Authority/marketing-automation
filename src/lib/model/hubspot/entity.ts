@@ -1,5 +1,3 @@
-import { HubspotInputObject } from "./manager.js";
-
 export abstract class HubspotEntity<T extends { [key: string]: any }> {
 
   id?: string;
