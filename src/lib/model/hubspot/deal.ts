@@ -92,4 +92,9 @@ class DealManager extends HubspotEntityManager<DealProps, Deal, SimplePublicObje
     amount: amount => ['amount', amount?.toString() ?? ''],
   };
 
+  override identifiers: (keyof DealProps)[] = [
+    'addonLicenseId',
+    'transactionId',
+  ];
+
 }

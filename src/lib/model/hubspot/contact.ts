@@ -106,4 +106,8 @@ class ContactManager extends HubspotEntityManager<ContactProps, Contact, SimpleP
     otherEmails: () => ['', ''],
   };
 
+  override identifiers: (keyof ContactProps)[] = [
+    'email',
+  ];
+
 }

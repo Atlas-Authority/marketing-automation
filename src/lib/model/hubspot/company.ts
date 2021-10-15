@@ -15,7 +15,8 @@ class CompanyManager extends HubspotEntityManager<CompanyProps, Company, SimpleP
   override Entity = Company;
   override kind: HubspotEntityKind = 'company';
 
-  override associations: [keyof Company, HubspotEntityKind][] = [];
+  override associations: [keyof Company, HubspotEntityKind][] = [
+  ];
 
   override apiProperties: string[] = [
     'name',
@@ -33,5 +34,8 @@ class CompanyManager extends HubspotEntityManager<CompanyProps, Company, SimpleP
     name: name => ['name', name],
     type: type => ['type', type === 'Partner' ? 'PARTNER' : ''],
   };
+
+  override identifiers: (keyof CompanyProps)[] = [
+  ];
 
 }
