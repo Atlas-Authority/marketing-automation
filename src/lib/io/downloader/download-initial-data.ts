@@ -136,7 +136,7 @@ function verifyStructure<T>(name: string, data: T[], schema: Array<['every' | 's
     const test: (items: T[]) => boolean = (
       howMany === 'every'
         ? items => items.every(getter)
-        : items => items.some(getter) && !items.every(getter)
+        : items => items.some(getter)
     );
 
     if (!test(data)) {
