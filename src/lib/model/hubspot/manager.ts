@@ -60,11 +60,12 @@ export abstract class HubspotEntityManager<
       associations = this.associations.map(a => a[1]);
     }
     const data = await this.api().getAll(undefined, undefined, this.apiProperties, associations);
-    const processedData = data.map(raw => {
+
+    const associators: any[] = [];
+
+    for (const raw of data) {
       const props = this.fromAPI(raw.properties);
       const entity = new this.Entity(raw.id, props);
-
-      const associators: any[] = [];
 
       for (const [container, other] of this.associations) {
         const list = raw.associations?.[container as string].results;
@@ -77,10 +78,10 @@ export abstract class HubspotEntityManager<
         // entity[container].push();
       }
 
-      return { entity, associators };
-    });
-    this.entities = processedData.map(m => m.entity);
-    return processedData.flatMap(m => m.associators);
+      this.entities.push(entity);
+    }
+
+    return associators;
   }
 
   public async syncUpAllEntities() {
