@@ -238,7 +238,7 @@ const licensesWithoutDataInsightsSchema: Array<['every' | 'some', (license: RawL
   ['every', license => isNonBlankString(license?.tier)],
 
   ['every', license => !!license?.contactDetails],
-  ['some', license => isNonBlankString(license?.contactDetails?.company)],
+  ['every', license => isNonBlankString(license?.contactDetails?.company)],
   ['every', license => isNonBlankString(license?.contactDetails?.country)],
   ['every', license => isNonBlankString(license?.contactDetails?.region)],
 
@@ -258,7 +258,7 @@ const licensesWithoutDataInsightsSchema: Array<['every' | 'some', (license: RawL
 
   ['some', transaction => !!transaction?.partnerDetails],
   ['every', transaction => !transaction?.partnerDetails || isNonBlankString(transaction?.partnerDetails?.partnerName)],
-  ['some', transaction => !transaction?.partnerDetails || isNonBlankString(transaction?.partnerDetails?.partnerType)],
+  ['every', transaction => !transaction?.partnerDetails || isNonBlankString(transaction?.partnerDetails?.partnerType)],
 
   ['some', license => !!license?.partnerDetails?.billingContact],
   ['every', license => !license?.partnerDetails?.billingContact || isNonBlankString(license?.partnerDetails?.billingContact.email)],
