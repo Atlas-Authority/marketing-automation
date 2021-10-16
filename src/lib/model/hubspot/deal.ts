@@ -1,9 +1,7 @@
 import { DealStage, Pipeline } from "../../config/dynamic-enums.js";
 import { SimplePublicObject } from "@hubspot/api-client/lib/codegen/crm/companies/api";
-import { HubspotEntity } from "./entity.js";
-import { HubspotEntityKind, HubspotEntityManager, HubspotPropertyTransformers } from "./manager.js";
-import { Company } from "./company.js";
-import { Contact } from "./contact.js";
+import { HubspotEntity, HubspotEntityKind } from "./entity.js";
+import { HubspotEntityManager, HubspotPropertyTransformers } from "./manager.js";
 import config from "../../config/index.js";
 
 const addonLicenseIdKey = config.hubspot.attrs.deal.addonLicenseId;
@@ -26,10 +24,6 @@ type DealProps = {
 };
 
 export class Deal extends HubspotEntity<DealProps> {
-
-  companies: Company[] = [];
-  contacts: Contact[] = [];
-
 }
 
 export class DealManager extends HubspotEntityManager<DealProps, Deal, SimplePublicObject> {
@@ -37,9 +31,9 @@ export class DealManager extends HubspotEntityManager<DealProps, Deal, SimplePub
   override Entity = Deal;
   override kind: HubspotEntityKind = "deal";
 
-  override associations: [keyof Deal, HubspotEntityKind][] = [
-    ["companies", "company"],
-    ["contacts", "contact"],
+  override associations: HubspotEntityKind[] = [
+    "company",
+    "contact",
   ];
 
   override apiProperties: string[] = [

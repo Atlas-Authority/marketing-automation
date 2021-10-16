@@ -1,7 +1,7 @@
 import * as hubspot from '@hubspot/api-client';
 import * as assert from 'assert';
 import { batchesOf } from '../../util/helpers.js';
-import { HubspotEntity } from "./entity.js";
+import { HubspotEntity, HubspotEntityKind } from "./entity.js";
 
 export type HubspotInputObject = {
   id: string,
@@ -20,8 +20,6 @@ export type HubspotInputObject = {
   },
 };
 
-export type HubspotEntityKind = 'deal' | 'contact' | 'company';
-
 export type HubspotPropertyTransformers<T> = {
   [P in keyof T]: (prop: T[P]) => [string, string]
 };
@@ -38,7 +36,7 @@ export abstract class HubspotEntityManager<
 
   protected abstract Entity: new (id: string | null, props: P) => E;
   protected abstract kind: HubspotEntityKind;
-  protected abstract associations: [keyof E, HubspotEntityKind][];
+  protected abstract associations: HubspotEntityKind[];
 
   protected abstract apiProperties: string[];
   protected abstract fromAPI(data: I['properties']): P | null;
@@ -57,11 +55,10 @@ export abstract class HubspotEntityManager<
   }
 
   public async downloadAllEntities() {
-    let associations: undefined | string[];
-    if (this.associations.length > 0) {
-      associations = this.associations.map(a => a[1]);
-    }
-    const data = await this.api().getAll(undefined, undefined, this.apiProperties, associations);
+    let inputAssociations = ((this.associations.length > 0)
+      ? this.associations
+      : undefined);
+    const data = await this.api().getAll(undefined, undefined, this.apiProperties, inputAssociations);
 
     /** Find entity based on kind and id, and when you have it, give it to me. */
     const associators: [HubspotEntityKind, string, HubspotAssociateFunction][] = [];
@@ -73,14 +70,14 @@ export abstract class HubspotEntityManager<
       const entity = new this.Entity(raw.id, props);
       assert.ok(entity.id);
 
-      for (const [container, otherKind] of this.associations) {
-        const list = raw.associations?.[container as string]?.results;
-        const expectedType = `${this.kind}_to_${otherKind}`;
-        for (const thing of list || []) {
-          assert.strictEqual(thing.type, expectedType);
-          associators.push([otherKind, thing.id, (otherEntity) => {
-            const list = entity[container] as unknown as HubspotEntity<any>[];
-            list.push(otherEntity);
+      for (const [, { results: list }] of Object.entries(raw.associations || {})) {
+        for (const item of list) {
+          const prefix = `${this.kind}_to_`;
+          assert.ok(item.type.startsWith(prefix));
+          const otherKind = item.type.substr(prefix.length) as HubspotEntityKind;
+
+          associators.push([otherKind, item.id, (otherEntity) => {
+            entity.assocs.push([otherKind, otherEntity]);
           }]);
         }
       }

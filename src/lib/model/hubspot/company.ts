@@ -1,6 +1,6 @@
 import { SimplePublicObject } from "@hubspot/api-client/lib/codegen/crm/companies/api";
-import { HubspotEntity } from "./entity.js";
-import { HubspotEntityKind, HubspotEntityManager, HubspotPropertyTransformers } from "./manager.js";
+import { HubspotEntity, HubspotEntityKind } from "./entity.js";
+import { HubspotEntityManager, HubspotPropertyTransformers } from "./manager.js";
 
 type CompanyProps = {
   name: string;
@@ -15,7 +15,7 @@ export class CompanyManager extends HubspotEntityManager<CompanyProps, Company, 
   override Entity = Company;
   override kind: HubspotEntityKind = 'company';
 
-  override associations: [keyof Company, HubspotEntityKind][] = [
+  override associations: HubspotEntityKind[] = [
   ];
 
   override apiProperties: string[] = [

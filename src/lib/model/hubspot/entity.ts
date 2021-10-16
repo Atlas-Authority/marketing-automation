@@ -1,8 +1,13 @@
+export type HubspotEntityKind = 'deal' | 'contact' | 'company';
+
 export abstract class HubspotEntity<P extends { [key: string]: any }> {
 
   id?: string;
   private props: P;
   private newProps: Partial<P>;
+
+  assocs: [HubspotEntityKind, HubspotEntity<any>][] = [];
+  newAssocs: [HubspotEntityKind, HubspotEntity<any>][] = [];
 
   constructor(id: string | null, props: P) {
     if (id) this.id = id;

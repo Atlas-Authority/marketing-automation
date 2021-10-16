@@ -2,8 +2,8 @@ import { DealManager } from "./hubspot/deal.js";
 import * as hubspot from '@hubspot/api-client';
 import { ContactManager } from "./hubspot/contact.js";
 import { CompanyManager } from "./hubspot/company.js";
-import { HubspotEntityKind } from "./hubspot/manager.js";
 import * as assert from 'assert';
+import { HubspotEntityKind } from "./hubspot/entity.js";
 
 class Database {
 
