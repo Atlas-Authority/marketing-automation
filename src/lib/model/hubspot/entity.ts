@@ -3,11 +3,12 @@ export type HubspotEntityKind = 'deal' | 'contact' | 'company';
 export abstract class HubspotEntity<P extends { [key: string]: any }> {
 
   id?: string;
+
   private props: P;
   private newProps: Partial<P>;
 
-  assocs: [HubspotEntityKind, HubspotEntity<any>][] = [];
-  newAssocs: [HubspotEntityKind, HubspotEntity<any>][] = [];
+  private assocs: [HubspotEntityKind, HubspotEntity<any>][] = [];
+  private newAssocs: [HubspotEntityKind, HubspotEntity<any>][] = [];
 
   constructor(id: string | null, props: P) {
     if (id) this.id = id;
@@ -47,6 +48,37 @@ export abstract class HubspotEntity<P extends { [key: string]: any }> {
 
   applyUpdates() {
     Object.assign(this.props, this.newProps);
+  }
+
+  protected makeDynamicAssociation<T extends HubspotEntity<any>>(kind: HubspotEntityKind) {
+    return {
+      add: (entity: T) => this.addAssociation(kind, entity),
+      remove: (entity: T) => this.removeAssociation(kind, entity),
+    };
+  }
+
+  public _addRawAssociation(kind: HubspotEntityKind, entity: HubspotEntity<any>) {
+    this.assocs.push([kind, entity]);
+  }
+
+  private addAssociation(kind: HubspotEntityKind, entity: HubspotEntity<any>) {
+
+  }
+
+  private removeAssociation(kind: HubspotEntityKind, entity: HubspotEntity<any>) {
+
+  }
+
+  private hasAssociationChanges() {
+
+  }
+
+  private getAssociationChanges() {
+
+  }
+
+  private applyAssociationChanges() {
+
   }
 
 }

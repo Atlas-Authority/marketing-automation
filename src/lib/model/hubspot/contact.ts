@@ -1,4 +1,5 @@
 import { SimplePublicObject } from "@hubspot/api-client/lib/codegen/crm/contacts/api";
+import { Company } from "./company.js";
 import { HubspotEntity, HubspotEntityKind } from "./entity.js";
 import { HubspotEntityManager, HubspotPropertyTransformers } from "./manager.js";
 
@@ -26,6 +27,9 @@ type ContactProps = {
 };
 
 export class Contact extends HubspotEntity<ContactProps> {
+
+  companies = this.makeDynamicAssociation<Company>('company');
+
 }
 
 export class ContactManager extends HubspotEntityManager<ContactProps, Contact, SimplePublicObject> {

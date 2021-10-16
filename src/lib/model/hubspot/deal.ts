@@ -3,6 +3,8 @@ import { SimplePublicObject } from "@hubspot/api-client/lib/codegen/crm/companie
 import { HubspotEntity, HubspotEntityKind } from "./entity.js";
 import { HubspotEntityManager, HubspotPropertyTransformers } from "./manager.js";
 import config from "../../config/index.js";
+import { Contact } from "./contact.js";
+import { Company } from "./company.js";
 
 const addonLicenseIdKey = config.hubspot.attrs.deal.addonLicenseId;
 const transactionIdKey = config.hubspot.attrs.deal.transactionId;
@@ -24,6 +26,10 @@ type DealProps = {
 };
 
 export class Deal extends HubspotEntity<DealProps> {
+
+  contacts = this.makeDynamicAssociation<Contact>('contact');
+  companies = this.makeDynamicAssociation<Company>('company');
+
 }
 
 export class DealManager extends HubspotEntityManager<DealProps, Deal, SimplePublicObject> {

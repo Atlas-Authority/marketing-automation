@@ -77,7 +77,7 @@ export abstract class HubspotEntityManager<
           const otherKind = item.type.substr(prefix.length) as HubspotEntityKind;
 
           associators.push([otherKind, item.id, (otherEntity) => {
-            entity.assocs.push([otherKind, otherEntity]);
+            entity._addRawAssociation(otherKind, otherEntity);
           }]);
         }
       }
