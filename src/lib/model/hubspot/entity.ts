@@ -31,11 +31,11 @@ export abstract class HubspotEntity<T extends { [key: string]: any }> {
     return this.props[key];
   }
 
-  hasChanges() {
+  hasPropertyChanges() {
     return this.id === undefined || Object.keys(this.newProps).length > 0;
   }
 
-  getChanges() {
+  getPropertyChanges() {
     if (this.id === undefined) return this.props;
     return this.newProps;
   }

@@ -96,7 +96,7 @@ export abstract class HubspotEntityManager<
   }
 
   public async syncUpAllEntities() {
-    const toSync = [...this.entities.values()].filter(e => e.hasChanges());
+    const toSync = [...this.entities.values()].filter(e => e.hasPropertyChanges());
     const toCreate = toSync.filter(e => e.id === undefined);
     const toUpdate = toSync.filter(e => e.id !== undefined);
 
@@ -150,7 +150,7 @@ export abstract class HubspotEntityManager<
 
   private getChangedProperties(e: E) {
     const properties: { [key: string]: string } = {};
-    for (const [k, v] of Object.entries(e.getChanges())) {
+    for (const [k, v] of Object.entries(e.getPropertyChanges())) {
       const fn = this.toAPI[k];
       const [newKey, newVal] = fn(v);
       properties[newKey] = newVal;
