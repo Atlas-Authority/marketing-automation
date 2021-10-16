@@ -52,6 +52,7 @@ export abstract class HubspotEntity<P extends { [key: string]: any }> {
 
   protected makeDynamicAssociation<T extends HubspotEntity<any>>(kind: HubspotEntityKind) {
     return {
+      get: () => this.getAssociations(kind),
       add: (entity: T) => this.addAssociation(kind, entity),
       remove: (entity: T) => this.removeAssociation(kind, entity),
     };
@@ -66,6 +67,10 @@ export abstract class HubspotEntity<P extends { [key: string]: any }> {
   }
 
   private removeAssociation(kind: HubspotEntityKind, entity: HubspotEntity<any>) {
+
+  }
+
+  private getAssociations(kind: HubspotEntityKind) {
 
   }
 
