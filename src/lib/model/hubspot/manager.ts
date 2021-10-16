@@ -72,7 +72,7 @@ export abstract class HubspotEntityManager<
       assert.ok(entity.id);
 
       for (const [container, otherKind] of this.associations) {
-        const list = raw.associations?.[container as string].results;
+        const list = raw.associations?.[container as string]?.results;
         const expectedType = `${this.kind}_to_${otherKind}`;
         for (const thing of list || []) {
           assert.strictEqual(thing.type, expectedType);
