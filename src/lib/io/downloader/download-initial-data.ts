@@ -110,6 +110,9 @@ function uniqLicenses(licenses: RawLicense[]) {
         attribution, evaluationOpportunitySize,
         parentProductBillingCycle, parentProductName,
         installedOnSandbox, parentProductEdition,
+        evaluationLicense, evaluationSaleDate,
+        evaluationStartDate, evaluationEndDate,
+        daysToConvertEval,
         ...dup }) => dup)
       .every((dup, i, array) => util.isDeepStrictEqual(dup, array[0])),
       util.inspect(dups, { colors: true, depth: null })
