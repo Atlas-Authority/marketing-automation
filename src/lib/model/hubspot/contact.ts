@@ -59,7 +59,7 @@ export class ContactManager extends HubspotEntityManager<ContactProps, Contact, 
     'hs_additional_emails',
   ];
 
-  override fromAPI(data: SimplePublicObject['properties']): ContactProps {
+  override fromAPI(data: SimplePublicObject['properties']): ContactProps | null {
     return {
       contactType: data.contact_type as ContactProps['contactType'],
 

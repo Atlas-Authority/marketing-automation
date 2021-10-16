@@ -58,7 +58,8 @@ export class DealManager extends HubspotEntityManager<DealProps, Deal, SimplePub
     'amount',
   ];
 
-  override fromAPI(data: SimplePublicObject['properties']): DealProps {
+  override fromAPI(data: SimplePublicObject['properties']): DealProps | null {
+    if (data.pipeline !== Pipeline.AtlassianMarketplace) return null;
     return {
       relatedProducts: data.related_products,
       aaApp: data.aa_app,

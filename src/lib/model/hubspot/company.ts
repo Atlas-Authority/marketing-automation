@@ -23,7 +23,7 @@ export class CompanyManager extends HubspotEntityManager<CompanyProps, Company, 
     'type',
   ];
 
-  override fromAPI(data: SimplePublicObject['properties']): CompanyProps {
+  override fromAPI(data: SimplePublicObject['properties']): CompanyProps | null {
     return {
       name: data.name,
       type: data.type === 'PARTNER' ? 'Partner' : null,

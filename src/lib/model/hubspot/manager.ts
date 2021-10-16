@@ -41,7 +41,7 @@ export abstract class HubspotEntityManager<
   protected abstract associations: [keyof E, HubspotEntityKind][];
 
   protected abstract apiProperties: string[];
-  protected abstract fromAPI(data: I['properties']): P;
+  protected abstract fromAPI(data: I['properties']): P | null;
   protected abstract toAPI: HubspotPropertyTransformers<P>;
 
   protected abstract identifiers: (keyof P)[];
@@ -68,6 +68,8 @@ export abstract class HubspotEntityManager<
 
     for (const raw of data) {
       const props = this.fromAPI(raw.properties);
+      if (!props) continue;
+
       const entity = new this.Entity(raw.id, props);
       assert.ok(entity.id);
 
