@@ -16,6 +16,16 @@ class Database {
   }
 
   async downloadAllEntities() {
+    const [
+      dealAssocations,
+      contactAssocations,
+      companyAssocations,
+    ] = await Promise.all([
+      this.dealManager.downloadAllEntities(),
+      this.contactManager.downloadAllEntities(),
+      this.companyManager.downloadAllEntities(),
+    ]);
+
 
   }
 
