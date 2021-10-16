@@ -44,7 +44,7 @@ export abstract class HubspotEntityManager<
 
   protected abstract identifiers: (keyof P)[];
 
-  protected entities: E[] = [];
+  protected entities = new Map<string, E>();
 
   private api() {
     switch (this.kind) {
@@ -66,6 +66,7 @@ export abstract class HubspotEntityManager<
     for (const raw of data) {
       const props = this.fromAPI(raw.properties);
       const entity = new this.Entity(raw.id, props);
+      assert.ok(entity.id);
 
       for (const [container, other] of this.associations) {
         const list = raw.associations?.[container as string].results;
@@ -78,14 +79,14 @@ export abstract class HubspotEntityManager<
         // entity[container].push();
       }
 
-      this.entities.push(entity);
+      this.entities.set(entity.id, entity);
     }
 
     return associators;
   }
 
   public async syncUpAllEntities() {
-    const toSync = this.entities.filter(e => e.hasChanges());
+    const toSync = [...this.entities.values()].filter(e => e.hasChanges());
     const toCreate = toSync.filter(e => e.id === undefined);
     const toUpdate = toSync.filter(e => e.id !== undefined);
 
