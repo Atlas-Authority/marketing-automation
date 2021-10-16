@@ -1,16 +1,16 @@
-export abstract class HubspotEntity<T extends { [key: string]: any }> {
+export abstract class HubspotEntity<P extends { [key: string]: any }> {
 
   id?: string;
-  private props: T;
-  private newProps: Partial<T>;
+  private props: P;
+  private newProps: Partial<P>;
 
-  constructor(id: string | null, props: T) {
+  constructor(id: string | null, props: P) {
     if (id) this.id = id;
     this.props = props;
     this.newProps = {};
   }
 
-  set<K extends keyof T>(key: K, val: T[K]) {
+  set<K extends keyof P>(key: K, val: P[K]) {
     if (this.id === undefined) {
       this.props[key] = val;
       return;
@@ -25,7 +25,7 @@ export abstract class HubspotEntity<T extends { [key: string]: any }> {
     }
   }
 
-  get<K extends keyof T>(key: K): T[K] | undefined {
+  get<K extends keyof P>(key: K): P[K] | undefined {
     if (this.id === undefined) return this.props[key];
     if (key in this.newProps) return this.newProps[key];
     return this.props[key];
