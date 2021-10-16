@@ -115,6 +115,7 @@ export abstract class HubspotEntityManager<
 
           assert.ok(found);
           e.id = found.id;
+          this.entities.set(found.id, e);
         }
       }
     }
