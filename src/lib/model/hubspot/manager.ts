@@ -26,6 +26,8 @@ export type HubspotPropertyTransformers<T> = {
   [P in keyof T]: (prop: T[P]) => [string, string]
 };
 
+type HubspotAssociateFunction = (entity: HubspotEntity<any>) => void;
+
 export abstract class HubspotEntityManager<
   P extends { [key: string]: any },
   E extends HubspotEntity<P>,
@@ -61,28 +63,34 @@ export abstract class HubspotEntityManager<
     }
     const data = await this.api().getAll(undefined, undefined, this.apiProperties, associations);
 
-    const associators: any[] = [];
+    /** Find entity based on kind and id, and when you have it, give it to me. */
+    const associators: [HubspotEntityKind, string, HubspotAssociateFunction][] = [];
 
     for (const raw of data) {
       const props = this.fromAPI(raw.properties);
       const entity = new this.Entity(raw.id, props);
       assert.ok(entity.id);
 
-      for (const [container, other] of this.associations) {
+      for (const [container, otherKind] of this.associations) {
         const list = raw.associations?.[container as string].results;
-        const expectedType = `${this.kind}_to_${other}`;
+        const expectedType = `${this.kind}_to_${otherKind}`;
         for (const thing of list || []) {
           assert.strictEqual(thing.type, expectedType);
-          associators.push();
+          associators.push([otherKind, thing.id, (otherEntity) => {
+            const list = entity[container] as unknown as HubspotEntity<any>[];
+            list.push(otherEntity);
+          }]);
         }
-
-        // entity[container].push();
       }
 
       this.entities.set(entity.id, entity);
     }
 
     return associators;
+  }
+
+  public get(id: string) {
+    return this.entities.get(id);
   }
 
   public async syncUpAllEntities() {

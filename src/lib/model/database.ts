@@ -2,6 +2,8 @@ import { DealManager } from "./hubspot/deal.js";
 import * as hubspot from '@hubspot/api-client';
 import { ContactManager } from "./hubspot/contact.js";
 import { CompanyManager } from "./hubspot/company.js";
+import { HubspotEntityKind } from "./hubspot/manager.js";
+import * as assert from 'assert';
 
 class Database {
 
@@ -26,7 +28,21 @@ class Database {
       this.companyManager.downloadAllEntities(),
     ]);
 
+    const getManager = (kind: HubspotEntityKind) => {
+      switch (kind) {
+        case 'deal': return this.dealManager;
+        case 'company': return this.companyManager;
+        case 'contact': return this.contactManager;
+      }
+    };
 
+    const allAssociations = [...dealAssociations, ...contactAssociations, ...companyAssociations];
+    for (const [otherKind, otherId, associate] of allAssociations) {
+      const manager = getManager(otherKind);
+      const otherEntity = manager.get(otherId);
+      assert.ok(otherEntity);
+      associate(otherEntity);
+    }
   }
 
 }
