@@ -30,7 +30,7 @@ export async function backfillDealCompanies(input: {
   contacts: Contact[],
   uploader: Uploader,
 }) {
-  const assocations: DealCompanyAssociationPair[] = [];
+  const associations: DealCompanyAssociationPair[] = [];
 
   for (const deal of input.deals) {
     const contacts = deal.contactIds.map(id => {
@@ -45,13 +45,13 @@ export async function backfillDealCompanies(input: {
     for (const companyId of newCompanyIds) {
       if (!deal.companyIds.includes(companyId)) {
         deal.companyIds.push(companyId);
-        assocations.push({ dealId: deal.id, companyId });
+        associations.push({ dealId: deal.id, companyId });
       }
     }
   }
 
-  if (assocations.length > 0) {
-    input.uploader.associateDealsWithCompanies(assocations);
+  if (associations.length > 0) {
+    input.uploader.associateDealsWithCompanies(associations);
   }
 }
 
