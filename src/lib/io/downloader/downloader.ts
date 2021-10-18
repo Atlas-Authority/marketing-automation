@@ -1,7 +1,7 @@
 import { Company } from "../../types/company.js";
 import { Contact } from "../../types/contact.js";
 import { Deal } from "../../types/deal.js";
-import { RawLicense, RawTransaction } from "../../types/marketplace.js";
+import { RawLicense, RawTransaction } from "../../model/marketplace/raw";
 
 export interface DownloadLogger {
   prepare(count: number): void;

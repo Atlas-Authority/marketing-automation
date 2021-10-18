@@ -2,7 +2,7 @@ import * as datadir from '../../cache/datadir.js';
 import { Company } from '../../types/company.js';
 import { Contact } from '../../types/contact.js';
 import { Deal } from '../../types/deal.js';
-import { RawLicense, RawTransaction } from '../../types/marketplace.js';
+import { RawLicense, RawTransaction } from "../../model/marketplace/raw";
 import { Downloader, DownloadLogger } from './downloader.js';
 
 export default class CachedFileDownloader implements Downloader {

@@ -7,7 +7,7 @@ import { contactFromHubspot } from '../../engine/contacts.js';
 import { Company } from '../../types/company.js';
 import { Contact } from '../../types/contact.js';
 import { Deal } from '../../types/deal.js';
-import { RawLicense, RawTransaction } from '../../types/marketplace.js';
+import { RawLicense, RawTransaction } from "../../model/marketplace/raw";
 import { AttachableError, SimpleError } from '../../util/errors.js';
 import { Downloader, DownloadLogger } from './downloader.js';
 

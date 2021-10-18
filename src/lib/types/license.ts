@@ -1,4 +1,4 @@
-import { RawLicense } from "./marketplace.js";
+import { RawLicense } from "../model/marketplace/raw";
 import { Transaction } from "./transaction.js";
 
 export type License = RawLicense;

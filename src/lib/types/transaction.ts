@@ -1,4 +1,4 @@
-import { RawTransaction } from "./marketplace.js";
+import { RawTransaction } from "../model/marketplace/raw";
 
 export type Transaction = RawTransaction;
 

@@ -6,7 +6,7 @@ import { Company } from '../../types/company.js';
 import { Contact } from '../../types/contact.js';
 import { Deal } from '../../types/deal.js';
 import { License } from '../../types/license.js';
-import { RawLicense, RawTransaction } from '../../types/marketplace.js';
+import { RawLicense, RawTransaction } from "../../model/marketplace/raw";
 import { Transaction } from '../../types/transaction.js';
 import { makeMultiProviderDomainsSet } from '../../util/domains.js';
 import { AttachableError } from '../../util/errors.js';
