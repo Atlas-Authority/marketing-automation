@@ -1,5 +1,6 @@
 import * as hubspot from '@hubspot/api-client';
 import * as assert from 'assert';
+import { SimpleError } from '../../util/errors.js';
 import { batchesOf } from '../../util/helpers.js';
 import { EntityDatabase, HubspotAssociationString, HubspotEntity, HubspotEntityKind } from "./entity.js";
 
@@ -249,7 +250,30 @@ export abstract class HubspotEntityManager<
         let associations = ((inputAssociations.length > 0)
           ? inputAssociations
           : undefined);
-        return await this.api(kind).getAll(undefined, undefined, apiProperties, associations);
+
+        try {
+          return await this.api(kind).getAll(undefined, undefined, apiProperties, associations);
+        }
+        catch (e: any) {
+          const body = e.response.body;
+          if (
+            (
+              typeof body === 'string' && (
+                body === 'internal error' ||
+                body.startsWith('<!DOCTYPE html>'))
+            ) || (
+              typeof body === 'object' &&
+              body.status === 'error' &&
+              body.message === 'internal error'
+            )
+          ) {
+            throw new SimpleError('Hubspot v3 API had internal error.');
+          }
+          else {
+            throw new Error(`Failed downloading ${kind}s: ${JSON.stringify(body)}`);
+          }
+
+        }
       },
     };
   }
