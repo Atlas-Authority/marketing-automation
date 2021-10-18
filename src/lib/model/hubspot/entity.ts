@@ -114,10 +114,15 @@ export abstract class HubspotEntity<P extends { [key: string]: any }> {
   getAssociationChanges() {
     const toAdd = [...this.newAssocs].filter(a => !this.assocs.has(a));
     const toDel = [...this.assocs].filter(a => !this.newAssocs.has(a));
-    return {
-      toAdd: toAdd.map(a => a.split('_') as [HubspotEntityKind, string]),
-      toDel: toDel.map(a => a.split('_') as [HubspotEntityKind, string]),
-    };
+    return [
+      ...toAdd.map(a => ({ op: 'add', ...this.getAssocInfo(a) })),
+      ...toDel.map(a => ({ op: 'del', ...this.getAssocInfo(a) })),
+    ] as { op: 'add' | 'del', kind: HubspotEntityKind, id: string }[];
+  }
+
+  private getAssocInfo(a: HubspotAssociationString) {
+    const [kind, id] = a.split('_');
+    return { kind: kind as HubspotEntityKind, id };
   }
 
   applyAssociationChanges() {

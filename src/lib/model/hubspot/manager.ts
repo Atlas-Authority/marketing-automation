@@ -140,6 +140,38 @@ export abstract class HubspotEntityManager<
   }
 
   private async syncUpAllEntitiesAssociations() {
+    const toSync = ([...this.entities.values()]
+      .filter(e => e.hasAssociationChanges())
+      .flatMap(e => e.getAssociationChanges()
+        .map(changes => ({ e, ...changes }))));
+
+    for (const otherKind of this.associations) {
+      const toSyncInKind = (toSync
+        .filter(changes => changes.kind === otherKind)
+        .map(changes => ({
+          ...changes,
+          inputs: {
+            from: { id: changes.e.guaranteedId() },
+            to: { id: changes.id },
+            type: `${this.kind}_${otherKind}`,
+          }
+        })));
+
+      const toAdd = toSyncInKind.filter(changes => changes.op === 'add');
+      const toDel = toSyncInKind.filter(changes => changes.op === 'del');
+
+      await this.client.crm.associations.batchApi.create(
+        this.kind,
+        otherKind,
+        { inputs: toAdd.map(changes => changes.inputs) },
+      );
+
+      await this.client.crm.associations.batchApi.archive(
+        this.kind,
+        otherKind,
+        { inputs: toDel.map(changes => changes.inputs) },
+      );
+    }
   }
 
   private getChangedProperties(e: E) {
