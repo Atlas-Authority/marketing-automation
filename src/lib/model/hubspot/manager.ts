@@ -3,6 +3,27 @@ import * as assert from 'assert';
 import { batchesOf } from '../../util/helpers.js';
 import { EntityDatabase, HubspotAssociationString, HubspotEntity, HubspotEntityKind } from "./entity.js";
 
+type HubspotApiCreateEntitiesInput = {
+  properties: {
+    [key: string]: string,
+  },
+};
+
+type HubspotApiUpdateEntitiesInput = (
+  HubspotApiCreateEntitiesInput & { id: string }
+);
+
+type HubspotApiCreateEntitiesOutput = {
+  body: {
+    results: {
+      id: string,
+      properties: { [key: string]: string },
+    }[],
+  },
+};
+
+type HubspotApiUpdateEntitiesOutput = HubspotApiCreateEntitiesOutput;
+
 type HubspotApiDownloadedEntity = {
   id: string;
   properties: {
@@ -35,6 +56,9 @@ interface Downloader {
 }
 
 interface Uploader {
+  createEntities: (kind: HubspotEntityKind, inputs: HubspotApiCreateEntitiesInput[]) => Promise<HubspotApiCreateEntitiesOutput>;
+  updateEntities: (kind: HubspotEntityKind, inputs: HubspotApiUpdateEntitiesInput[]) => Promise<HubspotApiUpdateEntitiesOutput>;
+
   createAssociations: (fromKind: HubspotEntityKind, toKind: HubspotEntityKind, input: HubspotApiAssociationInput) => Promise<void>;
   deleteAssociations: (fromKind: HubspotEntityKind, toKind: HubspotEntityKind, input: HubspotApiAssociationInput) => Promise<void>;
 }
@@ -128,11 +152,12 @@ export abstract class HubspotEntityManager<
       const amount = this.kind === 'contact' ? 10 : 100;
       const groupsToCreate = batchesOf(toCreate, amount);
       for (const entitiesToCreate of groupsToCreate) {
-        const results = await this.api(this.kind).batchApi.create({
-          inputs: entitiesToCreate.map(e => ({
+        const results = await this.uploader().createEntities(
+          this.kind,
+          entitiesToCreate.map(e => ({
             properties: this.getChangedProperties(e),
           }))
-        });
+        );
 
         for (const e of entitiesToCreate) {
           e.applyUpdates();
@@ -159,12 +184,13 @@ export abstract class HubspotEntityManager<
     if (toUpdate.length > 0) {
       const groupsToUpdate = batchesOf(toUpdate, 100);
       for (const entitiesToUpdate of groupsToUpdate) {
-        const results = await this.api(this.kind).batchApi.update({
-          inputs: entitiesToUpdate.map(e => ({
+        const results = await this.uploader().updateEntities(
+          this.kind,
+          entitiesToUpdate.map(e => ({
             id: e.guaranteedId(),
             properties: this.getChangedProperties(e),
           }))
-        });
+        );
 
         for (const e of entitiesToUpdate) {
           e.applyUpdates();
@@ -229,6 +255,12 @@ export abstract class HubspotEntityManager<
 
   private uploader(): Uploader {
     return {
+      createEntities: async (kind: HubspotEntityKind, inputs: HubspotApiCreateEntitiesInput[]): Promise<HubspotApiCreateEntitiesOutput> => {
+        return await this.api(kind).batchApi.create({ inputs });
+      },
+      updateEntities: async (kind: HubspotEntityKind, inputs: HubspotApiUpdateEntitiesInput[]): Promise<HubspotApiUpdateEntitiesOutput> => {
+        return await this.api(kind).batchApi.update({ inputs });
+      },
       createAssociations: async (fromKind: HubspotEntityKind, toKind: HubspotEntityKind, input: HubspotApiAssociationInput): Promise<void> => {
         await this.client.crm.associations.batchApi.create(fromKind, toKind, input);
       },
