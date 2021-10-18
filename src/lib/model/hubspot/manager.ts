@@ -92,17 +92,17 @@ export abstract class HubspotEntityManager<
     const toUpdate = toSync.filter(e => e.id !== undefined);
 
     if (toCreate.length > 0) {
-      const groups = batchesOf(toCreate, 10);
-      for (const entities of groups) {
+      const groupsToCreate = batchesOf(toCreate, 10);
+      for (const entitiesToCreate of groupsToCreate) {
         const results = await this.api().batchApi.create({
-          inputs: entities.map(e => ({ properties: this.getChangedProperties(e) }))
+          inputs: entitiesToCreate.map(e => ({ properties: this.getChangedProperties(e) }))
         });
 
-        for (const e of entities) {
+        for (const e of entitiesToCreate) {
           e.applyUpdates();
         }
 
-        for (const e of entities) {
+        for (const e of entitiesToCreate) {
           const found = results.body.results.find(result => {
             for (const localKey of this.identifiers) {
               const localVal = e.get(localKey);
@@ -121,16 +121,16 @@ export abstract class HubspotEntityManager<
     }
 
     if (toUpdate.length > 0) {
-      const groups = batchesOf(toUpdate, 10);
-      for (const entities of groups) {
+      const groupsToUpdate = batchesOf(toUpdate, 10);
+      for (const entitiesToUpdate of groupsToUpdate) {
         const results = await this.api().batchApi.update({
-          inputs: entities.map(e => ({
+          inputs: entitiesToUpdate.map(e => ({
             id: e.guaranteedId(),
             properties: this.getChangedProperties(e),
           }))
         });
 
-        for (const e of entities) {
+        for (const e of entitiesToUpdate) {
           e.applyUpdates();
         }
       }
