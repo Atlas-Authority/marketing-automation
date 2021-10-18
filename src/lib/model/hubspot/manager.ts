@@ -3,6 +3,42 @@ import * as assert from 'assert';
 import { batchesOf } from '../../util/helpers.js';
 import { EntityDatabase, HubspotAssociationString, HubspotEntity, HubspotEntityKind } from "./entity.js";
 
+type HubspotApiDownloadedEntity = {
+  id: string;
+  properties: {
+    [key: string]: string;
+  };
+  associations?: {
+    [key: string]: {
+      results: {
+        type: string;
+        id: string;
+      }[];
+    };
+  };
+};
+
+type HubspotApiAssociationInput = {
+  inputs: {
+    from: {
+      id: string;
+    };
+    to: {
+      id: string;
+    };
+    type: string;
+  }[];
+};
+
+interface Downloader {
+  downloadAllEntities: (kind: HubspotEntityKind, apiProperties: string[], inputAssociations: string[]) => Promise<HubspotApiDownloadedEntity[]>;
+}
+
+interface Uploader {
+  createAssociations: (fromKind: HubspotEntityKind, toKind: HubspotEntityKind, input: HubspotApiAssociationInput) => Promise<void>;
+  deleteAssociations: (fromKind: HubspotEntityKind, toKind: HubspotEntityKind, input: HubspotApiAssociationInput) => Promise<void>;
+}
+
 export type HubspotInputObject = {
   id: string,
   properties: { [key: string]: string },
@@ -44,8 +80,8 @@ export abstract class HubspotEntityManager<
 
   protected entities = new Map<string, E>();
 
-  private api() {
-    switch (this.kind) {
+  private api(kind: HubspotEntityKind) {
+    switch (kind) {
       case 'deal': return this.client.crm.deals;
       case 'company': return this.client.crm.companies;
       case 'contact': return this.client.crm.contacts;
@@ -53,10 +89,7 @@ export abstract class HubspotEntityManager<
   }
 
   public async downloadAllEntities() {
-    let inputAssociations = ((this.associations.length > 0)
-      ? this.associations
-      : undefined);
-    const data = await this.api().getAll(undefined, undefined, this.apiProperties, inputAssociations);
+    const data = await this.downloader().downloadAllEntities(this.kind, this.apiProperties, this.associations);
 
     for (const raw of data) {
       const props = this.fromAPI(raw.properties);
@@ -95,8 +128,10 @@ export abstract class HubspotEntityManager<
       const amount = this.kind === 'contact' ? 10 : 100;
       const groupsToCreate = batchesOf(toCreate, amount);
       for (const entitiesToCreate of groupsToCreate) {
-        const results = await this.api().batchApi.create({
-          inputs: entitiesToCreate.map(e => ({ properties: this.getChangedProperties(e) }))
+        const results = await this.api(this.kind).batchApi.create({
+          inputs: entitiesToCreate.map(e => ({
+            properties: this.getChangedProperties(e),
+          }))
         });
 
         for (const e of entitiesToCreate) {
@@ -124,7 +159,7 @@ export abstract class HubspotEntityManager<
     if (toUpdate.length > 0) {
       const groupsToUpdate = batchesOf(toUpdate, 100);
       for (const entitiesToUpdate of groupsToUpdate) {
-        const results = await this.api().batchApi.update({
+        const results = await this.api(this.kind).batchApi.update({
           inputs: entitiesToUpdate.map(e => ({
             id: e.guaranteedId(),
             properties: this.getChangedProperties(e),
@@ -160,7 +195,7 @@ export abstract class HubspotEntityManager<
       const toDel = toSyncInKind.filter(changes => changes.op === 'del');
 
       for (const toAddSubset of batchesOf(toAdd, 100)) {
-        await this.client.crm.associations.batchApi.create(
+        await this.uploader().createAssociations(
           this.kind,
           otherKind,
           { inputs: toAddSubset.map(changes => changes.inputs) },
@@ -168,7 +203,7 @@ export abstract class HubspotEntityManager<
       }
 
       for (const toDelSubset of batchesOf(toDel, 100)) {
-        await this.client.crm.associations.batchApi.archive(
+        await this.uploader().deleteAssociations(
           this.kind,
           otherKind,
           { inputs: toDelSubset.map(changes => changes.inputs) },
@@ -179,6 +214,28 @@ export abstract class HubspotEntityManager<
     for (const changes of toSync) {
       changes.e.applyAssociationChanges();
     }
+  }
+
+  private downloader(): Downloader {
+    return {
+      downloadAllEntities: async (kind: HubspotEntityKind, apiProperties: string[], inputAssociations: string[]): Promise<HubspotApiDownloadedEntity[]> => {
+        let associations = ((inputAssociations.length > 0)
+          ? inputAssociations
+          : undefined);
+        return await this.api(kind).getAll(undefined, undefined, apiProperties, associations);
+      },
+    };
+  }
+
+  private uploader(): Uploader {
+    return {
+      createAssociations: async (fromKind: HubspotEntityKind, toKind: HubspotEntityKind, input: HubspotApiAssociationInput): Promise<void> => {
+        await this.client.crm.associations.batchApi.create(fromKind, toKind, input);
+      },
+      deleteAssociations: async (fromKind: HubspotEntityKind, toKind: HubspotEntityKind, input: HubspotApiAssociationInput): Promise<void> => {
+        await this.client.crm.associations.batchApi.archive(fromKind, toKind, input);
+      },
+    };
   }
 
   private getChangedProperties(e: E) {
