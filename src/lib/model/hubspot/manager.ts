@@ -172,6 +172,10 @@ export abstract class HubspotEntityManager<
         { inputs: toDel.map(changes => changes.inputs) },
       );
     }
+
+    for (const changes of toSync) {
+      changes.e.applyAssociationChanges();
+    }
   }
 
   private getChangedProperties(e: E) {
