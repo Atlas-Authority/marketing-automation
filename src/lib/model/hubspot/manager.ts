@@ -95,13 +95,12 @@ export abstract class HubspotEntityManager<
       const groups = batchesOf(toCreate, 10);
       for (const entities of groups) {
         const results = await this.api().batchApi.create({
-          inputs: entities.map(e => {
-            const properties = this.getChangedProperties(e);
-            e.applyUpdates();
-
-            return { properties };
-          })
+          inputs: entities.map(e => ({ properties: this.getChangedProperties(e) }))
         });
+
+        for (const e of entities) {
+          e.applyUpdates();
+        }
 
         for (const e of entities) {
           const found = results.body.results.find(result => {
@@ -125,16 +124,15 @@ export abstract class HubspotEntityManager<
       const groups = batchesOf(toUpdate, 10);
       for (const entities of groups) {
         const results = await this.api().batchApi.update({
-          inputs: entities.map(e => {
-            const id = e.id;
-            assert.ok(id);
-
-            const properties = this.getChangedProperties(e);
-            e.applyUpdates();
-
-            return { id, properties };
-          })
+          inputs: entities.map(e => ({
+            id: e.guaranteedId(),
+            properties: this.getChangedProperties(e),
+          }))
         });
+
+        for (const e of entities) {
+          e.applyUpdates();
+        }
       }
     }
   }
