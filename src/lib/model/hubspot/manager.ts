@@ -165,11 +165,12 @@ export abstract class HubspotEntityManager<
 
         for (const e of entitiesToCreate) {
           const found = results.body.results.find(result => {
-            for (const localKey of this.identifiers) {
-              const localVal = e.get(localKey);
+            for (const localIdKey of this.identifiers) {
+              const localVal = e.get(localIdKey);
               assert.ok(localVal);
-              const [remoteKey, abnormalized] = this.toAPI[localKey](localVal);
-              if (abnormalized !== result.properties[remoteKey]) return false;
+              const [remoteIdKey, hsLocal] = this.toAPI[localIdKey](localVal);
+              const hsRemote = result.properties[remoteIdKey];
+              if (hsLocal !== hsRemote) return false;
             }
             return true;
           });
