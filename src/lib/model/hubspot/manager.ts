@@ -113,7 +113,7 @@ export abstract class HubspotEntityManager<
   }
 
   public async downloadAllEntities() {
-    const data = await this.downloader().downloadAllEntities(this.kind, this.apiProperties, this.associations);
+    const data = await this.downloader.downloadAllEntities(this.kind, this.apiProperties, this.associations);
 
     for (const raw of data) {
       const props = this.fromAPI(raw.properties);
@@ -152,7 +152,7 @@ export abstract class HubspotEntityManager<
       const amount = this.kind === 'contact' ? 10 : 100;
       const groupsToCreate = batchesOf(toCreate, amount);
       for (const entitiesToCreate of groupsToCreate) {
-        const results = await this.uploader().createEntities(
+        const results = await this.uploader.createEntities(
           this.kind,
           entitiesToCreate.map(e => ({
             properties: this.getChangedProperties(e),
@@ -184,7 +184,7 @@ export abstract class HubspotEntityManager<
     if (toUpdate.length > 0) {
       const groupsToUpdate = batchesOf(toUpdate, 100);
       for (const entitiesToUpdate of groupsToUpdate) {
-        const results = await this.uploader().updateEntities(
+        const results = await this.uploader.updateEntities(
           this.kind,
           entitiesToUpdate.map(e => ({
             id: e.guaranteedId(),
@@ -221,7 +221,7 @@ export abstract class HubspotEntityManager<
       const toDel = toSyncInKind.filter(changes => changes.op === 'del');
 
       for (const toAddSubset of batchesOf(toAdd, 100)) {
-        await this.uploader().createAssociations(
+        await this.uploader.createAssociations(
           this.kind,
           otherKind,
           { inputs: toAddSubset.map(changes => changes.inputs) },
@@ -229,7 +229,7 @@ export abstract class HubspotEntityManager<
       }
 
       for (const toDelSubset of batchesOf(toDel, 100)) {
-        await this.uploader().deleteAssociations(
+        await this.uploader.deleteAssociations(
           this.kind,
           otherKind,
           { inputs: toDelSubset.map(changes => changes.inputs) },
@@ -242,7 +242,7 @@ export abstract class HubspotEntityManager<
     }
   }
 
-  private downloader(): Downloader {
+  private get downloader(): Downloader {
     return {
       downloadAllEntities: async (kind: HubspotEntityKind, apiProperties: string[], inputAssociations: string[]): Promise<HubspotApiDownloadedEntity[]> => {
         let associations = ((inputAssociations.length > 0)
@@ -253,7 +253,7 @@ export abstract class HubspotEntityManager<
     };
   }
 
-  private uploader(): Uploader {
+  private get uploader(): Uploader {
     return {
       createEntities: async (kind: HubspotEntityKind, inputs: HubspotApiCreateEntitiesInput[]): Promise<HubspotApiCreateEntitiesOutput> => {
         return await this.api(kind).batchApi.create({ inputs });
