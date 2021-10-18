@@ -158,17 +158,21 @@ export abstract class HubspotEntityManager<
       const toAdd = toSyncInKind.filter(changes => changes.op === 'add');
       const toDel = toSyncInKind.filter(changes => changes.op === 'del');
 
-      await this.client.crm.associations.batchApi.create(
-        this.kind,
-        otherKind,
-        { inputs: toAdd.map(changes => changes.inputs) },
-      );
+      for (const toAddSubset of batchesOf(toAdd, 100)) {
+        await this.client.crm.associations.batchApi.create(
+          this.kind,
+          otherKind,
+          { inputs: toAddSubset.map(changes => changes.inputs) },
+        );
+      }
 
-      await this.client.crm.associations.batchApi.archive(
-        this.kind,
-        otherKind,
-        { inputs: toDel.map(changes => changes.inputs) },
-      );
+      for (const toDelSubset of batchesOf(toDel, 100)) {
+        await this.client.crm.associations.batchApi.archive(
+          this.kind,
+          otherKind,
+          { inputs: toDelSubset.map(changes => changes.inputs) },
+        );
+      }
     }
 
     for (const changes of toSync) {
