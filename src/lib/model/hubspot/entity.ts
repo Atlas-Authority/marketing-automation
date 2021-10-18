@@ -1,20 +1,48 @@
+import * as assert from 'assert';
+
 export type HubspotEntityKind = 'deal' | 'contact' | 'company';
+
+export type HubspotAssociationString = `${HubspotEntityKind}_${string}`;
+
+export interface EntityDatabase {
+  getEntity(kind: HubspotEntityKind, id: string): HubspotEntity<any>;
+}
 
 export abstract class HubspotEntity<P extends { [key: string]: any }> {
 
   id?: string;
 
+  /** The most recently saved props, or all unsaved props */
   private props: P;
+  /** Contains only new changes, and only when an entity is saved */
   private newProps: Partial<P>;
 
-  private assocs: [HubspotEntityKind, HubspotEntity<any>][] = [];
-  private newAssocs: [HubspotEntityKind, HubspotEntity<any>][] = [];
+  /** The associations this was created with, whether an existing or new entity */
+  private assocs = new Set<HubspotAssociationString>();
+  /** A copy of assocs, which all updates act on, whether an existing or new entity */
+  private newAssocs = new Set<HubspotAssociationString>();
 
-  constructor(id: string | null, props: P) {
+  constructor(
+    private db: EntityDatabase,
+    id: string | null,
+    props: P,
+    associations?: Set<HubspotAssociationString>
+  ) {
     if (id) this.id = id;
     this.props = props;
     this.newProps = {};
+    if (associations) {
+      this.assocs = associations;
+      this.newAssocs = new Set(associations);
+    }
   }
+
+  guaranteedId() {
+    assert.ok(this.id);
+    return this.id;
+  }
+
+  // Properties
 
   set<K extends keyof P>(key: K, val: P[K]) {
     if (this.id === undefined) {
@@ -50,40 +78,50 @@ export abstract class HubspotEntity<P extends { [key: string]: any }> {
     Object.assign(this.props, this.newProps);
   }
 
+  // Associations
+
   protected makeDynamicAssociation<T extends HubspotEntity<any>>(kind: HubspotEntityKind) {
     return {
-      get: () => this.getAssociations(kind),
+      getAll: () => this.getAssociations(kind) as T[],
       add: (entity: T) => this.addAssociation(kind, entity),
       remove: (entity: T) => this.removeAssociation(kind, entity),
     };
   }
 
-  public _addRawAssociation(kind: HubspotEntityKind, entity: HubspotEntity<any>) {
-    this.assocs.push([kind, entity]);
-  }
-
   private addAssociation(kind: HubspotEntityKind, entity: HubspotEntity<any>) {
-
+    this.newAssocs.add(`${kind}_${entity.guaranteedId()}`);
   }
 
   private removeAssociation(kind: HubspotEntityKind, entity: HubspotEntity<any>) {
-
+    this.newAssocs.delete(`${kind}_${entity.guaranteedId()}`);
   }
 
   private getAssociations(kind: HubspotEntityKind) {
-
+    return ([...this.newAssocs]
+      .map(a => a.split('_'))
+      .filter(([k,]) => k === kind)
+      .map((([, id]) => this.db.getEntity(kind, id)))
+    );
   }
 
-  private hasAssociationChanges() {
-
+  hasAssociationChanges() {
+    return (
+      [...this.assocs].sort().join() !==
+      [...this.newAssocs].sort().join()
+    );
   }
 
-  private getAssociationChanges() {
-
+  getAssociationChanges() {
+    const toAdd = [...this.newAssocs].filter(a => !this.assocs.has(a));
+    const toDel = [...this.assocs].filter(a => !this.newAssocs.has(a));
+    return {
+      toAdd: toAdd.map(a => a.split('_') as [HubspotEntityKind, string]),
+      toDel: toDel.map(a => a.split('_') as [HubspotEntityKind, string]),
+    };
   }
 
-  private applyAssociationChanges() {
-
+  applyAssociationChanges() {
+    this.assocs = new Set(this.newAssocs);
   }
 
 }
