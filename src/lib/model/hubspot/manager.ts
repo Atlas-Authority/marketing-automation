@@ -4,20 +4,8 @@ import { SimpleError } from '../../util/errors.js';
 import { batchesOf } from '../../util/helpers.js';
 import { EntityDatabase, HubspotAssociationString, HubspotEntity, HubspotEntityKind } from "./entity.js";
 
-type HubspotApiCreateEntitiesInput = {
-  properties: { [key: string]: string },
-};
-
-type HubspotApiUpdateEntitiesInput = (
-  HubspotApiCreateEntitiesInput & { id: string }
-);
-
-type HubspotApiCreateEntitiesOutput = {
-  id: string,
-  properties: { [key: string]: string },
-}[];
-
-type HubspotApiUpdateEntitiesOutput = HubspotApiCreateEntitiesOutput;
+type HubspotApiNewEntity = { properties: { [key: string]: string } };
+type HubspotApiFullEntity = HubspotApiNewEntity & { id: string };
 
 type HubspotApiDownloadedEntity = {
   id: string;
@@ -51,8 +39,8 @@ interface Downloader {
 }
 
 interface Uploader {
-  createEntities: (kind: HubspotEntityKind, inputs: HubspotApiCreateEntitiesInput[]) => Promise<HubspotApiCreateEntitiesOutput>;
-  updateEntities: (kind: HubspotEntityKind, inputs: HubspotApiUpdateEntitiesInput[]) => Promise<HubspotApiUpdateEntitiesOutput>;
+  createEntities: (kind: HubspotEntityKind, inputs: HubspotApiNewEntity[]) => Promise<HubspotApiFullEntity[]>;
+  updateEntities: (kind: HubspotEntityKind, inputs: HubspotApiFullEntity[]) => Promise<HubspotApiFullEntity[]>;
 
   createAssociations: (fromKind: HubspotEntityKind, toKind: HubspotEntityKind, input: HubspotApiAssociationInput) => Promise<void>;
   deleteAssociations: (fromKind: HubspotEntityKind, toKind: HubspotEntityKind, input: HubspotApiAssociationInput) => Promise<void>;
@@ -274,10 +262,10 @@ export abstract class HubspotEntityManager<
 
   private get uploader(): Uploader {
     return {
-      createEntities: async (kind: HubspotEntityKind, inputs: HubspotApiCreateEntitiesInput[]): Promise<HubspotApiCreateEntitiesOutput> => {
+      createEntities: async (kind: HubspotEntityKind, inputs: HubspotApiNewEntity[]): Promise<HubspotApiFullEntity[]> => {
         return (await this.api(kind).batchApi.create({ inputs })).body.results;
       },
-      updateEntities: async (kind: HubspotEntityKind, inputs: HubspotApiUpdateEntitiesInput[]): Promise<HubspotApiUpdateEntitiesOutput> => {
+      updateEntities: async (kind: HubspotEntityKind, inputs: HubspotApiFullEntity[]): Promise<HubspotApiFullEntity[]> => {
         return (await this.api(kind).batchApi.update({ inputs })).body.results;
       },
       createAssociations: async (fromKind: HubspotEntityKind, toKind: HubspotEntityKind, input: HubspotApiAssociationInput): Promise<void> => {
