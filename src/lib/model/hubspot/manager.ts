@@ -92,7 +92,8 @@ export abstract class HubspotEntityManager<
     const toUpdate = toSync.filter(e => e.id !== undefined);
 
     if (toCreate.length > 0) {
-      const groupsToCreate = batchesOf(toCreate, 10);
+      const amount = this.kind === 'contact' ? 10 : 100;
+      const groupsToCreate = batchesOf(toCreate, amount);
       for (const entitiesToCreate of groupsToCreate) {
         const results = await this.api().batchApi.create({
           inputs: entitiesToCreate.map(e => ({ properties: this.getChangedProperties(e) }))
@@ -121,7 +122,7 @@ export abstract class HubspotEntityManager<
     }
 
     if (toUpdate.length > 0) {
-      const groupsToUpdate = batchesOf(toUpdate, 10);
+      const groupsToUpdate = batchesOf(toUpdate, 100);
       for (const entitiesToUpdate of groupsToUpdate) {
         const results = await this.api().batchApi.update({
           inputs: entitiesToUpdate.map(e => ({
