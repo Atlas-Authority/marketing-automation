@@ -66,6 +66,10 @@ export abstract class HubspotEntityManager<
     return this.entities.get(id);
   }
 
+  public getAll() {
+    return this.entities.values();
+  }
+
   public async syncUpAllEntities() {
     this.syncUpAllEntitiesProperties();
     this.syncUpAllEntitiesAssociations();
