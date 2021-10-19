@@ -16,15 +16,15 @@ export default class LiveUploader implements Uploader {
 
   hubspotClient = new hubspot.Client({ apiKey: config.hubspot.apiKey });
 
-  async createEntities(kind: EntityKind, inputs: NewEntity[]): Promise<ExistingEntity[]> {
+  async createHubspotEntities(kind: EntityKind, inputs: NewEntity[]): Promise<ExistingEntity[]> {
     return (await apiFor(this.hubspotClient, kind).batchApi.create({ inputs })).body.results;
   }
 
-  async updateEntities(kind: EntityKind, inputs: ExistingEntity[]): Promise<ExistingEntity[]> {
+  async updateHubspotEntities(kind: EntityKind, inputs: ExistingEntity[]): Promise<ExistingEntity[]> {
     return (await apiFor(this.hubspotClient, kind).batchApi.update({ inputs })).body.results;
   }
 
-  async createAssociations(fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void> {
+  async createHubspotAssociations(fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void> {
     await this.hubspotClient.crm.associations.batchApi.create(fromKind, toKind, {
       inputs: inputs.map(input => ({
         from: { id: input.fromId },
@@ -34,7 +34,7 @@ export default class LiveUploader implements Uploader {
     });
   }
 
-  async deleteAssociations(fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void> {
+  async deleteHubspotAssociations(fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void> {
     await this.hubspotClient.crm.associations.batchApi.archive(fromKind, toKind, {
       inputs: inputs.map(input => ({
         from: { id: input.fromId },

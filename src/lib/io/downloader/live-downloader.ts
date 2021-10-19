@@ -18,7 +18,7 @@ export default class LiveDownloader implements Downloader {
 
   hubspotClient = new hubspot.Client({ apiKey: config.hubspot.apiKey });
 
-  async downloadAllEntities(kind: EntityKind, apiProperties: string[], inputAssociations: string[]): Promise<FullEntity[]> {
+  async downloadHubspotEntities(kind: EntityKind, apiProperties: string[], inputAssociations: string[]): Promise<FullEntity[]> {
     let associations = ((inputAssociations.length > 0)
       ? inputAssociations
       : undefined);

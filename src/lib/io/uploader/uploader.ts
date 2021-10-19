@@ -28,10 +28,10 @@ export interface Uploader {
   disassociateDealsFromCompanies(fromTos: DealCompanyAssociationPair[]): Promise<void>;
 
   /** @deprecated */
-  createEntities(kind: EntityKind, inputs: NewEntity[]): Promise<ExistingEntity[]>;
+  createHubspotEntities(kind: EntityKind, inputs: NewEntity[]): Promise<ExistingEntity[]>;
   /** @deprecated */
-  updateEntities(kind: EntityKind, inputs: ExistingEntity[]): Promise<ExistingEntity[]>;
+  updateHubspotEntities(kind: EntityKind, inputs: ExistingEntity[]): Promise<ExistingEntity[]>;
 
-  createAssociations(fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void>;
-  deleteAssociations(fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void>;
+  createHubspotAssociations(fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void>;
+  deleteHubspotAssociations(fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void>;
 }

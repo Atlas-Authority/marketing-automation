@@ -10,7 +10,7 @@ export interface DownloadLogger {
 }
 
 export interface Downloader {
-  downloadAllEntities(kind: EntityKind, apiProperties: string[], inputAssociations: string[]): Promise<FullEntity[]>;
+  downloadHubspotEntities(kind: EntityKind, apiProperties: string[], inputAssociations: string[]): Promise<FullEntity[]>;
 
   downloadFreeEmailProviders(downloadLogger: DownloadLogger): Promise<string[]>;
   downloadAllTlds(downloadLogger: DownloadLogger): Promise<string[]>;

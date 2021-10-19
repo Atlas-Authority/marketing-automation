@@ -35,7 +35,7 @@ export abstract class HubspotEntityManager<
   protected entities = new Map<string, E>();
 
   public async downloadAllEntities() {
-    const data = await this.downloader.downloadAllEntities(this.kind, this.apiProperties, this.associations);
+    const data = await this.downloader.downloadHubspotEntities(this.kind, this.apiProperties, this.associations);
 
     for (const raw of data) {
       const props = this.fromAPI(raw.properties);
@@ -76,7 +76,7 @@ export abstract class HubspotEntityManager<
       const amount = this.kind === 'contact' ? 10 : 100;
       const groupsToCreate = batchesOf(toCreate, amount);
       for (const entitiesToCreate of groupsToCreate) {
-        const results = await this.uploader.createEntities(
+        const results = await this.uploader.createHubspotEntities(
           this.kind,
           entitiesToCreate.map(e => ({
             properties: this.getChangedProperties(e),
@@ -109,7 +109,7 @@ export abstract class HubspotEntityManager<
     if (toUpdate.length > 0) {
       const groupsToUpdate = batchesOf(toUpdate, 100);
       for (const entitiesToUpdate of groupsToUpdate) {
-        const results = await this.uploader.updateEntities(
+        const results = await this.uploader.updateHubspotEntities(
           this.kind,
           entitiesToUpdate.map(e => ({
             id: e.guaranteedId(),
@@ -146,7 +146,7 @@ export abstract class HubspotEntityManager<
       const toDel = toSyncInKind.filter(changes => changes.op === 'del');
 
       for (const toAddSubset of batchesOf(toAdd, 100)) {
-        await this.uploader.createAssociations(
+        await this.uploader.createHubspotAssociations(
           this.kind,
           otherKind,
           toAddSubset.map(changes => changes.inputs),
@@ -154,7 +154,7 @@ export abstract class HubspotEntityManager<
       }
 
       for (const toDelSubset of batchesOf(toDel, 100)) {
-        await this.uploader.deleteAssociations(
+        await this.uploader.deleteHubspotAssociations(
           this.kind,
           otherKind,
           toDelSubset.map(changes => changes.inputs),
