@@ -38,4 +38,6 @@ export class CompanyManager extends HubspotEntityManager<CompanyProps, Company> 
   override identifiers: (keyof CompanyProps)[] = [
   ];
 
+  override rebuildIndexes() { }
+
 }

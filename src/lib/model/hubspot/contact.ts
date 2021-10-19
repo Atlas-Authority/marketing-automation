@@ -116,22 +116,12 @@ export class ContactManager extends HubspotEntityManager<ContactProps, Contact> 
     return this.contactsByEmail.get(email);
   }
 
-  private buildContactsStructure() {
+  override rebuildIndexes() {
     for (const contact of this.getAll()) {
       for (const email of [contact.data.email, ...contact.data.otherEmails]) {
         this.contactsByEmail.set(email, contact);
       }
     }
-  }
-
-  override async downloadAllEntities() {
-    await super.downloadAllEntities();
-    this.buildContactsStructure();
-  }
-
-  override async syncUpAllEntities() {
-    await super.syncUpAllEntities();
-    this.buildContactsStructure();
   }
 
 }

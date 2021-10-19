@@ -38,6 +38,8 @@ export abstract class HubspotEntityManager<
   protected abstract fromAPI(data: { [key: string]: string }): P | null;
   protected abstract toAPI: HubspotPropertyTransformers<P>;
 
+  public abstract rebuildIndexes(): void;
+
   protected abstract identifiers: (keyof P)[];
 
   protected entities = new Map<string, E>();
@@ -60,6 +62,8 @@ export abstract class HubspotEntityManager<
       const entity = new this.Entity(this.db, raw.id, props, associations);
       this.entities.set(entity.guaranteedId(), entity);
     }
+
+    this.rebuildIndexes();
   }
 
   public get(id: string) {
@@ -73,6 +77,7 @@ export abstract class HubspotEntityManager<
   public async syncUpAllEntities() {
     this.syncUpAllEntitiesProperties();
     this.syncUpAllEntitiesAssociations();
+    this.rebuildIndexes();
   }
 
   private async syncUpAllEntitiesProperties() {

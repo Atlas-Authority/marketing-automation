@@ -109,7 +109,7 @@ export class DealManager extends HubspotEntityManager<DealProps, Deal> {
     return this.dealsByTransactionId.get(id);
   }
 
-  private buildIndexes() {
+  override rebuildIndexes() {
     for (const deal of this.getAll()) {
       if (deal.data.addonLicenseId) {
         this.dealsByAddonLicenseId.set(deal.data.addonLicenseId, deal);
@@ -118,16 +118,6 @@ export class DealManager extends HubspotEntityManager<DealProps, Deal> {
         this.dealsByTransactionId.set(deal.data.transactionId, deal);
       }
     }
-  }
-
-  override async downloadAllEntities() {
-    await super.downloadAllEntities();
-    this.buildIndexes();
-  }
-
-  override async syncUpAllEntities() {
-    await super.syncUpAllEntities();
-    this.buildIndexes();
   }
 
 }
