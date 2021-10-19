@@ -1,24 +1,9 @@
 import * as hubspot from '@hubspot/api-client';
 import * as assert from 'assert';
+import { FullEntity, NewEntity, ExistingEntity, Association } from '../../io/hubspot.js';
 import { SimpleError } from '../../util/errors.js';
 import { batchesOf } from '../../util/helpers.js';
 import { EntityDatabase, HubspotAssociationString, HubspotEntity, HubspotEntityKind } from "./entity.js";
-
-type NewEntity = { properties: { [key: string]: string } };
-type ExistingEntity = NewEntity & { id: string };
-
-type FullEntity = ExistingEntity & {
-  associations: {
-    type: string;
-    id: string;
-  }[];
-};
-
-type Association = {
-  fromId: string,
-  toId: string,
-  toType: string,
-};
 
 interface Downloader {
   downloadAllEntities(kind: HubspotEntityKind, apiProperties: string[], inputAssociations: string[]): Promise<FullEntity[]>;
