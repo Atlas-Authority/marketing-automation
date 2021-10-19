@@ -9,7 +9,7 @@ import { Uploader } from "../io/uploader/uploader.js";
 import { MultiDownloadLogger } from "../log/download-logger.js";
 import log from "../log/logger.js";
 import { validateMarketplaceData } from "./marketplace/validation.js";
-import { NormalizedLicense, NormalizedTransaction, normalizeLicense, normalizeTransaction } from "./marketplace/normalized.js";
+import { NormalizedLicense, NormalizedTransaction, normalizeLicense, normalizeTransaction } from "./marketplace/normalize.js";
 import { License } from "../types/license.js";
 import { Transaction } from "../types/transaction.js";
 import { Company } from "../types/company.js";
