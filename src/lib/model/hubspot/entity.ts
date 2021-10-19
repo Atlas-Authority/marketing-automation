@@ -83,6 +83,7 @@ export abstract class HubspotEntity<P extends { [key: string]: any }> {
 
   applyPropertyChanges() {
     Object.assign(this.props, this.newProps);
+    this.newProps = {};
   }
 
   // Associations
