@@ -81,7 +81,7 @@ export abstract class HubspotEntity<P extends { [key: string]: any }> {
     return this.newProps;
   }
 
-  applyUpdates() {
+  applyPropertyChanges() {
     Object.assign(this.props, this.newProps);
   }
 

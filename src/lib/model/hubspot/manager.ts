@@ -92,7 +92,7 @@ export abstract class HubspotEntityManager<
         );
 
         for (const e of entitiesToCreate) {
-          e.applyUpdates();
+          e.applyPropertyChanges();
         }
 
         for (const e of entitiesToCreate) {
@@ -126,7 +126,7 @@ export abstract class HubspotEntityManager<
         );
 
         for (const e of entitiesToUpdate) {
-          e.applyUpdates();
+          e.applyPropertyChanges();
         }
       }
     }
