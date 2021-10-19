@@ -25,26 +25,17 @@ export function identifyDomains(db: Database) {
   }
 }
 
-export async function findAndFlagExternallyCreatedContacts({ uploader, contacts, partnerDomains, customerDomains }: {
-  uploader: Uploader,
-  contacts: Contact[],
-  partnerDomains: Set<string>,
-  customerDomains: Set<string>,
-}) {
+export async function findAndFlagExternallyCreatedContacts(db: Database) {
   // Only check contacts with no contact_type and with email
-  const candidates = contacts.filter(c => c.contact_type === null && c.email);
+  const candidates = [...db.contactManager.getAll()].filter(c => c.data.contactType === null && c.data.email);
 
-  const partners = candidates.filter(c => partnerDomains.has(c.email.split('@')[1]));
-  const customers = candidates.filter(c => customerDomains.has(c.email.split('@')[1]));
+  const partners = candidates.filter(c => db.partnerDomains.has(c.data.email.split('@')[1]));
+  const customers = candidates.filter(c => db.customerDomains.has(c.data.email.split('@')[1]));
 
-  // Fix them mutably for rest of engine run
-  for (const c of partners) { c.contact_type = 'Partner'; }
-  for (const c of customers) { c.contact_type = 'Customer'; }
+  for (const c of partners) { c.data.contactType = 'Partner'; }
+  for (const c of customers) { c.data.contactType = 'Customer'; }
 
-  await uploader.updateAllContacts([...partners, ...customers].map(c => ({
-    id: c.hs_object_id,
-    properties: { contact_type: c.contact_type },
-  })));
+  db.contactManager.syncUpAllEntities();
 }
 
 export async function findAndFlagPartnerCompanies({ uploader, contacts, companies }: {

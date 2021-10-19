@@ -33,12 +33,7 @@ export default async function runEngine({ downloader, uploader }: {
   identifyDomains(db);
 
   logStep('Flagging partner/customer contacts created outside engine');
-  await findAndFlagExternallyCreatedContacts({
-    contacts: db.allContacts,
-    partnerDomains,
-    customerDomains,
-    uploader,
-  });
+  await findAndFlagExternallyCreatedContacts(db);
 
   logStep('Generating contacts');
   const generatedContacts = generateContacts({
