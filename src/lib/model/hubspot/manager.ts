@@ -1,19 +1,9 @@
 import * as assert from 'assert';
+import { Downloader } from '../../io/downloader/downloader.js';
 import { FullEntity, NewEntity, ExistingEntity, Association, EntityKind } from '../../io/hubspot.js';
+import { Uploader } from '../../io/uploader/uploader.js';
 import { batchesOf } from '../../util/helpers.js';
 import { EntityDatabase, HubspotAssociationString, HubspotEntity } from "./entity.js";
-
-interface Downloader {
-  downloadAllEntities(kind: EntityKind, apiProperties: string[], inputAssociations: string[]): Promise<FullEntity[]>;
-}
-
-interface Uploader {
-  createEntities(kind: EntityKind, inputs: NewEntity[]): Promise<ExistingEntity[]>;
-  updateEntities(kind: EntityKind, inputs: ExistingEntity[]): Promise<ExistingEntity[]>;
-
-  createAssociations(fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void>;
-  deleteAssociations(fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void>;
-}
 
 export type HubspotPropertyTransformers<T> = {
   [P in keyof T]: (prop: T[P]) => [string, string]
