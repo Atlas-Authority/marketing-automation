@@ -9,7 +9,7 @@ export function validateMarketplaceData(
   licensesWithDataInsights: RawLicense[],
   licensesWithoutDataInsights: RawLicense[],
   allTransactions: RawTransaction[],
-  allTlds: string[],
+  emailRe: RegExp,
 ) {
   licensesWithDataInsights = licensesWithDataInsights.filter(filterLicensesWithTechEmail);
   licensesWithoutDataInsights = licensesWithoutDataInsights.filter(filterLicensesWithTechEmail);
@@ -31,7 +31,6 @@ export function validateMarketplaceData(
 
   let allLicenses = uniqLicenses(licensesWithDataInsights.concat(licensesWithoutDataInsights));
 
-  const emailRe = makeEmailValidationRegex(allTlds);
   const hasValidEmails = makeEmailValidator(emailRe);
 
   allTransactions = allTransactions.filter(hasValidEmails);
@@ -81,11 +80,6 @@ function uniqLicenses(licenses: RawLicense[]) {
   assert.ok(fixed.every(ls => ls.length === 1));
 
   return fixed.map(ls => ls[0]);
-}
-
-function makeEmailValidationRegex(tlds: string[]) {
-  const re = new RegExp(`.+@.+\\.(${tlds.join('|')})`);
-  return re;
 }
 
 function verifyStructure<T>(name: string, data: T[], schema: Array<['every' | 'some', (item: T) => boolean]>) {

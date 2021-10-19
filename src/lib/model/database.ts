@@ -73,16 +73,17 @@ export class Database {
 
     log.info('Downloader', 'Done');
 
+    this.providerDomains = makeMultiProviderDomainsSet(freeDomains);
+
+    const emailRe = makeEmailValidationRegex(allTlds);
     const results = validateMarketplaceData(
       licensesWithDataInsights,
       licensesWithoutDataInsights,
       allTransactions,
-      allTlds);
+      emailRe);
 
     this.allLicenses = results.allLicenses.map(normalizeLicense);
     this.allTransactions = results.allTransactions.map(normalizeTransaction);
-
-    this.providerDomains = makeMultiProviderDomainsSet(freeDomains);
 
     this.allDeals = allDeals;
     this.allCompanies = allCompanies;
@@ -125,4 +126,8 @@ export class Database {
     }
   }
 
+}
+
+function makeEmailValidationRegex(tlds: string[]) {
+  return new RegExp(`.+@.+\\.(${tlds.join('|')})`);
 }
