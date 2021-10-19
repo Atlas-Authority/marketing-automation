@@ -33,13 +33,13 @@ export function getContactInfo(contactInfo: RawLicenseContact | RawTransactionCo
   };
 }
 
-export function maybeGetContactInfo(contactInfo: RawLicenseContact | RawTransactionContact | undefined): ContactInfo | undefined {
-  if (!contactInfo) return undefined;
+export function maybeGetContactInfo(contactInfo: RawLicenseContact | RawTransactionContact | undefined): ContactInfo | null {
+  if (!contactInfo) return null;
   return getContactInfo(contactInfo);
 }
 
-export function getPartnerInfo(info: RawPartnerDetails | undefined): PartnerDetails | undefined {
-  if (!info) return undefined;
+export function getPartnerInfo(info: RawPartnerDetails | undefined): PartnerDetails | null {
+  if (!info) return null;
   return {
     partnerName: info.partnerName,
     partnerType: info.partnerType,

@@ -11,8 +11,8 @@ export interface NormalizedTransaction {
   lastUpdated: string,
 
   technicalContact: ContactInfo,
-  billingContact?: ContactInfo,
-  partnerDetails?: PartnerDetails,
+  billingContact: ContactInfo | null,
+  partnerDetails: PartnerDetails | null,
 
   company: string,
   country: string,

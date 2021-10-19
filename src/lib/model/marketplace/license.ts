@@ -11,8 +11,8 @@ export interface NormalizedLicense {
   lastUpdated: string,
 
   technicalContact: ContactInfo,
-  billingContact?: ContactInfo,
-  partnerDetails?: PartnerDetails,
+  billingContact: ContactInfo | null,
+  partnerDetails: PartnerDetails | null,
 
   company: string,
   country: string,
@@ -26,35 +26,35 @@ export interface NormalizedLicense {
 
   status: 'inactive' | 'active' | 'cancelled',
 
-  evaluationOpportunitySize?: string,
+  evaluationOpportunitySize: string,
 
-  attribution?: {
+  attribution: {
     channel: string,
     referrerDomain?: string,
     campaignName?: string,
     campaignSource?: string,
     campaignMedium?: string,
     campaignContent?: string,
-  },
+  } | null,
 
-  parentInfo?: {
+  parentInfo: {
     parentProductBillingCycle: 'NA' | 'Pending' | 'ANNUAL' | 'MONTHLY',
     parentProductName: 'NA' | 'Pending' | 'Confluence' | 'Jira',
     installedOnSandbox: 'NA' | 'Pending' | 'No' | 'Yes',
     parentProductEdition: 'NA' | 'Pending' | 'Free' | 'Standard' | 'Premium' | 'Enterprise',
-  },
+  } | null,
 
-  newEvalData?: {
+  newEvalData: {
     evaluationLicense: string,
     daysToConvertEval: string,
     evaluationStartDate: string,
     evaluationEndDate: string,
     evaluationSaleDate: string,
-  },
+  } | null,
 }
 
 export function normalizeLicense(license: RawLicense): NormalizedLicense {
-  let newEvalData: NormalizedLicense['newEvalData'] | undefined;
+  let newEvalData: NormalizedLicense['newEvalData'] | null = null;
   if (license.evaluationLicense) {
     newEvalData = {
       evaluationLicense: license.evaluationLicense,
@@ -65,7 +65,7 @@ export function normalizeLicense(license: RawLicense): NormalizedLicense {
     };
   }
 
-  let parentInfo: NormalizedLicense['parentInfo'] | undefined;
+  let parentInfo: NormalizedLicense['parentInfo'] | null = null;
   if (license.parentProductBillingCycle
     || license.parentProductName
     || license.installedOnSandbox
@@ -102,8 +102,8 @@ export function normalizeLicense(license: RawLicense): NormalizedLicense {
     maintenanceEndDate: license.maintenanceEndDate,
 
     status: license.status,
-    evaluationOpportunitySize: license.evaluationOpportunitySize,
-    attribution: license.attribution,
+    evaluationOpportunitySize: license.evaluationOpportunitySize ?? '',
+    attribution: license.attribution ?? null,
     parentInfo,
     newEvalData,
   };
