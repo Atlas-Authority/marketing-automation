@@ -34,7 +34,7 @@ export default class LiveDownloader implements Downloader {
               const prefix = `${kind}_to_`;
               assert.ok(item.type.startsWith(prefix));
               const otherKind = item.type.substr(prefix.length) as EntityKind;
-              return `${otherKind}_${item.id}` as RelativeAssociation;
+              return `${otherKind}:${item.id}` as RelativeAssociation;
             })
           )),
       }));

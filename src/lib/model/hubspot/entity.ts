@@ -95,18 +95,18 @@ export abstract class HubspotEntity<P extends { [key: string]: any }> {
   }
 
   private addAssociation(kind: EntityKind, entity: HubspotEntity<any>) {
-    this.newAssocs.add(`${kind}_${entity.guaranteedId()}`);
+    this.newAssocs.add(`${kind}:${entity.guaranteedId()}`);
   }
 
   private removeAssociation(kind: EntityKind, entity: HubspotEntity<any>) {
-    this.newAssocs.delete(`${kind}_${entity.guaranteedId()}`);
+    this.newAssocs.delete(`${kind}:${entity.guaranteedId()}`);
   }
 
   private getAssociations(kind: EntityKind) {
     return ([...this.newAssocs]
-      .map(a => a.split('_'))
-      .filter(([k,]) => k === kind)
-      .map((([, id]) => this.db.getEntity(kind, id)))
+      .map(a => this.getAssocInfo(a))
+      .filter(a => a.kind === kind)
+      .map((a => this.db.getEntity(kind, a.id)))
     );
   }
 
@@ -127,7 +127,7 @@ export abstract class HubspotEntity<P extends { [key: string]: any }> {
   }
 
   private getAssocInfo(a: RelativeAssociation) {
-    const [kind, id] = a.split('_');
+    const [kind, id] = a.split(':');
     return { kind: kind as EntityKind, id };
   }
 
