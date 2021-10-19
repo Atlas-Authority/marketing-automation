@@ -4,10 +4,10 @@ import { SimpleError } from '../../util/errors.js';
 import { batchesOf } from '../../util/helpers.js';
 import { EntityDatabase, HubspotAssociationString, HubspotEntity, HubspotEntityKind } from "./entity.js";
 
-type HubspotApiNewEntity = { properties: { [key: string]: string } };
-type HubspotApiFullEntity = HubspotApiNewEntity & { id: string };
+type NewEntity = { properties: { [key: string]: string } };
+type FullEntity = NewEntity & { id: string };
 
-type HubspotApiDownloadedEntity = {
+type DownloadedEntity = {
   id: string;
   properties: { [key: string]: string };
   associations: {
@@ -16,22 +16,22 @@ type HubspotApiDownloadedEntity = {
   }[];
 };
 
-type HubspotApiAssociationInput = {
+type Association = {
   fromId: string,
   toId: string,
   toType: string,
 };
 
 interface Downloader {
-  downloadAllEntities(kind: HubspotEntityKind, apiProperties: string[], inputAssociations: string[]): Promise<HubspotApiDownloadedEntity[]>;
+  downloadAllEntities(kind: HubspotEntityKind, apiProperties: string[], inputAssociations: string[]): Promise<DownloadedEntity[]>;
 }
 
 interface Uploader {
-  createEntities(kind: HubspotEntityKind, inputs: HubspotApiNewEntity[]): Promise<HubspotApiFullEntity[]>;
-  updateEntities(kind: HubspotEntityKind, inputs: HubspotApiFullEntity[]): Promise<HubspotApiFullEntity[]>;
+  createEntities(kind: HubspotEntityKind, inputs: NewEntity[]): Promise<FullEntity[]>;
+  updateEntities(kind: HubspotEntityKind, inputs: FullEntity[]): Promise<FullEntity[]>;
 
-  createAssociations(fromKind: HubspotEntityKind, toKind: HubspotEntityKind, inputs: HubspotApiAssociationInput[]): Promise<void>;
-  deleteAssociations(fromKind: HubspotEntityKind, toKind: HubspotEntityKind, inputs: HubspotApiAssociationInput[]): Promise<void>;
+  createAssociations(fromKind: HubspotEntityKind, toKind: HubspotEntityKind, inputs: Association[]): Promise<void>;
+  deleteAssociations(fromKind: HubspotEntityKind, toKind: HubspotEntityKind, inputs: Association[]): Promise<void>;
 }
 
 export type HubspotPropertyTransformers<T> = {
@@ -196,7 +196,7 @@ export abstract class HubspotEntityManager<
 
   private get downloader(): Downloader {
     return {
-      downloadAllEntities: async (kind: HubspotEntityKind, apiProperties: string[], inputAssociations: string[]): Promise<HubspotApiDownloadedEntity[]> => {
+      downloadAllEntities: async (kind: HubspotEntityKind, apiProperties: string[], inputAssociations: string[]): Promise<DownloadedEntity[]> => {
         let associations = ((inputAssociations.length > 0)
           ? inputAssociations
           : undefined);
@@ -236,13 +236,13 @@ export abstract class HubspotEntityManager<
 
   private get uploader(): Uploader {
     return {
-      createEntities: async (kind: HubspotEntityKind, inputs: HubspotApiNewEntity[]): Promise<HubspotApiFullEntity[]> => {
+      createEntities: async (kind: HubspotEntityKind, inputs: NewEntity[]): Promise<FullEntity[]> => {
         return (await this.api(kind).batchApi.create({ inputs })).body.results;
       },
-      updateEntities: async (kind: HubspotEntityKind, inputs: HubspotApiFullEntity[]): Promise<HubspotApiFullEntity[]> => {
+      updateEntities: async (kind: HubspotEntityKind, inputs: FullEntity[]): Promise<FullEntity[]> => {
         return (await this.api(kind).batchApi.update({ inputs })).body.results;
       },
-      createAssociations: async (fromKind: HubspotEntityKind, toKind: HubspotEntityKind, inputs: HubspotApiAssociationInput[]): Promise<void> => {
+      createAssociations: async (fromKind: HubspotEntityKind, toKind: HubspotEntityKind, inputs: Association[]): Promise<void> => {
         await this.client.crm.associations.batchApi.create(fromKind, toKind, {
           inputs: inputs.map(input => ({
             from: { id: input.fromId },
@@ -251,7 +251,7 @@ export abstract class HubspotEntityManager<
           }))
         });
       },
-      deleteAssociations: async (fromKind: HubspotEntityKind, toKind: HubspotEntityKind, inputs: HubspotApiAssociationInput[]): Promise<void> => {
+      deleteAssociations: async (fromKind: HubspotEntityKind, toKind: HubspotEntityKind, inputs: Association[]): Promise<void> => {
         await this.client.crm.associations.batchApi.archive(fromKind, toKind, {
           inputs: inputs.map(input => ({
             from: { id: input.fromId },
