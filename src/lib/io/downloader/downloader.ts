@@ -2,6 +2,7 @@ import { Company } from "../../types/company.js";
 import { Contact } from "../../types/contact.js";
 import { Deal } from "../../types/deal.js";
 import { RawLicense, RawTransaction } from "../../model/marketplace/raw";
+import { EntityKind, FullEntity } from "../hubspot.js";
 
 export interface DownloadLogger {
   prepare(count: number): void;
@@ -9,6 +10,8 @@ export interface DownloadLogger {
 }
 
 export interface Downloader {
+  downloadAllEntities(kind: EntityKind, apiProperties: string[], inputAssociations: string[]): Promise<FullEntity[]>;
+
   downloadFreeEmailProviders(downloadLogger: DownloadLogger): Promise<string[]>;
   downloadAllTlds(downloadLogger: DownloadLogger): Promise<string[]>;
 

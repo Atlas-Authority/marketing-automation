@@ -4,8 +4,14 @@ import { Contact } from '../../types/contact.js';
 import { Deal } from '../../types/deal.js';
 import { RawLicense, RawTransaction } from "../../model/marketplace/raw";
 import { Downloader, DownloadLogger } from './downloader.js';
+import { EntityKind, FullEntity } from '../hubspot.js';
 
 export default class CachedFileDownloader implements Downloader {
+
+  async downloadAllEntities(kind: EntityKind, apiProperties: string[], inputAssociations: string[]): Promise<FullEntity[]> {
+    const data = datadir.readJsonFile('in', `${kind}s.json`);
+    return data;
+  }
 
   async downloadFreeEmailProviders(downloadLogger: DownloadLogger): Promise<string[]> {
     downloadLogger.prepare(1);

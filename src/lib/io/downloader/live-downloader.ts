@@ -10,11 +10,47 @@ import { Deal } from '../../types/deal.js';
 import { RawLicense, RawTransaction } from "../../model/marketplace/raw";
 import { AttachableError, SimpleError } from '../../util/errors.js';
 import { Downloader, DownloadLogger } from './downloader.js';
+import { apiFor, EntityKind, FullEntity } from '../hubspot.js';
 
 
 export default class LiveDownloader implements Downloader {
 
   hubspotClient = new hubspot.Client({ apiKey: config.hubspot.apiKey });
+
+  async downloadAllEntities(kind: EntityKind, apiProperties: string[], inputAssociations: string[]): Promise<FullEntity[]> {
+    let associations = ((inputAssociations.length > 0)
+      ? inputAssociations
+      : undefined);
+
+    try {
+      const entities = await apiFor(this.hubspotClient, kind).getAll(undefined, undefined, apiProperties, associations);
+      return entities.map(({ id, properties, associations }) => ({
+        id,
+        properties,
+        associations: Object.entries(associations || {})
+          .flatMap(([, { results: list }]) => list),
+      }));
+    }
+    catch (e: any) {
+      const body = e.response.body;
+      if (
+        (
+          typeof body === 'string' && (
+            body === 'internal error' ||
+            body.startsWith('<!DOCTYPE html>'))
+        ) || (
+          typeof body === 'object' &&
+          body.status === 'error' &&
+          body.message === 'internal error'
+        )
+      ) {
+        throw new SimpleError('Hubspot v3 API had internal error.');
+      }
+      else {
+        throw new Error(`Failed downloading ${kind}s: ${JSON.stringify(body)}`);
+      }
+    }
+  }
 
   async downloadFreeEmailProviders(downloadLogger: DownloadLogger): Promise<string[]> {
     downloadLogger.prepare(1);
