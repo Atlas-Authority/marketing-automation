@@ -9,17 +9,11 @@ type HubspotApiFullEntity = HubspotApiNewEntity & { id: string };
 
 type HubspotApiDownloadedEntity = {
   id: string;
-  properties: {
-    [key: string]: string;
-  };
-  associations?: {
-    [key: string]: {
-      results: {
-        type: string;
-        id: string;
-      }[];
-    };
-  };
+  properties: { [key: string]: string };
+  associations: {
+    type: string;
+    id: string;
+  }[];
 };
 
 type HubspotApiAssociationInput = {
@@ -97,13 +91,11 @@ export abstract class HubspotEntityManager<
       if (!props) continue;
 
       const associations = new Set<HubspotAssociationString>();
-      for (const [, { results: list }] of Object.entries(raw.associations || {})) {
-        for (const item of list) {
-          const prefix = `${this.kind}_to_`;
-          assert.ok(item.type.startsWith(prefix));
-          const otherKind = item.type.substr(prefix.length) as HubspotEntityKind;
-          associations.add(`${otherKind}_${item.id}`);
-        }
+      for (const item of raw.associations) {
+        const prefix = `${this.kind}_to_`;
+        assert.ok(item.type.startsWith(prefix));
+        const otherKind = item.type.substr(prefix.length) as HubspotEntityKind;
+        associations.add(`${otherKind}_${item.id}`);
       }
 
       const entity = new this.Entity(this.db, raw.id, props, associations);
@@ -228,7 +220,13 @@ export abstract class HubspotEntityManager<
           : undefined);
 
         try {
-          return await this.api(kind).getAll(undefined, undefined, apiProperties, associations);
+          const entities = await this.api(kind).getAll(undefined, undefined, apiProperties, associations);
+          return entities.map(({ id, properties, associations }) => ({
+            id,
+            properties,
+            associations: Object.entries(associations || {})
+              .flatMap(([, { results: list }]) => list),
+          }));
         }
         catch (e: any) {
           const body = e.response.body;
