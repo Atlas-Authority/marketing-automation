@@ -5,11 +5,9 @@ import { batchesOf } from '../../util/helpers.js';
 import { EntityDatabase, HubspotAssociationString, HubspotEntity, HubspotEntityKind } from "./entity.js";
 
 type NewEntity = { properties: { [key: string]: string } };
-type FullEntity = NewEntity & { id: string };
+type ExistingEntity = NewEntity & { id: string };
 
-type DownloadedEntity = {
-  id: string;
-  properties: { [key: string]: string };
+type FullEntity = ExistingEntity & {
   associations: {
     type: string;
     id: string;
@@ -23,12 +21,12 @@ type Association = {
 };
 
 interface Downloader {
-  downloadAllEntities(kind: HubspotEntityKind, apiProperties: string[], inputAssociations: string[]): Promise<DownloadedEntity[]>;
+  downloadAllEntities(kind: HubspotEntityKind, apiProperties: string[], inputAssociations: string[]): Promise<FullEntity[]>;
 }
 
 interface Uploader {
-  createEntities(kind: HubspotEntityKind, inputs: NewEntity[]): Promise<FullEntity[]>;
-  updateEntities(kind: HubspotEntityKind, inputs: FullEntity[]): Promise<FullEntity[]>;
+  createEntities(kind: HubspotEntityKind, inputs: NewEntity[]): Promise<ExistingEntity[]>;
+  updateEntities(kind: HubspotEntityKind, inputs: ExistingEntity[]): Promise<ExistingEntity[]>;
 
   createAssociations(fromKind: HubspotEntityKind, toKind: HubspotEntityKind, inputs: Association[]): Promise<void>;
   deleteAssociations(fromKind: HubspotEntityKind, toKind: HubspotEntityKind, inputs: Association[]): Promise<void>;
@@ -196,7 +194,7 @@ export abstract class HubspotEntityManager<
 
   private get downloader(): Downloader {
     return {
-      downloadAllEntities: async (kind: HubspotEntityKind, apiProperties: string[], inputAssociations: string[]): Promise<DownloadedEntity[]> => {
+      downloadAllEntities: async (kind: HubspotEntityKind, apiProperties: string[], inputAssociations: string[]): Promise<FullEntity[]> => {
         let associations = ((inputAssociations.length > 0)
           ? inputAssociations
           : undefined);
@@ -236,10 +234,10 @@ export abstract class HubspotEntityManager<
 
   private get uploader(): Uploader {
     return {
-      createEntities: async (kind: HubspotEntityKind, inputs: NewEntity[]): Promise<FullEntity[]> => {
+      createEntities: async (kind: HubspotEntityKind, inputs: NewEntity[]): Promise<ExistingEntity[]> => {
         return (await this.api(kind).batchApi.create({ inputs })).body.results;
       },
-      updateEntities: async (kind: HubspotEntityKind, inputs: FullEntity[]): Promise<FullEntity[]> => {
+      updateEntities: async (kind: HubspotEntityKind, inputs: ExistingEntity[]): Promise<ExistingEntity[]> => {
         return (await this.api(kind).batchApi.update({ inputs })).body.results;
       },
       createAssociations: async (fromKind: HubspotEntityKind, toKind: HubspotEntityKind, inputs: Association[]): Promise<void> => {
