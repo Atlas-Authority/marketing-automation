@@ -24,12 +24,14 @@ export default class LiveDownloader implements Downloader {
 
     try {
       const entities = await apiFor(this.hubspotClient, kind).getAll(undefined, undefined, apiProperties, associations);
-      return entities.map(({ id, properties, associations }) => ({
+      const normalizedEntities = entities.map(({ id, properties, associations }) => ({
         id,
         properties,
         associations: Object.entries(associations || {})
           .flatMap(([, { results: list }]) => list),
       }));
+      save(`${kind}s2.json`, normalizedEntities);
+      return normalizedEntities;
     }
     catch (e: any) {
       const body = e.response.body;

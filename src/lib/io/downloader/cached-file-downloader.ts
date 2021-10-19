@@ -9,7 +9,7 @@ import { EntityKind, FullEntity } from '../hubspot.js';
 export default class CachedFileDownloader implements Downloader {
 
   async downloadAllEntities(kind: EntityKind, apiProperties: string[], inputAssociations: string[]): Promise<FullEntity[]> {
-    const data = datadir.readJsonFile('in', `${kind}s.json`);
+    const data = datadir.readJsonFile('in', `${kind}s2.json`);
     return data;
   }
 
