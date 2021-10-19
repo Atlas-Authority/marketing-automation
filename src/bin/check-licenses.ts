@@ -1,6 +1,5 @@
 import CachedFileDownloader from '../lib/io/downloader/cached-file-downloader.js';
 import { downloadAllData } from '../lib/io/downloader/download-initial-data.js';
-import { buildContactsStructure } from '../lib/engine/contacts.js';
 import { olderThan90Days } from '../lib/engine/generate-deals.js';
 import { shorterLicenseInfo } from '../lib/engine/license-grouper.js';
 import { License } from '../lib/types/license.js';
@@ -28,8 +27,6 @@ if (sens.length === 1 && sens[0].endsWith('.json')) {
 const data = await downloadAllData({
   downloader: new CachedFileDownloader()
 });
-
-const contactsByEmail = buildContactsStructure(data.allContacts);
 
 const ignored: (License & { reason: string })[][] = datadir.readJsonFile('out', 'ignored.json');
 
@@ -74,7 +71,7 @@ function check(sen: string) {
 }
 
 function checkSEN(sen: string) {
-  const foundDeal = data.allDeals.find(d => d.properties.addonLicenseId === sen);
+  const foundDeal = data.db.dealManager.getByAddonLicenseId(sen);
   if (foundDeal) {
     log.info('Dev', sen, 'Already has deal:', foundDeal.id);
     return true;
@@ -87,8 +84,8 @@ function checkSEN(sen: string) {
   }
 
   const ls = data.allLicenses.filter(l => l.addonLicenseId === sen);
-  const cs = ls.map(l => contactsByEmail[l.contactDetails.technicalContact.email]);
-  if (cs.some(c => c.contact_type === 'Partner')) {
+  const cs = ls.map(l => data.db.contactManager.getByEmail(l.contactDetails.technicalContact.email));
+  if (cs.some(c => c && c.data.contactType === 'Partner')) {
     log.info('Dev', sen, 'Contact is Partner');
     return true;
   }
