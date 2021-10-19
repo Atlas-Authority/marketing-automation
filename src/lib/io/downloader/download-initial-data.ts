@@ -57,11 +57,12 @@ export async function downloadAllData({ downloader, uploader }: {
     downloader.downloadAllDeals(multiDownloadLogger.makeDownloadLogger('Deals')),
     downloader.downloadAllCompanies(multiDownloadLogger.makeDownloadLogger('Companies')),
     downloader.downloadAllTlds(multiDownloadLogger.makeDownloadLogger('Tlds')),
-    Promise.all([
-      db.downloadAllCompanies(multiDownloadLogger.makeDownloadLogger('DB-Companies')),
-      db.downloadAllContacts(multiDownloadLogger.makeDownloadLogger('DB-Contacts')),
-      db.downloadAllDeals(multiDownloadLogger.makeDownloadLogger('DB-Deals')),
-    ]),
+  ]);
+
+  await Promise.all([
+    db.downloadAllCompanies(multiDownloadLogger.makeDownloadLogger('DB-Companies')),
+    db.downloadAllContacts(multiDownloadLogger.makeDownloadLogger('DB-Contacts')),
+    db.downloadAllDeals(multiDownloadLogger.makeDownloadLogger('DB-Deals')),
   ]);
 
   multiDownloadLogger.done();
