@@ -31,9 +31,9 @@ export function validateMarketplaceData(
 
   let allLicenses = uniqLicenses(licensesWithDataInsights.concat(licensesWithoutDataInsights));
 
-  function hasAllValidEmails(item: RawLicense | RawTransaction) {
-    return getEmails(item).every(e => emailRe.test(e));
-  }
+  const hasAllValidEmails = (item: RawLicense | RawTransaction) => (
+    getEmails(item).every(e => emailRe.test(e))
+  );
 
   return {
 
