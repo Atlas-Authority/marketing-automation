@@ -98,4 +98,36 @@ export class DealManager extends HubspotEntityManager<DealProps, Deal> {
     'transactionId',
   ];
 
+  private dealsByAddonLicenseId = new Map<string, Deal>();
+  private dealsByTransactionId = new Map<string, Deal>();
+
+  getByAddonLicenseId(id: string) {
+    return this.dealsByAddonLicenseId.get(id);
+  }
+
+  getByTransactionId(id: string) {
+    return this.dealsByTransactionId.get(id);
+  }
+
+  private buildIndexes() {
+    for (const deal of this.getAll()) {
+      if (deal.data.addonLicenseId) {
+        this.dealsByAddonLicenseId.set(deal.data.addonLicenseId, deal);
+      }
+      if (deal.data.transactionId) {
+        this.dealsByTransactionId.set(deal.data.transactionId, deal);
+      }
+    }
+  }
+
+  override async downloadAllEntities() {
+    await super.downloadAllEntities();
+    this.buildIndexes();
+  }
+
+  override async syncUpAllEntities() {
+    await super.syncUpAllEntities();
+    this.buildIndexes();
+  }
+
 }
