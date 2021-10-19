@@ -1,4 +1,5 @@
-import { ContactInfo, PartnerDetails } from "./common.js";
+import { ContactInfo, getContactInfo, getPartnerInfo, maybeGetContactInfo, PartnerDetails } from "./common.js";
+import { RawLicense } from "./raw.js";
 
 export interface NormalizedLicense {
   type: 'license',
@@ -50,4 +51,64 @@ export interface NormalizedLicense {
     evaluationEndDate: string,
     evaluationSaleDate: string,
   },
+}
+
+export function normalizeLicense(license: RawLicense): NormalizedLicense {
+  let newEvalData: NormalizedLicense['newEvalData'] | undefined;
+  if (license.evaluationLicense) {
+    newEvalData = {
+      evaluationLicense: license.evaluationLicense,
+      daysToConvertEval: license.daysToConvertEval as string,
+      evaluationStartDate: license.evaluationStartDate as string,
+      evaluationEndDate: license.evaluationEndDate as string,
+      evaluationSaleDate: license.evaluationSaleDate as string,
+    };
+  }
+
+  let parentInfo: NormalizedLicense['parentInfo'] | undefined;
+  if (license.parentProductBillingCycle
+    || license.parentProductName
+    || license.installedOnSandbox
+    || license.parentProductEdition) {
+    parentInfo = {
+      parentProductBillingCycle: license.parentProductBillingCycle,
+      parentProductName: license.parentProductName,
+      installedOnSandbox: license.installedOnSandbox,
+      parentProductEdition: license.parentProductEdition,
+    } as NormalizedLicense['parentInfo'];
+  }
+
+  return {
+    type: 'license',
+
+    addonLicenseId: license.addonLicenseId,
+    licenseId: license.licenseId,
+    addonKey: license.addonKey,
+    addonName: license.addonName,
+    lastUpdated: license.lastUpdated,
+
+    technicalContact: getContactInfo(license.contactDetails.technicalContact),
+    billingContact: maybeGetContactInfo(license.contactDetails.billingContact),
+    partnerDetails: getPartnerInfo(license.partnerDetails),
+
+    company: license.contactDetails.company,
+    country: license.contactDetails.country,
+    region: license.contactDetails.region,
+
+    tier: license.tier,
+    licenseType: license.licenseType,
+    hosting: license.hosting,
+    maintenanceStartDate: license.maintenanceStartDate,
+    maintenanceEndDate: license.maintenanceEndDate,
+
+    status: license.status,
+
+    evaluationOpportunitySize: license.evaluationOpportunitySize,
+
+    attribution: license.attribution,
+
+    parentInfo,
+
+    newEvalData,
+  };
 }

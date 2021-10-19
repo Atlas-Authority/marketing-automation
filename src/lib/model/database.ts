@@ -9,13 +9,14 @@ import { Uploader } from "../io/uploader/uploader.js";
 import { MultiDownloadLogger } from "../log/download-logger.js";
 import log from "../log/logger.js";
 import { validateMarketplaceData } from "./marketplace/validation.js";
-import { NormalizedLicense, NormalizedTransaction, normalizeLicense, normalizeTransaction } from "./marketplace/normalize.js";
 import { License } from "../types/license.js";
 import { Transaction } from "../types/transaction.js";
 import { Company } from "../types/company.js";
 import { Contact } from "../types/contact.js";
 import { Deal } from "../types/deal.js";
 import { makeMultiProviderDomainsSet } from "../util/domains.js";
+import { NormalizedLicense, normalizeLicense } from "./marketplace/license.js";
+import { NormalizedTransaction, normalizeTransaction } from "./marketplace/transaction.js";
 
 export class Database {
 
