@@ -1,7 +1,7 @@
 import { EntityKind } from "../../io/hubspot.js";
 import { Company } from "./company.js";
 import { Entity } from "./entity.js";
-import { HubspotEntityManager, HubspotPropertyTransformers } from "./manager.js";
+import { EntityManager, PropertyTransformers } from "./manager.js";
 
 type ContactProps = {
   email: string;
@@ -32,7 +32,7 @@ export class Contact extends Entity<ContactProps> {
 
 }
 
-export class ContactManager extends HubspotEntityManager<ContactProps, Contact> {
+export class ContactManager extends EntityManager<ContactProps, Contact> {
 
   override Entity = Contact;
   override kind: EntityKind = 'contact';
@@ -83,7 +83,7 @@ export class ContactManager extends HubspotEntityManager<ContactProps, Contact> 
     };
   }
 
-  override toAPI: HubspotPropertyTransformers<ContactProps> = {
+  override toAPI: PropertyTransformers<ContactProps> = {
     contactType: contactType => ['contact_type', contactType],
 
     email: email => ['email', email],

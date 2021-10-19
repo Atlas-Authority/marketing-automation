@@ -5,11 +5,11 @@ import { Uploader } from '../../io/uploader/uploader.js';
 import { batchesOf } from '../../util/helpers.js';
 import { EntityDatabase, Entity } from "./entity.js";
 
-export type HubspotPropertyTransformers<T> = {
+export type PropertyTransformers<T> = {
   [P in keyof T]: (prop: T[P]) => [string, string]
 };
 
-export abstract class HubspotEntityManager<
+export abstract class EntityManager<
   P extends { [key: string]: any },
   E extends Entity<P>>
 {
@@ -26,7 +26,7 @@ export abstract class HubspotEntityManager<
 
   protected abstract apiProperties: string[];
   protected abstract fromAPI(data: { [key: string]: string }): P | null;
-  protected abstract toAPI: HubspotPropertyTransformers<P>;
+  protected abstract toAPI: PropertyTransformers<P>;
 
   public abstract rebuildIndexes(): void;
 

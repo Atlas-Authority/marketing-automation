@@ -1,6 +1,6 @@
 import { EntityKind } from "../../io/hubspot.js";
 import { Entity } from "./entity.js";
-import { HubspotEntityManager, HubspotPropertyTransformers } from "./manager.js";
+import { EntityManager, PropertyTransformers } from "./manager.js";
 
 type CompanyProps = {
   name: string;
@@ -10,7 +10,7 @@ type CompanyProps = {
 export class Company extends Entity<CompanyProps> {
 }
 
-export class CompanyManager extends HubspotEntityManager<CompanyProps, Company> {
+export class CompanyManager extends EntityManager<CompanyProps, Company> {
 
   override Entity = Company;
   override kind: EntityKind = 'company';
@@ -30,7 +30,7 @@ export class CompanyManager extends HubspotEntityManager<CompanyProps, Company> 
     };
   }
 
-  override toAPI: HubspotPropertyTransformers<CompanyProps> = {
+  override toAPI: PropertyTransformers<CompanyProps> = {
     name: name => ['name', name],
     type: type => ['type', type === 'Partner' ? 'PARTNER' : ''],
   };

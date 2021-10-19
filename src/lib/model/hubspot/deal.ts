@@ -1,6 +1,6 @@
 import { DealStage, Pipeline } from "../../config/dynamic-enums.js";
 import { Entity } from "./entity.js";
-import { HubspotEntityManager, HubspotPropertyTransformers } from "./manager.js";
+import { EntityManager, PropertyTransformers } from "./manager.js";
 import config from "../../config/index.js";
 import { Contact } from "./contact.js";
 import { Company } from "./company.js";
@@ -39,7 +39,7 @@ export class Deal extends Entity<DealProps> {
 
 }
 
-export class DealManager extends HubspotEntityManager<DealProps, Deal> {
+export class DealManager extends EntityManager<DealProps, Deal> {
 
   override Entity = Deal;
   override kind: EntityKind = "deal";
@@ -84,7 +84,7 @@ export class DealManager extends HubspotEntityManager<DealProps, Deal> {
     };
   }
 
-  override toAPI: HubspotPropertyTransformers<DealProps> = {
+  override toAPI: PropertyTransformers<DealProps> = {
     relatedProducts: relatedProducts => ['related_products', relatedProducts],
     aaApp: aaApp => ['aa_app', aaApp],
     addonLicenseId: addonLicenseId => [addonLicenseIdKey, addonLicenseId || ''],
