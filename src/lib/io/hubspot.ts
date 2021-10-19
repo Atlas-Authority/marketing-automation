@@ -13,3 +13,5 @@ export type Association = {
   toId: string,
   toType: string,
 };
+
+export type HubspotEntityKind = 'deal' | 'contact' | 'company';

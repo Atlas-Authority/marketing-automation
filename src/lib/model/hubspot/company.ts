@@ -1,4 +1,5 @@
-import { HubspotEntity, HubspotEntityKind } from "./entity.js";
+import { HubspotEntityKind } from "../../io/hubspot.js";
+import { HubspotEntity } from "./entity.js";
 import { HubspotEntityManager, HubspotPropertyTransformers } from "./manager.js";
 
 type CompanyProps = {

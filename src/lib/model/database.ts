@@ -3,7 +3,8 @@ import * as hubspot from '@hubspot/api-client';
 import * as assert from 'assert';
 import { ContactManager } from "./hubspot/contact.js";
 import { CompanyManager } from "./hubspot/company.js";
-import { HubspotEntity, HubspotEntityKind } from "./hubspot/entity.js";
+import { HubspotEntity } from "./hubspot/entity.js";
+import { HubspotEntityKind } from "../io/hubspot.js";
 
 export class Database {
 

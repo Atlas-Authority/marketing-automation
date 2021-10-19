@@ -1,6 +1,5 @@
 import * as assert from 'assert';
-
-export type HubspotEntityKind = 'deal' | 'contact' | 'company';
+import { HubspotEntityKind } from '../../io/hubspot.js';
 
 export type HubspotAssociationString = `${HubspotEntityKind}_${string}`;
 
