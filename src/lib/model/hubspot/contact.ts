@@ -1,6 +1,6 @@
 import { EntityKind } from "../../io/hubspot.js";
 import { Company } from "./company.js";
-import { HubspotEntity } from "./entity.js";
+import { Entity } from "./entity.js";
 import { HubspotEntityManager, HubspotPropertyTransformers } from "./manager.js";
 
 type ContactProps = {
@@ -26,7 +26,7 @@ type ContactProps = {
   otherEmails: string[];
 };
 
-export class Contact extends HubspotEntity<ContactProps> {
+export class Contact extends Entity<ContactProps> {
 
   companies = this.makeDynamicAssociation<Company>('company');
 

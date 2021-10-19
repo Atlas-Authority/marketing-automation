@@ -2,10 +2,10 @@ import * as assert from 'assert';
 import { EntityKind, RelativeAssociation } from '../../io/hubspot.js';
 
 export interface EntityDatabase {
-  getEntity(kind: EntityKind, id: string): HubspotEntity<any>;
+  getEntity(kind: EntityKind, id: string): Entity<any>;
 }
 
-export abstract class HubspotEntity<P extends { [key: string]: any }> {
+export abstract class Entity<P extends { [key: string]: any }> {
 
   id?: string;
 
@@ -86,7 +86,7 @@ export abstract class HubspotEntity<P extends { [key: string]: any }> {
 
   // Associations
 
-  protected makeDynamicAssociation<T extends HubspotEntity<any>>(kind: EntityKind) {
+  protected makeDynamicAssociation<T extends Entity<any>>(kind: EntityKind) {
     return {
       getAll: () => this.getAssociations(kind) as T[],
       add: (entity: T) => this.addAssociation(kind, entity),
@@ -94,11 +94,11 @@ export abstract class HubspotEntity<P extends { [key: string]: any }> {
     };
   }
 
-  private addAssociation(kind: EntityKind, entity: HubspotEntity<any>) {
+  private addAssociation(kind: EntityKind, entity: Entity<any>) {
     this.newAssocs.add(`${kind}:${entity.guaranteedId()}`);
   }
 
-  private removeAssociation(kind: EntityKind, entity: HubspotEntity<any>) {
+  private removeAssociation(kind: EntityKind, entity: Entity<any>) {
     this.newAssocs.delete(`${kind}:${entity.guaranteedId()}`);
   }
 

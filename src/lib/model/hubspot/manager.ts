@@ -3,7 +3,7 @@ import { Downloader } from '../../io/downloader/downloader.js';
 import { EntityKind, RelativeAssociation } from '../../io/hubspot.js';
 import { Uploader } from '../../io/uploader/uploader.js';
 import { batchesOf } from '../../util/helpers.js';
-import { EntityDatabase, HubspotEntity } from "./entity.js";
+import { EntityDatabase, Entity } from "./entity.js";
 
 export type HubspotPropertyTransformers<T> = {
   [P in keyof T]: (prop: T[P]) => [string, string]
@@ -11,7 +11,7 @@ export type HubspotPropertyTransformers<T> = {
 
 export abstract class HubspotEntityManager<
   P extends { [key: string]: any },
-  E extends HubspotEntity<P>>
+  E extends Entity<P>>
 {
 
   constructor(

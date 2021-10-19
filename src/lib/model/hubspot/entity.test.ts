@@ -1,11 +1,11 @@
-import { HubspotEntity, EntityDatabase } from './entity.js';
+import { Entity, EntityDatabase } from './entity.js';
 
 type PersonProps = {
   age: number;
   name: string;
 };
 
-class Person extends HubspotEntity<PersonProps> {
+class Person extends Entity<PersonProps> {
 }
 
 const db: EntityDatabase = {

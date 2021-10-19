@@ -1,5 +1,5 @@
 import { EntityKind } from "../../io/hubspot.js";
-import { HubspotEntity } from "./entity.js";
+import { Entity } from "./entity.js";
 import { HubspotEntityManager, HubspotPropertyTransformers } from "./manager.js";
 
 type CompanyProps = {
@@ -7,7 +7,7 @@ type CompanyProps = {
   type: 'Partner' | null;
 };
 
-export class Company extends HubspotEntity<CompanyProps> {
+export class Company extends Entity<CompanyProps> {
 }
 
 export class CompanyManager extends HubspotEntityManager<CompanyProps, Company> {

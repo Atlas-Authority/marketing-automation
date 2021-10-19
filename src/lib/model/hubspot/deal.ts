@@ -1,5 +1,5 @@
 import { DealStage, Pipeline } from "../../config/dynamic-enums.js";
-import { HubspotEntity } from "./entity.js";
+import { Entity } from "./entity.js";
 import { HubspotEntityManager, HubspotPropertyTransformers } from "./manager.js";
 import config from "../../config/index.js";
 import { Contact } from "./contact.js";
@@ -25,7 +25,7 @@ type DealProps = {
   amount: number | null;
 };
 
-export class Deal extends HubspotEntity<DealProps> {
+export class Deal extends Entity<DealProps> {
 
   contacts = this.makeDynamicAssociation<Contact>('contact');
   companies = this.makeDynamicAssociation<Company>('company');
