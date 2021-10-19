@@ -102,13 +102,9 @@ export function normalizeLicense(license: RawLicense): NormalizedLicense {
     maintenanceEndDate: license.maintenanceEndDate,
 
     status: license.status,
-
     evaluationOpportunitySize: license.evaluationOpportunitySize,
-
     attribution: license.attribution,
-
     parentInfo,
-
     newEvalData,
   };
 }

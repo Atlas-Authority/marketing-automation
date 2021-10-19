@@ -4,8 +4,6 @@ import { RawTransaction } from "./raw.js";
 export interface NormalizedTransaction {
   type: 'transaction',
 
-  transactionId: string,
-
   addonLicenseId: string,
   licenseId: string,
   addonKey: string,
@@ -26,6 +24,7 @@ export interface NormalizedTransaction {
   maintenanceStartDate: string,
   maintenanceEndDate: string,
 
+  transactionId: string,
   saleDate: string,
   saleType: 'Renewal' | 'Upgrade' | 'New' | 'Refund',
 
@@ -63,9 +62,7 @@ export function normalizeTransaction(transaction: RawTransaction): NormalizedTra
 
     saleDate: transaction.purchaseDetails.saleDate,
     saleType: transaction.purchaseDetails.saleType,
-
     billingPeriod: transaction.purchaseDetails.billingPeriod,
-
     purchasePrice: transaction.purchaseDetails.purchasePrice,
     vendorAmount: transaction.purchaseDetails.vendorAmount,
   };
