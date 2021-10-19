@@ -31,15 +31,26 @@ export function validateMarketplaceData(
 
   let allLicenses = uniqLicenses(licensesWithDataInsights.concat(licensesWithoutDataInsights));
 
-  const hasValidEmails = makeEmailValidator(emailRe);
-
-  allTransactions = allTransactions.filter(hasValidEmails);
-  allLicenses = allLicenses.filter(hasValidEmails);
+  function hasAllValidEmails(item: RawLicense | RawTransaction) {
+    return getEmails(item).every(e => emailRe.test(e));
+  }
 
   return {
-    allTransactions,
-    allLicenses,
+
+    allTransactions: allTransactions.filter(item => {
+      const allGood = hasAllValidEmails(item);
+      if (!allGood) log.warn('Downloader', 'Transaction has invalid email(s); will be skipped:', item.transactionId);
+      return allGood;
+    }),
+
+    allLicenses: allLicenses.filter(item => {
+      const allGood = hasAllValidEmails(item);
+      if (!allGood) log.warn('Downloader', 'License has invalid email(s); will be skipped:', item.addonLicenseId);
+      return allGood;
+    }),
+
   };
+
 }
 
 function uniqLicenses(licenses: RawLicense[]) {
@@ -288,21 +299,6 @@ function isNumber(s: number | undefined) {
 
 function isUndefined(s: any) {
   return typeof s === 'undefined';
-}
-
-function makeEmailValidator(re: RegExp) {
-  return (item: RawTransaction | RawLicense) => {
-    if (!getEmails(item).every(e => re.test(e))) {
-      if (!isRawTransaction(item)) {
-        log.warn('Downloader', 'License has invalid email(s); will be skipped:', item.addonLicenseId);
-      }
-      else {
-        log.warn('Downloader', 'Transaction has invalid email(s); will be skipped:', item.transactionId);
-      }
-      return false;
-    }
-    return true;
-  };
 }
 
 function filterLicensesWithTechEmail(license: RawLicense) {
