@@ -114,7 +114,7 @@ export class ContactManager extends HubspotEntityManager<ContactProps, Contact> 
 
   public buildContactsStructure() {
     for (const contact of this.getAll()) {
-      for (const email of [contact.get('email'), ...contact.get('otherEmails')]) {
+      for (const email of [contact.data.email, ...contact.data.otherEmails]) {
         this.contactsByEmail.set(email, contact);
       }
     }

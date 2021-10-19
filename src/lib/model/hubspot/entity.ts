@@ -21,6 +21,8 @@ export abstract class HubspotEntity<P extends { [key: string]: any }> {
   /** A copy of assocs, which all updates act on, whether an existing or new entity */
   private newAssocs = new Set<HubspotAssociationString>();
 
+  data: { [K in keyof P]: P[K] };
+
   constructor(
     private db: EntityDatabase,
     id: string | null,
@@ -34,6 +36,33 @@ export abstract class HubspotEntity<P extends { [key: string]: any }> {
       this.assocs = associations;
       this.newAssocs = new Set(associations);
     }
+
+    type K = keyof P;
+    this.data = new Proxy(props, {
+      get: (_target, _key) => {
+        const key = _key as K;
+        if (this.id === undefined) return this.props[key];
+        if (key in this.newProps) return this.newProps[key];
+        return this.props[key];
+      },
+      set: (_target, _key, _val) => {
+        const key = _key as K;
+        const val = _val as P[K];
+        if (this.id === undefined) {
+          this.props[key] = val;
+          return true;
+        }
+
+        const oldVal = this.props[key];
+        if (oldVal === val) {
+          delete this.newProps[key];
+        }
+        else {
+          this.newProps[key] = val;
+        }
+        return true;
+      },
+    });
   }
 
   guaranteedId() {
@@ -42,27 +71,6 @@ export abstract class HubspotEntity<P extends { [key: string]: any }> {
   }
 
   // Properties
-
-  set<K extends keyof P>(key: K, val: P[K]) {
-    if (this.id === undefined) {
-      this.props[key] = val;
-      return;
-    }
-
-    const oldVal = this.props[key];
-    if (oldVal === val) {
-      delete this.newProps[key];
-    }
-    else {
-      this.newProps[key] = val;
-    }
-  }
-
-  get<K extends keyof P>(key: K): P[K] {
-    if (this.id === undefined) return this.props[key];
-    if (key in this.newProps) return this.newProps[key] as P[K];
-    return this.props[key];
-  }
 
   hasPropertyChanges() {
     return this.id === undefined || Object.keys(this.newProps).length > 0;
