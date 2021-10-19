@@ -23,15 +23,15 @@ type HubspotApiAssociationInput = {
 };
 
 interface Downloader {
-  downloadAllEntities: (kind: HubspotEntityKind, apiProperties: string[], inputAssociations: string[]) => Promise<HubspotApiDownloadedEntity[]>;
+  downloadAllEntities(kind: HubspotEntityKind, apiProperties: string[], inputAssociations: string[]): Promise<HubspotApiDownloadedEntity[]>;
 }
 
 interface Uploader {
-  createEntities: (kind: HubspotEntityKind, inputs: HubspotApiNewEntity[]) => Promise<HubspotApiFullEntity[]>;
-  updateEntities: (kind: HubspotEntityKind, inputs: HubspotApiFullEntity[]) => Promise<HubspotApiFullEntity[]>;
+  createEntities(kind: HubspotEntityKind, inputs: HubspotApiNewEntity[]): Promise<HubspotApiFullEntity[]>;
+  updateEntities(kind: HubspotEntityKind, inputs: HubspotApiFullEntity[]): Promise<HubspotApiFullEntity[]>;
 
-  createAssociations: (fromKind: HubspotEntityKind, toKind: HubspotEntityKind, inputs: HubspotApiAssociationInput[]) => Promise<void>;
-  deleteAssociations: (fromKind: HubspotEntityKind, toKind: HubspotEntityKind, inputs: HubspotApiAssociationInput[]) => Promise<void>;
+  createAssociations(fromKind: HubspotEntityKind, toKind: HubspotEntityKind, inputs: HubspotApiAssociationInput[]): Promise<void>;
+  deleteAssociations(fromKind: HubspotEntityKind, toKind: HubspotEntityKind, inputs: HubspotApiAssociationInput[]): Promise<void>;
 }
 
 export type HubspotInputObject = {
