@@ -58,9 +58,9 @@ export abstract class HubspotEntity<P extends { [key: string]: any }> {
     }
   }
 
-  get<K extends keyof P>(key: K): P[K] | undefined {
+  get<K extends keyof P>(key: K): P[K] {
     if (this.id === undefined) return this.props[key];
-    if (key in this.newProps) return this.newProps[key];
+    if (key in this.newProps) return this.newProps[key] as P[K];
     return this.props[key];
   }
 
