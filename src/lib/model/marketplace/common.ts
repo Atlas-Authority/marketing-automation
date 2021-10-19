@@ -17,7 +17,7 @@ export type PartnerBillingInfo = {
 };
 
 export type PartnerInfo = {
-  billingInfo: PartnerBillingInfo;
+  billingContact: PartnerBillingInfo;
   partnerName: string;
   partnerType?: string;
 };
@@ -47,7 +47,7 @@ export function getPartnerInfo(info: RawPartnerDetails | undefined): PartnerInfo
   return {
     partnerName: info.partnerName,
     partnerType: info.partnerType,
-    billingInfo: {
+    billingContact: {
       email: info.billingContact.email,
       name: info.billingContact.name,
     },
