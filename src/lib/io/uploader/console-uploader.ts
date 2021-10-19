@@ -3,10 +3,33 @@ import { Contact, GeneratedContact } from '../../types/contact.js';
 import { Deal, DealAssociationPair, DealCompanyAssociationPair, DealUpdate } from '../../types/deal.js';
 import log from '../../log/logger.js';
 import { Uploader } from './uploader.js';
+import { EntityKind, NewEntity, ExistingEntity, apiFor, Association } from '../hubspot.js';
 
 export default class ConsoleUploader implements Uploader {
 
   verbose: boolean;
+
+  async createEntities(kind: EntityKind, inputs: NewEntity[]): Promise<ExistingEntity[]> {
+    const objects = inputs.map((o, i) => ({
+      properties: o.properties,
+      id: (1000000000000 + i).toString(),
+    }));
+    this.fakeApiConsoleLog(`Fake-created ${kind}s:`, objects);
+    return objects;
+  }
+
+  async updateEntities(kind: EntityKind, inputs: ExistingEntity[]): Promise<ExistingEntity[]> {
+    this.fakeApiConsoleLog(`Fake-created ${kind}s:`, inputs);
+    return inputs;
+  }
+
+  async createAssociations(fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void> {
+    this.fakeApiConsoleLog(`Fake Associating ${fromKind}s to ${toKind}s:`, inputs);
+  }
+
+  async deleteAssociations(fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void> {
+    this.fakeApiConsoleLog(`Fake Unassociating ${fromKind}s to ${toKind}s:`, inputs);
+  }
 
   constructor({ verbose }: { verbose: boolean }) {
     this.verbose = verbose;

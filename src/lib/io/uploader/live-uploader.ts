@@ -8,12 +8,41 @@ import { Company } from '../../types/company.js';
 import { Contact, GeneratedContact } from '../../types/contact.js';
 import { Deal, DealAssociationPair, DealCompanyAssociationPair, DealUpdate } from '../../types/deal.js';
 import { batchesOf } from '../../util/helpers.js';
+import { EntityKind, NewEntity, ExistingEntity, Association, apiFor } from '../hubspot.js';
 import { Uploader } from './uploader.js';
 
 
 export default class LiveUploader implements Uploader {
 
   hubspotClient = new hubspot.Client({ apiKey: config.hubspot.apiKey });
+
+  async createEntities(kind: EntityKind, inputs: NewEntity[]): Promise<ExistingEntity[]> {
+    return (await apiFor(this.hubspotClient, kind).batchApi.create({ inputs })).body.results;
+  }
+
+  async updateEntities(kind: EntityKind, inputs: ExistingEntity[]): Promise<ExistingEntity[]> {
+    return (await apiFor(this.hubspotClient, kind).batchApi.update({ inputs })).body.results;
+  }
+
+  async createAssociations(fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void> {
+    await this.hubspotClient.crm.associations.batchApi.create(fromKind, toKind, {
+      inputs: inputs.map(input => ({
+        from: { id: input.fromId },
+        to: { id: input.toId },
+        type: input.toType,
+      }))
+    });
+  }
+
+  async deleteAssociations(fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void> {
+    await this.hubspotClient.crm.associations.batchApi.archive(fromKind, toKind, {
+      inputs: inputs.map(input => ({
+        from: { id: input.fromId },
+        to: { id: input.toId },
+        type: input.toType,
+      }))
+    });
+  }
 
   async associateDealsWithContacts(fromTos: DealAssociationPair[]) {
     try {
