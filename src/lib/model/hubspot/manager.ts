@@ -98,7 +98,7 @@ export abstract class HubspotEntityManager<
         for (const e of entitiesToCreate) {
           const found = results.find(result => {
             for (const localIdKey of this.identifiers) {
-              const localVal = e.get(localIdKey);
+              const localVal = e.data[localIdKey];
               assert.ok(localVal);
               const [remoteIdKey, hsLocal] = this.toAPI[localIdKey](localVal);
               const hsRemote = result.properties[remoteIdKey];
