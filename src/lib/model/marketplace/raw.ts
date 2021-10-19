@@ -1,8 +1,9 @@
-type RawTransactionContact = {
+export type RawTransactionContact = {
   email: string;
   name?: string;
 };
-type RawPartnerDetails = {
+
+export type RawPartnerDetails = {
   partnerName: string;
   partnerType?: string;
   billingContact: {
@@ -39,7 +40,8 @@ export interface RawTransaction {
   };
   partnerDetails?: RawPartnerDetails;
 }
-type RawLicenseContact = {
+
+export type RawLicenseContact = {
   email: string;
   name?: string;
   phone?: string;
