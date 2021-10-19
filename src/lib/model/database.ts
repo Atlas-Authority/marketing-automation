@@ -35,6 +35,8 @@ export class Database {
   allDeals: Deal[] = [];
 
   providerDomains = new Set<string>();
+  partnerDomains = new Set<string>();
+  customerDomains = new Set<string>();
 
   constructor(private downloader: Downloader, uploader: Uploader) {
     this.dealManager = new DealManager(downloader, uploader, this);

@@ -1,40 +1,28 @@
 import { Company } from '../types/company.js';
 import { Contact, GeneratedContact } from '../types/contact.js';
-import { License } from '../types/license.js';
-import { Transaction } from '../types/transaction.js';
 import { Uploader } from '../io/uploader/uploader.js';
 import config from '../config/index.js';
+import { Database } from '../model/database.js';
 
-export function identifyDomains(data: {
-  licenses: License[],
-  transactions: Transaction[],
-}) {
-  const partnerDomains = new Set<string>();
-  const customerDomains = new Set<string>();
-
-  for (const l of data.licenses) {
-    maybeAddDomain(partnerDomains, l.partnerDetails?.billingContact.email);
-    maybeAddDomain(customerDomains, l.contactDetails.billingContact?.email);
+export function identifyDomains(db: Database) {
+  for (const l of db.licenses) {
+    maybeAddDomain(db.partnerDomains, l.data.billingContact?.email);
+    maybeAddDomain(db.customerDomains, l.data.billingContact?.email);
   }
 
-  for (const tx of data.transactions) {
-    maybeAddDomain(partnerDomains, tx.partnerDetails?.billingContact.email);
-    maybeAddDomain(customerDomains, tx.customerDetails.billingContact?.email);
-    maybeAddDomain(customerDomains, tx.customerDetails.technicalContact.email);
+  for (const tx of db.transactions) {
+    maybeAddDomain(db.partnerDomains, tx.data.partnerDetails?.billingEmail);
+    maybeAddDomain(db.customerDomains, tx.data.billingContact?.email);
+    maybeAddDomain(db.customerDomains, tx.data.technicalContact.email);
   }
 
   for (const domain of config.engine.partnerDomains) {
-    partnerDomains.add(domain);
+    db.partnerDomains.add(domain);
   }
 
-  for (const domain of customerDomains) {
-    partnerDomains.delete(domain);
+  for (const domain of db.customerDomains) {
+    db.partnerDomains.delete(domain);
   }
-
-  return {
-    partnerDomains,
-    customerDomains,
-  };
 }
 
 export async function findAndFlagExternallyCreatedContacts({ uploader, contacts, partnerDomains, customerDomains }: {

@@ -30,10 +30,7 @@ export default async function runEngine({ downloader, uploader }: {
   await zeroEmptyDealAmounts(db.dealManager);
 
   logStep('Identifying partner and customer domains');
-  const { partnerDomains, customerDomains } = identifyDomains({
-    licenses: db.allLicenses,
-    transactions: db.allTransactions,
-  });
+  identifyDomains(db);
 
   logStep('Flagging partner/customer contacts created outside engine');
   await findAndFlagExternallyCreatedContacts({
