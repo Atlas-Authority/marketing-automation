@@ -23,15 +23,9 @@ type HubspotApiDownloadedEntity = {
 };
 
 type HubspotApiAssociationInput = {
-  inputs: {
-    from: {
-      id: string;
-    };
-    to: {
-      id: string;
-    };
-    type: string;
-  }[];
+  fromId: string,
+  toId: string,
+  toType: string,
 };
 
 interface Downloader {
@@ -42,8 +36,8 @@ interface Uploader {
   createEntities: (kind: HubspotEntityKind, inputs: HubspotApiNewEntity[]) => Promise<HubspotApiFullEntity[]>;
   updateEntities: (kind: HubspotEntityKind, inputs: HubspotApiFullEntity[]) => Promise<HubspotApiFullEntity[]>;
 
-  createAssociations: (fromKind: HubspotEntityKind, toKind: HubspotEntityKind, input: HubspotApiAssociationInput) => Promise<void>;
-  deleteAssociations: (fromKind: HubspotEntityKind, toKind: HubspotEntityKind, input: HubspotApiAssociationInput) => Promise<void>;
+  createAssociations: (fromKind: HubspotEntityKind, toKind: HubspotEntityKind, inputs: HubspotApiAssociationInput[]) => Promise<void>;
+  deleteAssociations: (fromKind: HubspotEntityKind, toKind: HubspotEntityKind, inputs: HubspotApiAssociationInput[]) => Promise<void>;
 }
 
 export type HubspotInputObject = {
@@ -195,9 +189,9 @@ export abstract class HubspotEntityManager<
         .map(changes => ({
           ...changes,
           inputs: {
-            from: { id: changes.e.guaranteedId() },
-            to: { id: changes.id },
-            type: `${this.kind}_${otherKind}`,
+            fromId: changes.e.guaranteedId(),
+            toId: changes.id,
+            toType: otherKind,
           }
         })));
 
@@ -208,7 +202,7 @@ export abstract class HubspotEntityManager<
         await this.uploader.createAssociations(
           this.kind,
           otherKind,
-          { inputs: toAddSubset.map(changes => changes.inputs) },
+          toAddSubset.map(changes => changes.inputs),
         );
       }
 
@@ -216,7 +210,7 @@ export abstract class HubspotEntityManager<
         await this.uploader.deleteAssociations(
           this.kind,
           otherKind,
-          { inputs: toDelSubset.map(changes => changes.inputs) },
+          toDelSubset.map(changes => changes.inputs),
         );
       }
     }
@@ -268,11 +262,23 @@ export abstract class HubspotEntityManager<
       updateEntities: async (kind: HubspotEntityKind, inputs: HubspotApiFullEntity[]): Promise<HubspotApiFullEntity[]> => {
         return (await this.api(kind).batchApi.update({ inputs })).body.results;
       },
-      createAssociations: async (fromKind: HubspotEntityKind, toKind: HubspotEntityKind, input: HubspotApiAssociationInput): Promise<void> => {
-        await this.client.crm.associations.batchApi.create(fromKind, toKind, input);
+      createAssociations: async (fromKind: HubspotEntityKind, toKind: HubspotEntityKind, inputs: HubspotApiAssociationInput[]): Promise<void> => {
+        await this.client.crm.associations.batchApi.create(fromKind, toKind, {
+          inputs: inputs.map(input => ({
+            from: { id: input.fromId },
+            to: { id: input.toId },
+            type: input.toType,
+          }))
+        });
       },
-      deleteAssociations: async (fromKind: HubspotEntityKind, toKind: HubspotEntityKind, input: HubspotApiAssociationInput): Promise<void> => {
-        await this.client.crm.associations.batchApi.archive(fromKind, toKind, input);
+      deleteAssociations: async (fromKind: HubspotEntityKind, toKind: HubspotEntityKind, inputs: HubspotApiAssociationInput[]): Promise<void> => {
+        await this.client.crm.associations.batchApi.archive(fromKind, toKind, {
+          inputs: inputs.map(input => ({
+            from: { id: input.fromId },
+            to: { id: input.toId },
+            type: input.toType,
+          }))
+        });
       },
     };
   }
