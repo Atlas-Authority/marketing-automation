@@ -79,23 +79,14 @@ export class Database {
       freeDomains,
       allTlds);
 
-    this.allLicenses = results.allLicenses;
-    this.allTransactions = results.allTransactions;
+    this.allLicenses = results.allLicenses.map(normalizeLicense);
+    this.allTransactions = results.allTransactions.map(normalizeTransaction);
 
     this.allDeals = allDeals;
     this.allCompanies = allCompanies;
     this.allContacts = allContacts;
 
     this.providerDomains = results.providerDomains;
-
-    return {
-      providerDomains: results.providerDomains,
-      allLicenses: results.allLicenses.map(normalizeLicense),
-      allTransactions: results.allTransactions.map(normalizeTransaction),
-      allContacts,
-      allDeals,
-      allCompanies,
-    };
   }
 
   async downloadAllDeals(downloadLogger: DownloadLogger) {
