@@ -27,7 +27,7 @@ export default async function runEngine({ downloader, uploader }: {
   });
 
   logStep('Normalizing deal amounts');
-  await zeroEmptyDealAmounts({ deals: initialData.allDeals, uploader });
+  await zeroEmptyDealAmounts(initialData.db.dealManager);
 
   logStep('Identifying partner and customer domains');
   const { partnerDomains, customerDomains } = identifyDomains({

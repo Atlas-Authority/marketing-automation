@@ -1,42 +1,22 @@
-import { Deal } from '../types/deal.js';
-import { Uploader } from '../io/uploader/uploader.js';
-import { DealStage, Pipeline } from '../config/index.js';
-import log from '../log/logger.js';
 import assert from 'assert';
+import { Pipeline } from '../config/index.js';
+import log from '../log/logger.js';
+import { DealManager } from '../model/hubspot/deal.js';
 
-export default async function ({ deals, uploader }: { deals: Deal[], uploader: Uploader }) {
-  assert.ok(deals.every(deal => deal.properties.pipeline === Pipeline.AtlassianMarketplace));
+export default async function (dealManager: DealManager) {
+  const deals = [...dealManager.getAll()];
+  assert.ok(deals.every(deal => deal.data.pipeline === Pipeline.AtlassianMarketplace));
 
-  log.info('Zeroing Empty Deal Amounts', 'Setting Amount=0 on applicable Closed deals');
-  const dealsToZero = deals.filter(deal =>
-    (
-      deal.properties.dealstage === DealStage.CLOSED_WON ||
-      deal.properties.dealstage === DealStage.CLOSED_LOST
-    ) &&
-    !deal.properties.amount // null, undefined, 0, and '' all apply
-  );
-  await uploader.updateAllDeals(dealsToZero.map(deal => {
-    deal.properties.amount = '0';
-
-    return ({
-      id: deal.id,
-      properties: { amount: deal.properties.amount },
-    });
-  }));
-
-  log.info('Zeroing Empty Deal Amounts', 'Setting Amount=null on applicable Eval deals');
-  const dealsToNullify = deals.filter(deal =>
-    deal.properties.dealstage === DealStage.EVAL &&
-    (deal.properties.amount === '0' || deal.properties.amount === '0.00')
-  );
-  await uploader.updateAllDeals(dealsToNullify.map(deal => {
-    deal.properties.amount = '';
-
-    return ({
-      id: deal.id,
-      properties: { amount: deal.properties.amount },
-    });
-  }));
+  log.info('Zeroing Empty Deal Amounts', 'Normalizing where !Amount, Amount=0 if Closed, Amount=null if Eval');
+  for (const deal of deals) {
+    if (deal.isClosed()) {
+      if (!deal.data.amount) deal.data.amount = 0;
+    }
+    else {
+      if (!deal.data.amount) deal.data.amount = null;
+    }
+  }
+  dealManager.syncUpAllEntities();
 
   log.info('Zeroing Empty Deal Amounts', 'Done');
 }

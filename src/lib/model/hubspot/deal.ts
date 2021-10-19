@@ -30,6 +30,13 @@ export class Deal extends HubspotEntity<DealProps> {
   contacts = this.makeDynamicAssociation<Contact>('contact');
   companies = this.makeDynamicAssociation<Company>('company');
 
+  isClosed() {
+    return (
+      this.data.dealstage === DealStage.CLOSED_LOST ||
+      this.data.dealstage === DealStage.CLOSED_WON
+    );
+  }
+
 }
 
 export class DealManager extends HubspotEntityManager<DealProps, Deal> {
