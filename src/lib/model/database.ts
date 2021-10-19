@@ -9,7 +9,7 @@ import { Uploader } from "../io/uploader/uploader.js";
 import { MultiDownloadLogger } from "../log/download-logger.js";
 import log from "../log/logger.js";
 import { validateMarketplaceData } from "./marketplace/validation.js";
-import { normalizeLicense, normalizeTransaction } from "./marketplace/normalize.js";
+import { NormalizedLicense, NormalizedTransaction, normalizeLicense, normalizeTransaction } from "./marketplace/normalized.js";
 import { License } from "../types/license.js";
 import { Transaction } from "../types/transaction.js";
 import { Company } from "../types/company.js";
@@ -22,6 +22,9 @@ export class Database {
   dealManager: DealManager;
   contactManager: ContactManager;
   companyManager: CompanyManager;
+
+  licenses: NormalizedLicense[] = [];
+  transactions: NormalizedTransaction[] = [];
 
   allLicenses: License[] = [];
   allTransactions: Transaction[] = [];
@@ -82,8 +85,11 @@ export class Database {
       allTransactions,
       emailRe);
 
-    this.allLicenses = results.allLicenses.map(normalizeLicense);
-    this.allTransactions = results.allTransactions.map(normalizeTransaction);
+    this.allLicenses = results.allLicenses;
+    this.allTransactions = results.allTransactions;
+
+    this.licenses = results.allLicenses.map(normalizeLicense);
+    this.transactions = results.allTransactions.map(normalizeTransaction);
 
     this.allDeals = allDeals;
     this.allCompanies = allCompanies;

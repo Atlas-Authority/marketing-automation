@@ -1,3 +1,5 @@
+import { RawLicense, RawTransaction } from "./raw.js";
+
 type ContactInfo = {
   email: string,
   name?: string,
@@ -103,3 +105,11 @@ export interface NormalizedTransaction {
 }
 
 export type NormalizedRecord = NormalizedLicense | NormalizedTransaction;
+
+export function normalizeLicense(license: RawLicense): NormalizedLicense {
+  return license;
+}
+
+export function normalizeTransaction(transaction: RawTransaction): NormalizedTransaction {
+  return transaction;
+}
