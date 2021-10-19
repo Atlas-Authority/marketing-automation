@@ -4,13 +4,13 @@ import { Company } from '../../types/company.js';
 import { Contact } from '../../types/contact.js';
 import { Deal } from '../../types/deal.js';
 import { License } from '../../types/license.js';
-import { RawLicense, RawTransaction } from "../../model/marketplace/raw";
 import { Transaction } from '../../types/transaction.js';
 import { Downloader } from './downloader.js';
 import { Uploader } from '../uploader/uploader.js';
 import ConsoleUploader from '../uploader/console-uploader.js';
 import { Database } from '../../model/database.js';
 import { validateMarketplaceData } from '../../model/marketplace/validation.js';
+import { normalizeLicense, normalizeTransaction } from '../../model/marketplace/normalize.js';
 
 type InitialData = {
   providerDomains: Set<string>,
@@ -83,12 +83,4 @@ export async function downloadAllData({ downloader, uploader }: {
     allCompanies,
     db,
   };
-}
-
-function normalizeLicense(license: RawLicense): License {
-  return license;
-}
-
-function normalizeTransaction(transaction: RawTransaction): Transaction {
-  return transaction;
 }
