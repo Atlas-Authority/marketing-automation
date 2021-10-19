@@ -1,6 +1,7 @@
 import * as hubspot from '@hubspot/api-client';
 import { DateTime, Duration, Interval } from 'luxon';
 import fetch from 'node-fetch';
+import assert from 'assert';
 import * as datadir from '../../cache/datadir.js';
 import config, { Pipeline } from '../../config/index.js';
 import { contactFromHubspot } from '../../engine/contacts.js';
@@ -10,7 +11,7 @@ import { Deal } from '../../types/deal.js';
 import { RawLicense, RawTransaction } from "../../model/marketplace/raw";
 import { AttachableError, SimpleError } from '../../util/errors.js';
 import { Downloader, DownloadLogger } from './downloader.js';
-import { apiFor, EntityKind, FullEntity } from '../hubspot.js';
+import { apiFor, EntityKind, FullEntity, HubspotAssociationString } from '../hubspot.js';
 
 
 export default class LiveDownloader implements Downloader {
@@ -28,7 +29,14 @@ export default class LiveDownloader implements Downloader {
         id,
         properties,
         associations: Object.entries(associations || {})
-          .flatMap(([, { results: list }]) => list),
+          .flatMap(([, { results }]) => (
+            results.map(item => {
+              const prefix = `${kind}_to_`;
+              assert.ok(item.type.startsWith(prefix));
+              const otherKind = item.type.substr(prefix.length) as EntityKind;
+              return `${otherKind}_${item.id}` as HubspotAssociationString;
+            })
+          )),
       }));
       save(`${kind}s2.json`, normalizedEntities);
       return normalizedEntities;

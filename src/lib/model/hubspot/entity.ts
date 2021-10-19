@@ -1,7 +1,5 @@
 import * as assert from 'assert';
-import { EntityKind } from '../../io/hubspot.js';
-
-export type HubspotAssociationString = `${EntityKind}_${string}`;
+import { EntityKind, HubspotAssociationString } from '../../io/hubspot.js';
 
 export interface EntityDatabase {
   getEntity(kind: EntityKind, id: string): HubspotEntity<any>;

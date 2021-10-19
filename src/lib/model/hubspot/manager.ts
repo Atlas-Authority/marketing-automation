@@ -1,9 +1,9 @@
 import * as assert from 'assert';
 import { Downloader } from '../../io/downloader/downloader.js';
-import { FullEntity, NewEntity, ExistingEntity, Association, EntityKind } from '../../io/hubspot.js';
+import { EntityKind, HubspotAssociationString } from '../../io/hubspot.js';
 import { Uploader } from '../../io/uploader/uploader.js';
 import { batchesOf } from '../../util/helpers.js';
-import { EntityDatabase, HubspotAssociationString, HubspotEntity } from "./entity.js";
+import { EntityDatabase, HubspotEntity } from "./entity.js";
 
 export type HubspotPropertyTransformers<T> = {
   [P in keyof T]: (prop: T[P]) => [string, string]
@@ -43,10 +43,7 @@ export abstract class HubspotEntityManager<
 
       const associations = new Set<HubspotAssociationString>();
       for (const item of raw.associations) {
-        const prefix = `${this.kind}_to_`;
-        assert.ok(item.type.startsWith(prefix));
-        const otherKind = item.type.substr(prefix.length) as EntityKind;
-        associations.add(`${otherKind}_${item.id}`);
+        associations.add(item);
       }
 
       const entity = new this.Entity(this.db, raw.id, props, associations);
