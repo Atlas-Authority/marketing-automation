@@ -1,5 +1,4 @@
 import { DealStage, Pipeline } from "../../config/dynamic-enums.js";
-import { SimplePublicObject } from "@hubspot/api-client/lib/codegen/crm/companies/api";
 import { HubspotEntity, HubspotEntityKind } from "./entity.js";
 import { HubspotEntityManager, HubspotPropertyTransformers } from "./manager.js";
 import config from "../../config/index.js";
@@ -32,7 +31,7 @@ export class Deal extends HubspotEntity<DealProps> {
 
 }
 
-export class DealManager extends HubspotEntityManager<DealProps, Deal, SimplePublicObject> {
+export class DealManager extends HubspotEntityManager<DealProps, Deal> {
 
   override Entity = Deal;
   override kind: HubspotEntityKind = "deal";
@@ -58,7 +57,7 @@ export class DealManager extends HubspotEntityManager<DealProps, Deal, SimplePub
     'amount',
   ];
 
-  override fromAPI(data: SimplePublicObject['properties']): DealProps | null {
+  override fromAPI(data: { [key: string]: string }): DealProps | null {
     if (data.pipeline !== Pipeline.AtlassianMarketplace) return null;
     return {
       relatedProducts: data.related_products,

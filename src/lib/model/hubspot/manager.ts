@@ -34,31 +34,13 @@ interface Uploader {
   deleteAssociations(fromKind: HubspotEntityKind, toKind: HubspotEntityKind, inputs: HubspotApiAssociationInput[]): Promise<void>;
 }
 
-export type HubspotInputObject = {
-  id: string,
-  properties: { [key: string]: string },
-  createdAt: Date,
-  updatedAt: Date,
-  archived?: boolean,
-  archivedAt?: Date,
-  associations?: {
-    [key: string]: {
-      results: {
-        id: string,
-        type: string,
-      }[],
-    },
-  },
-};
-
 export type HubspotPropertyTransformers<T> = {
   [P in keyof T]: (prop: T[P]) => [string, string]
 };
 
 export abstract class HubspotEntityManager<
   P extends { [key: string]: any },
-  E extends HubspotEntity<P>,
-  I extends HubspotInputObject>
+  E extends HubspotEntity<P>>
 {
 
   constructor(private client: hubspot.Client, private db: EntityDatabase) { }
@@ -68,7 +50,7 @@ export abstract class HubspotEntityManager<
   protected abstract associations: HubspotEntityKind[];
 
   protected abstract apiProperties: string[];
-  protected abstract fromAPI(data: I['properties']): P | null;
+  protected abstract fromAPI(data: { [key: string]: string }): P | null;
   protected abstract toAPI: HubspotPropertyTransformers<P>;
 
   protected abstract identifiers: (keyof P)[];

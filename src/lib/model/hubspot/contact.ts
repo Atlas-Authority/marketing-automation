@@ -1,4 +1,3 @@
-import { SimplePublicObject } from "@hubspot/api-client/lib/codegen/crm/contacts/api";
 import { Company } from "./company.js";
 import { HubspotEntity, HubspotEntityKind } from "./entity.js";
 import { HubspotEntityManager, HubspotPropertyTransformers } from "./manager.js";
@@ -32,7 +31,7 @@ export class Contact extends HubspotEntity<ContactProps> {
 
 }
 
-export class ContactManager extends HubspotEntityManager<ContactProps, Contact, SimplePublicObject> {
+export class ContactManager extends HubspotEntityManager<ContactProps, Contact> {
 
   override Entity = Contact;
   override kind: HubspotEntityKind = 'contact';
@@ -59,7 +58,7 @@ export class ContactManager extends HubspotEntityManager<ContactProps, Contact, 
     'hs_additional_emails',
   ];
 
-  override fromAPI(data: SimplePublicObject['properties']): ContactProps | null {
+  override fromAPI(data: { [key: string]: string }): ContactProps | null {
     return {
       contactType: data.contact_type as ContactProps['contactType'],
 
