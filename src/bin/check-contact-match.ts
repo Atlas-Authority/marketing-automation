@@ -15,7 +15,7 @@ const data = await downloadAllData({
   downloader: new CachedFileDownloader()
 });
 
-const contact = data.db.contactManager.get(contactId);
+const contact = data.contactManager.get(contactId);
 
 log.info('Dev', contact);
 

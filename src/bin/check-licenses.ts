@@ -71,7 +71,7 @@ function check(sen: string) {
 }
 
 function checkSEN(sen: string) {
-  const foundDeal = data.db.dealManager.getByAddonLicenseId(sen);
+  const foundDeal = data.dealManager.getByAddonLicenseId(sen);
   if (foundDeal) {
     log.info('Dev', sen, 'Already has deal:', foundDeal.id);
     return true;
@@ -84,7 +84,7 @@ function checkSEN(sen: string) {
   }
 
   const ls = data.allLicenses.filter(l => l.addonLicenseId === sen);
-  const cs = ls.map(l => data.db.contactManager.getByEmail(l.contactDetails.technicalContact.email));
+  const cs = ls.map(l => data.contactManager.getByEmail(l.contactDetails.technicalContact.email));
   if (cs.some(c => c && c.data.contactType === 'Partner')) {
     log.info('Dev', sen, 'Contact is Partner');
     return true;
