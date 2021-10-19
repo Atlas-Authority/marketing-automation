@@ -1,9 +1,7 @@
 import { ContactInfo, getContactInfo, getPartnerInfo, maybeGetContactInfo, PartnerDetails } from "./common.js";
 import { RawTransaction } from "./raw.js";
 
-export interface NormalizedTransaction {
-  type: 'transaction',
-
+export interface TransactionData {
   addonLicenseId: string,
   licenseId: string,
   addonKey: string,
@@ -34,10 +32,12 @@ export interface NormalizedTransaction {
   vendorAmount: number,
 }
 
-export function normalizeTransaction(transaction: RawTransaction): NormalizedTransaction {
-  return {
-    type: 'transaction',
+export class Transaction {
+  constructor(public data: TransactionData) { }
+}
 
+export function normalizeTransaction(transaction: RawTransaction): Transaction {
+  return new Transaction({
     transactionId: transaction.transactionId,
 
     addonLicenseId: transaction.addonLicenseId,
@@ -65,5 +65,5 @@ export function normalizeTransaction(transaction: RawTransaction): NormalizedTra
     billingPeriod: transaction.purchaseDetails.billingPeriod,
     purchasePrice: transaction.purchaseDetails.purchasePrice,
     vendorAmount: transaction.purchaseDetails.vendorAmount,
-  };
+  });
 }

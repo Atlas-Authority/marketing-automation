@@ -25,9 +25,7 @@ type NewEvalData = {
   evaluationSaleDate: string;
 };
 
-export interface NormalizedLicense {
-  type: 'license',
-
+export interface LicenseData {
   addonLicenseId: string,
   licenseId: string,
   addonKey: string,
@@ -56,7 +54,11 @@ export interface NormalizedLicense {
   newEvalData: NewEvalData | null,
 }
 
-export function normalizeLicense(license: RawLicense): NormalizedLicense {
+export class License {
+  constructor(public data: LicenseData) { }
+}
+
+export function normalizeLicense(license: RawLicense): License {
   let newEvalData: NewEvalData | null = null;
   if (license.evaluationLicense) {
     newEvalData = {
@@ -81,9 +83,7 @@ export function normalizeLicense(license: RawLicense): NormalizedLicense {
     } as ParentProductInfo;
   }
 
-  return {
-    type: 'license',
-
+  return new License({
     addonLicenseId: license.addonLicenseId,
     licenseId: license.licenseId,
     addonKey: license.addonKey,
@@ -109,5 +109,5 @@ export function normalizeLicense(license: RawLicense): NormalizedLicense {
     attribution: license.attribution ?? null,
     parentInfo,
     newEvalData,
-  };
+  });
 }
