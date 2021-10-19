@@ -1,6 +1,30 @@
 import { ContactInfo, getContactInfo, getPartnerInfo, maybeGetContactInfo, PartnerDetails } from "./common.js";
 import { RawLicense } from "./raw.js";
 
+type AttributionData = {
+  channel: string;
+  referrerDomain?: string;
+  campaignName?: string;
+  campaignSource?: string;
+  campaignMedium?: string;
+  campaignContent?: string;
+};
+
+type ParentProductInfo = {
+  parentProductBillingCycle: 'NA' | 'Pending' | 'ANNUAL' | 'MONTHLY';
+  parentProductName: 'NA' | 'Pending' | 'Confluence' | 'Jira';
+  installedOnSandbox: 'NA' | 'Pending' | 'No' | 'Yes';
+  parentProductEdition: 'NA' | 'Pending' | 'Free' | 'Standard' | 'Premium' | 'Enterprise';
+};
+
+type NewEvalData = {
+  evaluationLicense: string;
+  daysToConvertEval: string;
+  evaluationStartDate: string;
+  evaluationEndDate: string;
+  evaluationSaleDate: string;
+};
+
 export interface NormalizedLicense {
   type: 'license',
 
@@ -27,34 +51,13 @@ export interface NormalizedLicense {
   status: 'inactive' | 'active' | 'cancelled',
 
   evaluationOpportunitySize: string,
-
-  attribution: {
-    channel: string,
-    referrerDomain?: string,
-    campaignName?: string,
-    campaignSource?: string,
-    campaignMedium?: string,
-    campaignContent?: string,
-  } | null,
-
-  parentInfo: {
-    parentProductBillingCycle: 'NA' | 'Pending' | 'ANNUAL' | 'MONTHLY',
-    parentProductName: 'NA' | 'Pending' | 'Confluence' | 'Jira',
-    installedOnSandbox: 'NA' | 'Pending' | 'No' | 'Yes',
-    parentProductEdition: 'NA' | 'Pending' | 'Free' | 'Standard' | 'Premium' | 'Enterprise',
-  } | null,
-
-  newEvalData: {
-    evaluationLicense: string,
-    daysToConvertEval: string,
-    evaluationStartDate: string,
-    evaluationEndDate: string,
-    evaluationSaleDate: string,
-  } | null,
+  attribution: AttributionData | null,
+  parentInfo: ParentProductInfo | null,
+  newEvalData: NewEvalData | null,
 }
 
 export function normalizeLicense(license: RawLicense): NormalizedLicense {
-  let newEvalData: NormalizedLicense['newEvalData'] | null = null;
+  let newEvalData: NewEvalData | null = null;
   if (license.evaluationLicense) {
     newEvalData = {
       evaluationLicense: license.evaluationLicense,
@@ -65,7 +68,7 @@ export function normalizeLicense(license: RawLicense): NormalizedLicense {
     };
   }
 
-  let parentInfo: NormalizedLicense['parentInfo'] | null = null;
+  let parentInfo: ParentProductInfo | null = null;
   if (license.parentProductBillingCycle
     || license.parentProductName
     || license.installedOnSandbox
@@ -75,7 +78,7 @@ export function normalizeLicense(license: RawLicense): NormalizedLicense {
       parentProductName: license.parentProductName,
       installedOnSandbox: license.installedOnSandbox,
       parentProductEdition: license.parentProductEdition,
-    } as NormalizedLicense['parentInfo'];
+    } as ParentProductInfo;
   }
 
   return {
