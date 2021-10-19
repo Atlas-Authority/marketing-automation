@@ -1,6 +1,6 @@
 import * as assert from 'assert';
 import { Downloader } from '../../io/downloader/downloader.js';
-import { EntityKind, HubspotAssociationString } from '../../io/hubspot.js';
+import { EntityKind, RelativeAssociation } from '../../io/hubspot.js';
 import { Uploader } from '../../io/uploader/uploader.js';
 import { batchesOf } from '../../util/helpers.js';
 import { EntityDatabase, HubspotEntity } from "./entity.js";
@@ -20,7 +20,7 @@ export abstract class HubspotEntityManager<
     private db: EntityDatabase
   ) { }
 
-  protected abstract Entity: new (db: EntityDatabase, id: string | null, props: P, associations: Set<HubspotAssociationString>) => E;
+  protected abstract Entity: new (db: EntityDatabase, id: string | null, props: P, associations: Set<RelativeAssociation>) => E;
   protected abstract kind: EntityKind;
   protected abstract associations: EntityKind[];
 
@@ -41,7 +41,7 @@ export abstract class HubspotEntityManager<
       const props = this.fromAPI(raw.properties);
       if (!props) continue;
 
-      const associations = new Set<HubspotAssociationString>();
+      const associations = new Set<RelativeAssociation>();
       for (const item of raw.associations) {
         associations.add(item);
       }

@@ -2,9 +2,9 @@ import * as hubspot from '@hubspot/api-client';
 
 export type NewEntity = { properties: { [key: string]: string } };
 export type ExistingEntity = NewEntity & { id: string };
-export type FullEntity = ExistingEntity & { associations: HubspotAssociationString[] };
+export type FullEntity = ExistingEntity & { associations: RelativeAssociation[] };
 
-export type HubspotAssociationString = `${EntityKind}_${string}`;
+export type RelativeAssociation = `${EntityKind}_${string}`;
 
 export type Association = {
   fromId: string,

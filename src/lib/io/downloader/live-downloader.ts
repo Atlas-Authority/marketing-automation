@@ -11,7 +11,7 @@ import { Deal } from '../../types/deal.js';
 import { RawLicense, RawTransaction } from "../../model/marketplace/raw";
 import { AttachableError, SimpleError } from '../../util/errors.js';
 import { Downloader, DownloadLogger } from './downloader.js';
-import { apiFor, EntityKind, FullEntity, HubspotAssociationString } from '../hubspot.js';
+import { apiFor, EntityKind, FullEntity, RelativeAssociation } from '../hubspot.js';
 
 
 export default class LiveDownloader implements Downloader {
@@ -34,7 +34,7 @@ export default class LiveDownloader implements Downloader {
               const prefix = `${kind}_to_`;
               assert.ok(item.type.startsWith(prefix));
               const otherKind = item.type.substr(prefix.length) as EntityKind;
-              return `${otherKind}_${item.id}` as HubspotAssociationString;
+              return `${otherKind}_${item.id}` as RelativeAssociation;
             })
           )),
       }));

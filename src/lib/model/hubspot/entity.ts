@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import { EntityKind, HubspotAssociationString } from '../../io/hubspot.js';
+import { EntityKind, RelativeAssociation } from '../../io/hubspot.js';
 
 export interface EntityDatabase {
   getEntity(kind: EntityKind, id: string): HubspotEntity<any>;
@@ -15,9 +15,9 @@ export abstract class HubspotEntity<P extends { [key: string]: any }> {
   private newProps: Partial<P>;
 
   /** The associations this was created with, whether an existing or new entity */
-  private assocs = new Set<HubspotAssociationString>();
+  private assocs = new Set<RelativeAssociation>();
   /** A copy of assocs, which all updates act on, whether an existing or new entity */
-  private newAssocs = new Set<HubspotAssociationString>();
+  private newAssocs = new Set<RelativeAssociation>();
 
   data: { [K in keyof P]: P[K] };
 
@@ -25,7 +25,7 @@ export abstract class HubspotEntity<P extends { [key: string]: any }> {
     private db: EntityDatabase,
     id: string | null,
     props: P,
-    associations?: Set<HubspotAssociationString>
+    associations?: Set<RelativeAssociation>
   ) {
     if (id) this.id = id;
     this.props = props;
@@ -126,7 +126,7 @@ export abstract class HubspotEntity<P extends { [key: string]: any }> {
     ] as { op: 'add' | 'del', kind: EntityKind, id: string }[];
   }
 
-  private getAssocInfo(a: HubspotAssociationString) {
+  private getAssocInfo(a: RelativeAssociation) {
     const [kind, id] = a.split('_');
     return { kind: kind as EntityKind, id };
   }
