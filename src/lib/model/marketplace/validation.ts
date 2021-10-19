@@ -1,7 +1,6 @@
 import assert from 'assert';
 import util from 'util';
 import log from "../../log/logger.js";
-import { makeMultiProviderDomainsSet } from "../../util/domains.js";
 import { AttachableError } from "../../util/errors.js";
 import { isPresent } from '../../util/helpers.js';
 import { RawLicense, RawTransaction } from "./raw.js";
@@ -10,7 +9,6 @@ export function validateMarketplaceData(
   licensesWithDataInsights: RawLicense[],
   licensesWithoutDataInsights: RawLicense[],
   allTransactions: RawTransaction[],
-  freeDomains: string[],
   allTlds: string[],
 ) {
   licensesWithDataInsights = licensesWithDataInsights.filter(filterLicensesWithTechEmail);
@@ -33,8 +31,6 @@ export function validateMarketplaceData(
 
   let allLicenses = uniqLicenses(licensesWithDataInsights.concat(licensesWithoutDataInsights));
 
-  const providerDomains = makeMultiProviderDomainsSet(freeDomains);
-
   const emailRe = makeEmailValidationRegex(allTlds);
   const hasValidEmails = makeEmailValidator(emailRe);
 
@@ -44,7 +40,6 @@ export function validateMarketplaceData(
   return {
     allTransactions,
     allLicenses,
-    providerDomains,
   };
 }
 

@@ -15,6 +15,7 @@ import { Transaction } from "../types/transaction.js";
 import { Company } from "../types/company.js";
 import { Contact } from "../types/contact.js";
 import { Deal } from "../types/deal.js";
+import { makeMultiProviderDomainsSet } from "../util/domains.js";
 
 export class Database {
 
@@ -76,17 +77,16 @@ export class Database {
       licensesWithDataInsights,
       licensesWithoutDataInsights,
       allTransactions,
-      freeDomains,
       allTlds);
 
     this.allLicenses = results.allLicenses.map(normalizeLicense);
     this.allTransactions = results.allTransactions.map(normalizeTransaction);
 
+    this.providerDomains = makeMultiProviderDomainsSet(freeDomains);
+
     this.allDeals = allDeals;
     this.allCompanies = allCompanies;
     this.allContacts = allContacts;
-
-    this.providerDomains = results.providerDomains;
   }
 
   async downloadAllDeals(downloadLogger: DownloadLogger) {
