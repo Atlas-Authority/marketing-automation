@@ -4,7 +4,7 @@ import { HubspotEntityManager, HubspotPropertyTransformers } from "./manager.js"
 import config from "../../config/index.js";
 import { Contact } from "./contact.js";
 import { Company } from "./company.js";
-import { HubspotEntityKind } from "../../io/hubspot.js";
+import { EntityKind } from "../../io/hubspot.js";
 
 const addonLicenseIdKey = config.hubspot.attrs.deal.addonLicenseId;
 const transactionIdKey = config.hubspot.attrs.deal.transactionId;
@@ -35,9 +35,9 @@ export class Deal extends HubspotEntity<DealProps> {
 export class DealManager extends HubspotEntityManager<DealProps, Deal> {
 
   override Entity = Deal;
-  override kind: HubspotEntityKind = "deal";
+  override kind: EntityKind = "deal";
 
-  override associations: HubspotEntityKind[] = [
+  override associations: EntityKind[] = [
     "company",
     "contact",
   ];

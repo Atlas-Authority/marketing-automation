@@ -4,7 +4,7 @@ import * as assert from 'assert';
 import { ContactManager } from "./hubspot/contact.js";
 import { CompanyManager } from "./hubspot/company.js";
 import { HubspotEntity } from "./hubspot/entity.js";
-import { HubspotEntityKind } from "../io/hubspot.js";
+import { EntityKind } from "../io/hubspot.js";
 
 export class Database {
 
@@ -26,7 +26,7 @@ export class Database {
     ]);
   }
 
-  getEntity(kind: HubspotEntityKind, id: string): HubspotEntity<any> {
+  getEntity(kind: EntityKind, id: string): HubspotEntity<any> {
     const found = this.getManager(kind).get(id);
     // There's only two ways to set associations:
     // 1. They were already set in HubSpot when we downloaded them, or
@@ -36,7 +36,7 @@ export class Database {
     return found;
   }
 
-  private getManager(kind: HubspotEntityKind) {
+  private getManager(kind: EntityKind) {
     switch (kind) {
       case 'deal': return this.dealManager;
       case 'company': return this.companyManager;

@@ -1,4 +1,4 @@
-import { HubspotEntityKind } from "../../io/hubspot.js";
+import { EntityKind } from "../../io/hubspot.js";
 import { HubspotEntity } from "./entity.js";
 import { HubspotEntityManager, HubspotPropertyTransformers } from "./manager.js";
 
@@ -13,9 +13,9 @@ export class Company extends HubspotEntity<CompanyProps> {
 export class CompanyManager extends HubspotEntityManager<CompanyProps, Company> {
 
   override Entity = Company;
-  override kind: HubspotEntityKind = 'company';
+  override kind: EntityKind = 'company';
 
-  override associations: HubspotEntityKind[] = [
+  override associations: EntityKind[] = [
   ];
 
   override apiProperties: string[] = [

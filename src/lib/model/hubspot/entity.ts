@@ -1,10 +1,10 @@
 import * as assert from 'assert';
-import { HubspotEntityKind } from '../../io/hubspot.js';
+import { EntityKind } from '../../io/hubspot.js';
 
-export type HubspotAssociationString = `${HubspotEntityKind}_${string}`;
+export type HubspotAssociationString = `${EntityKind}_${string}`;
 
 export interface EntityDatabase {
-  getEntity(kind: HubspotEntityKind, id: string): HubspotEntity<any>;
+  getEntity(kind: EntityKind, id: string): HubspotEntity<any>;
 }
 
 export abstract class HubspotEntity<P extends { [key: string]: any }> {
@@ -79,7 +79,7 @@ export abstract class HubspotEntity<P extends { [key: string]: any }> {
 
   // Associations
 
-  protected makeDynamicAssociation<T extends HubspotEntity<any>>(kind: HubspotEntityKind) {
+  protected makeDynamicAssociation<T extends HubspotEntity<any>>(kind: EntityKind) {
     return {
       getAll: () => this.getAssociations(kind) as T[],
       add: (entity: T) => this.addAssociation(kind, entity),
@@ -87,15 +87,15 @@ export abstract class HubspotEntity<P extends { [key: string]: any }> {
     };
   }
 
-  private addAssociation(kind: HubspotEntityKind, entity: HubspotEntity<any>) {
+  private addAssociation(kind: EntityKind, entity: HubspotEntity<any>) {
     this.newAssocs.add(`${kind}_${entity.guaranteedId()}`);
   }
 
-  private removeAssociation(kind: HubspotEntityKind, entity: HubspotEntity<any>) {
+  private removeAssociation(kind: EntityKind, entity: HubspotEntity<any>) {
     this.newAssocs.delete(`${kind}_${entity.guaranteedId()}`);
   }
 
-  private getAssociations(kind: HubspotEntityKind) {
+  private getAssociations(kind: EntityKind) {
     return ([...this.newAssocs]
       .map(a => a.split('_'))
       .filter(([k,]) => k === kind)
@@ -116,12 +116,12 @@ export abstract class HubspotEntity<P extends { [key: string]: any }> {
     return [
       ...toAdd.map(a => ({ op: 'add', ...this.getAssocInfo(a) })),
       ...toDel.map(a => ({ op: 'del', ...this.getAssocInfo(a) })),
-    ] as { op: 'add' | 'del', kind: HubspotEntityKind, id: string }[];
+    ] as { op: 'add' | 'del', kind: EntityKind, id: string }[];
   }
 
   private getAssocInfo(a: HubspotAssociationString) {
     const [kind, id] = a.split('_');
-    return { kind: kind as HubspotEntityKind, id };
+    return { kind: kind as EntityKind, id };
   }
 
   applyAssociationChanges() {
