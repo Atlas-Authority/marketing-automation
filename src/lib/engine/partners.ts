@@ -11,7 +11,7 @@ export function identifyDomains(db: Database) {
   }
 
   for (const tx of db.transactions) {
-    maybeAddDomain(db.partnerDomains, tx.data.partnerDetails?.billingEmail);
+    maybeAddDomain(db.partnerDomains, tx.data.partnerDetails?.billingInfo.email);
     maybeAddDomain(db.customerDomains, tx.data.billingContact?.email);
     maybeAddDomain(db.customerDomains, tx.data.technicalContact.email);
   }

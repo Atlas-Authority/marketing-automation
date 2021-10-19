@@ -11,11 +11,15 @@ export type ContactInfo = {
   postcode?: string,
 };
 
-export type PartnerDetails = {
+export type PartnerBillingInfo = {
+  email: string;
+  name: string;
+};
+
+export type PartnerInfo = {
+  billingInfo: PartnerBillingInfo;
   partnerName: string;
   partnerType?: string;
-  billingEmail: string;
-  billingName: string;
 };
 
 // export type NormalizedRecord = NormalizedLicense | NormalizedTransaction;
@@ -38,12 +42,14 @@ export function maybeGetContactInfo(contactInfo: RawLicenseContact | RawTransact
   return getContactInfo(contactInfo);
 }
 
-export function getPartnerInfo(info: RawPartnerDetails | undefined): PartnerDetails | null {
+export function getPartnerInfo(info: RawPartnerDetails | undefined): PartnerInfo | null {
   if (!info) return null;
   return {
     partnerName: info.partnerName,
     partnerType: info.partnerType,
-    billingEmail: info.billingContact.email,
-    billingName: info.billingContact.name,
+    billingInfo: {
+      email: info.billingContact.email,
+      name: info.billingContact.name,
+    },
   };
 }

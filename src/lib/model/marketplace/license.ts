@@ -1,4 +1,4 @@
-import { ContactInfo, getContactInfo, getPartnerInfo, maybeGetContactInfo, PartnerDetails } from "./common.js";
+import { ContactInfo, getContactInfo, getPartnerInfo, maybeGetContactInfo, PartnerInfo } from "./common.js";
 import { RawLicense } from "./raw.js";
 
 type AttributionData = {
@@ -34,7 +34,7 @@ export interface LicenseData {
 
   technicalContact: ContactInfo,
   billingContact: ContactInfo | null,
-  partnerDetails: PartnerDetails | null,
+  partnerDetails: PartnerInfo | null,
 
   company: string,
   country: string,

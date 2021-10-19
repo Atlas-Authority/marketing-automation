@@ -3,7 +3,7 @@ import { Company } from "./company.js";
 import { Entity } from "./entity.js";
 import { EntityManager, PropertyTransformers } from "./manager.js";
 
-type ContactProps = {
+export type ContactProps = {
   email: string;
   firstName: string | null;
   lastName: string | null;

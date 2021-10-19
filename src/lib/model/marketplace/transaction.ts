@@ -1,4 +1,4 @@
-import { ContactInfo, getContactInfo, getPartnerInfo, maybeGetContactInfo, PartnerDetails } from "./common.js";
+import { ContactInfo, getContactInfo, getPartnerInfo, maybeGetContactInfo, PartnerInfo } from "./common.js";
 import { RawTransaction } from "./raw.js";
 
 export interface TransactionData {
@@ -10,7 +10,7 @@ export interface TransactionData {
 
   technicalContact: ContactInfo,
   billingContact: ContactInfo | null,
-  partnerDetails: PartnerDetails | null,
+  partnerDetails: PartnerInfo | null,
 
   company: string,
   country: string,
