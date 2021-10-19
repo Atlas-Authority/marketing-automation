@@ -1,10 +1,11 @@
 import { DealManager } from "./hubspot/deal.js";
-import * as hubspot from '@hubspot/api-client';
 import * as assert from 'assert';
 import { ContactManager } from "./hubspot/contact.js";
 import { CompanyManager } from "./hubspot/company.js";
 import { HubspotEntity } from "./hubspot/entity.js";
 import { EntityKind } from "../io/hubspot.js";
+import { Downloader } from "../io/downloader/downloader.js";
+import { Uploader } from "../io/uploader/uploader.js";
 
 export class Database {
 
@@ -12,10 +13,10 @@ export class Database {
   contactManager: ContactManager;
   companyManager: CompanyManager;
 
-  constructor(private client: hubspot.Client) {
-    this.dealManager = new DealManager(this.client, this);
-    this.contactManager = new ContactManager(this.client, this);
-    this.companyManager = new CompanyManager(this.client, this);
+  constructor(downloader: Downloader, uploader: Uploader) {
+    this.dealManager = new DealManager(downloader, uploader, this);
+    this.contactManager = new ContactManager(downloader, uploader, this);
+    this.companyManager = new CompanyManager(downloader, uploader, this);
   }
 
   async downloadAllEntities() {

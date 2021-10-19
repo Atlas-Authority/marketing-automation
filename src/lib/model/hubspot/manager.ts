@@ -1,7 +1,5 @@
-import * as hubspot from '@hubspot/api-client';
 import * as assert from 'assert';
 import { FullEntity, NewEntity, ExistingEntity, Association, EntityKind } from '../../io/hubspot.js';
-import { SimpleError } from '../../util/errors.js';
 import { batchesOf } from '../../util/helpers.js';
 import { EntityDatabase, HubspotAssociationString, HubspotEntity } from "./entity.js";
 
@@ -26,7 +24,11 @@ export abstract class HubspotEntityManager<
   E extends HubspotEntity<P>>
 {
 
-  constructor(private client: hubspot.Client, private db: EntityDatabase) { }
+  constructor(
+    private downloader: Downloader,
+    private uploader: Uploader,
+    private db: EntityDatabase
+  ) { }
 
   protected abstract Entity: new (db: EntityDatabase, id: string | null, props: P, associations: Set<HubspotAssociationString>) => E;
   protected abstract kind: EntityKind;
@@ -39,14 +41,6 @@ export abstract class HubspotEntityManager<
   protected abstract identifiers: (keyof P)[];
 
   protected entities = new Map<string, E>();
-
-  private api(kind: EntityKind) {
-    switch (kind) {
-      case 'deal': return this.client.crm.deals;
-      case 'company': return this.client.crm.companies;
-      case 'contact': return this.client.crm.contacts;
-    }
-  }
 
   public async downloadAllEntities() {
     const data = await this.downloader.downloadAllEntities(this.kind, this.apiProperties, this.associations);
@@ -175,75 +169,6 @@ export abstract class HubspotEntityManager<
     for (const changes of toSync) {
       changes.e.applyAssociationChanges();
     }
-  }
-
-  private get downloader(): Downloader {
-    return {
-      downloadAllEntities: async (kind: EntityKind, apiProperties: string[], inputAssociations: string[]): Promise<FullEntity[]> => {
-        let associations = ((inputAssociations.length > 0)
-          ? inputAssociations
-          : undefined);
-
-        try {
-          const entities = await this.api(kind).getAll(undefined, undefined, apiProperties, associations);
-          return entities.map(({ id, properties, associations }) => ({
-            id,
-            properties,
-            associations: Object.entries(associations || {})
-              .flatMap(([, { results: list }]) => list),
-          }));
-        }
-        catch (e: any) {
-          const body = e.response.body;
-          if (
-            (
-              typeof body === 'string' && (
-                body === 'internal error' ||
-                body.startsWith('<!DOCTYPE html>'))
-            ) || (
-              typeof body === 'object' &&
-              body.status === 'error' &&
-              body.message === 'internal error'
-            )
-          ) {
-            throw new SimpleError('Hubspot v3 API had internal error.');
-          }
-          else {
-            throw new Error(`Failed downloading ${kind}s: ${JSON.stringify(body)}`);
-          }
-
-        }
-      },
-    };
-  }
-
-  private get uploader(): Uploader {
-    return {
-      createEntities: async (kind: EntityKind, inputs: NewEntity[]): Promise<ExistingEntity[]> => {
-        return (await this.api(kind).batchApi.create({ inputs })).body.results;
-      },
-      updateEntities: async (kind: EntityKind, inputs: ExistingEntity[]): Promise<ExistingEntity[]> => {
-        return (await this.api(kind).batchApi.update({ inputs })).body.results;
-      },
-      createAssociations: async (fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void> => {
-        await this.client.crm.associations.batchApi.create(fromKind, toKind, {
-          inputs: inputs.map(input => ({
-            from: { id: input.fromId },
-            to: { id: input.toId },
-            type: input.toType,
-          }))
-        });
-      },
-      deleteAssociations: async (fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void> => {
-        await this.client.crm.associations.batchApi.archive(fromKind, toKind, {
-          inputs: inputs.map(input => ({
-            from: { id: input.fromId },
-            to: { id: input.toId },
-            type: input.toType,
-          }))
-        });
-      },
-    };
   }
 
   private getChangedProperties(e: E) {
