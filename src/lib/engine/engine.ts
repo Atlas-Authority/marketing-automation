@@ -22,22 +22,22 @@ export default async function runEngine({ downloader, uploader }: {
   resetLogCount();
 
   logStep('Starting to download data');
-  const initialData = await downloadAllData({
+  const db = await downloadAllData({
     downloader,
   });
 
   logStep('Normalizing deal amounts');
-  await zeroEmptyDealAmounts(initialData.dealManager);
+  await zeroEmptyDealAmounts(db.dealManager);
 
   logStep('Identifying partner and customer domains');
   const { partnerDomains, customerDomains } = identifyDomains({
-    licenses: initialData.allLicenses,
-    transactions: initialData.allTransactions,
+    licenses: db.allLicenses,
+    transactions: db.allTransactions,
   });
 
   logStep('Flagging partner/customer contacts created outside engine');
   await findAndFlagExternallyCreatedContacts({
-    contacts: initialData.allContacts,
+    contacts: db.allContacts,
     partnerDomains,
     customerDomains,
     uploader,
@@ -45,40 +45,40 @@ export default async function runEngine({ downloader, uploader }: {
 
   logStep('Generating contacts');
   const generatedContacts = generateContacts({
-    licenses: initialData.allLicenses,
-    transactions: initialData.allTransactions,
-    initialContacts: initialData.allContacts,
+    licenses: db.allLicenses,
+    transactions: db.allTransactions,
+    initialContacts: db.allContacts,
     partnerDomains,
   });
 
   logStep('Flagging partner companies');
   await findAndFlagPartnerCompanies({
     contacts: generatedContacts,
-    companies: initialData.allCompanies,
+    companies: db.allCompanies,
     uploader,
   });
 
   logStep('Flagging partners by domain');
   findAndFlagPartnersByDomain({
     contacts: generatedContacts,
-    sourceContacts: initialData.allContacts,
-    providerDomains: initialData.providerDomains,
+    sourceContacts: db.allContacts,
+    providerDomains: db.providerDomains,
   });
 
   logStep('Upserting contacts in Hubspot');
   const verifiedContacts = await upsertContactsInHubspot({
     uploader,
     newContacts: generatedContacts,
-    oldContacts: initialData.allContacts,
+    oldContacts: db.allContacts,
   });
 
   const contactsByEmail: { [email: string]: Contact } = buildContactsStructure(verifiedContacts);
 
   logStep('Running Scoring Engine');
   const allMatches: RelatedLicenseSet[] = matchIntoLikelyGroups({
-    transactions: initialData.allTransactions,
-    licenses: initialData.allLicenses,
-    providerDomains: initialData.providerDomains,
+    transactions: db.allTransactions,
+    licenses: db.allLicenses,
+    providerDomains: db.providerDomains,
     contactsByEmail,
   });
 
@@ -91,7 +91,7 @@ export default async function runEngine({ downloader, uploader }: {
   logStep('Backfill deal companies');
   await backfillDealCompanies({
     allMatches,
-    deals: initialData.allDeals,
+    deals: db.allDeals,
     contacts: verifiedContacts,
     uploader,
   });
@@ -99,8 +99,8 @@ export default async function runEngine({ downloader, uploader }: {
   logStep('Generating deals');
   const dealDiffs = generateDeals({
     contactsByEmail,
-    initialDeals: initialData.allDeals,
-    providerDomains: initialData.providerDomains,
+    initialDeals: db.allDeals,
+    providerDomains: db.providerDomains,
     allMatches,
     partnerDomains,
   });
