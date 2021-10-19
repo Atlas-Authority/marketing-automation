@@ -12,6 +12,9 @@ import { makeMultiProviderDomainsSet } from '../../util/domains.js';
 import { AttachableError } from '../../util/errors.js';
 import { isPresent } from '../../util/helpers.js';
 import { Downloader } from './downloader.js';
+import { Uploader } from '../uploader/uploader.js';
+import ConsoleUploader from '../uploader/console-uploader.js';
+import { Database } from '../../model/database.js';
 
 type InitialData = {
   providerDomains: Set<string>,
@@ -20,11 +23,19 @@ type InitialData = {
   allContacts: Contact[],
   allDeals: Deal[],
   allCompanies: Company[],
+  db: Database,
 };
 
 
-export async function downloadAllData({ downloader }: { downloader: Downloader }): Promise<InitialData> {
+export async function downloadAllData({ downloader, uploader }: {
+  downloader: Downloader,
+  uploader?: Uploader,
+}): Promise<InitialData> {
   log.info('Downloader', 'Starting downloads with API');
+
+  if (!uploader) uploader = new ConsoleUploader({ verbose: true });
+
+  const db = new Database(downloader, uploader);
 
   const multiDownloadLogger = new MultiDownloadLogger();
 
@@ -46,6 +57,11 @@ export async function downloadAllData({ downloader }: { downloader: Downloader }
     downloader.downloadAllDeals(multiDownloadLogger.makeDownloadLogger('Deals')),
     downloader.downloadAllCompanies(multiDownloadLogger.makeDownloadLogger('Companies')),
     downloader.downloadAllTlds(multiDownloadLogger.makeDownloadLogger('Tlds')),
+    Promise.all([
+      db.downloadAllCompanies(multiDownloadLogger.makeDownloadLogger('DB-Companies')),
+      db.downloadAllContacts(multiDownloadLogger.makeDownloadLogger('DB-Contacts')),
+      db.downloadAllDeals(multiDownloadLogger.makeDownloadLogger('DB-Deals')),
+    ]),
   ]);
 
   multiDownloadLogger.done();
@@ -87,6 +103,7 @@ export async function downloadAllData({ downloader }: { downloader: Downloader }
     allContacts,
     allDeals,
     allCompanies,
+    db,
   };
 }
 

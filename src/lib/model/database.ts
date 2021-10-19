@@ -4,7 +4,7 @@ import { ContactManager } from "./hubspot/contact.js";
 import { CompanyManager } from "./hubspot/company.js";
 import { HubspotEntity } from "./hubspot/entity.js";
 import { EntityKind } from "../io/hubspot.js";
-import { Downloader } from "../io/downloader/downloader.js";
+import { Downloader, DownloadLogger } from "../io/downloader/downloader.js";
 import { Uploader } from "../io/uploader/uploader.js";
 
 export class Database {
@@ -19,12 +19,22 @@ export class Database {
     this.companyManager = new CompanyManager(downloader, uploader, this);
   }
 
-  async downloadAllEntities() {
-    await Promise.all([
-      this.dealManager.downloadAllEntities(),
-      this.contactManager.downloadAllEntities(),
-      this.companyManager.downloadAllEntities(),
-    ]);
+  async downloadAllDeals(downloadLogger: DownloadLogger) {
+    downloadLogger.prepare(1);
+    await this.dealManager.downloadAllEntities();
+    downloadLogger.tick();
+  }
+
+  async downloadAllContacts(downloadLogger: DownloadLogger) {
+    downloadLogger.prepare(1);
+    await this.contactManager.downloadAllEntities();
+    downloadLogger.tick();
+  }
+
+  async downloadAllCompanies(downloadLogger: DownloadLogger) {
+    downloadLogger.prepare(1);
+    await this.companyManager.downloadAllEntities();
+    downloadLogger.tick();
   }
 
   getEntity(kind: EntityKind, id: string): HubspotEntity<any> {
