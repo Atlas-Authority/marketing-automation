@@ -39,13 +39,13 @@ export function validateMarketplaceData(
 
     allTransactions: allTransactions.filter(item => {
       const allGood = hasAllValidEmails(item);
-      if (!allGood) log.warn('Downloader', 'Transaction has invalid email(s); will be skipped:', item.transactionId);
+      if (!allGood) log.warn('Downloader', 'Transaction has invalid email(s); will be skipped:', item);
       return allGood;
     }),
 
     allLicenses: allLicenses.filter(item => {
       const allGood = hasAllValidEmails(item);
-      if (!allGood) log.warn('Downloader', 'License has invalid email(s); will be skipped:', item.addonLicenseId);
+      if (!allGood) log.warn('Downloader', 'License has invalid email(s); will be skipped:', item);
       return allGood;
     }),
 
