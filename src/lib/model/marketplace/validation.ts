@@ -31,26 +31,17 @@ export function validateMarketplaceData(
 
   let allLicenses = uniqLicenses(licensesWithDataInsights.concat(licensesWithoutDataInsights));
 
-  const hasAllValidEmails = (item: RawLicense | RawTransaction) => (
-    getEmails(item).every(e => emailRe.test(e))
-  );
+  const emailChecker = (kind: 'License' | 'Transaction') =>
+    (item: RawLicense | RawTransaction) => {
+      const allGood = getEmails(item).every(e => emailRe.test(e));
+      if (!allGood) log.warn('Downloader', `${kind} has invalid email(s); will be skipped:`, item);
+      return allGood;
+    };
 
   return {
-
-    allTransactions: allTransactions.filter(item => {
-      const allGood = hasAllValidEmails(item);
-      if (!allGood) log.warn('Downloader', 'Transaction has invalid email(s); will be skipped:', item);
-      return allGood;
-    }),
-
-    allLicenses: allLicenses.filter(item => {
-      const allGood = hasAllValidEmails(item);
-      if (!allGood) log.warn('Downloader', 'License has invalid email(s); will be skipped:', item);
-      return allGood;
-    }),
-
+    allTransactions: allTransactions.filter(emailChecker('Transaction')),
+    allLicenses: allLicenses.filter(emailChecker('License')),
   };
-
 }
 
 function uniqLicenses(licenses: RawLicense[]) {
