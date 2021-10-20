@@ -29,10 +29,6 @@ export class Database {
   allLicenses: License[] = [];
   allTransactions: Transaction[] = [];
 
-  allCompanies: Company[] = [];
-  allContacts: Contact[] = [];
-  allDeals: Deal[] = [];
-
   /** Domains that provide spam or free email accounts for masses. */
   providerDomains = new Set<string>();
   partnerDomains = new Set<string>();
@@ -54,18 +50,12 @@ export class Database {
       licensesWithDataInsights,
       licensesWithoutDataInsights,
       allTransactions,
-      allContacts,
-      allDeals,
-      allCompanies,
       allTlds,
     ] = await Promise.all([
       this.downloader.downloadFreeEmailProviders(multiDownloadLogger.makeDownloadLogger('Free Email Providers')),
       this.downloader.downloadLicensesWithDataInsights(multiDownloadLogger.makeDownloadLogger('Licenses With Data Insights')),
       this.downloader.downloadLicensesWithoutDataInsights(multiDownloadLogger.makeDownloadLogger('Licenses Without Data Insights')),
       this.downloader.downloadTransactions(multiDownloadLogger.makeDownloadLogger('Transactions')),
-      this.downloader.downloadAllContacts(multiDownloadLogger.makeDownloadLogger('Contacts')),
-      this.downloader.downloadAllDeals(multiDownloadLogger.makeDownloadLogger('Deals')),
-      this.downloader.downloadAllCompanies(multiDownloadLogger.makeDownloadLogger('Companies')),
       this.downloader.downloadAllTlds(multiDownloadLogger.makeDownloadLogger('Tlds')),
     ]);
 
@@ -93,10 +83,6 @@ export class Database {
 
     this.licenses = results.allLicenses.map(normalizeLicense);
     this.transactions = results.allTransactions.map(normalizeTransaction);
-
-    this.allDeals = allDeals;
-    this.allCompanies = allCompanies;
-    this.allContacts = allContacts;
   }
 
   async downloadAllDeals(downloadLogger: DownloadLogger) {

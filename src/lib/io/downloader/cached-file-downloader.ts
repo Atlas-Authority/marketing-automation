@@ -48,25 +48,4 @@ export default class CachedFileDownloader implements Downloader {
     return data;
   }
 
-  async downloadAllDeals(downloadLogger: DownloadLogger): Promise<Deal[]> {
-    downloadLogger.prepare(1);
-    const data = datadir.readJsonFile('in', 'deals.json');
-    downloadLogger.tick();
-    return data;
-  }
-
-  async downloadAllCompanies(downloadLogger: DownloadLogger): Promise<Company[]> {
-    downloadLogger.prepare(1);
-    const data = datadir.readJsonFile('in', 'companies.json');
-    downloadLogger.tick();
-    return data;
-  }
-
-  async downloadAllContacts(downloadLogger: DownloadLogger): Promise<Contact[]> {
-    downloadLogger.prepare(1);
-    const data = datadir.readJsonFile('in', 'contacts.json');
-    downloadLogger.tick();
-    return data;
-  }
-
 }

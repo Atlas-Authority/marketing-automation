@@ -18,7 +18,3 @@ export function sorter<T>(fn: (o: T) => string | number, dir: 'ASC' | 'DSC' = 'A
     fn(a) < fn(b) ? down : up
   );
 }
-
-export function nonBlankString(s: string | null | undefined) {
-  return s?.trim() || null;
-}

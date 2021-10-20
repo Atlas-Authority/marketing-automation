@@ -18,11 +18,4 @@ export interface Downloader {
   downloadTransactions(downloadLogger: DownloadLogger): Promise<RawTransaction[]>;
   downloadLicensesWithoutDataInsights(downloadLogger: DownloadLogger): Promise<RawLicense[]>;
   downloadLicensesWithDataInsights(downloadLogger: DownloadLogger): Promise<RawLicense[]>;
-
-  /** @deprecated */
-  downloadAllDeals(downloadLogger: DownloadLogger): Promise<Deal[]>;
-  /** @deprecated */
-  downloadAllContacts(downloadLogger: DownloadLogger): Promise<Contact[]>;
-  /** @deprecated */
-  downloadAllCompanies(downloadLogger: DownloadLogger): Promise<Company[]>;
 }
