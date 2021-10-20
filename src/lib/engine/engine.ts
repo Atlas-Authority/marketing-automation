@@ -4,7 +4,6 @@ import { Uploader } from '../io/uploader/uploader.js';
 import log from '../log/logger.js';
 import { Contact } from '../types/contact.js';
 import { backfillDealCompanies } from './backfill-deal-companies.js';
-import { buildContactsStructure } from './contacts.js';
 import { generateContacts } from "./generate-contacts.js";
 import { generateDeals } from './generate-deals.js';
 import { matchIntoLikelyGroups } from './license-grouper.js';
@@ -51,9 +50,6 @@ export default async function runEngine({ downloader, uploader }: {
 
   logStep('Updating Companies in Hubspot');
   await db.companyManager.syncUpAllEntities();
-
-  const verifiedContacts: Contact[] = [];
-  const contactsByEmail: { [email: string]: Contact } = buildContactsStructure(verifiedContacts);
 
   logStep('Running Scoring Engine');
   const allMatches = matchIntoLikelyGroups(db);

@@ -2,18 +2,6 @@ import { SimplePublicObject } from '@hubspot/api-client/lib/codegen/crm/contacts
 import { Contact, GeneratedContact } from '../types/contact.js';
 import { nonBlankString } from '../util/helpers.js';
 
-export function buildContactsStructure(contacts: Contact[]) {
-  const contactsByEmail: { [key: string]: Contact } = {};
-
-  for (const contact of contacts) {
-    for (const email of [contact.email, ...contact.otherEmails]) {
-      contactsByEmail[email] = contact;
-    }
-  }
-
-  return contactsByEmail;
-}
-
 export function contactFromHubspot(contact: SimplePublicObject): Contact {
   let { related_products, license_tier, ...properties } = contact.properties;
 
