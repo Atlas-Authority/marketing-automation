@@ -116,7 +116,7 @@ export class ContactManager extends EntityManager<ContactProps, Contact> {
     return this.contactsByEmail.get(email);
   }
 
-  override rebuildIndexes(contacts: Iterable<Contact>) {
+  override addIndexes(contacts: Iterable<Contact>) {
     for (const contact of contacts) {
       for (const email of [contact.data.email, ...contact.data.otherEmails]) {
         this.contactsByEmail.set(email, contact);

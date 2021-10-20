@@ -28,7 +28,7 @@ export abstract class EntityManager<
   protected abstract fromAPI(data: { [key: string]: string }): P | null;
   protected abstract toAPI: PropertyTransformers<P>;
 
-  public abstract rebuildIndexes(entities: Iterable<E>): void;
+  public abstract addIndexes(entities: Iterable<E>): void;
 
   protected abstract identifiers: (keyof P)[];
 
@@ -50,12 +50,12 @@ export abstract class EntityManager<
       this.entities.set(entity.guaranteedId(), entity);
     }
 
-    this.rebuildIndexes(this.entities.values());
+    this.addIndexes(this.entities.values());
   }
 
   public create(props: P) {
     const e = new this.Entity(this.db, null, props, new Set());
-    this.rebuildIndexes([e]);
+    this.addIndexes([e]);
     return e;
   }
 
@@ -70,7 +70,7 @@ export abstract class EntityManager<
   public async syncUpAllEntities() {
     this.syncUpAllEntitiesProperties();
     this.syncUpAllEntitiesAssociations();
-    this.rebuildIndexes(this.entities.values());
+    this.addIndexes(this.entities.values());
   }
 
   private async syncUpAllEntitiesProperties() {
