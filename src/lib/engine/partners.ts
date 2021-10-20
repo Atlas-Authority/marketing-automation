@@ -48,10 +48,12 @@ export function findAndFlagPartnersByDomain(db: Database) {
   const contactsByDomain = new Map<string, Contact[]>();
 
   for (const contact of db.contactManager.getAll()) {
-    const domain = domainFor(contact.data.email);
-    let contacts = contactsByDomain.get(domain);
-    if (!contacts) contactsByDomain.set(domain, contacts = []);
-    contacts.push(contact);
+    for (const email of contact.allEmails) {
+      const domain = domainFor(email);
+      let contacts = contactsByDomain.get(domain);
+      if (!contacts) contactsByDomain.set(domain, contacts = []);
+      contacts.push(contact);
+    }
   }
 
   for (const domain of db.providerDomains) {
@@ -63,8 +65,8 @@ export function findAndFlagPartnersByDomain(db: Database) {
     .map(([domain,]) => domain));
 
   for (const contact of db.contactManager.getAll()) {
-    const domain = domainFor(contact.data.email);
-    if (partnerDomains.has(domain)) {
+    const domains = contact.allEmails.map(domainFor);
+    if (domains.some(domain => partnerDomains.has(domain))) {
       contact.data.contactType = 'Partner';
     }
   }
