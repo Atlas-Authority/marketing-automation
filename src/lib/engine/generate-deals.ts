@@ -3,14 +3,13 @@ import _ from 'lodash';
 import { saveForInspection } from '../cache/inspection.js';
 import log from '../log/logger.js';
 import { Database } from '../model/database.js';
-import { ContactsByEmail } from '../types/contact.js';
 import { Deal, DealAssociationPair, DealCompanyAssociationPair, DealUpdate } from '../types/deal.js';
-import { License, RelatedLicenseSet } from '../types/license.js';
 import { isPresent, sorter } from '../util/helpers.js';
 import { ActionGenerator, CreateDealAction, UpdateDealAction } from './deal-generator/actions.js';
 import { DealFinder } from './deal-generator/deal-finder.js';
 import { EventGenerator } from './deal-generator/events.js';
 import { getEmails } from './deal-generator/records.js';
+import { RelatedLicenseSet } from './license-grouper.js';
 
 function contactsFor(contacts: ContactsByEmail, groups: RelatedLicenseSet) {
   return (_.uniq(
@@ -27,7 +26,7 @@ export function generateDeals(db: Database, allMatches: RelatedLicenseSet[]) {
   const { dealCreateActions, dealUpdateActions } = generateDealActions(db, allMatches
     .filter(group =>
       group.some(m =>
-        !olderThan90Days(m.license.maintenanceStartDate))));
+        !olderThan90Days(m.license.data.maintenanceStartDate))));
 
   const dealsToCreate: Omit<Deal, 'id'>[] = dealCreateActions.map(({ groups, properties }) => {
     const contacts = contactsFor(data.contactsByEmail, groups);
