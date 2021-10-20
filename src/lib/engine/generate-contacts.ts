@@ -78,6 +78,12 @@ class ContactGenerator {
 
   mergeGeneratedContacts() {
     for (const [contact, contacts] of this.toMerge) {
+      const currentContactProps = {
+        ...contact.data,
+        lastUpdated: contact.data.lastMpacEvent ?? '',
+      };
+      contacts.push(currentContactProps);
+
       if (contacts.some(c => c.contactType === 'Partner')) {
         contact.data.contactType = 'Partner';
       }
