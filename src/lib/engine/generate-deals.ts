@@ -2,7 +2,6 @@ import * as assert from 'assert';
 import _ from 'lodash';
 import { saveForInspection } from '../cache/inspection.js';
 import log from '../log/logger.js';
-import { Database } from '../model/database.js';
 import { ContactsByEmail } from '../types/contact.js';
 import { Deal, DealAssociationPair, DealCompanyAssociationPair, DealUpdate } from '../types/deal.js';
 import { License, RelatedLicenseSet } from '../types/license.js';
@@ -11,7 +10,6 @@ import { ActionGenerator, CreateDealAction, UpdateDealAction } from './deal-gene
 import { DealFinder } from './deal-generator/deal-finder.js';
 import { EventGenerator } from './deal-generator/events.js';
 import { getEmails } from './deal-generator/records.js';
-import { RelatedLicenseSet as NewRelatedLicenseSet } from './license-grouper.js';
 
 function contactsFor(contacts: ContactsByEmail, groups: RelatedLicenseSet) {
   return (_.uniq(
@@ -22,17 +20,6 @@ function contactsFor(contacts: ContactsByEmail, groups: RelatedLicenseSet) {
     .map(email => contacts[email])
     .filter(isPresent))
     .sort(sorter(c => c.contact_type === 'Customer' ? -1 : 0));
-}
-
-export function backfillDealCompanies(db: Database, allMatches: NewRelatedLicenseSet[]) {
-  for (const deal of db.dealManager.getAll()) {
-    const contacts = deal.contacts.getAll();
-    const customers = contacts.filter(c => c.isCustomer);
-    const customerCompany = customers.flatMap(customer => customer.companies.getAll());
-    for (const company of customerCompany) {
-      deal.companies.add(company);
-    }
-  }
 }
 
 export function generateDeals(data: {
