@@ -52,11 +52,21 @@ export default class Hubspot {
   }
 
   async createEntities(kind: EntityKind, inputs: NewEntity[]): Promise<ExistingEntity[]> {
-    return (await this.apiFor(kind).batchApi.create({ inputs })).body.results;
+    try {
+      return (await this.apiFor(kind).batchApi.create({ inputs })).body.results;
+    }
+    catch (e: any) {
+      throw new Error(e.response.body.message);
+    }
   }
 
   async updateEntities(kind: EntityKind, inputs: ExistingEntity[]): Promise<ExistingEntity[]> {
-    return (await this.apiFor(kind).batchApi.update({ inputs })).body.results;
+    try {
+      return (await this.apiFor(kind).batchApi.update({ inputs })).body.results;
+    }
+    catch (e: any) {
+      throw new Error(e.response.body.message);
+    }
   }
 
   async createAssociations(fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void> {
