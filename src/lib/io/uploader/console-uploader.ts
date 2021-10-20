@@ -19,7 +19,7 @@ export default class ConsoleUploader implements Uploader {
   }
 
   async updateHubspotEntities(kind: EntityKind, inputs: ExistingEntity[]): Promise<ExistingEntity[]> {
-    this.fakeApiConsoleLog(`Fake-created ${kind}s:`, inputs);
+    this.fakeApiConsoleLog(`Fake-updated ${kind}s:`, inputs);
     return inputs;
   }
 
