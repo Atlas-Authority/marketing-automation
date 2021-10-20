@@ -4,7 +4,7 @@ import { Contact } from '../model/hubspot/contact.js';
 
 export function identifyDomains(db: Database) {
   for (const l of db.licenses) {
-    maybeAddDomain(db.partnerDomains, l.data.billingContact?.email);
+    maybeAddDomain(db.partnerDomains, l.data.partnerDetails?.billingContact.email);
     maybeAddDomain(db.customerDomains, l.data.billingContact?.email);
   }
 
