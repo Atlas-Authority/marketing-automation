@@ -2,14 +2,12 @@ import { downloadAllData } from '../io/downloader/download-initial-data.js';
 import { Downloader } from '../io/downloader/downloader.js';
 import { Uploader } from '../io/uploader/uploader.js';
 import log from '../log/logger.js';
-import { Contact } from '../types/contact.js';
 import { backfillDealCompanies } from './backfill-deal-companies.js';
 import { generateContacts } from "./generate-contacts.js";
 import { generateDeals } from './generate-deals.js';
 import { matchIntoLikelyGroups } from './license-grouper.js';
 import { findAndFlagExternallyCreatedContacts, findAndFlagPartnerCompanies, findAndFlagPartnersByDomain, identifyDomains } from './partners.js';
 import { updateContactsBasedOnMatchResults } from './update-contacts-using-matches.js';
-import { upsertDealsInHubspot } from './upsert-deals.js';
 import zeroEmptyDealAmounts from './zero-empty-deal-amounts.js';
 
 export default async function runEngine({ downloader, uploader }: {
@@ -63,19 +61,10 @@ export default async function runEngine({ downloader, uploader }: {
   await db.dealManager.syncUpAllEntities();
 
   logStep('Generating deals');
-  const dealDiffs = generateDeals({
-    contactsByEmail,
-    initialDeals: db.allDeals,
-    providerDomains: db.providerDomains,
-    allMatches,
-    partnerDomains: db.partnerDomains,
-  });
+  generateDeals(db, allMatches);
 
   logStep('Upserting deals in Hubspot');
-  await upsertDealsInHubspot({
-    uploader,
-    dealDiffs,
-  });
+  await db.dealManager.syncUpAllEntities();
 
   logStep('Done!');
 }
