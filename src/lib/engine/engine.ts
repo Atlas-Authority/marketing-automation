@@ -44,10 +44,10 @@ export default async function runEngine({ downloader, uploader }: {
   findAndFlagPartnersByDomain(db);
 
   logStep('Upserting Contacts in Hubspot');
-  db.contactManager.syncUpAllEntities();
+  await db.contactManager.syncUpAllEntities();
 
   logStep('Updating Companies in Hubspot');
-  db.companyManager.syncUpAllEntities();
+  await db.companyManager.syncUpAllEntities();
 
   const contactsByEmail: { [email: string]: Contact } = buildContactsStructure(verifiedContacts);
 
