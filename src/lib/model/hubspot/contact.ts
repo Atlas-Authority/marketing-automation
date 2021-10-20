@@ -74,11 +74,11 @@ export class ContactManager extends EntityManager<ContactProps, Contact> {
       country: data.country,
       region: data.region,
 
-      firstName: data.firstname || '',
-      lastName: data.lastname || '',
-      phone: data.phone || '',
-      city: data.city || '',
-      state: data.state || '',
+      firstName: data.firstname?.trim() || null,
+      lastName: data.lastname?.trim() || null,
+      phone: data.phone?.trim() || null,
+      city: data.city?.trim() || null,
+      state: data.state?.trim() || null,
 
       relatedProducts: new Set(data.related_products ? data.related_products.split(';') : []),
       licenseTier: !data.license_tier ? null : +data.license_tier,
