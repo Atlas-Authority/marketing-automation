@@ -38,11 +38,7 @@ export default async function runEngine({ downloader, uploader }: {
   generateContacts(db);
 
   logStep('Flagging partner companies');
-  await findAndFlagPartnerCompanies({
-    contacts: generatedContacts,
-    companies: db.allCompanies,
-    uploader,
-  });
+  await findAndFlagPartnerCompanies(db);
 
   logStep('Flagging partners by domain');
   findAndFlagPartnersByDomain({
@@ -51,8 +47,11 @@ export default async function runEngine({ downloader, uploader }: {
     providerDomains: db.providerDomains,
   });
 
-  logStep('Upserting contacts in Hubspot');
+  logStep('Upserting Contacts in Hubspot');
   db.contactManager.syncUpAllEntities();
+
+  logStep('Updating Companies in Hubspot');
+  db.companyManager.syncUpAllEntities();
 
   const contactsByEmail: { [email: string]: Contact } = buildContactsStructure(verifiedContacts);
 

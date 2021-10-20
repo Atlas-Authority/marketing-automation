@@ -36,33 +36,18 @@ export async function findAndFlagExternallyCreatedContacts(db: Database) {
   for (const c of customers) { c.data.contactType = 'Customer'; }
 }
 
-export async function findAndFlagPartnerCompanies({ uploader, contacts, companies }: {
-  uploader: Uploader,
-  contacts: GeneratedContact[],
-  companies: Company[],
-}) {
-  const companyUpdates: { id: string, properties: { [key: string]: string } }[] = [];
-
-  for (const company of companies) {
-    const members = contacts.filter(contact => contact.company_id === company.id);
-    const hasPartner = members.some(c => c.contact_type === 'Partner');
+export async function findAndFlagPartnerCompanies(db: Database) {
+  for (const company of db.companyManager.getAll()) {
+    const members = db.contactManager.getArray().filter(contact => contact.companies.getAll().includes(company));
+    const hasPartner = members.some(c => c.data.contactType === 'Partner');
 
     if (hasPartner) {
-      if (company.type !== 'PARTNER') {
-        company.type = 'PARTNER';
-        companyUpdates.push({
-          id: company.id,
-          properties: { type: company.type }
-        });
-      }
-
-      for (const member of members.filter(c => c.contact_type !== 'Partner')) {
-        member.contact_type = 'Partner';
+      company.data.type === 'Partner';
+      for (const member of members) {
+        member.data.contactType = 'Partner';
       }
     }
   }
-
-  await uploader.updateAllCompanies(companyUpdates);
 }
 
 export function findAndFlagPartnersByDomain({ contacts, sourceContacts, providerDomains }: {
