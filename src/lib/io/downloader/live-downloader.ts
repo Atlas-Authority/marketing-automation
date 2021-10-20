@@ -20,7 +20,7 @@ export default class LiveDownloader implements Downloader {
   hubspotClient = new hubspot.Client({ apiKey: config.hubspot.apiKey });
 
   async downloadHubspotEntities(kind: EntityKind, apiProperties: string[], inputAssociations: string[]): Promise<FullEntity[]> {
-    const normalizedEntities = this.hubspot.downloadEntities(kind, apiProperties, inputAssociations);
+    const normalizedEntities = await this.hubspot.downloadEntities(kind, apiProperties, inputAssociations);
     save(`${kind}s2.json`, normalizedEntities);
     return normalizedEntities;
   }
@@ -35,7 +35,7 @@ export default class LiveDownloader implements Downloader {
 
   async downloadAllTlds(downloadLogger: DownloadLogger): Promise<string[]> {
     downloadLogger.prepare(1);
-    const tlds = downloadAllTlds();
+    const tlds = await downloadAllTlds();
     downloadLogger.tick();
     save('tlds.json', tlds);
     return tlds;
