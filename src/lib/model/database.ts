@@ -49,9 +49,6 @@ export class Database {
       this.downloader.downloadLicensesWithoutDataInsights(multiDownloadLogger.makeDownloadLogger('Licenses Without Data Insights')),
       this.downloader.downloadTransactions(multiDownloadLogger.makeDownloadLogger('Transactions')),
       this.downloader.downloadAllTlds(multiDownloadLogger.makeDownloadLogger('Tlds')),
-    ]);
-
-    await Promise.all([
       this.downloadAllCompanies(multiDownloadLogger.makeDownloadLogger('DB-Companies')),
       this.downloadAllContacts(multiDownloadLogger.makeDownloadLogger('DB-Contacts')),
       this.downloadAllDeals(multiDownloadLogger.makeDownloadLogger('DB-Deals')),
