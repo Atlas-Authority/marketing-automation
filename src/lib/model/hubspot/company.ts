@@ -38,6 +38,6 @@ export class CompanyManager extends EntityManager<CompanyProps, Company> {
   override identifiers: (keyof CompanyProps)[] = [
   ];
 
-  override rebuildIndexes() { }
+  override rebuildIndexes(companies: Iterable<Company>) { }
 
 }
