@@ -67,6 +67,10 @@ export abstract class EntityManager<
     return this.entities.values();
   }
 
+  public getArray() {
+    return [...this.entities.values()];
+  }
+
   public async syncUpAllEntities() {
     this.syncUpAllEntitiesProperties();
     this.syncUpAllEntitiesAssociations();
@@ -74,7 +78,7 @@ export abstract class EntityManager<
   }
 
   private async syncUpAllEntitiesProperties() {
-    const toSync = [...this.entities.values()].filter(e => e.hasPropertyChanges());
+    const toSync = this.getArray().filter(e => e.hasPropertyChanges());
     const toCreate = toSync.filter(e => e.id === undefined);
     const toUpdate = toSync.filter(e => e.id !== undefined);
 
@@ -131,7 +135,7 @@ export abstract class EntityManager<
   }
 
   private async syncUpAllEntitiesAssociations() {
-    const toSync = ([...this.entities.values()]
+    const toSync = (this.getArray()
       .filter(e => e.hasAssociationChanges())
       .flatMap(e => e.getAssociationChanges()
         .map(changes => ({ e, ...changes }))));
