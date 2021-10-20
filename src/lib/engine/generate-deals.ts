@@ -23,7 +23,7 @@ function contactsFor(contacts: ContactsByEmail, groups: RelatedLicenseSet) {
     .sort(sorter(c => c.contact_type === 'Customer' ? -1 : 0));
 }
 
-export function generateDeals(allMatches: RelatedLicenseSet[], db: Database) {
+export function generateDeals(db: Database, allMatches: RelatedLicenseSet[]) {
   const { dealCreateActions, dealUpdateActions } = generateDealActions(db, allMatches
     .filter(group =>
       group.some(m =>
