@@ -35,8 +35,10 @@ export function findAndFlagExternallyCreatedContacts(db: Database) {
 }
 
 export function findAndFlagPartnerCompanies(db: Database) {
+  const contacts = db.contactManager.getArray();
+
   for (const company of db.companyManager.getAll()) {
-    const members = db.contactManager.getArray().filter(contact => contact.companies.getAll().includes(company));
+    const members = contacts.filter(contact => contact.companies.has(company));
     const hasPartner = members.some(c => c.data.contactType === 'Partner');
 
     if (hasPartner) {

@@ -89,6 +89,7 @@ export abstract class Entity<P extends { [key: string]: any }> {
   protected makeDynamicAssociation<T extends Entity<any>>(kind: EntityKind) {
     return {
       getAll: () => this.getAssociations(kind) as T[],
+      has: (entity: T) => this.hasAssociation(kind, entity),
       add: (entity: T) => this.addAssociation(kind, entity),
       remove: (entity: T) => this.removeAssociation(kind, entity),
     };
@@ -100,6 +101,10 @@ export abstract class Entity<P extends { [key: string]: any }> {
 
   private removeAssociation(kind: EntityKind, entity: Entity<any>) {
     this.newAssocs.delete(`${kind}:${entity.guaranteedId()}`);
+  }
+
+  private hasAssociation(kind: EntityKind, entity: Entity<any>) {
+    return this.newAssocs.has(`${kind}:${entity.guaranteedId()}`);
   }
 
   private getAssociations(kind: EntityKind) {
