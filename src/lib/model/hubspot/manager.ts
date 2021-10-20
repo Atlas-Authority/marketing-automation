@@ -53,6 +53,12 @@ export abstract class EntityManager<
     this.rebuildIndexes(this.entities.values());
   }
 
+  public create(props: P) {
+    const e = new this.Entity(this.db, null, props, new Set());
+    this.rebuildIndexes([e]);
+    return e;
+  }
+
   public get(id: string) {
     return this.entities.get(id);
   }
