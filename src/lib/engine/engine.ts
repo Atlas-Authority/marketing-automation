@@ -3,7 +3,6 @@ import { Downloader } from '../io/downloader/downloader.js';
 import { Uploader } from '../io/uploader/uploader.js';
 import log from '../log/logger.js';
 import { Contact } from '../types/contact.js';
-import { RelatedLicenseSet } from '../types/license.js';
 import { buildContactsStructure } from './contacts.js';
 import { generateContactUpdateActions } from './generate-contact-updates.js';
 import { generateContacts } from "./generate-contacts.js";
@@ -57,12 +56,7 @@ export default async function runEngine({ downloader, uploader }: {
   const contactsByEmail: { [email: string]: Contact } = buildContactsStructure(verifiedContacts);
 
   logStep('Running Scoring Engine');
-  const allMatches: RelatedLicenseSet[] = matchIntoLikelyGroups({
-    transactions: db.allTransactions,
-    licenses: db.allLicenses,
-    providerDomains: db.providerDomains,
-    contactsByEmail,
-  });
+  const allMatches = matchIntoLikelyGroups(db);
 
   logStep('Generating contact updates');
   const contactUpdateActions = generateContactUpdateActions(allMatches, contactsByEmail);

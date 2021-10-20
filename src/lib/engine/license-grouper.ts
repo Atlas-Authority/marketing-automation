@@ -4,31 +4,33 @@ import * as util from 'util';
 import { fnOrCache } from '../cache/fn-cache.js';
 import { saveForInspection } from '../cache/inspection.js';
 import log from '../log/logger.js';
-import { Contact, ContactsByEmail } from '../types/contact.js';
-import { License, LicenseContext } from '../types/license.js';
-import { Transaction } from '../types/transaction.js';
+import { Database } from '../model/database.js';
+import { License } from '../model/marketplace/license.js';
+import { Transaction } from '../model/marketplace/transaction.js';
 import { sorter } from '../util/helpers.js';
 import { LicenseMatcher } from './license-matcher.js';
 
+type LicenseContext = {
+  license: License;
+  transactions: Transaction[];
+};
+
+/** Related via the matching engine. */
+export type RelatedLicenseSet = LicenseContext[];
 
 // Server/DC licenses have separate trial licenses.
 // Cloud licenses do NOT have separate trial licenses; updated in place.
 
 
-export function matchIntoLikelyGroups(data: {
-  transactions: Transaction[],
-  licenses: License[],
-  providerDomains: Set<string>,
-  contactsByEmail: ContactsByEmail,
-}) {
+export function matchIntoLikelyGroups(db: Database): RelatedLicenseSet[] {
   log.info('Scoring Engine', 'Storing licenses/transactions by id');
-  const itemsByAddonLicenseId: { [addonLicenseId: string]: LicenseContext } = buildMappingStructure(data.contactsByEmail, data.transactions, data.licenses);
+  const itemsByAddonLicenseId: { [addonLicenseId: string]: LicenseContext } = buildMappingStructure(db);
 
   log.info('Scoring Engine', 'Grouping licenses/transactions by hosting and addonKey');
   const productGroupings: { addonKey: string; hosting: string; group: License[] }[] = groupMappingByProduct(itemsByAddonLicenseId);
 
   const { maybeMatches, unaccounted } = fnOrCache('scorer.dat', () => {
-    const scorer = new LicenseMatcher(data.providerDomains, data.contactsByEmail);
+    const scorer = new LicenseMatcher(db);
     return scoreLicenseMatches(productGroupings, scorer);
   });
 
@@ -89,42 +91,42 @@ export function matchIntoLikelyGroups(data: {
     Array.from(new Set(Object.values(normalizedMatches)))
       .map(group => Array.from(group)
         .map(id => itemsByAddonLicenseId[id])
-        .sort(sorter(m => m.license.maintenanceStartDate)))
+        .sort(sorter(m => m.license.data.maintenanceStartDate)))
   );
 }
 
-function buildMappingStructure(contacts: { [key: string]: Contact }, transactions: Transaction[], licenses: License[]) {
+function buildMappingStructure(db: Database) {
   const mapping: { [key: string]: { license: License, transactions: Transaction[], partnerLicense: boolean, partnerTransaction: boolean } } = {};
 
   const oddTransactions: Transaction[] = [];
 
-  for (const license of licenses) {
-    const id = license.addonLicenseId;
+  for (const license of db.licenses) {
+    const id = license.data.addonLicenseId;
     assert.ok(!mapping[id], 'Expected license id to be unique.');
 
-    const contact = contacts[license.contactDetails.technicalContact.email];
-    assert.ok(contact, `No contact for: ${license.contactDetails.technicalContact.email}`);
+    const contact = db.contactManager.getByEmail(license.data.technicalContact.email);
+    assert.ok(contact, `No contact for: ${license.data.technicalContact.email}`);
 
     mapping[id] = {
       transactions: [],
       license,
-      partnerLicense: contact.contact_type === 'Partner',
+      partnerLicense: contact.isPartner,
       partnerTransaction: false,
     };
   }
 
-  for (const transaction of transactions) {
-    const id = transaction.addonLicenseId;
+  for (const transaction of db.transactions) {
+    const id = transaction.data.addonLicenseId;
 
     if (!mapping[id]) {
       oddTransactions.push(transaction);
       continue;
     }
 
-    const contact = contacts[transaction.customerDetails.technicalContact.email];
+    const contact = db.contactManager.getByEmail(transaction.data.technicalContact.email);
     assert.ok(contact, 'No contact');
 
-    if (contact.contact_type === 'Partner') {
+    if (contact.isPartner) {
       mapping[id].partnerTransaction = true;
     }
 
@@ -134,20 +136,20 @@ function buildMappingStructure(contacts: { [key: string]: Contact }, transaction
   const oddBalances: { [addonLicenseId: string]: { balance: number, tx: Transaction } } = {};
 
   for (const tx of oddTransactions) {
-    if (!oddBalances[tx.addonLicenseId]) oddBalances[tx.addonLicenseId] = { balance: 0, tx };
-    oddBalances[tx.addonLicenseId].balance += tx.purchaseDetails.purchasePrice;
+    if (!oddBalances[tx.data.addonLicenseId]) oddBalances[tx.data.addonLicenseId] = { balance: 0, tx };
+    oddBalances[tx.data.addonLicenseId].balance += tx.data.purchasePrice;
   }
 
   const badBalances = (Object.values(oddBalances)
     .filter(({ balance }) => (balance !== 0))
-    .map(({ tx }) => [tx.transactionId, tx.addonLicenseId]));
+    .map(({ tx }) => [tx.data.transactionId, tx.data.addonLicenseId]));
 
   if (badBalances.length > 0) {
     log.warn('Scoring Engine', "The following transactions have no accompanying licenses:",
       badBalances.map(([transaction, license]) => ({ transaction, license })));
   }
 
-  removeDuplicateTransactions(licenses, transactions);
+  removeDuplicateTransactions(db.licenses, db.transactions);
 
   return Object.fromEntries(Object.entries(mapping)
     .filter(([, m]) => !m.partnerLicense && !m.partnerTransaction)
@@ -162,8 +164,8 @@ function groupMappingByProduct(mapping: { [key: string]: LicenseContext }) {
   const productMapping: { [addonKeyAndHosting: string]: { addonKey: string, hosting: string, group: License[] } } = {};
 
   for (const [id, { license }] of Object.entries(mapping)) {
-    const addonKey = license.addonKey;
-    const hosting = license.hosting;
+    const addonKey = license.data.addonKey;
+    const hosting = license.data.hosting;
     const key = `${addonKey} - ${hosting}`;
 
     if (!productMapping[key]) productMapping[key] = { addonKey, hosting, group: [] };
@@ -204,8 +206,8 @@ function scoreLicenseMatches(productGroupings: { addonKey: string; hosting: stri
           }
         }
         else {
-          unaccounted.add(license1.addonLicenseId);
-          unaccounted.add(license2.addonLicenseId);
+          unaccounted.add(license1.data.addonLicenseId);
+          unaccounted.add(license2.data.addonLicenseId);
         }
       }
     }
@@ -227,25 +229,25 @@ function scoreLicenseMatches(productGroupings: { addonKey: string; hosting: stri
 
 export function shorterLicenseInfo(license: License) {
   return {
-    addonLicenseId: license.addonLicenseId,
+    addonLicenseId: license.data.addonLicenseId,
 
-    company: license.contactDetails.company,
+    company: license.data.company,
 
-    tech_email: license.contactDetails.technicalContact.email,
-    tech_name: license.contactDetails.technicalContact.name,
-    tech_address: license.contactDetails.technicalContact.address1,
-    tech_city: license.contactDetails.technicalContact.city,
-    tech_phone: license.contactDetails.technicalContact.phone,
-    tech_state: license.contactDetails.technicalContact.state,
-    tech_zip: license.contactDetails.technicalContact.postcode,
-    tech_country: license.contactDetails.country,
-    tech_address2: license.contactDetails.technicalContact.address2,
+    tech_email: license.data.technicalContact.email,
+    tech_name: license.data.technicalContact.name,
+    tech_address: license.data.technicalContact.address1,
+    tech_city: license.data.technicalContact.city,
+    tech_phone: license.data.technicalContact.phone,
+    tech_state: license.data.technicalContact.state,
+    tech_zip: license.data.technicalContact.postcode,
+    tech_country: license.data.country,
+    tech_address2: license.data.technicalContact.address2,
 
-    start: license.maintenanceStartDate,
-    end: license.maintenanceEndDate,
+    start: license.data.maintenanceStartDate,
+    end: license.data.maintenanceEndDate,
 
-    billing_email: license.contactDetails.billingContact?.email,
-    partner_email: license.partnerDetails?.billingContact.email,
+    billing_email: license.data.billingContact?.email,
+    partner_email: license.data.partnerDetails?.billingContact.email,
   };
 }
 
@@ -310,7 +312,7 @@ export function normalizeMatches(maybeMatches: { score: number, item1: string, i
 function removeDuplicateTransactions(allLicenses: License[], allTransactions: Transaction[]) {
   const transactionsWithSameId = (
     Object.values(
-      _.groupBy(allTransactions, t => [t.transactionId, t.addonKey, t.purchaseDetails.hosting, t.purchaseDetails.saleDate])
+      _.groupBy(allTransactions, t => [t.data.transactionId, t.data.addonKey, t.data.hosting, t.data.saleDate])
     )
       .filter(m => m.length > 1)
   );
@@ -321,7 +323,7 @@ function removeDuplicateTransactions(allLicenses: License[], allTransactions: Tr
         const t1 = ts[i1];
         const t2 = ts[i2];
 
-        const ls = allLicenses.filter(l => [t1.addonLicenseId, t2.addonLicenseId].includes(l.addonLicenseId));
+        const ls = allLicenses.filter(l => [t1.data.addonLicenseId, t2.data.addonLicenseId].includes(l.data.addonLicenseId));
         const [l1, l2] = ls;
 
         if (l1 && l2 && equalExceptIds(t1, t2) && equalExceptIds(l1, l2)) {
@@ -334,10 +336,10 @@ function removeDuplicateTransactions(allLicenses: License[], allTransactions: Tr
 }
 
 function equalExceptIds(a: License | Transaction, b: License | Transaction) {
-  if (a.licenseId == b.licenseId) return false;
-  if (a.addonLicenseId == b.addonLicenseId) return false;
-  const { addonLicenseId: ga1, licenseId: ga2, ...a1 } = a;
-  const { addonLicenseId: gb1, licenseId: gb2, ...b1 } = b;
+  if (a.data.licenseId == b.data.licenseId) return false;
+  if (a.data.addonLicenseId == b.data.addonLicenseId) return false;
+  const { addonLicenseId: ga1, licenseId: ga2, ...a1 } = a.data;
+  const { addonLicenseId: gb1, licenseId: gb2, ...b1 } = b.data;
   return util.isDeepStrictEqual(a1, b1);
 }
 
