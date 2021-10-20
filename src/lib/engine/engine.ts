@@ -33,6 +33,7 @@ export default async function runEngine({ downloader, uploader }: {
 
   logStep('Flagging partner/customer contacts created outside engine');
   findAndFlagExternallyCreatedContacts(db);
+  await db.contactManager.syncUpAllEntities();
 
   logStep('Generating contacts');
   generateContacts(db);
