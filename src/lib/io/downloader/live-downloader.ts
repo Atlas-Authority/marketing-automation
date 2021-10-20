@@ -1,6 +1,4 @@
 import * as hubspot from '@hubspot/api-client';
-import { DateTime, Duration, Interval } from 'luxon';
-import fetch from 'node-fetch';
 import * as datadir from '../../cache/datadir.js';
 import config, { Pipeline } from '../../config/index.js';
 import { contactFromHubspot } from '../../engine/contacts.js';
@@ -8,11 +6,12 @@ import { Company } from '../../types/company.js';
 import { Contact } from '../../types/contact.js';
 import { Deal } from '../../types/deal.js';
 import { RawLicense, RawTransaction } from "../../model/marketplace/raw";
-import { AttachableError, SimpleError } from '../../util/errors.js';
+import { SimpleError } from '../../util/errors.js';
 import { Downloader, DownloadLogger } from './downloader.js';
 import Hubspot from '../../services/hubspot.js';
 import { EntityKind, FullEntity } from '../hubspot.js';
 import { downloadAllTlds, downloadFreeEmailProviders } from '../../services/domains.js';
+import { downloadLicensesWithDataInsights, downloadLicensesWithoutDataInsights, downloadTransactions } from '../../services/marketplace.js';
 
 
 export default class LiveDownloader implements Downloader {
@@ -44,7 +43,7 @@ export default class LiveDownloader implements Downloader {
 
   async downloadTransactions(downloadLogger: DownloadLogger): Promise<RawTransaction[]> {
     downloadLogger.prepare(1);
-    const json: RawTransaction[] = await downloadMarketplaceData('/sales/transactions/export');
+    const json: RawTransaction[] = await downloadTransactions();
     downloadLogger.tick();
 
     save('transactions.json', json);
@@ -53,7 +52,7 @@ export default class LiveDownloader implements Downloader {
 
   async downloadLicensesWithoutDataInsights(downloadLogger: DownloadLogger): Promise<RawLicense[]> {
     downloadLogger.prepare(1);
-    let json: RawLicense[] = await downloadMarketplaceData('/licenses/export?endDate=2018-07-01');
+    let json: RawLicense[] = await downloadLicensesWithoutDataInsights();
     downloadLogger.tick();
 
     save('licenses-without.json', json);
@@ -61,15 +60,10 @@ export default class LiveDownloader implements Downloader {
   }
 
   async downloadLicensesWithDataInsights(downloadLogger: DownloadLogger): Promise<RawLicense[]> {
-    const dates = dataInsightDateRanges();
-    downloadLogger.prepare(dates.length);
-    const promises = dates.map(async ({ startDate, endDate }) => {
-      const json: RawLicense[] = await downloadMarketplaceData(`/licenses/export?withDataInsights=true&startDate=${startDate}&endDate=${endDate}`);
-      downloadLogger.tick(`${startDate}-${endDate}`);
-      return json;
-    });
-    const licenses = (await Promise.all(promises)).flat();
-
+    const licenses = await downloadLicensesWithDataInsights(
+      downloadLogger.prepare,
+      downloadLogger.tick
+    );
     save('licenses-with.json', licenses);
     return licenses;
   }
@@ -214,41 +208,9 @@ export default class LiveDownloader implements Downloader {
 
 }
 
-
-async function downloadMarketplaceData<T>(subpath: string): Promise<T[]> {
-  const res = await fetch(`https://marketplace.atlassian.com/rest/2/vendors/${config.mpac.sellerId}/reporting${subpath}`, {
-    headers: {
-      'Authorization': 'Basic ' + Buffer.from(config.mpac.user + ':' + config.mpac.pass).toString('base64'),
-    },
-  });
-
-  let text;
-  try {
-    text = await res.text();
-    return JSON.parse(text);
-  }
-  catch (e) {
-    throw new AttachableError('Probably invalid Marketplace JSON.', text as string);
-  }
-}
-
-
-
-// Helpers
-
 function save(file: string, data: unknown) {
   if (config.isProduction) return;
 
   const content = JSON.stringify(data, null, 2);
   datadir.writeFile('in', file, content);
-}
-
-function dataInsightDateRanges() {
-  return Interval.fromDateTimes(
-    DateTime.local(2018, 7, 1),
-    DateTime.local()
-  ).splitBy(Duration.fromObject({ months: 2 })).map(int => ({
-    startDate: int.start.toISODate(),
-    endDate: int.end.toISODate(),
-  }));
 }
