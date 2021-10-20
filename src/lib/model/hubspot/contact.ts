@@ -3,6 +3,8 @@ import { Company } from "./company.js";
 import { Entity } from "./entity.js";
 import { EntityManager, PropertyTransformers } from "./manager.js";
 
+export type ContactType = 'Partner' | 'Customer';
+
 export type ContactProps = {
   email: string;
   firstName: string | null;
@@ -11,7 +13,7 @@ export type ContactProps = {
   city: string | null;
   state: string | null;
 
-  contactType: 'Partner' | 'Customer';
+  contactType: ContactType;
 
   country: string;
   region: string;
