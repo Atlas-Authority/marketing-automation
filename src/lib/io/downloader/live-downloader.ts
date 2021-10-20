@@ -1,4 +1,3 @@
-import * as hubspot from '@hubspot/api-client';
 import * as datadir from '../../cache/datadir.js';
 import config from '../../config/index.js';
 import { RawLicense, RawTransaction } from "../../model/marketplace/raw";
@@ -12,7 +11,6 @@ import { Downloader, DownloadLogger } from './downloader.js';
 export default class LiveDownloader implements Downloader {
 
   hubspot = new Hubspot();
-  hubspotClient = new hubspot.Client({ apiKey: config.hubspot.apiKey });
 
   async downloadHubspotEntities(kind: EntityKind, apiProperties: string[], inputAssociations: string[]): Promise<FullEntity[]> {
     const normalizedEntities = await this.hubspot.downloadEntities(kind, apiProperties, inputAssociations);

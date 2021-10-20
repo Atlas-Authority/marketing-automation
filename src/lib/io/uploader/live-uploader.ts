@@ -1,5 +1,3 @@
-import * as hubspot from '@hubspot/api-client';
-import config from '../../config/index.js';
 import Hubspot from '../../services/hubspot.js';
 import { Association, EntityKind, ExistingEntity, NewEntity } from '../hubspot.js';
 import { Uploader } from './uploader.js';
@@ -8,7 +6,6 @@ import { Uploader } from './uploader.js';
 export default class LiveUploader implements Uploader {
 
   hubspot = new Hubspot();
-  hubspotClient = new hubspot.Client({ apiKey: config.hubspot.apiKey });
 
   async createHubspotEntities(kind: EntityKind, inputs: NewEntity[]): Promise<ExistingEntity[]> {
     return await this.hubspot.createEntities(kind, inputs);
