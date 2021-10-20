@@ -4,8 +4,6 @@ import { Uploader } from "../io/uploader/uploader.js";
 import { MultiDownloadLogger } from "../log/download-logger.js";
 import log from "../log/logger.js";
 import { makeMultiProviderDomainsSet } from "../services/domains.js";
-import { License } from "../types/license.js";
-import { Transaction } from "../types/transaction.js";
 import { CompanyManager } from "./hubspot/company.js";
 import { ContactManager } from "./hubspot/contact.js";
 import { DealManager } from "./hubspot/deal.js";
@@ -22,9 +20,6 @@ export class Database {
 
   licenses: NormalizedLicense[] = [];
   transactions: NormalizedTransaction[] = [];
-
-  allLicenses: License[] = [];
-  allTransactions: Transaction[] = [];
 
   /** Domains that provide spam or free email accounts for masses. */
   providerDomains = new Set<string>();
@@ -74,9 +69,6 @@ export class Database {
       licensesWithoutDataInsights,
       allTransactions,
       emailRe);
-
-    this.allLicenses = results.allLicenses;
-    this.allTransactions = results.allTransactions;
 
     this.licenses = results.allLicenses.map(normalizeLicense);
     this.transactions = results.allTransactions.map(normalizeTransaction);

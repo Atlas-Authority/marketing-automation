@@ -40,10 +40,10 @@ for (const sen of sens) {
 function check(sen: string) {
   if (sen.startsWith('SEN-')) sen = sen.slice(4);
 
-  const withWrongId = data.allLicenses.find(l => l.addonLicenseId !== sen && l.licenseId === 'SEN-' + sen);
+  const withWrongId = data.licenses.find(l => l.data.addonLicenseId !== sen && l.data.licenseId === 'SEN-' + sen);
   if (withWrongId) {
-    log.warn('Dev', sen, `Using addonLicenseId (${withWrongId.addonLicenseId}) instead of licenseId`);
-    sen = withWrongId.addonLicenseId;
+    log.warn('Dev', sen, `Using addonLicenseId (${withWrongId.data.addonLicenseId}) instead of licenseId`);
+    sen = withWrongId.data.addonLicenseId;
   }
 
   if (checkSEN(sen)) {
@@ -83,8 +83,8 @@ function checkSEN(sen: string) {
     return true;
   }
 
-  const ls = data.allLicenses.filter(l => l.addonLicenseId === sen);
-  const cs = ls.map(l => data.contactManager.getByEmail(l.contactDetails.technicalContact.email));
+  const ls = data.licenses.filter(l => l.data.addonLicenseId === sen);
+  const cs = ls.map(l => data.contactManager.getByEmail(l.data.technicalContact.email));
   if (cs.some(c => c && c.data.contactType === 'Partner')) {
     log.info('Dev', sen, 'Contact is Partner');
     return true;

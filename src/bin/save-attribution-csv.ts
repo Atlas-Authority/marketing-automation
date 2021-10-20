@@ -8,8 +8,8 @@ const data = await downloadAllData({
 });
 
 const attributions = (data
-  .allLicenses
-  .map(l => l.attribution)
+  .licenses
+  .map(l => l.data.attribution)
   .filter(isPresent)
 );
 
