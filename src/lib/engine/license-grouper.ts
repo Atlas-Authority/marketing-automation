@@ -10,7 +10,7 @@ import { Transaction } from '../model/marketplace/transaction.js';
 import { sorter } from '../util/helpers.js';
 import { LicenseMatcher } from './license-matcher.js';
 
-type LicenseContext = {
+export type LicenseContext = {
   license: License;
   transactions: Transaction[];
 };

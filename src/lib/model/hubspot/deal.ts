@@ -9,7 +9,7 @@ import { EntityManager, PropertyTransformers } from "./manager.js";
 const addonLicenseIdKey = config.hubspot.attrs.deal.addonLicenseId;
 const transactionIdKey = config.hubspot.attrs.deal.transactionId;
 
-type DealProps = {
+export type DealProps = {
   relatedProducts: string;
   aaApp: string;
   addonLicenseId: string | null;
@@ -30,6 +30,7 @@ export class Deal extends Entity<DealProps> {
   contacts = this.makeDynamicAssociation<Contact>('contact');
   companies = this.makeDynamicAssociation<Company>('company');
 
+  isEval() { return this.data.dealstage === DealStage.EVAL; }
   isClosed() {
     return (
       this.data.dealstage === DealStage.CLOSED_LOST ||
