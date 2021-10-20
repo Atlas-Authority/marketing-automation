@@ -1,8 +1,9 @@
 import log from '../../log/logger.js';
-import { License, LicenseContext } from "../../types/license.js";
-import { Transaction } from "../../types/transaction.js";
+import { License } from '../../model/marketplace/license.js';
+import { Transaction } from '../../model/marketplace/transaction.js';
 import { sorter } from "../../util/helpers.js";
-import { abbrRecordDetails, getDate, getLicense, getLicenseType, isEvalOrOpenSourceLicense, isLicense, isPaidLicense, isTransaction } from "./records.js";
+import { LicenseContext } from '../license-grouper.js';
+import { abbrRecordDetails, getDate, getLicense, getLicenseType, isEvalOrOpenSourceLicense, isPaidLicense } from "./records.js";
 
 export type RefundEvent = { type: 'refund', groups: LicenseContext[], refundedTxs: Transaction[] };
 export type EvalEvent = { type: 'eval', groups: LicenseContext[], licenses: License[] };
@@ -27,7 +28,7 @@ export class EventGenerator {
     this.sortRecords(records);
 
     for (const record of records) {
-      if (isLicense(record)) {
+      if (record instanceof License) {
         if (isEvalOrOpenSourceLicense(record)) {
           this.events.push({ type: 'eval', groups, licenses: [record] });
         }
@@ -35,10 +36,10 @@ export class EventGenerator {
           this.events.push({ type: 'purchase', groups, licenses: [record] });
         }
       }
-      else if (isTransaction(record)) {
-        switch (record.purchaseDetails.saleType) {
+      else {
+        switch (record.data.saleType) {
           case 'New': {
-            const license = getLicense(record.addonLicenseId, groups);
+            const license = getLicense(record.data.addonLicenseId, groups);
             this.events.push({ type: 'purchase', groups, licenses: [license], transaction: record });
             break;
           }
@@ -107,7 +108,7 @@ export class EventGenerator {
       const records: (License | Transaction)[] = [...transactions];
 
       // Include the License unless it's based on a 'New' Transaction
-      if (!transactions.some(t => t.purchaseDetails.saleType === 'New')) {
+      if (!transactions.some(t => t.data.saleType === 'New')) {
         records.push(group.license);
       }
 
@@ -138,20 +139,20 @@ export class EventGenerator {
 
     // Handle refunds fully, either by applying or removing them
     for (const transaction of transactions) {
-      if (transaction.purchaseDetails.saleType === 'Refund') {
+      if (transaction.data.saleType === 'Refund') {
         const sameDayTransactions = (transactions
           .filter(other =>
-            other.purchaseDetails.maintenanceStartDate === transaction.purchaseDetails.maintenanceStartDate &&
-            other.purchaseDetails.saleType !== 'Refund'
+            other.data.maintenanceStartDate === transaction.data.maintenanceStartDate &&
+            other.data.saleType !== 'Refund'
           )
           .sort(sorter(tx =>
-            tx.purchaseDetails.maintenanceStartDate
+            tx.data.maintenanceStartDate
           ))
         );
 
         const fullyRefundedTx = sameDayTransactions.find(other =>
-          other.purchaseDetails.vendorAmount ===
-          -transaction.purchaseDetails.vendorAmount
+          other.data.vendorAmount ===
+          -transaction.data.vendorAmount
         );
 
         if (fullyRefundedTx) {
@@ -164,13 +165,13 @@ export class EventGenerator {
         }
         else {
           const partiallyRefundedTx = sameDayTransactions.find(other =>
-            other.purchaseDetails.vendorAmount >
-            Math.abs(transaction.purchaseDetails.vendorAmount)
+            other.data.vendorAmount >
+            Math.abs(transaction.data.vendorAmount)
           );
 
           if (partiallyRefundedTx) {
             // Apply partial refund on first found transaction
-            partiallyRefundedTx.purchaseDetails.vendorAmount += transaction.purchaseDetails.vendorAmount;
+            partiallyRefundedTx.data.vendorAmount += transaction.data.vendorAmount;
             transactions = transactions.filter(tx => tx !== transaction);
           }
           else {
@@ -195,10 +196,10 @@ export class EventGenerator {
 
 function abbrEventDetails(e: DealRelevantEvent) {
   switch (e.type) {
-    case 'eval': return { type: e.type, ids: e.licenses.map(l => l.addonLicenseId) };
-    case 'purchase': return { type: e.type, ids: e.licenses.map(l => l.addonLicenseId), tx: e.transaction?.transactionId };
-    case 'refund': return { type: e.type, ids: e.refundedTxs.map(tx => tx.transactionId) };
-    case 'renewal': return { type: e.type, id: e.transaction.transactionId };
-    case 'upgrade': return { type: e.type, id: e.transaction.transactionId };
+    case 'eval': return { type: e.type, ids: e.licenses.map(l => l.data.addonLicenseId) };
+    case 'purchase': return { type: e.type, ids: e.licenses.map(l => l.data.addonLicenseId), tx: e.transaction?.data.transactionId };
+    case 'refund': return { type: e.type, ids: e.refundedTxs.map(tx => tx.data.transactionId) };
+    case 'renewal': return { type: e.type, id: e.transaction.data.transactionId };
+    case 'upgrade': return { type: e.type, id: e.transaction.data.transactionId };
   }
 }
