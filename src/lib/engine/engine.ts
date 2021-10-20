@@ -32,13 +32,13 @@ export default async function runEngine({ downloader, uploader }: {
   identifyDomains(db);
 
   logStep('Flagging partner/customer contacts created outside engine');
-  await findAndFlagExternallyCreatedContacts(db);
+  findAndFlagExternallyCreatedContacts(db);
 
   logStep('Generating contacts');
   generateContacts(db);
 
   logStep('Flagging partner companies');
-  await findAndFlagPartnerCompanies(db);
+  findAndFlagPartnerCompanies(db);
 
   logStep('Flagging partners by domain');
   findAndFlagPartnersByDomain({

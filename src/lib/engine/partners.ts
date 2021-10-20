@@ -25,7 +25,7 @@ export function identifyDomains(db: Database) {
   }
 }
 
-export async function findAndFlagExternallyCreatedContacts(db: Database) {
+export function findAndFlagExternallyCreatedContacts(db: Database) {
   // Only check contacts with no contact_type and with email
   const candidates = db.contactManager.getArray().filter(c => c.data.contactType === null && c.data.email);
 
@@ -36,7 +36,7 @@ export async function findAndFlagExternallyCreatedContacts(db: Database) {
   for (const c of customers) { c.data.contactType = 'Customer'; }
 }
 
-export async function findAndFlagPartnerCompanies(db: Database) {
+export function findAndFlagPartnerCompanies(db: Database) {
   for (const company of db.companyManager.getAll()) {
     const members = db.contactManager.getArray().filter(contact => contact.companies.getAll().includes(company));
     const hasPartner = members.some(c => c.data.contactType === 'Partner');
