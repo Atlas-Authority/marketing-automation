@@ -1,7 +1,7 @@
+import * as datadir from '../lib/cache/datadir.js';
+import { shorterLicenseInfo } from '../lib/engine/license-grouper.js';
 import CachedFileDownloader from '../lib/io/downloader/cached-file-downloader.js';
 import { downloadAllData } from '../lib/io/downloader/download-initial-data.js';
-import { shorterLicenseInfo } from '../lib/engine/license-grouper.js';
-import * as datadir from '../lib/cache/datadir.js';
 import log from '../lib/log/logger.js';
 
 const [contactId] = process.argv.slice(2);

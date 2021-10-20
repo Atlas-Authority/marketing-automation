@@ -1,22 +1,22 @@
-import { DealManager } from "./hubspot/deal.js";
 import * as assert from 'assert';
-import { ContactManager } from "./hubspot/contact.js";
-import { CompanyManager } from "./hubspot/company.js";
-import { Entity } from "./hubspot/entity.js";
-import { EntityKind } from "../io/hubspot.js";
 import { Downloader, DownloadLogger } from "../io/downloader/downloader.js";
+import { EntityKind } from "../io/hubspot.js";
 import { Uploader } from "../io/uploader/uploader.js";
 import { MultiDownloadLogger } from "../log/download-logger.js";
 import log from "../log/logger.js";
-import { validateMarketplaceData } from "./marketplace/validation.js";
-import { License } from "../types/license.js";
-import { Transaction } from "../types/transaction.js";
+import { makeMultiProviderDomainsSet } from "../services/domains.js";
 import { Company } from "../types/company.js";
 import { Contact } from "../types/contact.js";
 import { Deal } from "../types/deal.js";
-import { makeMultiProviderDomainsSet } from "../services/domains.js";
+import { License } from "../types/license.js";
+import { Transaction } from "../types/transaction.js";
+import { CompanyManager } from "./hubspot/company.js";
+import { ContactManager } from "./hubspot/contact.js";
+import { DealManager } from "./hubspot/deal.js";
+import { Entity } from "./hubspot/entity.js";
 import { License as NormalizedLicense, normalizeLicense } from "./marketplace/license.js";
-import { Transaction as NormalizedTransaction, normalizeTransaction } from "./marketplace/transaction.js";
+import { normalizeTransaction, Transaction as NormalizedTransaction } from "./marketplace/transaction.js";
+import { validateMarketplaceData } from "./marketplace/validation.js";
 
 export class Database {
 

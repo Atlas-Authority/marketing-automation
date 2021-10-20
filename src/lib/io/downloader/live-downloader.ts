@@ -2,16 +2,16 @@ import * as hubspot from '@hubspot/api-client';
 import * as datadir from '../../cache/datadir.js';
 import config, { Pipeline } from '../../config/index.js';
 import { contactFromHubspot } from '../../engine/contacts.js';
+import { RawLicense, RawTransaction } from "../../model/marketplace/raw";
+import { downloadAllTlds, downloadFreeEmailProviders } from '../../services/domains.js';
+import Hubspot from '../../services/hubspot.js';
+import { downloadLicensesWithDataInsights, downloadLicensesWithoutDataInsights, downloadTransactions } from '../../services/marketplace.js';
 import { Company } from '../../types/company.js';
 import { Contact } from '../../types/contact.js';
 import { Deal } from '../../types/deal.js';
-import { RawLicense, RawTransaction } from "../../model/marketplace/raw";
 import { SimpleError } from '../../util/errors.js';
-import { Downloader, DownloadLogger } from './downloader.js';
-import Hubspot from '../../services/hubspot.js';
 import { EntityKind, FullEntity } from '../hubspot.js';
-import { downloadAllTlds, downloadFreeEmailProviders } from '../../services/domains.js';
-import { downloadLicensesWithDataInsights, downloadLicensesWithoutDataInsights, downloadTransactions } from '../../services/marketplace.js';
+import { Downloader, DownloadLogger } from './downloader.js';
 
 
 export default class LiveDownloader implements Downloader {

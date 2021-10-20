@@ -3,7 +3,7 @@ import { Downloader } from '../../io/downloader/downloader.js';
 import { EntityKind, RelativeAssociation } from '../../io/hubspot.js';
 import { Uploader } from '../../io/uploader/uploader.js';
 import { batchesOf } from '../../util/helpers.js';
-import { EntityDatabase, Entity } from "./entity.js";
+import { Entity, EntityDatabase } from "./entity.js";
 
 export type PropertyTransformers<T> = {
   [P in keyof T]: (prop: T[P]) => [string, string]

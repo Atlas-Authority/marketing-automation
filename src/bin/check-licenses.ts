@@ -1,12 +1,12 @@
-import CachedFileDownloader from '../lib/io/downloader/cached-file-downloader.js';
-import { downloadAllData } from '../lib/io/downloader/download-initial-data.js';
+import * as fs from 'fs';
+import * as datadir from '../lib/cache/datadir.js';
 import { olderThan90Days } from '../lib/engine/generate-deals.js';
 import { shorterLicenseInfo } from '../lib/engine/license-grouper.js';
+import CachedFileDownloader from '../lib/io/downloader/cached-file-downloader.js';
+import { downloadAllData } from '../lib/io/downloader/download-initial-data.js';
+import log from '../lib/log/logger.js';
 import { License } from '../lib/types/license.js';
 import { Transaction } from '../lib/types/transaction.js';
-import * as datadir from '../lib/cache/datadir.js';
-import * as fs from 'fs';
-import log from '../lib/log/logger.js';
 
 const args = process.argv.slice(2);
 

@@ -9,7 +9,7 @@ import { Company } from '../../types/company.js';
 import { Contact, GeneratedContact } from '../../types/contact.js';
 import { Deal, DealAssociationPair, DealCompanyAssociationPair, DealUpdate } from '../../types/deal.js';
 import { batchesOf } from '../../util/helpers.js';
-import { EntityKind, NewEntity, ExistingEntity, Association } from '../hubspot.js';
+import { Association, EntityKind, ExistingEntity, NewEntity } from '../hubspot.js';
 import { Uploader } from './uploader.js';
 
 

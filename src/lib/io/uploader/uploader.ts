@@ -1,7 +1,7 @@
 import { Company } from "../../types/company.js";
 import { Contact, GeneratedContact } from "../../types/contact.js";
 import { Deal, DealAssociationPair, DealCompanyAssociationPair, DealUpdate } from "../../types/deal.js";
-import { EntityKind, NewEntity, ExistingEntity, Association } from "../hubspot.js";
+import { Association, EntityKind, ExistingEntity, NewEntity } from "../hubspot.js";
 
 export interface Uploader {
   /** @deprecated */

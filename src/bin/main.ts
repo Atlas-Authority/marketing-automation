@@ -1,9 +1,9 @@
-import runEngine from "../lib/engine/engine.js";
 import { getCliOptions } from "../lib/cli/index.js";
 import config from "../lib/config/index.js";
+import runEngine from "../lib/engine/engine.js";
+import Slack from "../lib/services/slack.js";
 import { AttachableError, SimpleError } from '../lib/util/errors.js';
 import run from '../lib/util/runner.js';
-import Slack from "../lib/services/slack.js";
 
 const { downloader, uploader } = getCliOptions();
 

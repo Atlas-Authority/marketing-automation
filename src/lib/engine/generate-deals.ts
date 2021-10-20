@@ -1,17 +1,16 @@
 import * as assert from 'assert';
 import _ from 'lodash';
+import { saveForInspection } from '../cache/inspection.js';
+import { Uploader } from '../io/uploader/uploader.js';
+import log from '../log/logger.js';
 import { Contact, ContactsByEmail } from '../types/contact.js';
 import { Deal, DealAssociationPair, DealCompanyAssociationPair, DealUpdate } from '../types/deal.js';
 import { License, LicenseContext, RelatedLicenseSet } from '../types/license.js';
 import { isPresent, sorter } from '../util/helpers.js';
-import { saveForInspection } from '../cache/inspection.js';
-import log from '../log/logger.js';
 import { ActionGenerator, CreateDealAction, UpdateDealAction } from './deal-generator/actions.js';
 import { DealFinder } from './deal-generator/deal-finder.js';
 import { EventGenerator } from './deal-generator/events.js';
 import { getEmails } from './deal-generator/records.js';
-import { Uploader } from '../io/uploader/uploader.js';
-import { Company } from '../types/company.js';
 
 function contactsFor(contacts: ContactsByEmail, groups: LicenseContext[]) {
   return (_.uniq(

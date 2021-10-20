@@ -1,4 +1,4 @@
-import { RawLicenseContact, RawTransactionContact, RawPartnerDetails } from "./raw.js";
+import { RawLicenseContact, RawPartnerDetails, RawTransactionContact } from "./raw.js";
 
 export type ContactInfo = {
   email: string,

@@ -1,7 +1,7 @@
-import { Downloader } from './downloader.js';
-import { Uploader } from '../uploader/uploader.js';
-import ConsoleUploader from '../uploader/console-uploader.js';
 import { Database } from '../../model/database.js';
+import ConsoleUploader from '../uploader/console-uploader.js';
+import { Uploader } from '../uploader/uploader.js';
+import { Downloader } from './downloader.js';
 
 export async function downloadAllData({ downloader, uploader }: {
   downloader: Downloader,

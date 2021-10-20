@@ -1,9 +1,9 @@
 import assert from 'assert';
 import mustache from 'mustache';
+import config, { DealStage, Pipeline } from '../../config/index.js';
 import { Deal } from '../../types/deal.js';
 import { License, LicenseContext } from '../../types/license.js';
 import { DealNameTemplateProperties, Transaction } from '../../types/transaction.js';
-import config, { DealStage, Pipeline } from '../../config/index.js';
 import { isPresent, sorter } from "../../util/helpers.js";
 import { parseLicenseTier, parseTransactionTier, tierFromEvalOpportunity } from './tiers.js';
 

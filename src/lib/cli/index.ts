@@ -1,10 +1,10 @@
+import config, { LogLevel } from "../config/index.js";
 import CachedFileDownloader from "../io/downloader/cached-file-downloader.js";
 import { Downloader } from "../io/downloader/downloader.js";
 import LiveDownloader from '../io/downloader/live-downloader.js';
 import ConsoleUploader from "../io/uploader/console-uploader.js";
 import LiveUploader from "../io/uploader/live-uploader.js";
 import { Uploader } from "../io/uploader/uploader.js";
-import config, { LogLevel } from "../config/index.js";
 import { ArgParser } from './arg-parser.js';
 
 export function getCliOptions() {

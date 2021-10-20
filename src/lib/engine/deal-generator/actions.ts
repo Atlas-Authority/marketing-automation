@@ -1,9 +1,9 @@
+import { DealStage } from '../../config/index.js';
+import log from '../../log/logger.js';
 import { Deal } from '../../types/deal.js';
 import { License, LicenseContext } from '../../types/license.js';
 import { Transaction } from '../../types/transaction.js';
-import { DealStage } from '../../config/index.js';
 import { isPresent, sorter } from '../../util/helpers.js';
-import log from '../../log/logger.js';
 import { DealFinder } from './deal-finder.js';
 import { DealRelevantEvent, EvalEvent, PurchaseEvent, RefundEvent, RenewalEvent, UpgradeEvent } from "./events.js";
 import { dealCreationProperties, dealUpdateProperties, getDate } from './records.js';

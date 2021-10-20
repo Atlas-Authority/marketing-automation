@@ -1,10 +1,10 @@
 import * as datadir from '../../cache/datadir.js';
+import { RawLicense, RawTransaction } from "../../model/marketplace/raw";
 import { Company } from '../../types/company.js';
 import { Contact } from '../../types/contact.js';
 import { Deal } from '../../types/deal.js';
-import { RawLicense, RawTransaction } from "../../model/marketplace/raw";
-import { Downloader, DownloadLogger } from './downloader.js';
 import { EntityKind, FullEntity } from '../hubspot.js';
+import { Downloader, DownloadLogger } from './downloader.js';
 
 export default class CachedFileDownloader implements Downloader {
 
