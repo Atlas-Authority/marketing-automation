@@ -47,12 +47,10 @@ export function findAndFlagPartnerCompanies(db: Database) {
 export function findAndFlagPartnersByDomain(db: Database) {
   const domainToContacts = new Map<string, Contact[]>();
 
-  for (const sc of db.contactManager.getAll()) {
-    if (!sc.data.email || !sc.data.contactType) continue;
-
-    const domain = sc.data.email.split('@')[1];
+  for (const contact of db.contactManager.getAll()) {
+    const domain = contact.data.email.split('@')[1];
     if (!domainToContacts.has(domain)) domainToContacts.set(domain, []);
-    domainToContacts.get(domain)?.push(sc);
+    domainToContacts.get(domain)?.push(contact);
   }
 
   for (const domain of db.providerDomains) {

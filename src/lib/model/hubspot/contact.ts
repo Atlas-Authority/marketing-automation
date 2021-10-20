@@ -32,6 +32,10 @@ export class Contact extends Entity<ContactProps> {
 
   companies = this.makeDynamicAssociation<Company>('company');
 
+  get allEmails() {
+    return [this.data.email, ...this.data.otherEmails];
+  }
+
 }
 
 export class ContactManager extends EntityManager<ContactProps, Contact> {
@@ -120,8 +124,17 @@ export class ContactManager extends EntityManager<ContactProps, Contact> {
 
   override addIndexes(contacts: Iterable<Contact>) {
     for (const contact of contacts) {
-      for (const email of [contact.data.email, ...contact.data.otherEmails]) {
+      for (const email of contact.allEmails) {
         this.contactsByEmail.set(email, contact);
+      }
+    }
+  }
+
+  removeExternallyCreatedContacts(contacts: Set<Contact>) {
+    for (const contact of contacts) {
+      this.entities.delete(contact.guaranteedId());
+      for (const email of contact.allEmails) {
+        this.contactsByEmail.delete(email);
       }
     }
   }

@@ -36,7 +36,10 @@ export default async function runEngine({ downloader, uploader }: {
   await db.contactManager.syncUpAllEntities();
 
   logStep('Generating contacts');
-  generateContacts(db);
+  const externalContacts = generateContacts(db);
+
+  logStep('Removing externally created contacts from rest of engine run');
+  db.contactManager.removeExternallyCreatedContacts(externalContacts);
 
   logStep('Flagging partner companies');
   findAndFlagPartnerCompanies(db);

@@ -10,15 +10,22 @@ export function generateContacts(db: Database) {
   const gen = new ContactGenerator(db);
   gen.generateContacts();
   gen.mergeGeneratedContacts();
+  return gen.nonGeneratedContacts;
 }
 
 type GeneratedContact = ContactProps & { lastUpdated: string };
 
 class ContactGenerator {
 
+  nonGeneratedContacts = new Set<Contact>();
+
   toMerge = new Map<Contact, GeneratedContact[]>();
 
-  constructor(private db: Database) { }
+  constructor(private db: Database) {
+    for (const contact of db.contactManager.getAll()) {
+      this.nonGeneratedContacts.add(contact);
+    }
+  }
 
   generateContacts() {
     for (const license of this.db.licenses) {
@@ -39,6 +46,8 @@ class ContactGenerator {
 
     let contact = this.db.contactManager.getByEmail(generated.email);
     if (!contact) contact = this.db.contactManager.create(generated);
+
+    this.nonGeneratedContacts.delete(contact);
 
     let entry = this.toMerge.get(contact);
     if (!entry) this.toMerge.set(contact, entry = []);
