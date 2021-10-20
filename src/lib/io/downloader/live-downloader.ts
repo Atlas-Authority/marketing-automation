@@ -1,14 +1,10 @@
 import * as hubspot from '@hubspot/api-client';
 import * as datadir from '../../cache/datadir.js';
-import config, { Pipeline } from '../../config/index.js';
+import config from '../../config/index.js';
 import { RawLicense, RawTransaction } from "../../model/marketplace/raw";
 import { downloadAllTlds, downloadFreeEmailProviders } from '../../services/domains.js';
 import Hubspot from '../../services/hubspot.js';
 import { downloadLicensesWithDataInsights, downloadLicensesWithoutDataInsights, downloadTransactions } from '../../services/marketplace.js';
-import { Company } from '../../types/company.js';
-import { Contact } from '../../types/contact.js';
-import { Deal } from '../../types/deal.js';
-import { SimpleError } from '../../util/errors.js';
 import { EntityKind, FullEntity } from '../hubspot.js';
 import { Downloader, DownloadLogger } from './downloader.js';
 

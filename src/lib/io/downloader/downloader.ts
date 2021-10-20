@@ -1,7 +1,4 @@
 import { RawLicense, RawTransaction } from "../../model/marketplace/raw";
-import { Company } from "../../types/company.js";
-import { Contact } from "../../types/contact.js";
-import { Deal } from "../../types/deal.js";
 import { EntityKind, FullEntity } from "../hubspot.js";
 
 export interface DownloadLogger {
