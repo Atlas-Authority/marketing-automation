@@ -25,7 +25,7 @@ export abstract class EntityManager<
   protected abstract associations: EntityKind[];
 
   protected abstract apiProperties: string[];
-  protected abstract fromAPI(data: { [key: string]: string }): P | null;
+  protected abstract fromAPI(data: { [key: string]: string | null }): P | null;
   protected abstract toAPI: PropertyTransformers<P>;
 
   public abstract addIndexes(entities: Iterable<E>): void;

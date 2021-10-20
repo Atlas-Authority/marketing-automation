@@ -65,22 +65,22 @@ export class DealManager extends EntityManager<DealProps, Deal> {
     'amount',
   ];
 
-  override fromAPI(data: { [key: string]: string }): DealProps | null {
+  override fromAPI(data: { [key: string]: string | null }): DealProps | null {
     if (data.pipeline !== Pipeline.AtlassianMarketplace) return null;
     return {
-      relatedProducts: data.related_products,
-      aaApp: data.aa_app,
+      relatedProducts: data.related_products as string,
+      aaApp: data.aa_app as string,
       addonLicenseId: data[addonLicenseIdKey],
       transactionId: data[transactionIdKey],
-      closeDate: data.closedate.substr(0, 10),
-      country: data.country,
-      dealName: data.dealname,
+      closeDate: (data.closedate as string).substr(0, 10),
+      country: data.country as string,
+      dealName: data.dealname as string,
       origin: data.origin as DealProps['origin'],
       deployment: data.deployment as DealProps['deployment'],
-      licenseTier: +data.license_tier,
+      licenseTier: +(data.license_tier as string),
       pipeline: data.pipeline,
-      dealstage: data.dealstage,
-      amount: data.amount === '' ? null : +data.amount,
+      dealstage: data.dealstage as string,
+      amount: !data.amount ? null : +data.amount,
     };
   }
 

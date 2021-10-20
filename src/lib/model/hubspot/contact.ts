@@ -15,15 +15,15 @@ export type ContactProps = {
 
   contactType: ContactType;
 
-  country: string;
-  region: string;
+  country: string | null;
+  region: string | null;
 
-  hosting: string;
+  hosting: string | null;
   deployment: 'Cloud' | 'Data Center' | 'Server' | 'Multiple';
 
   relatedProducts: string[];
   licenseTier: number | null;
-  lastMpacEvent: string;
+  lastMpacEvent: string | null;
 
   otherEmails: string[];
 };
@@ -61,11 +61,11 @@ export class ContactManager extends EntityManager<ContactProps, Contact> {
     'hs_additional_emails',
   ];
 
-  override fromAPI(data: { [key: string]: string }): ContactProps | null {
+  override fromAPI(data: { [key: string]: string | null }): ContactProps | null {
     return {
       contactType: data.contact_type as ContactProps['contactType'],
 
-      email: data.email,
+      email: data.email ?? '',
       hosting: data.hosting,
       country: data.country,
       region: data.region,
@@ -77,7 +77,7 @@ export class ContactManager extends EntityManager<ContactProps, Contact> {
       state: data.state || '',
 
       relatedProducts: data.related_products ? data.related_products.split(';') : [],
-      licenseTier: data.license_tier === '' ? null : +data.license_tier,
+      licenseTier: !data.license_tier ? null : +data.license_tier,
       deployment: data.deployment as ContactProps['deployment'],
       lastMpacEvent: data.last_mpac_event,
 
@@ -89,9 +89,9 @@ export class ContactManager extends EntityManager<ContactProps, Contact> {
     contactType: contactType => ['contact_type', contactType],
 
     email: email => ['email', email],
-    hosting: hosting => ['hosting', hosting],
-    country: country => ['country', country],
-    region: region => ['region', region],
+    hosting: hosting => ['hosting', hosting ?? ''],
+    country: country => ['country', country ?? ''],
+    region: region => ['region', region ?? ''],
 
     firstName: firstName => ['firstname', firstName?.trim() || ''],
     lastName: lastName => ['lastname', lastName?.trim() || ''],
@@ -102,7 +102,7 @@ export class ContactManager extends EntityManager<ContactProps, Contact> {
     relatedProducts: relatedProducts => ['related_products', relatedProducts.join(';')],
     licenseTier: licenseTier => ['license_tier', licenseTier?.toFixed() ?? ''],
     deployment: deployment => ['deployment', deployment],
-    lastMpacEvent: lastMpacEvent => ['last_mpac_event', lastMpacEvent],
+    lastMpacEvent: lastMpacEvent => ['last_mpac_event', lastMpacEvent ?? ''],
 
     // Never sync'd up
     otherEmails: () => ['', ''],
