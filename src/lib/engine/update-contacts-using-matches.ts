@@ -11,19 +11,18 @@ export function updateContactsBasedOnMatchResults(db: Database, allMatches: Rela
     const contacts = new Set(group.map(m => db.contactManager.getByEmail(m.license.data.technicalContact.email)!));
 
     for (const contact of contacts) {
-      for (const tier of [
-        ...group.flatMap(g => g.license.allTiers()),
-        ...group.flatMap(g => g.transactions.map(t => t.parseTier()))
-      ]) {
+      const items = [
+        ...group.map(g => g.license),
+        ...group.flatMap(g => g.transactions)
+      ];
+
+      for (const tier of items.map(item => item.maxTier)) {
         if (contact.data.licenseTier !== null && tier > contact.data.licenseTier) {
           contact.data.licenseTier = tier;
         }
       }
 
-      for (const item of [
-        ...group.map(g => g.license),
-        ...group.flatMap(g => g.transactions)
-      ]) {
+      for (const item of items) {
         if (!contact.data.lastMpacEvent || contact.data.lastMpacEvent < item.data.maintenanceStartDate) {
           contact.data.lastMpacEvent = item.data.maintenanceStartDate;
         }

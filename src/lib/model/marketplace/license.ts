@@ -59,8 +59,8 @@ export class License {
 
   constructor(public data: LicenseData) { }
 
-  allTiers() {
-    return [this.parseTier(), this.tierFromEvalOpportunity()];
+  get maxTier() {
+    return Math.max(this.parseTier(), this.tierFromEvalOpportunity());
   }
 
   parseTier() {

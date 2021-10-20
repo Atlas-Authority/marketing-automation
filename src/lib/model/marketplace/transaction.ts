@@ -37,7 +37,7 @@ export class Transaction {
 
   constructor(public data: TransactionData) { }
 
-  parseTier() {
+  get maxTier() {
     const tier = this.data.tier;
 
     if (tier === 'Unlimited Users') return 10001;
