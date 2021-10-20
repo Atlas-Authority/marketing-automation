@@ -39,8 +39,8 @@ export function validateMarketplaceData(
     };
 
   return {
-    allTransactions: allTransactions.filter(emailChecker('Transaction')),
-    allLicenses: allLicenses.filter(emailChecker('License')),
+    transactions: allTransactions.filter(emailChecker('Transaction')),
+    licenses: allLicenses.filter(emailChecker('License')),
   };
 }
 

@@ -70,8 +70,8 @@ export class Database {
       allTransactions,
       emailRe);
 
-    this.licenses = results.allLicenses.map(normalizeLicense);
-    this.transactions = results.allTransactions.map(normalizeTransaction);
+    this.licenses = results.licenses.map(normalizeLicense);
+    this.transactions = results.transactions.map(normalizeTransaction);
   }
 
   async downloadAllDeals(downloadLogger: DownloadLogger) {
