@@ -38,26 +38,10 @@ export abstract class Entity<P extends { [key: string]: any }> {
     type K = keyof P;
     this.data = new Proxy(props, {
       get: (_target, _key) => {
-        const key = _key as K;
-        if (this.id === undefined) return this.props[key];
-        if (key in this.newProps) return this.newProps[key];
-        return this.props[key];
+        return this.get(_key as K);
       },
       set: (_target, _key, _val) => {
-        const key = _key as K;
-        const val = _val as P[K];
-        if (this.id === undefined) {
-          this.props[key] = val;
-          return true;
-        }
-
-        const oldVal = this.props[key];
-        if (oldVal === val) {
-          delete this.newProps[key];
-        }
-        else {
-          this.newProps[key] = val;
-        }
+        this.set(_key as K, _val as P[K]);
         return true;
       },
     });
@@ -69,6 +53,27 @@ export abstract class Entity<P extends { [key: string]: any }> {
   }
 
   // Properties
+
+  get<K extends keyof P>(key: K) {
+    if (this.id === undefined) return this.props[key];
+    if (key in this.newProps) return this.newProps[key];
+    return this.props[key];
+  }
+
+  set<K extends keyof P>(key: K, val: P[K]) {
+    if (this.id === undefined) {
+      this.props[key] = val;
+      return;
+    }
+
+    const oldVal = this.props[key];
+    if (oldVal === val) {
+      delete this.newProps[key];
+    }
+    else {
+      this.newProps[key] = val;
+    }
+  }
 
   hasPropertyChanges() {
     return this.id === undefined || Object.keys(this.newProps).length > 0;
