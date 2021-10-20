@@ -62,12 +62,8 @@ export default async function runEngine({ downloader, uploader }: {
   await db.contactManager.syncUpAllEntities();
 
   logStep('Backfill deal companies');
-  await backfillDealCompanies({
-    allMatches,
-    deals: db.allDeals,
-    contacts: verifiedContacts,
-    uploader,
-  });
+  backfillDealCompanies(db, allMatches);
+  await db.dealManager.syncUpAllEntities();
 
   logStep('Generating deals');
   const dealDiffs = generateDeals({

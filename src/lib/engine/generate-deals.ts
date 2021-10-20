@@ -1,18 +1,19 @@
 import * as assert from 'assert';
 import _ from 'lodash';
 import { saveForInspection } from '../cache/inspection.js';
-import { Uploader } from '../io/uploader/uploader.js';
 import log from '../log/logger.js';
-import { Contact, ContactsByEmail } from '../types/contact.js';
+import { Database } from '../model/database.js';
+import { ContactsByEmail } from '../types/contact.js';
 import { Deal, DealAssociationPair, DealCompanyAssociationPair, DealUpdate } from '../types/deal.js';
-import { License, LicenseContext, RelatedLicenseSet } from '../types/license.js';
+import { License, RelatedLicenseSet } from '../types/license.js';
 import { isPresent, sorter } from '../util/helpers.js';
 import { ActionGenerator, CreateDealAction, UpdateDealAction } from './deal-generator/actions.js';
 import { DealFinder } from './deal-generator/deal-finder.js';
 import { EventGenerator } from './deal-generator/events.js';
 import { getEmails } from './deal-generator/records.js';
+import { RelatedLicenseSet as NewRelatedLicenseSet } from './license-grouper.js';
 
-function contactsFor(contacts: ContactsByEmail, groups: LicenseContext[]) {
+function contactsFor(contacts: ContactsByEmail, groups: RelatedLicenseSet) {
   return (_.uniq(
     groups
       .flatMap(group => [group.license, ...group.transactions])
@@ -23,34 +24,14 @@ function contactsFor(contacts: ContactsByEmail, groups: LicenseContext[]) {
     .sort(sorter(c => c.contact_type === 'Customer' ? -1 : 0));
 }
 
-export async function backfillDealCompanies(input: {
-  allMatches: RelatedLicenseSet[],
-  deals: Deal[],
-  contacts: Contact[],
-  uploader: Uploader,
-}) {
-  const associations: DealCompanyAssociationPair[] = [];
-
-  for (const deal of input.deals) {
-    const contacts = deal.contactIds.map(id => {
-      const contact = input.contacts.find(c => c.hs_object_id === id);
-      assert.ok(contact);
-      return contact;
-    });
-
-    const customers = contacts.filter(c => c.contact_type === 'Customer');
-    const newCompanyIds = customers.map(customer => customer.company_id).filter(isPresent);
-
-    for (const companyId of newCompanyIds) {
-      if (!deal.companyIds.includes(companyId)) {
-        deal.companyIds.push(companyId);
-        associations.push({ dealId: deal.id, companyId });
-      }
+export function backfillDealCompanies(db: Database, allMatches: NewRelatedLicenseSet[]) {
+  for (const deal of db.dealManager.getAll()) {
+    const contacts = deal.contacts.getAll();
+    const customers = contacts.filter(c => c.isCustomer);
+    const customerCompany = customers.flatMap(customer => customer.companies.getAll());
+    for (const company of customerCompany) {
+      deal.companies.add(company);
     }
-  }
-
-  if (associations.length > 0) {
-    input.uploader.associateDealsWithCompanies(associations);
   }
 }
 
