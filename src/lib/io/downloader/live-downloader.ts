@@ -12,6 +12,7 @@ import { AttachableError, SimpleError } from '../../util/errors.js';
 import { Downloader, DownloadLogger } from './downloader.js';
 import Hubspot from '../../services/hubspot.js';
 import { EntityKind, FullEntity } from '../hubspot.js';
+import { downloadAllTlds, downloadFreeEmailProviders } from '../../services/domains.js';
 
 
 export default class LiveDownloader implements Downloader {
@@ -20,27 +21,23 @@ export default class LiveDownloader implements Downloader {
   hubspotClient = new hubspot.Client({ apiKey: config.hubspot.apiKey });
 
   async downloadHubspotEntities(kind: EntityKind, apiProperties: string[], inputAssociations: string[]): Promise<FullEntity[]> {
-    const normalizedEntities = this.hubspot.downloadHubspotEntities(kind, apiProperties, inputAssociations);
+    const normalizedEntities = this.hubspot.downloadEntities(kind, apiProperties, inputAssociations);
     save(`${kind}s2.json`, normalizedEntities);
     return normalizedEntities;
   }
 
   async downloadFreeEmailProviders(downloadLogger: DownloadLogger): Promise<string[]> {
     downloadLogger.prepare(1);
-    const res = await fetch(`https://f.hubspotusercontent40.net/hubfs/2832391/Marketing/Lead-Capture/free-domains-1.csv`);
-    const text = await res.text();
+    const domains = await downloadFreeEmailProviders();
     downloadLogger.tick();
-    const domains = text.split(',\n');
     save('domains.json', domains);
     return domains;
   }
 
   async downloadAllTlds(downloadLogger: DownloadLogger): Promise<string[]> {
     downloadLogger.prepare(1);
-    const res = await fetch(`https://data.iana.org/TLD/tlds-alpha-by-domain.txt`);
-    const text = await res.text();
+    const tlds = downloadAllTlds();
     downloadLogger.tick();
-    const tlds = text.trim().split('\n').splice(1).map(s => s.toLowerCase());
     save('tlds.json', tlds);
     return tlds;
   }

@@ -14,7 +14,7 @@ import { Transaction } from "../types/transaction.js";
 import { Company } from "../types/company.js";
 import { Contact } from "../types/contact.js";
 import { Deal } from "../types/deal.js";
-import { makeMultiProviderDomainsSet } from "../util/domains.js";
+import { makeMultiProviderDomainsSet } from "../services/domains.js";
 import { License as NormalizedLicense, normalizeLicense } from "./marketplace/license.js";
 import { Transaction as NormalizedTransaction, normalizeTransaction } from "./marketplace/transaction.js";
 
