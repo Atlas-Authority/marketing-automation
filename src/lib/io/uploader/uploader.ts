@@ -27,9 +27,7 @@ export interface Uploader {
   /** @deprecated */
   disassociateDealsFromCompanies(fromTos: DealCompanyAssociationPair[]): Promise<void>;
 
-  /** @deprecated */
   createHubspotEntities(kind: EntityKind, inputs: NewEntity[]): Promise<ExistingEntity[]>;
-  /** @deprecated */
   updateHubspotEntities(kind: EntityKind, inputs: ExistingEntity[]): Promise<ExistingEntity[]>;
 
   createHubspotAssociations(fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void>;
