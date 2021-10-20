@@ -130,8 +130,9 @@ export class ContactManager extends EntityManager<ContactProps, Contact> {
     }
   }
 
-  removeExternallyCreatedContacts(contacts: Set<Contact>) {
-    for (const contact of contacts) {
+  removeExternallyCreatedContacts() {
+    for (const contact of this.entities.values()) {
+      if (contact.data.email && contact.data.contactType) return;
       this.entities.delete(contact.guaranteedId());
       for (const email of contact.allEmails) {
         this.contactsByEmail.delete(email);
