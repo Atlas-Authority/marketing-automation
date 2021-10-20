@@ -4,12 +4,11 @@ import { Uploader } from '../io/uploader/uploader.js';
 import log from '../log/logger.js';
 import { Contact } from '../types/contact.js';
 import { buildContactsStructure } from './contacts.js';
-import { generateContactUpdateActions } from './generate-contact-updates.js';
+import { updateContactsBasedOnMatchResults } from './generate-contact-updates.js';
 import { generateContacts } from "./generate-contacts.js";
 import { backfillDealCompanies, generateDeals } from './generate-deals.js';
 import { matchIntoLikelyGroups } from './license-grouper.js';
 import { findAndFlagExternallyCreatedContacts, findAndFlagPartnerCompanies, findAndFlagPartnersByDomain, identifyDomains } from './partners.js';
-import { updateContactsInHubspotAgain } from './upsert-contact-updates.js';
 import { upsertDealsInHubspot } from './upsert-deals.js';
 import zeroEmptyDealAmounts from './zero-empty-deal-amounts.js';
 
@@ -58,11 +57,9 @@ export default async function runEngine({ downloader, uploader }: {
   logStep('Running Scoring Engine');
   const allMatches = matchIntoLikelyGroups(db);
 
-  logStep('Generating contact updates');
-  const contactUpdateActions = generateContactUpdateActions(allMatches, contactsByEmail);
-
-  logStep('Updating contacts in Hubspot');
-  await updateContactsInHubspotAgain({ uploader, contactUpdateActions });
+  logStep('Updating Contacts based on Match Results');
+  updateContactsBasedOnMatchResults(db, allMatches);
+  await db.contactManager.syncUpAllEntities();
 
   logStep('Backfill deal companies');
   await backfillDealCompanies({

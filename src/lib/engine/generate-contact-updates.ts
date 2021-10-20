@@ -1,73 +1,48 @@
-import * as assert from 'assert';
-import _ from 'lodash';
 import { ADDONKEY_TO_PLATFORM } from '../config/index.js';
-import { Contact, ContactsByEmail, ContactUpdateAction } from '../types/contact.js';
-import { RelatedLicenseSet } from '../types/license.js';
+import { Database } from '../model/database.js';
 import { SimpleError } from '../util/errors.js';
-import { calculateTierFromLicenseContext } from './deal-generator/tiers.js';
+import { RelatedLicenseSet } from './license-grouper.js';
 
-const PLATFORMS = _.uniq(Object.values(ADDONKEY_TO_PLATFORM));
+const PLATFORMS = new Set(Object.values(ADDONKEY_TO_PLATFORM));
 
 
-export function generateContactUpdateActions(allMatches: RelatedLicenseSet[], contactsByEmail: ContactsByEmail) {
-  const contactUpdates = new Map<Contact, { events: Set<string>, products: Set<string>, hostings: Set<'Server' | 'Cloud' | 'Data Center'>, tiers: Set<number> }>();
-
+export function updateContactsBasedOnMatchResults(db: Database, allMatches: RelatedLicenseSet[]) {
   for (const group of allMatches) {
-    const contacts = _.uniq(group.map(m => contactsByEmail[m.license.contactDetails.technicalContact.email]));
+    const contacts = new Set(group.map(m => db.contactManager.getByEmail(m.license.data.technicalContact.email)!));
 
     for (const contact of contacts) {
-      if (!contactUpdates.has(contact)) {
-        contactUpdates.set(contact, {
-          events: new Set(),
-          hostings: new Set(),
-          products: new Set(),
-          tiers: new Set([-1]),
-        });
+      for (const tier of [
+        ...group.flatMap(g => g.license.allTiers()),
+        ...group.flatMap(g => g.transactions.map(t => t.parseTier()))
+      ]) {
+        if (contact.data.licenseTier !== null && tier > contact.data.licenseTier) {
+          contact.data.licenseTier = tier;
+        }
       }
 
-      const updates = contactUpdates.get(contact);
-      assert.ok(updates);
-
-      if (typeof contact.license_tier === 'number') {
-        updates.tiers.add(contact.license_tier);
+      for (const item of [
+        ...group.map(g => g.license),
+        ...group.flatMap(g => g.transactions)
+      ]) {
+        if (!contact.data.lastMpacEvent || contact.data.lastMpacEvent < item.data.maintenanceStartDate) {
+          contact.data.lastMpacEvent = item.data.maintenanceStartDate;
+        }
       }
 
-      for (const tier of group.flatMap(calculateTierFromLicenseContext)) {
-        updates.tiers.add(tier);
-      }
-
-      for (const license of group.map(g => g.license)) {
-        updates.events.add(license.maintenanceStartDate);
-      }
-
-      for (const transaction of group.flatMap(g => g.transactions)) {
-        updates.events.add(transaction.purchaseDetails.saleDate);
-      }
-
-      const addonKey = group[0].license.addonKey;
+      const addonKey = group[0].license.data.addonKey;
       const product = ADDONKEY_TO_PLATFORM[addonKey];
-      if (!PLATFORMS.includes(product)) {
+      if (!PLATFORMS.has(product)) {
         throw new SimpleError(`Add "${addonKey}" to ADDONKEY_PLATFORMS`);
       }
+      contact.data.relatedProducts.add(product);
 
-      updates.hostings.add(group[0].license.hosting);
-      updates.products.add(product);
+      const hosting = group[0].license.data.hosting;
+      if (!contact.data.deployment) {
+        contact.data.deployment = hosting;
+      }
+      else if (contact.data.deployment !== hosting) {
+        contact.data.deployment = 'Multiple';
+      }
     }
   }
-
-  const contactUpdateActions: ContactUpdateAction[] = [];
-
-  for (const [contact, { hostings, products, tiers, events }] of contactUpdates) {
-    let deployment: 'Server' | 'Cloud' | 'Data Center' | 'Multiple' | undefined;
-    [deployment] = hostings.size > 1 ? ['Multiple'] : hostings;
-    assert.ok([null, 'Server', 'Cloud', 'Multiple', 'Data Center'].includes(deployment));
-
-    const related_products = [...products];
-    const tier = [...tiers].reduce((a, b) => Math.max(a, b));
-    const event = [...events].reduce((a, b) => a > b ? a : b);
-
-    contactUpdateActions.push({ contact, deployment, related_products, tier, event });
-  }
-
-  return contactUpdateActions;
 }
