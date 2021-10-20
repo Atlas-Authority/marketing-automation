@@ -2,6 +2,7 @@ import * as assert from 'assert';
 import _ from 'lodash';
 import { saveForInspection } from '../cache/inspection.js';
 import log from '../log/logger.js';
+import { Database } from '../model/database.js';
 import { ContactsByEmail } from '../types/contact.js';
 import { Deal, DealAssociationPair, DealCompanyAssociationPair, DealUpdate } from '../types/deal.js';
 import { License, RelatedLicenseSet } from '../types/license.js';
@@ -22,22 +23,11 @@ function contactsFor(contacts: ContactsByEmail, groups: RelatedLicenseSet) {
     .sort(sorter(c => c.contact_type === 'Customer' ? -1 : 0));
 }
 
-export function generateDeals(data: {
-  allMatches: RelatedLicenseSet[],
-  initialDeals: Deal[],
-  contactsByEmail: ContactsByEmail,
-  providerDomains: Set<string>,
-  partnerDomains: Set<string>,
-}) {
-  const { dealCreateActions, dealUpdateActions } = generateDealActions({
-    matches: data.allMatches
-      .filter(group =>
-        group.some(m =>
-          !olderThan90Days(m.license.maintenanceStartDate))),
-    initialDeals: data.initialDeals,
-    providerDomains: data.providerDomains,
-    partnerDomains: data.partnerDomains,
-  });
+export function generateDeals(allMatches: RelatedLicenseSet[], db: Database) {
+  const { dealCreateActions, dealUpdateActions } = generateDealActions(db, allMatches
+    .filter(group =>
+      group.some(m =>
+        !olderThan90Days(m.license.maintenanceStartDate))));
 
   const dealsToCreate: Omit<Deal, 'id'>[] = dealCreateActions.map(({ groups, properties }) => {
     const contacts = contactsFor(data.contactsByEmail, groups);
@@ -116,8 +106,8 @@ class DealActionGenerator {
 
   ignoredLicenseSets: (License & { reason: string })[][] = [];
 
-  constructor(private providerDomains: Set<string>, private partnerDomains: Set<string>, initialDeals: Deal[]) {
-    this.dealFinder = new DealFinder(initialDeals);
+  constructor(private db: Database) {
+    this.dealFinder = new DealFinder(db.dealManager.getAll());
     this.actionGenerator = new ActionGenerator(this.dealFinder);
   }
 
@@ -158,20 +148,15 @@ class DealActionGenerator {
 
 }
 
-function generateDealActions(data: {
-  matches: RelatedLicenseSet[],
-  initialDeals: Deal[],
-  providerDomains: Set<string>,
-  partnerDomains: Set<string>,
-}) {
-  const generator = new DealActionGenerator(data.providerDomains, data.partnerDomains, data.initialDeals);
+function generateDealActions(db: Database, matches: RelatedLicenseSet[]) {
+  const generator = new DealActionGenerator(db);
 
   // Stages:
   // 1. Sort and normalize licenses/transactions (event records)
   // 2. Turn event records into deal-generating-relevant events
   // 3. Match events up with deal state and generate actions
 
-  for (const relatedLicenseIds of data.matches) {
+  for (const relatedLicenseIds of matches) {
     generator.generateActionsForMatchedGroup(relatedLicenseIds);
   }
 
