@@ -19,7 +19,7 @@ export type ContactProps = {
   region: string | null;
 
   hosting: string | null;
-  deployment: 'Cloud' | 'Data Center' | 'Server' | 'Multiple';
+  deployment: 'Cloud' | 'Data Center' | 'Server' | 'Multiple' | null;
 
   relatedProducts: Set<string>;
   licenseTier: number | null;
@@ -113,7 +113,7 @@ export class ContactManager extends EntityManager<ContactProps, Contact> {
 
     relatedProducts: relatedProducts => ['related_products', [...relatedProducts].join(';')],
     licenseTier: licenseTier => ['license_tier', licenseTier?.toFixed() ?? ''],
-    deployment: deployment => ['deployment', deployment],
+    deployment: deployment => ['deployment', deployment ?? ''],
     lastMpacEvent: lastMpacEvent => ['last_mpac_event', lastMpacEvent ?? ''],
 
     // Never sync'd up
