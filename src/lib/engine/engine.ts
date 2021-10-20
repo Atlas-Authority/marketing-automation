@@ -49,6 +49,7 @@ export default async function runEngine({ downloader, uploader }: {
   logStep('Updating Companies in Hubspot');
   await db.companyManager.syncUpAllEntities();
 
+  const verifiedContacts: Contact[] = [];
   const contactsByEmail: { [email: string]: Contact } = buildContactsStructure(verifiedContacts);
 
   logStep('Running Scoring Engine');
@@ -79,7 +80,7 @@ export default async function runEngine({ downloader, uploader }: {
     initialDeals: db.allDeals,
     providerDomains: db.providerDomains,
     allMatches,
-    partnerDomains,
+    partnerDomains: db.partnerDomains,
   });
 
   logStep('Upserting deals in Hubspot');
