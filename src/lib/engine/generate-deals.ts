@@ -3,6 +3,7 @@ import _ from 'lodash';
 import { saveForInspection } from '../cache/inspection.js';
 import log from '../log/logger.js';
 import { Database } from '../model/database.js';
+import { License, LicenseData } from '../model/marketplace/license.js';
 import { Deal, DealAssociationPair, DealCompanyAssociationPair, DealUpdate } from '../types/deal.js';
 import { isPresent, sorter } from '../util/helpers.js';
 import { ActionGenerator, CreateDealAction, UpdateDealAction } from './deal-generator/actions.js';
@@ -103,7 +104,7 @@ class DealActionGenerator {
   dealCreateActions: CreateDealAction[] = [];
   dealUpdateActions: UpdateDealAction[] = [];
 
-  ignoredLicenseSets: (License & { reason: string })[][] = [];
+  ignoredLicenseSets: (LicenseData & { reason: string })[][] = [];
 
   constructor(private db: Database) {
     this.dealFinder = new DealFinder(db.dealManager.getAll());
@@ -130,8 +131,8 @@ class DealActionGenerator {
   /** Ignore if every license's tech contact domain is partner or mass-provider */
   ignoring(groups: RelatedLicenseSet) {
     const licenses = groups.map(g => g.license);
-    const domains = licenses.map(license => license.contactDetails.technicalContact.email.toLowerCase().split('@')[1]);
-    const badDomains = domains.filter(domain => this.partnerDomains.has(domain) || this.providerDomains.has(domain));
+    const domains = licenses.map(license => license.data.technicalContact.email.toLowerCase().split('@')[1]);
+    const badDomains = domains.filter(domain => this.db.partnerDomains.has(domain) || this.db.providerDomains.has(domain));
 
     if (badDomains.length === licenses.length) {
       this.ignoreLicenses('bad-domains:' + _.uniq(badDomains).join(','), licenses);
@@ -142,7 +143,7 @@ class DealActionGenerator {
   }
 
   ignoreLicenses(reason: string, licenses: License[]) {
-    this.ignoredLicenseSets.push(licenses.map(license => ({ reason, ...license })));
+    this.ignoredLicenseSets.push(licenses.map(license => ({ reason, ...license.data })));
   }
 
 }
