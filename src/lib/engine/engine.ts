@@ -22,7 +22,8 @@ export default async function runEngine({ downloader, uploader }: {
   });
 
   logStep('Normalizing deal amounts');
-  await zeroEmptyDealAmounts(db.dealManager);
+  zeroEmptyDealAmounts(db.dealManager.getArray());
+  await db.dealManager.syncUpAllEntities();
 
   logStep('Identifying partner and customer domains');
   identifyDomains(db);
