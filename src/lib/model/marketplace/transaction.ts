@@ -1,3 +1,4 @@
+import * as assert from 'assert';
 import { ContactInfo, getContactInfo, getPartnerInfo, maybeGetContactInfo, PartnerInfo } from "./common.js";
 import { RawTransaction } from "./raw.js";
 
@@ -33,7 +34,25 @@ export interface TransactionData {
 }
 
 export class Transaction {
+
   constructor(public data: TransactionData) { }
+
+  parseTier() {
+    const tier = this.data.tier;
+
+    if (tier === 'Unlimited Users') return 10001;
+
+    let m;
+    if (m = tier.match(/^Per Unit Pricing \((\d+) users\)$/i)) {
+      return +m[1];
+    }
+    if (m = tier.match(/^(\d+) Users$/)) {
+      return +m[1];
+    }
+
+    assert.fail(`Unknown transaction tier: ${tier}`);
+  }
+
 }
 
 export function normalizeTransaction(transaction: RawTransaction): Transaction {

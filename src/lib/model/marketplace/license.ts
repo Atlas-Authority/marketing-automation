@@ -1,3 +1,4 @@
+import * as assert from 'assert';
 import { ContactInfo, getContactInfo, getPartnerInfo, maybeGetContactInfo, PartnerInfo } from "./common.js";
 import { RawLicense } from "./raw.js";
 
@@ -55,7 +56,47 @@ export interface LicenseData {
 }
 
 export class License {
+
   constructor(public data: LicenseData) { }
+
+  allTiers() {
+    return [this.parseTier(), this.tierFromEvalOpportunity()];
+  }
+
+  parseTier() {
+    const tier = this.data.tier;
+    switch (tier) {
+      case 'Unlimited Users':
+        return 10001;
+      case 'Subscription': // it'll be in evaluationOpportunitySize instead
+      case 'Evaluation':
+      case 'Demonstration License':
+        return -1;
+    }
+
+    const m = tier.match(/^(\d+) Users$/);
+    assert.ok(m, `Unknown license tier: ${tier}`);
+
+    return + m[1];
+  }
+
+  tierFromEvalOpportunity() {
+    const size = this.data.evaluationOpportunitySize;
+    switch (size) {
+      case 'Unlimited Users':
+        return 10001;
+      case 'Unknown':
+      case 'Evaluation':
+      case 'NA':
+      case '':
+      case null:
+      case undefined:
+        return -1;
+      default:
+        return +size;
+    }
+  }
+
 }
 
 export function normalizeLicense(license: RawLicense): License {
