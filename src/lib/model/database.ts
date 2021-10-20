@@ -34,6 +34,7 @@ export class Database {
   allContacts: Contact[] = [];
   allDeals: Deal[] = [];
 
+  /** Domains that provide spam or free email accounts for masses. */
   providerDomains = new Set<string>();
   partnerDomains = new Set<string>();
   customerDomains = new Set<string>();

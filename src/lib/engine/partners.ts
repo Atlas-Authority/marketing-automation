@@ -45,25 +45,25 @@ export function findAndFlagPartnerCompanies(db: Database) {
 }
 
 export function findAndFlagPartnersByDomain(db: Database) {
-  const domainToContacts = new Map<string, Contact[]>();
+  const contactsByDomain = new Map<string, Contact[]>();
 
   for (const contact of db.contactManager.getAll()) {
-    const domain = contact.data.email.split('@')[1];
-    if (!domainToContacts.has(domain)) domainToContacts.set(domain, []);
-    domainToContacts.get(domain)?.push(contact);
+    const domain = domainFor(contact.data.email);
+    let contacts = contactsByDomain.get(domain);
+    if (!contacts) contactsByDomain.set(domain, contacts = []);
+    contacts.push(contact);
   }
 
   for (const domain of db.providerDomains) {
-    domainToContacts.delete(domain);
+    contactsByDomain.delete(domain);
   }
 
-  const partnerDomains = new Set([...domainToContacts]
-    .filter(([, contacts]) =>
-      contacts.some(c => c.data.contactType === 'Partner'))
+  const partnerDomains = new Set([...contactsByDomain]
+    .filter(([, contacts]) => contacts.some(c => c.isPartner))
     .map(([domain,]) => domain));
 
   for (const contact of db.contactManager.getAll()) {
-    const domain = contact.data.email.split('@')[1];
+    const domain = domainFor(contact.data.email);
     if (partnerDomains.has(domain)) {
       contact.data.contactType = 'Partner';
     }
@@ -71,7 +71,9 @@ export function findAndFlagPartnersByDomain(db: Database) {
 }
 
 function maybeAddDomain(set: Set<string>, email: string | undefined) {
-  if (!email) return;
-  const domain = email.split('@')[1];
-  set.add(domain);
+  if (email) set.add(domainFor(email));
+}
+
+function domainFor(email: string): string {
+  return email.split('@')[1];
 }

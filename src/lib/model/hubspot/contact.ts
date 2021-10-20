@@ -36,6 +36,14 @@ export class Contact extends Entity<ContactProps> {
     return [this.data.email, ...this.data.otherEmails];
   }
 
+  get isPartner() {
+    return this.data.contactType === 'Partner';
+  }
+
+  get isCustomer() {
+    return this.data.contactType === 'Customer';
+  }
+
 }
 
 export class ContactManager extends EntityManager<ContactProps, Contact> {
