@@ -4,44 +4,34 @@ import { saveToJson } from '../../cache/inspection.js';
 import config from '../../config/index.js';
 import { contactToHubspotProperties } from '../../engine/contacts.js';
 import log from '../../log/logger.js';
+import Hubspot from '../../services/hubspot.js';
 import { Company } from '../../types/company.js';
 import { Contact, GeneratedContact } from '../../types/contact.js';
 import { Deal, DealAssociationPair, DealCompanyAssociationPair, DealUpdate } from '../../types/deal.js';
 import { batchesOf } from '../../util/helpers.js';
-import { EntityKind, NewEntity, ExistingEntity, Association, apiFor } from '../hubspot.js';
+import { EntityKind, NewEntity, ExistingEntity, Association } from '../hubspot.js';
 import { Uploader } from './uploader.js';
 
 
 export default class LiveUploader implements Uploader {
 
+  hubspot = new Hubspot();
   hubspotClient = new hubspot.Client({ apiKey: config.hubspot.apiKey });
 
   async createHubspotEntities(kind: EntityKind, inputs: NewEntity[]): Promise<ExistingEntity[]> {
-    return (await apiFor(this.hubspotClient, kind).batchApi.create({ inputs })).body.results;
+    return await this.hubspot.createEntities(kind, inputs);
   }
 
   async updateHubspotEntities(kind: EntityKind, inputs: ExistingEntity[]): Promise<ExistingEntity[]> {
-    return (await apiFor(this.hubspotClient, kind).batchApi.update({ inputs })).body.results;
+    return await this.hubspot.updateEntities(kind, inputs);
   }
 
   async createHubspotAssociations(fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void> {
-    await this.hubspotClient.crm.associations.batchApi.create(fromKind, toKind, {
-      inputs: inputs.map(input => ({
-        from: { id: input.fromId },
-        to: { id: input.toId },
-        type: input.toType,
-      }))
-    });
+    await this.hubspot.createAssociations(fromKind, toKind, inputs);
   }
 
   async deleteHubspotAssociations(fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void> {
-    await this.hubspotClient.crm.associations.batchApi.archive(fromKind, toKind, {
-      inputs: inputs.map(input => ({
-        from: { id: input.fromId },
-        to: { id: input.toId },
-        type: input.toType,
-      }))
-    });
+    await this.hubspot.deleteAssociations(fromKind, toKind, inputs);
   }
 
   async associateDealsWithContacts(fromTos: DealAssociationPair[]) {

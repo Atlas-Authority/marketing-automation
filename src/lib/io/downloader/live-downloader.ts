@@ -1,7 +1,6 @@
 import * as hubspot from '@hubspot/api-client';
 import { DateTime, Duration, Interval } from 'luxon';
 import fetch from 'node-fetch';
-import assert from 'assert';
 import * as datadir from '../../cache/datadir.js';
 import config, { Pipeline } from '../../config/index.js';
 import { contactFromHubspot } from '../../engine/contacts.js';
@@ -11,55 +10,19 @@ import { Deal } from '../../types/deal.js';
 import { RawLicense, RawTransaction } from "../../model/marketplace/raw";
 import { AttachableError, SimpleError } from '../../util/errors.js';
 import { Downloader, DownloadLogger } from './downloader.js';
-import { apiFor, EntityKind, FullEntity, RelativeAssociation } from '../hubspot.js';
+import Hubspot from '../../services/hubspot.js';
+import { EntityKind, FullEntity } from '../hubspot.js';
 
 
 export default class LiveDownloader implements Downloader {
 
+  hubspot = new Hubspot();
   hubspotClient = new hubspot.Client({ apiKey: config.hubspot.apiKey });
 
   async downloadHubspotEntities(kind: EntityKind, apiProperties: string[], inputAssociations: string[]): Promise<FullEntity[]> {
-    let associations = ((inputAssociations.length > 0)
-      ? inputAssociations
-      : undefined);
-
-    try {
-      const entities = await apiFor(this.hubspotClient, kind).getAll(undefined, undefined, apiProperties, associations);
-      const normalizedEntities = entities.map(({ id, properties, associations }) => ({
-        id,
-        properties,
-        associations: Object.entries(associations || {})
-          .flatMap(([, { results }]) => (
-            results.map(item => {
-              const prefix = `${kind}_to_`;
-              assert.ok(item.type.startsWith(prefix));
-              const otherKind = item.type.substr(prefix.length) as EntityKind;
-              return `${otherKind}:${item.id}` as RelativeAssociation;
-            })
-          )),
-      }));
-      save(`${kind}s2.json`, normalizedEntities);
-      return normalizedEntities;
-    }
-    catch (e: any) {
-      const body = e.response.body;
-      if (
-        (
-          typeof body === 'string' && (
-            body === 'internal error' ||
-            body.startsWith('<!DOCTYPE html>'))
-        ) || (
-          typeof body === 'object' &&
-          body.status === 'error' &&
-          body.message === 'internal error'
-        )
-      ) {
-        throw new SimpleError('Hubspot v3 API had internal error.');
-      }
-      else {
-        throw new Error(`Failed downloading ${kind}s: ${JSON.stringify(body)}`);
-      }
-    }
+    const normalizedEntities = this.hubspot.downloadHubspotEntities(kind, apiProperties, inputAssociations);
+    save(`${kind}s2.json`, normalizedEntities);
+    return normalizedEntities;
   }
 
   async downloadFreeEmailProviders(downloadLogger: DownloadLogger): Promise<string[]> {
