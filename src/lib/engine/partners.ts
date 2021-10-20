@@ -34,8 +34,6 @@ export async function findAndFlagExternallyCreatedContacts(db: Database) {
 
   for (const c of partners) { c.data.contactType = 'Partner'; }
   for (const c of customers) { c.data.contactType = 'Customer'; }
-
-  db.contactManager.syncUpAllEntities();
 }
 
 export async function findAndFlagPartnerCompanies({ uploader, contacts, companies }: {
