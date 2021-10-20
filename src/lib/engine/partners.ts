@@ -1,8 +1,6 @@
-import { Company } from '../types/company.js';
-import { Contact, GeneratedContact } from '../types/contact.js';
-import { Uploader } from '../io/uploader/uploader.js';
 import config from '../config/index.js';
 import { Database } from '../model/database.js';
+import { Contact } from '../model/hubspot/contact.js';
 
 export function identifyDomains(db: Database) {
   for (const l of db.licenses) {
@@ -50,33 +48,30 @@ export function findAndFlagPartnerCompanies(db: Database) {
   }
 }
 
-export function findAndFlagPartnersByDomain({ contacts, sourceContacts, providerDomains }: {
-  contacts: GeneratedContact[],
-  sourceContacts: Contact[],
-  providerDomains: Set<string>,
-}) {
+export function findAndFlagPartnersByDomain(db: Database) {
   const domainToContacts = new Map<string, Contact[]>();
 
-  for (const sc of sourceContacts) {
-    if (!sc.email || !sc.contact_type) continue;
-    const domain = sc.email.split('@')[1];
+  for (const sc of db.contactManager.getAll()) {
+    if (!sc.data.email || !sc.data.contactType) continue;
+
+    const domain = sc.data.email.split('@')[1];
     if (!domainToContacts.has(domain)) domainToContacts.set(domain, []);
     domainToContacts.get(domain)?.push(sc);
   }
 
-  for (const domain of providerDomains) {
+  for (const domain of db.providerDomains) {
     domainToContacts.delete(domain);
   }
 
   const partnerDomains = new Set([...domainToContacts]
     .filter(([, contacts]) =>
-      contacts.some(c => c.contact_type === 'Partner'))
+      contacts.some(c => c.data.contactType === 'Partner'))
     .map(([domain,]) => domain));
 
-  for (const contact of contacts) {
-    const domain = contact.email.split('@')[1];
-    if (partnerDomains.has(domain) && contact.contact_type === 'Customer') {
-      contact.contact_type = 'Partner';
+  for (const contact of db.contactManager.getAll()) {
+    const domain = contact.data.email.split('@')[1];
+    if (partnerDomains.has(domain)) {
+      contact.data.contactType = 'Partner';
     }
   }
 }

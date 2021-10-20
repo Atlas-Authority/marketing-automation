@@ -41,11 +41,7 @@ export default async function runEngine({ downloader, uploader }: {
   findAndFlagPartnerCompanies(db);
 
   logStep('Flagging partners by domain');
-  findAndFlagPartnersByDomain({
-    contacts: generatedContacts,
-    sourceContacts: db.allContacts,
-    providerDomains: db.providerDomains,
-  });
+  findAndFlagPartnersByDomain(db);
 
   logStep('Upserting Contacts in Hubspot');
   db.contactManager.syncUpAllEntities();
