@@ -75,7 +75,7 @@ class ContactGenerator {
       state: 'state' in info ? capitalize.words(info.state || '') : null,
       country: capitalize.words(item.data.country),
       region: item.data.region,
-      relatedProducts: [],
+      relatedProducts: new Set(),
       deployment: item.data.hosting,
       hosting: item.data.hosting,
       otherEmails: [],
