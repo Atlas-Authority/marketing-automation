@@ -1,4 +1,3 @@
-import * as assert from 'assert';
 import { Downloader, DownloadLogger } from "../io/downloader/downloader.js";
 import { EntityKind } from "../io/hubspot.js";
 import { Uploader } from "../io/uploader/uploader.js";
@@ -124,7 +123,7 @@ export class Database {
     // 1. They were already set in HubSpot when we downloaded them, or
     // 2. We set them in code with an object already having a valid id.
     // In either case, an invalid id would fail before this method.
-    assert.ok(found);
+    if (!found) throw new Error(`Expected to find ${kind} with id ${id}`);
     return found;
   }
 
