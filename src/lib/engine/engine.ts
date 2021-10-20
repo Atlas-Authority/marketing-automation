@@ -11,7 +11,6 @@ import { backfillDealCompanies, generateDeals } from './generate-deals.js';
 import { matchIntoLikelyGroups } from './license-grouper.js';
 import { findAndFlagExternallyCreatedContacts, findAndFlagPartnerCompanies, findAndFlagPartnersByDomain, identifyDomains } from './partners.js';
 import { updateContactsInHubspotAgain } from './upsert-contact-updates.js';
-import { upsertContactsInHubspot } from "./upsert-contacts.js";
 import { upsertDealsInHubspot } from './upsert-deals.js';
 import zeroEmptyDealAmounts from './zero-empty-deal-amounts.js';
 
@@ -53,11 +52,7 @@ export default async function runEngine({ downloader, uploader }: {
   });
 
   logStep('Upserting contacts in Hubspot');
-  const verifiedContacts = await upsertContactsInHubspot({
-    uploader,
-    newContacts: generatedContacts,
-    oldContacts: db.allContacts,
-  });
+  db.contactManager.syncUpAllEntities();
 
   const contactsByEmail: { [email: string]: Contact } = buildContactsStructure(verifiedContacts);
 
