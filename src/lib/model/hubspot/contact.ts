@@ -32,17 +32,9 @@ export class Contact extends Entity<ContactProps> {
 
   companies = this.makeDynamicAssociation<Company>('company');
 
-  get allEmails() {
-    return [this.data.email, ...this.data.otherEmails];
-  }
-
-  get isPartner() {
-    return this.data.contactType === 'Partner';
-  }
-
-  get isCustomer() {
-    return this.data.contactType === 'Customer';
-  }
+  get allEmails() { return [this.data.email, ...this.data.otherEmails]; }
+  get isPartner() { return this.data.contactType === 'Partner'; }
+  get isCustomer() { return this.data.contactType === 'Customer'; }
 
 }
 
