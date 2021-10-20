@@ -21,7 +21,7 @@ export type ContactProps = {
   hosting: string | null;
   deployment: 'Cloud' | 'Data Center' | 'Server' | 'Multiple';
 
-  relatedProducts: string[];
+  relatedProducts: Set<string>;
   licenseTier: number | null;
   lastMpacEvent: string | null;
 
@@ -88,7 +88,7 @@ export class ContactManager extends EntityManager<ContactProps, Contact> {
       city: data.city || '',
       state: data.state || '',
 
-      relatedProducts: data.related_products ? data.related_products.split(';') : [],
+      relatedProducts: new Set(data.related_products ? data.related_products.split(';') : []),
       licenseTier: !data.license_tier ? null : +data.license_tier,
       deployment: data.deployment as ContactProps['deployment'],
       lastMpacEvent: data.last_mpac_event,
@@ -111,7 +111,7 @@ export class ContactManager extends EntityManager<ContactProps, Contact> {
     city: city => ['city', city?.trim() || ''],
     state: state => ['state', state?.trim() || ''],
 
-    relatedProducts: relatedProducts => ['related_products', relatedProducts.join(';')],
+    relatedProducts: relatedProducts => ['related_products', [...relatedProducts].join(';')],
     licenseTier: licenseTier => ['license_tier', licenseTier?.toFixed() ?? ''],
     deployment: deployment => ['deployment', deployment],
     lastMpacEvent: lastMpacEvent => ['last_mpac_event', lastMpacEvent ?? ''],
