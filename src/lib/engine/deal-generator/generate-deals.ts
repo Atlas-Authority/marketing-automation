@@ -1,15 +1,15 @@
 import * as assert from 'assert';
 import _ from 'lodash';
-import { saveForInspection } from '../cache/inspection.js';
-import log from '../log/logger.js';
-import { Database } from '../model/database.js';
-import { License, LicenseData } from '../model/marketplace/license.js';
-import { isPresent, sorter } from '../util/helpers.js';
-import { ActionGenerator, CreateDealAction, UpdateDealAction } from './deal-generator/actions.js';
-import { DealFinder } from './deal-generator/deal-finder.js';
-import { EventGenerator } from './deal-generator/events.js';
-import { getEmails } from './deal-generator/records.js';
-import { RelatedLicenseSet } from './license-grouper.js';
+import { saveForInspection } from '../../cache/inspection.js';
+import log from '../../log/logger.js';
+import { Database } from '../../model/database.js';
+import { License, LicenseData } from '../../model/marketplace/license.js';
+import { isPresent, sorter } from '../../util/helpers.js';
+import { RelatedLicenseSet } from '../license-grouper.js';
+import { ActionGenerator, CreateDealAction, UpdateDealAction } from './actions.js';
+import { DealFinder } from './deal-finder.js';
+import { EventGenerator } from './events.js';
+import { getEmails } from './records.js';
 
 export function generateDeals(db: Database, allMatches: RelatedLicenseSet[]) {
   const matches = allMatches

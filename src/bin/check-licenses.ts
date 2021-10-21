@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as datadir from '../lib/cache/datadir.js';
-import { olderThan90Days } from '../lib/engine/generate-deals.js';
+import { olderThan90Days } from '../lib/engine/deal-generator/generate-deals.js';
 import { shorterLicenseInfo } from '../lib/engine/license-grouper.js';
 import CachedFileDownloader from '../lib/io/downloader/cached-file-downloader.js';
 import ConsoleUploader from '../lib/io/uploader/console-uploader.js';
