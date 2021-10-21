@@ -26,12 +26,12 @@ export function getContactInfo(contactInfo: RawLicenseContact | RawTransactionCo
   return {
     email: contactInfo.email,
     name: contactInfo.name,
-    ...('phone' in contactInfo && { phone: contactInfo.phone }),
-    ...('address1' in contactInfo && { address1: contactInfo.address1 }),
-    ...('address2' in contactInfo && { address2: contactInfo.address2 }),
-    ...('city' in contactInfo && { city: contactInfo.city }),
-    ...('state' in contactInfo && { state: contactInfo.state }),
-    ...('postcode' in contactInfo && { postcode: contactInfo.postcode }),
+    ...('phone' in contactInfo && { phone: normalizeContactField(contactInfo.phone) }),
+    ...('address1' in contactInfo && { address1: normalizeContactField(contactInfo.address1) }),
+    ...('address2' in contactInfo && { address2: normalizeContactField(contactInfo.address2) }),
+    ...('city' in contactInfo && { city: normalizeContactField(contactInfo.city) }),
+    ...('state' in contactInfo && { state: normalizeContactField(contactInfo.state) }),
+    ...('postcode' in contactInfo && { postcode: normalizeContactField(contactInfo.postcode) }),
   };
 }
 
@@ -50,4 +50,12 @@ export function getPartnerInfo(info: RawPartnerDetails | undefined): PartnerInfo
       name: info.billingContact.name,
     },
   };
+}
+
+function normalizeContactField(field: string | undefined) {
+  if (field === undefined) return undefined;
+  if (field === 'null') return undefined;
+  const normalized = field.replace(/\r/g, '').trim();
+  if (normalized === '') return undefined;
+  return normalized;
 }
