@@ -1,10 +1,10 @@
 import capitalize from 'capitalize';
-import { Database } from '../model/database.js';
-import { Contact, ContactProps, ContactType } from '../model/hubspot/contact.js';
-import { ContactInfo, PartnerBillingInfo } from '../model/marketplace/common.js';
-import { License } from '../model/marketplace/license.js';
-import { Transaction } from '../model/marketplace/transaction.js';
-import { sorter } from '../util/helpers.js';
+import { Database } from '../../model/database.js';
+import { Contact, ContactProps, ContactType } from '../../model/hubspot/contact.js';
+import { ContactInfo, PartnerBillingInfo } from '../../model/marketplace/common.js';
+import { License } from '../../model/marketplace/license.js';
+import { Transaction } from '../../model/marketplace/transaction.js';
+import { sorter } from '../../util/helpers.js';
 
 export function generateContacts(db: Database) {
   const gen = new ContactGenerator(db);

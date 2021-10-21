@@ -4,11 +4,11 @@ import { EngineLogger } from '../log/engine-logger.js';
 import { Database } from '../model/database.js';
 import { backfillDealCompanies } from './backfilling/backfill-deal-companies.js';
 import zeroEmptyDealAmounts from './backfilling/zero-empty-deal-amounts.js';
-import { findAndFlagExternallyCreatedContacts, findAndFlagPartnerCompanies, findAndFlagPartnersByDomain, identifyDomains } from './contact-types.js';
+import { findAndFlagExternallyCreatedContacts, findAndFlagPartnerCompanies, findAndFlagPartnersByDomain, identifyDomains } from './contacts/contact-types.js';
+import { generateContacts } from "./contacts/generate-contacts.js";
+import { updateContactsBasedOnMatchResults } from './contacts/update-contacts-using-matches.js';
 import { generateDeals } from './deal-generator/generate-deals.js';
-import { generateContacts } from "./generate-contacts.js";
 import { matchIntoLikelyGroups } from './license-matching/license-grouper.js';
-import { updateContactsBasedOnMatchResults } from './update-contacts-using-matches.js';
 
 export default async function runEngine({ downloader, uploader }: {
   downloader: Downloader,
