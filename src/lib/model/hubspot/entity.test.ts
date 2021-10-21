@@ -20,7 +20,7 @@ describe('entities', () => {
     const p = new Person(db, '123', {
       age: 20,
       name: 'Bob',
-    });
+    }, new Set());
     expect(p.hasPropertyChanges()).toBe(false);
     expect(p.data.age).toEqual(20);
     expect(p.data.name).toEqual('Bob');

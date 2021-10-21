@@ -12,7 +12,7 @@ export abstract class Entity<P extends { [key: string]: any }> {
   /** The most recently saved props, or all unsaved props */
   private props: P;
   /** Contains only new changes, and only when an entity is saved */
-  private newProps: Partial<P>;
+  private newProps: Partial<P> = {};
 
   /** The associations this was created with, whether an existing or new entity */
   private assocs = new Set<RelativeAssociation>();
@@ -25,15 +25,12 @@ export abstract class Entity<P extends { [key: string]: any }> {
     private db: EntityDatabase,
     id: string | null,
     props: P,
-    associations?: Set<RelativeAssociation>
+    associations: Set<RelativeAssociation>
   ) {
     if (id) this.id = id;
     this.props = props;
-    this.newProps = {};
-    if (associations) {
-      this.assocs = associations;
-      this.newAssocs = new Set(associations);
-    }
+    this.assocs = associations;
+    this.newAssocs = new Set(associations);
 
     type K = keyof P;
     this.data = new Proxy(props, {
