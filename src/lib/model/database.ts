@@ -71,19 +71,19 @@ export class Database {
     this.transactions = results.transactions.map(normalizeTransaction);
   }
 
-  async downloadAllDeals(downloadLogger: DownloadLogger) {
+  private async downloadAllDeals(downloadLogger: DownloadLogger) {
     downloadLogger.prepare(1);
     await this.dealManager.downloadAllEntities();
     downloadLogger.tick();
   }
 
-  async downloadAllContacts(downloadLogger: DownloadLogger) {
+  private async downloadAllContacts(downloadLogger: DownloadLogger) {
     downloadLogger.prepare(1);
     await this.contactManager.downloadAllEntities();
     downloadLogger.tick();
   }
 
-  async downloadAllCompanies(downloadLogger: DownloadLogger) {
+  private async downloadAllCompanies(downloadLogger: DownloadLogger) {
     downloadLogger.prepare(1);
     await this.companyManager.downloadAllEntities();
     downloadLogger.tick();
