@@ -8,8 +8,8 @@ import { CompanyManager } from "./hubspot/company.js";
 import { ContactManager } from "./hubspot/contact.js";
 import { DealManager } from "./hubspot/deal.js";
 import { Entity } from "./hubspot/entity.js";
-import { License as NormalizedLicense, normalizeLicense } from "./marketplace/license.js";
-import { normalizeTransaction, Transaction as NormalizedTransaction } from "./marketplace/transaction.js";
+import { License, normalizeLicense } from "./marketplace/license.js";
+import { normalizeTransaction, Transaction } from "./marketplace/transaction.js";
 import { validateMarketplaceData } from "./marketplace/validation.js";
 
 export class Database {
@@ -18,8 +18,8 @@ export class Database {
   contactManager: ContactManager;
   companyManager: CompanyManager;
 
-  licenses: NormalizedLicense[] = [];
-  transactions: NormalizedTransaction[] = [];
+  licenses: License[] = [];
+  transactions: Transaction[] = [];
 
   /** Domains that provide spam or free email accounts for masses. */
   providerDomains = new Set<string>();
