@@ -34,14 +34,23 @@ export function generateDeals(db: Database, allMatches: RelatedLicenseSet[]) {
   const dealCreateActions = generator.dealCreateActions;
   const dealUpdateActions = generator.dealUpdateActions;
 
+  for (const { groups, properties } of dealCreateActions) {
+    const deal = db.dealManager.create(properties);
 
-
-  const dealsToCreate: Omit<Deal, 'id'>[] = dealCreateActions.map(({ groups, properties }) => {
     const contacts = contactsFor(db, groups);
-    const contactIds = contacts.map(c => c.hs_object_id);
-    const companyIds = contacts.filter(c => c.contact_type === 'Customer').map(c => c.company_id).filter(isPresent);
-    return { contactIds, properties, companyIds };
-  });
+    const companies = (contacts
+      .filter(c => c.isCustomer)
+      .flatMap(c => c.companies.getAll()));
+
+    for (const contact of contacts) {
+      deal.contacts.add(contact);
+    }
+
+    for (const company of companies) {
+      deal.companies.add(company);
+    }
+  }
+
 
   const dealsToUpdate: DealUpdate[] = [];
 
