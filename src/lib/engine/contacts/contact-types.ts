@@ -27,8 +27,8 @@ export function findAndFlagExternallyCreatedContacts(db: Database) {
   // Only check contacts with no contact_type and with email
   const candidates = db.contactManager.getArray().filter(c => c.data.contactType === null && c.data.email);
 
-  const partners = candidates.filter(c => db.partnerDomains.has(c.data.email.split('@')[1]));
-  const customers = candidates.filter(c => db.customerDomains.has(c.data.email.split('@')[1]));
+  const partners = candidates.filter(c => db.partnerDomains.has(domainFor(c.data.email)));
+  const customers = candidates.filter(c => db.customerDomains.has(domainFor(c.data.email)));
 
   for (const c of partners) { c.data.contactType = 'Partner'; }
   for (const c of customers) { c.data.contactType = 'Customer'; }
