@@ -72,8 +72,8 @@ export abstract class EntityManager<
   }
 
   public async syncUpAllEntities() {
-    this.syncUpAllEntitiesProperties();
-    this.syncUpAllEntitiesAssociations();
+    await this.syncUpAllEntitiesProperties();
+    await this.syncUpAllEntitiesAssociations();
     this.addIndexes(this.entities.values());
   }
 
