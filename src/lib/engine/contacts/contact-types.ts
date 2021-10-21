@@ -19,8 +19,8 @@ export function identifyDomains(db: Database) {
     db.partnerDomains.add(domain);
   }
 
-  for (const domain of db.customerDomains) {
-    db.partnerDomains.delete(domain);
+  for (const domain of db.partnerDomains) {
+    db.customerDomains.delete(domain);
   }
 }
 
