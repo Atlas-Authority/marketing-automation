@@ -8,7 +8,7 @@ import { RawLicense, RawTransaction } from "./raw.js";
 export function validateMarketplaceData(
   licensesWithDataInsights: RawLicense[],
   licensesWithoutDataInsights: RawLicense[],
-  allTransactions: RawTransaction[],
+  transactions: RawTransaction[],
   emailRe: RegExp,
 ) {
   licensesWithDataInsights = licensesWithDataInsights.filter(filterLicensesWithTechEmail);
@@ -23,10 +23,10 @@ export function validateMarketplaceData(
     licensesWithoutDataInsightsSchema);
 
   verifyStructure('transactions',
-    allTransactions,
+    transactions,
     transactionsSchema);
 
-  let allLicenses = uniqLicenses(licensesWithDataInsights.concat(licensesWithoutDataInsights));
+  const allLicenses = uniqLicenses(licensesWithDataInsights.concat(licensesWithoutDataInsights));
 
   const emailChecker = (kind: 'License' | 'Transaction') =>
     (item: RawLicense | RawTransaction) => {
@@ -36,7 +36,7 @@ export function validateMarketplaceData(
     };
 
   return {
-    transactions: allTransactions.filter(emailChecker('Transaction')),
+    transactions: transactions.filter(emailChecker('Transaction')),
     licenses: allLicenses.filter(emailChecker('License')),
   };
 }
