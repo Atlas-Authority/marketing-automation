@@ -19,11 +19,6 @@ export function generateDeals(db: Database, allMatches: RelatedLicenseSet[]) {
 
   const generator = new DealActionGenerator(db);
 
-  // Stages:
-  // 1. Sort and normalize licenses/transactions (event records)
-  // 2. Turn event records into deal-generating-relevant events
-  // 3. Match events up with deal state and generate actions
-
   for (const relatedLicenseIds of matches) {
     generator.generateActionsForMatchedGroup(relatedLicenseIds);
   }
