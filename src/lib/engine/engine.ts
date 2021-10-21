@@ -1,7 +1,7 @@
-import { downloadAllData } from '../io/downloader/download-initial-data.js';
 import { Downloader } from '../io/downloader/downloader.js';
 import { Uploader } from '../io/uploader/uploader.js';
 import log from '../log/logger.js';
+import { Database } from '../model/database.js';
 import { backfillDealCompanies } from './backfill-deal-companies.js';
 import { generateContacts } from "./generate-contacts.js";
 import { generateDeals } from './generate-deals.js';
@@ -17,9 +17,8 @@ export default async function runEngine({ downloader, uploader }: {
   resetLogCount();
 
   logStep('Starting to download data');
-  const db = await downloadAllData({
-    downloader,
-  });
+  const db = new Database(downloader, uploader);
+  await db.downloadAllData();
 
   logStep('Normalizing deal amounts');
   zeroEmptyDealAmounts(db.dealManager.getArray());

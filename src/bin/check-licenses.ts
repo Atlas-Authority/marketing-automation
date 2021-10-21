@@ -3,8 +3,9 @@ import * as datadir from '../lib/cache/datadir.js';
 import { olderThan90Days } from '../lib/engine/generate-deals.js';
 import { shorterLicenseInfo } from '../lib/engine/license-grouper.js';
 import CachedFileDownloader from '../lib/io/downloader/cached-file-downloader.js';
-import { downloadAllData } from '../lib/io/downloader/download-initial-data.js';
+import ConsoleUploader from '../lib/io/uploader/console-uploader.js';
 import log from '../lib/log/logger.js';
+import { Database } from '../lib/model/database.js';
 import { License } from '../lib/types/license.js';
 import { Transaction } from '../lib/types/transaction.js';
 
@@ -24,9 +25,8 @@ if (sens.length === 1 && sens[0].endsWith('.json')) {
   sens = ts.map(t => t.addonLicenseId);
 }
 
-const data = await downloadAllData({
-  downloader: new CachedFileDownloader()
-});
+const db = new Database(new CachedFileDownloader(), new ConsoleUploader({ verbose: true }));
+await db.downloadAllData();
 
 const ignored: (License & { reason: string })[][] = datadir.readJsonFile('out', 'ignored.json');
 
@@ -40,7 +40,7 @@ for (const sen of sens) {
 function check(sen: string) {
   if (sen.startsWith('SEN-')) sen = sen.slice(4);
 
-  const withWrongId = data.licenses.find(l => l.data.addonLicenseId !== sen && l.data.licenseId === 'SEN-' + sen);
+  const withWrongId = db.licenses.find(l => l.data.addonLicenseId !== sen && l.data.licenseId === 'SEN-' + sen);
   if (withWrongId) {
     log.warn('Dev', sen, `Using addonLicenseId (${withWrongId.data.addonLicenseId}) instead of licenseId`);
     sen = withWrongId.data.addonLicenseId;
@@ -71,7 +71,7 @@ function check(sen: string) {
 }
 
 function checkSEN(sen: string) {
-  const foundDeal = data.dealManager.getByAddonLicenseId(sen);
+  const foundDeal = db.dealManager.getByAddonLicenseId(sen);
   if (foundDeal) {
     log.info('Dev', sen, 'Already has deal:', foundDeal.id);
     return true;
@@ -83,8 +83,8 @@ function checkSEN(sen: string) {
     return true;
   }
 
-  const ls = data.licenses.filter(l => l.data.addonLicenseId === sen);
-  const cs = ls.map(l => data.contactManager.getByEmail(l.data.technicalContact.email));
+  const ls = db.licenses.filter(l => l.data.addonLicenseId === sen);
+  const cs = ls.map(l => db.contactManager.getByEmail(l.data.technicalContact.email));
   if (cs.some(c => c && c.data.contactType === 'Partner')) {
     log.info('Dev', sen, 'Contact is Partner');
     return true;
