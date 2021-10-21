@@ -36,6 +36,7 @@ export interface TransactionData {
 export class Transaction {
 
   public data: TransactionData;
+  public maxTier: number;
 
   constructor(rawTransaction: RawTransaction) {
     this.data = {
@@ -67,9 +68,11 @@ export class Transaction {
       purchasePrice: rawTransaction.purchaseDetails.purchasePrice,
       vendorAmount: rawTransaction.purchaseDetails.vendorAmount,
     };
+
+    this.maxTier = this.parseTier();
   }
 
-  get maxTier() {
+  private parseTier() {
     const tier = this.data.tier;
 
     if (tier === 'Unlimited Users') return 10001;
