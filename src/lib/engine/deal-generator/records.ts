@@ -1,7 +1,7 @@
 import assert from 'assert';
 import mustache from 'mustache';
 import config, { DealStage, Pipeline } from '../../config/index.js';
-import { Deal } from '../../model/hubspot/deal.js';
+import { Deal, DealProps } from '../../model/hubspot/deal.js';
 import { License } from '../../model/marketplace/license.js';
 import { Transaction } from '../../model/marketplace/transaction.js';
 import { isPresent, sorter } from "../../util/helpers.js";
@@ -46,37 +46,31 @@ export function abbrRecordDetails(record: Transaction | License) {
   };
 }
 
-export function dealCreationProperties(record: License | Transaction, dealstage: string): Deal['properties'] {
+export function dealCreationProperties(record: License | Transaction, dealstage: string): DealProps {
   const dealNameTemplateProperties = {
     ...record.data,
     technicalContactEmail: record.data.technicalContact.email,
   };
 
   return {
-    ...(isLicense(record)
-      ? { addonLicenseId: record.addonLicenseId, transactionId: '' }
-      : { transactionId: record.transactionId, addonLicenseId: '' }),
-    closedate: (isLicense(record)
-      ? record.maintenanceStartDate
-      : record.purchaseDetails.maintenanceStartDate),
-    deployment: (isLicense(record)
-      ? record.hosting
-      : record.purchaseDetails.hosting),
-    aa_app: record.addonKey,
-    license_tier: getTier(record).toFixed(),
-    country: (isLicense(record)
-      ? record.contactDetails.country
-      : record.customerDetails.country),
+    ...(record instanceof License
+      ? { addonLicenseId: record.data.addonLicenseId, transactionId: '' }
+      : { transactionId: record.data.transactionId, addonLicenseId: '' }),
+    closeDate: record.data.maintenanceStartDate,
+    deployment: record.data.hosting,
+    aaApp: record.data.addonKey,
+    licenseTier: record.maxTier,
+    country: record.data.country,
     origin: config.constants.dealOrigin,
-    related_products: config.constants.dealRelatedProducts,
-    dealname: mustache.render(config.constants.dealDealName, dealNameTemplateProperties),
+    relatedProducts: config.constants.dealRelatedProducts,
+    dealName: mustache.render(config.constants.dealDealName, dealNameTemplateProperties),
     dealstage,
     pipeline: Pipeline.AtlassianMarketplace,
     amount: (dealstage === DealStage.EVAL
-      ? ''
-      : isLicense(record)
-        ? '0'
-        : record.purchaseDetails.vendorAmount.toString()),
+      ? null
+      : record instanceof License
+        ? 0
+        : record.data.vendorAmount),
   };
 }
 

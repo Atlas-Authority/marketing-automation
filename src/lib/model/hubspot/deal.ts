@@ -17,7 +17,7 @@ export type DealProps = {
   closeDate: string;
   country: string;
   dealName: string;
-  origin: 'MPAC Lead';
+  origin: string;
   deployment: 'Server' | 'Cloud' | 'Data Center';
   licenseTier: number;
   pipeline: Pipeline;
