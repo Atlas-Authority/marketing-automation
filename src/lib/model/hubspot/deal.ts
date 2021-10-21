@@ -117,7 +117,11 @@ export class DealManager extends EntityManager<DealProps, Deal> {
     return this.dealsByTransactionId.get(id);
   }
 
-  override addIndexes(deals: Iterable<Deal>) {
+  override addIndexes(deals: Iterable<Deal>, full: boolean) {
+    if (full) {
+      this.dealsByAddonLicenseId.clear();
+      this.dealsByTransactionId.clear();
+    }
     for (const deal of deals) {
       if (deal.data.addonLicenseId) {
         this.dealsByAddonLicenseId.set(deal.data.addonLicenseId, deal);
