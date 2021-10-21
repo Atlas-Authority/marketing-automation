@@ -11,22 +11,13 @@ export function validateMarketplaceData(
   transactions: RawTransaction[],
   emailRe: RegExp,
 ) {
-  licensesWithDataInsights = licensesWithDataInsights.filter(filterLicensesWithTechEmail);
-  licensesWithoutDataInsights = licensesWithoutDataInsights.filter(filterLicensesWithTechEmail);
+  const licenses = uniqLicenses([
+    ...licensesWithDataInsights.filter(filterLicensesWithTechEmail),
+    ...licensesWithoutDataInsights.filter(filterLicensesWithTechEmail),
+  ]);
 
-  verifyStructure('licenses_with_data_insights',
-    licensesWithDataInsights,
-    licensesWithDataInsightsSchema);
-
-  verifyStructure('licenses_without_data_insights',
-    licensesWithoutDataInsights,
-    licensesWithoutDataInsightsSchema);
-
-  verifyStructure('transactions',
-    transactions,
-    transactionsSchema);
-
-  const allLicenses = uniqLicenses(licensesWithDataInsights.concat(licensesWithoutDataInsights));
+  licenses.forEach(validateLicense);
+  transactions.forEach(validateTransaction);
 
   const emailChecker = (kind: 'License' | 'Transaction') =>
     (item: RawLicense | RawTransaction) => {
@@ -37,7 +28,7 @@ export function validateMarketplaceData(
 
   return {
     transactions: transactions.filter(emailChecker('Transaction')),
-    licenses: allLicenses.filter(emailChecker('License')),
+    licenses: licenses.filter(emailChecker('License')),
   };
 }
 
@@ -81,212 +72,50 @@ function uniqLicenses(licenses: RawLicense[]) {
   return fixed.map(ls => ls[0]);
 }
 
-function verifyStructure<T>(name: string, data: T[], schema: Array<['every' | 'some', (item: T) => boolean]>) {
-  log.info('Downloader', 'Verifying schema for:', name);
-  for (const [howMany, getter] of schema) {
-    const test: (items: T[]) => boolean = (
-      howMany === 'every'
-        ? items => items.every(getter)
-        : items => items.some(getter)
-    );
-
-    if (!test(data)) {
-      let errorData = data;
-
-      if (howMany === 'every') {
-        errorData = data.filter(item => !getter(item));
-      }
-
-      throw new AttachableError(`Schema changed for ${name}: ${getter.toString()} -- no longer holds true for ${howMany} items`, JSON.stringify(errorData, null, 2));
-    }
-  }
+function validateLicense(license: RawLicense) {
+  validateField(license, l => l.addonLicenseId);
+  validateField(license, l => l.licenseId);
+  validateField(license, l => l.addonKey);
+  validateField(license, l => l.addonName);
+  validateField(license, l => l.lastUpdated);
+  validateField(license, l => l.contactDetails);
+  validateField(license, l => l.contactDetails.technicalContact);
+  validateField(license, l => l.contactDetails.technicalContact.email);
+  validateField(license, l => l.tier);
+  validateField(license, l => l.licenseType);
+  validateField(license, l => l.hosting);
+  validateField(license, l => l.maintenanceStartDate);
+  validateField(license, l => l.maintenanceEndDate);
+  validateField(license, l => l.status);
 }
 
-const licensesWithDataInsightsSchema: Array<['every' | 'some', (license: RawLicense) => boolean]> = [
-  ['every', license => isNonBlankString(license?.addonLicenseId)],
-  ['every', license => isNonBlankString(license?.licenseId)],
-  ['every', license => isNonBlankString(license?.addonKey)],
-  ['every', license => isNonBlankString(license?.addonName)],
-  ['every', license => isNonBlankString(license?.hosting)],
-  ['every', license => isNonBlankString(license?.lastUpdated)],
-  ['every', license => isNonBlankString(license?.licenseType)],
-  ['every', license => isNonBlankString(license?.maintenanceStartDate)],
-  ['every', license => isNonBlankString(license?.maintenanceEndDate)],
-  ['every', license => isNonBlankString(license?.status)],
-  ['every', license => isNonBlankString(license?.tier)],
-
-  ['every', license => !!license?.contactDetails],
-  ['every', license => isString(license?.contactDetails?.company)],
-  ['every', license => isNonBlankString(license?.contactDetails?.country)],
-  ['every', license => isNonBlankString(license?.contactDetails?.region)],
-
-  ['every', license => !!license?.contactDetails?.technicalContact],
-  ['every', license => isNonBlankString(license?.contactDetails?.technicalContact?.email)],
-  ['some', license => isNonBlankString(license?.contactDetails?.technicalContact?.name)],
-  ['some', license => isNonBlankString(license?.contactDetails?.technicalContact?.phone)],
-  ['some', license => isNonBlankString(license?.contactDetails?.technicalContact?.city)],
-  ['some', license => isNonBlankString(license?.contactDetails?.technicalContact?.state)],
-
-  ['some', license => !!license?.contactDetails?.billingContact],
-  ['every', license => !license?.contactDetails?.billingContact || isNonBlankString(license?.contactDetails?.billingContact.email)],
-  ['some', license => !license?.contactDetails?.billingContact || isNonBlankString(license?.contactDetails?.billingContact.name)],
-  ['some', license => !license?.contactDetails?.billingContact || isNonBlankString(license?.contactDetails?.billingContact.phone)],
-  ['some', license => !license?.contactDetails?.billingContact || isNonBlankString(license?.contactDetails?.billingContact.city)],
-  ['some', license => !license?.contactDetails?.billingContact || isNonBlankString(license?.contactDetails?.billingContact.state)],
-
-  ['some', transaction => !!transaction?.partnerDetails],
-  ['every', transaction => !transaction?.partnerDetails || isNonBlankString(transaction?.partnerDetails?.partnerName)],
-  ['some', transaction => !transaction?.partnerDetails || isNonBlankString(transaction?.partnerDetails?.partnerType)],
-
-  ['some', license => !!license?.partnerDetails?.billingContact],
-  ['every', license => !license?.partnerDetails?.billingContact || isNonBlankString(license?.partnerDetails?.billingContact.email)],
-  ['every', license => !license?.partnerDetails?.billingContact || isNonBlankString(license?.partnerDetails?.billingContact.name)],
-
-  ['every', license => isNonBlankString(license?.evaluationOpportunitySize)],
-  ['some', license => !!license?.attribution],
-  ['every', license => !license?.attribution || isNonBlankString(license?.attribution?.channel)],
-  ['some', license => !license?.attribution || isNonBlankString(license?.attribution?.referrerDomain)],
-  ['some', license => !license?.attribution || isNonBlankString(license?.attribution?.campaignName)],
-  ['some', license => !license?.attribution || isNonBlankString(license?.attribution?.campaignSource)],
-  ['some', license => !license?.attribution || isNonBlankString(license?.attribution?.campaignMedium)],
-  ['some', license => !license?.attribution || isNonBlankString(license?.attribution?.campaignContent)],
-
-  ['every', license => isNonBlankString(license?.parentProductBillingCycle)],
-  ['every', license => isNonBlankString(license?.parentProductName)],
-  ['every', license => isNonBlankString(license?.installedOnSandbox)],
-  ['every', license => isNonBlankString(license?.parentProductEdition)],
-
-  ['some', license => isNonBlankString(license?.evaluationLicense)],
-  ['some', license => isNonBlankString(license?.daysToConvertEval)],
-  ['some', license => isNonBlankString(license?.evaluationStartDate)],
-  ['some', license => isNonBlankString(license?.evaluationEndDate)],
-  ['some', license => isNonBlankString(license?.evaluationSaleDate)],
-  ['every', license =>
-    (
-      isUndefined(license?.evaluationLicense) &&
-      isUndefined(license?.daysToConvertEval) &&
-      isUndefined(license?.evaluationStartDate) &&
-      isUndefined(license?.evaluationEndDate) &&
-      isUndefined(license?.evaluationSaleDate)
-    ) || (
-      isNonBlankString(license?.evaluationLicense) &&
-      isNonBlankString(license?.daysToConvertEval) &&
-      isNonBlankString(license?.evaluationStartDate) &&
-      isNonBlankString(license?.evaluationEndDate) &&
-      isNonBlankString(license?.evaluationSaleDate)
-    )
-  ],
-];
-
-const licensesWithoutDataInsightsSchema: Array<['every' | 'some', (license: RawLicense) => boolean]> = [
-  ['every', license => isNonBlankString(license?.addonLicenseId)],
-  ['every', license => isNonBlankString(license?.licenseId)],
-  ['every', license => isNonBlankString(license?.addonKey)],
-  ['every', license => isNonBlankString(license?.addonName)],
-  ['every', license => isNonBlankString(license?.hosting)],
-  ['every', license => isNonBlankString(license?.lastUpdated)],
-  ['every', license => isNonBlankString(license?.licenseType)],
-  ['every', license => isNonBlankString(license?.maintenanceStartDate)],
-  ['every', license => isNonBlankString(license?.maintenanceEndDate)],
-  ['every', license => isNonBlankString(license?.status)],
-  ['every', license => isNonBlankString(license?.tier)],
-
-  ['every', license => !!license?.contactDetails],
-  ['some', license => isNonBlankString(license?.contactDetails?.company)],
-  ['every', license => isNonBlankString(license?.contactDetails?.country)],
-  ['every', license => isNonBlankString(license?.contactDetails?.region)],
-
-  ['every', license => !!license?.contactDetails?.technicalContact],
-  ['every', license => isNonBlankString(license?.contactDetails?.technicalContact?.email)],
-  ['some', license => isNonBlankString(license?.contactDetails?.technicalContact?.name)],
-  ['some', license => isNonBlankString(license?.contactDetails?.technicalContact?.phone)],
-  ['some', license => isNonBlankString(license?.contactDetails?.technicalContact?.city)],
-  ['some', license => isNonBlankString(license?.contactDetails?.technicalContact?.state)],
-
-  ['some', license => !!license?.contactDetails?.billingContact],
-  ['every', license => !license?.contactDetails?.billingContact || isNonBlankString(license?.contactDetails?.billingContact.email)],
-  ['some', license => !license?.contactDetails?.billingContact || isNonBlankString(license?.contactDetails?.billingContact.name)],
-  ['some', license => !license?.contactDetails?.billingContact || isNonBlankString(license?.contactDetails?.billingContact.phone)],
-  ['some', license => !license?.contactDetails?.billingContact || isNonBlankString(license?.contactDetails?.billingContact.city)],
-  ['some', license => !license?.contactDetails?.billingContact || isNonBlankString(license?.contactDetails?.billingContact.state)],
-
-  ['some', transaction => !!transaction?.partnerDetails],
-  ['every', transaction => !transaction?.partnerDetails || isNonBlankString(transaction?.partnerDetails?.partnerName)],
-  ['some', transaction => !transaction?.partnerDetails || isNonBlankString(transaction?.partnerDetails?.partnerType)],
-
-  ['some', license => !!license?.partnerDetails?.billingContact],
-  ['every', license => !license?.partnerDetails?.billingContact || isNonBlankString(license?.partnerDetails?.billingContact.email)],
-  ['every', license => !license?.partnerDetails?.billingContact || isNonBlankString(license?.partnerDetails?.billingContact.name)],
-
-  ['every', license => isUndefined(license?.evaluationOpportunitySize)],
-  ['every', license => !license?.attribution],
-
-  ['every', license => isUndefined(license?.parentProductBillingCycle)],
-  ['every', license => isUndefined(license?.parentProductName)],
-  ['every', license => isUndefined(license?.installedOnSandbox)],
-  ['every', license => isUndefined(license?.parentProductEdition)],
-
-  ['every', license => isUndefined(license?.evaluationLicense)],
-  ['every', license => isUndefined(license?.daysToConvertEval)],
-  ['every', license => isUndefined(license?.evaluationStartDate)],
-  ['every', license => isUndefined(license?.evaluationEndDate)],
-  ['every', license => isUndefined(license?.evaluationSaleDate)],
-];
-
-const transactionsSchema: Array<['every' | 'some', (transaction: RawTransaction) => boolean]> = [
-  ['every', transaction => isNonBlankString(transaction?.transactionId)],
-  ['every', transaction => isNonBlankString(transaction?.addonLicenseId)],
-  ['every', transaction => isNonBlankString(transaction?.licenseId)],
-  ['every', transaction => isNonBlankString(transaction?.addonKey)],
-  ['every', transaction => isNonBlankString(transaction?.addonName)],
-
-  ['every', transaction => !!transaction?.customerDetails],
-  ['every', transaction => isNonBlankString(transaction?.customerDetails?.company)],
-  ['every', transaction => isNonBlankString(transaction?.customerDetails?.country)],
-  ['every', transaction => isNonBlankString(transaction?.customerDetails?.region)],
-
-  ['every', transaction => !!transaction?.customerDetails.technicalContact],
-  ['every', transaction => isNonBlankString(transaction?.customerDetails?.technicalContact?.email)],
-  ['some', transaction => isNonBlankString(transaction?.customerDetails?.technicalContact?.name)],
-
-  ['every', transaction => !!transaction?.customerDetails.billingContact],
-  ['every', transaction => isNonBlankString(transaction?.customerDetails?.billingContact?.email)],
-  ['some', transaction => isNonBlankString(transaction?.customerDetails?.billingContact?.name)],
-
-  ['every', transaction => isNonBlankString(transaction?.purchaseDetails?.saleDate)],
-  ['every', transaction => isNonBlankString(transaction?.purchaseDetails?.tier)],
-  ['every', transaction => isNonBlankString(transaction?.purchaseDetails?.licenseType)],
-  ['every', transaction => isNonBlankString(transaction?.purchaseDetails?.hosting)],
-  ['every', transaction => isNonBlankString(transaction?.purchaseDetails?.billingPeriod)],
-  ['every', transaction => isNumber(transaction?.purchaseDetails?.purchasePrice)],
-  ['every', transaction => isNumber(transaction?.purchaseDetails?.vendorAmount)],
-  ['every', transaction => isNonBlankString(transaction?.purchaseDetails?.saleType)],
-  ['every', transaction => isNonBlankString(transaction?.purchaseDetails?.maintenanceStartDate)],
-  ['every', transaction => isNonBlankString(transaction?.purchaseDetails?.maintenanceEndDate)],
-
-  ['some', transaction => !!transaction?.partnerDetails],
-  ['every', transaction => !transaction?.partnerDetails || isNonBlankString(transaction?.partnerDetails?.partnerName)],
-  ['some', transaction => !transaction?.partnerDetails || isNonBlankString(transaction?.partnerDetails?.partnerType)],
-
-  ['every', transaction => !transaction?.partnerDetails || !!transaction?.partnerDetails?.billingContact],
-  ['every', transaction => !transaction?.partnerDetails || isNonBlankString(transaction?.partnerDetails?.billingContact?.email)],
-  ['every', transaction => !transaction?.partnerDetails || isNonBlankString(transaction?.partnerDetails?.billingContact?.name)],
-];
-
-function isNonBlankString(s: string | undefined) {
-  return typeof s === 'string' && s.trim().length > 0;
+function validateTransaction(transaction: RawTransaction) {
+  validateField(transaction, t => t.transactionId);
+  validateField(transaction, t => t.addonLicenseId);
+  validateField(transaction, t => t.licenseId);
+  validateField(transaction, t => t.addonKey);
+  validateField(transaction, t => t.addonName);
+  validateField(transaction, t => t.lastUpdated);
+  validateField(transaction, t => t.customerDetails);
+  validateField(transaction, t => t.customerDetails.technicalContact);
+  validateField(transaction, t => t.customerDetails.technicalContact.email);
+  validateField(transaction, t => t.purchaseDetails);
+  validateField(transaction, t => t.purchaseDetails.saleDate);
+  validateField(transaction, t => t.purchaseDetails.tier);
+  validateField(transaction, t => t.purchaseDetails.licenseType);
+  validateField(transaction, t => t.purchaseDetails.hosting);
+  validateField(transaction, t => t.purchaseDetails.billingPeriod);
+  validateField(transaction, t => t.purchaseDetails.purchasePrice);
+  validateField(transaction, t => t.purchaseDetails.vendorAmount);
+  validateField(transaction, t => t.purchaseDetails.saleType);
+  validateField(transaction, t => t.purchaseDetails.maintenanceStartDate);
+  validateField(transaction, t => t.purchaseDetails.maintenanceEndDate);
 }
 
-function isString(s: string | undefined) {
-  return typeof s === 'string';
-}
-
-function isNumber(s: number | undefined) {
-  return typeof s === 'number';
-}
-
-function isUndefined(s: any) {
-  return typeof s === 'undefined';
+function validateField<T>(o: T, accessor: (o: T) => any) {
+  const val = accessor(o);
+  const path = accessor.toString().replace(/^(\w+) => \1\./, '');
+  if (!val) throw new AttachableError(`Invalid License: ${path} missing`, JSON.stringify(o));
 }
 
 function filterLicensesWithTechEmail(license: RawLicense) {
