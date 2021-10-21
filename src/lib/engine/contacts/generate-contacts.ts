@@ -33,7 +33,14 @@ class ContactGenerator {
     }
   }
 
-  generateContact(item: License | Transaction, info: ContactInfo | PartnerBillingInfo | null) {
+  mergeGeneratedContacts() {
+    for (const [contact, contacts] of this.toMerge) {
+      contacts.sort(sorter(c => c.lastUpdated, 'DSC'));
+      mergeContactInfo(contact.data, contacts);
+    }
+  }
+
+  private generateContact(item: License | Transaction, info: ContactInfo | PartnerBillingInfo | null) {
     if (!info) return;
     const generated = this.contactFrom(item, info);
 
@@ -45,7 +52,7 @@ class ContactGenerator {
     entry.push(generated);
   }
 
-  contactFrom(item: License | Transaction, info: ContactInfo | PartnerBillingInfo): GeneratedContact {
+  private contactFrom(item: License | Transaction, info: ContactInfo | PartnerBillingInfo): GeneratedContact {
     let [firstName, ...lastNameGroup] = (info.name || ' ').split(' ');
     let lastName = lastNameGroup.filter(n => n).join(' ');
 
@@ -74,13 +81,6 @@ class ContactGenerator {
       lastMpacEvent: '',
       lastUpdated: (item instanceof License ? item.data.lastUpdated : item.data.saleDate),
     };
-  }
-
-  mergeGeneratedContacts() {
-    for (const [contact, contacts] of this.toMerge) {
-      contacts.sort(sorter(c => c.lastUpdated, 'DSC'));
-      mergeContactInfo(contact.data, contacts);
-    }
   }
 
 }
