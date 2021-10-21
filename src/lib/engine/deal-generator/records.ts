@@ -74,29 +74,29 @@ export function dealCreationProperties(record: License | Transaction, dealstage:
   };
 }
 
-export function dealUpdateProperties(deal: Deal, record: License | Transaction): Partial<Deal['properties']> {
-  const properties: Partial<Deal['properties']> = {};
+export function dealUpdateProperties(deal: Deal, record: License | Transaction): Partial<DealProps> {
+  const properties: Partial<DealProps> = {};
 
-  if (isTransaction(record)) {
-    if (deal.properties.transactionId !== record.transactionId) properties.transactionId = record.transactionId;
-    if (deal.properties.addonLicenseId !== '') properties.addonLicenseId = '';
+  if (record instanceof Transaction) {
+    if (deal.data.transactionId !== record.data.transactionId) properties.transactionId = record.data.transactionId;
+    if (deal.data.addonLicenseId !== null) properties.addonLicenseId = null;
   }
   else {
-    if (deal.properties.addonLicenseId !== record.addonLicenseId) properties.addonLicenseId = record.addonLicenseId;
-    if (deal.properties.transactionId !== '') properties.transactionId = '';
+    if (deal.data.addonLicenseId !== record.data.addonLicenseId) properties.addonLicenseId = record.data.addonLicenseId;
+    if (deal.data.transactionId !== null) properties.transactionId = null;
   }
 
-  const oldAmount = deal.properties.amount;
-  const newAmount = (isTransaction(record) ? record.purchaseDetails.vendorAmount.toString() : oldAmount);
+  const oldAmount = deal.data.amount;
+  const newAmount = (record instanceof Transaction ? record.data.vendorAmount : oldAmount);
   if (newAmount !== oldAmount) properties.amount = newAmount;
 
-  const oldCloseDate = deal.properties.closedate;
+  const oldCloseDate = deal.data.closeDate;
   const newCloseDate = record.data.maintenanceStartDate;
-  if (newCloseDate !== oldCloseDate) properties.closedate = newCloseDate;
+  if (newCloseDate !== oldCloseDate) properties.closeDate = newCloseDate;
 
-  const oldTier = +deal.properties.license_tier;
-  const newTier = getTier(record);
-  if (newTier > oldTier) properties.license_tier = newTier.toFixed();
+  const oldTier = +deal.data.licenseTier;
+  const newTier = record.maxTier;
+  if (newTier > oldTier) properties.licenseTier = newTier;
 
   return properties;
 }
