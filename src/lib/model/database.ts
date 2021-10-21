@@ -3,7 +3,7 @@ import { EntityKind } from "../io/hubspot.js";
 import { Uploader } from "../io/uploader/uploader.js";
 import { MultiDownloadLogger } from "../log/download-logger.js";
 import log from "../log/logger.js";
-import { makeMultiProviderDomainsSet } from "../services/domains.js";
+import { makeEmailValidationRegex, makeMultiProviderDomainsSet } from "../services/domains.js";
 import { CompanyManager } from "./hubspot/company.js";
 import { ContactManager } from "./hubspot/contact.js";
 import { DealManager } from "./hubspot/deal.js";
@@ -107,8 +107,4 @@ export class Database {
     }
   }
 
-}
-
-function makeEmailValidationRegex(tlds: string[]) {
-  return new RegExp(`.+@.+\\.(${tlds.join('|')})`);
 }

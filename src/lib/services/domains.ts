@@ -2,6 +2,10 @@ import { emailBurnerList } from 'burner-email-providers';
 import allEmailProviders from 'email-providers';
 import fetch from 'node-fetch';
 
+export function makeEmailValidationRegex(tlds: string[]) {
+  return new RegExp(`.+@.+\\.(${tlds.join('|')})`);
+}
+
 /** A set of domains that host multiple unrelated email addresses */
 export function makeMultiProviderDomainsSet(freeDomains: string[]) {
   return new Set([
