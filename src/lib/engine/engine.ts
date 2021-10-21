@@ -2,13 +2,13 @@ import { Downloader } from '../io/downloader/downloader.js';
 import { Uploader } from '../io/uploader/uploader.js';
 import log from '../log/logger.js';
 import { Database } from '../model/database.js';
-import { backfillDealCompanies } from './backfill-deal-companies.js';
+import { backfillDealCompanies } from './backfilling/backfill-deal-companies.js';
+import zeroEmptyDealAmounts from './backfilling/zero-empty-deal-amounts.js';
 import { generateDeals } from './deal-generator/generate-deals.js';
 import { generateContacts } from "./generate-contacts.js";
 import { matchIntoLikelyGroups } from './license-grouper.js';
 import { findAndFlagExternallyCreatedContacts, findAndFlagPartnerCompanies, findAndFlagPartnersByDomain, identifyDomains } from './partners.js';
 import { updateContactsBasedOnMatchResults } from './update-contacts-using-matches.js';
-import zeroEmptyDealAmounts from './zero-empty-deal-amounts.js';
 
 export default async function runEngine({ downloader, uploader }: {
   downloader: Downloader,

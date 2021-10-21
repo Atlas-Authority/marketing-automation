@@ -1,7 +1,7 @@
 import assert from 'assert';
-import { Pipeline } from '../config/index.js';
-import log from '../log/logger.js';
-import { Deal } from '../model/hubspot/deal.js';
+import { Pipeline } from '../../config/index.js';
+import log from '../../log/logger.js';
+import { Deal } from '../../model/hubspot/deal.js';
 
 export default function (deals: Deal[]) {
   assert.ok(deals.every(deal => deal.data.pipeline === Pipeline.AtlassianMarketplace));
