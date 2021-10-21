@@ -22,18 +22,16 @@ export type PartnerInfo = {
   partnerType?: string;
 };
 
-// export type NormalizedRecord = NormalizedLicense | NormalizedTransaction;
-
 export function getContactInfo(contactInfo: RawLicenseContact | RawTransactionContact): ContactInfo {
   return {
     email: contactInfo.email,
     name: contactInfo.name,
-    phone: 'phone' in contactInfo ? contactInfo.phone : undefined,
-    address1: 'address1' in contactInfo ? contactInfo.address1 : undefined,
-    address2: 'address2' in contactInfo ? contactInfo.address2 : undefined,
-    city: 'city' in contactInfo ? contactInfo.city : undefined,
-    state: 'state' in contactInfo ? contactInfo.state : undefined,
-    postcode: 'postcode' in contactInfo ? contactInfo.postcode : undefined,
+    ...('phone' in contactInfo && { phone: contactInfo.phone }),
+    ...('address1' in contactInfo && { address1: contactInfo.address1 }),
+    ...('address2' in contactInfo && { address2: contactInfo.address2 }),
+    ...('city' in contactInfo && { city: contactInfo.city }),
+    ...('state' in contactInfo && { state: contactInfo.state }),
+    ...('postcode' in contactInfo && { postcode: contactInfo.postcode }),
   };
 }
 
