@@ -24,10 +24,28 @@ function contactsFor(contacts: ContactsByEmail, groups: RelatedLicenseSet) {
 }
 
 export function generateDeals(db: Database, allMatches: RelatedLicenseSet[]) {
-  const { dealCreateActions, dealUpdateActions } = generateDealActions(db, allMatches
+  const matches = allMatches
     .filter(group =>
       group.some(m =>
-        !olderThan90Days(m.license.data.maintenanceStartDate))));
+        !olderThan90Days(m.license.data.maintenanceStartDate)));
+
+  const generator = new DealActionGenerator(db);
+
+  // Stages:
+  // 1. Sort and normalize licenses/transactions (event records)
+  // 2. Turn event records into deal-generating-relevant events
+  // 3. Match events up with deal state and generate actions
+
+  for (const relatedLicenseIds of matches) {
+    generator.generateActionsForMatchedGroup(relatedLicenseIds);
+  }
+
+  saveForInspection('ignored', generator.ignoredLicenseSets);
+
+  const dealCreateActions = generator.dealCreateActions;
+  const dealUpdateActions = generator.dealUpdateActions;
+
+
 
   const dealsToCreate: Omit<Deal, 'id'>[] = dealCreateActions.map(({ groups, properties }) => {
     const contacts = contactsFor(data.contactsByEmail, groups);
@@ -140,26 +158,6 @@ class DealActionGenerator {
     this.ignoredLicenseSets.push(licenses.map(license => ({ reason, ...license.data })));
   }
 
-}
-
-function generateDealActions(db: Database, matches: RelatedLicenseSet[]) {
-  const generator = new DealActionGenerator(db);
-
-  // Stages:
-  // 1. Sort and normalize licenses/transactions (event records)
-  // 2. Turn event records into deal-generating-relevant events
-  // 3. Match events up with deal state and generate actions
-
-  for (const relatedLicenseIds of matches) {
-    generator.generateActionsForMatchedGroup(relatedLicenseIds);
-  }
-
-  saveForInspection('ignored', generator.ignoredLicenseSets);
-
-  return {
-    dealCreateActions: generator.dealCreateActions,
-    dealUpdateActions: generator.dealUpdateActions,
-  };
 }
 
 const NINETY_DAYS_AS_MS = (1000 * 60 * 60 * 24 * 90);
