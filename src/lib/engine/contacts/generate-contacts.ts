@@ -12,7 +12,7 @@ export function generateContacts(db: Database) {
   gen.mergeGeneratedContacts();
 }
 
-type GeneratedContact = ContactProps & { lastUpdated: string };
+export type GeneratedContact = ContactProps & { lastUpdated: string };
 
 class ContactGenerator {
 
@@ -78,49 +78,56 @@ class ContactGenerator {
 
   mergeGeneratedContacts() {
     for (const [contact, contacts] of this.toMerge) {
-      const currentContactProps = {
-        ...contact.data,
-        lastUpdated: contact.data.lastMpacEvent ?? '',
-      };
-      contacts.push(currentContactProps);
-
-      if (contacts.some(c => c.contactType === 'Partner')) {
-        contact.data.contactType = 'Partner';
-      }
-
       contacts.sort(sorter(c => c.lastUpdated, 'DSC'));
-
-      const hasName = contacts.find(c => c.firstName && c.lastName);
-      if (hasName) {
-        contact.data.firstName = hasName.firstName;
-        contact.data.lastName = hasName.lastName;
-      }
-      else {
-        const hasFirstName = contacts.find(c => c.firstName);
-        if (hasFirstName) contact.data.firstName = hasFirstName.firstName;
-
-        const hasLastName = contacts.find(c => c.lastName);
-        if (hasLastName) contact.data.lastName = hasLastName.lastName;
-      }
-
-      const hasPhone = contacts.find(c => c.phone);
-      if (hasPhone) {
-        contact.data.phone = hasPhone.phone;
-      }
-
-      const hasAddress = contacts.find(c => c.city && c.state);
-      if (hasAddress) {
-        contact.data.city = hasAddress.city;
-        contact.data.state = hasAddress.state;
-      }
-      else {
-        const hasCity = contacts.find(c => c.city);
-        if (hasCity) contact.data.city = hasCity.city;
-
-        const hasState = contacts.find(c => c.state);
-        if (hasState) contact.data.state = hasState.state;
-      }
+      mergeContactInfo(contact.data, contacts);
     }
   }
 
+}
+
+export function mergeContactInfo(contact: ContactProps, contacts: GeneratedContact[]) {
+  const currentContactProps = {
+    ...contact,
+    lastUpdated: contact.lastMpacEvent ?? '',
+  };
+  contacts.push(currentContactProps);
+
+  if (contacts.some(c => c.contactType === 'Partner')) {
+    contact.contactType = 'Partner';
+  }
+
+  const hasName = contacts.find(c => c.firstName && c.lastName);
+  if (hasName) {
+    contact.firstName = hasName.firstName;
+    contact.lastName = hasName.lastName;
+  }
+  else {
+    const hasFirstName = contacts.find(c => c.firstName);
+    if (hasFirstName)
+      contact.firstName = hasFirstName.firstName;
+
+    const hasLastName = contacts.find(c => c.lastName);
+    if (hasLastName)
+      contact.lastName = hasLastName.lastName;
+  }
+
+  const hasPhone = contacts.find(c => c.phone);
+  if (hasPhone) {
+    contact.phone = hasPhone.phone;
+  }
+
+  const hasAddress = contacts.find(c => c.city && c.state);
+  if (hasAddress) {
+    contact.city = hasAddress.city;
+    contact.state = hasAddress.state;
+  }
+  else {
+    const hasCity = contacts.find(c => c.city);
+    if (hasCity)
+      contact.city = hasCity.city;
+
+    const hasState = contacts.find(c => c.state);
+    if (hasState)
+      contact.state = hasState.state;
+  }
 }

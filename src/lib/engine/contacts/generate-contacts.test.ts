@@ -1,48 +1,21 @@
-import { mergeContactProperties, TmpContact } from "./generate-contacts.js";
+import { ContactProps, ContactType } from "../../model/hubspot/contact.js";
+import { GeneratedContact, mergeContactInfo } from "./generate-contacts.js";
 
 describe('updating latest contact properties', () => {
 
-  it('chooses latest values', () => {
-    let a;
-
-    mergeContactProperties('email2', [
-      fakeContact({
-        firstname: 'firstname',
-        lastname: 'lastname',
-        phone: 'phone',
-        city: 'city',
-        state: 'state',
-      }),
-      a = fakeContact({
-        updated: '2021-04-02',
-        country: 'country2',
-        region: 'region2',
-        hosting: 'hosting2',
-        email: 'email2',
-      }),
-    ]);
-
-    expect(a).toEqual(fakeContact({
-      updated: '2021-04-02',
-      country: 'country2',
-      region: 'region2',
-      hosting: 'hosting2',
-      email: 'email2',
-      firstname: 'firstname',
-      lastname: 'lastname',
-      phone: 'phone',
-      city: 'city',
-      state: 'state',
-    }));
-  });
-
   it('gathers name, phone, and address separately', () => {
-    let a;
+    const a = fakeContact({
+      lastUpdated: '2021-04-02',
+      country: 'country2',
+      region: 'region2',
+      hosting: 'hosting2',
+      email: 'email2',
+    });
 
-    mergeContactProperties('email2', [
+    mergeContactInfo(a, [
       fakeContact({
-        firstname: 'firstname',
-        lastname: 'lastname',
+        firstName: 'firstName',
+        lastName: 'lastName',
       }),
       fakeContact({
         phone: 'phone',
@@ -51,123 +24,79 @@ describe('updating latest contact properties', () => {
         city: 'city',
         state: 'state',
       }),
-      a = fakeContact({
-        updated: '2021-04-02',
-        country: 'country2',
-        region: 'region2',
-        hosting: 'hosting2',
-        email: 'email2',
-      }),
+      a,
     ]);
 
     expect(a).toEqual(fakeContact({
-      updated: '2021-04-02',
+      lastUpdated: '2021-04-02',
       country: 'country2',
       region: 'region2',
       hosting: 'hosting2',
       email: 'email2',
-      firstname: 'firstname',
-      lastname: 'lastname',
+      firstName: 'firstName',
+      lastName: 'lastName',
       phone: 'phone',
       city: 'city',
       state: 'state',
     }));
   });
 
-  it('picks the canonical by latest updated, regardless of order', () => {
-    let a;
+  it('gets the newest full firstName/lastName pair if present', () => {
+    const a = fakeContact({});
 
-    mergeContactProperties('email2', [
+    mergeContactInfo(a, [
       fakeContact({
-        firstname: 'firstname',
-        lastname: 'lastname',
-      }),
-      a = fakeContact({
-        updated: '2021-04-02',
-        country: 'country2',
-        region: 'region2',
-        hosting: 'hosting2',
-        email: 'email2',
+        lastUpdated: '2021-03-05',
+        firstName: 'firstName1',
       }),
       fakeContact({
-        phone: 'phone',
+        lastUpdated: '2021-03-05',
+        lastName: 'lastName1',
       }),
       fakeContact({
-        city: 'city',
-        state: 'state',
+        lastUpdated: '2021-03-01',
+        firstName: 'firstName2',
+        lastName: 'lastName2',
       }),
+      a,
     ]);
 
     expect(a).toEqual(fakeContact({
-      updated: '2021-04-02',
-      country: 'country2',
-      region: 'region2',
-      hosting: 'hosting2',
-      email: 'email2',
-      firstname: 'firstname',
-      lastname: 'lastname',
-      phone: 'phone',
-      city: 'city',
-      state: 'state',
+      firstName: 'firstName2',
+      lastName: 'lastName2',
     }));
   });
 
-  it('gets the newest full firstname/lastname pair if present', () => {
-    let a;
+  it('uses first found firstName and lastName if no pair present', () => {
+    const a = fakeContact({});
 
-    mergeContactProperties('email1', [
+    mergeContactInfo(a, [
       fakeContact({
-        updated: '2021-03-05',
-        firstname: 'firstname1',
+        firstName: 'firstName1',
       }),
       fakeContact({
-        updated: '2021-03-05',
-        lastname: 'lastname1',
+        lastName: 'lastName2',
       }),
-      fakeContact({
-        updated: '2021-03-01',
-        firstname: 'firstname2',
-        lastname: 'lastname2',
-      }),
-      a = fakeContact({}),
+      a,
     ]);
 
     expect(a).toEqual(fakeContact({
-      firstname: 'firstname2',
-      lastname: 'lastname2',
-    }));
-  });
-
-  it('uses first found firstname and lastname if no pair present', () => {
-    let a;
-
-    mergeContactProperties('email1', [
-      fakeContact({
-        firstname: 'firstname1',
-      }),
-      fakeContact({
-        lastname: 'lastname2',
-      }),
-      a = fakeContact({}),
-    ]);
-
-    expect(a).toEqual(fakeContact({
-      firstname: 'firstname1',
-      lastname: 'lastname2',
+      firstName: 'firstName1',
+      lastName: 'lastName2',
     }));
   });
 
   it('uses neither city nor state if no pair present', () => {
-    let a;
+    const a = fakeContact({});
 
-    mergeContactProperties('email1', [
+    mergeContactInfo(a, [
       fakeContact({
         city: 'city1',
       }),
       fakeContact({
         state: 'state2',
       }),
-      a = fakeContact({}),
+      a,
     ]);
 
     expect(a).toEqual(fakeContact({
@@ -177,76 +106,78 @@ describe('updating latest contact properties', () => {
   });
 
   it('updates canonical to Partner if any are Partner', () => {
-    let a;
+    const a = fakeContact({});
 
-    mergeContactProperties('email1', [
+    mergeContactInfo(a, [
       fakeContact({
         city: 'city1',
-        contact_type: 'Partner',
+        contactType: 'Partner',
       }),
       fakeContact({
         state: 'state2',
       }),
-      a = fakeContact({}),
+      a,
     ]);
 
     expect(a).toEqual(fakeContact({
       city: 'city1',
       state: 'state2',
-      contact_type: 'Partner',
+      contactType: 'Partner',
     }));
   });
 
   it('makes the last as canonical when "updated" is tied', () => {
-    let a;
+    const a = fakeContact({
+      email: 'email1',
+      firstName: 'firstName2',
+      lastName: 'lastName2',
+      phone: null,
+      city: null,
+      state: null,
+    });
 
-    mergeContactProperties('email1', [
+    mergeContactInfo(a, [
+      a,
       fakeContact({
         email: 'email2',
-        firstname: 'firstname1',
-        lastname: 'lastname1',
+        firstName: 'firstName1',
+        lastName: 'lastName1',
         phone: 'phone',
         city: 'city',
         state: 'state',
-        company_id: null,
-      }),
-      a = fakeContact({
-        email: 'email1',
-        firstname: 'firstname2',
-        lastname: 'lastname2',
-        phone: null,
-        city: null,
-        state: null,
-        company_id: null,
       }),
     ]);
 
     expect(a).toEqual(fakeContact({
       email: 'email1',
-      firstname: 'firstname2',
-      lastname: 'lastname2',
+      firstName: 'firstName2',
+      lastName: 'lastName2',
       phone: 'phone',
       city: 'city',
       state: 'state',
-      company_id: null,
     }));
   });
 
 });
 
-function fakeContact(props: { [key: string]: string | null }): TmpContact {
+function fakeContact(props: Partial<GeneratedContact>): GeneratedContact {
   return {
-    updated: props.updated || '2021-04-01',
-    contact_type: props.contact_type as any || 'Customer',
+    lastUpdated: props.lastUpdated || '2021-04-01',
+    contactType: props.contactType as ContactType || 'Customer',
     country: props.country || 'country1',
     region: props.region || 'region1',
     hosting: props.hosting || 'hosting1',
     email: props.email || 'email1',
-    firstname: props.firstname || null,
-    lastname: props.lastname || null,
+    firstName: props.firstName || null,
+    lastName: props.lastName || null,
     phone: props.phone || null,
     city: props.city || null,
     state: props.state || null,
-    company_id: null,
+
+    deployment: null,
+    lastMpacEvent: null,
+    licenseTier: null,
+    otherEmails: [],
+    relatedProducts: new Set(),
   };
 }
