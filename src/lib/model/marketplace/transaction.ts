@@ -35,7 +35,39 @@ export interface TransactionData {
 
 export class Transaction {
 
-  constructor(public data: TransactionData) { }
+  public data: TransactionData;
+
+  constructor(rawTransaction: RawTransaction) {
+    this.data = {
+      transactionId: rawTransaction.transactionId,
+
+      addonLicenseId: rawTransaction.addonLicenseId,
+      licenseId: rawTransaction.licenseId,
+      addonKey: rawTransaction.addonKey,
+      addonName: rawTransaction.addonName,
+      lastUpdated: rawTransaction.lastUpdated,
+
+      technicalContact: getContactInfo(rawTransaction.customerDetails.technicalContact),
+      billingContact: maybeGetContactInfo(rawTransaction.customerDetails.billingContact),
+      partnerDetails: getPartnerInfo(rawTransaction.partnerDetails),
+
+      company: rawTransaction.customerDetails.company,
+      country: rawTransaction.customerDetails.country,
+      region: rawTransaction.customerDetails.region,
+
+      tier: rawTransaction.purchaseDetails.tier,
+      licenseType: rawTransaction.purchaseDetails.licenseType,
+      hosting: rawTransaction.purchaseDetails.hosting,
+      maintenanceStartDate: rawTransaction.purchaseDetails.maintenanceStartDate,
+      maintenanceEndDate: rawTransaction.purchaseDetails.maintenanceEndDate,
+
+      saleDate: rawTransaction.purchaseDetails.saleDate,
+      saleType: rawTransaction.purchaseDetails.saleType,
+      billingPeriod: rawTransaction.purchaseDetails.billingPeriod,
+      purchasePrice: rawTransaction.purchaseDetails.purchasePrice,
+      vendorAmount: rawTransaction.purchaseDetails.vendorAmount,
+    };
+  }
 
   get maxTier() {
     const tier = this.data.tier;
@@ -53,36 +85,4 @@ export class Transaction {
     assert.fail(`Unknown transaction tier: ${tier}`);
   }
 
-}
-
-export function normalizeTransaction(transaction: RawTransaction): Transaction {
-  return new Transaction({
-    transactionId: transaction.transactionId,
-
-    addonLicenseId: transaction.addonLicenseId,
-    licenseId: transaction.licenseId,
-    addonKey: transaction.addonKey,
-    addonName: transaction.addonName,
-    lastUpdated: transaction.lastUpdated,
-
-    technicalContact: getContactInfo(transaction.customerDetails.technicalContact),
-    billingContact: maybeGetContactInfo(transaction.customerDetails.billingContact),
-    partnerDetails: getPartnerInfo(transaction.partnerDetails),
-
-    company: transaction.customerDetails.company,
-    country: transaction.customerDetails.country,
-    region: transaction.customerDetails.region,
-
-    tier: transaction.purchaseDetails.tier,
-    licenseType: transaction.purchaseDetails.licenseType,
-    hosting: transaction.purchaseDetails.hosting,
-    maintenanceStartDate: transaction.purchaseDetails.maintenanceStartDate,
-    maintenanceEndDate: transaction.purchaseDetails.maintenanceEndDate,
-
-    saleDate: transaction.purchaseDetails.saleDate,
-    saleType: transaction.purchaseDetails.saleType,
-    billingPeriod: transaction.purchaseDetails.billingPeriod,
-    purchasePrice: transaction.purchaseDetails.purchasePrice,
-    vendorAmount: transaction.purchaseDetails.vendorAmount,
-  });
 }

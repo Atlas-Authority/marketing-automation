@@ -57,7 +57,61 @@ export interface LicenseData {
 
 export class License {
 
-  constructor(public data: LicenseData) { }
+  public data: LicenseData;
+
+  constructor(rawLicense: RawLicense) {
+    let newEvalData: NewEvalData | null = null;
+    if (rawLicense.evaluationLicense) {
+      newEvalData = {
+        evaluationLicense: rawLicense.evaluationLicense,
+        daysToConvertEval: rawLicense.daysToConvertEval as string,
+        evaluationStartDate: rawLicense.evaluationStartDate as string,
+        evaluationEndDate: rawLicense.evaluationEndDate as string,
+        evaluationSaleDate: rawLicense.evaluationSaleDate as string,
+      };
+    }
+
+    let parentInfo: ParentProductInfo | null = null;
+    if (rawLicense.parentProductBillingCycle
+      || rawLicense.parentProductName
+      || rawLicense.installedOnSandbox
+      || rawLicense.parentProductEdition) {
+      parentInfo = {
+        parentProductBillingCycle: rawLicense.parentProductBillingCycle,
+        parentProductName: rawLicense.parentProductName,
+        installedOnSandbox: rawLicense.installedOnSandbox,
+        parentProductEdition: rawLicense.parentProductEdition,
+      } as ParentProductInfo;
+    }
+
+    this.data = {
+      addonLicenseId: rawLicense.addonLicenseId,
+      licenseId: rawLicense.licenseId,
+      addonKey: rawLicense.addonKey,
+      addonName: rawLicense.addonName,
+      lastUpdated: rawLicense.lastUpdated,
+
+      technicalContact: getContactInfo(rawLicense.contactDetails.technicalContact),
+      billingContact: maybeGetContactInfo(rawLicense.contactDetails.billingContact),
+      partnerDetails: getPartnerInfo(rawLicense.partnerDetails),
+
+      company: rawLicense.contactDetails.company,
+      country: rawLicense.contactDetails.country,
+      region: rawLicense.contactDetails.region,
+
+      tier: rawLicense.tier,
+      licenseType: rawLicense.licenseType,
+      hosting: rawLicense.hosting,
+      maintenanceStartDate: rawLicense.maintenanceStartDate,
+      maintenanceEndDate: rawLicense.maintenanceEndDate,
+
+      status: rawLicense.status,
+      evaluationOpportunitySize: rawLicense.evaluationOpportunitySize ?? '',
+      attribution: rawLicense.attribution ?? null,
+      parentInfo,
+      newEvalData,
+    };
+  }
 
   get maxTier() {
     return Math.max(this.parseTier(), this.tierFromEvalOpportunity());
@@ -97,58 +151,4 @@ export class License {
     }
   }
 
-}
-
-export function normalizeLicense(license: RawLicense): License {
-  let newEvalData: NewEvalData | null = null;
-  if (license.evaluationLicense) {
-    newEvalData = {
-      evaluationLicense: license.evaluationLicense,
-      daysToConvertEval: license.daysToConvertEval as string,
-      evaluationStartDate: license.evaluationStartDate as string,
-      evaluationEndDate: license.evaluationEndDate as string,
-      evaluationSaleDate: license.evaluationSaleDate as string,
-    };
-  }
-
-  let parentInfo: ParentProductInfo | null = null;
-  if (license.parentProductBillingCycle
-    || license.parentProductName
-    || license.installedOnSandbox
-    || license.parentProductEdition) {
-    parentInfo = {
-      parentProductBillingCycle: license.parentProductBillingCycle,
-      parentProductName: license.parentProductName,
-      installedOnSandbox: license.installedOnSandbox,
-      parentProductEdition: license.parentProductEdition,
-    } as ParentProductInfo;
-  }
-
-  return new License({
-    addonLicenseId: license.addonLicenseId,
-    licenseId: license.licenseId,
-    addonKey: license.addonKey,
-    addonName: license.addonName,
-    lastUpdated: license.lastUpdated,
-
-    technicalContact: getContactInfo(license.contactDetails.technicalContact),
-    billingContact: maybeGetContactInfo(license.contactDetails.billingContact),
-    partnerDetails: getPartnerInfo(license.partnerDetails),
-
-    company: license.contactDetails.company,
-    country: license.contactDetails.country,
-    region: license.contactDetails.region,
-
-    tier: license.tier,
-    licenseType: license.licenseType,
-    hosting: license.hosting,
-    maintenanceStartDate: license.maintenanceStartDate,
-    maintenanceEndDate: license.maintenanceEndDate,
-
-    status: license.status,
-    evaluationOpportunitySize: license.evaluationOpportunitySize ?? '',
-    attribution: license.attribution ?? null,
-    parentInfo,
-    newEvalData,
-  });
 }

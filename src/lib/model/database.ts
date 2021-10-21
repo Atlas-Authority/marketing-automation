@@ -8,8 +8,8 @@ import { CompanyManager } from "./hubspot/company.js";
 import { ContactManager } from "./hubspot/contact.js";
 import { DealManager } from "./hubspot/deal.js";
 import { Entity } from "./hubspot/entity.js";
-import { License, normalizeLicense } from "./marketplace/license.js";
-import { normalizeTransaction, Transaction } from "./marketplace/transaction.js";
+import { License } from "./marketplace/license.js";
+import { Transaction } from "./marketplace/transaction.js";
 import { validateMarketplaceData } from "./marketplace/validation.js";
 
 export class Database {
@@ -82,8 +82,8 @@ export class Database {
       transactions,
       emailRe);
 
-    this.licenses = results.licenses.map(normalizeLicense);
-    this.transactions = results.transactions.map(normalizeTransaction);
+    this.licenses = results.licenses.map(raw => new License(raw));
+    this.transactions = results.transactions.map(raw => new Transaction(raw));
   }
 
   async syncUpAllEntities() {
