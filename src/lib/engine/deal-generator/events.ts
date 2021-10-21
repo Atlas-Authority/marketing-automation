@@ -3,7 +3,7 @@ import { License } from '../../model/marketplace/license.js';
 import { Transaction } from '../../model/marketplace/transaction.js';
 import { sorter } from "../../util/helpers.js";
 import { LicenseContext } from '../license-grouper.js';
-import { abbrRecordDetails, getDate, getLicense, getLicenseType, isEvalOrOpenSourceLicense, isPaidLicense } from "./records.js";
+import { abbrRecordDetails, getLicense, isEvalOrOpenSourceLicense, isPaidLicense } from "./records.js";
 
 export type RefundEvent = { type: 'refund', groups: LicenseContext[], refundedTxs: Transaction[] };
 export type EvalEvent = { type: 'eval', groups: LicenseContext[], licenses: License[] };
@@ -119,14 +119,14 @@ export class EventGenerator {
   private sortRecords(records: (License | Transaction)[]) {
     records.sort((a, b) => {
       // First sort by date
-      const date1 = getDate(a);
-      const date2 = getDate(b);
+      const date1 = a.data.maintenanceStartDate;
+      const date2 = b.data.maintenanceStartDate;
       if (date1 < date2) return -1;
       if (date1 > date2) return 1;
 
       // Evals on the same date always go before other transactions
-      const type1 = getLicenseType(a);
-      const type2 = getLicenseType(b);
+      const type1 = a.data.licenseType;
+      const type2 = b.data.licenseType;
       if (type1 === 'EVALUATION' && type2 !== 'EVALUATION') return -1;
       if (type1 !== 'EVALUATION' && type2 === 'EVALUATION') return -1;
 

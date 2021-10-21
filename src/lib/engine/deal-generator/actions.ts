@@ -7,7 +7,7 @@ import { isPresent, sorter } from '../../util/helpers.js';
 import { LicenseContext } from '../license-grouper.js';
 import { DealFinder } from './deal-finder.js';
 import { DealRelevantEvent, EvalEvent, PurchaseEvent, RefundEvent, RenewalEvent, UpgradeEvent } from "./events.js";
-import { dealCreationProperties, dealUpdateProperties, getDate } from './records.js';
+import { dealCreationProperties, dealUpdateProperties } from './records.js';
 
 export class ActionGenerator {
 
@@ -139,5 +139,5 @@ function makeIgnoreAction(event: DealRelevantEvent, deal: Deal, reason: string):
 function getLatestRecord(event: PurchaseEvent): License | Transaction {
   const records: (License | Transaction)[] = [...event.licenses];
   if (event.transaction) records.push(event.transaction);
-  return records.sort(sorter(getDate, 'DSC'))[0];
+  return records.sort(sorter(item => item.data.maintenanceStartDate, 'DSC'))[0];
 }
