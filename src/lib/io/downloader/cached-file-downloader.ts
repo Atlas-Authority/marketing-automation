@@ -6,7 +6,7 @@ import { Downloader, Progress } from './downloader.js';
 export default class CachedFileDownloader implements Downloader {
 
   async downloadHubspotEntities(_progress: Progress, kind: EntityKind, apiProperties: string[], inputAssociations: string[]): Promise<FullEntity[]> {
-    return datadir.readJsonFile('in', `${kind}s2.json`);
+    return datadir.readJsonFile('in', `${kind}.json`);
   }
 
   async downloadFreeEmailProviders(): Promise<string[]> {

@@ -14,7 +14,7 @@ export default class LiveDownloader implements Downloader {
 
   async downloadHubspotEntities(_progress: Progress, kind: EntityKind, apiProperties: string[], inputAssociations: string[]): Promise<FullEntity[]> {
     const normalizedEntities = await this.hubspot.downloadEntities(kind, apiProperties, inputAssociations);
-    save(`${kind}s2.json`, normalizedEntities);
+    save(`${kind}.json`, normalizedEntities);
     return normalizedEntities;
   }
 
