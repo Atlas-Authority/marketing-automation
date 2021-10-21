@@ -7,7 +7,7 @@ import { isPresent, sorter } from '../../util/helpers.js';
 import { LicenseContext } from '../license-grouper.js';
 import { DealFinder } from './deal-finder.js';
 import { DealRelevantEvent, EvalEvent, PurchaseEvent, RefundEvent, RenewalEvent, UpgradeEvent } from "./events.js";
-import { dealCreationProperties, dealUpdateProperties } from './records.js';
+import { dealCreationProperties, updateDeal } from './records.js';
 
 export class ActionGenerator {
 
@@ -115,10 +115,10 @@ function makeCreateAction(event: DealRelevantEvent, record: License | Transactio
 }
 
 function makeUpdateAction(event: DealRelevantEvent, deal: Deal, record: License | Transaction | null, properties: Partial<DealProps>): Action {
-  const combinedProperties = (record ? dealUpdateProperties(deal, record) : {});
-  Object.assign(combinedProperties, properties);
-
-  if (Object.keys(combinedProperties).length === 0) {
+  if (record) {
+    updateDeal(deal, record);
+  }
+  if (!deal.hasPropertyChanges()) {
     return makeIgnoreAction(event, deal, 'No properties to update');
   }
 
@@ -126,7 +126,7 @@ function makeUpdateAction(event: DealRelevantEvent, deal: Deal, record: License 
     type: 'update',
     groups: event.groups,
     deal,
-    properties: combinedProperties,
+    properties: deal.getPropertyChanges(),
   };
 }
 

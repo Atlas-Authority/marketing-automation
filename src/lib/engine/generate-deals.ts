@@ -60,10 +60,6 @@ export function generateDeals(db: Database, allMatches: RelatedLicenseSet[]) {
     for (const company of companies) {
       deal.companies.add(company);
     }
-
-    for (const [k, v] of Object.entries(properties)) {
-      deal.data[k] = v;
-    }
   }
 }
 

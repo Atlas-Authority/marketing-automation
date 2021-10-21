@@ -74,31 +74,22 @@ export function dealCreationProperties(record: License | Transaction, dealstage:
   };
 }
 
-export function dealUpdateProperties(deal: Deal, record: License | Transaction): Partial<DealProps> {
-  const properties: Partial<DealProps> = {};
-
+export function updateDeal(deal: Deal, record: License | Transaction) {
   if (record instanceof Transaction) {
-    if (deal.data.transactionId !== record.data.transactionId) properties.transactionId = record.data.transactionId;
-    if (deal.data.addonLicenseId !== null) properties.addonLicenseId = null;
+    deal.data.transactionId = record.data.transactionId;
+    deal.data.addonLicenseId = null;
   }
   else {
-    if (deal.data.addonLicenseId !== record.data.addonLicenseId) properties.addonLicenseId = record.data.addonLicenseId;
-    if (deal.data.transactionId !== null) properties.transactionId = null;
+    deal.data.addonLicenseId = record.data.addonLicenseId;
+    deal.data.transactionId = null;
   }
 
-  const oldAmount = deal.data.amount;
-  const newAmount = (record instanceof Transaction ? record.data.vendorAmount : oldAmount);
-  if (newAmount !== oldAmount) properties.amount = newAmount;
+  if (record instanceof Transaction) {
+    deal.data.amount = record.data.vendorAmount;
+  }
 
-  const oldCloseDate = deal.data.closeDate;
-  const newCloseDate = record.data.maintenanceStartDate;
-  if (newCloseDate !== oldCloseDate) properties.closeDate = newCloseDate;
-
-  const oldTier = +deal.data.licenseTier;
-  const newTier = record.maxTier;
-  if (newTier > oldTier) properties.licenseTier = newTier;
-
-  return properties;
+  deal.data.closeDate = record.data.maintenanceStartDate;
+  deal.data.licenseTier = Math.max(deal.data.licenseTier, record.maxTier);
 }
 
 export function getEmails(item: Transaction | License) {
