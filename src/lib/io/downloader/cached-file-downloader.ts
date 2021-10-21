@@ -1,48 +1,32 @@
 import * as datadir from '../../cache/datadir.js';
 import { RawLicense, RawTransaction } from "../../model/marketplace/raw";
 import { EntityKind, FullEntity } from '../hubspot.js';
-import { Downloader, DownloadLogger } from './downloader.js';
+import { Downloader, Progress } from './downloader.js';
 
 export default class CachedFileDownloader implements Downloader {
 
-  async downloadHubspotEntities(kind: EntityKind, apiProperties: string[], inputAssociations: string[]): Promise<FullEntity[]> {
-    const data = datadir.readJsonFile('in', `${kind}s2.json`);
-    return data;
+  async downloadHubspotEntities(_progress: Progress, kind: EntityKind, apiProperties: string[], inputAssociations: string[]): Promise<FullEntity[]> {
+    return datadir.readJsonFile('in', `${kind}s2.json`);
   }
 
-  async downloadFreeEmailProviders(downloadLogger: DownloadLogger): Promise<string[]> {
-    downloadLogger.prepare(1);
-    const data = datadir.readJsonFile('in', 'domains.json');
-    downloadLogger.tick();
-    return data;
+  async downloadFreeEmailProviders(): Promise<string[]> {
+    return datadir.readJsonFile('in', 'domains.json');
   }
 
-  async downloadAllTlds(downloadLogger: DownloadLogger): Promise<string[]> {
-    downloadLogger.prepare(1);
-    const data = datadir.readJsonFile('in', 'tlds.json');
-    downloadLogger.tick();
-    return data;
+  async downloadAllTlds(): Promise<string[]> {
+    return datadir.readJsonFile('in', 'tlds.json');
   }
 
-  async downloadTransactions(downloadLogger: DownloadLogger): Promise<RawTransaction[]> {
-    downloadLogger.prepare(1);
-    const data = datadir.readJsonFile('in', 'transactions.json');
-    downloadLogger.tick();
-    return data;
+  async downloadTransactions(): Promise<RawTransaction[]> {
+    return datadir.readJsonFile('in', 'transactions.json');
   }
 
-  async downloadLicensesWithoutDataInsights(downloadLogger: DownloadLogger): Promise<RawLicense[]> {
-    downloadLogger.prepare(1);
-    const data = datadir.readJsonFile('in', 'licenses-without.json');
-    downloadLogger.tick();
-    return data;
+  async downloadLicensesWithoutDataInsights(): Promise<RawLicense[]> {
+    return datadir.readJsonFile('in', 'licenses-without.json');
   }
 
-  async downloadLicensesWithDataInsights(downloadLogger: DownloadLogger): Promise<RawLicense[]> {
-    downloadLogger.prepare(1);
-    const data = datadir.readJsonFile('in', 'licenses-with.json');
-    downloadLogger.tick();
-    return data;
+  async downloadLicensesWithDataInsights(): Promise<RawLicense[]> {
+    return datadir.readJsonFile('in', 'licenses-with.json');
   }
 
 }

@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import { Downloader } from '../../io/downloader/downloader.js';
+import { Downloader, Progress } from '../../io/downloader/downloader.js';
 import { EntityKind, RelativeAssociation } from '../../io/hubspot.js';
 import { Uploader } from '../../io/uploader/uploader.js';
 import { batchesOf } from '../../util/helpers.js';
@@ -34,8 +34,8 @@ export abstract class EntityManager<
 
   protected entities = new Map<string, E>();
 
-  public async downloadAllEntities() {
-    const data = await this.downloader.downloadHubspotEntities(this.kind, this.apiProperties, this.associations);
+  public async downloadAllEntities(progress: Progress) {
+    const data = await this.downloader.downloadHubspotEntities(progress, this.kind, this.apiProperties, this.associations);
 
     for (const raw of data) {
       const props = this.fromAPI(raw.properties);

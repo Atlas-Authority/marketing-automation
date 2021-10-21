@@ -5,58 +5,45 @@ import { downloadAllTlds, downloadFreeEmailProviders } from '../../services/doma
 import Hubspot from '../../services/hubspot.js';
 import { downloadLicensesWithDataInsights, downloadLicensesWithoutDataInsights, downloadTransactions } from '../../services/marketplace.js';
 import { EntityKind, FullEntity } from '../hubspot.js';
-import { Downloader, DownloadLogger } from './downloader.js';
+import { Downloader, Progress } from './downloader.js';
 
 
 export default class LiveDownloader implements Downloader {
 
   hubspot = new Hubspot();
 
-  async downloadHubspotEntities(kind: EntityKind, apiProperties: string[], inputAssociations: string[]): Promise<FullEntity[]> {
+  async downloadHubspotEntities(_progress: Progress, kind: EntityKind, apiProperties: string[], inputAssociations: string[]): Promise<FullEntity[]> {
     const normalizedEntities = await this.hubspot.downloadEntities(kind, apiProperties, inputAssociations);
     save(`${kind}s2.json`, normalizedEntities);
     return normalizedEntities;
   }
 
-  async downloadFreeEmailProviders(downloadLogger: DownloadLogger): Promise<string[]> {
-    downloadLogger.prepare(1);
+  async downloadFreeEmailProviders(): Promise<string[]> {
     const domains = await downloadFreeEmailProviders();
-    downloadLogger.tick();
     save('domains.json', domains);
     return domains;
   }
 
-  async downloadAllTlds(downloadLogger: DownloadLogger): Promise<string[]> {
-    downloadLogger.prepare(1);
+  async downloadAllTlds(): Promise<string[]> {
     const tlds = await downloadAllTlds();
-    downloadLogger.tick();
     save('tlds.json', tlds);
     return tlds;
   }
 
-  async downloadTransactions(downloadLogger: DownloadLogger): Promise<RawTransaction[]> {
-    downloadLogger.prepare(1);
-    const json: RawTransaction[] = await downloadTransactions();
-    downloadLogger.tick();
-
+  async downloadTransactions(): Promise<RawTransaction[]> {
+    const json = await downloadTransactions();
     save('transactions.json', json);
     return json;
   }
 
-  async downloadLicensesWithoutDataInsights(downloadLogger: DownloadLogger): Promise<RawLicense[]> {
-    downloadLogger.prepare(1);
-    let json: RawLicense[] = await downloadLicensesWithoutDataInsights();
-    downloadLogger.tick();
-
+  async downloadLicensesWithoutDataInsights(): Promise<RawLicense[]> {
+    let json = await downloadLicensesWithoutDataInsights();
     save('licenses-without.json', json);
     return json;
   }
 
-  async downloadLicensesWithDataInsights(downloadLogger: DownloadLogger): Promise<RawLicense[]> {
-    const licenses = await downloadLicensesWithDataInsights(
-      downloadLogger.prepare,
-      downloadLogger.tick
-    );
+  async downloadLicensesWithDataInsights(progress: Progress): Promise<RawLicense[]> {
+    const licenses = await downloadLicensesWithDataInsights(progress);
     save('licenses-with.json', licenses);
     return licenses;
   }

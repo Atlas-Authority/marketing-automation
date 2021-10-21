@@ -1,6 +1,7 @@
 import { DateTime, Duration, Interval } from 'luxon';
 import fetch from 'node-fetch';
 import config from '../config/index.js';
+import { Progress } from '../io/downloader/downloader.js';
 import { RawLicense, RawTransaction } from "../model/marketplace/raw";
 import { AttachableError } from '../util/errors.js';
 
@@ -12,12 +13,12 @@ export async function downloadLicensesWithoutDataInsights(): Promise<RawLicense[
   return await downloadMarketplaceData('/licenses/export?endDate=2018-07-01');
 }
 
-export async function downloadLicensesWithDataInsights(start: (count: number) => void, tick: (range: string) => void): Promise<RawLicense[]> {
+export async function downloadLicensesWithDataInsights(progress: Progress): Promise<RawLicense[]> {
   const dates = dataInsightDateRanges();
-  start(dates.length);
+  progress.setCount(dates.length);
   const promises = dates.map(async ({ startDate, endDate }) => {
     const json: RawLicense[] = await downloadMarketplaceData(`/licenses/export?withDataInsights=true&startDate=${startDate}&endDate=${endDate}`);
-    tick(`${startDate}-${endDate}`);
+    progress.tick(`${startDate}-${endDate}`);
     return json;
   });
   return (await Promise.all(promises)).flat();

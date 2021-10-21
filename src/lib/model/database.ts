@@ -1,4 +1,4 @@
-import { Downloader, DownloadLogger } from "../io/downloader/downloader.js";
+import { Downloader } from "../io/downloader/downloader.js";
 import { EntityKind } from "../io/hubspot.js";
 import { Uploader } from "../io/uploader/uploader.js";
 import { MultiDownloadLogger } from "../log/download-logger.js";
@@ -35,7 +35,7 @@ export class Database {
   async downloadAllData() {
     log.info('Downloader', 'Starting downloads with API');
 
-    const multiDownloadLogger = new MultiDownloadLogger();
+    const logbox = new MultiDownloadLogger();
 
     let [
       freeDomains,
@@ -44,17 +44,32 @@ export class Database {
       allTransactions,
       allTlds,
     ] = await Promise.all([
-      this.downloader.downloadFreeEmailProviders(multiDownloadLogger.makeDownloadLogger('Free Email Providers')),
-      this.downloader.downloadLicensesWithDataInsights(multiDownloadLogger.makeDownloadLogger('Licenses With Data Insights')),
-      this.downloader.downloadLicensesWithoutDataInsights(multiDownloadLogger.makeDownloadLogger('Licenses Without Data Insights')),
-      this.downloader.downloadTransactions(multiDownloadLogger.makeDownloadLogger('Transactions')),
-      this.downloader.downloadAllTlds(multiDownloadLogger.makeDownloadLogger('Tlds')),
-      this.downloadAllCompanies(multiDownloadLogger.makeDownloadLogger('Companies')),
-      this.downloadAllContacts(multiDownloadLogger.makeDownloadLogger('Contacts')),
-      this.downloadAllDeals(multiDownloadLogger.makeDownloadLogger('Deals')),
+      logbox.wrap('Free Email Providers', (progress) =>
+        this.downloader.downloadFreeEmailProviders(progress)),
+
+      logbox.wrap('Licenses With Data Insights', (progress) =>
+        this.downloader.downloadLicensesWithDataInsights(progress)),
+
+      logbox.wrap('Licenses Without Data Insights', (progress) =>
+        this.downloader.downloadLicensesWithoutDataInsights(progress)),
+
+      logbox.wrap('Transactions', (progress) =>
+        this.downloader.downloadTransactions(progress)),
+
+      logbox.wrap('Tlds', (progress) =>
+        this.downloader.downloadAllTlds(progress)),
+
+      logbox.wrap('Deals', (progress) =>
+        this.dealManager.downloadAllEntities(progress)),
+
+      logbox.wrap('Companies', (progress) =>
+        this.companyManager.downloadAllEntities(progress)),
+
+      logbox.wrap('Contacts', (progress) =>
+        this.contactManager.downloadAllEntities(progress)),
     ]);
 
-    multiDownloadLogger.done();
+    logbox.done();
 
     log.info('Downloader', 'Done');
 
@@ -69,24 +84,6 @@ export class Database {
 
     this.licenses = results.licenses.map(normalizeLicense);
     this.transactions = results.transactions.map(normalizeTransaction);
-  }
-
-  private async downloadAllDeals(downloadLogger: DownloadLogger) {
-    downloadLogger.prepare(1);
-    await this.dealManager.downloadAllEntities();
-    downloadLogger.tick();
-  }
-
-  private async downloadAllContacts(downloadLogger: DownloadLogger) {
-    downloadLogger.prepare(1);
-    await this.contactManager.downloadAllEntities();
-    downloadLogger.tick();
-  }
-
-  private async downloadAllCompanies(downloadLogger: DownloadLogger) {
-    downloadLogger.prepare(1);
-    await this.companyManager.downloadAllEntities();
-    downloadLogger.tick();
   }
 
   getEntity(kind: EntityKind, id: string): Entity<any> {
