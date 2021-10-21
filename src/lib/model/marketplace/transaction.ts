@@ -36,7 +36,7 @@ export interface TransactionData {
 export class Transaction {
 
   public data: TransactionData;
-  public maxTier: number;
+  public tier: number;
 
   constructor(rawTransaction: RawTransaction) {
     this.data = {
@@ -69,7 +69,7 @@ export class Transaction {
       vendorAmount: rawTransaction.purchaseDetails.vendorAmount,
     };
 
-    this.maxTier = this.parseTier();
+    this.tier = this.parseTier();
   }
 
   private parseTier() {

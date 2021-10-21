@@ -59,7 +59,7 @@ export function dealCreationProperties(record: License | Transaction, dealstage:
     closeDate: record.data.maintenanceStartDate,
     deployment: record.data.hosting,
     aaApp: record.data.addonKey,
-    licenseTier: record.maxTier,
+    licenseTier: record.tier,
     country: record.data.country,
     origin: config.constants.dealOrigin,
     relatedProducts: config.constants.dealRelatedProducts,
@@ -89,7 +89,7 @@ export function updateDeal(deal: Deal, record: License | Transaction) {
   }
 
   deal.data.closeDate = record.data.maintenanceStartDate;
-  deal.data.licenseTier = Math.max(deal.data.licenseTier, record.maxTier);
+  deal.data.licenseTier = Math.max(deal.data.licenseTier, record.tier);
 }
 
 export function getEmails(item: Transaction | License) {

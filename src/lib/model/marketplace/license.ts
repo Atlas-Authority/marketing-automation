@@ -58,7 +58,7 @@ export interface LicenseData {
 export class License {
 
   public data: LicenseData;
-  public maxTier: number;
+  public tier: number;
 
   constructor(rawLicense: RawLicense) {
     let newEvalData: NewEvalData | null = null;
@@ -113,7 +113,7 @@ export class License {
       newEvalData,
     };
 
-    this.maxTier = Math.max(this.parseTier(), this.tierFromEvalOpportunity());
+    this.tier = Math.max(this.parseTier(), this.tierFromEvalOpportunity());
   }
 
   private parseTier() {

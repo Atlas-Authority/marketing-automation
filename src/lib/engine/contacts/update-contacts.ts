@@ -16,7 +16,7 @@ export function updateContactsBasedOnMatchResults(db: Database, allMatches: Rela
         ...group.flatMap(g => g.transactions)
       ];
 
-      for (const tier of items.map(item => item.maxTier)) {
+      for (const tier of items.map(item => item.tier)) {
         if (contact.data.licenseTier !== null && tier > contact.data.licenseTier) {
           contact.data.licenseTier = tier;
         }
