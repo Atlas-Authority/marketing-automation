@@ -71,21 +71,13 @@ export default class Hubspot {
 
   async createAssociations(fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void> {
     await this.client.crm.associations.batchApi.create(fromKind, toKind, {
-      inputs: inputs.map(input => ({
-        from: { id: input.fromId },
-        to: { id: input.toId },
-        type: input.toType,
-      }))
+      inputs: inputs.map(mapAssociationInput)
     });
   }
 
   async deleteAssociations(fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void> {
     await this.client.crm.associations.batchApi.archive(fromKind, toKind, {
-      inputs: inputs.map(input => ({
-        from: { id: input.fromId },
-        to: { id: input.toId },
-        type: input.toType,
-      }))
+      inputs: inputs.map(mapAssociationInput)
     });
   }
 
@@ -97,4 +89,12 @@ export default class Hubspot {
     }
   }
 
+}
+
+function mapAssociationInput(input: Association) {
+  return {
+    from: { id: input.fromId },
+    to: { id: input.toId },
+    type: input.toType,
+  };
 }
