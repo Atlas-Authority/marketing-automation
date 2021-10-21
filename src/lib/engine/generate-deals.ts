@@ -12,17 +12,6 @@ import { EventGenerator } from './deal-generator/events.js';
 import { getEmails } from './deal-generator/records.js';
 import { RelatedLicenseSet } from './license-grouper.js';
 
-function contactsFor(contacts: ContactsByEmail, groups: RelatedLicenseSet) {
-  return (_.uniq(
-    groups
-      .flatMap(group => [group.license, ...group.transactions])
-      .flatMap(getEmails)
-  )
-    .map(email => contacts[email])
-    .filter(isPresent))
-    .sort(sorter(c => c.contact_type === 'Customer' ? -1 : 0));
-}
-
 export function generateDeals(db: Database, allMatches: RelatedLicenseSet[]) {
   const matches = allMatches
     .filter(group =>
@@ -48,7 +37,7 @@ export function generateDeals(db: Database, allMatches: RelatedLicenseSet[]) {
 
 
   const dealsToCreate: Omit<Deal, 'id'>[] = dealCreateActions.map(({ groups, properties }) => {
-    const contacts = contactsFor(data.contactsByEmail, groups);
+    const contacts = contactsFor(db, groups);
     const contactIds = contacts.map(c => c.hs_object_id);
     const companyIds = contacts.filter(c => c.contact_type === 'Customer').map(c => c.company_id).filter(isPresent);
     return { contactIds, properties, companyIds };
@@ -65,7 +54,7 @@ export function generateDeals(db: Database, allMatches: RelatedLicenseSet[]) {
   for (const { deal: oldDeal, properties, groups } of dealUpdateActions) {
     // Start with deal->contact associations
 
-    const contacts = contactsFor(data.contactsByEmail, groups);
+    const contacts = contactsFor(db, groups);
 
     const oldAssociatedContactIds = oldDeal.contactIds;
     const newAssociatedContactIds = contacts.map(c => c.hs_object_id);
@@ -166,4 +155,15 @@ export function olderThan90Days(dateString: string) {
   const now = Date.now();
   const then = new Date(dateString).getTime();
   return (now - then > NINETY_DAYS_AS_MS);
+}
+
+function contactsFor(db: Database, groups: RelatedLicenseSet) {
+  return (_.uniq(
+    groups
+      .flatMap(group => [group.license, ...group.transactions])
+      .flatMap(getEmails)
+  )
+    .map(email => db.contactManager.getByEmail(email))
+    .filter(isPresent))
+    .sort(sorter(c => c.isCustomer ? -1 : 0));
 }
