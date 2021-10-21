@@ -87,12 +87,6 @@ export function generateDeals(db: Database, allMatches: RelatedLicenseSet[]) {
       dealsToUpdate.push(newDeal);
     }
   }
-
-  return {
-    dealsToCreate, dealsToUpdate,
-    associationsToCreate, associationsToRemove,
-    companyAssociationsToCreate, companyAssociationsToRemove,
-  };
 }
 
 /** Generates deal actions based on match data */
