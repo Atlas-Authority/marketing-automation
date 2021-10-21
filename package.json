@@ -9,6 +9,7 @@
     "start": "env TS_NODE_TRANSPILE_ONLY=true TS_NODE_FILES=true node --loader ts-node/esm src/bin/run-once.ts",
     "download": "env TS_NODE_TRANSPILE_ONLY=true TS_NODE_FILES=true node --loader ts-node/esm src/bin/download.ts",
     "explain": "env TS_NODE_TRANSPILE_ONLY=true TS_NODE_FILES=true node --loader ts-node/esm src/bin/check-licenses.ts",
+    "ts-node": "env TS_NODE_TRANSPILE_ONLY=true TS_NODE_FILES=true node --loader ts-node/esm",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js out",
     "test-watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js out --watch --watchPathIgnorePatterns='src/'"
   },

@@ -18,7 +18,7 @@ function saveArrayToCsv(filename: string, array: any[]) {
   log.info('Dev', 'Saved data to:', filename);
 }
 
-export function saveToJson(filename: string, object: unknown) {
+function saveToJson(filename: string, object: unknown) {
   if (config.isProduction || config.isTest) return;
 
   const out = JSON.stringify(object, null, 2);
