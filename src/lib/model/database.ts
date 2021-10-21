@@ -39,13 +39,16 @@ export class Database {
 
     let [
       freeDomains,
+      tlds,
       licensesWithDataInsights,
       licensesWithoutDataInsights,
       transactions,
-      tlds,
     ] = await Promise.all([
       logbox.wrap('Free Email Providers', (progress) =>
         this.downloader.downloadFreeEmailProviders(progress)),
+
+      logbox.wrap('Tlds', (progress) =>
+        this.downloader.downloadAllTlds(progress)),
 
       logbox.wrap('Licenses With Data Insights', (progress) =>
         this.downloader.downloadLicensesWithDataInsights(progress)),
@@ -55,9 +58,6 @@ export class Database {
 
       logbox.wrap('Transactions', (progress) =>
         this.downloader.downloadTransactions(progress)),
-
-      logbox.wrap('Tlds', (progress) =>
-        this.downloader.downloadAllTlds(progress)),
 
       logbox.wrap('Deals', (progress) =>
         this.dealManager.downloadAllEntities(progress)),
