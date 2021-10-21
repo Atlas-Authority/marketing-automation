@@ -41,8 +41,8 @@ export class Database {
       freeDomains,
       licensesWithDataInsights,
       licensesWithoutDataInsights,
-      allTransactions,
-      allTlds,
+      transactions,
+      tlds,
     ] = await Promise.all([
       logbox.wrap('Free Email Providers', (progress) =>
         this.downloader.downloadFreeEmailProviders(progress)),
@@ -75,11 +75,11 @@ export class Database {
 
     this.providerDomains = makeMultiProviderDomainsSet(freeDomains);
 
-    const emailRe = makeEmailValidationRegex(allTlds);
+    const emailRe = makeEmailValidationRegex(tlds);
     const results = validateMarketplaceData(
       licensesWithDataInsights,
       licensesWithoutDataInsights,
-      allTransactions,
+      transactions,
       emailRe);
 
     this.licenses = results.licenses.map(normalizeLicense);
