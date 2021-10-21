@@ -97,6 +97,7 @@ export abstract class Entity<P extends { [key: string]: any }> {
       has: (entity: T) => this.hasAssociation(kind, entity),
       add: (entity: T) => this.addAssociation(kind, entity),
       remove: (entity: T) => this.removeAssociation(kind, entity),
+      clear: () => this.clearAssociations(kind),
     };
   }
 
@@ -118,6 +119,14 @@ export abstract class Entity<P extends { [key: string]: any }> {
       .filter(a => a.kind === kind)
       .map((a => this.db.getEntity(kind, a.id)))
     );
+  }
+
+  private clearAssociations(kind: EntityKind) {
+    for (const a of this.newAssocs) {
+      if (this.getAssocInfo(a).kind === kind) {
+        this.newAssocs.delete(a);
+      }
+    }
   }
 
   hasAssociationChanges() {

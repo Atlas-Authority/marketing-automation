@@ -4,7 +4,6 @@ import { saveForInspection } from '../cache/inspection.js';
 import log from '../log/logger.js';
 import { Database } from '../model/database.js';
 import { License, LicenseData } from '../model/marketplace/license.js';
-import { Deal, DealAssociationPair, DealCompanyAssociationPair, DealUpdate } from '../types/deal.js';
 import { isPresent, sorter } from '../util/helpers.js';
 import { ActionGenerator, CreateDealAction, UpdateDealAction } from './deal-generator/actions.js';
 import { DealFinder } from './deal-generator/deal-finder.js';
@@ -51,56 +50,24 @@ export function generateDeals(db: Database, allMatches: RelatedLicenseSet[]) {
     }
   }
 
-
-  const dealsToUpdate: DealUpdate[] = [];
-
-  const associationsToCreate: DealAssociationPair[] = [];
-  const associationsToRemove: DealAssociationPair[] = [];
-
-  const companyAssociationsToCreate: DealCompanyAssociationPair[] = [];
-  const companyAssociationsToRemove: DealCompanyAssociationPair[] = [];
-
-  for (const { deal: oldDeal, properties, groups } of dealUpdateActions) {
-    // Start with deal->contact associations
-
+  for (const { deal, groups, properties } of dealUpdateActions) {
     const contacts = contactsFor(db, groups);
+    const companies = (contacts
+      .filter(c => c.isCustomer)
+      .flatMap(c => c.companies.getAll()));
 
-    const oldAssociatedContactIds = oldDeal.contactIds;
-    const newAssociatedContactIds = contacts.map(c => c.hs_object_id);
-
-    const creatingAssociatedContactIds = newAssociatedContactIds.filter(id => !oldAssociatedContactIds.includes(id));
-    const removingAssociatedContactIds = oldAssociatedContactIds.filter(id => !newAssociatedContactIds.includes(id));
-
-    if (creatingAssociatedContactIds.length > 0) associationsToCreate.push(...creatingAssociatedContactIds.map(contactId => ({ contactId, dealId: oldDeal.id })));
-    if (removingAssociatedContactIds.length > 0) associationsToRemove.push(...removingAssociatedContactIds.map(contactId => ({ contactId, dealId: oldDeal.id })));
-
-    // Now deal with deal->company associations
-
-    const oldAssociatedCompanyIds = oldDeal.companyIds;
-    const newAssociatedCompanyIds = contacts.filter(c => c.contact_type === 'Customer').map(c => c.company_id).filter(isPresent);
-
-    const creatingAssociatedCompanyIds = newAssociatedCompanyIds.filter(id => !oldAssociatedCompanyIds.includes(id));
-    const removingAssociatedCompanyIds = oldAssociatedCompanyIds.filter(id => !newAssociatedCompanyIds.includes(id));
-
-    if (creatingAssociatedCompanyIds.length > 0) companyAssociationsToCreate.push(...creatingAssociatedCompanyIds.map(companyId => ({ companyId, dealId: oldDeal.id })));
-    if (removingAssociatedCompanyIds.length > 0) companyAssociationsToRemove.push(...removingAssociatedCompanyIds.map(companyId => ({ companyId, dealId: oldDeal.id })));
-
-    // Now deal with deal
-
-    const newDeal: DealUpdate = {
-      id: oldDeal.id,
-      properties,
-    };
-
-    for (const [key, val] of Object.entries(newDeal.properties)) {
-      const typedKey = key as keyof Deal['properties'];
-      if (val === oldDeal.properties[typedKey]) {
-        delete newDeal.properties[typedKey];
-      }
+    deal.contacts.clear();
+    for (const contact of contacts) {
+      deal.contacts.add(contact);
     }
 
-    if (Object.keys(newDeal.properties).length > 0) {
-      dealsToUpdate.push(newDeal);
+    deal.companies.clear();
+    for (const company of companies) {
+      deal.companies.add(company);
+    }
+
+    for (const [k, v] of Object.entries(properties)) {
+      deal.data[k] = v;
     }
   }
 }
