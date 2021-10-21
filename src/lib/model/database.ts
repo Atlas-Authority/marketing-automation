@@ -37,7 +37,7 @@ export class Database {
 
     const logbox = new MultiDownloadLogger();
 
-    let [
+    const [
       freeDomains,
       tlds,
       licensesWithDataInsights,
