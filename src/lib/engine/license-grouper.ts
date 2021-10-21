@@ -1,5 +1,4 @@
 import * as assert from 'assert';
-import _ from 'lodash';
 import * as util from 'util';
 import { fnOrCache } from '../cache/fn-cache.js';
 import { saveForInspection } from '../cache/inspection.js';
@@ -7,7 +6,7 @@ import log from '../log/logger.js';
 import { Database } from '../model/database.js';
 import { License } from '../model/marketplace/license.js';
 import { Transaction } from '../model/marketplace/transaction.js';
-import { sorter } from '../util/helpers.js';
+import { groupBy, sorter } from '../util/helpers.js';
 import { LicenseMatcher } from './license-matcher.js';
 
 export type LicenseContext = {
@@ -310,12 +309,11 @@ export function normalizeMatches(maybeMatches: { score: number, item1: string, i
 }
 
 function removeDuplicateTransactions(allLicenses: License[], allTransactions: Transaction[]) {
-  const transactionsWithSameId = (
-    Object.values(
-      _.groupBy(allTransactions, t => [t.data.transactionId, t.data.addonKey, t.data.hosting, t.data.saleDate])
-    )
-      .filter(m => m.length > 1)
-  );
+  const groupedTransactions = groupBy(allTransactions,
+    t => `${t.data.transactionId}${t.data.addonKey}${t.data.hosting}${t.data.saleDate}`
+  )
+    .values();
+  const transactionsWithSameId = [...groupedTransactions].filter(m => m.length > 1);
 
   for (const ts of transactionsWithSameId) {
     for (let i1 = 0; i1 < ts.length; i1++) {

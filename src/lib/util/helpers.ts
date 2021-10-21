@@ -18,3 +18,18 @@ export function sorter<T>(fn: (o: T) => string | number, dir: 'ASC' | 'DSC' = 'A
     fn(a) < fn(b) ? down : up
   );
 }
+
+export function uniqueArray<T>(a: Iterable<T>): T[] {
+  return [...new Set(a)];
+}
+
+export function groupBy<T>(a: Iterable<T>, fn: (o: T) => string): Map<string, T[]> {
+  const map = new Map<string, T[]>();
+  for (const o of a) {
+    const key = fn(o);
+    let group = map.get(key);
+    if (!group) map.set(key, group = []);
+    group.push(o);
+  }
+  return map;
+}

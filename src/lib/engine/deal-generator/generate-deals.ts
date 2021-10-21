@@ -1,10 +1,9 @@
 import * as assert from 'assert';
-import _ from 'lodash';
 import { saveForInspection } from '../../cache/inspection.js';
 import log from '../../log/logger.js';
 import { Database } from '../../model/database.js';
 import { License, LicenseData } from '../../model/marketplace/license.js';
-import { isPresent, sorter } from '../../util/helpers.js';
+import { isPresent, sorter, uniqueArray } from '../../util/helpers.js';
 import { RelatedLicenseSet } from '../license-grouper.js';
 import { ActionGenerator, CreateDealAction, UpdateDealAction } from './actions.js';
 import { DealFinder } from './deal-finder.js';
@@ -103,7 +102,7 @@ class DealActionGenerator {
     const badDomains = domains.filter(domain => this.db.partnerDomains.has(domain) || this.db.providerDomains.has(domain));
 
     if (badDomains.length === licenses.length) {
-      this.ignoreLicenses('bad-domains:' + _.uniq(badDomains).join(','), licenses);
+      this.ignoreLicenses('bad-domains:' + uniqueArray(badDomains).join(','), licenses);
       return true;
     }
 
@@ -125,7 +124,7 @@ export function olderThan90Days(dateString: string) {
 }
 
 function contactsFor(db: Database, groups: RelatedLicenseSet) {
-  return (_.uniq(
+  return (uniqueArray(
     groups
       .flatMap(group => [group.license, ...group.transactions])
       .flatMap(getEmails)

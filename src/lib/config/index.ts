@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import { optional, required } from './helpers.js';
 export { DealStage, Pipeline } from './dynamic-enums.js';
 
@@ -41,7 +40,7 @@ export default {
     runInterval: required('RUN_INTERVAL'),
     retryInterval: required('RETRY_INTERVAL'),
     retryTimes: +required('RETRY_TIMES'),
-    partnerDomains: _.uniq(required('PARTNER_DOMAINS').split(/\s*,\s*/g)),
+    partnerDomains: new Set(required('PARTNER_DOMAINS').split(/\s*,\s*/g)),
   },
   cache: {
     fns: [] as string[],
