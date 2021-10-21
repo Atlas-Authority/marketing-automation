@@ -5,7 +5,7 @@ import { EntityManager, PropertyTransformers } from "./manager.js";
 
 export type ContactType = 'Partner' | 'Customer';
 
-export type ContactProps = {
+export type ContactData = {
   email: string;
   firstName: string | null;
   lastName: string | null;
@@ -28,7 +28,7 @@ export type ContactProps = {
   otherEmails: string[];
 };
 
-export class Contact extends Entity<ContactProps> {
+export class Contact extends Entity<ContactData> {
 
   companies = this.makeDynamicAssociation<Company>('company');
 
@@ -38,7 +38,7 @@ export class Contact extends Entity<ContactProps> {
 
 }
 
-export class ContactManager extends EntityManager<ContactProps, Contact> {
+export class ContactManager extends EntityManager<ContactData, Contact> {
 
   override Entity = Contact;
   override kind: EntityKind = 'contact';
@@ -65,9 +65,9 @@ export class ContactManager extends EntityManager<ContactProps, Contact> {
     'hs_additional_emails',
   ];
 
-  override fromAPI(data: { [key: string]: string | null }): ContactProps | null {
+  override fromAPI(data: { [key: string]: string | null }): ContactData | null {
     return {
-      contactType: data.contact_type as ContactProps['contactType'],
+      contactType: data.contact_type as ContactData['contactType'],
 
       email: data.email ?? '',
       hosting: data.hosting,
@@ -82,14 +82,14 @@ export class ContactManager extends EntityManager<ContactProps, Contact> {
 
       relatedProducts: new Set(data.related_products ? data.related_products.split(';') : []),
       licenseTier: !data.license_tier ? null : +data.license_tier,
-      deployment: data.deployment as ContactProps['deployment'],
+      deployment: data.deployment as ContactData['deployment'],
       lastMpacEvent: data.last_mpac_event,
 
       otherEmails: data.hs_additional_emails?.split(';') || [],
     };
   }
 
-  override toAPI: PropertyTransformers<ContactProps> = {
+  override toAPI: PropertyTransformers<ContactData> = {
     contactType: contactType => ['contact_type', contactType],
 
     email: email => ['email', email],
@@ -112,7 +112,7 @@ export class ContactManager extends EntityManager<ContactProps, Contact> {
     otherEmails: () => ['', ''],
   };
 
-  override identifiers: (keyof ContactProps)[] = [
+  override identifiers: (keyof ContactData)[] = [
     'email',
   ];
 

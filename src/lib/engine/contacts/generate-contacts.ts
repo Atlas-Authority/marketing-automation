@@ -1,6 +1,6 @@
 import capitalize from 'capitalize';
 import { Database } from '../../model/database.js';
-import { Contact, ContactProps, ContactType } from '../../model/hubspot/contact.js';
+import { Contact, ContactData, ContactType } from '../../model/hubspot/contact.js';
 import { ContactInfo, PartnerBillingInfo } from '../../model/marketplace/common.js';
 import { License } from '../../model/marketplace/license.js';
 import { Transaction } from '../../model/marketplace/transaction.js';
@@ -12,7 +12,7 @@ export function generateContacts(db: Database) {
   gen.mergeGeneratedContacts();
 }
 
-export type GeneratedContact = ContactProps & { lastUpdated: string };
+export type GeneratedContact = ContactData & { lastUpdated: string };
 
 class ContactGenerator {
 
@@ -85,7 +85,7 @@ class ContactGenerator {
 
 }
 
-export function mergeContactInfo(contact: ContactProps, contacts: GeneratedContact[]) {
+export function mergeContactInfo(contact: ContactData, contacts: GeneratedContact[]) {
   const currentContactProps = {
     ...contact,
     lastUpdated: contact.lastMpacEvent ?? '',

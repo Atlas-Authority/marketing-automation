@@ -1,6 +1,6 @@
 import { DealStage } from '../../config/index.js';
 import log from '../../log/logger.js';
-import { Deal, DealProps } from '../../model/hubspot/deal.js';
+import { Deal, DealData } from '../../model/hubspot/deal.js';
 import { License } from '../../model/marketplace/license.js';
 import { Transaction } from '../../model/marketplace/transaction.js';
 import { isPresent, sorter } from '../../util/helpers.js';
@@ -88,14 +88,14 @@ export class ActionGenerator {
 export type CreateDealAction = {
   type: 'create';
   groups: LicenseContext[];
-  properties: DealProps;
+  properties: DealData;
 };
 
 export type UpdateDealAction = {
   type: 'update';
   groups: LicenseContext[];
   deal: Deal;
-  properties: Partial<DealProps>;
+  properties: Partial<DealData>;
 };
 
 export type IgnoreDealAction = {
@@ -114,7 +114,7 @@ function makeCreateAction(event: DealRelevantEvent, record: License | Transactio
   };
 }
 
-function makeUpdateAction(event: DealRelevantEvent, deal: Deal, record: License | Transaction | null, properties: Partial<DealProps>): Action {
+function makeUpdateAction(event: DealRelevantEvent, deal: Deal, record: License | Transaction | null, properties: Partial<DealData>): Action {
   if (record) {
     updateDeal(deal, record);
   }

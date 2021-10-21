@@ -9,7 +9,7 @@ import { EntityManager, PropertyTransformers } from "./manager.js";
 const addonLicenseIdKey = config.hubspot.attrs.deal.addonLicenseId;
 const transactionIdKey = config.hubspot.attrs.deal.transactionId;
 
-export type DealProps = {
+export type DealData = {
   relatedProducts: string;
   aaApp: string;
   addonLicenseId: string | null;
@@ -25,7 +25,7 @@ export type DealProps = {
   amount: number | null;
 };
 
-export class Deal extends Entity<DealProps> {
+export class Deal extends Entity<DealData> {
 
   contacts = this.makeDynamicAssociation<Contact>('contact');
   companies = this.makeDynamicAssociation<Company>('company');
@@ -40,7 +40,7 @@ export class Deal extends Entity<DealProps> {
 
 }
 
-export class DealManager extends EntityManager<DealProps, Deal> {
+export class DealManager extends EntityManager<DealData, Deal> {
 
   override Entity = Deal;
   override kind: EntityKind = "deal";
@@ -66,7 +66,7 @@ export class DealManager extends EntityManager<DealProps, Deal> {
     'amount',
   ];
 
-  override fromAPI(data: { [key: string]: string | null }): DealProps | null {
+  override fromAPI(data: { [key: string]: string | null }): DealData | null {
     if (data.pipeline !== Pipeline.AtlassianMarketplace) return null;
     return {
       relatedProducts: data.related_products as string,
@@ -76,8 +76,8 @@ export class DealManager extends EntityManager<DealProps, Deal> {
       closeDate: (data.closedate as string).substr(0, 10),
       country: data.country as string,
       dealName: data.dealname as string,
-      origin: data.origin as DealProps['origin'],
-      deployment: data.deployment as DealProps['deployment'],
+      origin: data.origin as DealData['origin'],
+      deployment: data.deployment as DealData['deployment'],
       licenseTier: +(data.license_tier as string),
       pipeline: data.pipeline,
       dealstage: data.dealstage as string,
@@ -85,7 +85,7 @@ export class DealManager extends EntityManager<DealProps, Deal> {
     };
   }
 
-  override toAPI: PropertyTransformers<DealProps> = {
+  override toAPI: PropertyTransformers<DealData> = {
     relatedProducts: relatedProducts => ['related_products', relatedProducts],
     aaApp: aaApp => ['aa_app', aaApp],
     addonLicenseId: addonLicenseId => [addonLicenseIdKey, addonLicenseId || ''],
@@ -101,7 +101,7 @@ export class DealManager extends EntityManager<DealProps, Deal> {
     amount: amount => ['amount', amount?.toString() ?? ''],
   };
 
-  override identifiers: (keyof DealProps)[] = [
+  override identifiers: (keyof DealData)[] = [
     'addonLicenseId',
     'transactionId',
   ];

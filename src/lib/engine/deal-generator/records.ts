@@ -1,7 +1,7 @@
 import assert from 'assert';
 import mustache from 'mustache';
 import config, { DealStage, Pipeline } from '../../config/index.js';
-import { Deal, DealProps } from '../../model/hubspot/deal.js';
+import { Deal, DealData } from '../../model/hubspot/deal.js';
 import { License } from '../../model/marketplace/license.js';
 import { Transaction } from '../../model/marketplace/transaction.js';
 import { isPresent, sorter } from "../../util/helpers.js";
@@ -46,7 +46,7 @@ export function abbrRecordDetails(record: Transaction | License) {
   };
 }
 
-export function dealCreationProperties(record: License | Transaction, dealstage: string): DealProps {
+export function dealCreationProperties(record: License | Transaction, dealstage: string): DealData {
   const dealNameTemplateProperties = {
     ...record.data,
     technicalContactEmail: record.data.technicalContact.email,

@@ -2,15 +2,15 @@ import { EntityKind } from "../../io/hubspot.js";
 import { Entity } from "./entity.js";
 import { EntityManager, PropertyTransformers } from "./manager.js";
 
-type CompanyProps = {
+type CompanyData = {
   name: string;
   type: 'Partner' | null;
 };
 
-export class Company extends Entity<CompanyProps> {
+export class Company extends Entity<CompanyData> {
 }
 
-export class CompanyManager extends EntityManager<CompanyProps, Company> {
+export class CompanyManager extends EntityManager<CompanyData, Company> {
 
   override Entity = Company;
   override kind: EntityKind = 'company';
@@ -23,19 +23,19 @@ export class CompanyManager extends EntityManager<CompanyProps, Company> {
     'type',
   ];
 
-  override fromAPI(data: { [key: string]: string | null }): CompanyProps | null {
+  override fromAPI(data: { [key: string]: string | null }): CompanyData | null {
     return {
       name: data.name ?? '',
       type: data.type === 'PARTNER' ? 'Partner' : null,
     };
   }
 
-  override toAPI: PropertyTransformers<CompanyProps> = {
+  override toAPI: PropertyTransformers<CompanyData> = {
     name: name => ['name', name],
     type: type => ['type', type === 'Partner' ? 'PARTNER' : ''],
   };
 
-  override identifiers: (keyof CompanyProps)[] = [
+  override identifiers: (keyof CompanyData)[] = [
   ];
 
   override addIndexes(companies: Iterable<Company>, full: boolean) { }
