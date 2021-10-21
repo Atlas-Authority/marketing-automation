@@ -6,8 +6,8 @@ import CachedFileDownloader from '../lib/io/downloader/cached-file-downloader.js
 import ConsoleUploader from '../lib/io/uploader/console-uploader.js';
 import log from '../lib/log/logger.js';
 import { Database } from '../lib/model/database.js';
-import { License } from '../lib/types/license.js';
-import { Transaction } from '../lib/types/transaction.js';
+import { LicenseData } from '../lib/model/marketplace/license.js';
+import { RawTransaction } from '../lib/model/marketplace/raw.js';
 
 const args = process.argv.slice(2);
 
@@ -21,14 +21,14 @@ if (sens.length === 0 || !sens.every(sen => sen.length > 0)) {
 }
 
 if (sens.length === 1 && sens[0].endsWith('.json')) {
-  const ts: Transaction[] = JSON.parse(fs.readFileSync(sens[0], 'utf8'));
+  const ts: RawTransaction[] = JSON.parse(fs.readFileSync(sens[0], 'utf8'));
   sens = ts.map(t => t.addonLicenseId);
 }
 
 const db = new Database(new CachedFileDownloader(), new ConsoleUploader({ verbose: true }));
 await db.downloadAllData();
 
-const ignored: (License & { reason: string })[][] = datadir.readJsonFile('out', 'ignored.json');
+const ignored: (LicenseData & { reason: string })[][] = datadir.readJsonFile('out', 'ignored.json');
 
 const matchedGroups: ReturnType<typeof shorterLicenseInfo>[][] = datadir.readJsonFile('out', 'matched-groups-all.json');
 
