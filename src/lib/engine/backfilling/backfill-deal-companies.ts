@@ -1,5 +1,5 @@
 import { Database } from '../../model/database.js';
-import { RelatedLicenseSet } from '../license-grouper.js';
+import { RelatedLicenseSet } from '../license-matching/license-grouper.js';
 
 export function backfillDealCompanies(db: Database, allMatches: RelatedLicenseSet[]) {
   for (const deal of db.dealManager.getAll()) {

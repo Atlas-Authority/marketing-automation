@@ -1,7 +1,7 @@
 import { ADDONKEY_TO_PLATFORM } from '../config/index.js';
 import { Database } from '../model/database.js';
 import { SimpleError } from '../util/errors.js';
-import { RelatedLicenseSet } from './license-grouper.js';
+import { RelatedLicenseSet } from './license-matching/license-grouper.js';
 
 const PLATFORMS = new Set(Object.values(ADDONKEY_TO_PLATFORM));
 

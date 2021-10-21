@@ -2,7 +2,7 @@ import log from '../../log/logger.js';
 import { License } from '../../model/marketplace/license.js';
 import { Transaction } from '../../model/marketplace/transaction.js';
 import { sorter } from "../../util/helpers.js";
-import { LicenseContext } from '../license-grouper.js';
+import { LicenseContext } from '../license-matching/license-grouper.js';
 import { abbrRecordDetails, getLicense, isEvalOrOpenSourceLicense, isPaidLicense } from "./records.js";
 
 export type RefundEvent = { type: 'refund', groups: LicenseContext[], refundedTxs: Transaction[] };

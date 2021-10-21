@@ -4,7 +4,7 @@ import { Deal, DealProps } from '../../model/hubspot/deal.js';
 import { License } from '../../model/marketplace/license.js';
 import { Transaction } from '../../model/marketplace/transaction.js';
 import { isPresent, sorter } from '../../util/helpers.js';
-import { LicenseContext } from '../license-grouper.js';
+import { LicenseContext } from '../license-matching/license-grouper.js';
 import { DealFinder } from './deal-finder.js';
 import { DealRelevantEvent, EvalEvent, PurchaseEvent, RefundEvent, RenewalEvent, UpgradeEvent } from "./events.js";
 import { dealCreationProperties, updateDeal } from './records.js';

@@ -1,5 +1,5 @@
-import { Database } from '../model/database.js';
-import { License } from '../model/marketplace/license.js';
+import { Database } from '../../model/database.js';
+import { License } from '../../model/marketplace/license.js';
 import { SimilarityScorer } from './similarity-scorer.js';
 
 export class LicenseMatcher {

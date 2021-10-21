@@ -6,7 +6,7 @@ import { backfillDealCompanies } from './backfilling/backfill-deal-companies.js'
 import zeroEmptyDealAmounts from './backfilling/zero-empty-deal-amounts.js';
 import { generateDeals } from './deal-generator/generate-deals.js';
 import { generateContacts } from "./generate-contacts.js";
-import { matchIntoLikelyGroups } from './license-grouper.js';
+import { matchIntoLikelyGroups } from './license-matching/license-grouper.js';
 import { findAndFlagExternallyCreatedContacts, findAndFlagPartnerCompanies, findAndFlagPartnersByDomain, identifyDomains } from './partners.js';
 import { updateContactsBasedOnMatchResults } from './update-contacts-using-matches.js';
 
