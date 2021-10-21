@@ -86,6 +86,12 @@ export class Database {
     this.transactions = results.transactions.map(normalizeTransaction);
   }
 
+  async syncUpAllEntities() {
+    await this.dealManager.syncUpAllEntities();
+    await this.contactManager.syncUpAllEntities();
+    await this.companyManager.syncUpAllEntities();
+  }
+
   getEntity(kind: EntityKind, id: string): Entity<any> {
     const found = this.getManager(kind).get(id);
     // There's only two ways to set associations:

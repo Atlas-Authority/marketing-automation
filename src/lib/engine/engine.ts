@@ -22,14 +22,14 @@ export default async function runEngine({ downloader, uploader }: {
 
   logStep('Normalizing deal amounts');
   zeroEmptyDealAmounts(db.dealManager.getArray());
-  await db.dealManager.syncUpAllEntities();
+  await db.syncUpAllEntities();
 
   logStep('Identifying partner and customer domains');
   identifyDomains(db);
 
   logStep('Flagging partner/customer contacts created outside engine');
   findAndFlagExternallyCreatedContacts(db);
-  await db.contactManager.syncUpAllEntities();
+  await db.syncUpAllEntities();
 
   logStep('Generating contacts');
   generateContacts(db);
@@ -44,27 +44,27 @@ export default async function runEngine({ downloader, uploader }: {
   findAndFlagPartnersByDomain(db);
 
   logStep('Upserting Contacts in Hubspot');
-  await db.contactManager.syncUpAllEntities();
+  await db.syncUpAllEntities();
 
   logStep('Updating Companies in Hubspot');
-  await db.companyManager.syncUpAllEntities();
+  await db.syncUpAllEntities();
 
   logStep('Running Scoring Engine');
   const allMatches = matchIntoLikelyGroups(db);
 
   logStep('Updating Contacts based on Match Results');
   updateContactsBasedOnMatchResults(db, allMatches);
-  await db.contactManager.syncUpAllEntities();
+  await db.syncUpAllEntities();
 
   logStep('Backfill deal companies');
   backfillDealCompanies(db, allMatches);
-  await db.dealManager.syncUpAllEntities();
+  await db.syncUpAllEntities();
 
   logStep('Generating deals');
   generateDeals(db, allMatches);
 
   logStep('Upserting deals in Hubspot');
-  await db.dealManager.syncUpAllEntities();
+  await db.syncUpAllEntities();
 
   logStep('Done!');
 }
