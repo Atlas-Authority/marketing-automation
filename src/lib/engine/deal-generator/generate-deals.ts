@@ -35,10 +35,7 @@ class DealGenerator {
 
     saveForInspection('ignored', this.ignoredLicenseSets);
 
-    const dealCreateActions = this.dealCreateActions;
-    const dealUpdateActions = this.dealUpdateActions;
-
-    for (const { groups, properties } of dealCreateActions) {
+    for (const { groups, properties } of this.dealCreateActions) {
       const deal = this.db.dealManager.create(properties);
 
       const contacts = contactsFor(this.db, groups);
@@ -55,7 +52,7 @@ class DealGenerator {
       }
     }
 
-    for (const { deal, groups, properties } of dealUpdateActions) {
+    for (const { deal, groups, properties } of this.dealUpdateActions) {
       const contacts = contactsFor(this.db, groups);
       const companies = (contacts
         .filter(c => c.isCustomer)
