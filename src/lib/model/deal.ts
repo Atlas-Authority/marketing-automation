@@ -8,6 +8,7 @@ import { EntityManager, PropertyTransformers } from "./hubspot/manager.js";
 
 const addonLicenseIdKey = config.hubspot.attrs.deal.addonLicenseId;
 const transactionIdKey = config.hubspot.attrs.deal.transactionId;
+const deploymentKey = config.hubspot.attrs.deal.deployment;
 const appKey = config.hubspot.attrs.deal.app;
 
 export type DealData = {
@@ -53,7 +54,7 @@ export class DealManager extends EntityManager<DealData, Deal> {
 
   override apiProperties: string[] = [
     'closedate',
-    'deployment',
+    deploymentKey,
     addonLicenseIdKey,
     transactionIdKey,
     appKey,
@@ -78,7 +79,7 @@ export class DealManager extends EntityManager<DealData, Deal> {
       country: data.country as string,
       dealName: data.dealname as string,
       origin: data.origin as DealData['origin'],
-      deployment: data.deployment as DealData['deployment'],
+      deployment: data[deploymentKey] as DealData['deployment'],
       licenseTier: +(data.license_tier as string),
       pipeline: data.pipeline,
       dealstage: data.dealstage as string,
@@ -95,7 +96,7 @@ export class DealManager extends EntityManager<DealData, Deal> {
     country: country => ['country', country],
     dealName: dealName => ['dealname', dealName],
     origin: origin => ['origin', origin],
-    deployment: deployment => ['deployment', deployment],
+    deployment: deployment => [deploymentKey, deployment],
     licenseTier: licenseTier => ['license_tier', licenseTier.toFixed()],
     pipeline: pipeline => ['pipeline', pipeline],
     dealstage: dealstage => ['dealstage', dealstage],

@@ -30,6 +30,7 @@ export default {
       },
       deal: {
         app: required('HUBSPOT_DEAL_APP_ATTR'),
+        deployment: required('HUBSPOT_DEAL_DEPLOYMENT_ATTR'),
         addonLicenseId: required('HUBSPOT_DEAL_ADDONLICENESID_ATTR'),
         transactionId: required('HUBSPOT_DEAL_TRANSACTIONID_ATTR'),
       },
