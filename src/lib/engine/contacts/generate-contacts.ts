@@ -45,7 +45,10 @@ class ContactGenerator {
     const generated = this.contactFrom(item, info);
 
     let contact = this.db.contactManager.getByEmail(generated.email);
-    if (!contact) contact = this.db.contactManager.create(generated);
+    if (!contact) {
+      const { lastUpdated, ...generatedWithoutLastUpdated } = generated;
+      contact = this.db.contactManager.create(generatedWithoutLastUpdated);
+    }
 
     let entry = this.toMerge.get(contact);
     if (!entry) this.toMerge.set(contact, entry = []);
