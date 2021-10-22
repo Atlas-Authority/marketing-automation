@@ -2,9 +2,10 @@ import * as assert from 'assert';
 import { saveForInspection } from '../../cache/inspection.js';
 import log from '../../log/logger.js';
 import { Database } from '../../model/database.js';
+import { Deal } from '../../model/deal.js';
 import { License, LicenseData } from '../../model/license.js';
 import { isPresent, sorter, uniqueArray } from '../../util/helpers.js';
-import { RelatedLicenseSet } from '../license-matching/license-grouper.js';
+import { LicenseContext, RelatedLicenseSet } from '../license-matching/license-grouper.js';
 import { ActionGenerator, CreateDealAction, UpdateDealAction } from './actions.js';
 import { EventGenerator } from './events.js';
 import { getEmails } from './records.js';
@@ -37,36 +38,11 @@ class DealGenerator {
 
     for (const { groups, properties } of this.dealCreateActions) {
       const deal = this.db.dealManager.create(properties);
-
-      const contacts = contactsFor(this.db, groups);
-      const companies = (contacts
-        .filter(c => c.isCustomer)
-        .flatMap(c => c.companies.getAll()));
-
-      for (const contact of contacts) {
-        deal.contacts.add(contact);
-      }
-
-      for (const company of companies) {
-        deal.companies.add(company);
-      }
+      this.associateDealContactsAndCompanies(groups, deal);
     }
 
-    for (const { deal, groups, properties } of this.dealUpdateActions) {
-      const contacts = contactsFor(this.db, groups);
-      const companies = (contacts
-        .filter(c => c.isCustomer)
-        .flatMap(c => c.companies.getAll()));
-
-      deal.contacts.clear();
-      for (const contact of contacts) {
-        deal.contacts.add(contact);
-      }
-
-      deal.companies.clear();
-      for (const company of companies) {
-        deal.companies.add(company);
-      }
+    for (const { deal, groups } of this.dealUpdateActions) {
+      this.associateDealContactsAndCompanies(groups, deal);
     }
   }
 
@@ -84,6 +60,23 @@ class DealGenerator {
         case 'update': this.dealUpdateActions.push(action); break;
         case 'ignore': this.ignoreLicenses(action.reason, action.groups.map(g => g.license));
       }
+    }
+  }
+
+  private associateDealContactsAndCompanies(groups: LicenseContext[], deal: Deal) {
+    const contacts = contactsFor(this.db, groups);
+    const companies = (contacts
+      .filter(c => c.isCustomer)
+      .flatMap(c => c.companies.getAll()));
+
+    deal.contacts.clear();
+    for (const contact of contacts) {
+      deal.contacts.add(contact);
+    }
+
+    deal.companies.clear();
+    for (const company of companies) {
+      deal.companies.add(company);
     }
   }
 
