@@ -58,7 +58,7 @@ export function dealCreationProperties(record: License | Transaction, dealstage:
       : { transactionId: record.data.transactionId, addonLicenseId: '' }),
     closeDate: record.data.maintenanceStartDate,
     deployment: record.data.hosting,
-    aaApp: record.data.addonKey,
+    app: record.data.addonKey,
     licenseTier: record.tier,
     country: record.data.country,
     origin: config.constants.dealOrigin,
