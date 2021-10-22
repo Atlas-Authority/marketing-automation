@@ -5,7 +5,7 @@ import { Entity } from "./hubspot/entity.js";
 import { EntityManager, PropertyTransformers } from "./hubspot/manager.js";
 
 const deploymentKey = config.hubspot.attrs.contact.deployment;
-const productsKey = config.hubspot.attrs.contact.product;
+const productsKey = config.hubspot.attrs.contact.products;
 
 export type ContactType = 'Partner' | 'Customer';
 
