@@ -2,7 +2,6 @@ import { Downloader } from '../io/downloader/downloader.js';
 import { Uploader } from '../io/uploader/uploader.js';
 import { EngineLogger } from '../log/engine-logger.js';
 import { Database } from '../model/database.js';
-import { backfillDealCompanies } from './backfilling/backfill-deal-companies.js';
 import { findAndFlagExternallyCreatedContacts, findAndFlagPartnerCompanies, findAndFlagPartnersByDomain, identifyDomains } from './contacts/contact-types.js';
 import { generateContacts } from "./contacts/generate-contacts.js";
 import { updateContactsBasedOnMatchResults } from './contacts/update-contacts.js';
@@ -46,10 +45,6 @@ export default async function runEngine({ downloader, uploader }: {
 
   log.step('Updating Contacts based on Match Results');
   updateContactsBasedOnMatchResults(db, allMatches);
-  await db.syncUpAllEntities();
-
-  log.step('Backfill deal companies');
-  backfillDealCompanies(db, allMatches);
   await db.syncUpAllEntities();
 
   log.step('Generating deals');
