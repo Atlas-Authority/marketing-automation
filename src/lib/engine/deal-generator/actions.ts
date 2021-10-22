@@ -33,7 +33,7 @@ export class ActionGenerator {
       return makeCreateAction(event, latestLicense, DealStage.EVAL);
     }
     else if (deal.isEval()) {
-      return makeUpdateAction(event, deal, latestLicense, {});
+      return makeUpdateAction(event, deal, latestLicense);
     }
     else {
       return makeIgnoreAction(event, deal, 'Deal already exists and is not eval');
@@ -55,7 +55,7 @@ export class ActionGenerator {
       return makeCreateAction(event, record, DealStage.CLOSED_WON);
     }
     else if (deal.isEval()) {
-      return makeUpdateAction(event, deal, record, { dealstage: DealStage.CLOSED_WON });
+      return makeUpdateAction(event, deal, record, DealStage.CLOSED_WON);
     }
     else {
       return makeIgnoreAction(event, deal, 'Deal already exists and is not eval');
@@ -75,7 +75,7 @@ export class ActionGenerator {
     return (deals
       .filter(deal => deal.data.dealstage !== DealStage.CLOSED_LOST)
       .map(deal => {
-        return makeUpdateAction(event, deal, null, { dealstage: DealStage.CLOSED_LOST })
+        return makeUpdateAction(event, deal, null, DealStage.CLOSED_LOST)
       })
       .filter(isPresent)
     );
@@ -112,11 +112,10 @@ function makeCreateAction(event: DealRelevantEvent, record: License | Transactio
   };
 }
 
-function makeUpdateAction(event: DealRelevantEvent, deal: Deal, record: License | Transaction | null, properties: Partial<DealData>): Action {
-  if (record) {
-    updateDeal(deal, record);
-  }
-  Object.assign(deal.data, properties);
+function makeUpdateAction(event: DealRelevantEvent, deal: Deal, record: License | Transaction | null, dealstage?: DealStage): Action {
+  if (dealstage) deal.data.dealstage = dealstage;
+  if (record) updateDeal(deal, record);
+
   if (!deal.hasPropertyChanges()) {
     return makeIgnoreAction(event, deal, 'No properties to update');
   }
