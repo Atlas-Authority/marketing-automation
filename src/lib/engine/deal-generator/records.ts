@@ -88,6 +88,10 @@ export function updateDeal(deal: Deal, record: License | Transaction) {
     deal.data.amount = record.data.vendorAmount;
   }
 
+  if (!deal.data.amount) {
+    deal.data.amount = (deal.isClosed() ? 0 : null);
+  }
+
   deal.data.closeDate = record.data.maintenanceStartDate;
   deal.data.licenseTier = Math.max(deal.data.licenseTier, record.tier);
 }

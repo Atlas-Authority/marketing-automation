@@ -3,7 +3,6 @@ import { Uploader } from '../io/uploader/uploader.js';
 import { EngineLogger } from '../log/engine-logger.js';
 import { Database } from '../model/database.js';
 import { backfillDealCompanies } from './backfilling/backfill-deal-companies.js';
-import zeroEmptyDealAmounts from './backfilling/zero-empty-deal-amounts.js';
 import { findAndFlagExternallyCreatedContacts, findAndFlagPartnerCompanies, findAndFlagPartnersByDomain, identifyDomains } from './contacts/contact-types.js';
 import { generateContacts } from "./contacts/generate-contacts.js";
 import { updateContactsBasedOnMatchResults } from './contacts/update-contacts.js';
@@ -19,10 +18,6 @@ export default async function runEngine({ downloader, uploader }: {
   log.step('Starting to download data');
   const db = new Database(downloader, uploader);
   await db.downloadAllData();
-
-  log.step('Normalizing deal amounts');
-  zeroEmptyDealAmounts(db.dealManager.getArray());
-  await db.syncUpAllEntities();
 
   log.step('Identifying partner and customer domains');
   identifyDomains(db);
