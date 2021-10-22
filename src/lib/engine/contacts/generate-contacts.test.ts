@@ -8,7 +8,7 @@ describe('updating latest contact properties', () => {
       lastUpdated: '2021-04-02',
       country: 'country2',
       region: 'region2',
-      hosting: 'hosting2',
+      deployment: 'Cloud',
       email: 'email2',
     });
 
@@ -31,7 +31,7 @@ describe('updating latest contact properties', () => {
       lastUpdated: '2021-04-02',
       country: 'country2',
       region: 'region2',
-      hosting: 'hosting2',
+      deployment: 'Cloud',
       email: 'email2',
       firstName: 'firstName',
       lastName: 'lastName',
@@ -166,7 +166,7 @@ function fakeContact(props: Partial<GeneratedContact>): GeneratedContact {
     contactType: props.contactType as ContactType || 'Customer',
     country: props.country || 'country1',
     region: props.region || 'region1',
-    hosting: props.hosting || 'hosting1',
+    deployment: props.deployment || 'Server',
     email: props.email || 'email1',
     firstName: props.firstName || null,
     lastName: props.lastName || null,
@@ -174,7 +174,6 @@ function fakeContact(props: Partial<GeneratedContact>): GeneratedContact {
     city: props.city || null,
     state: props.state || null,
 
-    deployment: null,
     lastMpacEvent: null,
     licenseTier: null,
     otherEmails: [],

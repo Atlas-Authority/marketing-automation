@@ -75,7 +75,6 @@ class ContactGenerator {
       region: item.data.region,
       relatedProducts: new Set(),
       deployment: item.data.hosting,
-      hosting: item.data.hosting,
       otherEmails: [],
       licenseTier: null,
       lastMpacEvent: '',

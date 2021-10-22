@@ -18,7 +18,6 @@ export type ContactData = {
   country: string | null;
   region: string | null;
 
-  hosting: string | null;
   deployment: 'Cloud' | 'Data Center' | 'Server' | 'Multiple' | null;
 
   relatedProducts: Set<string>;
@@ -54,7 +53,6 @@ export class ContactManager extends EntityManager<ContactData, Contact> {
     'country',
     'region',
     'contact_type',
-    'hosting',
     'firstname',
     'lastname',
     'phone',
@@ -70,7 +68,6 @@ export class ContactManager extends EntityManager<ContactData, Contact> {
       contactType: data.contact_type as ContactData['contactType'],
 
       email: data.email ?? '',
-      hosting: data.hosting,
       country: data.country,
       region: data.region,
 
@@ -93,7 +90,6 @@ export class ContactManager extends EntityManager<ContactData, Contact> {
     contactType: contactType => ['contact_type', contactType],
 
     email: email => ['email', email],
-    hosting: hosting => ['hosting', hosting ?? ''],
     country: country => ['country', country ?? ''],
     region: region => ['region', region ?? ''],
 
