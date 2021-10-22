@@ -13,7 +13,7 @@ export default class ConsoleUploader implements Uploader {
   async createHubspotEntities(kind: EntityKind, inputs: NewEntity[]): Promise<ExistingEntity[]> {
     const objects = inputs.map((o, i) => ({
       properties: o.properties,
-      id: `fake.${kind}:${i}`,
+      id: `fake.${kind}.${i}`,
     }));
     this.fakeApiConsoleLog(`Fake-created ${kind}s:`, objects);
     return objects;
