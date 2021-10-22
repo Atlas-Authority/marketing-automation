@@ -174,6 +174,7 @@ function fakeContact(props: Partial<GeneratedContact>): GeneratedContact {
     city: props.city || null,
     state: props.state || null,
 
+    product: 'product1',
     lastMpacEvent: null,
     licenseTier: null,
     otherEmails: [],

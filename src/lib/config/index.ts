@@ -27,6 +27,7 @@ export default {
     attrs: {
       contact: {
         deployment: required('HUBSPOT_CONTACT_DEPLOYMENT_ATTR'),
+        product: required('HUBSPOT_CONTACT_PRODUCT_ATTR'),
       },
       deal: {
         app: required('HUBSPOT_DEAL_APP_ATTR'),

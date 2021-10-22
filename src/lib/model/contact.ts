@@ -5,6 +5,7 @@ import { Entity } from "./hubspot/entity.js";
 import { EntityManager, PropertyTransformers } from "./hubspot/manager.js";
 
 const deploymentKey = config.hubspot.attrs.contact.deployment;
+const productKey = config.hubspot.attrs.contact.product;
 
 export type ContactType = 'Partner' | 'Customer';
 
@@ -21,6 +22,7 @@ export type ContactData = {
   country: string | null;
   region: string | null;
 
+  product: string | null;
   deployment: 'Cloud' | 'Data Center' | 'Server' | 'Multiple' | null;
 
   relatedProducts: Set<string>;
@@ -60,6 +62,7 @@ export class ContactManager extends EntityManager<ContactData, Contact> {
     'lastname',
     'phone',
     deploymentKey,
+    productKey,
     'related_products',
     'license_tier',
     'last_mpac_event',
@@ -83,6 +86,7 @@ export class ContactManager extends EntityManager<ContactData, Contact> {
       relatedProducts: new Set(data.related_products ? data.related_products.split(';') : []),
       licenseTier: !data.license_tier ? null : +data.license_tier,
       deployment: data[deploymentKey] as ContactData['deployment'],
+      product: data[productKey],
       lastMpacEvent: data.last_mpac_event,
 
       otherEmails: data.hs_additional_emails?.split(';') || [],
@@ -105,6 +109,7 @@ export class ContactManager extends EntityManager<ContactData, Contact> {
     relatedProducts: relatedProducts => ['related_products', [...relatedProducts].join(';')],
     licenseTier: licenseTier => ['license_tier', licenseTier?.toFixed() ?? ''],
     deployment: deployment => [deploymentKey, deployment ?? ''],
+    product: product => [productKey, product ?? ''],
     lastMpacEvent: lastMpacEvent => ['last_mpac_event', lastMpacEvent ?? ''],
 
     // Never sync'd up
