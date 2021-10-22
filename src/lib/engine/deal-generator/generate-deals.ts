@@ -9,12 +9,7 @@ import { ActionGenerator, CreateDealAction, UpdateDealAction } from './actions.j
 import { EventGenerator } from './events.js';
 import { getEmails } from './records.js';
 
-export function generateDeals(db: Database, allMatches: RelatedLicenseSet[]) {
-  const matches = allMatches
-    .filter(group =>
-      group.some(m =>
-        !olderThan90Days(m.license.data.maintenanceStartDate)));
-
+export function generateDeals(db: Database, matches: RelatedLicenseSet[]) {
   const generator = new DealActionGenerator(db);
 
   for (const relatedLicenseIds of matches) {
