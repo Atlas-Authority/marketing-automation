@@ -185,7 +185,7 @@ export abstract class EntityManager<
     for (const [k, v] of Object.entries(e.getPropertyChanges())) {
       const fn = this.toAPI[k];
       const [newKey, newVal] = fn(v);
-      properties[newKey] = newVal;
+      if (newKey) properties[newKey] = newVal;
     }
     return properties;
   }
