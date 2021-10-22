@@ -43,10 +43,7 @@ export default async function runEngine({ downloader, uploader }: {
   log.step('Flagging partners by domain');
   findAndFlagPartnersByDomain(db);
 
-  log.step('Upserting Contacts in Hubspot');
-  await db.syncUpAllEntities();
-
-  log.step('Updating Companies in Hubspot');
+  log.step('Upserting Contacts/Companies in Hubspot');
   await db.syncUpAllEntities();
 
   log.step('Running Scoring Engine');
