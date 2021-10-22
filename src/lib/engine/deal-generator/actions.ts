@@ -116,6 +116,7 @@ function makeUpdateAction(event: DealRelevantEvent, deal: Deal, record: License 
   if (record) {
     updateDeal(deal, record);
   }
+  Object.assign(deal.data, properties);
   if (!deal.hasPropertyChanges()) {
     return makeIgnoreAction(event, deal, 'No properties to update');
   }
