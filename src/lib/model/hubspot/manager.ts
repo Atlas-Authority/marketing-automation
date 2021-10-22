@@ -104,7 +104,6 @@ export abstract class EntityManager<
           const found = results.find(result => {
             for (const localIdKey of this.identifiers) {
               const localVal = e.data[localIdKey];
-              assert.ok(localVal);
               const [remoteIdKey, hsLocal] = this.toAPI[localIdKey](localVal);
               const hsRemote = result.properties[remoteIdKey];
               if (hsLocal !== hsRemote) return false;
