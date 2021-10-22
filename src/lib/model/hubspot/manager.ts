@@ -32,7 +32,8 @@ export abstract class EntityManager<
 
   protected abstract identifiers: (keyof P)[];
 
-  protected entities = new Map<string, E>();
+  protected entitiesById = new Map<string, E>();
+  protected entities: E[] = [];
 
   public async downloadAllEntities(progress: Progress) {
     const data = await this.downloader.downloadHubspotEntities(progress, this.kind, this.apiProperties, this.associations);
@@ -47,38 +48,40 @@ export abstract class EntityManager<
       }
 
       const entity = new this.Entity(this.db, raw.id, props, associations);
-      this.entities.set(entity.guaranteedId(), entity);
+      this.entities.push(entity);
+      this.entitiesById.set(entity.guaranteedId(), entity);
     }
 
-    this.addIndexes(this.entities.values(), true);
+    this.addIndexes(this.entities, true);
   }
 
   public create(props: P) {
     const e = new this.Entity(this.db, null, props, new Set());
+    this.entities.push(e);
     this.addIndexes([e], false);
     return e;
   }
 
   public get(id: string) {
-    return this.entities.get(id);
+    return this.entitiesById.get(id);
   }
 
-  public getAll() {
-    return this.entities.values();
+  public getAll(): Iterable<E> {
+    return this.entities;
   }
 
-  public getArray() {
-    return [...this.entities.values()];
+  public getArray(): E[] {
+    return this.entities;
   }
 
   public async syncUpAllEntities() {
     await this.syncUpAllEntitiesProperties();
     await this.syncUpAllEntitiesAssociations();
-    this.addIndexes(this.entities.values(), true);
+    this.addIndexes(this.entities, true);
   }
 
   private async syncUpAllEntitiesProperties() {
-    const toSync = this.getArray().filter(e => e.hasPropertyChanges());
+    const toSync = this.entities.filter(e => e.hasPropertyChanges());
     const toCreate = toSync.filter(e => e.id === undefined);
     const toUpdate = toSync.filter(e => e.id !== undefined);
 
@@ -111,7 +114,7 @@ export abstract class EntityManager<
 
           assert.ok(found);
           e.id = found.id;
-          this.entities.set(found.id, e);
+          this.entitiesById.set(found.id, e);
         }
       }
     }
@@ -135,7 +138,7 @@ export abstract class EntityManager<
   }
 
   private async syncUpAllEntitiesAssociations() {
-    const toSync = (this.getArray()
+    const toSync = (this.entities
       .filter(e => e.hasAssociationChanges())
       .flatMap(e => e.getAssociationChanges()
         .map(changes => ({ e, ...changes }))));
