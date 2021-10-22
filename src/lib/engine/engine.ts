@@ -5,7 +5,7 @@ import { Database } from '../model/database.js';
 import { findAndFlagExternallyCreatedContacts, findAndFlagPartnerCompanies, findAndFlagPartnersByDomain, identifyDomains } from './contacts/contact-types.js';
 import { generateContacts } from "./contacts/generate-contacts.js";
 import { updateContactsBasedOnMatchResults } from './contacts/update-contacts.js';
-import { generateDeals } from './deal-generator/generate-deals.js';
+import { DealGenerator } from './deal-generator/generate-deals.js';
 import { matchIntoLikelyGroups } from './license-matching/license-grouper.js';
 
 export default async function runEngine({ downloader, uploader }: {
@@ -48,7 +48,7 @@ export default async function runEngine({ downloader, uploader }: {
   await db.syncUpAllEntities();
 
   log.step('Generating deals');
-  generateDeals(db, allMatches);
+  new DealGenerator(db).run(allMatches);
 
   log.step('Upserting deals in Hubspot');
   await db.syncUpAllEntities();

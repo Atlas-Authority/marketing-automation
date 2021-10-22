@@ -10,20 +10,15 @@ import { ActionGenerator, CreateDealAction, UpdateDealAction } from './actions.j
 import { EventGenerator } from './events.js';
 import { getEmails } from './records.js';
 
-export function generateDeals(db: Database, matches: RelatedLicenseSet[]) {
-  const generator = new DealGenerator(db);
-  generator.run(matches);
-}
-
 /** Generates deal actions based on match data */
-class DealGenerator {
+export class DealGenerator {
 
-  actionGenerator: ActionGenerator;
+  private actionGenerator: ActionGenerator;
 
-  dealCreateActions: CreateDealAction[] = [];
-  dealUpdateActions: UpdateDealAction[] = [];
+  private dealCreateActions: CreateDealAction[] = [];
+  private dealUpdateActions: UpdateDealAction[] = [];
 
-  ignoredLicenseSets: (LicenseData & { reason: string })[][] = [];
+  private ignoredLicenseSets: (LicenseData & { reason: string })[][] = [];
 
   constructor(private db: Database) {
     this.actionGenerator = new ActionGenerator(db.dealManager);
