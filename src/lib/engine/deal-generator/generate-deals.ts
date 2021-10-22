@@ -6,7 +6,6 @@ import { License, LicenseData } from '../../model/license.js';
 import { isPresent, sorter, uniqueArray } from '../../util/helpers.js';
 import { RelatedLicenseSet } from '../license-matching/license-grouper.js';
 import { ActionGenerator, CreateDealAction, UpdateDealAction } from './actions.js';
-import { DealFinder } from './deal-finder.js';
 import { EventGenerator } from './events.js';
 import { getEmails } from './records.js';
 
@@ -66,7 +65,6 @@ export function generateDeals(db: Database, allMatches: RelatedLicenseSet[]) {
 class DealActionGenerator {
 
   actionGenerator: ActionGenerator;
-  dealFinder: DealFinder;
 
   dealCreateActions: CreateDealAction[] = [];
   dealUpdateActions: UpdateDealAction[] = [];
@@ -74,8 +72,7 @@ class DealActionGenerator {
   ignoredLicenseSets: (LicenseData & { reason: string })[][] = [];
 
   constructor(private db: Database) {
-    this.dealFinder = new DealFinder(db.dealManager.getAll());
-    this.actionGenerator = new ActionGenerator(this.dealFinder);
+    this.actionGenerator = new ActionGenerator(db.dealManager);
   }
 
   generateActionsForMatchedGroup(groups: RelatedLicenseSet) {

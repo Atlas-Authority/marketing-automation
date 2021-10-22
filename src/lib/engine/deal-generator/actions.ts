@@ -1,18 +1,16 @@
 import { DealStage } from '../../config/index.js';
 import log from '../../log/logger.js';
-import { Deal, DealData } from '../../model/deal.js';
+import { Deal, DealData, DealManager } from '../../model/deal.js';
 import { License } from '../../model/license.js';
 import { Transaction } from '../../model/transaction.js';
 import { isPresent, sorter } from '../../util/helpers.js';
 import { LicenseContext } from '../license-matching/license-grouper.js';
-import { DealFinder } from './deal-finder.js';
 import { DealRelevantEvent, EvalEvent, PurchaseEvent, RefundEvent, RenewalEvent, UpgradeEvent } from "./events.js";
 import { dealCreationProperties, updateDeal } from './records.js';
 
 export class ActionGenerator {
 
-  constructor(private dealFinder: DealFinder) {
-  }
+  constructor(private dealManager: DealManager) { }
 
   generateFrom(events: DealRelevantEvent[]) {
     return events.flatMap(event => this.actionsFor(event));
@@ -29,7 +27,7 @@ export class ActionGenerator {
   }
 
   private actionForEval(event: EvalEvent): Action {
-    const deal = this.dealFinder.getDeal(event.licenses);
+    const deal = this.dealManager.getDealForRecord(event.licenses);
     const latestLicense = event.licenses[event.licenses.length - 1];
     if (!deal) {
       return makeCreateAction(event, latestLicense, DealStage.EVAL);
@@ -45,9 +43,9 @@ export class ActionGenerator {
   private actionForPurchase(event: PurchaseEvent): Action {
     const deal = (
       // Either it is an eval or a purchase without a transaction,
-      this.dealFinder.getDeal(event.licenses) ||
+      this.dealManager.getDealForRecord(event.licenses) ||
       // or it exists as a purchase with a transaction
-      this.dealFinder.getDeal(event.transaction
+      this.dealManager.getDealForRecord(event.transaction
         ? [event.transaction]
         : [])
     );
@@ -65,7 +63,7 @@ export class ActionGenerator {
   }
 
   private actionForRenewal(event: RenewalEvent | UpgradeEvent): Action {
-    const deal = this.dealFinder.getDeal([event.transaction]);
+    const deal = this.dealManager.getDealForRecord([event.transaction]);
     if (deal) {
       return makeIgnoreAction(event, deal, 'Deal already exists for this transaction');
     }
@@ -73,7 +71,7 @@ export class ActionGenerator {
   }
 
   private actionsForRefund(event: RefundEvent): Action[] {
-    const deals = this.dealFinder.getDeals(event.refundedTxs);
+    const deals = this.dealManager.getDealsForRecords(event.refundedTxs);
     return (deals
       .filter(deal => deal.data.dealstage !== DealStage.CLOSED_LOST)
       .map(deal => {

@@ -1,10 +1,13 @@
 import { DealStage, Pipeline } from "../config/dynamic-enums.js";
 import config from "../config/index.js";
 import { EntityKind } from "../io/hubspot.js";
+import { isPresent } from "../util/helpers.js";
 import { Company } from "./company.js";
 import { Contact } from "./contact.js";
 import { Entity } from "./hubspot/entity.js";
 import { EntityManager, PropertyTransformers } from "./hubspot/manager.js";
+import { License } from "./license.js";
+import { Transaction } from "./transaction.js";
 
 const addonLicenseIdKey = config.hubspot.attrs.deal.addonLicenseId;
 const transactionIdKey = config.hubspot.attrs.deal.transactionId;
@@ -132,6 +135,25 @@ export class DealManager extends EntityManager<DealData, Deal> {
         this.dealsByTransactionId.set(deal.data.transactionId, deal);
       }
     }
+  }
+
+  getDealForRecord(records: (License | Transaction)[]) {
+    return this.getDealsForRecords(records).find(deal => deal);
+  }
+
+  getDealsForRecords(records: (License | Transaction)[]) {
+    return (records
+      .map(record => this.getById(record))
+      .filter(isPresent));
+  }
+
+  private getById(record: License | Transaction): Deal | undefined {
+    return (record instanceof Transaction
+      ? (
+        this.dealsByTransactionId.get(record.data.transactionId) ||
+        this.dealsByAddonLicenseId.get(record.data.addonLicenseId)
+      )
+      : this.dealsByAddonLicenseId.get(record.data.addonLicenseId));
   }
 
 }
