@@ -73,49 +73,49 @@ function uniqLicenses(licenses: RawLicense[]) {
 }
 
 function validateLicense(license: RawLicense) {
-  validateField(license, l => l.addonLicenseId);
-  validateField(license, l => l.licenseId);
-  validateField(license, l => l.addonKey);
-  validateField(license, l => l.addonName);
-  validateField(license, l => l.lastUpdated);
-  validateField(license, l => l.contactDetails);
-  validateField(license, l => l.contactDetails.technicalContact);
-  validateField(license, l => l.contactDetails.technicalContact.email);
-  validateField(license, l => l.tier);
-  validateField(license, l => l.licenseType);
-  validateField(license, l => l.hosting);
-  validateField(license, l => l.maintenanceStartDate);
-  validateField(license, l => l.maintenanceEndDate);
-  validateField(license, l => l.status);
+  validateField(license, license => license.addonLicenseId);
+  validateField(license, license => license.licenseId);
+  validateField(license, license => license.addonKey);
+  validateField(license, license => license.addonName);
+  validateField(license, license => license.lastUpdated);
+  validateField(license, license => license.contactDetails);
+  validateField(license, license => license.contactDetails.technicalContact);
+  validateField(license, license => license.contactDetails.technicalContact.email);
+  validateField(license, license => license.tier);
+  validateField(license, license => license.licenseType);
+  validateField(license, license => license.hosting);
+  validateField(license, license => license.maintenanceStartDate);
+  validateField(license, license => license.maintenanceEndDate);
+  validateField(license, license => license.status);
 }
 
 function validateTransaction(transaction: RawTransaction) {
-  validateField(transaction, t => t.transactionId);
-  validateField(transaction, t => t.addonLicenseId);
-  validateField(transaction, t => t.licenseId);
-  validateField(transaction, t => t.addonKey);
-  validateField(transaction, t => t.addonName);
-  validateField(transaction, t => t.lastUpdated);
-  validateField(transaction, t => t.customerDetails);
-  validateField(transaction, t => t.customerDetails.technicalContact);
-  validateField(transaction, t => t.customerDetails.technicalContact.email);
-  validateField(transaction, t => t.purchaseDetails);
-  validateField(transaction, t => t.purchaseDetails.saleDate);
-  validateField(transaction, t => t.purchaseDetails.tier);
-  validateField(transaction, t => t.purchaseDetails.licenseType);
-  validateField(transaction, t => t.purchaseDetails.hosting);
-  validateField(transaction, t => t.purchaseDetails.billingPeriod);
-  validateField(transaction, t => t.purchaseDetails.purchasePrice);
-  validateField(transaction, t => t.purchaseDetails.vendorAmount);
-  validateField(transaction, t => t.purchaseDetails.saleType);
-  validateField(transaction, t => t.purchaseDetails.maintenanceStartDate);
-  validateField(transaction, t => t.purchaseDetails.maintenanceEndDate);
+  validateField(transaction, transaction => transaction.transactionId);
+  validateField(transaction, transaction => transaction.addonLicenseId);
+  validateField(transaction, transaction => transaction.licenseId);
+  validateField(transaction, transaction => transaction.addonKey);
+  validateField(transaction, transaction => transaction.addonName);
+  validateField(transaction, transaction => transaction.lastUpdated);
+  validateField(transaction, transaction => transaction.customerDetails);
+  validateField(transaction, transaction => transaction.customerDetails.technicalContact);
+  validateField(transaction, transaction => transaction.customerDetails.technicalContact.email);
+  validateField(transaction, transaction => transaction.purchaseDetails);
+  validateField(transaction, transaction => transaction.purchaseDetails.saleDate);
+  validateField(transaction, transaction => transaction.purchaseDetails.tier);
+  validateField(transaction, transaction => transaction.purchaseDetails.licenseType);
+  validateField(transaction, transaction => transaction.purchaseDetails.hosting);
+  validateField(transaction, transaction => transaction.purchaseDetails.billingPeriod);
+  validateField(transaction, transaction => transaction.purchaseDetails.purchasePrice);
+  validateField(transaction, transaction => transaction.purchaseDetails.vendorAmount);
+  validateField(transaction, transaction => transaction.purchaseDetails.saleType);
+  validateField(transaction, transaction => transaction.purchaseDetails.maintenanceStartDate);
+  validateField(transaction, transaction => transaction.purchaseDetails.maintenanceEndDate);
 }
 
 function validateField<T>(o: T, accessor: (o: T) => any) {
   const val = accessor(o);
-  const path = accessor.toString().replace(/^(\w+) => \1\./, '');
-  if (!val) throw new AttachableError(`Invalid License: ${path} missing`, JSON.stringify(o));
+  const path = accessor.toString().replace(/^(\w+) => /, '');
+  if (!val) throw new AttachableError(`Missing field: ${path}`, JSON.stringify(o));
 }
 
 function filterLicensesWithTechEmail(license: RawLicense) {
