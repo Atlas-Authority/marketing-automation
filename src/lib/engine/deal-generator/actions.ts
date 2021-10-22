@@ -74,9 +74,7 @@ export class ActionGenerator {
     const deals = this.dealManager.getDealsForRecords(event.refundedTxs);
     return (deals
       .filter(deal => deal.data.dealstage !== DealStage.CLOSED_LOST)
-      .map(deal => {
-        return makeUpdateAction(event, deal, null, DealStage.CLOSED_LOST)
-      })
+      .map(deal => makeUpdateAction(event, deal, null, DealStage.CLOSED_LOST))
       .filter(isPresent)
     );
   }
