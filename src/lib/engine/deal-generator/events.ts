@@ -2,14 +2,14 @@ import log from '../../log/logger.js';
 import { License } from '../../model/license.js';
 import { Transaction } from '../../model/transaction.js';
 import { sorter } from "../../util/helpers.js";
-import { LicenseContext } from '../license-matching/license-grouper.js';
+import { RelatedLicenseSet } from '../license-matching/license-grouper.js';
 import { abbrRecordDetails, getLicense, isEvalOrOpenSourceLicense, isPaidLicense } from "./records.js";
 
-export type RefundEvent = { type: 'refund', groups: LicenseContext[], refundedTxs: Transaction[] };
-export type EvalEvent = { type: 'eval', groups: LicenseContext[], licenses: License[] };
-export type PurchaseEvent = { type: 'purchase', groups: LicenseContext[], licenses: License[], transaction?: Transaction };
-export type RenewalEvent = { type: 'renewal', groups: LicenseContext[], transaction: Transaction };
-export type UpgradeEvent = { type: 'upgrade', groups: LicenseContext[], transaction: Transaction };
+export type RefundEvent = { type: 'refund', groups: RelatedLicenseSet, refundedTxs: Transaction[] };
+export type EvalEvent = { type: 'eval', groups: RelatedLicenseSet, licenses: License[] };
+export type PurchaseEvent = { type: 'purchase', groups: RelatedLicenseSet, licenses: License[], transaction?: Transaction };
+export type RenewalEvent = { type: 'renewal', groups: RelatedLicenseSet, transaction: Transaction };
+export type UpgradeEvent = { type: 'upgrade', groups: RelatedLicenseSet, transaction: Transaction };
 
 export type DealRelevantEvent = (
   RefundEvent |
@@ -23,7 +23,7 @@ export class EventGenerator {
 
   events: DealRelevantEvent[] = [];
 
-  interpretAsEvents(groups: LicenseContext[]) {
+  interpretAsEvents(groups: RelatedLicenseSet) {
     const records = this.getRecords(groups);
     this.sortRecords(records);
 
@@ -102,7 +102,7 @@ export class EventGenerator {
     }
   }
 
-  private getRecords(groups: LicenseContext[]) {
+  private getRecords(groups: RelatedLicenseSet) {
     return groups.flatMap(group => {
       const transactions = this.applyRefunds(group.transactions, groups);
       const records: (License | Transaction)[] = [...transactions];
@@ -134,7 +134,7 @@ export class EventGenerator {
     });
   }
 
-  private applyRefunds(transactions: Transaction[], groups: LicenseContext[]) {
+  private applyRefunds(transactions: Transaction[], groups: RelatedLicenseSet) {
     const refundedTxs: Transaction[] = [];
 
     // Handle refunds fully, either by applying or removing them

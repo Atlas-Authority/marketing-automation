@@ -5,7 +5,7 @@ import { Deal, DealData } from '../../model/deal.js';
 import { License } from '../../model/license.js';
 import { Transaction } from '../../model/transaction.js';
 import { isPresent, sorter } from "../../util/helpers.js";
-import { LicenseContext } from '../license-matching/license-grouper.js';
+import { RelatedLicenseSet } from '../license-matching/license-grouper.js';
 
 export function isEvalOrOpenSourceLicense(record: License) {
   return (
@@ -23,7 +23,7 @@ export function isPaidLicense(license: License) {
   );
 }
 
-export function getLicense(addonLicenseId: string, groups: LicenseContext[]) {
+export function getLicense(addonLicenseId: string, groups: RelatedLicenseSet) {
   const license = (groups
     .map(g => g.license)
     .sort(sorter(l => l.data.maintenanceStartDate, 'DSC'))

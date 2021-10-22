@@ -5,7 +5,7 @@ import { Database } from '../../model/database.js';
 import { Deal } from '../../model/deal.js';
 import { License, LicenseData } from '../../model/license.js';
 import { isPresent, sorter, uniqueArray } from '../../util/helpers.js';
-import { LicenseContext, RelatedLicenseSet } from '../license-matching/license-grouper.js';
+import { RelatedLicenseSet } from '../license-matching/license-grouper.js';
 import { ActionGenerator, CreateDealAction, UpdateDealAction } from './actions.js';
 import { EventGenerator } from './events.js';
 import { getEmails } from './records.js';
@@ -63,7 +63,7 @@ class DealGenerator {
     }
   }
 
-  private associateDealContactsAndCompanies(groups: LicenseContext[], deal: Deal) {
+  private associateDealContactsAndCompanies(groups: RelatedLicenseSet, deal: Deal) {
     const contacts = contactsFor(this.db, groups);
     const companies = (contacts
       .filter(c => c.isCustomer)
