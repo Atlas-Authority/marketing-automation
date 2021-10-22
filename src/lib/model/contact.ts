@@ -1,7 +1,11 @@
+import config from "../config/index.js";
 import { EntityKind } from "../io/hubspot.js";
 import { Company } from "./company.js";
 import { Entity } from "./hubspot/entity.js";
 import { EntityManager, PropertyTransformers } from "./hubspot/manager.js";
+
+const deploymentKey = config.hubspot.attrs.contact.deployment;
+const productsKey = config.hubspot.attrs.contact.products;
 
 export type ContactType = 'Partner' | 'Customer';
 
@@ -18,7 +22,7 @@ export type ContactData = {
   country: string | null;
   region: string | null;
 
-  hosting: string | null;
+  products: Set<string>;
   deployment: 'Cloud' | 'Data Center' | 'Server' | 'Multiple' | null;
 
   relatedProducts: Set<string>;
@@ -54,11 +58,11 @@ export class ContactManager extends EntityManager<ContactData, Contact> {
     'country',
     'region',
     'contact_type',
-    'hosting',
     'firstname',
     'lastname',
     'phone',
-    'deployment',
+    deploymentKey,
+    productsKey,
     'related_products',
     'license_tier',
     'last_mpac_event',
@@ -70,7 +74,6 @@ export class ContactManager extends EntityManager<ContactData, Contact> {
       contactType: data.contact_type as ContactData['contactType'],
 
       email: data.email ?? '',
-      hosting: data.hosting,
       country: data.country,
       region: data.region,
 
@@ -82,7 +85,8 @@ export class ContactManager extends EntityManager<ContactData, Contact> {
 
       relatedProducts: new Set(data.related_products ? data.related_products.split(';') : []),
       licenseTier: !data.license_tier ? null : +data.license_tier,
-      deployment: data.deployment as ContactData['deployment'],
+      deployment: data[deploymentKey] as ContactData['deployment'],
+      products: new Set(data[productsKey]?.split(';') || []),
       lastMpacEvent: data.last_mpac_event,
 
       otherEmails: data.hs_additional_emails?.split(';') || [],
@@ -93,7 +97,6 @@ export class ContactManager extends EntityManager<ContactData, Contact> {
     contactType: contactType => ['contact_type', contactType],
 
     email: email => ['email', email],
-    hosting: hosting => ['hosting', hosting ?? ''],
     country: country => ['country', country ?? ''],
     region: region => ['region', region ?? ''],
 
@@ -105,7 +108,8 @@ export class ContactManager extends EntityManager<ContactData, Contact> {
 
     relatedProducts: relatedProducts => ['related_products', [...relatedProducts].join(';')],
     licenseTier: licenseTier => ['license_tier', licenseTier?.toFixed() ?? ''],
-    deployment: deployment => ['deployment', deployment ?? ''],
+    deployment: deployment => [deploymentKey, deployment ?? ''],
+    products: products => [productsKey, [...products].join(';')],
     lastMpacEvent: lastMpacEvent => ['last_mpac_event', lastMpacEvent ?? ''],
 
     // Never sync'd up

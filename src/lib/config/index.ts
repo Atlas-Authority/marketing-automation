@@ -25,7 +25,13 @@ export default {
   hubspot: {
     apiKey: required('HUBSPOT_API_KEY'),
     attrs: {
+      contact: {
+        deployment: required('HUBSPOT_CONTACT_DEPLOYMENT_ATTR'),
+        products: required('HUBSPOT_CONTACT_PRODUCTS_ATTR'),
+      },
       deal: {
+        app: required('HUBSPOT_DEAL_APP_ATTR'),
+        deployment: required('HUBSPOT_DEAL_DEPLOYMENT_ATTR'),
         addonLicenseId: required('HUBSPOT_DEAL_ADDONLICENESID_ATTR'),
         transactionId: required('HUBSPOT_DEAL_TRANSACTIONID_ATTR'),
       },

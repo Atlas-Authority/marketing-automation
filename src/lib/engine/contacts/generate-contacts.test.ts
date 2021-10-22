@@ -8,7 +8,7 @@ describe('updating latest contact properties', () => {
       lastUpdated: '2021-04-02',
       country: 'country2',
       region: 'region2',
-      hosting: 'hosting2',
+      deployment: 'Cloud',
       email: 'email2',
     });
 
@@ -31,7 +31,7 @@ describe('updating latest contact properties', () => {
       lastUpdated: '2021-04-02',
       country: 'country2',
       region: 'region2',
-      hosting: 'hosting2',
+      deployment: 'Cloud',
       email: 'email2',
       firstName: 'firstName',
       lastName: 'lastName',
@@ -158,26 +158,59 @@ describe('updating latest contact properties', () => {
     }));
   });
 
+  it('keeps products', () => {
+    const a = fakeContact({ products: new Set(['p1', 'p2']) });
+
+    mergeContactInfo(a, [
+      fakeContact({ products: new Set() }),
+      a,
+    ]);
+
+    expect(a).toEqual(fakeContact({ products: new Set(['p1', 'p2']) }));
+  });
+
+  it('adds products', () => {
+    const a = fakeContact({ products: new Set() });
+
+    mergeContactInfo(a, [
+      fakeContact({ products: new Set(['p2', 'p3']) }),
+      a,
+    ]);
+
+    expect(a).toEqual(fakeContact({ products: new Set(['p2', 'p3']) }));
+  });
+
+  it('merges products', () => {
+    const a = fakeContact({ products: new Set(['p1', 'p2']) });
+
+    mergeContactInfo(a, [
+      fakeContact({ products: new Set(['p2', 'p3']) }),
+      a,
+    ]);
+
+    expect(a).toEqual(fakeContact({ products: new Set(['p1', 'p2', 'p3']) }));
+  });
+
 });
 
 function fakeContact(props: Partial<GeneratedContact>): GeneratedContact {
   return {
-    lastUpdated: props.lastUpdated || '2021-04-01',
-    contactType: props.contactType as ContactType || 'Customer',
-    country: props.country || 'country1',
-    region: props.region || 'region1',
-    hosting: props.hosting || 'hosting1',
-    email: props.email || 'email1',
-    firstName: props.firstName || null,
-    lastName: props.lastName || null,
-    phone: props.phone || null,
-    city: props.city || null,
-    state: props.state || null,
-
-    deployment: null,
+    email: 'email1',
+    lastUpdated: '2021-04-01',
+    contactType: 'Customer',
+    country: 'country1',
+    region: 'region1',
+    deployment: 'Server',
+    firstName: null,
+    lastName: null,
+    phone: null,
+    city: null,
+    state: null,
+    products: new Set(),
     lastMpacEvent: null,
     licenseTier: null,
     otherEmails: [],
     relatedProducts: new Set(),
+    ...props
   };
 }

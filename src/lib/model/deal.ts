@@ -8,17 +8,19 @@ import { EntityManager, PropertyTransformers } from "./hubspot/manager.js";
 
 const addonLicenseIdKey = config.hubspot.attrs.deal.addonLicenseId;
 const transactionIdKey = config.hubspot.attrs.deal.transactionId;
+const deploymentKey = config.hubspot.attrs.deal.deployment;
+const appKey = config.hubspot.attrs.deal.app;
 
 export type DealData = {
   relatedProducts: string;
-  aaApp: string;
+  app: string;
   addonLicenseId: string | null;
   transactionId: string | null;
   closeDate: string;
   country: string;
   dealName: string;
   origin: string;
-  deployment: 'Server' | 'Cloud' | 'Data Center';
+  deployment: 'Server' | 'Cloud' | 'Data Center' | 'Multiple';
   licenseTier: number;
   pipeline: Pipeline;
   dealstage: DealStage;
@@ -52,10 +54,10 @@ export class DealManager extends EntityManager<DealData, Deal> {
 
   override apiProperties: string[] = [
     'closedate',
-    'deployment',
+    deploymentKey,
     addonLicenseIdKey,
     transactionIdKey,
-    'aa_app',
+    appKey,
     'license_tier',
     'country',
     'origin',
@@ -70,14 +72,14 @@ export class DealManager extends EntityManager<DealData, Deal> {
     if (data.pipeline !== Pipeline.AtlassianMarketplace) return null;
     return {
       relatedProducts: data.related_products as string,
-      aaApp: data.aa_app as string,
+      app: data[appKey] as string,
       addonLicenseId: data[addonLicenseIdKey],
       transactionId: data[transactionIdKey],
       closeDate: (data.closedate as string).substr(0, 10),
       country: data.country as string,
       dealName: data.dealname as string,
       origin: data.origin as DealData['origin'],
-      deployment: data.deployment as DealData['deployment'],
+      deployment: data[deploymentKey] as DealData['deployment'],
       licenseTier: +(data.license_tier as string),
       pipeline: data.pipeline,
       dealstage: data.dealstage as string,
@@ -87,14 +89,14 @@ export class DealManager extends EntityManager<DealData, Deal> {
 
   override toAPI: PropertyTransformers<DealData> = {
     relatedProducts: relatedProducts => ['related_products', relatedProducts],
-    aaApp: aaApp => ['aa_app', aaApp],
+    app: app => [appKey, app],
     addonLicenseId: addonLicenseId => [addonLicenseIdKey, addonLicenseId || ''],
     transactionId: transactionId => [transactionIdKey, transactionId || ''],
     closeDate: closeDate => ['closedate', closeDate],
     country: country => ['country', country],
     dealName: dealName => ['dealname', dealName],
     origin: origin => ['origin', origin],
-    deployment: deployment => ['deployment', deployment],
+    deployment: deployment => [deploymentKey, deployment],
     licenseTier: licenseTier => ['license_tier', licenseTier.toFixed()],
     pipeline: pipeline => ['pipeline', pipeline],
     dealstage: dealstage => ['dealstage', dealstage],

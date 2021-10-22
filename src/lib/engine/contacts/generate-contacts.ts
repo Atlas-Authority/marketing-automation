@@ -75,7 +75,7 @@ class ContactGenerator {
       region: item.data.region,
       relatedProducts: new Set(),
       deployment: item.data.hosting,
-      hosting: item.data.hosting,
+      products: new Set(item.data.addonKey),
       otherEmails: [],
       licenseTier: null,
       lastMpacEvent: '',
@@ -129,5 +129,11 @@ export function mergeContactInfo(contact: ContactData, contacts: GeneratedContac
     const hasState = contacts.find(c => c.state);
     if (hasState)
       contact.state = hasState.state;
+  }
+
+  for (const other of contacts) {
+    for (const product of other.products) {
+      contact.products.add(product);
+    }
   }
 }
