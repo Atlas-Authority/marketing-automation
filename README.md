@@ -25,6 +25,18 @@ After running the engine, to test logic *after* the Scoring Engine runs, pass `-
 
 ## Engine Logic
 
+### High-level Overview
+
+1. Download HubSpot and Marketplace data
+2. Generate contacts from all Licenses/Transactions
+3. Identify and flag Contact Type for each Contact/Company
+4. Match License/Transaction groups via similarity-scoring
+5. Update Contacts based on match results
+6. Generate Deals based on match results
+7. Upsert HubSpot data entities
+
+### Step by step
+
 1. **Download all initial data.**
 
     This includes downloading:
