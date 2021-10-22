@@ -1,4 +1,4 @@
-import { ContactType } from "../../model/hubspot/contact.js";
+import { ContactType } from "../../model/contact.js";
 import { GeneratedContact, mergeContactInfo } from "./generate-contacts.js";
 
 describe('updating latest contact properties', () => {

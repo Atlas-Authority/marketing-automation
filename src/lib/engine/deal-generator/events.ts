@@ -1,6 +1,6 @@
 import log from '../../log/logger.js';
-import { License } from '../../model/marketplace/license.js';
-import { Transaction } from '../../model/marketplace/transaction.js';
+import { License } from '../../model/license.js';
+import { Transaction } from '../../model/transaction.js';
 import { sorter } from "../../util/helpers.js";
 import { LicenseContext } from '../license-matching/license-grouper.js';
 import { abbrRecordDetails, getLicense, isEvalOrOpenSourceLicense, isPaidLicense } from "./records.js";

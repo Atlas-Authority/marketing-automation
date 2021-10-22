@@ -1,7 +1,7 @@
-import { EntityKind } from "../../io/hubspot.js";
+import { EntityKind } from "../io/hubspot.js";
 import { Company } from "./company.js";
-import { Entity } from "./entity.js";
-import { EntityManager, PropertyTransformers } from "./manager.js";
+import { Entity } from "./hubspot/entity.js";
+import { EntityManager, PropertyTransformers } from "./hubspot/manager.js";
 
 export type ContactType = 'Partner' | 'Customer';
 

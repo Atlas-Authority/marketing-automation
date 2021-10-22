@@ -1,9 +1,9 @@
 import assert from 'assert';
 import mustache from 'mustache';
 import config, { DealStage, Pipeline } from '../../config/index.js';
-import { Deal, DealData } from '../../model/hubspot/deal.js';
-import { License } from '../../model/marketplace/license.js';
-import { Transaction } from '../../model/marketplace/transaction.js';
+import { Deal, DealData } from '../../model/deal.js';
+import { License } from '../../model/license.js';
+import { Transaction } from '../../model/transaction.js';
 import { isPresent, sorter } from "../../util/helpers.js";
 import { LicenseContext } from '../license-matching/license-grouper.js';
 

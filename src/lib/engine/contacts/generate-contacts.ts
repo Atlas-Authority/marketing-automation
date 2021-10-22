@@ -1,9 +1,9 @@
 import capitalize from 'capitalize';
+import { Contact, ContactData, ContactType } from '../../model/contact.js';
 import { Database } from '../../model/database.js';
-import { Contact, ContactData, ContactType } from '../../model/hubspot/contact.js';
+import { License } from '../../model/license.js';
 import { ContactInfo, PartnerBillingInfo } from '../../model/marketplace/common.js';
-import { License } from '../../model/marketplace/license.js';
-import { Transaction } from '../../model/marketplace/transaction.js';
+import { Transaction } from '../../model/transaction.js';
 import { sorter } from '../../util/helpers.js';
 
 export function generateContacts(db: Database) {

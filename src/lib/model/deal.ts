@@ -1,10 +1,10 @@
-import { DealStage, Pipeline } from "../../config/dynamic-enums.js";
-import config from "../../config/index.js";
-import { EntityKind } from "../../io/hubspot.js";
+import { DealStage, Pipeline } from "../config/dynamic-enums.js";
+import config from "../config/index.js";
+import { EntityKind } from "../io/hubspot.js";
 import { Company } from "./company.js";
 import { Contact } from "./contact.js";
-import { Entity } from "./entity.js";
-import { EntityManager, PropertyTransformers } from "./manager.js";
+import { Entity } from "./hubspot/entity.js";
+import { EntityManager, PropertyTransformers } from "./hubspot/manager.js";
 
 const addonLicenseIdKey = config.hubspot.attrs.deal.addonLicenseId;
 const transactionIdKey = config.hubspot.attrs.deal.transactionId;

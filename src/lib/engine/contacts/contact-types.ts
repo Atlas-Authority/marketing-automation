@@ -1,6 +1,6 @@
 import config from '../../config/index.js';
+import { Contact } from '../../model/contact.js';
 import { Database } from '../../model/database.js';
-import { Contact } from '../../model/hubspot/contact.js';
 
 export function identifyDomains(db: Database) {
   for (const l of db.licenses) {

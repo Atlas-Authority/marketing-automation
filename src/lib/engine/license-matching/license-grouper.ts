@@ -4,8 +4,8 @@ import { fnOrCache } from '../../cache/fn-cache.js';
 import { saveForInspection } from '../../cache/inspection.js';
 import log from '../../log/logger.js';
 import { Database } from '../../model/database.js';
-import { License } from '../../model/marketplace/license.js';
-import { Transaction } from '../../model/marketplace/transaction.js';
+import { License } from '../../model/license.js';
+import { Transaction } from '../../model/transaction.js';
 import { groupBy, sorter } from '../../util/helpers.js';
 import { LicenseMatcher } from './license-matcher.js';
 

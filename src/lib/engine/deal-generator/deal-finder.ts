@@ -1,6 +1,6 @@
-import { Deal } from '../../model/hubspot/deal.js';
-import { License } from '../../model/marketplace/license.js';
-import { Transaction } from '../../model/marketplace/transaction.js';
+import { Deal } from '../../model/deal.js';
+import { License } from '../../model/license.js';
+import { Transaction } from '../../model/transaction.js';
 import { isPresent } from '../../util/helpers.js';
 
 export class DealFinder {

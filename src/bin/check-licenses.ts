@@ -6,7 +6,7 @@ import CachedFileDownloader from '../lib/io/downloader/cached-file-downloader.js
 import ConsoleUploader from '../lib/io/uploader/console-uploader.js';
 import log from '../lib/log/logger.js';
 import { Database } from '../lib/model/database.js';
-import { LicenseData } from '../lib/model/marketplace/license.js';
+import { LicenseData } from '../lib/model/license.js';
 import { RawTransaction } from '../lib/model/marketplace/raw.js';
 
 const args = process.argv.slice(2);

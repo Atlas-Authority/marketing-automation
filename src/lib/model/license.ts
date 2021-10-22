@@ -1,6 +1,6 @@
 import * as assert from 'assert';
-import { ContactInfo, getContactInfo, getPartnerInfo, maybeGetContactInfo, PartnerInfo } from "./common.js";
-import { RawLicense } from "./raw.js";
+import { ContactInfo, getContactInfo, getPartnerInfo, maybeGetContactInfo, PartnerInfo } from "./marketplace/common.js";
+import { RawLicense } from "./marketplace/raw.js";
 
 type AttributionData = {
   channel: string;

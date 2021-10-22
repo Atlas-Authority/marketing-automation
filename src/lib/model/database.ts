@@ -4,13 +4,13 @@ import { Uploader } from "../io/uploader/uploader.js";
 import { MultiDownloadLogger } from "../log/download-logger.js";
 import log from "../log/logger.js";
 import { makeEmailValidationRegex, makeMultiProviderDomainsSet } from "../services/domains.js";
-import { CompanyManager } from "./hubspot/company.js";
-import { ContactManager } from "./hubspot/contact.js";
-import { DealManager } from "./hubspot/deal.js";
+import { CompanyManager } from "./company.js";
+import { ContactManager } from "./contact.js";
+import { DealManager } from "./deal.js";
 import { Entity } from "./hubspot/entity.js";
-import { License } from "./marketplace/license.js";
-import { Transaction } from "./marketplace/transaction.js";
+import { License } from "./license.js";
 import { validateMarketplaceData } from "./marketplace/validation.js";
+import { Transaction } from "./transaction.js";
 
 export class Database {
 
