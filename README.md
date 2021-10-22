@@ -110,12 +110,12 @@ After running the engine, to test logic *after* the Scoring Engine runs, pass `-
 
        * Run complex scoring based on email, domain, company name, company address, tech name, and tech phone, to see if both licenses were done by the same contact.
 
-    3. Now that we have a list of score between License 1 and License 2, for every possible license within the same "product" group, we group them into probably-related groups over a given score threshold.
+    4. Now that we have a list of score between License 1 and License 2, for every possible license within the same "product" group, we group them into probably-related groups over a given score threshold.
 
        Given the following table:
 
        | L1  | L2  | Score |
-       |-----|-----|-------|
+       | --- | --- | ----- |
        | `a` | `b` | 50    |
        | `a` | `c` | 50    |
        | `b` | `c` | 30    |
@@ -158,7 +158,7 @@ After running the engine, to test logic *after* the Scoring Engine runs, pass `-
 
     Then we update all of these in Hubspot again as needed.
 
-  9. **Generate Deals.**
+9. **Generate Deals.**
 
      The final step is to generate deals from the given matches.
  
