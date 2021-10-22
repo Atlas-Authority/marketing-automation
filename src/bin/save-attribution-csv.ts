@@ -1,15 +1,15 @@
-import CachedFileDownloader from '../lib/io/downloader/cached-file-downloader.js';
-import { downloadAllData } from '../lib/io/downloader/download-initial-data.js';
-import { isPresent, sorter } from '../lib/util/helpers.js';
 import { saveForInspection } from '../lib/cache/inspection.js';
+import CachedFileDownloader from '../lib/io/downloader/cached-file-downloader.js';
+import ConsoleUploader from '../lib/io/uploader/console-uploader.js';
+import { Database } from '../lib/model/database.js';
+import { isPresent, sorter } from '../lib/util/helpers.js';
 
-const data = await downloadAllData({
-  downloader: new CachedFileDownloader()
-});
+const db = new Database(new CachedFileDownloader(), new ConsoleUploader({ verbose: true }));
+await db.downloadAllData();
 
-const attributions = (data
-  .allLicenses
-  .map(l => l.attribution)
+const attributions = (db
+  .licenses
+  .map(l => l.data.attribution)
   .filter(isPresent)
 );
 

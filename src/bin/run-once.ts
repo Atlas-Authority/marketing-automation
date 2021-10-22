@@ -1,5 +1,5 @@
-import runEngine from "../lib/engine/engine.js";
 import { getCliOptions } from "../lib/cli/index.js";
+import runEngine from "../lib/engine/engine.js";
 
 const { downloader, uploader } = getCliOptions();
 

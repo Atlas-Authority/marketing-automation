@@ -1,12 +1,13 @@
-import { Deal } from '../../types/deal.js';
-import { License, LicenseContext } from '../../types/license.js';
-import { Transaction } from '../../types/transaction.js';
 import { DealStage } from '../../config/index.js';
-import { isPresent, sorter } from '../../util/helpers.js';
 import log from '../../log/logger.js';
+import { Deal, DealData } from '../../model/hubspot/deal.js';
+import { License } from '../../model/marketplace/license.js';
+import { Transaction } from '../../model/marketplace/transaction.js';
+import { isPresent, sorter } from '../../util/helpers.js';
+import { LicenseContext } from '../license-matching/license-grouper.js';
 import { DealFinder } from './deal-finder.js';
 import { DealRelevantEvent, EvalEvent, PurchaseEvent, RefundEvent, RenewalEvent, UpgradeEvent } from "./events.js";
-import { dealCreationProperties, dealUpdateProperties, getDate } from './records.js';
+import { dealCreationProperties, updateDeal } from './records.js';
 
 export class ActionGenerator {
 
@@ -33,7 +34,7 @@ export class ActionGenerator {
     if (!deal) {
       return makeCreateAction(event, latestLicense, DealStage.EVAL);
     }
-    else if (deal.properties.dealstage === DealStage.EVAL) {
+    else if (deal.isEval()) {
       return makeUpdateAction(event, deal, latestLicense, {});
     }
     else {
@@ -55,7 +56,7 @@ export class ActionGenerator {
     if (!deal) {
       return makeCreateAction(event, record, DealStage.CLOSED_WON);
     }
-    else if (deal.properties.dealstage === DealStage.EVAL) {
+    else if (deal.isEval()) {
       return makeUpdateAction(event, deal, record, { dealstage: DealStage.CLOSED_WON });
     }
     else {
@@ -74,7 +75,7 @@ export class ActionGenerator {
   private actionsForRefund(event: RefundEvent): Action[] {
     const deals = this.dealFinder.getDeals(event.refundedTxs);
     return (deals
-      .filter(deal => deal.properties.dealstage !== DealStage.CLOSED_LOST)
+      .filter(deal => deal.data.dealstage !== DealStage.CLOSED_LOST)
       .map(deal => {
         return makeUpdateAction(event, deal, null, { dealstage: DealStage.CLOSED_LOST })
       })
@@ -87,14 +88,14 @@ export class ActionGenerator {
 export type CreateDealAction = {
   type: 'create';
   groups: LicenseContext[];
-  properties: Deal['properties'];
+  properties: DealData;
 };
 
 export type UpdateDealAction = {
   type: 'update';
   groups: LicenseContext[];
   deal: Deal;
-  properties: Partial<Deal['properties']>;
+  properties: Partial<DealData>;
 };
 
 export type IgnoreDealAction = {
@@ -113,11 +114,11 @@ function makeCreateAction(event: DealRelevantEvent, record: License | Transactio
   };
 }
 
-function makeUpdateAction(event: DealRelevantEvent, deal: Deal, record: License | Transaction | null, properties: Partial<Deal['properties']>): Action {
-  const combinedProperties = (record ? dealUpdateProperties(deal, record) : {});
-  Object.assign(combinedProperties, properties);
-
-  if (Object.keys(combinedProperties).length === 0) {
+function makeUpdateAction(event: DealRelevantEvent, deal: Deal, record: License | Transaction | null, properties: Partial<DealData>): Action {
+  if (record) {
+    updateDeal(deal, record);
+  }
+  if (!deal.hasPropertyChanges()) {
     return makeIgnoreAction(event, deal, 'No properties to update');
   }
 
@@ -125,7 +126,7 @@ function makeUpdateAction(event: DealRelevantEvent, deal: Deal, record: License 
     type: 'update',
     groups: event.groups,
     deal,
-    properties: combinedProperties,
+    properties: deal.getPropertyChanges(),
   };
 }
 
@@ -138,5 +139,5 @@ function makeIgnoreAction(event: DealRelevantEvent, deal: Deal, reason: string):
 function getLatestRecord(event: PurchaseEvent): License | Transaction {
   const records: (License | Transaction)[] = [...event.licenses];
   if (event.transaction) records.push(event.transaction);
-  return records.sort(sorter(getDate, 'DSC'))[0];
+  return records.sort(sorter(item => item.data.maintenanceStartDate, 'DSC'))[0];
 }

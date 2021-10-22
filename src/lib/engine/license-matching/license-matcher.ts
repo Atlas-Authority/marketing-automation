@@ -1,33 +1,30 @@
-import { Contact } from '../types/contact.js';
-import { License } from '../types/license.js';
+import { Database } from '../../model/database.js';
+import { License } from '../../model/marketplace/license.js';
 import { SimilarityScorer } from './similarity-scorer.js';
 
 export class LicenseMatcher {
 
   similarityScorer = new SimilarityScorer();
 
-  constructor(private providerDomains: Set<string>, private contacts: { [key: string]: Contact }) {
-    this.providerDomains = providerDomains;
-    this.contacts = contacts;
-  }
+  constructor(private db: Database) { }
 
   score(license1: License, license2: License): null | { item1: string, item2: string, score: number, reasons: string[] } {
-    const item1 = license1.addonLicenseId;
-    const item2 = license2.addonLicenseId;
+    const item1 = license1.data.addonLicenseId;
+    const item2 = license2.data.addonLicenseId;
 
-    const techEmail1 = license1.contactDetails.technicalContact.email;
-    const techEmail2 = license2.contactDetails.technicalContact.email;
+    const techEmail1 = license1.data.technicalContact.email;
+    const techEmail2 = license2.data.technicalContact.email;
 
-    const billingEmail1 = license1.contactDetails.billingContact?.email;
-    const billingEmail2 = license2.contactDetails.billingContact?.email;
+    const billingEmail1 = license1.data.billingContact?.email;
+    const billingEmail2 = license2.data.billingContact?.email;
 
-    const contact1 = this.contacts[techEmail1];
-    const contact2 = this.contacts[techEmail2];
+    const contact1 = this.db.contactManager.getByEmail(techEmail1);
+    const contact2 = this.db.contactManager.getByEmail(techEmail2);
 
     // Skip if over 90 days apart
     const dateGap = dateDiff(
-      license1.maintenanceStartDate, license1.maintenanceEndDate,
-      license2.maintenanceStartDate, license2.maintenanceEndDate
+      license1.data.maintenanceStartDate, license1.data.maintenanceEndDate,
+      license2.data.maintenanceStartDate, license2.data.maintenanceEndDate
     );
 
     if (dateGap > 90) {
@@ -72,7 +69,7 @@ export class LicenseMatcher {
     const [emailAddress1, domain1] = techEmail1.split('@');
     const [emailAddress2, domain2] = techEmail2.split('@');
 
-    if (!this.providerDomains.has(domain1)) {
+    if (!this.db.providerDomains.has(domain1)) {
       const domainScore = Math.round(30 * this.similarityScorer.score(0.80,
         domain1.toLowerCase(),
         domain2.toLowerCase(),
@@ -91,8 +88,8 @@ export class LicenseMatcher {
     }
 
     const addressScore = Math.round(80 * this.similarityScorer.score(0.90,
-      license1.contactDetails.technicalContact.address1?.toLowerCase(),
-      license2.contactDetails.technicalContact.address1?.toLowerCase(),
+      license1.data.technicalContact.address1?.toLowerCase(),
+      license2.data.technicalContact.address1?.toLowerCase(),
     ));
     if (addressScore) {
       score += addressScore;
@@ -100,8 +97,8 @@ export class LicenseMatcher {
     }
 
     const companyScore = Math.round(80 * this.similarityScorer.score(0.90,
-      license1.contactDetails.company?.toLowerCase(),
-      license2.contactDetails.company?.toLowerCase(),
+      license1.data.company?.toLowerCase(),
+      license2.data.company?.toLowerCase(),
     ));
     if (companyScore) {
       score += companyScore;
@@ -109,8 +106,8 @@ export class LicenseMatcher {
     }
 
     const techContactNameScore = Math.round(30 * this.similarityScorer.score(0.70,
-      license1.contactDetails.technicalContact.name?.toLowerCase(),
-      license2.contactDetails.technicalContact.name?.toLowerCase(),
+      license1.data.technicalContact.name?.toLowerCase(),
+      license2.data.technicalContact.name?.toLowerCase(),
     ));
     if (techContactNameScore) {
       score += techContactNameScore;
@@ -118,8 +115,8 @@ export class LicenseMatcher {
     }
 
     const techContactPhoneScore = Math.round(30 * this.similarityScorer.score(0.90,
-      license1.contactDetails.technicalContact.phone?.toLowerCase(),
-      license2.contactDetails.technicalContact.phone?.toLowerCase(),
+      license1.data.technicalContact.phone?.toLowerCase(),
+      license2.data.technicalContact.phone?.toLowerCase(),
     ));
     if (techContactPhoneScore) {
       score += techContactPhoneScore;

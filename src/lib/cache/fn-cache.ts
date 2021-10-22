@@ -1,7 +1,7 @@
 import v8 from "v8";
 import config from '../config/index.js';
-import * as datadir from './datadir.js';
 import log from '../log/logger.js';
+import * as datadir from './datadir.js';
 
 export function fnOrCache<T>(filename: string, fn: () => T): T {
   if (config.isProduction || config.isTest) return fn();

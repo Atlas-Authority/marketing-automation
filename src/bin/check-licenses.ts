@@ -1,13 +1,13 @@
-import CachedFileDownloader from '../lib/io/downloader/cached-file-downloader.js';
-import { downloadAllData } from '../lib/io/downloader/download-initial-data.js';
-import { buildContactsStructure } from '../lib/engine/contacts.js';
-import { olderThan90Days } from '../lib/engine/generate-deals.js';
-import { shorterLicenseInfo } from '../lib/engine/license-grouper.js';
-import { License } from '../lib/types/license.js';
-import { Transaction } from '../lib/types/transaction.js';
-import * as datadir from '../lib/cache/datadir.js';
 import * as fs from 'fs';
+import * as datadir from '../lib/cache/datadir.js';
+import { olderThan90Days } from '../lib/engine/deal-generator/generate-deals.js';
+import { shorterLicenseInfo } from '../lib/engine/license-matching/license-grouper.js';
+import CachedFileDownloader from '../lib/io/downloader/cached-file-downloader.js';
+import ConsoleUploader from '../lib/io/uploader/console-uploader.js';
 import log from '../lib/log/logger.js';
+import { Database } from '../lib/model/database.js';
+import { LicenseData } from '../lib/model/marketplace/license.js';
+import { RawTransaction } from '../lib/model/marketplace/raw.js';
 
 const args = process.argv.slice(2);
 
@@ -21,17 +21,14 @@ if (sens.length === 0 || !sens.every(sen => sen.length > 0)) {
 }
 
 if (sens.length === 1 && sens[0].endsWith('.json')) {
-  const ts: Transaction[] = JSON.parse(fs.readFileSync(sens[0], 'utf8'));
+  const ts: RawTransaction[] = JSON.parse(fs.readFileSync(sens[0], 'utf8'));
   sens = ts.map(t => t.addonLicenseId);
 }
 
-const data = await downloadAllData({
-  downloader: new CachedFileDownloader()
-});
+const db = new Database(new CachedFileDownloader(), new ConsoleUploader({ verbose: true }));
+await db.downloadAllData();
 
-const contactsByEmail = buildContactsStructure(data.allContacts);
-
-const ignored: (License & { reason: string })[][] = datadir.readJsonFile('out', 'ignored.json');
+const ignored: (LicenseData & { reason: string })[][] = datadir.readJsonFile('out', 'ignored.json');
 
 const matchedGroups: ReturnType<typeof shorterLicenseInfo>[][] = datadir.readJsonFile('out', 'matched-groups-all.json');
 
@@ -43,10 +40,10 @@ for (const sen of sens) {
 function check(sen: string) {
   if (sen.startsWith('SEN-')) sen = sen.slice(4);
 
-  const withWrongId = data.allLicenses.find(l => l.addonLicenseId !== sen && l.licenseId === 'SEN-' + sen);
+  const withWrongId = db.licenses.find(l => l.data.addonLicenseId !== sen && l.data.licenseId === 'SEN-' + sen);
   if (withWrongId) {
-    log.warn('Dev', sen, `Using addonLicenseId (${withWrongId.addonLicenseId}) instead of licenseId`);
-    sen = withWrongId.addonLicenseId;
+    log.warn('Dev', sen, `Using addonLicenseId (${withWrongId.data.addonLicenseId}) instead of licenseId`);
+    sen = withWrongId.data.addonLicenseId;
   }
 
   if (checkSEN(sen)) {
@@ -74,7 +71,7 @@ function check(sen: string) {
 }
 
 function checkSEN(sen: string) {
-  const foundDeal = data.allDeals.find(d => d.properties.addonLicenseId === sen);
+  const foundDeal = db.dealManager.getByAddonLicenseId(sen);
   if (foundDeal) {
     log.info('Dev', sen, 'Already has deal:', foundDeal.id);
     return true;
@@ -86,9 +83,9 @@ function checkSEN(sen: string) {
     return true;
   }
 
-  const ls = data.allLicenses.filter(l => l.addonLicenseId === sen);
-  const cs = ls.map(l => contactsByEmail[l.contactDetails.technicalContact.email]);
-  if (cs.some(c => c.contact_type === 'Partner')) {
+  const ls = db.licenses.filter(l => l.data.addonLicenseId === sen);
+  const cs = ls.map(l => db.contactManager.getByEmail(l.data.technicalContact.email));
+  if (cs.some(c => c && c.data.contactType === 'Partner')) {
     log.info('Dev', sen, 'Contact is Partner');
     return true;
   }

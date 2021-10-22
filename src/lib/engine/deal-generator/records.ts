@@ -1,180 +1,101 @@
 import assert from 'assert';
 import mustache from 'mustache';
-import { Deal } from '../../types/deal.js';
-import { License, LicenseContext } from '../../types/license.js';
-import { DealNameTemplateProperties, Transaction } from '../../types/transaction.js';
 import config, { DealStage, Pipeline } from '../../config/index.js';
+import { Deal, DealData } from '../../model/hubspot/deal.js';
+import { License } from '../../model/marketplace/license.js';
+import { Transaction } from '../../model/marketplace/transaction.js';
 import { isPresent, sorter } from "../../util/helpers.js";
-import { parseLicenseTier, parseTransactionTier, tierFromEvalOpportunity } from './tiers.js';
+import { LicenseContext } from '../license-matching/license-grouper.js';
 
 export function isEvalOrOpenSourceLicense(record: License) {
   return (
-    record.licenseType === 'EVALUATION' ||
-    record.licenseType === 'OPEN_SOURCE'
+    record.data.licenseType === 'EVALUATION' ||
+    record.data.licenseType === 'OPEN_SOURCE'
   );
-}
-
-export function isLicense(record: License | Transaction): record is License {
-  return 'maintenanceStartDate' in record;
-}
-
-export function isTransaction(record: License | Transaction): record is Transaction {
-  return 'transactionId' in record;
 }
 
 export function isPaidLicense(license: License) {
   return (
-    license.licenseType === 'ACADEMIC' ||
-    license.licenseType === 'COMMERCIAL' ||
-    license.licenseType === 'COMMUNITY' ||
-    license.licenseType === 'DEMONSTRATION'
+    license.data.licenseType === 'ACADEMIC' ||
+    license.data.licenseType === 'COMMERCIAL' ||
+    license.data.licenseType === 'COMMUNITY' ||
+    license.data.licenseType === 'DEMONSTRATION'
   );
-}
-
-export function getDate(record: License | Transaction) {
-  return isLicense(record)
-    ? record.maintenanceStartDate
-    : record.purchaseDetails.maintenanceStartDate;
-}
-
-export function getLicenseType(record: License | Transaction) {
-  return isLicense(record)
-    ? record.licenseType
-    : record.purchaseDetails.licenseType;
 }
 
 export function getLicense(addonLicenseId: string, groups: LicenseContext[]) {
   const license = (groups
     .map(g => g.license)
-    .sort(sorter(l => l.maintenanceStartDate, 'DSC'))
-    .find(l => l.addonLicenseId === addonLicenseId));
+    .sort(sorter(l => l.data.maintenanceStartDate, 'DSC'))
+    .find(l => l.data.addonLicenseId === addonLicenseId));
   assert.ok(license);
   return license;
 }
 
-function getTier(record: License | Transaction) {
-  return (isTransaction(record)
-    ? parseTransactionTier(record.purchaseDetails.tier)
-    : Math.max(
-      tierFromEvalOpportunity(record.evaluationOpportunitySize),
-      parseLicenseTier(record.tier)
-    )
-  );
-}
-
 export function abbrRecordDetails(record: Transaction | License) {
-  return (isLicense(record)
-    ? {
-      hosting: record.hosting,
-      sen: record.addonLicenseId,
-      date: record.maintenanceStartDate,
-      type: record.licenseType,
-    }
-    : {
-      hosting: record.purchaseDetails.hosting,
-      sen: record.addonLicenseId,
-      date: record.purchaseDetails.maintenanceStartDate,
-      type: record.purchaseDetails.licenseType,
-      sale: record.purchaseDetails.saleType,
-      at: record.transactionId,
-      amt: record.purchaseDetails.vendorAmount,
-    });
-}
-
-export function dealCreationProperties(record: License | Transaction, dealstage: string): Deal['properties'] {
-  const dealNameTemplateProperties: DealNameTemplateProperties = (isLicense(record)
-    ? {
-      addonKey: record.addonKey,
-      addonName: record.addonName,
-      hosting: record.hosting,
-      licenseType: record.licenseType,
-      tier: record.tier,
-      company: record.contactDetails.company,
-      country: record.contactDetails.country,
-      region: record.contactDetails.region,
-      technicalContactEmail: record.contactDetails.technicalContact.email,
-    }
-    : {
-      addonKey: record.addonKey,
-      addonName: record.addonName,
-      hosting: record.purchaseDetails.hosting,
-      licenseType: record.purchaseDetails.licenseType,
-      tier: record.purchaseDetails.tier,
-      company: record.customerDetails.company,
-      country: record.customerDetails.country,
-      region: record.customerDetails.region,
-      technicalContactEmail: record.customerDetails.technicalContact.email,
-    }
-  );
-
   return {
-    ...(isLicense(record)
-      ? { addonLicenseId: record.addonLicenseId, transactionId: '' }
-      : { transactionId: record.transactionId, addonLicenseId: '' }),
-    closedate: (isLicense(record)
-      ? record.maintenanceStartDate
-      : record.purchaseDetails.maintenanceStartDate),
-    deployment: (isLicense(record)
-      ? record.hosting
-      : record.purchaseDetails.hosting),
-    aa_app: record.addonKey,
-    license_tier: getTier(record).toFixed(),
-    country: (isLicense(record)
-      ? record.contactDetails.country
-      : record.customerDetails.country),
-    origin: config.constants.dealOrigin,
-    related_products: config.constants.dealRelatedProducts,
-    dealname: mustache.render(config.constants.dealDealName, dealNameTemplateProperties),
-    dealstage,
-    pipeline: Pipeline.AtlassianMarketplace,
-    amount: (dealstage === DealStage.EVAL
-      ? ''
-      : isLicense(record)
-        ? '0'
-        : record.purchaseDetails.vendorAmount.toString()),
+    hosting: record.data.hosting,
+    sen: record.data.addonLicenseId,
+    date: record.data.maintenanceStartDate,
+    type: record.data.licenseType,
+    ...(record instanceof Transaction && {
+      sale: record.data.saleType,
+      at: record.data.transactionId,
+      amt: record.data.vendorAmount,
+    }),
   };
 }
 
-export function dealUpdateProperties(deal: Deal, record: License | Transaction): Partial<Deal['properties']> {
-  const properties: Partial<Deal['properties']> = {};
+export function dealCreationProperties(record: License | Transaction, dealstage: string): DealData {
+  const dealNameTemplateProperties = {
+    ...record.data,
+    technicalContactEmail: record.data.technicalContact.email,
+  };
 
-  if (isTransaction(record)) {
-    if (deal.properties.transactionId !== record.transactionId) properties.transactionId = record.transactionId;
-    if (deal.properties.addonLicenseId !== '') properties.addonLicenseId = '';
+  return {
+    ...(record instanceof License
+      ? { addonLicenseId: record.data.addonLicenseId, transactionId: '' }
+      : { transactionId: record.data.transactionId, addonLicenseId: '' }),
+    closeDate: record.data.maintenanceStartDate,
+    deployment: record.data.hosting,
+    aaApp: record.data.addonKey,
+    licenseTier: record.tier,
+    country: record.data.country,
+    origin: config.constants.dealOrigin,
+    relatedProducts: config.constants.dealRelatedProducts,
+    dealName: mustache.render(config.constants.dealDealName, dealNameTemplateProperties),
+    dealstage,
+    pipeline: Pipeline.AtlassianMarketplace,
+    amount: (dealstage === DealStage.EVAL
+      ? null
+      : record instanceof License
+        ? 0
+        : record.data.vendorAmount),
+  };
+}
+
+export function updateDeal(deal: Deal, record: License | Transaction) {
+  if (record instanceof Transaction) {
+    deal.data.transactionId = record.data.transactionId;
+    deal.data.addonLicenseId = null;
   }
   else {
-    if (deal.properties.addonLicenseId !== record.addonLicenseId) properties.addonLicenseId = record.addonLicenseId;
-    if (deal.properties.transactionId !== '') properties.transactionId = '';
+    deal.data.addonLicenseId = record.data.addonLicenseId;
+    deal.data.transactionId = null;
   }
 
-  const oldAmount = deal.properties.amount;
-  const newAmount = (isTransaction(record) ? record.purchaseDetails.vendorAmount.toString() : oldAmount);
-  if (newAmount !== oldAmount) properties.amount = newAmount;
+  if (record instanceof Transaction) {
+    deal.data.amount = record.data.vendorAmount;
+  }
 
-  const oldCloseDate = deal.properties.closedate;
-  const newCloseDate = getDate(record);
-  if (newCloseDate !== oldCloseDate) properties.closedate = newCloseDate;
-
-  const oldTier = +deal.properties.license_tier;
-  const newTier = getTier(record);
-  if (newTier > oldTier) properties.license_tier = newTier.toFixed();
-
-  return properties;
+  deal.data.closeDate = record.data.maintenanceStartDate;
+  deal.data.licenseTier = Math.max(deal.data.licenseTier, record.tier);
 }
 
 export function getEmails(item: Transaction | License) {
-  if ('contactDetails' in item) {
-    return [
-      item.contactDetails.technicalContact.email,
-      item.contactDetails.billingContact?.email,
-      item.partnerDetails?.billingContact.email,
-    ].filter(isPresent);
-  }
-  else {
-    return [
-      item.customerDetails.technicalContact.email,
-      item.customerDetails.billingContact?.email,
-      item.partnerDetails?.billingContact.email,
-    ].filter(isPresent);
-  }
+  return [
+    item.data.technicalContact.email,
+    item.data.billingContact?.email,
+    item.data.partnerDetails?.billingContact.email,
+  ].filter(isPresent);
 }

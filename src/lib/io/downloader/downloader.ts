@@ -1,22 +1,18 @@
-import { Company } from "../../types/company.js";
-import { Contact } from "../../types/contact.js";
-import { Deal } from "../../types/deal.js";
-import { RawLicense, RawTransaction } from "../../types/marketplace.js";
+import { RawLicense, RawTransaction } from "../../model/marketplace/raw";
+import { EntityKind, FullEntity } from "../hubspot.js";
 
-export interface DownloadLogger {
-  prepare(count: number): void;
-  tick(moreInfo?: string): void;
+export interface Progress {
+  setCount: (count: number) => void;
+  tick: (range: string) => void;
 }
 
 export interface Downloader {
-  downloadFreeEmailProviders(downloadLogger: DownloadLogger): Promise<string[]>;
-  downloadAllTlds(downloadLogger: DownloadLogger): Promise<string[]>;
+  downloadHubspotEntities(progress: Progress, kind: EntityKind, apiProperties: string[], inputAssociations: string[]): Promise<FullEntity[]>;
 
-  downloadTransactions(downloadLogger: DownloadLogger): Promise<RawTransaction[]>;
-  downloadLicensesWithoutDataInsights(downloadLogger: DownloadLogger): Promise<RawLicense[]>;
-  downloadLicensesWithDataInsights(downloadLogger: DownloadLogger): Promise<RawLicense[]>;
+  downloadFreeEmailProviders(progress: Progress): Promise<string[]>;
+  downloadAllTlds(progress: Progress): Promise<string[]>;
 
-  downloadAllDeals(downloadLogger: DownloadLogger): Promise<Deal[]>;
-  downloadAllContacts(downloadLogger: DownloadLogger): Promise<Contact[]>;
-  downloadAllCompanies(downloadLogger: DownloadLogger): Promise<Company[]>;
+  downloadTransactions(progress: Progress): Promise<RawTransaction[]>;
+  downloadLicensesWithoutDataInsights(progress: Progress): Promise<RawLicense[]>;
+  downloadLicensesWithDataInsights(progress: Progress): Promise<RawLicense[]>;
 }

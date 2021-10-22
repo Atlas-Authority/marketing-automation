@@ -1,8 +1,8 @@
 import csvStringify from 'csv-stringify/lib/es5/sync.js';
 import flatten from 'flat';
 import config from '../config/index.js';
-import * as datadir from './datadir.js';
 import log from '../log/logger.js';
+import * as datadir from './datadir.js';
 
 function saveArrayToCsv(filename: string, array: any[]) {
   if (config.isProduction || config.isTest) return;
@@ -18,7 +18,7 @@ function saveArrayToCsv(filename: string, array: any[]) {
   log.info('Dev', 'Saved data to:', filename);
 }
 
-export function saveToJson(filename: string, object: unknown) {
+function saveToJson(filename: string, object: unknown) {
   if (config.isProduction || config.isTest) return;
 
   const out = JSON.stringify(object, null, 2);
