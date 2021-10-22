@@ -43,7 +43,7 @@ export default class Hubspot {
           body.message === 'internal error'
         )
       ) {
-        throw new SimpleError('Hubspot v3 API had internal error.');
+        throw new SimpleError(`Hubspot v3 API for "${kind}" had internal error.`);
       }
       else {
         throw new Error(`Failed downloading ${kind}s: ${JSON.stringify(body)}`);
