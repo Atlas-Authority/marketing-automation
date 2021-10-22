@@ -23,7 +23,7 @@ export type DealData = {
   country: string;
   dealName: string;
   origin: string;
-  deployment: 'Server' | 'Cloud' | 'Data Center' | 'Multiple';
+  deployment: 'Server' | 'Cloud' | 'Data Center';
   licenseTier: number;
   pipeline: Pipeline;
   dealstage: DealStage;

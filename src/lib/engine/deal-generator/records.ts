@@ -90,10 +90,6 @@ export function updateDeal(deal: Deal, record: License | Transaction) {
 
   deal.data.closeDate = record.data.maintenanceStartDate;
   deal.data.licenseTier = Math.max(deal.data.licenseTier, record.tier);
-
-  if (deal.data.deployment !== record.data.hosting) {
-    deal.data.deployment = 'Multiple';
-  }
 }
 
 export function getEmails(item: Transaction | License) {
