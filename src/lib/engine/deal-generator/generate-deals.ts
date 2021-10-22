@@ -10,12 +10,12 @@ import { EventGenerator } from './events.js';
 import { getEmails } from './records.js';
 
 export function generateDeals(db: Database, matches: RelatedLicenseSet[]) {
-  const generator = new DealActionGenerator(db);
+  const generator = new DealGenerator(db);
   generator.run(matches);
 }
 
 /** Generates deal actions based on match data */
-class DealActionGenerator {
+class DealGenerator {
 
   actionGenerator: ActionGenerator;
 
