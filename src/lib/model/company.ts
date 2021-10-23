@@ -38,6 +38,4 @@ export class CompanyManager extends EntityManager<CompanyData, Company> {
   override identifiers: (keyof CompanyData)[] = [
   ];
 
-  override addIndexes(companies: Iterable<Company>, full: boolean) { }
-
 }
