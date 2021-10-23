@@ -7,6 +7,7 @@ import { ContactGenerator } from './contacts/generate-contacts.js';
 import { updateContactsBasedOnMatchResults } from './contacts/update-contacts.js';
 import { DealGenerator } from './deal-generator/generate-deals.js';
 import { matchIntoLikelyGroups } from './license-matching/license-grouper.js';
+import { printSummary } from './summary.js';
 
 export default async function runEngine({ downloader, uploader }: {
   downloader: Downloader,
@@ -52,6 +53,8 @@ export default async function runEngine({ downloader, uploader }: {
 
   log.step('Upserting deals in Hubspot');
   await db.syncUpAllEntities();
+
+  printSummary(db);
 
   log.step('Done!');
 }
