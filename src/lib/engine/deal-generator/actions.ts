@@ -30,7 +30,10 @@ export class ActionGenerator {
     const deal = this.dealManager.getDealForRecord(event.licenses);
     const latestLicense = event.licenses[event.licenses.length - 1];
     if (!deal) {
-      return makeCreateAction(event, latestLicense, DealStage.EVAL);
+      return makeCreateAction(event, latestLicense,
+        latestLicense.active
+          ? DealStage.EVAL
+          : DealStage.CLOSED_LOST);
     }
     else if (deal.isEval()) {
       return makeUpdateAction(event, deal, latestLicense);

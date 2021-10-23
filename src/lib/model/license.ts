@@ -59,6 +59,7 @@ export class License {
 
   public data: LicenseData;
   public tier: number;
+  public active: boolean;
 
   constructor(rawLicense: RawLicense) {
     let newEvalData: NewEvalData | null = null;
@@ -114,6 +115,7 @@ export class License {
     };
 
     this.tier = Math.max(this.parseTier(), this.tierFromEvalOpportunity());
+    this.active = this.data.status === 'active';
   }
 
   private parseTier() {
