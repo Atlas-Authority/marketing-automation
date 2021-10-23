@@ -20,6 +20,9 @@ export abstract class EntityManager<
     private db: EntityDatabase
   ) { }
 
+  public createdCount = 0;
+  public updatedCount = 0;
+
   protected abstract Entity: new (db: EntityDatabase, id: string | null, props: P, associations: Set<RelativeAssociation>) => E;
   protected abstract kind: EntityKind;
   protected abstract associations: EntityKind[];
@@ -140,6 +143,9 @@ export abstract class EntityManager<
         }
       }
     }
+
+    this.createdCount += toCreate.length;
+    this.updatedCount += toUpdate.length;
   }
 
   private async syncUpAllEntitiesAssociations() {
