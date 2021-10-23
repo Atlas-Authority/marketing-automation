@@ -33,6 +33,7 @@
       "args": [
         "--downloader=cached",
         "--uploader=console",
+        "--loglevel=info",
       ],
       "type": "pwa-node",
       "outFiles": [
