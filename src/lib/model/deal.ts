@@ -111,8 +111,8 @@ export class DealManager extends EntityManager<DealData, Deal> {
     'transactionId',
   ];
 
-  private dealsByAddonLicenseId = new Map<string, Deal>();
-  private dealsByTransactionId = new Map<string, Deal>();
+  private dealsByAddonLicenseId = this.makeIndex(d => [d.data.addonLicenseId].filter(isPresent));
+  private dealsByTransactionId = this.makeIndex(d => [d.data.transactionId].filter(isPresent));
 
   getByAddonLicenseId(id: string) {
     return this.dealsByAddonLicenseId.get(id);
@@ -120,21 +120,6 @@ export class DealManager extends EntityManager<DealData, Deal> {
 
   getByTransactionId(id: string) {
     return this.dealsByTransactionId.get(id);
-  }
-
-  override addIndexes(deals: Iterable<Deal>, full: boolean) {
-    if (full) {
-      this.dealsByAddonLicenseId.clear();
-      this.dealsByTransactionId.clear();
-    }
-    for (const deal of deals) {
-      if (deal.data.addonLicenseId) {
-        this.dealsByAddonLicenseId.set(deal.data.addonLicenseId, deal);
-      }
-      if (deal.data.transactionId) {
-        this.dealsByTransactionId.set(deal.data.transactionId, deal);
-      }
-    }
   }
 
   getDealForRecord(records: (License | Transaction)[]) {

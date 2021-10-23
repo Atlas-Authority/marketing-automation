@@ -120,23 +120,14 @@ export class ContactManager extends EntityManager<ContactData, Contact> {
     'email',
   ];
 
-  private contactsByEmail = new Map<string, Contact>();
+  private contactsByEmail = this.makeIndex(c => c.allEmails);
 
   getByEmail(email: string) {
     return this.contactsByEmail.get(email);
   }
 
-  override addIndexes(contacts: Iterable<Contact>, full: boolean) {
-    if (full) this.contactsByEmail.clear();
-    for (const contact of contacts) {
-      for (const email of contact.allEmails) {
-        this.contactsByEmail.set(email, contact);
-      }
-    }
-  }
-
   removeExternallyCreatedContacts() {
-    for (const contact of this.entitiesById.values()) {
+    for (const contact of this.entities) {
       if (contact.data.email && contact.data.contactType) return;
       this.entitiesById.delete(contact.guaranteedId());
       for (const email of contact.allEmails) {

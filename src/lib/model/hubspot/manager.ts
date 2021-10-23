@@ -28,11 +28,11 @@ export abstract class EntityManager<
   protected abstract fromAPI(data: { [key: string]: string | null }): P | null;
   protected abstract toAPI: PropertyTransformers<P>;
 
-  public abstract addIndexes(entities: Iterable<E>, full: boolean): void;
+  private indexes: Index<E>[] = [];
 
   protected abstract identifiers: (keyof P)[];
 
-  protected entitiesById = new Map<string, E>();
+  protected entitiesById = this.makeIndex(e => e.id ? [e.id] : []);
   protected entities: E[] = [];
 
   public async downloadAllEntities(progress: Progress) {
@@ -49,16 +49,20 @@ export abstract class EntityManager<
 
       const entity = new this.Entity(this.db, raw.id, props, associations);
       this.entities.push(entity);
-      this.entitiesById.set(entity.guaranteedId(), entity);
     }
 
-    this.addIndexes(this.entities, true);
+    for (const index of this.indexes) {
+      index.clear();
+      index.addIndexesFor(this.entities);
+    }
   }
 
   public create(props: P) {
     const e = new this.Entity(this.db, null, props, new Set());
     this.entities.push(e);
-    this.addIndexes([e], false);
+    for (const index of this.indexes) {
+      index.addIndexesFor([e]);
+    }
     return e;
   }
 
@@ -77,7 +81,10 @@ export abstract class EntityManager<
   public async syncUpAllEntities() {
     await this.syncUpAllEntitiesProperties();
     await this.syncUpAllEntitiesAssociations();
-    this.addIndexes(this.entities, true);
+    for (const index of this.indexes) {
+      index.clear();
+      index.addIndexesFor(this.entities);
+    }
   }
 
   private async syncUpAllEntitiesProperties() {
@@ -113,7 +120,6 @@ export abstract class EntityManager<
 
           assert.ok(found);
           e.id = found.id;
-          this.entitiesById.set(found.id, e);
         }
       }
     }
@@ -187,6 +193,41 @@ export abstract class EntityManager<
       if (newKey) properties[newKey] = newVal;
     }
     return properties;
+  }
+
+  protected makeIndex(keysFor: (e: E) => string[]): ReadonlyIndex<E> {
+    const index = new Index(keysFor);
+    this.indexes.push(index);
+    return index;
+  }
+
+}
+
+type ReadonlyIndex<T> = Pick<Index<T>, 'get' | 'delete'>;
+
+class Index<E> {
+
+  private map = new Map<string, E>();
+  constructor(private keysFor: (e: E) => string[]) { }
+
+  clear() {
+    this.map.clear();
+  }
+
+  addIndexesFor(entities: Iterable<E>) {
+    for (const e of entities) {
+      for (const key of this.keysFor(e)) {
+        this.map.set(key, e);
+      }
+    }
+  }
+
+  get(key: string) {
+    return this.map.get(key);
+  }
+
+  delete(key: string) {
+    return this.map.delete(key);
   }
 
 }
