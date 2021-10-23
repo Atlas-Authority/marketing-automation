@@ -22,10 +22,10 @@ export type RelatedLicenseSet = LicenseContext[];
 
 export function matchIntoLikelyGroups(db: Database): RelatedLicenseSet[] {
   log.info('Scoring Engine', 'Storing licenses/transactions by id');
-  const itemsByAddonLicenseId: { [addonLicenseId: string]: LicenseContext } = buildMappingStructure(db);
+  const itemsByAddonLicenseId: Map<string, LicenseContext> = buildMappingStructure(db);
 
   log.info('Scoring Engine', 'Grouping licenses/transactions by hosting and addonKey');
-  const productGroupings: { addonKey: string; hosting: string; group: License[] }[] = groupMappingByProduct(itemsByAddonLicenseId);
+  const productGroupings: Iterable<{ addonKey: string; hosting: string; group: License[] }> = groupMappingByProduct(itemsByAddonLicenseId);
 
   const { maybeMatches, unaccounted } = fnOrCache('scorer.dat', () => {
     const scorer = new LicenseMatcher(db);
@@ -35,8 +35,8 @@ export function matchIntoLikelyGroups(db: Database): RelatedLicenseSet[] {
   saveForInspection('match-scores-all', maybeMatches
     .sort(sorter(m => m.score, 'DSC'))
     .map(m => [
-      { score: m.score, reasons: m.reasons.join(', '), ...shorterLicenseInfo(itemsByAddonLicenseId[m.item1].license) },
-      { score: m.score, reasons: m.reasons.join(', '), ...shorterLicenseInfo(itemsByAddonLicenseId[m.item2].license) },
+      { score: m.score, reasons: m.reasons.join(', '), ...shorterLicenseInfo(itemsByAddonLicenseId.get(m.item1)!.license) },
+      { score: m.score, reasons: m.reasons.join(', '), ...shorterLicenseInfo(itemsByAddonLicenseId.get(m.item2)!.license) },
     ])
   );
 
@@ -44,8 +44,8 @@ export function matchIntoLikelyGroups(db: Database): RelatedLicenseSet[] {
     .filter(m => m.score < 1000)
     .sort(sorter(m => m.score, 'DSC'))
     .map(m => [
-      { score: m.score, reasons: m.reasons.join(', '), ...shorterLicenseInfo(itemsByAddonLicenseId[m.item1].license) },
-      { score: m.score, reasons: m.reasons.join(', '), ...shorterLicenseInfo(itemsByAddonLicenseId[m.item2].license) },
+      { score: m.score, reasons: m.reasons.join(', '), ...shorterLicenseInfo(itemsByAddonLicenseId.get(m.item1)!.license) },
+      { score: m.score, reasons: m.reasons.join(', '), ...shorterLicenseInfo(itemsByAddonLicenseId.get(m.item2)!.license) },
     ])
   );
 
@@ -66,13 +66,13 @@ export function matchIntoLikelyGroups(db: Database): RelatedLicenseSet[] {
   saveForInspection('matched-groups-all',
     Array.from(new Set(Object.values(normalizedMatches)))
       .map(group => Array.from(group)
-        .map(id => shorterLicenseInfo(itemsByAddonLicenseId[id].license))
+        .map(id => shorterLicenseInfo(itemsByAddonLicenseId.get(id)!.license))
         .sort(sorter(l => l.start))));
 
   saveForInspection('matched-groups-to-check',
     Array.from(new Set(Object.values(normalizedMatches)))
       .map(group => Array.from(group)
-        .map(id => shorterLicenseInfo(itemsByAddonLicenseId[id].license))
+        .map(id => shorterLicenseInfo(itemsByAddonLicenseId.get(id)!.license))
         .sort(sorter(l => l.start)))
       .filter(group => (
         group.length > 1 &&
@@ -88,47 +88,52 @@ export function matchIntoLikelyGroups(db: Database): RelatedLicenseSet[] {
   return (
     Array.from(new Set(Object.values(normalizedMatches)))
       .map(group => Array.from(group)
-        .map(id => itemsByAddonLicenseId[id])
+        .map(id => itemsByAddonLicenseId.get(id)!)
         .sort(sorter(m => m.license.data.maintenanceStartDate)))
   );
 }
 
 function buildMappingStructure(db: Database) {
-  const mapping: {
-    [key: string]: {
-      license: License,
-      transactions: Transaction[],
-    }
-  } = {};
+  const mapping = new Map<string, {
+    license: License,
+    transactions: Transaction[],
+  }>();
 
   const oddTransactions: Transaction[] = [];
 
   for (const license of db.licenses) {
     const id = license.data.addonLicenseId;
-    assert.ok(!mapping[id], 'Expected license id to be unique.');
+    assert.ok(!mapping.get(id), 'Expected license id to be unique.');
 
-    mapping[id] = {
+    mapping.set(id, {
       transactions: [],
       license,
-    };
+    });
   }
 
   for (const transaction of db.transactions) {
     const id = transaction.data.addonLicenseId;
 
-    if (!mapping[id]) {
+    const group = mapping.get(id);
+    if (!group) {
       oddTransactions.push(transaction);
     }
     else {
-      mapping[id].transactions.push(transaction);
+      group.transactions.push(transaction);
     }
   }
 
-  const oddBalances: { [addonLicenseId: string]: { balance: number, tx: Transaction } } = {};
+  const oddBalances: {
+    [addonLicenseId: string]: {
+      balance: number,
+      tx: Transaction,
+    }
+  } = Object.create(null);
 
   for (const tx of oddTransactions) {
-    if (!oddBalances[tx.data.addonLicenseId]) oddBalances[tx.data.addonLicenseId] = { balance: 0, tx };
-    oddBalances[tx.data.addonLicenseId].balance += tx.data.purchasePrice;
+    const id = tx.data.addonLicenseId;
+    if (!oddBalances[id]) oddBalances[id] = { balance: 0, tx };
+    oddBalances[id].balance += tx.data.purchasePrice;
   }
 
   const badBalances = (Object.values(oddBalances)
@@ -143,23 +148,30 @@ function buildMappingStructure(db: Database) {
   return mapping;
 }
 
-function groupMappingByProduct(mapping: { [key: string]: LicenseContext }) {
-  const productMapping: { [addonKeyAndHosting: string]: { addonKey: string, hosting: string, group: License[] } } = {};
+function groupMappingByProduct(mapping: Map<string, LicenseContext>) {
+  const productMapping = new Map<
+    string, {
+      addonKey: string,
+      hosting: string,
+      group: License[],
+    }
+  >();
 
-  for (const [id, { license }] of Object.entries(mapping)) {
+  for (const [id, { license }] of mapping.entries()) {
     const addonKey = license.data.addonKey;
     const hosting = license.data.hosting;
     const key = `${addonKey} - ${hosting}`;
 
-    if (!productMapping[key]) productMapping[key] = { addonKey, hosting, group: [] };
-    productMapping[key].group.push(license);
+    let list = productMapping.get(key);
+    if (!list) productMapping.set(key, list = { addonKey, hosting, group: [] });
+    list.group.push(license);
   }
 
-  return Object.values(productMapping);
+  return productMapping.values();
 }
 
 /** Score how likely each license is connected to another license. */
-function scoreLicenseMatches(productGroupings: { addonKey: string; hosting: string; group: License[] }[], scorer: LicenseMatcher) {
+function scoreLicenseMatches(productGroupings: Iterable<{ addonKey: string; hosting: string; group: License[] }>, scorer: LicenseMatcher) {
   log.info('Scoring Engine', 'Preparing license-matching jobs within [addonKey + hosting] groups');
 
   const maybeMatches: { score: number, item1: string, item2: string, reasons: string[] }[] = [];
