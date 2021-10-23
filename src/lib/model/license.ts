@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import { ContactInfo, getContactInfo, getPartnerInfo, maybeGetContactInfo, PartnerInfo } from "./marketplace/common.js";
+import { AddonLicenseId, ContactInfo, getContactInfo, getPartnerInfo, maybeGetContactInfo, PartnerInfo } from "./marketplace/common.js";
 import { RawLicense } from "./marketplace/raw.js";
 
 type AttributionData = {
@@ -27,7 +27,7 @@ type NewEvalData = {
 };
 
 export interface LicenseData {
-  addonLicenseId: string,
+  addonLicenseId: AddonLicenseId,
   licenseId: string,
   addonKey: string,
   addonName: string,
@@ -54,6 +54,8 @@ export interface LicenseData {
   parentInfo: ParentProductInfo | null,
   newEvalData: NewEvalData | null,
 }
+
+// event.groups.some(g => g.license.data.addonLicenseId === '3907452' || g.license.data.addonLicenseId === '3907453')
 
 export class License {
 

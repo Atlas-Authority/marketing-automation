@@ -4,6 +4,7 @@ import { saveForInspection } from '../../cache/inspection.js';
 import log from '../../log/logger.js';
 import { Database } from '../../model/database.js';
 import { License } from '../../model/license.js';
+import { AddonLicenseId } from '../../model/marketplace/common.js';
 import { Transaction } from '../../model/transaction.js';
 import { sorter } from '../../util/helpers.js';
 import { LicenseMatcher } from './license-matcher.js';
@@ -16,13 +17,10 @@ export type LicenseContext = {
 /** Related via the matching engine. */
 export type RelatedLicenseSet = LicenseContext[];
 
-// Server/DC licenses have separate trial licenses.
-// Cloud licenses do NOT have separate trial licenses; updated in place.
-
 
 export function matchIntoLikelyGroups(db: Database): RelatedLicenseSet[] {
   log.info('Scoring Engine', 'Storing licenses/transactions by id');
-  const itemsByAddonLicenseId: Map<string, LicenseContext> = buildMappingStructure(db);
+  const itemsByAddonLicenseId: Map<AddonLicenseId, LicenseContext> = buildMappingStructure(db);
 
   log.info('Scoring Engine', 'Grouping licenses/transactions by hosting and addonKey');
   const productGroupings: Iterable<{ addonKey: string; hosting: string; group: License[] }> = groupMappingByProduct(itemsByAddonLicenseId);
@@ -94,7 +92,7 @@ export function matchIntoLikelyGroups(db: Database): RelatedLicenseSet[] {
 }
 
 function buildMappingStructure(db: Database) {
-  const mapping = new Map<string, {
+  const mapping = new Map<AddonLicenseId, {
     license: License,
     transactions: Transaction[],
   }>();
@@ -148,14 +146,12 @@ function buildMappingStructure(db: Database) {
   return mapping;
 }
 
-function groupMappingByProduct(mapping: Map<string, LicenseContext>) {
-  const productMapping = new Map<
-    string, {
-      addonKey: string,
-      hosting: string,
-      group: License[],
-    }
-  >();
+function groupMappingByProduct(mapping: Map<AddonLicenseId, LicenseContext>) {
+  const productMapping = new Map<string, {
+    addonKey: string,
+    hosting: string,
+    group: License[],
+  }>();
 
   for (const [id, { license }] of mapping.entries()) {
     const addonKey = license.data.addonKey;
