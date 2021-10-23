@@ -1,12 +1,11 @@
 import * as assert from 'assert';
-import * as util from 'util';
 import { fnOrCache } from '../../cache/fn-cache.js';
 import { saveForInspection } from '../../cache/inspection.js';
 import log from '../../log/logger.js';
 import { Database } from '../../model/database.js';
 import { License } from '../../model/license.js';
 import { Transaction } from '../../model/transaction.js';
-import { groupBy, sorter } from '../../util/helpers.js';
+import { sorter } from '../../util/helpers.js';
 import { LicenseMatcher } from './license-matcher.js';
 
 export type LicenseContext = {
@@ -95,7 +94,14 @@ export function matchIntoLikelyGroups(db: Database): RelatedLicenseSet[] {
 }
 
 function buildMappingStructure(db: Database) {
-  const mapping: { [key: string]: { license: License, transactions: Transaction[], partnerLicense: boolean, partnerTransaction: boolean } } = {};
+  const mapping: {
+    [key: string]: {
+      license: License,
+      transactions: Transaction[],
+      partnerLicense: boolean,
+      partnerTransaction: boolean,
+    }
+  } = {};
 
   const oddTransactions: Transaction[] = [];
 
@@ -147,8 +153,6 @@ function buildMappingStructure(db: Database) {
     log.warn('Scoring Engine', "The following transactions have no accompanying licenses:",
       badBalances.map(([transaction, license]) => ({ transaction, license })));
   }
-
-  removeDuplicateTransactions(db.licenses, db.transactions);
 
   return Object.fromEntries(Object.entries(mapping)
     .filter(([, m]) => !m.partnerLicense && !m.partnerTransaction)
@@ -306,39 +310,6 @@ export function normalizeMatches(maybeMatches: { score: number, item1: string, i
   }
 
   return final;
-}
-
-function removeDuplicateTransactions(allLicenses: License[], allTransactions: Transaction[]) {
-  const groupedTransactions = groupBy(allTransactions,
-    t => `${t.data.transactionId}${t.data.addonKey}${t.data.hosting}${t.data.saleDate}`
-  )
-    .values();
-  const transactionsWithSameId = [...groupedTransactions].filter(m => m.length > 1);
-
-  for (const ts of transactionsWithSameId) {
-    for (let i1 = 0; i1 < ts.length; i1++) {
-      for (let i2 = i1 + 1; i2 < ts.length; i2++) {
-        const t1 = ts[i1];
-        const t2 = ts[i2];
-
-        const ls = allLicenses.filter(l => [t1.data.addonLicenseId, t2.data.addonLicenseId].includes(l.data.addonLicenseId));
-        const [l1, l2] = ls;
-
-        if (l1 && l2 && equalExceptIds(t1, t2) && equalExceptIds(l1, l2)) {
-          allTransactions.splice(allTransactions.indexOf(t1), 1);
-          allLicenses.splice(allLicenses.indexOf(l1), 1);
-        }
-      }
-    }
-  }
-}
-
-function equalExceptIds(a: License | Transaction, b: License | Transaction) {
-  if (a.data.licenseId == b.data.licenseId) return false;
-  if (a.data.addonLicenseId == b.data.addonLicenseId) return false;
-  const { addonLicenseId: ga1, licenseId: ga2, ...a1 } = a.data;
-  const { addonLicenseId: gb1, licenseId: gb2, ...b1 } = b.data;
-  return util.isDeepStrictEqual(a1, b1);
 }
 
 function timeAsMinutesSeconds(ns: bigint) {
