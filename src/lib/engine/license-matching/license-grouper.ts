@@ -98,8 +98,6 @@ function buildMappingStructure(db: Database) {
     [key: string]: {
       license: License,
       transactions: Transaction[],
-      partnerLicense: boolean,
-      partnerTransaction: boolean,
     }
   } = {};
 
@@ -109,14 +107,9 @@ function buildMappingStructure(db: Database) {
     const id = license.data.addonLicenseId;
     assert.ok(!mapping[id], 'Expected license id to be unique.');
 
-    const contact = db.contactManager.getByEmail(license.data.technicalContact.email);
-    assert.ok(contact, `No contact for: ${license.data.technicalContact.email}`);
-
     mapping[id] = {
       transactions: [],
       license,
-      partnerLicense: contact.isPartner,
-      partnerTransaction: false,
     };
   }
 
@@ -125,17 +118,10 @@ function buildMappingStructure(db: Database) {
 
     if (!mapping[id]) {
       oddTransactions.push(transaction);
-      continue;
     }
-
-    const contact = db.contactManager.getByEmail(transaction.data.technicalContact.email);
-    assert.ok(contact, 'No contact');
-
-    if (contact.isPartner) {
-      mapping[id].partnerTransaction = true;
+    else {
+      mapping[id].transactions.push(transaction);
     }
-
-    mapping[id].transactions.push(transaction);
   }
 
   const oddBalances: { [addonLicenseId: string]: { balance: number, tx: Transaction } } = {};
@@ -154,13 +140,7 @@ function buildMappingStructure(db: Database) {
       badBalances.map(([transaction, license]) => ({ transaction, license })));
   }
 
-  return Object.fromEntries(Object.entries(mapping)
-    .filter(([, m]) => !m.partnerLicense && !m.partnerTransaction)
-    .map(([id, { license, transactions }]) => [
-      id,
-      { license, transactions },
-    ])
-  );
+  return mapping;
 }
 
 function groupMappingByProduct(mapping: { [key: string]: LicenseContext }) {
