@@ -27,7 +27,7 @@ export default async function runEngine({ downloader, uploader }: {
   await db.syncUpAllEntities();
 
   log.step('Generating contacts');
-  new ContactGenerator(db).run()
+  new ContactGenerator(db).run();
 
   log.step('Removing externally created contacts from rest of engine run');
   db.contactManager.removeExternallyCreatedContacts();

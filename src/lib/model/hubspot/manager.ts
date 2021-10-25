@@ -31,12 +31,11 @@ export abstract class EntityManager<
   protected abstract fromAPI(data: { [key: string]: string | null }): P | null;
   protected abstract toAPI: PropertyTransformers<P>;
 
-  private indexes: Index<E>[] = [];
-
   protected abstract identifiers: (keyof P)[];
 
-  protected entitiesById = this.makeIndex(e => e.id ? [e.id] : []);
-  protected entities: E[] = [];
+  private entities: E[] = [];
+  private indexes: Index<E>[] = [];
+  private entitiesById = this.makeIndex(e => e.id ? [e.id] : []);
 
   public async downloadAllEntities(progress: Progress) {
     const data = await this.downloader.downloadHubspotEntities(progress, this.kind, this.apiProperties, this.associations);
@@ -67,6 +66,16 @@ export abstract class EntityManager<
       index.addIndexesFor([e]);
     }
     return e;
+  }
+
+  public removeLocally(entities: Iterable<E>) {
+    for (const index of this.indexes) {
+      index.removeIndexesFor(entities);
+    }
+    for (const e of entities) {
+      const idx = this.entities.indexOf(e);
+      this.entities.splice(idx, 1);
+    }
   }
 
   public get(id: string) {
@@ -224,6 +233,14 @@ class Index<E> {
     for (const e of entities) {
       for (const key of this.keysFor(e)) {
         this.map.set(key, e);
+      }
+    }
+  }
+
+  removeIndexesFor(entities: Iterable<E>) {
+    for (const e of entities) {
+      for (const key of this.keysFor(e)) {
+        this.map.delete(key);
       }
     }
   }

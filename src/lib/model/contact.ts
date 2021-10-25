@@ -36,6 +36,8 @@ export class Contact extends Entity<ContactData> {
 
   companies = this.makeDynamicAssociation<Company>('company');
 
+  get isExternal() { return !this.data.email || !this.data.contactType; }
+
   get allEmails() { return [this.data.email, ...this.data.otherEmails]; }
   get isPartner() { return this.data.contactType === 'Partner'; }
   get isCustomer() { return this.data.contactType === 'Customer'; }
@@ -127,13 +129,8 @@ export class ContactManager extends EntityManager<ContactData, Contact> {
   }
 
   removeExternallyCreatedContacts() {
-    for (const contact of this.entities) {
-      if (contact.data.email && contact.data.contactType) return;
-      this.entitiesById.delete(contact.guaranteedId());
-      for (const email of contact.allEmails) {
-        this.contactsByEmail.delete(email);
-      }
-    }
+    const externalContacts = this.getArray().filter(c => c.isExternal);
+    this.removeLocally(externalContacts);
   }
 
 }
