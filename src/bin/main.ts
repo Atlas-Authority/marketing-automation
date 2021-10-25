@@ -1,11 +1,13 @@
 import { getCliOptions } from "../lib/cli/index.js";
 import config from "../lib/config/index.js";
 import runEngine from "../lib/engine/engine.js";
+import { Database } from "../lib/model/database.js";
 import Slack from "../lib/services/slack.js";
 import { AttachableError, SimpleError } from '../lib/util/errors.js';
 import run from '../lib/util/runner.js';
 
 const { downloader, uploader } = getCliOptions();
+const db = new Database(downloader, uploader);
 
 const slack = new Slack();
 
@@ -14,10 +16,7 @@ await slack.postToSlack(`Starting Marketing Engine`);
 await run({
 
   async work() {
-    await runEngine({
-      downloader,
-      uploader,
-    });
+    await runEngine(db);
   },
 
   async failed(errors) {

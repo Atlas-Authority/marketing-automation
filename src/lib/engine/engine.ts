@@ -1,5 +1,3 @@
-import { Downloader } from '../io/downloader/downloader.js';
-import { Uploader } from '../io/uploader/uploader.js';
 import { EngineLogger } from '../log/engine-logger.js';
 import { Database } from '../model/database.js';
 import { findAndFlagExternallyCreatedContacts, findAndFlagPartnerCompanies, findAndFlagPartnersByDomain, identifyDomains } from './contacts/contact-types.js';
@@ -9,14 +7,10 @@ import { DealGenerator } from './deal-generator/generate-deals.js';
 import { matchIntoLikelyGroups } from './license-matching/license-grouper.js';
 import { printSummary } from './summary.js';
 
-export default async function runEngine({ downloader, uploader }: {
-  downloader: Downloader,
-  uploader: Uploader,
-}) {
+export default async function runEngine(db: Database) {
   const log = new EngineLogger();
 
   log.step('Starting to download data');
-  const db = new Database(downloader, uploader);
   await db.downloadAllData();
 
   log.step('Identifying partner and customer domains');
