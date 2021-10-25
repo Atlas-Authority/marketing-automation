@@ -1,11 +1,10 @@
-import config, { LogLevel } from "../lib/config/index.js";
 import Engine from "../lib/engine/engine.js";
 import CachedFileDownloader from "../lib/io/downloader/cached-file-downloader.js";
 import ConsoleUploader from "../lib/io/uploader/console-uploader.js";
 import { Database } from "../lib/model/database.js";
 
 const downloader = new CachedFileDownloader();
-const uploader = new ConsoleUploader({ verbose: config.logLevel >= LogLevel.Verbose });
+const uploader = new ConsoleUploader({ verbose: false });
 const db = new Database(downloader, uploader);
 
 {

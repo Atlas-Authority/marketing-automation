@@ -42,6 +42,24 @@
       ]
     },
     {
+      "name": "Run cached-download twice",
+      "request": "launch",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "program": "${workspaceFolder}/src/bin/verify-double-run.ts",
+      "args": [
+        "--downloader=cached",
+        "--uploader=console",
+        "--loglevel=info",
+      ],
+      "type": "pwa-node",
+      "outFiles": [
+        "${workspaceFolder}/out/**/*.js",
+        "!**/node_modules/**"
+      ]
+    },
+    {
       "name": "Downloader",
       "program": "${workspaceFolder}/src/bin/download.ts",
       "request": "launch",
