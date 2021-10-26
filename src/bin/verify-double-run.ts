@@ -14,8 +14,8 @@ const db = new Database(downloader, uploader);
   db.dealManager.updatedCount = 0;
   db.dealManager.duplicatesToDelete.clear();
   db.contactManager.createdCount = 0;
-  db.contactManager.createdCount = 0;
-  db.companyManager.updatedCount = 0;
+  db.contactManager.updatedCount = 0;
+  db.companyManager.createdCount = 0;
   db.companyManager.updatedCount = 0;
 }
 
