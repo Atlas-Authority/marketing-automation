@@ -46,16 +46,14 @@ export function abbrRecordDetails(record: Transaction | License) {
   };
 }
 
-export function dealCreationProperties(record: License | Transaction, dealstage: string): DealData {
+export function dealCreationProperties(record: License | Transaction, data: Pick<DealData, 'addonLicenseId' | 'transactionId' | 'dealstage'>): DealData {
   const dealNameTemplateProperties = {
     ...record.data,
     technicalContactEmail: record.data.technicalContact.email,
   };
 
   return {
-    ...(record instanceof License
-      ? { addonLicenseId: record.data.addonLicenseId, transactionId: '' }
-      : { transactionId: record.data.transactionId, addonLicenseId: '' }),
+    ...data,
     closeDate: record.data.maintenanceStartDate,
     deployment: record.data.hosting,
     app: record.data.addonKey,
@@ -64,10 +62,9 @@ export function dealCreationProperties(record: License | Transaction, dealstage:
     origin: config.constants.dealOrigin,
     relatedProducts: config.constants.dealRelatedProducts,
     dealName: mustache.render(config.constants.dealDealName, dealNameTemplateProperties),
-    dealstage,
     pipeline: Pipeline.AtlassianMarketplace,
     hasActivity: false,
-    amount: (dealstage === DealStage.EVAL
+    amount: (data.dealstage === DealStage.EVAL
       ? null
       : record instanceof License
         ? 0

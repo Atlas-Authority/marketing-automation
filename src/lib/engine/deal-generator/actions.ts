@@ -31,10 +31,13 @@ export class ActionGenerator {
 
     const latestLicense = event.licenses[event.licenses.length - 1];
     if (!deal) {
-      return makeCreateAction(event, latestLicense,
-        latestLicense.active
+      return makeCreateAction(event, latestLicense, {
+        dealstage: latestLicense.active
           ? DealStage.EVAL
-          : DealStage.CLOSED_LOST);
+          : DealStage.CLOSED_LOST,
+        addonLicenseId: latestLicense.data.addonLicenseId,
+        transactionId: null,
+      });
     }
     else if (deal.isEval()) {
       return makeUpdateAction(event, deal, latestLicense);
@@ -49,7 +52,11 @@ export class ActionGenerator {
 
     const record = getLatestRecord(event);
     if (!deal) {
-      return makeCreateAction(event, record, DealStage.CLOSED_WON);
+      return makeCreateAction(event, record, {
+        dealstage: DealStage.CLOSED_WON,
+        addonLicenseId: record.data.addonLicenseId,
+        transactionId: null,
+      });
     }
     else if (deal.isEval()) {
       return makeUpdateAction(event, deal, record, DealStage.CLOSED_WON);
@@ -65,7 +72,11 @@ export class ActionGenerator {
     if (deal) {
       return makeIgnoreAction(event, deal, 'Deal already exists for this transaction');
     }
-    return makeCreateAction(event, event.transaction, DealStage.CLOSED_WON);
+    return makeCreateAction(event, event.transaction, {
+      dealstage: DealStage.CLOSED_WON,
+      addonLicenseId: null,
+      transactionId: event.transaction.data.transactionId,
+    });
   }
 
   private actionsForRefund(event: RefundEvent): Action[] {
@@ -151,11 +162,11 @@ export type IgnoreDealAction = {
 
 export type Action = CreateDealAction | UpdateDealAction | IgnoreDealAction;
 
-function makeCreateAction(event: DealRelevantEvent, record: License | Transaction, dealstage: DealStage): Action {
+function makeCreateAction(event: DealRelevantEvent, record: License | Transaction, data: Pick<DealData, 'addonLicenseId' | 'transactionId' | 'dealstage'>): Action {
   return {
     type: 'create',
     groups: event.groups,
-    properties: dealCreationProperties(record, dealstage),
+    properties: dealCreationProperties(record, data),
   };
 }
 
