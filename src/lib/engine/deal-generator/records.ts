@@ -66,6 +66,7 @@ export function dealCreationProperties(record: License | Transaction, dealstage:
     dealName: mustache.render(config.constants.dealDealName, dealNameTemplateProperties),
     dealstage,
     pipeline: Pipeline.AtlassianMarketplace,
+    hasActivity: false,
     amount: (dealstage === DealStage.EVAL
       ? null
       : record instanceof License

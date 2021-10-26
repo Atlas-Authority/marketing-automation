@@ -86,8 +86,7 @@ export class ActionGenerator {
     else if (foundDeals.size > 1) {
       // Has duplicates!
 
-      const importantDeals = [...foundDeals].filter(d =>
-        d.data.hasEngagement || d.data.hasOwner);
+      const importantDeals = [...foundDeals].filter(d => d.data.hasActivity);
 
       let toDelete = [];
 

@@ -29,7 +29,7 @@ export type ContactData = {
   licenseTier: number | null;
   lastMpacEvent: string | null;
 
-  otherEmails: string[];
+  readonly otherEmails: readonly string[];
 };
 
 export class Contact extends Entity<ContactData> {

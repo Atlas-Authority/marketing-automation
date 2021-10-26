@@ -28,9 +28,7 @@ export type DealData = {
   pipeline: Pipeline;
   dealstage: DealStage;
   amount: number | null;
-
-  hasOwner: boolean;
-  hasEngagement: boolean;
+  readonly hasActivity: boolean;
 };
 
 export class Deal extends Entity<DealData> {
@@ -72,8 +70,16 @@ export class DealManager extends EntityManager<DealData, Deal> {
     'dealstage',
     'pipeline',
     'amount',
+
     'hs_user_ids_of_all_owners',
     'engagements_last_meeting_booked',
+    'hs_latest_meeting_activity',
+    'notes_last_contacted',
+    'notes_last_updated',
+    'notes_next_activity_date',
+    'num_contacted_notes',
+    'num_notes',
+    'hs_sales_email_last_replied',
   ];
 
   override fromAPI(data: { [key: string]: string | null }): DealData | null {
@@ -92,8 +98,17 @@ export class DealManager extends EntityManager<DealData, Deal> {
       pipeline: data.pipeline,
       dealstage: data.dealstage as string,
       amount: !data.amount ? null : +data.amount,
-      hasOwner: (data.hs_user_ids_of_all_owners ?? '').length > 0,
-      hasEngagement: (data.engagements_last_meeting_booked ?? '').length > 0,
+      hasActivity: (
+        isNonBlankString(data['hs_user_ids_of_all_owners']) ||
+        isNonBlankString(data['engagements_last_meeting_booked']) ||
+        isNonBlankString(data['hs_latest_meeting_activity']) ||
+        isNonBlankString(data['notes_last_contacted']) ||
+        isNonBlankString(data['notes_last_updated']) ||
+        isNonBlankString(data['notes_next_activity_date']) ||
+        isNonBlankString(data['hs_sales_email_last_replied']) ||
+        isNonZeroNumberString(data['num_contacted_notes']) ||
+        isNonZeroNumberString(data['num_notes'])
+      ),
     };
   }
 
@@ -111,8 +126,7 @@ export class DealManager extends EntityManager<DealData, Deal> {
     pipeline: pipeline => ['pipeline', pipeline],
     dealstage: dealstage => ['dealstage', dealstage],
     amount: amount => ['amount', amount?.toString() ?? ''],
-    hasOwner: EntityManager.downSyncOnly,
-    hasEngagement: EntityManager.downSyncOnly,
+    hasActivity: EntityManager.downSyncOnly,
   };
 
   override identifiers: (keyof DealData)[] = [
@@ -146,4 +160,12 @@ export class DealManager extends EntityManager<DealData, Deal> {
       : this.dealsByAddonLicenseId.get(record.data.addonLicenseId));
   }
 
+}
+
+function isNonBlankString(str: string | null) {
+  return (str ?? '').length > 0;
+}
+
+function isNonZeroNumberString(str: string | null) {
+  return +(str ?? '') > 0;
 }
