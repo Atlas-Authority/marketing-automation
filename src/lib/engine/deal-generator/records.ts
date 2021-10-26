@@ -74,15 +74,6 @@ export function dealCreationProperties(record: License | Transaction, data: Pick
 
 export function updateDeal(deal: Deal, record: License | Transaction) {
   if (record instanceof Transaction) {
-    deal.data.transactionId = record.data.transactionId;
-    deal.data.addonLicenseId = null;
-  }
-  else {
-    deal.data.addonLicenseId = record.data.addonLicenseId;
-    deal.data.transactionId = null;
-  }
-
-  if (record instanceof Transaction) {
     deal.data.amount = record.data.vendorAmount;
   }
 
