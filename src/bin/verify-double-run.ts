@@ -12,6 +12,7 @@ const db = new Database(downloader, uploader);
   await engine.run();
   db.dealManager.createdCount = 0;
   db.dealManager.updatedCount = 0;
+  db.dealManager.duplicatesToDelete.clear();
   db.contactManager.createdCount = 0;
   db.contactManager.createdCount = 0;
   db.companyManager.updatedCount = 0;
