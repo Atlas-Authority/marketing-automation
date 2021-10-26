@@ -85,19 +85,19 @@ export class DealManager extends EntityManager<DealData, Deal> {
   override fromAPI(data: { [key: string]: string | null }): DealData | null {
     if (data.pipeline !== Pipeline.AtlassianMarketplace) return null;
     return {
-      relatedProducts: data.related_products as string,
+      relatedProducts: data['related_products'] as string,
       app: data[appKey] as string,
       addonLicenseId: data[addonLicenseIdKey],
       transactionId: data[transactionIdKey],
-      closeDate: (data.closedate as string).substr(0, 10),
-      country: data.country as string,
-      dealName: data.dealname as string,
-      origin: data.origin as DealData['origin'],
+      closeDate: (data['closedate'] as string).substr(0, 10),
+      country: data['country'] as string,
+      dealName: data['dealname'] as string,
+      origin: data['origin'] as DealData['origin'],
       deployment: data[deploymentKey] as DealData['deployment'],
-      licenseTier: +(data.license_tier as string),
-      pipeline: data.pipeline,
-      dealstage: data.dealstage as string,
-      amount: !data.amount ? null : +data.amount,
+      licenseTier: +(data['license_tier'] as string),
+      pipeline: data['pipeline'],
+      dealstage: data['dealstage'] as string,
+      amount: !data['amount'] ? null : +data['amount'],
       hasActivity: (
         isNonBlankString(data['hs_user_ids_of_all_owners']) ||
         isNonBlankString(data['engagements_last_meeting_booked']) ||

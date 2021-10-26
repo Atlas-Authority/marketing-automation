@@ -73,25 +73,25 @@ export class ContactManager extends EntityManager<ContactData, Contact> {
 
   override fromAPI(data: { [key: string]: string | null }): ContactData | null {
     return {
-      contactType: data.contact_type as ContactData['contactType'],
+      contactType: data['contact_type'] as ContactData['contactType'],
 
-      email: data.email ?? '',
-      country: data.country,
-      region: data.region,
+      email: data['email'] ?? '',
+      country: data['country'],
+      region: data['region'],
 
-      firstName: data.firstname?.trim() || null,
-      lastName: data.lastname?.trim() || null,
-      phone: data.phone?.trim() || null,
-      city: data.city?.trim() || null,
-      state: data.state?.trim() || null,
+      firstName: data['firstname']?.trim() || null,
+      lastName: data['lastname']?.trim() || null,
+      phone: data['phone']?.trim() || null,
+      city: data['city']?.trim() || null,
+      state: data['state']?.trim() || null,
 
-      relatedProducts: new Set(data.related_products ? data.related_products.split(';') : []),
-      licenseTier: !data.license_tier ? null : +data.license_tier,
+      relatedProducts: new Set(data['related_products'] ? data['related_products'].split(';') : []),
+      licenseTier: !data['license_tier'] ? null : +data['license_tier'],
       deployment: data[deploymentKey] as ContactData['deployment'],
       products: new Set(data[productsKey]?.split(';') || []),
-      lastMpacEvent: data.last_mpac_event,
+      lastMpacEvent: data['last_mpac_event'],
 
-      otherEmails: data.hs_additional_emails?.split(';') || [],
+      otherEmails: data['hs_additional_emails']?.split(';') || [],
     };
   }
 

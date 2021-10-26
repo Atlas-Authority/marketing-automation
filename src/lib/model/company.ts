@@ -25,8 +25,8 @@ export class CompanyManager extends EntityManager<CompanyData, Company> {
 
   override fromAPI(data: { [key: string]: string | null }): CompanyData | null {
     return {
-      name: data.name ?? '',
-      type: data.type === 'PARTNER' ? 'Partner' : null,
+      name: data['name'] ?? '',
+      type: data['type'] === 'PARTNER' ? 'Partner' : null,
     };
   }
 
