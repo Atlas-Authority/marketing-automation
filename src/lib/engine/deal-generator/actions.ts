@@ -10,8 +10,6 @@ import { dealCreationProperties, updateDeal } from './records.js';
 
 export class ActionGenerator {
 
-  duplicatesToDelete = new Set<string>();
-
   constructor(private dealManager: DealManager) { }
 
   generateFrom(events: DealRelevantEvent[]) {
@@ -111,10 +109,9 @@ export class ActionGenerator {
         }
       }
 
+      this.dealManager.removeLocally(toDelete);
       for (const deal of toDelete) {
-        if (deal.id) {
-          this.duplicatesToDelete.add(deal.id);
-        }
+        this.dealManager.duplicatesToDelete.add(deal);
       }
     }
 

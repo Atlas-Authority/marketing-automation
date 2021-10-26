@@ -3,6 +3,14 @@ import { Database } from "../model/database.js";
 import { isPresent } from "../util/helpers.js";
 
 export function printSummary(db: Database) {
+
+  if (db.dealManager.duplicatesToDelete.size > 0) {
+    log.warn('Deal Generator',
+      'Found duplicate deals; delete them manually',
+      [...db.dealManager.duplicatesToDelete].map(deal =>
+        `https://app.hubspot.com/contacts/3466897/deal/${deal.id}/`));
+  }
+
   const deals = db.dealManager.getArray();
   log.info('Summary', 'Results of this run:', {
     'TotalDealCount': formatNumber(deals.length),
@@ -18,6 +26,7 @@ export function printSummary(db: Database) {
 
     'CompaniesUpdated': formatNumber(db.companyManager.updatedCount),
   });
+
 }
 
 function formatNumber(n: number) {

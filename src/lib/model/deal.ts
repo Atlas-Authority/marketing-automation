@@ -137,6 +137,8 @@ export class DealManager extends EntityManager<DealData, Deal> {
   private dealsByAddonLicenseId = this.makeIndex(d => [d.data.addonLicenseId].filter(isPresent));
   private dealsByTransactionId = this.makeIndex(d => [d.data.transactionId].filter(isPresent));
 
+  duplicatesToDelete = new Set<Deal>();
+
   getByAddonLicenseId(id: string) {
     return this.dealsByAddonLicenseId.get(id);
   }

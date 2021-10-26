@@ -39,13 +39,6 @@ export class DealGenerator {
     for (const { deal, groups } of this.dealUpdateActions) {
       this.associateDealContactsAndCompanies(groups, deal);
     }
-
-    if (this.actionGenerator.duplicatesToDelete.size > 0) {
-      log.warn('Deal Generator',
-        'Found duplicate deals; delete them manually',
-        [...this.actionGenerator.duplicatesToDelete].map(id =>
-          `https://app.hubspot.com/contacts/3466897/deal/${id}/`));
-    }
   }
 
   private generateActionsForMatchedGroup(groups: RelatedLicenseSet) {
