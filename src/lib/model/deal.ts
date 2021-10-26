@@ -147,19 +147,16 @@ export class DealManager extends EntityManager<DealData, Deal> {
     return this.dealsByTransactionId.get(id);
   }
 
-  getDealsForRecords(records: (License | Transaction)[]) {
-    return new Set(records
-      .map(record => this.getById(record))
+  getDealsForLicenses(licenses: License[]) {
+    return new Set(licenses
+      .map(l => this.getByAddonLicenseId(l.data.addonLicenseId))
       .filter(isPresent));
   }
 
-  private getById(record: License | Transaction): Deal | undefined {
-    return (record instanceof Transaction
-      ? (
-        this.dealsByTransactionId.get(record.data.transactionId) ||
-        this.dealsByAddonLicenseId.get(record.data.addonLicenseId)
-      )
-      : this.dealsByAddonLicenseId.get(record.data.addonLicenseId));
+  getDealsForTransactions(transactions: Transaction[]) {
+    return new Set(transactions
+      .map(tx => this.getByTransactionId(tx.data.transactionId))
+      .filter(isPresent));
   }
 
 }

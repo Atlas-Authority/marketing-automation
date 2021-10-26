@@ -13,20 +13,22 @@ export class ActionGenerator {
   constructor(private dealManager: DealManager) { }
 
   generateFrom(events: DealRelevantEvent[]) {
-    return events.flatMap(event => this.actionsFor(event, events));
+    return events.flatMap(event => this.actionsFor(event));
   }
 
-  private actionsFor(event: DealRelevantEvent, events: DealRelevantEvent[]): Action[] {
+  private actionsFor(event: DealRelevantEvent): Action[] {
     switch (event.type) {
-      case 'eval': return [this.actionForEval(event, this.dealFor(events))];
-      case 'purchase': return [this.actionForPurchase(event, this.dealFor(events))];
-      case 'renewal': return [this.actionForRenewal(event, this.dealFor(events))];
-      case 'upgrade': return [this.actionForRenewal(event, this.dealFor(events))];
+      case 'eval': return [this.actionForEval(event)];
+      case 'purchase': return [this.actionForPurchase(event)];
+      case 'renewal': return [this.actionForRenewal(event)];
+      case 'upgrade': return [this.actionForRenewal(event)];
       case 'refund': return this.actionsForRefund(event);
     }
   }
 
-  private actionForEval(event: EvalEvent, deal: Deal | null): Action {
+  private actionForEval(event: EvalEvent): Action {
+    const deal = this.getDealForLicenses(event.licenses);
+
     const latestLicense = event.licenses[event.licenses.length - 1];
     if (!deal) {
       return makeCreateAction(event, latestLicense,
@@ -42,7 +44,9 @@ export class ActionGenerator {
     }
   }
 
-  private actionForPurchase(event: PurchaseEvent, deal: Deal | null): Action {
+  private actionForPurchase(event: PurchaseEvent): Action {
+    const deal = this.getDealForLicenses(event.licenses);
+
     const record = getLatestRecord(event);
     if (!deal) {
       return makeCreateAction(event, record, DealStage.CLOSED_WON);
@@ -55,7 +59,9 @@ export class ActionGenerator {
     }
   }
 
-  private actionForRenewal(event: RenewalEvent | UpgradeEvent, deal: Deal | null): Action {
+  private actionForRenewal(event: RenewalEvent | UpgradeEvent): Action {
+    const deal = this.getDealForTransaction(event.transaction);
+
     if (deal) {
       return makeIgnoreAction(event, deal, 'Deal already exists for this transaction');
     }
@@ -63,7 +69,7 @@ export class ActionGenerator {
   }
 
   private actionsForRefund(event: RefundEvent): Action[] {
-    const deals = this.dealManager.getDealsForRecords(event.refundedTxs);
+    const deals = this.dealManager.getDealsForTransactions(event.refundedTxs);
     return ([...deals]
       .filter(deal => deal.data.dealstage !== DealStage.CLOSED_LOST)
       .map(deal => makeUpdateAction(event, deal, null, DealStage.CLOSED_LOST))
@@ -71,12 +77,16 @@ export class ActionGenerator {
     );
   }
 
-  private dealFor(events: DealRelevantEvent[]) {
-    let dealToUse = null;
+  private getDealForLicenses(licenses: License[]) {
+    return this.singleDeal(this.dealManager.getDealsForLicenses(licenses));
+  }
 
-    const groups = events.flatMap(e => e.groups);
-    const records = groups.flatMap(g => [g.license, ...g.transactions]);
-    const foundDeals = this.dealManager.getDealsForRecords(records);
+  private getDealForTransaction(transaction: Transaction) {
+    return this.singleDeal(this.dealManager.getDealsForTransactions([transaction]));
+  }
+
+  private singleDeal(foundDeals: Set<Deal>) {
+    let dealToUse = null;
 
     if (foundDeals.size === 1) {
       [dealToUse] = foundDeals;
