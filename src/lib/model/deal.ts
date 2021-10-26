@@ -28,6 +28,9 @@ export type DealData = {
   pipeline: Pipeline;
   dealstage: DealStage;
   amount: number | null;
+
+  hasOwner: boolean;
+  hasEngagement: boolean;
 };
 
 export class Deal extends Entity<DealData> {
@@ -69,6 +72,8 @@ export class DealManager extends EntityManager<DealData, Deal> {
     'dealstage',
     'pipeline',
     'amount',
+    'hs_user_ids_of_all_owners',
+    'engagements_last_meeting_booked',
   ];
 
   override fromAPI(data: { [key: string]: string | null }): DealData | null {
@@ -87,6 +92,8 @@ export class DealManager extends EntityManager<DealData, Deal> {
       pipeline: data.pipeline,
       dealstage: data.dealstage as string,
       amount: !data.amount ? null : +data.amount,
+      hasOwner: (data.hs_user_ids_of_all_owners ?? '').length > 0,
+      hasEngagement: (data.engagements_last_meeting_booked ?? '').length > 0,
     };
   }
 
@@ -104,6 +111,8 @@ export class DealManager extends EntityManager<DealData, Deal> {
     pipeline: pipeline => ['pipeline', pipeline],
     dealstage: dealstage => ['dealstage', dealstage],
     amount: amount => ['amount', amount?.toString() ?? ''],
+    hasOwner: EntityManager.downSyncOnly,
+    hasEngagement: EntityManager.downSyncOnly,
   };
 
   override identifiers: (keyof DealData)[] = [

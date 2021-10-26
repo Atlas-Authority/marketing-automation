@@ -114,8 +114,7 @@ export class ContactManager extends EntityManager<ContactData, Contact> {
     products: products => [productsKey, [...products].join(';')],
     lastMpacEvent: lastMpacEvent => ['last_mpac_event', lastMpacEvent ?? ''],
 
-    // Never sync'd up
-    otherEmails: () => ['', ''],
+    otherEmails: EntityManager.downSyncOnly,
   };
 
   override identifiers: (keyof ContactData)[] = [

@@ -14,6 +14,8 @@ export abstract class EntityManager<
   E extends Entity<P>>
 {
 
+  protected static readonly downSyncOnly = (): [string, string] => ['', ''];
+
   constructor(
     private downloader: Downloader,
     private uploader: Uploader,
