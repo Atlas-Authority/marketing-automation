@@ -20,6 +20,7 @@ const db = new Database(downloader, uploader);
 }
 
 {
+  uploader.verbose = true;
   const engine = new Engine(db);
   engine.shouldDownload = false;
   await engine.run();
