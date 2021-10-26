@@ -132,7 +132,9 @@ export class ActionGenerator {
 
       this.dealManager.removeLocally(toDelete);
       for (const deal of toDelete) {
-        this.dealManager.duplicatesToDelete.add(deal);
+        let dupOf = this.dealManager.duplicatesToDelete.get(deal);
+        if (!dupOf) this.dealManager.duplicatesToDelete.set(deal, dupOf = new Set());
+        dupOf.add(dealToUse);
       }
     }
 
