@@ -10,24 +10,25 @@ import { dealCreationProperties, updateDeal } from './records.js';
 
 export class ActionGenerator {
 
+  duplicatesToDelete = new Set<string>();
+
   constructor(private dealManager: DealManager) { }
 
   generateFrom(events: DealRelevantEvent[]) {
-    return events.flatMap(event => this.actionsFor(event));
+    return events.flatMap(event => this.actionsFor(event, events));
   }
 
-  private actionsFor(event: DealRelevantEvent): Action[] {
+  private actionsFor(event: DealRelevantEvent, events: DealRelevantEvent[]): Action[] {
     switch (event.type) {
-      case 'eval': return [this.actionForEval(event)];
-      case 'purchase': return [this.actionForPurchase(event)];
-      case 'renewal': return [this.actionForRenewal(event)];
-      case 'upgrade': return [this.actionForRenewal(event)];
+      case 'eval': return [this.actionForEval(event, this.dealFor(events))];
+      case 'purchase': return [this.actionForPurchase(event, this.dealFor(events))];
+      case 'renewal': return [this.actionForRenewal(event, this.dealFor(events))];
+      case 'upgrade': return [this.actionForRenewal(event, this.dealFor(events))];
       case 'refund': return this.actionsForRefund(event);
     }
   }
 
-  private actionForEval(event: EvalEvent): Action {
-    const deal = this.dealManager.getDealForRecord(event.licenses);
+  private actionForEval(event: EvalEvent, deal: Deal | null): Action {
     const latestLicense = event.licenses[event.licenses.length - 1];
     if (!deal) {
       return makeCreateAction(event, latestLicense,
@@ -43,16 +44,7 @@ export class ActionGenerator {
     }
   }
 
-  private actionForPurchase(event: PurchaseEvent): Action {
-    const deal = (
-      // Either it is an eval or a purchase without a transaction,
-      this.dealManager.getDealForRecord(event.licenses) ||
-      // or it exists as a purchase with a transaction
-      this.dealManager.getDealForRecord(event.transaction
-        ? [event.transaction]
-        : [])
-    );
-
+  private actionForPurchase(event: PurchaseEvent, deal: Deal | null): Action {
     const record = getLatestRecord(event);
     if (!deal) {
       return makeCreateAction(event, record, DealStage.CLOSED_WON);
@@ -65,8 +57,7 @@ export class ActionGenerator {
     }
   }
 
-  private actionForRenewal(event: RenewalEvent | UpgradeEvent): Action {
-    const deal = this.dealManager.getDealForRecord([event.transaction]);
+  private actionForRenewal(event: RenewalEvent | UpgradeEvent, deal: Deal | null): Action {
     if (deal) {
       return makeIgnoreAction(event, deal, 'Deal already exists for this transaction');
     }
@@ -75,11 +66,60 @@ export class ActionGenerator {
 
   private actionsForRefund(event: RefundEvent): Action[] {
     const deals = this.dealManager.getDealsForRecords(event.refundedTxs);
-    return (deals
+    return ([...deals]
       .filter(deal => deal.data.dealstage !== DealStage.CLOSED_LOST)
       .map(deal => makeUpdateAction(event, deal, null, DealStage.CLOSED_LOST))
       .filter(isPresent)
     );
+  }
+
+  private dealFor(events: DealRelevantEvent[]) {
+    let dealToUse = null;
+
+    const groups = events.flatMap(e => e.groups);
+    const records = groups.flatMap(g => [g.license, ...g.transactions]);
+    const foundDeals = this.dealManager.getDealsForRecords(records);
+
+    if (foundDeals.size === 1) {
+      [dealToUse] = foundDeals;
+    }
+    else if (foundDeals.size > 1) {
+      // Has duplicates!
+
+      const importantDeals = [...foundDeals].filter(d =>
+        d.data.hasEngagement || d.data.hasOwner);
+
+      let toDelete = [];
+
+      if (importantDeals.length === 0) {
+        // Just pick one, it'll be updated soon; delete the rest
+        [dealToUse, ...toDelete] = foundDeals;
+      }
+      else {
+        // Pick one, keep/report the other importants; delete the rest
+        dealToUse = importantDeals[0];
+
+        if (importantDeals.length > 1) {
+          log.warn('Deal Generator',
+            `Found duplicates that can't be auto-deleted.`,
+            importantDeals.map(d => ({ id: d.id, ...d.data })));
+        }
+
+        for (const deal of foundDeals) {
+          if (!importantDeals.includes(deal)) {
+            toDelete.push(deal);
+          }
+        }
+      }
+
+      for (const deal of toDelete) {
+        if (deal.id) {
+          this.duplicatesToDelete.add(deal.id);
+        }
+      }
+    }
+
+    return dealToUse;
   }
 
 }

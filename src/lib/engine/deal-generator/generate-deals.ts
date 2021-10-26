@@ -39,6 +39,10 @@ export class DealGenerator {
     for (const { deal, groups } of this.dealUpdateActions) {
       this.associateDealContactsAndCompanies(groups, deal);
     }
+
+    if (this.actionGenerator.duplicatesToDelete.size > 0) {
+      log.warn('Deal Generator', 'Found duplicate deals; delete them manually', this.actionGenerator.duplicatesToDelete);
+    }
   }
 
   private generateActionsForMatchedGroup(groups: RelatedLicenseSet) {

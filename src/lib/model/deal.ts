@@ -131,12 +131,8 @@ export class DealManager extends EntityManager<DealData, Deal> {
     return this.dealsByTransactionId.get(id);
   }
 
-  getDealForRecord(records: (License | Transaction)[]) {
-    return this.getDealsForRecords(records).find(deal => deal);
-  }
-
   getDealsForRecords(records: (License | Transaction)[]) {
-    return (records
+    return new Set(records
       .map(record => this.getById(record))
       .filter(isPresent));
   }
