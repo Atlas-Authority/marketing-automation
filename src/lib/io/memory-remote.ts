@@ -84,7 +84,7 @@ export class MemoryRemote implements Downloader, Uploader {
   async updateHubspotEntities(kind: EntityKind, inputs: ExistingEntity[]): Promise<ExistingEntity[]> {
     for (const input of inputs) {
       const entity = this.getEntity(kind, input.id);
-      Object.assign(entity, input.properties);
+      Object.assign(entity.properties, input.properties);
     }
 
     this.fakeApiConsoleLog(`Fake-updated ${kind}s:`, inputs);
