@@ -1,7 +1,7 @@
 import config from "../config/index.js";
-import { EntityKind } from "../io/hubspot.js";
 import { Company } from "./company.js";
 import { Entity } from "./hubspot/entity.js";
+import { EntityKind } from "./hubspot/interfaces.js";
 import { EntityManager, PropertyTransformers } from "./hubspot/manager.js";
 
 const deploymentKey = config.hubspot.attrs.contact.deployment;

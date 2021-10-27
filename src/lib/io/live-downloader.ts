@@ -1,10 +1,10 @@
 import * as datadir from '../cache/datadir.js';
 import config from '../config/index.js';
+import { EntityKind, FullEntity } from '../model/hubspot/interfaces.js';
 import { RawLicense, RawTransaction } from "../model/marketplace/raw";
 import { downloadAllTlds, downloadFreeEmailProviders } from '../services/domains.js';
 import Hubspot from '../services/hubspot.js';
 import { downloadLicensesWithDataInsights, downloadLicensesWithoutDataInsights, downloadTransactions } from '../services/marketplace.js';
-import { EntityKind, FullEntity } from './hubspot.js';
 import { Downloader, Progress } from './interfaces.js';
 
 

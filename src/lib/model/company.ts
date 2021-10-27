@@ -1,5 +1,5 @@
-import { EntityKind } from "../io/hubspot.js";
 import { Entity } from "./hubspot/entity.js";
+import { EntityKind } from "./hubspot/interfaces.js";
 import { EntityManager, PropertyTransformers } from "./hubspot/manager.js";
 
 type CompanyData = {

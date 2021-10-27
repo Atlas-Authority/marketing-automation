@@ -1,5 +1,5 @@
+import { Association, EntityKind, ExistingEntity, FullEntity, NewEntity } from "../model/hubspot/interfaces.js";
 import { RawLicense, RawTransaction } from "../model/marketplace/raw";
-import { Association, EntityKind, ExistingEntity, FullEntity, NewEntity } from "./hubspot.js";
 
 export interface Progress {
   setCount: (count: number) => void;

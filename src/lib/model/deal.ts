@@ -1,10 +1,10 @@
 import { DealStage, Pipeline } from "../config/dynamic-enums.js";
 import config from "../config/index.js";
-import { EntityKind } from "../io/hubspot.js";
 import { isPresent } from "../util/helpers.js";
 import { Company } from "./company.js";
 import { Contact } from "./contact.js";
 import { Entity } from "./hubspot/entity.js";
+import { EntityKind } from "./hubspot/interfaces.js";
 import { EntityManager, PropertyTransformers } from "./hubspot/manager.js";
 import { License } from "./license.js";
 import { Transaction } from "./transaction.js";

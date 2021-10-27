@@ -1,4 +1,3 @@
-import { EntityKind } from "../io/hubspot.js";
 import { Downloader, Uploader } from "../io/interfaces.js";
 import { MultiDownloadLogger } from "../log/download-logger.js";
 import log from "../log/logger.js";
@@ -7,6 +6,7 @@ import { CompanyManager } from "./company.js";
 import { ContactManager } from "./contact.js";
 import { DealManager } from "./deal.js";
 import { Entity } from "./hubspot/entity.js";
+import { EntityKind } from "./hubspot/interfaces.js";
 import { License } from "./license.js";
 import { validateMarketplaceData } from "./marketplace/validation.js";
 import { Transaction } from "./transaction.js";

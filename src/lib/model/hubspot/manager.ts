@@ -1,8 +1,8 @@
 import * as assert from 'assert';
-import { EntityKind, RelativeAssociation } from '../../io/hubspot.js';
 import { Downloader, Progress, Uploader } from '../../io/interfaces.js';
 import { batchesOf } from '../../util/helpers.js';
 import { Entity, EntityDatabase } from "./entity.js";
+import { EntityKind, RelativeAssociation } from './interfaces.js';
 
 export type PropertyTransformers<T> = {
   [P in keyof T]: (prop: T[P]) => [string, string]
