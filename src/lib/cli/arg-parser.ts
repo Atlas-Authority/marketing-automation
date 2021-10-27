@@ -1,6 +1,6 @@
 import { batchesOf } from "../util/helpers.js";
 
-export class ArgParser {
+class ArgParser {
 
   #opts: { [opt: string]: string };
 
@@ -34,3 +34,5 @@ export class ArgParser {
   }
 
 }
+
+export const sharedArgParser = new ArgParser(process.argv.slice(2));

@@ -1,5 +1,15 @@
 import util from 'util';
-import config, { LogLevel } from '../config/index.js';
+import { sharedArgParser } from '../cli/arg-parser.js';
+
+export enum LogLevel {
+  Error,
+  Warn,
+  Info,
+  Verbose,
+  Detailed,
+}
+
+export const logLevel = logLevelFromCliString(sharedArgParser.get('--loglevel')?.trim().toLowerCase());
 
 let enabled = true;
 
@@ -36,7 +46,7 @@ const levelPrefixes = {
 
 function print(level: LogLevel, prefix: string, ...args: any[]) {
   if (!enabled) return;
-  if (level > config.logLevel) return;
+  if (level > logLevel) return;
 
   const first = levelPrefixes[level];
   const styledPrefix = `${royal}${prefix}${reset}`;
@@ -74,4 +84,15 @@ function formatted(data: unknown, prefixLength: number) {
     maxArrayLength: null,
     maxStringLength: null,
   });
+}
+
+function logLevelFromCliString(level: string | undefined) {
+  switch (level) {
+    case 'error': return LogLevel.Error;
+    case 'warn': return LogLevel.Warn;
+    case 'info': return LogLevel.Info;
+    case 'verbose': return LogLevel.Verbose;
+    case 'detailed': return LogLevel.Detailed;
+    default: return LogLevel.Verbose;
+  }
 }
