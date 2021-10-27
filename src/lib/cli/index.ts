@@ -6,40 +6,34 @@ import { Uploader } from "../io/uploader/uploader.js";
 import { sharedArgParser } from './arg-parser.js';
 
 export function getIoFromCli() {
-  const downloaderArg = sharedArgParser.getChoiceOrFail('--downloader', [
-    'cached',
-    'live'
-  ]);
-
-  const uploaderArg = sharedArgParser.getChoiceOrFail('--uploader', [
-    'console',
-    'live'
-  ]);
-
-  if (downloaderArg === 'cached' && uploaderArg === 'console') {
-    const memoryRemote = new MemoryRemote();
-    return {
-      downloader: memoryRemote,
-      uploader: memoryRemote,
-    };
-  }
-
   return {
-    downloader: getDownloader(downloaderArg),
-    uploader: getUploader(uploaderArg),
+    downloader: getDownloader(sharedArgParser.getChoiceOrFail('--downloader', [
+      'cached',
+      'live'
+    ])),
+    uploader: getUploader(sharedArgParser.getChoiceOrFail('--uploader', [
+      'console',
+      'live'
+    ])),
   };
 }
 
 function getDownloader(kind: 'cached' | 'live'): Downloader {
   switch (kind) {
     case 'live': return new LiveDownloader();
-    case 'cached': return new MemoryRemote();
+    case 'cached': return getSingletonMemoryRemote();
   }
 }
 
 function getUploader(kind: 'console' | 'live'): Uploader {
   switch (kind) {
     case 'live': return new LiveUploader();
-    case 'console': return new MemoryRemote();
+    case 'console': return getSingletonMemoryRemote();
   }
+}
+
+let memoryRemote: MemoryRemote | undefined;
+function getSingletonMemoryRemote() {
+  if (!memoryRemote) memoryRemote = new MemoryRemote();
+  return memoryRemote;
 }
