@@ -7,14 +7,14 @@ export interface Progress {
 }
 
 export interface Downloader {
-  downloadHubspotEntities(progress: Progress, kind: EntityKind, apiProperties: string[], inputAssociations: string[]): Promise<FullEntity[]>;
+  downloadHubspotEntities(progress: Progress, kind: EntityKind, apiProperties: string[], inputAssociations: string[]): Promise<readonly FullEntity[]>;
 
-  downloadFreeEmailProviders(progress: Progress): Promise<string[]>;
-  downloadAllTlds(progress: Progress): Promise<string[]>;
+  downloadFreeEmailProviders(progress: Progress): Promise<readonly string[]>;
+  downloadAllTlds(progress: Progress): Promise<readonly string[]>;
 
-  downloadTransactions(progress: Progress): Promise<RawTransaction[]>;
-  downloadLicensesWithoutDataInsights(progress: Progress): Promise<RawLicense[]>;
-  downloadLicensesWithDataInsights(progress: Progress): Promise<RawLicense[]>;
+  downloadTransactions(progress: Progress): Promise<readonly RawTransaction[]>;
+  downloadLicensesWithoutDataInsights(progress: Progress): Promise<readonly RawLicense[]>;
+  downloadLicensesWithDataInsights(progress: Progress): Promise<readonly RawLicense[]>;
 }
 
 export interface Uploader {

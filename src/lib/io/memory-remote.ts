@@ -9,14 +9,14 @@ export class MemoryRemote implements Downloader, Uploader {
   verbose: boolean;
   ids = new Map<string, number>();
 
-  contacts: FullEntity[];
-  companies: FullEntity[];
-  deals: FullEntity[];
-  licensesWith: RawLicense[];
-  licensesWithout: RawLicense[];
-  transactions: RawTransaction[];
-  domains: string[];
-  tlds: string[];
+  readonly contacts: FullEntity[];
+  readonly companies: FullEntity[];
+  readonly deals: FullEntity[];
+  readonly licensesWith: readonly RawLicense[];
+  readonly licensesWithout: readonly RawLicense[];
+  readonly transactions: readonly RawTransaction[];
+  readonly domains: readonly string[];
+  readonly tlds: readonly string[];
 
   // Downloader
 
@@ -35,27 +35,27 @@ export class MemoryRemote implements Downloader, Uploader {
     this.domains = datadir.readJsonFile('in', 'domains.json');
   }
 
-  async downloadHubspotEntities(_progress: Progress, kind: EntityKind, apiProperties: string[], inputAssociations: string[]): Promise<FullEntity[]> {
+  async downloadHubspotEntities(_progress: Progress, kind: EntityKind, apiProperties: string[], inputAssociations: string[]): Promise<readonly FullEntity[]> {
     return this.arrayFor(kind);
   }
 
-  async downloadFreeEmailProviders(): Promise<string[]> {
+  async downloadFreeEmailProviders(): Promise<readonly string[]> {
     return this.domains;
   }
 
-  async downloadAllTlds(): Promise<string[]> {
+  async downloadAllTlds(): Promise<readonly string[]> {
     return this.tlds;
   }
 
-  async downloadTransactions(): Promise<RawTransaction[]> {
+  async downloadTransactions(): Promise<readonly RawTransaction[]> {
     return this.transactions;
   }
 
-  async downloadLicensesWithoutDataInsights(): Promise<RawLicense[]> {
+  async downloadLicensesWithoutDataInsights(): Promise<readonly RawLicense[]> {
     return this.licensesWithout;
   }
 
-  async downloadLicensesWithDataInsights(): Promise<RawLicense[]> {
+  async downloadLicensesWithDataInsights(): Promise<readonly RawLicense[]> {
     return this.licensesWith;
   }
 

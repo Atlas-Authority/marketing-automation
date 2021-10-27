@@ -6,9 +6,9 @@ import { isPresent } from '../../util/helpers.js';
 import { RawLicense, RawTransaction } from "./raw.js";
 
 export function validateMarketplaceData(
-  licensesWithDataInsights: RawLicense[],
-  licensesWithoutDataInsights: RawLicense[],
-  transactions: RawTransaction[],
+  licensesWithDataInsights: readonly RawLicense[],
+  licensesWithoutDataInsights: readonly RawLicense[],
+  transactions: readonly RawTransaction[],
   emailRe: RegExp,
 ) {
   const licenses = uniqLicenses([
