@@ -14,7 +14,7 @@ export function identifyAndFlagContactTypes(db: Database) {
 
   // Flagging contacts and companies
   flagKnownContactTypesByDomain(db);
-  flagPartnerCompanies(db);
+  setPartnerDomainsViaCoworkers(db);
 }
 
 function identifyContactTypesFromRecordDomains(db: Database, records: (Transaction | License)[]) {
@@ -55,10 +55,18 @@ function flagKnownContactTypesByDomain(db: Database) {
   }
 }
 
-function flagPartnerCompanies(db: Database) {
+function setPartnerDomainsViaCoworkers(db: Database) {
   for (const contact of db.contactManager.getAll()) {
-    if (contact.data.contactType === 'Partner') {
-      for (const company of contact.companies.getAll()) {
+    const companies = contact.companies.getAll();
+    const coworkers = companies.flatMap(company =>
+      db.contactManager.getArray().filter(other =>
+        other.companies.getAll().includes(company)));
+
+    if (coworkers.some(c => c.isPartner)) {
+      for (const coworker of coworkers) {
+        coworker.data.contactType = 'Partner';
+      }
+      for (const company of companies) {
         company.data.type = 'Partner';
       }
     }
