@@ -1,10 +1,8 @@
-import CachedFileDownloader from "../io/downloader/cached-file-downloader.js";
 import { Downloader } from "../io/downloader/downloader.js";
 import LiveDownloader from '../io/downloader/live-downloader.js';
-import ConsoleUploader from "../io/uploader/console-uploader.js";
+import { MemoryRemote } from "../io/memory-remote.js";
 import LiveUploader from "../io/uploader/live-uploader.js";
 import { Uploader } from "../io/uploader/uploader.js";
-import { LogLevel, logLevel } from "../log/logger.js";
 import { sharedArgParser } from './arg-parser.js';
 
 export function getIoFromCli() {
@@ -18,6 +16,14 @@ export function getIoFromCli() {
     'live'
   ]);
 
+  if (downloaderArg === 'cached' && uploaderArg === 'console') {
+    const memoryRemote = new MemoryRemote();
+    return {
+      downloader: memoryRemote,
+      uploader: memoryRemote,
+    };
+  }
+
   return {
     downloader: getDownloader(downloaderArg),
     uploader: getUploader(uploaderArg),
@@ -27,13 +33,13 @@ export function getIoFromCli() {
 function getDownloader(kind: 'cached' | 'live'): Downloader {
   switch (kind) {
     case 'live': return new LiveDownloader();
-    case 'cached': return new CachedFileDownloader();
+    case 'cached': return new MemoryRemote();
   }
 }
 
 function getUploader(kind: 'console' | 'live'): Uploader {
   switch (kind) {
     case 'live': return new LiveUploader();
-    case 'console': return new ConsoleUploader({ verbose: logLevel >= LogLevel.Verbose });
+    case 'console': return new MemoryRemote();
   }
 }

@@ -9,18 +9,12 @@ import { printSummary } from './summary.js';
 
 export default class Engine {
 
-  public shouldDownload = true;
   log = new EngineLogger();
   constructor(private db: Database) { }
 
   async run() {
-    if (this.shouldDownload) {
-      this.log.step('Starting to download data');
-      await this.db.downloadAllData();
-    }
-    else {
-      this.log.step('Skipping download step');
-    }
+    this.log.step('Starting to download data');
+    await this.db.downloadAllData();
 
     this.log.step('Identifying partner and customer domains');
     identifyDomains(this.db);
