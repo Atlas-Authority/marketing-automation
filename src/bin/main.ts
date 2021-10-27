@@ -10,8 +10,6 @@ import run from '../lib/util/runner.js';
 const { downloader, uploader } = getIoFromCli();
 sharedArgParser.failIfExtraOpts();
 
-const db = new Database(downloader, uploader);
-
 const slack = new Slack();
 
 await slack.postToSlack(`Starting Marketing Engine`);
@@ -19,6 +17,7 @@ await slack.postToSlack(`Starting Marketing Engine`);
 await run({
 
   async work() {
+    const db = new Database(downloader, uploader);
     await new Engine().run(db);
   },
 
