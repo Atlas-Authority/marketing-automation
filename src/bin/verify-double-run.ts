@@ -8,13 +8,6 @@ const memoryRemote = new MemoryRemote({ verbose: false });
   const db = new Database(memoryRemote, memoryRemote);
   const engine = new Engine(db);
   await engine.run();
-  db.dealManager.createdCount = 0;
-  db.dealManager.updatedCount = 0;
-  db.dealManager.duplicatesToDelete.clear();
-  db.contactManager.createdCount = 0;
-  db.contactManager.updatedCount = 0;
-  db.companyManager.createdCount = 0;
-  db.companyManager.updatedCount = 0;
 }
 
 {
