@@ -14,3 +14,6 @@ await engine.run(new Database(memoryRemote, memoryRemote));
 // Second
 memoryRemote.verbose = true;
 await engine.run(new Database(memoryRemote, memoryRemote));
+
+// Third
+await engine.run(new Database(memoryRemote, memoryRemote));
