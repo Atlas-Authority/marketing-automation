@@ -67,6 +67,14 @@ function setPartnerDomainsViaCoworkers(db: Database) {
       for (const company of companies) {
         company.data.type = 'Partner';
       }
+
+      // Add all company domains (that aren't mass-providers) to partner domains
+      const domains = new Set(coworkers.flatMap(c => c.allEmails).map(domainFor));
+      for (const domain of domains) {
+        if (!db.providerDomains.has(domain)) {
+          db.partnerDomains.add(domain);
+        }
+      }
     }
   }
 }
