@@ -1,6 +1,6 @@
 import { EngineLogger } from '../log/engine-logger.js';
 import { Database } from '../model/database.js';
-import { findAndFlagExternallyCreatedContacts, findAndFlagPartnerCompanies, findAndFlagPartnersByDomain, identifyDomains } from './contacts/contact-types.js';
+import { identifyAndFlagContactTypes } from './contacts/contact-types.js';
 import { ContactGenerator } from './contacts/generate-contacts.js';
 import { updateContactsBasedOnMatchResults } from './contacts/update-contacts.js';
 import { DealGenerator } from './deal-generator/generate-deals.js';
@@ -15,26 +15,19 @@ export default class Engine {
     log.step('Starting to download data');
     await db.downloadAllData();
 
-    log.step('Identifying partner and customer domains');
-    identifyDomains(db);
+    log.step('Identifying and Flagging Contact Types');
+    identifyAndFlagContactTypes(db);
 
-    log.step('Flagging partner/customer contacts created outside engine');
-    findAndFlagExternallyCreatedContacts(db);
+    log.step('Updating Contacts/Companies in Hubspot');
     await db.syncUpAllEntities();
-
-    log.step('Generating contacts');
-    new ContactGenerator(db).run();
 
     log.step('Removing externally created contacts from rest of engine run');
     db.contactManager.removeExternallyCreatedContacts();
 
-    log.step('Flagging partner companies');
-    findAndFlagPartnerCompanies(db);
+    log.step('Generating contacts');
+    new ContactGenerator(db).run();
 
-    log.step('Flagging partners by domain');
-    findAndFlagPartnersByDomain(db);
-
-    log.step('Upserting Contacts/Companies in Hubspot');
+    log.step('Upserting Generated Contacts in Hubspot');
     await db.syncUpAllEntities();
 
     log.step('Running Scoring Engine');

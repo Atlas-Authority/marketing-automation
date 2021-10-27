@@ -1,79 +1,66 @@
 import config from '../../config/index.js';
 import { Contact } from '../../model/contact.js';
 import { Database } from '../../model/database.js';
+import { License } from '../../model/license.js';
+import { Transaction } from '../../model/transaction.js';
 
-export function identifyDomains(db: Database) {
-  for (const l of db.licenses) {
-    maybeAddDomain(db.partnerDomains, l.data.partnerDetails?.billingContact.email);
-    maybeAddDomain(db.customerDomains, l.data.billingContact?.email);
-    maybeAddDomain(db.customerDomains, l.data.technicalContact.email);
+export function identifyAndFlagContactTypes(db: Database) {
+  // Identifying contact types
+  identifyContactTypesFromRecordDomains(db, db.licenses);
+  identifyContactTypesFromRecordDomains(db, db.transactions);
+  addPartnerDomainsFromEnv(db);
+  removeProviderDomainsFromPartnerDomains(db);
+  separatePartnerDomainsFromCustomerDomains(db);
+
+  // Flagging contacts and companies
+  flagKnownContactTypesByDomain(db);
+  flagPartnerCompanies(db);
+}
+
+function identifyContactTypesFromRecordDomains(db: Database, records: (Transaction | License)[]) {
+  for (const record of records) {
+    maybeAddDomain(db.partnerDomains, record.data.partnerDetails?.billingContact.email);
+    maybeAddDomain(db.customerDomains, record.data.billingContact?.email);
+    maybeAddDomain(db.customerDomains, record.data.technicalContact.email);
   }
+}
 
-  for (const tx of db.transactions) {
-    maybeAddDomain(db.partnerDomains, tx.data.partnerDetails?.billingContact.email);
-    maybeAddDomain(db.customerDomains, tx.data.billingContact?.email);
-    maybeAddDomain(db.customerDomains, tx.data.technicalContact.email);
-  }
-
+function addPartnerDomainsFromEnv(db: Database) {
   for (const domain of config.engine.partnerDomains) {
     db.partnerDomains.add(domain);
   }
+}
 
+function removeProviderDomainsFromPartnerDomains(db: Database) {
+  for (const domain of db.providerDomains) {
+    db.partnerDomains.delete(domain);
+  }
+}
+
+function separatePartnerDomainsFromCustomerDomains(db: Database) {
   // If it's a partner domain, then it's not a customer domain
   for (const domain of db.partnerDomains) {
     db.customerDomains.delete(domain);
   }
 }
 
-export function findAndFlagExternallyCreatedContacts(db: Database) {
-  // Only check contacts with no contact_type and with email
-  const externals = db.contactManager.getArray().filter(c => c.data.contactType === null && c.data.email);
-
-  for (const contact of externals) {
+function flagKnownContactTypesByDomain(db: Database) {
+  for (const contact of db.contactManager.getAll()) {
     if (usesDomains(contact, db.partnerDomains)) {
       contact.data.contactType = 'Partner';
     }
     else if (usesDomains(contact, db.customerDomains)) {
       contact.data.contactType = 'Customer';
     }
-    // Leave the rest alone for now
   }
 }
 
-export function findAndFlagPartnerCompanies(db: Database) {
+function flagPartnerCompanies(db: Database) {
   for (const contact of db.contactManager.getAll()) {
     if (contact.data.contactType === 'Partner') {
       for (const company of contact.companies.getAll()) {
         company.data.type = 'Partner';
       }
-    }
-  }
-}
-
-export function findAndFlagPartnersByDomain(db: Database) {
-  const contactsByDomain = new Map<string, Contact[]>();
-
-  for (const contact of db.contactManager.getAll()) {
-    for (const email of contact.allEmails) {
-      const domain = domainFor(email);
-      let contacts = contactsByDomain.get(domain);
-      if (!contacts) contactsByDomain.set(domain, contacts = []);
-      contacts.push(contact);
-    }
-  }
-
-  for (const domain of db.providerDomains) {
-    contactsByDomain.delete(domain);
-  }
-
-  const partnerDomains = new Set([...contactsByDomain]
-    .filter(([, contacts]) => contacts.some(c => c.isPartner))
-    .map(([domain,]) => domain));
-
-  for (const contact of db.contactManager.getAll()) {
-    const domains = contact.allEmails.map(domainFor);
-    if (domains.some(domain => partnerDomains.has(domain))) {
-      contact.data.contactType = 'Partner';
     }
   }
 }
