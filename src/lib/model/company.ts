@@ -1,3 +1,4 @@
+import { Contact } from "./contact.js";
 import { Entity } from "./hubspot/entity.js";
 import { EntityKind } from "./hubspot/interfaces.js";
 import { EntityManager, PropertyTransformers } from "./hubspot/manager.js";
@@ -8,6 +9,9 @@ type CompanyData = {
 };
 
 export class Company extends Entity<CompanyData> {
+
+  contacts = this.makeDynamicAssociation<Contact>('contact');
+
 }
 
 export class CompanyManager extends EntityManager<CompanyData, Company> {
@@ -16,6 +20,7 @@ export class CompanyManager extends EntityManager<CompanyData, Company> {
   override kind: EntityKind = 'company';
 
   override associations: EntityKind[] = [
+    'contact'
   ];
 
   override apiProperties: string[] = [

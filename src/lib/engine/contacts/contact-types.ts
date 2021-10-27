@@ -58,9 +58,7 @@ function flagKnownContactTypesByDomain(db: Database) {
 function setPartnerDomainsViaCoworkers(db: Database) {
   for (const contact of db.contactManager.getAll()) {
     const companies = contact.companies.getAll();
-    const coworkers = companies.flatMap(company =>
-      db.contactManager.getArray().filter(other =>
-        other.companies.getAll().includes(company)));
+    const coworkers = companies.flatMap(company => company.contacts.getAll());
 
     if (coworkers.some(c => c.isPartner)) {
       for (const coworker of coworkers) {
