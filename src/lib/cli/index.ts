@@ -7,7 +7,7 @@ import { Uploader } from "../io/uploader/uploader.js";
 import { LogLevel, logLevel } from "../log/logger.js";
 import { sharedArgParser } from './arg-parser.js';
 
-export function getCliOptions() {
+export function getIoFromCli() {
   return {
     downloader: sharedArgParser.getChoiceOrFail<Downloader>('--downloader', {
       'live': () => new LiveDownloader(),
