@@ -59,21 +59,24 @@ function setPartnerDomainsViaCoworkers(db: Database) {
   for (const contact of db.contactManager.getAll()) {
     const companies = contact.companies.getAll();
     const coworkers = companies.flatMap(company => company.contacts.getAll());
+    flagPartnersViaCoworkers(db, coworkers);
+  }
+}
 
-    if (coworkers.some(c => c.isPartner)) {
-      for (const coworker of coworkers) {
-        coworker.data.contactType = 'Partner';
-      }
-      for (const company of companies) {
+export function flagPartnersViaCoworkers(db: Database, coworkers: Contact[]) {
+  if (coworkers.some(c => c.isPartner)) {
+    for (const coworker of coworkers) {
+      coworker.data.contactType = 'Partner';
+      for (const company of coworker.companies.getAll()) {
         company.data.type = 'Partner';
       }
+    }
 
-      // Add all company domains (that aren't mass-providers) to partner domains
-      const domains = new Set(coworkers.flatMap(c => c.allEmails).map(domainFor));
-      for (const domain of domains) {
-        if (!db.providerDomains.has(domain)) {
-          db.partnerDomains.add(domain);
-        }
+    // Add all company domains (that aren't mass-providers) to partner domains
+    const domains = new Set(coworkers.flatMap(c => c.allEmails).map(domainFor));
+    for (const domain of domains) {
+      if (!db.providerDomains.has(domain)) {
+        db.partnerDomains.add(domain);
       }
     }
   }
