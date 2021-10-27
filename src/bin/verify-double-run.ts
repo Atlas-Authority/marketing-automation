@@ -1,6 +1,9 @@
+import { sharedArgParser } from "../lib/cli/arg-parser.js";
 import Engine from "../lib/engine/engine.js";
 import { MemoryRemote } from "../lib/io/memory-remote.js";
 import { Database } from "../lib/model/database.js";
+
+sharedArgParser.failIfExtraOpts();
 
 const memoryRemote = new MemoryRemote({ verbose: false });
 const engine = new Engine();
