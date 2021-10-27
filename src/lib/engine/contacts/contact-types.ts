@@ -51,7 +51,7 @@ function flagKnownContactTypesByDomain(db: Database) {
     if (usesDomains(contact, db.partnerDomains)) {
       contact.data.contactType = 'Partner';
     }
-    else if (usesDomains(contact, db.customerDomains)) {
+    else if (contact.isExternal && usesDomains(contact, db.customerDomains)) {
       contact.data.contactType = 'Customer';
     }
   }
