@@ -19,6 +19,7 @@ export function identifyDomains(db: Database) {
     db.partnerDomains.add(domain);
   }
 
+  // If it's a partner domain, then it's not a customer domain
   for (const domain of db.partnerDomains) {
     db.customerDomains.delete(domain);
   }
