@@ -1,3 +1,4 @@
+import { sharedArgParser } from "../lib/cli/arg-parser.js";
 import { getCliOptions } from "../lib/cli/index.js";
 import config from "../lib/config/index.js";
 import Engine from "../lib/engine/engine.js";
@@ -7,6 +8,8 @@ import { AttachableError, SimpleError } from '../lib/util/errors.js';
 import run from '../lib/util/runner.js';
 
 const { downloader, uploader } = getCliOptions();
+sharedArgParser.failIfExtraOpts();
+
 const db = new Database(downloader, uploader);
 
 const slack = new Slack();

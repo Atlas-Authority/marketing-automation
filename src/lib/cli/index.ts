@@ -8,20 +8,14 @@ import { LogLevel, logLevel } from "../log/logger.js";
 import { sharedArgParser } from './arg-parser.js';
 
 export function getCliOptions() {
-  const downloader = sharedArgParser.getChoiceOrFail<Downloader>('--downloader', {
-    'live': () => new LiveDownloader(),
-    'cached': () => new CachedFileDownloader(),
-  });
-
-  const uploader = sharedArgParser.getChoiceOrFail<Uploader>('--uploader', {
-    'live': () => new LiveUploader(),
-    'console': () => new ConsoleUploader({ verbose: logLevel >= LogLevel.Verbose }),
-  });
-
-  sharedArgParser.failIfExtraOpts();
-
   return {
-    downloader,
-    uploader,
+    downloader: sharedArgParser.getChoiceOrFail<Downloader>('--downloader', {
+      'live': () => new LiveDownloader(),
+      'cached': () => new CachedFileDownloader(),
+    }),
+    uploader: sharedArgParser.getChoiceOrFail<Uploader>('--uploader', {
+      'live': () => new LiveUploader(),
+      'console': () => new ConsoleUploader({ verbose: logLevel >= LogLevel.Verbose }),
+    }),
   };
 }
