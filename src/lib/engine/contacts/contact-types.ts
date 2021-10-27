@@ -12,9 +12,11 @@ export function identifyAndFlagContactTypes(db: Database) {
   removeProviderDomainsFromPartnerDomains(db);
   separatePartnerDomainsFromCustomerDomains(db);
 
+  // Both Identifying and Flagging
+  setPartnerDomainsViaCoworkers(db);
+
   // Flagging contacts and companies
   flagKnownContactTypesByDomain(db);
-  setPartnerDomainsViaCoworkers(db);
 }
 
 function identifyContactTypesFromRecordDomains(db: Database, records: (Transaction | License)[]) {
