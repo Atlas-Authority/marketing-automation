@@ -27,13 +27,17 @@ export function identifyDomains(db: Database) {
 
 export function findAndFlagExternallyCreatedContacts(db: Database) {
   // Only check contacts with no contact_type and with email
-  const candidates = db.contactManager.getArray().filter(c => c.data.contactType === null && c.data.email);
+  const externals = db.contactManager.getArray().filter(c => c.data.contactType === null && c.data.email);
 
-  const partners = candidates.filter(c => db.partnerDomains.has(domainFor(c.data.email)));
-  const customers = candidates.filter(c => db.customerDomains.has(domainFor(c.data.email)));
-
-  for (const c of partners) { c.data.contactType = 'Partner'; }
-  for (const c of customers) { c.data.contactType = 'Customer'; }
+  for (const contact of externals) {
+    if (usesDomains(contact, db.partnerDomains)) {
+      contact.data.contactType = 'Partner';
+    }
+    else if (usesDomains(contact, db.customerDomains)) {
+      contact.data.contactType = 'Customer';
+    }
+    // Leave the rest alone for now
+  }
 }
 
 export function findAndFlagPartnerCompanies(db: Database) {
@@ -76,6 +80,10 @@ export function findAndFlagPartnersByDomain(db: Database) {
 
 function maybeAddDomain(set: Set<string>, email: string | undefined) {
   if (email) set.add(domainFor(email));
+}
+
+function usesDomains(contact: Contact, domains: Set<string>) {
+  return contact.allEmails.some(email => domains.has(domainFor(email)));
 }
 
 function domainFor(email: string): string {
