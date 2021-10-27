@@ -8,4 +8,4 @@ sharedArgParser.failIfExtraOpts();
 
 const db = new Database(downloader, uploader);
 
-await new Engine(db).run();
+await new Engine().run(db);

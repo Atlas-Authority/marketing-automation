@@ -9,51 +9,50 @@ import { printSummary } from './summary.js';
 
 export default class Engine {
 
-  log = new EngineLogger();
-  constructor(private db: Database) { }
+  async run(db: Database) {
+    const log = new EngineLogger();
 
-  async run() {
-    this.log.step('Starting to download data');
-    await this.db.downloadAllData();
+    log.step('Starting to download data');
+    await db.downloadAllData();
 
-    this.log.step('Identifying partner and customer domains');
-    identifyDomains(this.db);
+    log.step('Identifying partner and customer domains');
+    identifyDomains(db);
 
-    this.log.step('Flagging partner/customer contacts created outside engine');
-    findAndFlagExternallyCreatedContacts(this.db);
-    await this.db.syncUpAllEntities();
+    log.step('Flagging partner/customer contacts created outside engine');
+    findAndFlagExternallyCreatedContacts(db);
+    await db.syncUpAllEntities();
 
-    this.log.step('Generating contacts');
-    new ContactGenerator(this.db).run();
+    log.step('Generating contacts');
+    new ContactGenerator(db).run();
 
-    this.log.step('Removing externally created contacts from rest of engine run');
-    this.db.contactManager.removeExternallyCreatedContacts();
+    log.step('Removing externally created contacts from rest of engine run');
+    db.contactManager.removeExternallyCreatedContacts();
 
-    this.log.step('Flagging partner companies');
-    findAndFlagPartnerCompanies(this.db);
+    log.step('Flagging partner companies');
+    findAndFlagPartnerCompanies(db);
 
-    this.log.step('Flagging partners by domain');
-    findAndFlagPartnersByDomain(this.db);
+    log.step('Flagging partners by domain');
+    findAndFlagPartnersByDomain(db);
 
-    this.log.step('Upserting Contacts/Companies in Hubspot');
-    await this.db.syncUpAllEntities();
+    log.step('Upserting Contacts/Companies in Hubspot');
+    await db.syncUpAllEntities();
 
-    this.log.step('Running Scoring Engine');
-    const allMatches = matchIntoLikelyGroups(this.db);
+    log.step('Running Scoring Engine');
+    const allMatches = matchIntoLikelyGroups(db);
 
-    this.log.step('Updating Contacts based on Match Results');
-    updateContactsBasedOnMatchResults(this.db, allMatches);
-    await this.db.syncUpAllEntities();
+    log.step('Updating Contacts based on Match Results');
+    updateContactsBasedOnMatchResults(db, allMatches);
+    await db.syncUpAllEntities();
 
-    this.log.step('Generating deals');
-    new DealGenerator(this.db).run(allMatches);
+    log.step('Generating deals');
+    new DealGenerator(db).run(allMatches);
 
-    this.log.step('Upserting deals in Hubspot');
-    await this.db.syncUpAllEntities();
+    log.step('Upserting deals in Hubspot');
+    await db.syncUpAllEntities();
 
-    printSummary(this.db);
+    printSummary(db);
 
-    this.log.step('Done!');
+    log.step('Done!');
   }
 
 }

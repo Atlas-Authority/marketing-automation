@@ -19,7 +19,7 @@ await slack.postToSlack(`Starting Marketing Engine`);
 await run({
 
   async work() {
-    await new Engine(db).run();
+    await new Engine().run(db);
   },
 
   async failed(errors) {
