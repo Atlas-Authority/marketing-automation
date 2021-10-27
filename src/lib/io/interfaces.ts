@@ -1,5 +1,5 @@
-import { RawLicense, RawTransaction } from "../../model/marketplace/raw";
-import { EntityKind, FullEntity } from "../hubspot.js";
+import { RawLicense, RawTransaction } from "../model/marketplace/raw";
+import { Association, EntityKind, ExistingEntity, FullEntity, NewEntity } from "./hubspot.js";
 
 export interface Progress {
   setCount: (count: number) => void;
@@ -15,4 +15,12 @@ export interface Downloader {
   downloadTransactions(progress: Progress): Promise<RawTransaction[]>;
   downloadLicensesWithoutDataInsights(progress: Progress): Promise<RawLicense[]>;
   downloadLicensesWithDataInsights(progress: Progress): Promise<RawLicense[]>;
+}
+
+export interface Uploader {
+  createHubspotEntities(kind: EntityKind, inputs: NewEntity[]): Promise<ExistingEntity[]>;
+  updateHubspotEntities(kind: EntityKind, inputs: ExistingEntity[]): Promise<ExistingEntity[]>;
+
+  createHubspotAssociations(fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void>;
+  deleteHubspotAssociations(fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void>;
 }

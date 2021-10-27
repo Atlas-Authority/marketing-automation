@@ -1,7 +1,6 @@
 import * as assert from 'assert';
-import { Downloader, Progress } from '../../io/downloader/downloader.js';
 import { EntityKind, RelativeAssociation } from '../../io/hubspot.js';
-import { Uploader } from '../../io/uploader/uploader.js';
+import { Downloader, Progress, Uploader } from '../../io/interfaces.js';
 import { batchesOf } from '../../util/helpers.js';
 import { Entity, EntityDatabase } from "./entity.js";
 

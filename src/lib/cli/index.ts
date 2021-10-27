@@ -1,8 +1,7 @@
-import { Downloader } from "../io/downloader/downloader.js";
-import LiveDownloader from '../io/downloader/live-downloader.js';
+import { Downloader, Uploader } from "../io/interfaces.js";
+import LiveDownloader from '../io/live-downloader.js';
+import LiveUploader from "../io/live-uploader.js";
 import { MemoryRemote } from "../io/memory-remote.js";
-import LiveUploader from "../io/uploader/live-uploader.js";
-import { Uploader } from "../io/uploader/uploader.js";
 import { sharedArgParser } from './arg-parser.js';
 
 export function getIoFromCli() {

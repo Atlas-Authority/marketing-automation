@@ -1,4 +1,4 @@
-import LiveDownloader from '../lib/io/downloader/live-downloader.js';
+import LiveDownloader from '../lib/io/live-downloader.js';
 import { MemoryRemote } from '../lib/io/memory-remote.js';
 import { Database } from '../lib/model/database.js';
 

@@ -1,6 +1,5 @@
-import { Downloader } from "../io/downloader/downloader.js";
 import { EntityKind } from "../io/hubspot.js";
-import { Uploader } from "../io/uploader/uploader.js";
+import { Downloader, Uploader } from "../io/interfaces.js";
 import { MultiDownloadLogger } from "../log/download-logger.js";
 import log from "../log/logger.js";
 import { makeEmailValidationRegex, makeMultiProviderDomainsSet } from "../services/domains.js";

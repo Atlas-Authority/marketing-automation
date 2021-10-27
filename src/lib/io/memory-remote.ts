@@ -1,9 +1,8 @@
 import * as datadir from '../cache/datadir.js';
 import log, { LogLevel, logLevel } from '../log/logger.js';
 import { RawLicense, RawTransaction } from "../model/marketplace/raw.js";
-import { Downloader, Progress } from "./downloader/downloader.js";
 import { Association, EntityKind, ExistingEntity, FullEntity, NewEntity } from "./hubspot.js";
-import { Uploader } from "./uploader/uploader.js";
+import { Downloader, Progress, Uploader } from "./interfaces.js";
 
 export class MemoryRemote implements Downloader, Uploader {
 
