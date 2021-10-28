@@ -11,8 +11,6 @@ export enum LogLevel {
 
 export const logLevel = logLevelFromCliString(cliParams.get('--loglevel')?.trim().toLowerCase());
 
-let enabled = true;
-
 const great = '\x1b[32m';
 const nerve = '\x1b[43;30;1m';
 const scary = '\x1b[40;31;1m';
@@ -21,9 +19,6 @@ const royal = '\x1b[35m';
 const relax = '\x1b[33;2m';
 
 class Logger {
-
-  enable() { enabled = true; }
-  disable() { enabled = false; }
 
   error(prefix: string, ...args: any[]) { print(LogLevel.Error, prefix, ...args); }
   warn(prefix: string, ...args: any[]) { print(LogLevel.Warn, prefix, ...args); }
@@ -45,7 +40,6 @@ const levelPrefixes = {
 };
 
 function print(level: LogLevel, prefix: string, ...args: any[]) {
-  if (!enabled) return;
   if (level > logLevel) return;
 
   const first = levelPrefixes[level];
