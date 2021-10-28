@@ -1,10 +1,10 @@
 import v8 from "v8";
-import { sharedArgParser } from "../cli/arg-parser.js";
+import { cliParams } from "../cli/arg-parser.js";
 import config from '../config/index.js';
 import log from '../log/logger.js';
 import * as datadir from './datadir.js';
 
-const cachedFns = sharedArgParser.get('--cached-fns')?.split(',') || [];
+const cachedFns = cliParams.get('--cached-fns')?.split(',') || [];
 
 export function fnOrCache<T>(filename: string, fn: () => T): T {
   if (config.isProduction || config.isTest) return fn();

@@ -1,5 +1,5 @@
 import util from 'util';
-import { sharedArgParser } from '../cli/arg-parser.js';
+import { cliParams } from '../cli/arg-parser.js';
 
 export enum LogLevel {
   Error,
@@ -9,7 +9,7 @@ export enum LogLevel {
   Detailed,
 }
 
-export const logLevel = logLevelFromCliString(sharedArgParser.get('--loglevel')?.trim().toLowerCase());
+export const logLevel = logLevelFromCliString(cliParams.get('--loglevel')?.trim().toLowerCase());
 
 let enabled = true;
 

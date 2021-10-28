@@ -35,4 +35,4 @@ class ArgParser {
 
 }
 
-export const sharedArgParser = new ArgParser(process.argv.slice(2));
+export const cliParams = new ArgParser(process.argv.slice(2));
