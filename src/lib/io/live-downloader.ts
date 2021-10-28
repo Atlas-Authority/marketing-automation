@@ -13,46 +13,35 @@ export default class LiveDownloader implements Downloader {
   hubspot = new Hubspot();
 
   async downloadHubspotEntities(_progress: Progress, kind: EntityKind, apiProperties: string[], inputAssociations: string[]): Promise<FullEntity[]> {
-    const normalizedEntities = await this.hubspot.downloadEntities(kind, apiProperties, inputAssociations);
-    save(`${kind}.json`, normalizedEntities);
-    return normalizedEntities;
+    return cache(`${kind}.json`, await this.hubspot.downloadEntities(kind, apiProperties, inputAssociations));
   }
 
   async downloadFreeEmailProviders(): Promise<string[]> {
-    const domains = await downloadFreeEmailProviders();
-    save('domains.json', domains);
-    return domains;
+    return cache('domains.json', await downloadFreeEmailProviders());
   }
 
   async downloadAllTlds(): Promise<string[]> {
-    const tlds = await downloadAllTlds();
-    save('tlds.json', tlds);
-    return tlds;
+    return cache('tlds.json', await downloadAllTlds());
   }
 
   async downloadTransactions(): Promise<RawTransaction[]> {
-    const json = await downloadTransactions();
-    save('transactions.json', json);
-    return json;
+    return cache('transactions.json', await downloadTransactions());
   }
 
   async downloadLicensesWithoutDataInsights(): Promise<RawLicense[]> {
-    let json = await downloadLicensesWithoutDataInsights();
-    save('licenses-without.json', json);
-    return json;
+    return cache('licenses-without.json', await downloadLicensesWithoutDataInsights());
   }
 
   async downloadLicensesWithDataInsights(progress: Progress): Promise<RawLicense[]> {
-    const licenses = await downloadLicensesWithDataInsights(progress);
-    save('licenses-with.json', licenses);
-    return licenses;
+    return cache('licenses-with.json', await downloadLicensesWithDataInsights(progress));
   }
 
 }
 
-function save(file: string, data: unknown) {
-  if (config.isProduction) return;
-
-  const content = JSON.stringify(data, null, 2);
-  datadir.writeFile('in', file, content);
+function cache<T>(file: string, data: T): T {
+  if (!config.isProduction) {
+    const content = JSON.stringify(data, null, 2);
+    datadir.writeFile('in', file, content);
+  }
+  return data;
 }
