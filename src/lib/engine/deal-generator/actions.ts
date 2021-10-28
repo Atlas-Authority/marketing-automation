@@ -32,7 +32,7 @@ export class ActionGenerator {
     const latestLicense = event.licenses[event.licenses.length - 1];
     if (!deal) {
       return makeCreateAction(event, latestLicense, {
-        dealstage: latestLicense.active
+        dealstage: event.licenses.some(l => l.active)
           ? DealStage.EVAL
           : DealStage.CLOSED_LOST,
         addonLicenseId: latestLicense.data.addonLicenseId,
