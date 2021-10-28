@@ -74,7 +74,9 @@ export function dealCreationProperties(record: License | Transaction, data: Pick
 
 export function updateDeal(deal: Deal, record: License | Transaction) {
   if (record instanceof Transaction) {
-    deal.data.amount = record.data.vendorAmount;
+    deal.data.amount = Math.max(
+      deal.data.amount ?? 0,
+      record.data.vendorAmount);
   }
 
   if (!deal.data.amount) {
