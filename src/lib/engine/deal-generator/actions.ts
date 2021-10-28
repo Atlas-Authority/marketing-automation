@@ -40,7 +40,10 @@ export class ActionGenerator {
       });
     }
     else if (deal.isEval()) {
-      return makeUpdateAction(event, deal, latestLicense);
+      const dealStage = (event.licenses.some(l => l.active)
+        ? DealStage.EVAL
+        : DealStage.CLOSED_LOST);
+      return makeUpdateAction(event, deal, latestLicense, dealStage);
     }
     else {
       return makeIgnoreAction(event, deal, 'Deal already exists and is not eval');
