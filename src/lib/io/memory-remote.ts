@@ -117,7 +117,10 @@ export class MemoryRemote implements Downloader, Uploader {
   }
 
   private fakeApiConsoleLog(title: string, data: unknown[]) {
-    log.info('Fake Uploader', title, this.verbose ? data : data.length);
+    log.info('Fake Uploader', title, data.length);
+    if (this.verbose) {
+      log.verbose('Fake Uploader', title, data);
+    }
   }
 
   private getEntity(kind: EntityKind, id: string) {
