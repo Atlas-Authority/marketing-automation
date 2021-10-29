@@ -127,7 +127,7 @@ export abstract class EntityManager<
             for (const localIdKey of this.identifiers) {
               const localVal = e.data[localIdKey];
               const [remoteIdKey, hsLocal] = this.toAPI[localIdKey](localVal);
-              const hsRemote = result.properties[remoteIdKey];
+              const hsRemote = result.properties[remoteIdKey] ?? '';
               if (hsLocal !== hsRemote) return false;
             }
             return true;
