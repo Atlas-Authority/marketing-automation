@@ -1,6 +1,7 @@
 import log from "../log/logger.js";
 import { Database } from "../model/database.js";
 import { Deal } from "../model/deal.js";
+import { formatMoney, formatNumber } from "../util/formatters.js";
 import { isPresent } from "../util/helpers.js";
 
 export function printSummary(db: Database) {
@@ -34,14 +35,6 @@ export function printSummary(db: Database) {
     'CompaniesUpdated': formatNumber(db.companyManager.updatedCount),
   });
 
-}
-
-function formatNumber(n: number) {
-  return new Intl.NumberFormat('en-US').format(n);
-}
-
-function formatMoney(n: number) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n);
 }
 
 function dealLink(deal: Deal) {
