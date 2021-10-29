@@ -7,7 +7,6 @@ export default class Slack {
   slackWebClient = new slack.WebClient(config.slack.apiToken);
 
   async postErrorToSlack(text: string) {
-    text = (config.slack.errorPrefix || '') + text;
     await this.postToSlack(text);
   }
 

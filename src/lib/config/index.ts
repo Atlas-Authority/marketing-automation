@@ -30,7 +30,6 @@ export default {
   },
   slack: {
     apiToken: required('SLACK_API_TOKEN'),
-    errorPrefix: optional('SLACK_ERROR_PREFIX'),
     errorChannelId: optional('SLACK_ERROR_CHANNEL_ID'),
   },
   engine: {
