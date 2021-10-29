@@ -15,14 +15,14 @@ const deploymentKey = config.hubspot.attrs.deal.deployment;
 const appKey = config.hubspot.attrs.deal.app;
 
 export type DealData = {
-  relatedProducts: string;
+  relatedProducts: string | null;
   app: string;
   addonLicenseId: string | null;
   transactionId: string | null;
   closeDate: string;
   country: string;
   dealName: string;
-  origin: string;
+  origin: string | null;
   deployment: 'Server' | 'Cloud' | 'Data Center';
   licenseTier: number;
   pipeline: Pipeline;
@@ -85,14 +85,14 @@ export class DealManager extends EntityManager<DealData, Deal> {
   override fromAPI(data: { [key: string]: string | null }): DealData | null {
     if (data.pipeline !== Pipeline.AtlassianMarketplace) return null;
     return {
-      relatedProducts: data['related_products'] as string,
+      relatedProducts: data['related_products'] || null,
       app: data[appKey] as string,
       addonLicenseId: data[addonLicenseIdKey],
       transactionId: data[transactionIdKey],
       closeDate: (data['closedate'] as string).substr(0, 10),
       country: data['country'] as string,
       dealName: data['dealname'] as string,
-      origin: data['origin'] as DealData['origin'],
+      origin: data['origin'] || null,
       deployment: data[deploymentKey] as DealData['deployment'],
       licenseTier: +(data['license_tier'] as string),
       pipeline: data['pipeline'],
@@ -113,14 +113,14 @@ export class DealManager extends EntityManager<DealData, Deal> {
   }
 
   override toAPI: PropertyTransformers<DealData> = {
-    relatedProducts: relatedProducts => ['related_products', relatedProducts],
+    relatedProducts: relatedProducts => ['related_products', relatedProducts ?? ''],
     app: app => [appKey, app],
     addonLicenseId: addonLicenseId => [addonLicenseIdKey, addonLicenseId || ''],
     transactionId: transactionId => [transactionIdKey, transactionId || ''],
     closeDate: closeDate => ['closedate', closeDate],
     country: country => ['country', country],
     dealName: dealName => ['dealname', dealName],
-    origin: origin => ['origin', origin],
+    origin: origin => ['origin', origin ?? ''],
     deployment: deployment => [deploymentKey, deployment],
     licenseTier: licenseTier => ['license_tier', licenseTier.toFixed()],
     pipeline: pipeline => ['pipeline', pipeline],
