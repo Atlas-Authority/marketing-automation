@@ -115,7 +115,7 @@ function validateTransaction(transaction: RawTransaction) {
 function validateField<T>(o: T, accessor: (o: T) => any) {
   const val = accessor(o);
   const path = accessor.toString().replace(/^(\w+) => /, '');
-  if (!val) throw new AttachableError(`Missing field: ${path}`, JSON.stringify(o));
+  if (!val) throw new AttachableError(`Missing field: ${path}`, JSON.stringify(o, null, 2));
 }
 
 function filterLicensesWithTechEmail(license: RawLicense) {

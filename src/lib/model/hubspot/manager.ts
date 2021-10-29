@@ -1,5 +1,6 @@
 import * as assert from 'assert';
 import { Downloader, Progress, Uploader } from '../../io/interfaces.js';
+import { AttachableError } from '../../util/errors.js';
 import { batchesOf } from '../../util/helpers.js';
 import { Entity, EntityDatabase } from "./entity.js";
 import { EntityKind, RelativeAssociation } from './interfaces.js';
@@ -131,6 +132,16 @@ export abstract class EntityManager<
             }
             return true;
           });
+
+          if (!found) {
+            throw new AttachableError("Couldn't find ", JSON.stringify({
+              local: e.data,
+              remotes: results.map(r => ({
+                id: r.id,
+                properties: r.properties,
+              })),
+            }, null, 2));
+          }
 
           assert.ok(found);
           e.id = found.id;
