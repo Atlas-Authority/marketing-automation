@@ -134,8 +134,8 @@ export function mergeContactInfo(contact: ContactData, contacts: GeneratedContac
   }
 
   for (const other of contacts) {
-    for (const product of other.products) {
-      contact.products.add(product);
+    for (const product of other.products ?? []) {
+      contact.products?.add(product);
     }
   }
 }

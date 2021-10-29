@@ -14,7 +14,16 @@ export abstract class EntityManager<
   E extends Entity<P>>
 {
 
-  protected static readonly downSyncOnly = (): [string, string] => ['', ''];
+  protected static readonly noUpSync = (): [string, string] => ['', ''];
+
+  protected static upSyncIfConfigured<T>(
+    attributeKey: string | undefined,
+    transformer: (localValue: T) => string
+  ): (val: T) => [string, string] {
+    return (attributeKey ?
+      (value => [attributeKey, transformer(value)])
+      : this.noUpSync);
+  }
 
   constructor(
     private downloader: Downloader,

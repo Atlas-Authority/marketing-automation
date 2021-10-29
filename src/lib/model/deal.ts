@@ -16,14 +16,14 @@ const appKey = config.hubspot.attrs.deal.app;
 
 export type DealData = {
   relatedProducts: string | null;
-  app: string;
+  app: string | null;
   addonLicenseId: string | null;
   transactionId: string | null;
   closeDate: string;
   country: string;
   dealName: string;
   origin: string | null;
-  deployment: 'Server' | 'Cloud' | 'Data Center';
+  deployment: 'Server' | 'Cloud' | 'Data Center' | null;
   licenseTier: number;
   pipeline: Pipeline;
   dealstage: DealStage;
@@ -57,11 +57,8 @@ export class DealManager extends EntityManager<DealData, Deal> {
   ];
 
   override apiProperties: string[] = [
+    // Required
     'closedate',
-    deploymentKey,
-    addonLicenseIdKey,
-    transactionIdKey,
-    appKey,
     'license_tier',
     'country',
     'origin',
@@ -71,6 +68,15 @@ export class DealManager extends EntityManager<DealData, Deal> {
     'pipeline',
     'amount',
 
+    // User-configurable
+    addonLicenseIdKey,
+    transactionIdKey,
+    ...[
+      deploymentKey,
+      appKey,
+    ].filter(isPresent),
+
+    // For checking activity in duplicates
     'hs_user_ids_of_all_owners',
     'engagements_last_meeting_booked',
     'hs_latest_meeting_activity',
@@ -86,14 +92,14 @@ export class DealManager extends EntityManager<DealData, Deal> {
     if (data.pipeline !== Pipeline.AtlassianMarketplace) return null;
     return {
       relatedProducts: data['related_products'] || null,
-      app: data[appKey] as string,
+      app: appKey ? data[appKey] as string : null,
       addonLicenseId: data[addonLicenseIdKey],
       transactionId: data[transactionIdKey],
       closeDate: (data['closedate'] as string).substr(0, 10),
       country: data['country'] as string,
       dealName: data['dealname'] as string,
       origin: data['origin'] || null,
-      deployment: data[deploymentKey] as DealData['deployment'],
+      deployment: deploymentKey ? data[deploymentKey] as DealData['deployment'] : null,
       licenseTier: +(data['license_tier'] as string),
       pipeline: data['pipeline'],
       dealstage: data['dealstage'] as string,
@@ -114,19 +120,19 @@ export class DealManager extends EntityManager<DealData, Deal> {
 
   override toAPI: PropertyTransformers<DealData> = {
     relatedProducts: relatedProducts => ['related_products', relatedProducts ?? ''],
-    app: app => [appKey, app],
+    app: EntityManager.upSyncIfConfigured(appKey, app => app ?? ''),
     addonLicenseId: addonLicenseId => [addonLicenseIdKey, addonLicenseId || ''],
     transactionId: transactionId => [transactionIdKey, transactionId || ''],
     closeDate: closeDate => ['closedate', closeDate],
     country: country => ['country', country],
     dealName: dealName => ['dealname', dealName],
     origin: origin => ['origin', origin ?? ''],
-    deployment: deployment => [deploymentKey, deployment],
+    deployment: EntityManager.upSyncIfConfigured(deploymentKey, deployment => deployment ?? ''),
     licenseTier: licenseTier => ['license_tier', licenseTier.toFixed()],
     pipeline: pipeline => ['pipeline', pipeline],
     dealstage: dealstage => ['dealstage', dealstage],
     amount: amount => ['amount', amount?.toString() ?? ''],
-    hasActivity: EntityManager.downSyncOnly,
+    hasActivity: EntityManager.noUpSync,
   };
 
   override identifiers: (keyof DealData)[] = [
