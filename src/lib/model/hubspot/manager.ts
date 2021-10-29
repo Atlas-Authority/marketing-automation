@@ -105,7 +105,7 @@ export abstract class EntityManager<
     const toCreate = toSync.filter(e => e.id === undefined);
     const toUpdate = toSync.filter(e => e.id !== undefined);
 
-    const batchSize = this.kind === 'contact' ? 10 : 100;
+    const batchSize = 10;
 
     if (toCreate.length > 0) {
       const groupsToCreate = batchesOf(toCreate, batchSize);
