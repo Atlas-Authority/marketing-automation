@@ -105,9 +105,10 @@ export abstract class EntityManager<
     const toCreate = toSync.filter(e => e.id === undefined);
     const toUpdate = toSync.filter(e => e.id !== undefined);
 
+    const batchSize = this.kind === 'contact' ? 10 : 100;
+
     if (toCreate.length > 0) {
-      const amount = this.kind === 'contact' ? 10 : 100;
-      const groupsToCreate = batchesOf(toCreate, amount);
+      const groupsToCreate = batchesOf(toCreate, batchSize);
       for (const entitiesToCreate of groupsToCreate) {
         const results = await this.uploader.createHubspotEntities(
           this.kind,
@@ -138,7 +139,7 @@ export abstract class EntityManager<
     }
 
     if (toUpdate.length > 0) {
-      const groupsToUpdate = batchesOf(toUpdate, 100);
+      const groupsToUpdate = batchesOf(toUpdate, batchSize);
       for (const entitiesToUpdate of groupsToUpdate) {
         const results = await this.uploader.updateHubspotEntities(
           this.kind,
