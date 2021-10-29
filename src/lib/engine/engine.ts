@@ -31,15 +31,15 @@ export default class Engine {
     log.step('Upserting Generated Contacts in Hubspot');
     await db.syncUpAllEntities();
 
-    log.step('Removing ignored apps from rest of engine run');
-    removeIgnoredApps(db);
-
     log.step('Running Scoring Engine');
     const allMatches = matchIntoLikelyGroups(db);
 
     log.step('Updating Contacts based on Match Results');
     updateContactsBasedOnMatchResults(db, allMatches);
     await db.syncUpAllEntities();
+
+    log.step('Removing ignored apps from rest of engine run');
+    removeIgnoredApps(db, allMatches);
 
     log.step('Generating deals');
     new DealGenerator(db).run(allMatches);
