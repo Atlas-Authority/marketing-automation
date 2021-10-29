@@ -1,10 +1,10 @@
 import { saveForInspection } from '../lib/cache/inspection.js';
-import CachedFileDownloader from '../lib/io/downloader/cached-file-downloader.js';
-import ConsoleUploader from '../lib/io/uploader/console-uploader.js';
+import { MemoryRemote } from '../lib/io/memory-remote.js';
 import { Database } from '../lib/model/database.js';
 import { isPresent, sorter } from '../lib/util/helpers.js';
 
-const db = new Database(new CachedFileDownloader(), new ConsoleUploader({ verbose: true }));
+const memoryRemote = new MemoryRemote({ verbose: true });
+const db = new Database(memoryRemote, memoryRemote);
 await db.downloadAllData();
 
 const attributions = (db

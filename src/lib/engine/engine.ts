@@ -1,67 +1,51 @@
-import { Downloader } from '../io/downloader/downloader.js';
-import { Uploader } from '../io/uploader/uploader.js';
 import { EngineLogger } from '../log/engine-logger.js';
 import { Database } from '../model/database.js';
-import { backfillDealCompanies } from './backfilling/backfill-deal-companies.js';
-import zeroEmptyDealAmounts from './backfilling/zero-empty-deal-amounts.js';
-import { findAndFlagExternallyCreatedContacts, findAndFlagPartnerCompanies, findAndFlagPartnersByDomain, identifyDomains } from './contacts/contact-types.js';
-import { generateContacts } from "./contacts/generate-contacts.js";
+import { identifyAndFlagContactTypes } from './contacts/contact-types.js';
+import { ContactGenerator } from './contacts/generate-contacts.js';
 import { updateContactsBasedOnMatchResults } from './contacts/update-contacts.js';
-import { generateDeals } from './deal-generator/generate-deals.js';
+import { DealGenerator } from './deal-generator/generate-deals.js';
 import { matchIntoLikelyGroups } from './license-matching/license-grouper.js';
+import { printSummary } from './summary.js';
 
-export default async function runEngine({ downloader, uploader }: {
-  downloader: Downloader,
-  uploader: Uploader,
-}) {
-  const log = new EngineLogger();
+export default class Engine {
 
-  log.step('Starting to download data');
-  const db = new Database(downloader, uploader);
-  await db.downloadAllData();
+  async run(db: Database) {
+    const log = new EngineLogger();
 
-  log.step('Normalizing deal amounts');
-  zeroEmptyDealAmounts(db.dealManager.getArray());
-  await db.syncUpAllEntities();
+    log.step('Starting to download data');
+    await db.downloadAllData();
 
-  log.step('Identifying partner and customer domains');
-  identifyDomains(db);
+    log.step('Identifying and Flagging Contact Types');
+    identifyAndFlagContactTypes(db);
 
-  log.step('Flagging partner/customer contacts created outside engine');
-  findAndFlagExternallyCreatedContacts(db);
-  await db.syncUpAllEntities();
+    log.step('Updating Contacts/Companies in Hubspot');
+    await db.syncUpAllEntities();
 
-  log.step('Generating contacts');
-  generateContacts(db);
+    log.step('Removing externally created contacts from rest of engine run');
+    db.contactManager.removeExternallyCreatedContacts();
 
-  log.step('Removing externally created contacts from rest of engine run');
-  db.contactManager.removeExternallyCreatedContacts();
+    log.step('Generating contacts');
+    new ContactGenerator(db).run();
 
-  log.step('Flagging partner companies');
-  findAndFlagPartnerCompanies(db);
+    log.step('Upserting Generated Contacts in Hubspot');
+    await db.syncUpAllEntities();
 
-  log.step('Flagging partners by domain');
-  findAndFlagPartnersByDomain(db);
+    log.step('Running Scoring Engine');
+    const allMatches = matchIntoLikelyGroups(db);
 
-  log.step('Upserting Contacts/Companies in Hubspot');
-  await db.syncUpAllEntities();
+    log.step('Updating Contacts based on Match Results');
+    updateContactsBasedOnMatchResults(db, allMatches);
+    await db.syncUpAllEntities();
 
-  log.step('Running Scoring Engine');
-  const allMatches = matchIntoLikelyGroups(db);
+    log.step('Generating deals');
+    new DealGenerator(db).run(allMatches);
 
-  log.step('Updating Contacts based on Match Results');
-  updateContactsBasedOnMatchResults(db, allMatches);
-  await db.syncUpAllEntities();
+    log.step('Upserting deals in Hubspot');
+    await db.syncUpAllEntities();
 
-  log.step('Backfill deal companies');
-  backfillDealCompanies(db, allMatches);
-  await db.syncUpAllEntities();
+    printSummary(db);
 
-  log.step('Generating deals');
-  generateDeals(db, allMatches);
+    log.step('Done!');
+  }
 
-  log.step('Upserting deals in Hubspot');
-  await db.syncUpAllEntities();
-
-  log.step('Done!');
 }

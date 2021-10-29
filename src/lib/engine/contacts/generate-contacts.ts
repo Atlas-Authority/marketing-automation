@@ -6,21 +6,20 @@ import { ContactInfo, PartnerBillingInfo } from '../../model/marketplace/common.
 import { Transaction } from '../../model/transaction.js';
 import { sorter } from '../../util/helpers.js';
 
-export function generateContacts(db: Database) {
-  const gen = new ContactGenerator(db);
-  gen.generateContacts();
-  gen.mergeGeneratedContacts();
-}
-
 export type GeneratedContact = ContactData & { lastUpdated: string };
 
-class ContactGenerator {
+export class ContactGenerator {
 
-  toMerge = new Map<Contact, GeneratedContact[]>();
+  private toMerge = new Map<Contact, GeneratedContact[]>();
 
   constructor(private db: Database) { }
 
-  generateContacts() {
+  run() {
+    this.generateContacts();
+    this.mergeGeneratedContacts();
+  }
+
+  private generateContacts() {
     for (const license of this.db.licenses) {
       this.generateContact(license, license.data.technicalContact);
       this.generateContact(license, license.data.billingContact);
@@ -33,7 +32,7 @@ class ContactGenerator {
     }
   }
 
-  mergeGeneratedContacts() {
+  private mergeGeneratedContacts() {
     for (const [contact, contacts] of this.toMerge) {
       contacts.sort(sorter(c => c.lastUpdated, 'DSC'));
       mergeContactInfo(contact.data, contacts);

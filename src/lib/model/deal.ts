@@ -1,10 +1,10 @@
 import { DealStage, Pipeline } from "../config/dynamic-enums.js";
 import config from "../config/index.js";
-import { EntityKind } from "../io/hubspot.js";
 import { isPresent } from "../util/helpers.js";
 import { Company } from "./company.js";
 import { Contact } from "./contact.js";
 import { Entity } from "./hubspot/entity.js";
+import { EntityKind } from "./hubspot/interfaces.js";
 import { EntityManager, PropertyTransformers } from "./hubspot/manager.js";
 import { License } from "./license.js";
 import { Transaction } from "./transaction.js";
@@ -28,6 +28,7 @@ export type DealData = {
   pipeline: Pipeline;
   dealstage: DealStage;
   amount: number | null;
+  readonly hasActivity: boolean;
 };
 
 export class Deal extends Entity<DealData> {
@@ -69,24 +70,45 @@ export class DealManager extends EntityManager<DealData, Deal> {
     'dealstage',
     'pipeline',
     'amount',
+
+    'hs_user_ids_of_all_owners',
+    'engagements_last_meeting_booked',
+    'hs_latest_meeting_activity',
+    'notes_last_contacted',
+    'notes_last_updated',
+    'notes_next_activity_date',
+    'num_contacted_notes',
+    'num_notes',
+    'hs_sales_email_last_replied',
   ];
 
   override fromAPI(data: { [key: string]: string | null }): DealData | null {
     if (data.pipeline !== Pipeline.AtlassianMarketplace) return null;
     return {
-      relatedProducts: data.related_products as string,
+      relatedProducts: data['related_products'] as string,
       app: data[appKey] as string,
       addonLicenseId: data[addonLicenseIdKey],
       transactionId: data[transactionIdKey],
-      closeDate: (data.closedate as string).substr(0, 10),
-      country: data.country as string,
-      dealName: data.dealname as string,
-      origin: data.origin as DealData['origin'],
+      closeDate: (data['closedate'] as string).substr(0, 10),
+      country: data['country'] as string,
+      dealName: data['dealname'] as string,
+      origin: data['origin'] as DealData['origin'],
       deployment: data[deploymentKey] as DealData['deployment'],
-      licenseTier: +(data.license_tier as string),
-      pipeline: data.pipeline,
-      dealstage: data.dealstage as string,
-      amount: !data.amount ? null : +data.amount,
+      licenseTier: +(data['license_tier'] as string),
+      pipeline: data['pipeline'],
+      dealstage: data['dealstage'] as string,
+      amount: !data['amount'] ? null : +data['amount'],
+      hasActivity: (
+        isNonBlankString(data['hs_user_ids_of_all_owners']) ||
+        isNonBlankString(data['engagements_last_meeting_booked']) ||
+        isNonBlankString(data['hs_latest_meeting_activity']) ||
+        isNonBlankString(data['notes_last_contacted']) ||
+        isNonBlankString(data['notes_last_updated']) ||
+        isNonBlankString(data['notes_next_activity_date']) ||
+        isNonBlankString(data['hs_sales_email_last_replied']) ||
+        isNonZeroNumberString(data['num_contacted_notes']) ||
+        isNonZeroNumberString(data['num_notes'])
+      ),
     };
   }
 
@@ -104,6 +126,7 @@ export class DealManager extends EntityManager<DealData, Deal> {
     pipeline: pipeline => ['pipeline', pipeline],
     dealstage: dealstage => ['dealstage', dealstage],
     amount: amount => ['amount', amount?.toString() ?? ''],
+    hasActivity: EntityManager.downSyncOnly,
   };
 
   override identifiers: (keyof DealData)[] = [
@@ -111,8 +134,10 @@ export class DealManager extends EntityManager<DealData, Deal> {
     'transactionId',
   ];
 
-  private dealsByAddonLicenseId = new Map<string, Deal>();
-  private dealsByTransactionId = new Map<string, Deal>();
+  private dealsByAddonLicenseId = this.makeIndex(d => [d.data.addonLicenseId].filter(isPresent));
+  private dealsByTransactionId = this.makeIndex(d => [d.data.transactionId].filter(isPresent));
+
+  duplicatesToDelete = new Map<Deal, Set<Deal>>();
 
   getByAddonLicenseId(id: string) {
     return this.dealsByAddonLicenseId.get(id);
@@ -122,38 +147,24 @@ export class DealManager extends EntityManager<DealData, Deal> {
     return this.dealsByTransactionId.get(id);
   }
 
-  override addIndexes(deals: Iterable<Deal>, full: boolean) {
-    if (full) {
-      this.dealsByAddonLicenseId.clear();
-      this.dealsByTransactionId.clear();
-    }
-    for (const deal of deals) {
-      if (deal.data.addonLicenseId) {
-        this.dealsByAddonLicenseId.set(deal.data.addonLicenseId, deal);
-      }
-      if (deal.data.transactionId) {
-        this.dealsByTransactionId.set(deal.data.transactionId, deal);
-      }
-    }
-  }
-
-  getDealForRecord(records: (License | Transaction)[]) {
-    return this.getDealsForRecords(records).find(deal => deal);
-  }
-
-  getDealsForRecords(records: (License | Transaction)[]) {
-    return (records
-      .map(record => this.getById(record))
+  getDealsForLicenses(licenses: License[]) {
+    return new Set(licenses
+      .map(l => this.getByAddonLicenseId(l.data.addonLicenseId))
       .filter(isPresent));
   }
 
-  private getById(record: License | Transaction): Deal | undefined {
-    return (record instanceof Transaction
-      ? (
-        this.dealsByTransactionId.get(record.data.transactionId) ||
-        this.dealsByAddonLicenseId.get(record.data.addonLicenseId)
-      )
-      : this.dealsByAddonLicenseId.get(record.data.addonLicenseId));
+  getDealsForTransactions(transactions: Transaction[]) {
+    return new Set(transactions
+      .map(tx => this.getByTransactionId(tx.data.transactionId))
+      .filter(isPresent));
   }
 
+}
+
+function isNonBlankString(str: string | null) {
+  return (str ?? '').length > 0;
+}
+
+function isNonZeroNumberString(str: string | null) {
+  return +(str ?? '') > 0;
 }

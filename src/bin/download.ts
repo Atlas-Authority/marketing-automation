@@ -1,6 +1,6 @@
-import LiveDownloader from '../lib/io/downloader/live-downloader.js';
-import ConsoleUploader from '../lib/io/uploader/console-uploader.js';
+import LiveDownloader from '../lib/io/live-downloader.js';
+import { MemoryRemote } from '../lib/io/memory-remote.js';
 import { Database } from '../lib/model/database.js';
 
-const db = new Database(new LiveDownloader(), new ConsoleUploader({ verbose: true }));
+const db = new Database(new LiveDownloader(), new MemoryRemote({ verbose: true }));
 await db.downloadAllData();

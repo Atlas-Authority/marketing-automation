@@ -1,7 +1,7 @@
 import { DateTime, Duration, Interval } from 'luxon';
 import fetch from 'node-fetch';
 import config from '../config/index.js';
-import { Progress } from '../io/downloader/downloader.js';
+import { Progress } from '../io/interfaces.js';
 import { RawLicense, RawTransaction } from "../model/marketplace/raw";
 import { AttachableError } from '../util/errors.js';
 

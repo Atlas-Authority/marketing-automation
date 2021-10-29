@@ -4,7 +4,7 @@ import { Deal, DealData, DealManager } from '../../model/deal.js';
 import { License } from '../../model/license.js';
 import { Transaction } from '../../model/transaction.js';
 import { isPresent, sorter } from '../../util/helpers.js';
-import { LicenseContext } from '../license-matching/license-grouper.js';
+import { RelatedLicenseSet } from '../license-matching/license-grouper.js';
 import { DealRelevantEvent, EvalEvent, PurchaseEvent, RefundEvent, RenewalEvent, UpgradeEvent } from "./events.js";
 import { dealCreationProperties, updateDeal } from './records.js';
 
@@ -27,13 +27,23 @@ export class ActionGenerator {
   }
 
   private actionForEval(event: EvalEvent): Action {
-    const deal = this.dealManager.getDealForRecord(event.licenses);
+    const deal = this.getDealForLicenses(event.licenses);
+
     const latestLicense = event.licenses[event.licenses.length - 1];
     if (!deal) {
-      return makeCreateAction(event, latestLicense, DealStage.EVAL);
+      return makeCreateAction(event, latestLicense, {
+        dealstage: event.licenses.some(l => l.active)
+          ? DealStage.EVAL
+          : DealStage.CLOSED_LOST,
+        addonLicenseId: latestLicense.data.addonLicenseId,
+        transactionId: null,
+      });
     }
     else if (deal.isEval()) {
-      return makeUpdateAction(event, deal, latestLicense, {});
+      const dealStage = (event.licenses.some(l => l.active)
+        ? DealStage.EVAL
+        : DealStage.CLOSED_LOST);
+      return makeUpdateAction(event, deal, latestLicense, dealStage);
     }
     else {
       return makeIgnoreAction(event, deal, 'Deal already exists and is not eval');
@@ -41,21 +51,18 @@ export class ActionGenerator {
   }
 
   private actionForPurchase(event: PurchaseEvent): Action {
-    const deal = (
-      // Either it is an eval or a purchase without a transaction,
-      this.dealManager.getDealForRecord(event.licenses) ||
-      // or it exists as a purchase with a transaction
-      this.dealManager.getDealForRecord(event.transaction
-        ? [event.transaction]
-        : [])
-    );
+    const deal = this.getDealForLicenses(event.licenses);
 
     const record = getLatestRecord(event);
     if (!deal) {
-      return makeCreateAction(event, record, DealStage.CLOSED_WON);
+      return makeCreateAction(event, record, {
+        dealstage: DealStage.CLOSED_WON,
+        addonLicenseId: record.data.addonLicenseId,
+        transactionId: null,
+      });
     }
     else if (deal.isEval()) {
-      return makeUpdateAction(event, deal, record, { dealstage: DealStage.CLOSED_WON });
+      return makeUpdateAction(event, deal, record, DealStage.CLOSED_WON);
     }
     else {
       return makeIgnoreAction(event, deal, 'Deal already exists and is not eval');
@@ -63,60 +70,115 @@ export class ActionGenerator {
   }
 
   private actionForRenewal(event: RenewalEvent | UpgradeEvent): Action {
-    const deal = this.dealManager.getDealForRecord([event.transaction]);
+    const deal = this.getDealForTransaction(event.transaction);
+
     if (deal) {
       return makeIgnoreAction(event, deal, 'Deal already exists for this transaction');
     }
-    return makeCreateAction(event, event.transaction, DealStage.CLOSED_WON);
+    return makeCreateAction(event, event.transaction, {
+      dealstage: DealStage.CLOSED_WON,
+      addonLicenseId: null,
+      transactionId: event.transaction.data.transactionId,
+    });
   }
 
   private actionsForRefund(event: RefundEvent): Action[] {
-    const deals = this.dealManager.getDealsForRecords(event.refundedTxs);
-    return (deals
+    const deals = this.dealManager.getDealsForTransactions(event.refundedTxs);
+    return ([...deals]
       .filter(deal => deal.data.dealstage !== DealStage.CLOSED_LOST)
-      .map(deal => {
-        return makeUpdateAction(event, deal, null, { dealstage: DealStage.CLOSED_LOST })
-      })
+      .map(deal => makeUpdateAction(event, deal, null, DealStage.CLOSED_LOST))
       .filter(isPresent)
     );
+  }
+
+  private getDealForLicenses(licenses: License[]) {
+    return this.singleDeal(this.dealManager.getDealsForLicenses(licenses));
+  }
+
+  private getDealForTransaction(transaction: Transaction) {
+    return this.singleDeal(this.dealManager.getDealsForTransactions([transaction]));
+  }
+
+  private singleDeal(foundDeals: Set<Deal>) {
+    let dealToUse = null;
+
+    if (foundDeals.size === 1) {
+      [dealToUse] = foundDeals;
+    }
+    else if (foundDeals.size > 1) {
+      // Has duplicates!
+
+      const importantDeals = [...foundDeals].filter(d => d.data.hasActivity);
+
+      let toDelete = [];
+
+      if (importantDeals.length === 0) {
+        // Just pick one, it'll be updated soon; delete the rest
+        [dealToUse, ...toDelete] = foundDeals;
+      }
+      else {
+        // Pick one, keep/report the other importants; delete the rest
+        dealToUse = importantDeals[0];
+
+        if (importantDeals.length > 1) {
+          log.warn('Deal Generator',
+            `Found duplicates that can't be auto-deleted.`,
+            importantDeals.map(d => ({ id: d.id, ...d.data })));
+        }
+
+        for (const deal of foundDeals) {
+          if (!importantDeals.includes(deal)) {
+            toDelete.push(deal);
+          }
+        }
+      }
+
+      this.dealManager.removeLocally(toDelete);
+      for (const deal of toDelete) {
+        let dupOf = this.dealManager.duplicatesToDelete.get(deal);
+        if (!dupOf) this.dealManager.duplicatesToDelete.set(deal, dupOf = new Set());
+        dupOf.add(dealToUse);
+      }
+    }
+
+    return dealToUse;
   }
 
 }
 
 export type CreateDealAction = {
   type: 'create';
-  groups: LicenseContext[];
+  groups: RelatedLicenseSet;
   properties: DealData;
 };
 
 export type UpdateDealAction = {
   type: 'update';
-  groups: LicenseContext[];
+  groups: RelatedLicenseSet;
   deal: Deal;
   properties: Partial<DealData>;
 };
 
 export type IgnoreDealAction = {
   type: 'ignore';
-  groups: LicenseContext[];
+  groups: RelatedLicenseSet;
   reason: string;
 };
 
 export type Action = CreateDealAction | UpdateDealAction | IgnoreDealAction;
 
-function makeCreateAction(event: DealRelevantEvent, record: License | Transaction, dealstage: DealStage): Action {
+function makeCreateAction(event: DealRelevantEvent, record: License | Transaction, data: Pick<DealData, 'addonLicenseId' | 'transactionId' | 'dealstage'>): Action {
   return {
     type: 'create',
     groups: event.groups,
-    properties: dealCreationProperties(record, dealstage),
+    properties: dealCreationProperties(record, data),
   };
 }
 
-function makeUpdateAction(event: DealRelevantEvent, deal: Deal, record: License | Transaction | null, properties: Partial<DealData>): Action {
-  if (record) {
-    updateDeal(deal, record);
-  }
-  Object.assign(deal.data, properties);
+function makeUpdateAction(event: DealRelevantEvent, deal: Deal, record: License | Transaction | null, dealstage?: DealStage): Action {
+  if (dealstage) deal.data.dealstage = dealstage;
+  if (record) updateDeal(deal, record);
+
   if (!deal.hasPropertyChanges()) {
     return makeIgnoreAction(event, deal, 'No properties to update');
   }

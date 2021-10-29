@@ -1,7 +1,7 @@
 import config from "../config/index.js";
-import { EntityKind } from "../io/hubspot.js";
 import { Company } from "./company.js";
 import { Entity } from "./hubspot/entity.js";
+import { EntityKind } from "./hubspot/interfaces.js";
 import { EntityManager, PropertyTransformers } from "./hubspot/manager.js";
 
 const deploymentKey = config.hubspot.attrs.contact.deployment;
@@ -29,12 +29,14 @@ export type ContactData = {
   licenseTier: number | null;
   lastMpacEvent: string | null;
 
-  otherEmails: string[];
+  readonly otherEmails: readonly string[];
 };
 
 export class Contact extends Entity<ContactData> {
 
   companies = this.makeDynamicAssociation<Company>('company');
+
+  get isExternal() { return !this.data.email || !this.data.contactType; }
 
   get allEmails() { return [this.data.email, ...this.data.otherEmails]; }
   get isPartner() { return this.data.contactType === 'Partner'; }
@@ -71,25 +73,25 @@ export class ContactManager extends EntityManager<ContactData, Contact> {
 
   override fromAPI(data: { [key: string]: string | null }): ContactData | null {
     return {
-      contactType: data.contact_type as ContactData['contactType'],
+      contactType: data['contact_type'] as ContactData['contactType'],
 
-      email: data.email ?? '',
-      country: data.country,
-      region: data.region,
+      email: data['email'] ?? '',
+      country: data['country'],
+      region: data['region'],
 
-      firstName: data.firstname?.trim() || null,
-      lastName: data.lastname?.trim() || null,
-      phone: data.phone?.trim() || null,
-      city: data.city?.trim() || null,
-      state: data.state?.trim() || null,
+      firstName: data['firstname']?.trim() || null,
+      lastName: data['lastname']?.trim() || null,
+      phone: data['phone']?.trim() || null,
+      city: data['city']?.trim() || null,
+      state: data['state']?.trim() || null,
 
-      relatedProducts: new Set(data.related_products ? data.related_products.split(';') : []),
-      licenseTier: !data.license_tier ? null : +data.license_tier,
+      relatedProducts: new Set(data['related_products'] ? data['related_products'].split(';') : []),
+      licenseTier: !data['license_tier'] ? null : +data['license_tier'],
       deployment: data[deploymentKey] as ContactData['deployment'],
       products: new Set(data[productsKey]?.split(';') || []),
-      lastMpacEvent: data.last_mpac_event,
+      lastMpacEvent: data['last_mpac_event'],
 
-      otherEmails: data.hs_additional_emails?.split(';') || [],
+      otherEmails: data['hs_additional_emails']?.split(';') || [],
     };
   }
 
@@ -112,37 +114,22 @@ export class ContactManager extends EntityManager<ContactData, Contact> {
     products: products => [productsKey, [...products].join(';')],
     lastMpacEvent: lastMpacEvent => ['last_mpac_event', lastMpacEvent ?? ''],
 
-    // Never sync'd up
-    otherEmails: () => ['', ''],
+    otherEmails: EntityManager.downSyncOnly,
   };
 
   override identifiers: (keyof ContactData)[] = [
     'email',
   ];
 
-  private contactsByEmail = new Map<string, Contact>();
+  private contactsByEmail = this.makeIndex(c => c.allEmails);
 
   getByEmail(email: string) {
     return this.contactsByEmail.get(email);
   }
 
-  override addIndexes(contacts: Iterable<Contact>, full: boolean) {
-    if (full) this.contactsByEmail.clear();
-    for (const contact of contacts) {
-      for (const email of contact.allEmails) {
-        this.contactsByEmail.set(email, contact);
-      }
-    }
-  }
-
   removeExternallyCreatedContacts() {
-    for (const contact of this.entitiesById.values()) {
-      if (contact.data.email && contact.data.contactType) return;
-      this.entitiesById.delete(contact.guaranteedId());
-      for (const email of contact.allEmails) {
-        this.contactsByEmail.delete(email);
-      }
-    }
+    const externalContacts = this.getArray().filter(c => c.isExternal);
+    this.removeLocally(externalContacts);
   }
 
 }

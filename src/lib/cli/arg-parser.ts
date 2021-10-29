@@ -1,6 +1,6 @@
 import { batchesOf } from "../util/helpers.js";
 
-export class ArgParser {
+class ArgParser {
 
   #opts: { [opt: string]: string };
 
@@ -15,7 +15,7 @@ export class ArgParser {
     return value;
   }
 
-  getChoiceOrFail<T>(option: string, choices: { [opt: string]: () => T }) {
+  getChoiceOrFail<T>(option: string, choices: { [opt: string]: () => T }): T {
     const value = this.get(option);
     if (!value || !choices[value]) {
       console.log(`Error: ${option} must be ${Object.keys(choices)
@@ -34,3 +34,5 @@ export class ArgParser {
   }
 
 }
+
+export const cliParams = new ArgParser(process.argv.slice(2));

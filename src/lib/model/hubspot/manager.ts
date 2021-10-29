@@ -1,9 +1,8 @@
 import * as assert from 'assert';
-import { Downloader, Progress } from '../../io/downloader/downloader.js';
-import { EntityKind, RelativeAssociation } from '../../io/hubspot.js';
-import { Uploader } from '../../io/uploader/uploader.js';
+import { Downloader, Progress, Uploader } from '../../io/interfaces.js';
 import { batchesOf } from '../../util/helpers.js';
 import { Entity, EntityDatabase } from "./entity.js";
+import { EntityKind, RelativeAssociation } from './interfaces.js';
 
 export type PropertyTransformers<T> = {
   [P in keyof T]: (prop: T[P]) => [string, string]
@@ -14,11 +13,16 @@ export abstract class EntityManager<
   E extends Entity<P>>
 {
 
+  protected static readonly downSyncOnly = (): [string, string] => ['', ''];
+
   constructor(
     private downloader: Downloader,
     private uploader: Uploader,
     private db: EntityDatabase
   ) { }
+
+  public createdCount = 0;
+  public updatedCount = 0;
 
   protected abstract Entity: new (db: EntityDatabase, id: string | null, props: P, associations: Set<RelativeAssociation>) => E;
   protected abstract kind: EntityKind;
@@ -28,12 +32,11 @@ export abstract class EntityManager<
   protected abstract fromAPI(data: { [key: string]: string | null }): P | null;
   protected abstract toAPI: PropertyTransformers<P>;
 
-  public abstract addIndexes(entities: Iterable<E>, full: boolean): void;
-
   protected abstract identifiers: (keyof P)[];
 
-  protected entitiesById = new Map<string, E>();
-  protected entities: E[] = [];
+  private entities: E[] = [];
+  private indexes: Index<E>[] = [];
+  private entitiesById = this.makeIndex(e => e.id ? [e.id] : []);
 
   public async downloadAllEntities(progress: Progress) {
     const data = await this.downloader.downloadHubspotEntities(progress, this.kind, this.apiProperties, this.associations);
@@ -49,17 +52,31 @@ export abstract class EntityManager<
 
       const entity = new this.Entity(this.db, raw.id, props, associations);
       this.entities.push(entity);
-      this.entitiesById.set(entity.guaranteedId(), entity);
     }
 
-    this.addIndexes(this.entities, true);
+    for (const index of this.indexes) {
+      index.clear();
+      index.addIndexesFor(this.entities);
+    }
   }
 
   public create(props: P) {
     const e = new this.Entity(this.db, null, props, new Set());
     this.entities.push(e);
-    this.addIndexes([e], false);
+    for (const index of this.indexes) {
+      index.addIndexesFor([e]);
+    }
     return e;
+  }
+
+  public removeLocally(entities: Iterable<E>) {
+    for (const index of this.indexes) {
+      index.removeIndexesFor(entities);
+    }
+    for (const e of entities) {
+      const idx = this.entities.indexOf(e);
+      this.entities.splice(idx, 1);
+    }
   }
 
   public get(id: string) {
@@ -77,7 +94,10 @@ export abstract class EntityManager<
   public async syncUpAllEntities() {
     await this.syncUpAllEntitiesProperties();
     await this.syncUpAllEntitiesAssociations();
-    this.addIndexes(this.entities, true);
+    for (const index of this.indexes) {
+      index.clear();
+      index.addIndexesFor(this.entities);
+    }
   }
 
   private async syncUpAllEntitiesProperties() {
@@ -113,7 +133,6 @@ export abstract class EntityManager<
 
           assert.ok(found);
           e.id = found.id;
-          this.entitiesById.set(found.id, e);
         }
       }
     }
@@ -134,6 +153,9 @@ export abstract class EntityManager<
         }
       }
     }
+
+    this.createdCount += toCreate.length;
+    this.updatedCount += toUpdate.length;
   }
 
   private async syncUpAllEntitiesAssociations() {
@@ -187,6 +209,49 @@ export abstract class EntityManager<
       if (newKey) properties[newKey] = newVal;
     }
     return properties;
+  }
+
+  protected makeIndex(keysFor: (e: E) => string[]): ReadonlyIndex<E> {
+    const index = new Index(keysFor);
+    this.indexes.push(index);
+    return index;
+  }
+
+}
+
+type ReadonlyIndex<T> = Pick<Index<T>, 'get' | 'delete'>;
+
+class Index<E> {
+
+  private map = new Map<string, E>();
+  constructor(private keysFor: (e: E) => string[]) { }
+
+  clear() {
+    this.map.clear();
+  }
+
+  addIndexesFor(entities: Iterable<E>) {
+    for (const e of entities) {
+      for (const key of this.keysFor(e)) {
+        this.map.set(key, e);
+      }
+    }
+  }
+
+  removeIndexesFor(entities: Iterable<E>) {
+    for (const e of entities) {
+      for (const key of this.keysFor(e)) {
+        this.map.delete(key);
+      }
+    }
+  }
+
+  get(key: string) {
+    return this.map.get(key);
+  }
+
+  delete(key: string) {
+    return this.map.delete(key);
   }
 
 }

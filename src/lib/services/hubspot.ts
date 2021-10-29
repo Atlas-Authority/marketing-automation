@@ -1,7 +1,7 @@
 import * as hubspot from '@hubspot/api-client';
 import assert from 'assert';
 import config from '../config/index.js';
-import { Association, EntityKind, ExistingEntity, FullEntity, NewEntity, RelativeAssociation } from '../io/hubspot.js';
+import { Association, EntityKind, ExistingEntity, FullEntity, NewEntity, RelativeAssociation } from '../model/hubspot/interfaces.js';
 import { SimpleError } from '../util/errors.js';
 
 export default class Hubspot {

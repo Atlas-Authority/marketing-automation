@@ -2,8 +2,7 @@ import * as fs from 'fs';
 import * as datadir from '../lib/cache/datadir.js';
 import { olderThan90Days } from '../lib/engine/deal-generator/generate-deals.js';
 import { shorterLicenseInfo } from '../lib/engine/license-matching/license-grouper.js';
-import CachedFileDownloader from '../lib/io/downloader/cached-file-downloader.js';
-import ConsoleUploader from '../lib/io/uploader/console-uploader.js';
+import { MemoryRemote } from '../lib/io/memory-remote.js';
 import log from '../lib/log/logger.js';
 import { Database } from '../lib/model/database.js';
 import { LicenseData } from '../lib/model/license.js';
@@ -25,7 +24,8 @@ if (sens.length === 1 && sens[0].endsWith('.json')) {
   sens = ts.map(t => t.addonLicenseId);
 }
 
-const db = new Database(new CachedFileDownloader(), new ConsoleUploader({ verbose: true }));
+const memoryRemote = new MemoryRemote({ verbose: true });
+const db = new Database(memoryRemote, memoryRemote);
 await db.downloadAllData();
 
 const ignored: (LicenseData & { reason: string })[][] = datadir.readJsonFile('out', 'ignored.json');

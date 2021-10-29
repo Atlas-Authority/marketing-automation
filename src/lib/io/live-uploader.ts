@@ -1,6 +1,6 @@
-import Hubspot from '../../services/hubspot.js';
-import { Association, EntityKind, ExistingEntity, NewEntity } from '../hubspot.js';
-import { Uploader } from './uploader.js';
+import { Association, EntityKind, ExistingEntity, NewEntity } from '../model/hubspot/interfaces.js';
+import Hubspot from '../services/hubspot.js';
+import { Uploader } from './interfaces.js';
 
 
 export default class LiveUploader implements Uploader {

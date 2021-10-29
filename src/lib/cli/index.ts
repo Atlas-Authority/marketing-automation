@@ -1,51 +1,24 @@
-import config, { LogLevel } from "../config/index.js";
-import CachedFileDownloader from "../io/downloader/cached-file-downloader.js";
-import { Downloader } from "../io/downloader/downloader.js";
-import LiveDownloader from '../io/downloader/live-downloader.js';
-import ConsoleUploader from "../io/uploader/console-uploader.js";
-import LiveUploader from "../io/uploader/live-uploader.js";
-import { Uploader } from "../io/uploader/uploader.js";
-import { ArgParser } from './arg-parser.js';
+import { Downloader, Uploader } from "../io/interfaces.js";
+import LiveDownloader from '../io/live-downloader.js';
+import LiveUploader from "../io/live-uploader.js";
+import { MemoryRemote } from "../io/memory-remote.js";
+import { cliParams } from './arg-parser.js';
 
-export function getCliOptions() {
-  const argParser = new ArgParser(process.argv.slice(2));
-
-  const logLevelString = argParser.get('--loglevel');
-  if (logLevelString) {
-    const logLevel = logLevelFromString(logLevelString.trim().toLowerCase());
-    if (logLevel !== null) {
-      config.logLevel = logLevel;
-    }
-  }
-
-  const downloader = argParser.getChoiceOrFail<Downloader>('--downloader', {
-    'live': () => new LiveDownloader(),
-    'cached': () => new CachedFileDownloader(),
-  });
-
-  const uploader = argParser.getChoiceOrFail<Uploader>('--uploader', {
-    'live': () => new LiveUploader(),
-    'console': () => new ConsoleUploader({ verbose: config.logLevel >= LogLevel.Verbose }),
-  });
-
-  const cachedFns = argParser.get('--cached-fns')?.split(',') || [];
-  config.cache.fns = cachedFns;
-
-  argParser.failIfExtraOpts();
-
+export function getIoFromCli() {
   return {
-    downloader,
-    uploader,
+    downloader: cliParams.getChoiceOrFail<Downloader>('--downloader', {
+      'cached': getSingletonMemoryRemote,
+      'live': () => new LiveDownloader(),
+    }),
+    uploader: cliParams.getChoiceOrFail<Uploader>('--uploader', {
+      'console': getSingletonMemoryRemote,
+      'live': () => new LiveUploader(),
+    }),
   };
 }
 
-function logLevelFromString(level: string) {
-  switch (level) {
-    case 'error': return LogLevel.Error;
-    case 'warn': return LogLevel.Warn;
-    case 'info': return LogLevel.Info;
-    case 'verbose': return LogLevel.Verbose;
-    case 'detailed': return LogLevel.Detailed;
-    default: return null;
-  }
+let memoryRemote: MemoryRemote | undefined;
+function getSingletonMemoryRemote() {
+  if (!memoryRemote) memoryRemote = new MemoryRemote();
+  return memoryRemote;
 }

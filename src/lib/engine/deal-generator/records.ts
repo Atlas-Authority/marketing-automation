@@ -5,7 +5,7 @@ import { Deal, DealData } from '../../model/deal.js';
 import { License } from '../../model/license.js';
 import { Transaction } from '../../model/transaction.js';
 import { isPresent, sorter } from "../../util/helpers.js";
-import { LicenseContext } from '../license-matching/license-grouper.js';
+import { RelatedLicenseSet } from '../license-matching/license-grouper.js';
 
 export function isEvalOrOpenSourceLicense(record: License) {
   return (
@@ -23,7 +23,7 @@ export function isPaidLicense(license: License) {
   );
 }
 
-export function getLicense(addonLicenseId: string, groups: LicenseContext[]) {
+export function getLicense(addonLicenseId: string, groups: RelatedLicenseSet) {
   const license = (groups
     .map(g => g.license)
     .sort(sorter(l => l.data.maintenanceStartDate, 'DSC'))
@@ -46,16 +46,14 @@ export function abbrRecordDetails(record: Transaction | License) {
   };
 }
 
-export function dealCreationProperties(record: License | Transaction, dealstage: string): DealData {
+export function dealCreationProperties(record: License | Transaction, data: Pick<DealData, 'addonLicenseId' | 'transactionId' | 'dealstage'>): DealData {
   const dealNameTemplateProperties = {
     ...record.data,
     technicalContactEmail: record.data.technicalContact.email,
   };
 
   return {
-    ...(record instanceof License
-      ? { addonLicenseId: record.data.addonLicenseId, transactionId: '' }
-      : { transactionId: record.data.transactionId, addonLicenseId: '' }),
+    ...data,
     closeDate: record.data.maintenanceStartDate,
     deployment: record.data.hosting,
     app: record.data.addonKey,
@@ -64,9 +62,9 @@ export function dealCreationProperties(record: License | Transaction, dealstage:
     origin: config.constants.dealOrigin,
     relatedProducts: config.constants.dealRelatedProducts,
     dealName: mustache.render(config.constants.dealDealName, dealNameTemplateProperties),
-    dealstage,
     pipeline: Pipeline.AtlassianMarketplace,
-    amount: (dealstage === DealStage.EVAL
+    hasActivity: false,
+    amount: (data.dealstage === DealStage.EVAL
       ? null
       : record instanceof License
         ? 0
@@ -76,16 +74,13 @@ export function dealCreationProperties(record: License | Transaction, dealstage:
 
 export function updateDeal(deal: Deal, record: License | Transaction) {
   if (record instanceof Transaction) {
-    deal.data.transactionId = record.data.transactionId;
-    deal.data.addonLicenseId = null;
-  }
-  else {
-    deal.data.addonLicenseId = record.data.addonLicenseId;
-    deal.data.transactionId = null;
+    deal.data.amount = Math.max(
+      deal.data.amount ?? 0,
+      record.data.vendorAmount);
   }
 
-  if (record instanceof Transaction) {
-    deal.data.amount = record.data.vendorAmount;
+  if (!deal.data.amount) {
+    deal.data.amount = (deal.isClosed() ? 0 : null);
   }
 
   deal.data.closeDate = record.data.maintenanceStartDate;

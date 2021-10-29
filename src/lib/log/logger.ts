@@ -1,7 +1,15 @@
 import util from 'util';
-import config, { LogLevel } from '../config/index.js';
+import { cliParams } from '../cli/arg-parser.js';
 
-let enabled = true;
+export enum LogLevel {
+  Error,
+  Warn,
+  Info,
+  Verbose,
+  Detailed,
+}
+
+export const logLevel = logLevelFromCliString(cliParams.get('--loglevel')?.trim().toLowerCase());
 
 const great = '\x1b[32m';
 const nerve = '\x1b[43;30;1m';
@@ -11,9 +19,6 @@ const royal = '\x1b[35m';
 const relax = '\x1b[33;2m';
 
 class Logger {
-
-  enable() { enabled = true; }
-  disable() { enabled = false; }
 
   error(prefix: string, ...args: any[]) { print(LogLevel.Error, prefix, ...args); }
   warn(prefix: string, ...args: any[]) { print(LogLevel.Warn, prefix, ...args); }
@@ -35,8 +40,7 @@ const levelPrefixes = {
 };
 
 function print(level: LogLevel, prefix: string, ...args: any[]) {
-  if (!enabled) return;
-  if (level > config.logLevel) return;
+  if (level > logLevel) return;
 
   const first = levelPrefixes[level];
   const styledPrefix = `${royal}${prefix}${reset}`;
@@ -74,4 +78,15 @@ function formatted(data: unknown, prefixLength: number) {
     maxArrayLength: null,
     maxStringLength: null,
   });
+}
+
+function logLevelFromCliString(level: string | undefined) {
+  switch (level) {
+    case 'error': return LogLevel.Error;
+    case 'warn': return LogLevel.Warn;
+    case 'info': return LogLevel.Info;
+    case 'verbose': return LogLevel.Verbose;
+    case 'detailed': return LogLevel.Detailed;
+    default: return LogLevel.Verbose;
+  }
 }

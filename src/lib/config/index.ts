@@ -1,14 +1,6 @@
 import { optional, required } from './helpers.js';
 export { DealStage, Pipeline } from './dynamic-enums.js';
 
-export enum LogLevel {
-  Error,
-  Warn,
-  Info,
-  Verbose,
-  Detailed,
-}
-
 export const ADDONKEY_TO_PLATFORM: { [addonKey: string]: string } = Object.fromEntries(
   required('ADDONKEY_PLATFORMS')
     .split(',')
@@ -16,7 +8,6 @@ export const ADDONKEY_TO_PLATFORM: { [addonKey: string]: string } = Object.fromE
 );
 
 export default {
-  logLevel: LogLevel.Verbose,
   mpac: {
     user: required('MPAC_USER'),
     pass: required('MPAC_PASS'),
@@ -47,9 +38,6 @@ export default {
     retryInterval: required('RETRY_INTERVAL'),
     retryTimes: +required('RETRY_TIMES'),
     partnerDomains: new Set(required('PARTNER_DOMAINS').split(/\s*,\s*/g)),
-  },
-  cache: {
-    fns: [] as string[],
   },
   constants: {
     dealOrigin: required('DEAL_ORIGIN'),
