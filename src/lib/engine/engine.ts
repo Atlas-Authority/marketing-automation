@@ -4,6 +4,7 @@ import { identifyAndFlagContactTypes } from './contacts/contact-types.js';
 import { ContactGenerator } from './contacts/generate-contacts.js';
 import { updateContactsBasedOnMatchResults } from './contacts/update-contacts.js';
 import { DealGenerator } from './deal-generator/generate-deals.js';
+import { removeIgnoredApps } from './deal-generator/ignored-apps.js';
 import { matchIntoLikelyGroups } from './license-matching/license-grouper.js';
 import { printSummary } from './summary.js';
 
@@ -29,6 +30,9 @@ export default class Engine {
 
     log.step('Upserting Generated Contacts in Hubspot');
     await db.syncUpAllEntities();
+
+    log.step('Removing ignored apps from rest of engine run');
+    removeIgnoredApps(db);
 
     log.step('Running Scoring Engine');
     const allMatches = matchIntoLikelyGroups(db);

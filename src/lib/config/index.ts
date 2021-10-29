@@ -38,6 +38,7 @@ export default {
     retryInterval: required('RETRY_INTERVAL'),
     retryTimes: +required('RETRY_TIMES'),
     partnerDomains: new Set(required('PARTNER_DOMAINS').split(/\s*,\s*/g)),
+    ignoredApps: new Set(optional('IGNORED_APPS')?.split(',') ?? []),
   },
   constants: {
     dealOrigin: required('DEAL_ORIGIN'),
