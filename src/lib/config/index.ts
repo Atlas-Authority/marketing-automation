@@ -29,7 +29,7 @@ export default {
     },
   },
   slack: {
-    apiToken: required('SLACK_API_TOKEN'),
+    apiToken: optional('SLACK_API_TOKEN'),
     errorChannelId: optional('SLACK_ERROR_CHANNEL_ID'),
   },
   engine: {

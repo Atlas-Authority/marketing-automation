@@ -4,7 +4,14 @@ import log from '../log/logger.js';
 
 export default class Slack {
 
-  slackWebClient = new slack.WebClient(config.slack.apiToken);
+  client?: slack.WebClient;
+
+  constructor() {
+    if (config.slack.apiToken) {
+      this.client = new slack.WebClient(config.slack.apiToken);
+    }
+  }
+
 
   async postErrorToSlack(text: string) {
     await this.postToSlack(text);
@@ -14,7 +21,7 @@ export default class Slack {
     log.info('Slack', title, content);
 
     if (config.slack.errorChannelId) {
-      await this.slackWebClient.files.upload({
+      await this.client?.files.upload({
         channels: config.slack.errorChannelId,
         title: title,
         content: content,
@@ -26,7 +33,7 @@ export default class Slack {
     log.info('Slack', text);
 
     if (config.slack.errorChannelId) {
-      await this.slackWebClient.chat.postMessage({
+      await this.client?.chat.postMessage({
         channel: config.slack.errorChannelId,
         text: text,
       });
