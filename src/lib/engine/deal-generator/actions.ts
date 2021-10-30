@@ -46,7 +46,7 @@ export class ActionGenerator {
       return makeUpdateAction(event, deal, latestLicense, dealStage);
     }
     else {
-      return makeIgnoreAction(event, deal, 'Deal already exists and is not eval');
+      return makeIgnoreAction(event, deal, 'Deal already exists for eval, and is not eval');
     }
   }
 
@@ -65,7 +65,7 @@ export class ActionGenerator {
       return makeUpdateAction(event, deal, record, DealStage.CLOSED_WON);
     }
     else {
-      return makeIgnoreAction(event, deal, 'Deal already exists and is not eval');
+      return makeIgnoreAction(event, deal, 'Deal already exists for purchase, and is not eval');
     }
   }
 
@@ -161,6 +161,7 @@ export type UpdateDealAction = {
 
 export type IgnoreDealAction = {
   type: 'ignore';
+  details: string,
   groups: RelatedLicenseSet;
   reason: string;
 };
@@ -192,9 +193,8 @@ function makeUpdateAction(event: DealRelevantEvent, deal: Deal, record: License 
 }
 
 function makeIgnoreAction(event: DealRelevantEvent, deal: Deal, reason: string): Action {
-  reason = `${reason} (${deal.id})`;
   log.detailed('Deal Actions', `No action: ${reason}`);
-  return { type: 'ignore', reason, groups: event.groups };
+  return { type: 'ignore', details: deal.id ?? '', reason, groups: event.groups };
 }
 
 function getLatestRecord(event: PurchaseEvent): License | Transaction {

@@ -12,6 +12,11 @@ import { ActionGenerator, CreateDealAction, UpdateDealAction } from './actions.j
 import { EventGenerator } from './events.js';
 import { getEmails } from './records.js';
 
+export type IgnoredLicense = LicenseData & {
+  reason: string;
+  details: string;
+};
+
 /** Generates deal actions based on match data */
 export class DealGenerator {
 
@@ -20,8 +25,8 @@ export class DealGenerator {
   private dealCreateActions: CreateDealAction[] = [];
   private dealUpdateActions: UpdateDealAction[] = [];
 
-  private ignoredLicenseSets: (LicenseData & { reason: string })[][] = [];
-  private ignoredAmount = 0;
+  private ignoredLicenseSets: (IgnoredLicense)[][] = [];
+  private ignoredAmounts = new Map<string, number>();
 
   constructor(private db: Database) {
     this.actionGenerator = new ActionGenerator(db.dealManager);
@@ -33,7 +38,13 @@ export class DealGenerator {
     }
 
     saveForInspection('ignored', this.ignoredLicenseSets);
-    log.info('Deal Actions', 'Total Amount of Transactions Ignored', formatMoney(this.ignoredAmount));
+
+    let ignoredTotal = 0;
+    for (const [reason, amount] of this.ignoredAmounts) {
+      log.info('Deal Actions', 'Amount of Transactions Ignored', { reason, amount: formatMoney(amount) });
+      ignoredTotal += amount;
+    }
+    log.info('Deal Actions', 'Total Amount of Transactions Ignored', formatMoney(ignoredTotal));
 
     for (const { groups, properties } of this.dealCreateActions) {
       const deal = this.db.dealManager.create(properties);
@@ -57,7 +68,7 @@ export class DealGenerator {
       switch (action.type) {
         case 'create': this.dealCreateActions.push(action); break;
         case 'update': this.dealUpdateActions.push(action); break;
-        case 'ignore': this.ignoreLicenses(action.reason, action.groups.map(g => g.license), action.groups.flatMap(g => g.transactions));
+        case 'ignore': this.ignoreLicenses(action.reason, action.details, action.groups.map(g => g.license), action.groups.flatMap(g => g.transactions));
       }
     }
   }
@@ -82,24 +93,45 @@ export class DealGenerator {
   /** Ignore if every license's tech contact domain is partner or mass-provider */
   private ignoring(groups: RelatedLicenseSet) {
     const licenses = groups.map(g => g.license);
-    const domains = licenses.map(license => license.data.technicalContact.email.toLowerCase().split('@')[1]);
-    const badDomains = domains.filter(domain => this.db.partnerDomains.has(domain) || this.db.providerDomains.has(domain));
+    const domains = new Set(licenses.map(license => license.data.technicalContact.email.toLowerCase().split('@')[1]));
 
-    if (badDomains.length === licenses.length) {
-      this.ignoreLicenses('bad-domains:' + uniqueArray(badDomains).join(','), licenses, groups.flatMap(g => g.transactions));
+    const partnerDomains = [...domains].filter(domain => this.db.partnerDomains.has(domain));
+    const providerDomains = [...domains].filter(domain => this.db.providerDomains.has(domain));
+
+    if (domains.size == partnerDomains.length + providerDomains.length) {
+      let reason;
+      if (partnerDomains.length > 0 && providerDomains.length > 0) {
+        reason = 'Partner & Mass-Provider Domains';
+      }
+      else if (partnerDomains.length > 0) {
+        reason = 'Partner Domains';
+      }
+      else if (providerDomains.length > 0) {
+        reason = 'Mass-Provider Domains';
+      }
+      else {
+        reason = 'Unknown domain issue';
+      }
+
+      this.ignoreLicenses(reason, [...domains].join(','), licenses, groups.flatMap(g => g.transactions));
       return true;
     }
 
     return false;
   }
 
-  private ignoreLicenses(reason: string, licenses: License[], transactions: Transaction[]) {
-    this.ignoredAmount += (transactions
+  private ignoreLicenses(reason: string, details: string, licenses: License[], transactions: Transaction[]) {
+    const ignoringAmount = (transactions
       .map(t => t.data.vendorAmount)
       .reduce((a, b) => a + b, 0));
 
+    this.ignoredAmounts.set(reason,
+      (this.ignoredAmounts.get(reason) ?? 0) +
+      ignoringAmount);
+
     this.ignoredLicenseSets.push(licenses.map(license => ({
       reason,
+      details,
       ...license.data,
     })));
   }
