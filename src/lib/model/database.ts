@@ -2,6 +2,7 @@ import { Downloader, Uploader } from "../io/interfaces.js";
 import { MultiDownloadLogger } from "../log/download-logger.js";
 import log from "../log/logger.js";
 import { makeEmailValidationRegex, makeMultiProviderDomainsSet } from "../services/domains.js";
+import { formatMoney, formatNumber } from "../util/formatters.js";
 import { CompanyManager } from "./company.js";
 import { ContactManager } from "./contact.js";
 import { DealManager } from "./deal.js";
@@ -83,6 +84,13 @@ export class Database {
 
     this.licenses = results.licenses.map(raw => new License(raw));
     this.transactions = results.transactions.map(raw => new Transaction(raw));
+
+    log.info('Dev', 'Licenses', formatNumber(this.licenses.length));
+    log.info('Dev', 'Transactions', formatNumber(this.transactions.length));
+    log.info('Dev', 'Amount in Transactions', formatMoney(
+      this.transactions
+        .map(t => t.data.vendorAmount)
+        .reduce((a, b) => a + b)));
   }
 
   async syncUpAllEntities() {
