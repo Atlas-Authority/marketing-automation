@@ -1,8 +1,8 @@
 import assert from 'assert';
 import mustache from 'mustache';
-import config, { DealStage } from '../../config/index.js';
+import config from '../../config/index.js';
 import { Deal, DealData } from '../../model/deal.js';
-import { Pipeline } from '../../model/hubspot/interfaces.js';
+import { DealStage, Pipeline } from '../../model/hubspot/interfaces.js';
 import { License } from '../../model/license.js';
 import { Transaction } from '../../model/transaction.js';
 import { isPresent, sorter } from "../../util/helpers.js";

@@ -1,11 +1,10 @@
-import { DealStage } from "../config/dynamic-enums.js";
 import config from "../config/index.js";
 import { AttachableError } from "../util/errors.js";
 import { isPresent } from "../util/helpers.js";
 import { Company } from "./company.js";
 import { Contact } from "./contact.js";
 import { Entity } from "./hubspot/entity.js";
-import { EntityKind, Pipeline } from "./hubspot/interfaces.js";
+import { DealStage, EntityKind, Pipeline } from "./hubspot/interfaces.js";
 import { EntityManager, PropertyTransformers } from "./hubspot/manager.js";
 import { License } from "./license.js";
 import { Transaction } from "./transaction.js";
@@ -97,7 +96,7 @@ export class DealManager extends EntityManager<DealData, Deal> {
       deployment: data[deploymentKey] as DealData['deployment'],
       licenseTier: +(data['license_tier'] as string),
       pipeline: enumFromValue(pipelines, data['pipeline']),
-      dealstage: data['dealstage'] as string,
+      dealstage: enumFromValue(dealstages, data['dealstage'] ?? ''),
       amount: !data['amount'] ? null : +data['amount'],
       hasActivity: (
         isNonBlankString(data['hs_user_ids_of_all_owners']) ||
@@ -125,7 +124,7 @@ export class DealManager extends EntityManager<DealData, Deal> {
     deployment: deployment => [deploymentKey, deployment],
     licenseTier: licenseTier => ['license_tier', licenseTier.toFixed()],
     pipeline: pipeline => ['pipeline', pipelines[pipeline]],
-    dealstage: dealstage => ['dealstage', dealstage],
+    dealstage: dealstage => ['dealstage', dealstages[dealstage]],
     amount: amount => ['amount', amount?.toString() ?? ''],
     hasActivity: EntityManager.downSyncOnly,
   };
@@ -179,4 +178,10 @@ function enumFromValue<T extends number>(mapping: Record<T, string>, apiValue: s
 
 const pipelines: Record<Pipeline, string> = {
   [Pipeline.MPAC]: config.hubspot.pipeline.mpac,
+};
+
+const dealstages: Record<DealStage, string> = {
+  [DealStage.EVAL]: config.hubspot.dealstage.eval,
+  [DealStage.CLOSED_WON]: config.hubspot.dealstage.closedWon,
+  [DealStage.CLOSED_LOST]: config.hubspot.dealstage.closedLost,
 };

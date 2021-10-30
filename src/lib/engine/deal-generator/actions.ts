@@ -1,6 +1,6 @@
-import { DealStage } from '../../config/index.js';
 import log from '../../log/logger.js';
 import { Deal, DealData, DealManager } from '../../model/deal.js';
+import { DealStage } from '../../model/hubspot/interfaces.js';
 import { License } from '../../model/license.js';
 import { Transaction } from '../../model/transaction.js';
 import { isPresent, sorter } from '../../util/helpers.js';
