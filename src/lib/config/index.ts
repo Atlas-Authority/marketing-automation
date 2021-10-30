@@ -1,5 +1,5 @@
 import { optional, required } from './helpers.js';
-export { DealStage, Pipeline } from './dynamic-enums.js';
+export { DealStage } from './dynamic-enums.js';
 
 export const ADDONKEY_TO_PLATFORM: { [addonKey: string]: string } = Object.fromEntries(
   required('ADDONKEY_PLATFORMS')
@@ -14,6 +14,9 @@ export default {
     sellerId: required('MPAC_SELLER_ID'),
   },
   hubspot: {
+    pipeline: {
+      mpac: required('HUBSPOT_PIPELINE_MPAC'),
+    },
     apiKey: required('HUBSPOT_API_KEY'),
     attrs: {
       contact: {

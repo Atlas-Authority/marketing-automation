@@ -11,3 +11,7 @@ export type Association = {
 };
 
 export type EntityKind = 'deal' | 'contact' | 'company';
+
+export enum Pipeline {
+  MPAC,
+}

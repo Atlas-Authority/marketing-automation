@@ -1,7 +1,8 @@
 import assert from 'assert';
 import mustache from 'mustache';
-import config, { DealStage, Pipeline } from '../../config/index.js';
+import config, { DealStage } from '../../config/index.js';
 import { Deal, DealData } from '../../model/deal.js';
+import { Pipeline } from '../../model/hubspot/interfaces.js';
 import { License } from '../../model/license.js';
 import { Transaction } from '../../model/transaction.js';
 import { isPresent, sorter } from "../../util/helpers.js";
@@ -62,7 +63,7 @@ export function dealCreationProperties(record: License | Transaction, data: Pick
     origin: config.constants.dealOrigin,
     relatedProducts: config.constants.dealRelatedProducts,
     dealName: mustache.render(config.constants.dealDealName, dealNameTemplateProperties),
-    pipeline: Pipeline.AtlassianMarketplace,
+    pipeline: Pipeline.MPAC,
     hasActivity: false,
     amount: (data.dealstage === DealStage.EVAL
       ? null

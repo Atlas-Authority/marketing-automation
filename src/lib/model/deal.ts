@@ -1,10 +1,11 @@
-import { DealStage, Pipeline } from "../config/dynamic-enums.js";
+import { DealStage } from "../config/dynamic-enums.js";
 import config from "../config/index.js";
+import { AttachableError } from "../util/errors.js";
 import { isPresent } from "../util/helpers.js";
 import { Company } from "./company.js";
 import { Contact } from "./contact.js";
 import { Entity } from "./hubspot/entity.js";
-import { EntityKind } from "./hubspot/interfaces.js";
+import { EntityKind, Pipeline } from "./hubspot/interfaces.js";
 import { EntityManager, PropertyTransformers } from "./hubspot/manager.js";
 import { License } from "./license.js";
 import { Transaction } from "./transaction.js";
@@ -83,7 +84,7 @@ export class DealManager extends EntityManager<DealData, Deal> {
   ];
 
   override fromAPI(data: { [key: string]: string | null }): DealData | null {
-    if (data.pipeline !== Pipeline.AtlassianMarketplace) return null;
+    if (data['pipeline'] !== config.hubspot.pipeline.mpac) return null;
     return {
       relatedProducts: data['related_products'] as string,
       app: data[appKey] as string,
@@ -95,7 +96,7 @@ export class DealManager extends EntityManager<DealData, Deal> {
       origin: data['origin'] as DealData['origin'],
       deployment: data[deploymentKey] as DealData['deployment'],
       licenseTier: +(data['license_tier'] as string),
-      pipeline: data['pipeline'],
+      pipeline: enumFromValue(pipelines, data['pipeline']),
       dealstage: data['dealstage'] as string,
       amount: !data['amount'] ? null : +data['amount'],
       hasActivity: (
@@ -123,7 +124,7 @@ export class DealManager extends EntityManager<DealData, Deal> {
     origin: origin => ['origin', origin],
     deployment: deployment => [deploymentKey, deployment],
     licenseTier: licenseTier => ['license_tier', licenseTier.toFixed()],
-    pipeline: pipeline => ['pipeline', pipeline],
+    pipeline: pipeline => ['pipeline', pipelines[pipeline]],
     dealstage: dealstage => ['dealstage', dealstage],
     amount: amount => ['amount', amount?.toString() ?? ''],
     hasActivity: EntityManager.downSyncOnly,
@@ -168,3 +169,14 @@ function isNonBlankString(str: string | null) {
 function isNonZeroNumberString(str: string | null) {
   return +(str ?? '') > 0;
 }
+
+function enumFromValue<T extends number>(mapping: Record<T, string>, apiValue: string): T {
+  const found = Object.entries(mapping).find(([k, v]) => v === apiValue);
+  if (!found) throw new AttachableError('Cannot find ENV-configured mapping:',
+    JSON.stringify({ mapping, apiValue }, null, 2));
+  return +found[0] as T;
+}
+
+const pipelines: Record<Pipeline, string> = {
+  [Pipeline.MPAC]: config.hubspot.pipeline.mpac,
+};
