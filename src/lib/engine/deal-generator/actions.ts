@@ -64,6 +64,9 @@ export class ActionGenerator {
     else if (deal.isEval()) {
       return makeUpdateAction(event, deal, record, DealStage.CLOSED_WON);
     }
+    else if (event.transaction && event.transaction.data.vendorAmount > (deal.data.amount ?? 0)) {
+      return makeUpdateAction(event, deal, event.transaction);
+    }
     else {
       return makeIgnoreAction(event, deal, 'Deal already exists for purchase, and is not eval');
     }
