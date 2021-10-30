@@ -3,14 +3,15 @@ import config from '../config/index.js';
 import { EntityKind, FullEntity } from '../model/hubspot/interfaces.js';
 import { RawLicense, RawTransaction } from "../model/marketplace/raw";
 import { downloadAllTlds, downloadFreeEmailProviders } from '../services/domains.js';
-import Hubspot from '../services/hubspot.js';
-import { downloadLicensesWithDataInsights, downloadLicensesWithoutDataInsights, downloadTransactions } from '../services/marketplace.js';
+import LiveHubspot from '../services/hubspot.js';
+import { Marketplace } from '../services/marketplace.js';
 import { Downloader, Progress } from './interfaces.js';
 
 
 export default class LiveDownloader implements Downloader {
 
-  hubspot = new Hubspot();
+  hubspot = new LiveHubspot();
+  mpac = new Marketplace();
 
   async downloadHubspotEntities(_progress: Progress, kind: EntityKind, apiProperties: string[], inputAssociations: string[]): Promise<FullEntity[]> {
     return cache(`${kind}.json`, await this.hubspot.downloadEntities(kind, apiProperties, inputAssociations));
@@ -25,15 +26,15 @@ export default class LiveDownloader implements Downloader {
   }
 
   async downloadTransactions(): Promise<RawTransaction[]> {
-    return cache('transactions.json', await downloadTransactions());
+    return cache('transactions.json', await this.mpac.downloadTransactions());
   }
 
   async downloadLicensesWithoutDataInsights(): Promise<RawLicense[]> {
-    return cache('licenses-without.json', await downloadLicensesWithoutDataInsights());
+    return cache('licenses-without.json', await this.mpac.downloadLicensesWithoutDataInsights());
   }
 
   async downloadLicensesWithDataInsights(progress: Progress): Promise<RawLicense[]> {
-    return cache('licenses-with.json', await downloadLicensesWithDataInsights(progress));
+    return cache('licenses-with.json', await this.mpac.downloadLicensesWithDataInsights(progress));
   }
 
 }

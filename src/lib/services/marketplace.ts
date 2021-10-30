@@ -5,40 +5,44 @@ import { Progress } from '../io/interfaces.js';
 import { RawLicense, RawTransaction } from "../model/marketplace/raw";
 import { AttachableError } from '../util/errors.js';
 
-export async function downloadTransactions(): Promise<RawTransaction[]> {
-  return await downloadMarketplaceData('/sales/transactions/export');
-}
+export class Marketplace {
 
-export async function downloadLicensesWithoutDataInsights(): Promise<RawLicense[]> {
-  return await downloadMarketplaceData('/licenses/export?endDate=2018-07-01');
-}
-
-export async function downloadLicensesWithDataInsights(progress: Progress): Promise<RawLicense[]> {
-  const dates = dataInsightDateRanges();
-  progress.setCount(dates.length);
-  const promises = dates.map(async ({ startDate, endDate }) => {
-    const json: RawLicense[] = await downloadMarketplaceData(`/licenses/export?withDataInsights=true&startDate=${startDate}&endDate=${endDate}`);
-    progress.tick(`${startDate}-${endDate}`);
-    return json;
-  });
-  return (await Promise.all(promises)).flat();
-}
-
-async function downloadMarketplaceData<T>(subpath: string): Promise<T[]> {
-  const res = await fetch(`https://marketplace.atlassian.com/rest/2/vendors/${config.mpac.sellerId}/reporting${subpath}`, {
-    headers: {
-      'Authorization': 'Basic ' + Buffer.from(config.mpac.user + ':' + config.mpac.pass).toString('base64'),
-    },
-  });
-
-  let text;
-  try {
-    text = await res.text();
-    return JSON.parse(text);
+  async downloadTransactions(): Promise<RawTransaction[]> {
+    return await this.downloadMarketplaceData('/sales/transactions/export');
   }
-  catch (e) {
-    throw new AttachableError('Probably invalid Marketplace JSON.', text as string);
+
+  async downloadLicensesWithoutDataInsights(): Promise<RawLicense[]> {
+    return await this.downloadMarketplaceData('/licenses/export?endDate=2018-07-01');
   }
+
+  async downloadLicensesWithDataInsights(progress: Progress): Promise<RawLicense[]> {
+    const dates = dataInsightDateRanges();
+    progress.setCount(dates.length);
+    const promises = dates.map(async ({ startDate, endDate }) => {
+      const json: RawLicense[] = await this.downloadMarketplaceData(`/licenses/export?withDataInsights=true&startDate=${startDate}&endDate=${endDate}`);
+      progress.tick(`${startDate}-${endDate}`);
+      return json;
+    });
+    return (await Promise.all(promises)).flat();
+  }
+
+  private async downloadMarketplaceData<T>(subpath: string): Promise<T[]> {
+    const res = await fetch(`https://marketplace.atlassian.com/rest/2/vendors/${config.mpac.sellerId}/reporting${subpath}`, {
+      headers: {
+        'Authorization': 'Basic ' + Buffer.from(config.mpac.user + ':' + config.mpac.pass).toString('base64'),
+      },
+    });
+
+    let text;
+    try {
+      text = await res.text();
+      return JSON.parse(text);
+    }
+    catch (e) {
+      throw new AttachableError('Probably invalid Marketplace JSON.', text as string);
+    }
+  }
+
 }
 
 function dataInsightDateRanges() {
