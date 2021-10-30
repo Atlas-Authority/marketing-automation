@@ -1,4 +1,4 @@
-import * as datadir from '../cache/datadir.js';
+import { DataDir } from '../cache/datadir.js';
 import config from '../config/index.js';
 import { EntityKind, FullEntity } from '../model/hubspot/interfaces.js';
 import { RawLicense, RawTransaction } from "../model/marketplace/raw";
@@ -41,7 +41,7 @@ export default class LiveDownloader implements Downloader {
 function cache<T>(file: string, data: T): T {
   if (!config.isProduction) {
     const content = JSON.stringify(data, null, 2);
-    datadir.writeFile('in', file, content);
+    DataDir.in.writeFile(file, content);
   }
   return data;
 }

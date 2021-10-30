@@ -1,4 +1,4 @@
-import * as datadir from '../lib/cache/datadir.js';
+import { DataDir } from '../lib/cache/datadir.js';
 import { shorterLicenseInfo } from '../lib/engine/license-matching/license-grouper.js';
 import { MemoryRemote } from '../lib/io/memory-remote.js';
 import log from '../lib/log/logger.js';
@@ -19,7 +19,7 @@ const contact = db.contactManager.get(contactId);
 
 log.info('Dev', contact);
 
-const matchedGroups: ReturnType<typeof shorterLicenseInfo>[][] = datadir.readJsonFile('out', 'matched-groups-all.json');
+const matchedGroups: ReturnType<typeof shorterLicenseInfo>[][] = DataDir.out.readJsonFile('matched-groups-all.json');
 
 const groups = matchedGroups.filter(g => g.some(l => l.tech_email === contact?.data.email));
 

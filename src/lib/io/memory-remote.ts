@@ -1,4 +1,4 @@
-import * as datadir from '../cache/datadir.js';
+import { DataDir } from '../cache/datadir.js';
 import log, { LogLevel, logLevel } from '../log/logger.js';
 import { Association, EntityKind, ExistingEntity, FullEntity, NewEntity, RelativeAssociation } from "../model/hubspot/interfaces.js";
 import { RawLicense, RawTransaction } from "../model/marketplace/raw.js";
@@ -23,16 +23,16 @@ export class MemoryRemote implements Downloader, Uploader {
   constructor(opts?: { verbose?: boolean }) {
     this.verbose = opts?.verbose ?? logLevel >= LogLevel.Verbose;
 
-    this.deals = datadir.readJsonFile('in', `deal.json`);
-    this.companies = datadir.readJsonFile('in', `company.json`);
-    this.contacts = datadir.readJsonFile('in', `contact.json`);
+    this.deals = DataDir.in.readJsonFile(`deal.json`);
+    this.companies = DataDir.in.readJsonFile(`company.json`);
+    this.contacts = DataDir.in.readJsonFile(`contact.json`);
 
-    this.licensesWith = datadir.readJsonFile('in', 'licenses-with.json');
-    this.licensesWithout = datadir.readJsonFile('in', 'licenses-without.json');
-    this.transactions = datadir.readJsonFile('in', 'transactions.json');
+    this.licensesWith = DataDir.in.readJsonFile('licenses-with.json');
+    this.licensesWithout = DataDir.in.readJsonFile('licenses-without.json');
+    this.transactions = DataDir.in.readJsonFile('transactions.json');
 
-    this.tlds = datadir.readJsonFile('in', 'tlds.json');
-    this.domains = datadir.readJsonFile('in', 'domains.json');
+    this.tlds = DataDir.in.readJsonFile('tlds.json');
+    this.domains = DataDir.in.readJsonFile('domains.json');
   }
 
   async downloadHubspotEntities(_progress: Progress, kind: EntityKind, apiProperties: string[], inputAssociations: string[]): Promise<readonly FullEntity[]> {

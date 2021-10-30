@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import * as datadir from '../lib/cache/datadir.js';
+import { DataDir } from '../lib/cache/datadir.js';
 import { olderThan90Days } from '../lib/engine/deal-generator/generate-deals.js';
 import { shorterLicenseInfo } from '../lib/engine/license-matching/license-grouper.js';
 import { MemoryRemote } from '../lib/io/memory-remote.js';
@@ -28,9 +28,9 @@ const memoryRemote = new MemoryRemote({ verbose: true });
 const db = new Database(memoryRemote, memoryRemote);
 await db.downloadAllData();
 
-const ignored: (LicenseData & { reason: string })[][] = datadir.readJsonFile('out', 'ignored.json');
+const ignored: (LicenseData & { reason: string })[][] = DataDir.out.readJsonFile('ignored.json');
 
-const matchedGroups: ReturnType<typeof shorterLicenseInfo>[][] = datadir.readJsonFile('out', 'matched-groups-all.json');
+const matchedGroups: ReturnType<typeof shorterLicenseInfo>[][] = DataDir.out.readJsonFile('matched-groups-all.json');
 
 for (const sen of sens) {
   check(sen);

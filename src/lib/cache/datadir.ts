@@ -2,36 +2,44 @@ import fs from 'fs';
 import { URL } from 'url';
 import log from '../log/logger.js';
 
-type DataDirPlace = 'in' | 'out' | 'cache';
+const rootDataDir = new URL(`../../../data/`, import.meta.url);
+if (!fs.existsSync(rootDataDir)) fs.mkdirSync(rootDataDir);
 
-export function writeFile(place: DataDirPlace, filename: string, contents: string | Buffer) {
-  ensureDir(`../../../data`);
-  ensureDir(`../../../data/${place}`);
-  fs.writeFileSync(new URL(`../../../data/${place}/${filename}`, import.meta.url), contents);
-}
+export class DataDir {
 
-export function readFile(place: DataDirPlace, filename: string) {
-  const dir = `../../../data/${place}`;
+  static readonly in = new DataDir("in");
+  static readonly out = new DataDir("out");
+  static readonly cache = new DataDir("cache");
 
-  if (!fs.existsSync(new URL(dir, import.meta.url))) {
-    log.error('Dev', `Data directory doesn't exist yet. First run the engine with --downloader=live`);
-    process.exit(1);
+  #base: URL;
+
+  constructor(place: string) {
+    this.#base = new URL(`${place}/`, rootDataDir);
+    if (!fs.existsSync(this.#base)) fs.mkdirSync(this.#base);
   }
 
-  return fs.readFileSync(new URL(`${dir}/${filename}`, import.meta.url));
-}
-
-export function readJsonFile(place: DataDirPlace, filename: string) {
-  return JSON.parse(readFile(place, filename).toString('utf8'));
-}
-
-export function pathExists(place: DataDirPlace, filename: string) {
-  const path = `../../../data/${place}/${filename}`;
-  return fs.existsSync(new URL(path, import.meta.url));
-}
-
-function ensureDir(path: string) {
-  if (!fs.existsSync(new URL(path, import.meta.url))) {
-    fs.mkdirSync(new URL(path, import.meta.url));
+  writeFile(filename: string, contents: string | Buffer) {
+    fs.writeFileSync(this.url(filename), contents);
   }
+
+  readFile(filename: string) {
+    if (!this.pathExists(filename)) {
+      log.error('Dev', `Data file doesn't exist yet; run engine to create`, this.url(filename));
+      process.exit(1);
+    }
+    return fs.readFileSync(this.url(filename));
+  }
+
+  readJsonFile(filename: string) {
+    return JSON.parse(this.readFile(filename).toString('utf8'));
+  }
+
+  pathExists(filename: string) {
+    return fs.existsSync(this.url(filename));
+  }
+
+  private url(filename: string) {
+    return new URL(filename, this.#base);
+  }
+
 }
