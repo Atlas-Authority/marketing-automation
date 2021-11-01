@@ -76,7 +76,7 @@ export class ActionGenerator {
     const deal = this.getDealForTransaction(event.transaction);
 
     if (deal) {
-      return makeIgnoreAction(event, deal, 'Deal already exists for this transaction');
+      return makeUpdateAction(event, deal, event.transaction);
     }
     return makeCreateAction(event, event.transaction, {
       dealstage: DealStage.CLOSED_WON,
