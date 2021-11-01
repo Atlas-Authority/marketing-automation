@@ -1,4 +1,5 @@
 import config from "../config/index.js";
+import { isPresent } from "../util/helpers.js";
 import { Company } from "./company.js";
 import { Entity } from "./hubspot/entity.js";
 import { EntityKind } from "./hubspot/interfaces.js";
@@ -22,7 +23,7 @@ export type ContactData = {
   country: string | null;
   region: string | null;
 
-  products: Set<string>;
+  products: Set<string> | null;
   deployment: 'Cloud' | 'Data Center' | 'Server' | 'Multiple' | null;
 
   relatedProducts: Set<string>;
@@ -54,6 +55,7 @@ export class ContactManager extends EntityManager<ContactData, Contact> {
   ];
 
   override apiProperties: string[] = [
+    // Required
     'email',
     'city',
     'state',
@@ -63,12 +65,16 @@ export class ContactManager extends EntityManager<ContactData, Contact> {
     'firstname',
     'lastname',
     'phone',
-    deploymentKey,
-    productsKey,
     'related_products',
     'license_tier',
     'last_mpac_event',
     'hs_additional_emails',
+
+    // User-configurable
+    ...[
+      deploymentKey,
+      productsKey,
+    ].filter(isPresent),
   ];
 
   override fromAPI(data: { [key: string]: string | null }): ContactData | null {
@@ -87,8 +93,8 @@ export class ContactManager extends EntityManager<ContactData, Contact> {
 
       relatedProducts: new Set(data['related_products'] ? data['related_products'].split(';') : []),
       licenseTier: !data['license_tier'] ? null : +data['license_tier'],
-      deployment: data[deploymentKey] as ContactData['deployment'],
-      products: new Set(data[productsKey]?.split(';') || []),
+      deployment: deploymentKey ? data[deploymentKey] as ContactData['deployment'] : null,
+      products: productsKey ? new Set(data[productsKey]?.split(';') || []) : null,
       lastMpacEvent: data['last_mpac_event'],
 
       otherEmails: data['hs_additional_emails']?.split(';') || [],
@@ -110,11 +116,11 @@ export class ContactManager extends EntityManager<ContactData, Contact> {
 
     relatedProducts: relatedProducts => ['related_products', [...relatedProducts].join(';')],
     licenseTier: licenseTier => ['license_tier', licenseTier?.toFixed() ?? ''],
-    deployment: deployment => [deploymentKey, deployment ?? ''],
-    products: products => [productsKey, [...products].join(';')],
+    deployment: EntityManager.upSyncIfConfigured(deploymentKey, deployment => deployment ?? ''),
+    products: EntityManager.upSyncIfConfigured(productsKey, products => [...products ?? []].join(';')),
     lastMpacEvent: lastMpacEvent => ['last_mpac_event', lastMpacEvent ?? ''],
 
-    otherEmails: EntityManager.downSyncOnly,
+    otherEmails: EntityManager.noUpSync,
   };
 
   override identifiers: (keyof ContactData)[] = [
