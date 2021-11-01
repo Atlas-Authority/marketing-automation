@@ -3,17 +3,16 @@ import * as dotenv from 'dotenv';
 
 dotenv.config();
 
-export const ADDONKEY_TO_PLATFORM: { [addonKey: string]: string } = Object.fromEntries(
-  required('ADDONKEY_PLATFORMS')
-    .split(',')
-    .map(kv => kv.split('='))
-);
-
 export default {
   mpac: {
     user: required('MPAC_USER'),
     pass: required('MPAC_PASS'),
     sellerId: required('MPAC_SELLER_ID'),
+    platforms: Object.fromEntries<string>(
+      required('ADDONKEY_PLATFORMS')
+        .split(',')
+        .map(kv => kv.split('=') as [string, string])
+    ),
   },
   hubspot: {
     pipeline: {
