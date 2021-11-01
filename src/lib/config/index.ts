@@ -52,6 +52,7 @@ export default {
     retryTimes: +required('RETRY_TIMES'),
     partnerDomains: new Set(optional('PARTNER_DOMAINS')?.split(/\s*,\s*/g) ?? []),
     ignoredApps: new Set(optional('IGNORED_APPS')?.split(',') ?? []),
+    ignoredEmails: new Set((optional('IGNORED_EMAILS')?.split(',') ?? []).map(e => e.toLowerCase())),
   },
   isProduction: process.env.NODE_ENV === 'production',
   isTest: process.env.NODE_ENV === 'test',
