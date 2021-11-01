@@ -59,11 +59,11 @@ function setPartnersViaCoworkers(db: Database) {
   for (const contact of db.contactManager.getAll()) {
     const companies = contact.companies.getAll();
     const coworkers = companies.flatMap(company => company.contacts.getAll());
-    flagPartnersViaCoworkers(db, coworkers);
+    flagPartnersViaCoworkers(coworkers);
   }
 }
 
-export function flagPartnersViaCoworkers(db: Database, coworkers: Contact[]) {
+export function flagPartnersViaCoworkers(coworkers: Contact[]) {
   if (coworkers.some(c => c.isPartner)) {
     for (const coworker of coworkers) {
       coworker.data.contactType = 'Partner';

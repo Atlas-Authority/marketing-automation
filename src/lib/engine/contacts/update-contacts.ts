@@ -9,7 +9,7 @@ export function updateContactsBasedOnMatchResults(db: Database, allMatches: Rela
   for (const group of allMatches) {
     const contacts = new Set(group.map(m => db.contactManager.getByEmail(m.license.data.technicalContact.email)!));
 
-    flagPartnersViaCoworkers(db, [...contacts]);
+    flagPartnersViaCoworkers([...contacts]);
 
     for (const contact of contacts) {
       const items = [
