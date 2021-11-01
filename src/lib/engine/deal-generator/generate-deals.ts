@@ -100,7 +100,8 @@ export class DealGenerator {
   /** Ignore if every license's tech contact domain is partner or mass-provider */
   private ignoring(groups: RelatedLicenseSet) {
     const licenses = groups.map(g => g.license);
-    const domains = new Set(licenses.map(license => license.data.technicalContact.email.toLowerCase().split('@')[1]));
+    const records = groups.flatMap(g => [g.license, ...g.transactions]);
+    const domains = new Set(records.map(license => license.data.technicalContact.email.toLowerCase().split('@')[1]));
 
     const partnerDomains = [...domains].filter(domain => this.db.partnerDomains.has(domain));
     const providerDomains = [...domains].filter(domain => this.db.providerDomains.has(domain));
