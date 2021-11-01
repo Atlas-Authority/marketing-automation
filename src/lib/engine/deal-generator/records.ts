@@ -55,7 +55,7 @@ export function dealCreationProperties(record: License | Transaction, data: Pick
 
   return {
     ...data,
-    closeDate: record.data.maintenanceStartDate,
+    closeDate: getCloseDate(record),
     deployment: record.data.hosting,
     app: record.data.addonKey,
     licenseTier: record.tier,
@@ -84,7 +84,7 @@ export function updateDeal(deal: Deal, record: License | Transaction) {
     deal.data.amount = (deal.isClosed() ? 0 : null);
   }
 
-  deal.data.closeDate = record.data.maintenanceStartDate;
+  deal.data.closeDate = getCloseDate(record);
   deal.data.licenseTier = Math.max(deal.data.licenseTier, record.tier);
 }
 
@@ -94,4 +94,10 @@ export function getEmails(item: Transaction | License) {
     item.data.billingContact?.email,
     item.data.partnerDetails?.billingContact.email,
   ].filter(isPresent);
+}
+
+function getCloseDate(record: License | Transaction): string {
+  return (record instanceof Transaction
+    ? record.data.saleDate
+    : record.data.maintenanceStartDate);
 }
