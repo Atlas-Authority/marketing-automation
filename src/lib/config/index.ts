@@ -15,6 +15,7 @@ export default {
     ),
   },
   hubspot: {
+    apiKey: required('HUBSPOT_API_KEY'),
     pipeline: {
       mpac: required('HUBSPOT_PIPELINE_MPAC'),
     },
@@ -23,7 +24,11 @@ export default {
       closedWon: required('HUBSPOT_DEALSTAGE_CLOSED_WON'),
       closedLost: required('HUBSPOT_DEALSTAGE_CLOSED_LOST'),
     },
-    apiKey: required('HUBSPOT_API_KEY'),
+    deals: {
+      dealOrigin: optional('DEAL_ORIGIN'),
+      dealRelatedProducts: optional('DEAL_RELATED_PRODUCTS'),
+      dealDealName: required('DEAL_DEALNAME'),
+    },
     attrs: {
       contact: {
         deployment: optional('HUBSPOT_CONTACT_DEPLOYMENT_ATTR'),
@@ -47,11 +52,6 @@ export default {
     retryTimes: +required('RETRY_TIMES'),
     partnerDomains: new Set(optional('PARTNER_DOMAINS')?.split(/\s*,\s*/g) ?? []),
     ignoredApps: new Set(optional('IGNORED_APPS')?.split(',') ?? []),
-  },
-  constants: {
-    dealOrigin: optional('DEAL_ORIGIN'),
-    dealRelatedProducts: optional('DEAL_RELATED_PRODUCTS'),
-    dealDealName: required('DEAL_DEALNAME'),
   },
   isProduction: process.env.NODE_ENV === 'production',
   isTest: process.env.NODE_ENV === 'test',

@@ -60,9 +60,9 @@ export function dealCreationProperties(record: License | Transaction, data: Pick
     app: record.data.addonKey,
     licenseTier: record.tier,
     country: record.data.country,
-    origin: config.constants.dealOrigin ?? null,
-    relatedProducts: config.constants.dealRelatedProducts ?? null,
-    dealName: mustache.render(config.constants.dealDealName, dealNameTemplateProperties),
+    origin: config.hubspot.deals.dealOrigin ?? null,
+    relatedProducts: config.hubspot.deals.dealRelatedProducts ?? null,
+    dealName: mustache.render(config.hubspot.deals.dealDealName, dealNameTemplateProperties),
     pipeline: Pipeline.MPAC,
     hasActivity: false,
     amount: (data.dealstage === DealStage.EVAL
