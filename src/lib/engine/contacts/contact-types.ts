@@ -12,11 +12,9 @@ export function identifyAndFlagContactTypes(db: Database) {
   removeProviderDomainsFromPartnerDomains(db);
   separatePartnerDomainsFromCustomerDomains(db);
 
-  // Both Identifying and Flagging
-  setPartnerDomainsViaCoworkers(db);
-
   // Flagging contacts and companies
   flagKnownContactTypesByDomain(db);
+  setPartnersViaCoworkers(db);
 }
 
 function identifyContactTypesFromRecordDomains(db: Database, records: (Transaction | License)[]) {
@@ -57,7 +55,7 @@ function flagKnownContactTypesByDomain(db: Database) {
   }
 }
 
-function setPartnerDomainsViaCoworkers(db: Database) {
+function setPartnersViaCoworkers(db: Database) {
   for (const contact of db.contactManager.getAll()) {
     const companies = contact.companies.getAll();
     const coworkers = companies.flatMap(company => company.contacts.getAll());
