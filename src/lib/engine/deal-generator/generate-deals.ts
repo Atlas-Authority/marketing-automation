@@ -6,7 +6,7 @@ import { Deal } from '../../model/deal.js';
 import { License, LicenseData } from '../../model/license.js';
 import { Transaction } from '../../model/transaction.js';
 import { formatMoney } from '../../util/formatters.js';
-import { isPresent, sorter, uniqueArray } from '../../util/helpers.js';
+import { isPresent, sorter } from '../../util/helpers.js';
 import { RelatedLicenseSet } from '../license-matching/license-grouper.js';
 import { ActionGenerator, CreateDealAction, UpdateDealAction } from './actions.js';
 import { EventGenerator } from './events.js';
@@ -153,12 +153,11 @@ export function olderThan90Days(dateString: string) {
 }
 
 function contactsFor(db: Database, groups: RelatedLicenseSet) {
-  return (uniqueArray(
-    groups
-      .flatMap(group => [group.license, ...group.transactions])
-      .flatMap(getEmails)
-  )
+  const records = groups.flatMap(group => [group.license, ...group.transactions]);
+  const emails = [...new Set(records.flatMap(getEmails))];
+  const contacts = (emails
     .map(email => db.contactManager.getByEmail(email))
-    .filter(isPresent))
-    .sort(sorter(c => c.isCustomer ? -1 : 0));
+    .filter(isPresent));
+  contacts.sort(sorter(c => c.isCustomer ? -1 : 0));
+  return contacts;
 }
