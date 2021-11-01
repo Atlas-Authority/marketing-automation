@@ -46,7 +46,7 @@ export class ActionGenerator {
       return makeUpdateAction(event, deal, latestLicense, dealStage);
     }
     else {
-      return makeIgnoreAction(event, deal, 'Deal already exists for eval, and is not eval');
+      return makeUpdateAction(event, deal, latestLicense);
     }
   }
 
@@ -68,7 +68,7 @@ export class ActionGenerator {
       return makeUpdateAction(event, deal, event.transaction);
     }
     else {
-      return makeIgnoreAction(event, deal, 'Deal already exists for purchase, and is not eval');
+      return makeUpdateAction(event, deal, record);
     }
   }
 
