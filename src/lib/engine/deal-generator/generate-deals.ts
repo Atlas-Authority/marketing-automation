@@ -28,7 +28,7 @@ export class DealGenerator {
   private ignoredLicenseSets: (IgnoredLicense)[][] = [];
   private ignoredAmounts = new Map<string, number>();
 
-  private partnerAmounts: [string, number][] = [];
+  private partnerTransactions = new Set<Transaction>();
 
   constructor(private db: Database) {
     this.actionGenerator = new ActionGenerator(db.dealManager);
@@ -47,7 +47,11 @@ export class DealGenerator {
       ignoredTotal += amount;
     }
     log.info('Deal Actions', 'Total Amount of Transactions Ignored', formatMoney(ignoredTotal));
-    log.warn('Deal Actions', 'Partner amounts', this.partnerAmounts);
+    log.warn('Deal Actions', 'Partner amounts', [...this.partnerTransactions].map(t => ({
+      id: t.data.transactionId,
+      amt: t.data.vendorAmount,
+      emails: [...new Set(getEmails(t))],
+    })));
 
     for (const { groups, properties } of this.dealCreateActions) {
       const deal = this.db.dealManager.create(properties);
@@ -108,9 +112,9 @@ export class DealGenerator {
       }
       else if (partnerDomains.length > 0) {
         reason = 'Partner Domains';
-        this.partnerAmounts.push(...groups
-          .flatMap(g => g.transactions.map(t => [t.data.transactionId, t.data.vendorAmount] as [string, number]))
-          .filter(l => l.length > 0));
+        for (const tx of groups.flatMap(g => g.transactions)) {
+          this.partnerTransactions.add(tx);
+        }
       }
       else if (providerDomains.length > 0) {
         reason = 'Mass-Provider Domains';
