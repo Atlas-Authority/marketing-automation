@@ -47,11 +47,8 @@ export class DealGenerator {
       ignoredTotal += amount;
     }
     log.info('Deal Actions', 'Total Amount of Transactions Ignored', formatMoney(ignoredTotal));
-    log.warn('Deal Actions', 'Partner amounts', [...this.partnerTransactions].map(t => ({
-      id: t.data.transactionId,
-      amt: t.data.vendorAmount,
-      emails: [...new Set(getEmails(t))],
-    })));
+    log.warn('Deal Actions', 'Partner amounts', '\n' + [...this.partnerTransactions].map(t =>
+      `  ${t.data.transactionId}, ${[...new Set(getEmails(t))].join(', ')}`).join('\n'));
 
     for (const { groups, properties } of this.dealCreateActions) {
       const deal = this.db.dealManager.create(properties);
