@@ -180,7 +180,7 @@ function makeCreateAction(event: DealRelevantEvent, record: License | Transactio
 }
 
 function makeUpdateAction(event: DealRelevantEvent, deal: Deal, record: License | Transaction | null, dealstage?: DealStage): Action {
-  if (dealstage) deal.data.dealstage = dealstage;
+  if (dealstage !== undefined) deal.data.dealstage = dealstage;
   if (record) updateDeal(deal, record);
 
   if (!deal.hasPropertyChanges()) {
