@@ -12,7 +12,7 @@ const engine = new Engine();
 await engine.run(new Database(memoryRemote, memoryRemote));
 
 // Second
-memoryRemote.verbose = true;
+memoryRemote.hubspot.verbose = true;
 await engine.run(new Database(memoryRemote, memoryRemote));
 
 // Third

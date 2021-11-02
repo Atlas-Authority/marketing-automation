@@ -6,21 +6,37 @@ export interface Progress {
   tick: (range: string) => void;
 }
 
-export interface Downloader {
+export interface HubspotService {
   downloadEntities(progress: Progress, kind: EntityKind, apiProperties: string[], inputAssociations: string[]): Promise<readonly FullEntity[]>;
 
-  downloadFreeEmailProviders(progress: Progress): Promise<readonly string[]>;
-  downloadAllTlds(progress: Progress): Promise<readonly string[]>;
-
-  downloadTransactions(progress: Progress): Promise<readonly RawTransaction[]>;
-  downloadLicensesWithoutDataInsights(progress: Progress): Promise<readonly RawLicense[]>;
-  downloadLicensesWithDataInsights(progress: Progress): Promise<readonly RawLicense[]>;
-}
-
-export interface Uploader {
   createEntities(kind: EntityKind, inputs: NewEntity[]): Promise<ExistingEntity[]>;
   updateEntities(kind: EntityKind, inputs: ExistingEntity[]): Promise<ExistingEntity[]>;
 
   createAssociations(fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void>;
   deleteAssociations(fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void>;
+}
+
+export interface TldListerService {
+  downloadAllTlds(progress: Progress): Promise<readonly string[]>;
+}
+
+export interface EmailProviderListerService {
+  downloadFreeEmailProviders(progress: Progress): Promise<readonly string[]>;
+}
+
+export interface MarketplaceService {
+  downloadTransactions(progress: Progress): Promise<readonly RawTransaction[]>;
+  downloadLicensesWithoutDataInsights(progress: Progress): Promise<readonly RawLicense[]>;
+  downloadLicensesWithDataInsights(progress: Progress): Promise<readonly RawLicense[]>;
+}
+
+export interface Downloader {
+  hubspot: HubspotService;
+  emailProviderLister: EmailProviderListerService;
+  tldLister: TldListerService;
+  marketplace: MarketplaceService;
+}
+
+export interface Uploader {
+  hubspot: HubspotService;
 }

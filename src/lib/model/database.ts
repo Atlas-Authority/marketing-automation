@@ -46,19 +46,19 @@ export class Database {
       transactions,
     ] = await Promise.all([
       logbox.wrap('Free Email Providers', (progress) =>
-        this.downloader.downloadFreeEmailProviders(progress)),
+        this.downloader.emailProviderLister.downloadFreeEmailProviders(progress)),
 
       logbox.wrap('Tlds', (progress) =>
-        this.downloader.downloadAllTlds(progress)),
+        this.downloader.tldLister.downloadAllTlds(progress)),
 
       logbox.wrap('Licenses With Data Insights', (progress) =>
-        this.downloader.downloadLicensesWithDataInsights(progress)),
+        this.downloader.marketplace.downloadLicensesWithDataInsights(progress)),
 
       logbox.wrap('Licenses Without Data Insights', (progress) =>
-        this.downloader.downloadLicensesWithoutDataInsights(progress)),
+        this.downloader.marketplace.downloadLicensesWithoutDataInsights(progress)),
 
       logbox.wrap('Transactions', (progress) =>
-        this.downloader.downloadTransactions(progress)),
+        this.downloader.marketplace.downloadTransactions(progress)),
 
       logbox.wrap('Deals', (progress) =>
         this.dealManager.downloadAllEntities(progress)),

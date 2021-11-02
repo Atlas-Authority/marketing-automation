@@ -1,6 +1,7 @@
 import { emailBurnerList } from 'burner-email-providers';
 import allEmailProviders from 'email-providers';
 import cache from '../io/cache.js';
+import { EmailProviderListerService } from '../io/interfaces.js';
 
 /** A set of domains that host multiple unrelated email addresses */
 export function makeMultiProviderDomainsSet(freeDomains: readonly string[]) {
@@ -11,7 +12,7 @@ export function makeMultiProviderDomainsSet(freeDomains: readonly string[]) {
   ].map(d => d.toLowerCase()));
 }
 
-export class LiveEmailProviderListerService {
+export class LiveEmailProviderListerService implements EmailProviderListerService {
 
   async downloadFreeEmailProviders(): Promise<string[]> {
     const res = await fetch(`https://f.hubspotusercontent40.net/hubfs/2832391/Marketing/Lead-Capture/free-domains-1.csv`);

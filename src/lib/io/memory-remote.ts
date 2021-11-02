@@ -2,52 +2,21 @@ import DataDir from '../cache/datadir.js';
 import log, { LogLevel, logLevel } from '../log/logger.js';
 import { Association, EntityKind, ExistingEntity, FullEntity, NewEntity, RelativeAssociation } from "../model/hubspot/interfaces.js";
 import { RawLicense, RawTransaction } from "../model/marketplace/raw.js";
-import { Downloader, Progress, Uploader } from "./interfaces.js";
+import { Downloader, EmailProviderListerService, HubspotService, MarketplaceService, Progress, TldListerService, Uploader } from "./interfaces.js";
 
-export class MemoryRemote implements Downloader, Uploader {
+class MemoryHubspot implements HubspotService {
 
-  verbose: boolean;
+  verbose = false;
   ids = new Map<string, number>();
 
   readonly deals = DataDir.in.file<FullEntity[]>(`deal.json`);
   readonly companies = DataDir.in.file<FullEntity[]>(`company.json`);
   readonly contacts = DataDir.in.file<FullEntity[]>(`contact.json`);
 
-  readonly licensesWith = DataDir.in.file<readonly RawLicense[]>('licenses-with.json');
-  readonly licensesWithout = DataDir.in.file<readonly RawLicense[]>('licenses-without.json');
-  readonly transactions = DataDir.in.file<readonly RawTransaction[]>('transactions.json');
-
-  readonly tlds = DataDir.in.file<readonly string[]>('tlds.json');
-  readonly domains = DataDir.in.file<readonly string[]>('domains.json');
-
   // Downloader
-
-  constructor(opts?: { verbose?: boolean }) {
-    this.verbose = opts?.verbose ?? logLevel >= LogLevel.Verbose;
-  }
 
   async downloadEntities(_progress: Progress, kind: EntityKind, apiProperties: string[], inputAssociations: string[]): Promise<readonly FullEntity[]> {
     return this.arrayFor(kind);
-  }
-
-  async downloadFreeEmailProviders(): Promise<readonly string[]> {
-    return this.domains.readJson();
-  }
-
-  async downloadAllTlds(): Promise<readonly string[]> {
-    return this.tlds.readJson();
-  }
-
-  async downloadTransactions(): Promise<readonly RawTransaction[]> {
-    return this.transactions.readJson();
-  }
-
-  async downloadLicensesWithoutDataInsights(): Promise<readonly RawLicense[]> {
-    return this.licensesWithout.readJson();
-  }
-
-  async downloadLicensesWithDataInsights(): Promise<readonly RawLicense[]> {
-    return this.licensesWith.readJson();
   }
 
   // Uploader
@@ -128,6 +97,59 @@ export class MemoryRemote implements Downloader, Uploader {
       case 'contact': return this.contacts.readJson();
       case 'deal': return this.deals.readJson();
     }
+  }
+
+}
+
+class MemoryTldListerService implements TldListerService {
+
+  readonly tlds = DataDir.in.file<readonly string[]>('tlds.json');
+
+  async downloadAllTlds(): Promise<readonly string[]> {
+    return this.tlds.readJson();
+  }
+
+}
+
+class MemoryEmailProviderListerService implements EmailProviderListerService {
+
+  readonly domains = DataDir.in.file<readonly string[]>('domains.json');
+
+  async downloadFreeEmailProviders(): Promise<readonly string[]> {
+    return this.domains.readJson();
+  }
+
+}
+
+class MemoryMarketplace implements MarketplaceService {
+
+  readonly licensesWith = DataDir.in.file<readonly RawLicense[]>('licenses-with.json');
+  readonly licensesWithout = DataDir.in.file<readonly RawLicense[]>('licenses-without.json');
+  readonly transactions = DataDir.in.file<readonly RawTransaction[]>('transactions.json');
+
+  async downloadTransactions(): Promise<readonly RawTransaction[]> {
+    return this.transactions.readJson();
+  }
+
+  async downloadLicensesWithoutDataInsights(): Promise<readonly RawLicense[]> {
+    return this.licensesWithout.readJson();
+  }
+
+  async downloadLicensesWithDataInsights(): Promise<readonly RawLicense[]> {
+    return this.licensesWith.readJson();
+  }
+
+}
+
+export class MemoryRemote implements Downloader, Uploader {
+
+  marketplace = new MemoryMarketplace();
+  tldLister = new MemoryTldListerService();
+  emailProviderLister = new MemoryEmailProviderListerService();
+  hubspot = new MemoryHubspot();
+
+  constructor(opts?: { verbose?: boolean }) {
+    this.hubspot.verbose = opts?.verbose ?? logLevel >= LogLevel.Verbose;
   }
 
 }
