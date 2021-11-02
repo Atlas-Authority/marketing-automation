@@ -1,10 +1,10 @@
 import * as hubspot from '@hubspot/api-client';
 import assert from 'assert';
-import config from '../config/index.js';
-import cache from '../io/cache.js';
-import { HubspotService, Progress } from '../io/interfaces.js';
-import { Association, EntityKind, ExistingEntity, FullEntity, NewEntity, RelativeAssociation } from '../model/hubspot/interfaces.js';
-import { SimpleError } from '../util/errors.js';
+import config from '../../config/index.js';
+import cache from '../../io/cache.js';
+import { HubspotService, Progress } from '../../io/interfaces.js';
+import { Association, EntityKind, ExistingEntity, FullEntity, NewEntity, RelativeAssociation } from '../../model/hubspot/interfaces.js';
+import { SimpleError } from '../../util/errors.js';
 
 export default class LiveHubspotService implements HubspotService {
 

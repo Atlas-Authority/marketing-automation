@@ -1,4 +1,4 @@
-import LiveHubspotService from '../services/hubspot.js';
+import LiveHubspotService from '../services/live/hubspot.js';
 import { Uploader } from './interfaces.js';
 
 

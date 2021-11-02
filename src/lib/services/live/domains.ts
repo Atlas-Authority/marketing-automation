@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
-import cache from '../io/cache.js';
-import { TldListerService } from '../io/interfaces.js';
+import cache from '../../io/cache.js';
+import { TldListerService } from '../../io/interfaces.js';
 
 export function makeEmailValidationRegex(tlds: readonly string[]) {
   return new RegExp(`.+@.+\\.(${tlds.join('|')})`);

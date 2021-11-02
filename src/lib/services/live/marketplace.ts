@@ -1,10 +1,10 @@
 import { DateTime, Duration, Interval } from 'luxon';
 import fetch from 'node-fetch';
-import config from '../config/index.js';
-import cache from '../io/cache.js';
-import { MarketplaceService, Progress } from '../io/interfaces.js';
-import { RawLicense, RawTransaction } from "../model/marketplace/raw";
-import { AttachableError } from '../util/errors.js';
+import config from '../../config/index.js';
+import cache from '../../io/cache.js';
+import { MarketplaceService, Progress } from '../../io/interfaces.js';
+import { RawLicense, RawTransaction } from "../../model/marketplace/raw";
+import { AttachableError } from '../../util/errors.js';
 
 export class LiveMarketplaceService implements MarketplaceService {
 
