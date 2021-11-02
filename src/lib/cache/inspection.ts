@@ -21,8 +21,7 @@ function saveArrayToCsv(filename: string, array: any[]) {
 function saveToJson(filename: string, object: unknown) {
   if (config.isProduction || config.isTest) return;
 
-  const out = JSON.stringify(object, null, 2);
-  DataDir.out.writeFile(filename, out);
+  DataDir.out.writeJsonFile(filename, object);
   log.info('Dev', 'Saved data to:', filename);
 }
 

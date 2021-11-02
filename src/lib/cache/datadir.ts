@@ -22,7 +22,11 @@ export class DataDir {
     fs.writeFileSync(this.url(filename), contents);
   }
 
-  readFile(filename: string) {
+  writeJsonFile(filename: string, contents: unknown) {
+    this.writeFile(filename, JSON.stringify(contents, null, 2));
+  }
+
+  private readFile(filename: string) {
     if (!this.pathExists(filename)) {
       log.error('Dev', `Data file doesn't exist yet; run engine to create`, this.url(filename));
       process.exit(1);

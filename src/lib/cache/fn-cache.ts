@@ -1,4 +1,3 @@
-import v8 from "v8";
 import { cliParams } from "../cli/arg-parser.js";
 import config from '../config/index.js';
 import log from '../log/logger.js';
@@ -22,12 +21,10 @@ export function fnOrCache<T>(filename: string, fn: () => T): T {
 
   if (live) {
     const data = fn();
-    const buffer = v8.serialize(data);
-    DataDir.cache.writeFile(filename, buffer);
+    DataDir.cache.writeJsonFile(filename, data);
     return data;
   }
   else {
-    const buffer = DataDir.cache.readFile(filename);
-    return v8.deserialize(buffer);
+    return DataDir.cache.readJsonFile(filename);
   }
 }
