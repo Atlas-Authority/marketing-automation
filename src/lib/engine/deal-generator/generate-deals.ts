@@ -146,14 +146,6 @@ export class DealGenerator {
 
 }
 
-const NINETY_DAYS_AS_MS = (1000 * 60 * 60 * 24 * 90);
-
-export function olderThan90Days(dateString: string) {
-  const now = Date.now();
-  const then = new Date(dateString).getTime();
-  return (now - then > NINETY_DAYS_AS_MS);
-}
-
 function contactsFor(db: Database, groups: RelatedLicenseSet) {
   const records = groups.flatMap(group => [group.license, ...group.transactions]);
   const emails = [...new Set(records.flatMap(getEmails))];

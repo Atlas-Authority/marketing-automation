@@ -1,6 +1,5 @@
 import * as fs from 'fs';
 import { DataDir } from '../lib/cache/datadir.js';
-import { olderThan90Days } from '../lib/engine/deal-generator/generate-deals.js';
 import { shorterLicenseInfo } from '../lib/engine/license-matching/license-grouper.js';
 import { MemoryRemote } from '../lib/io/memory-remote.js';
 import log from '../lib/log/logger.js';
@@ -52,11 +51,6 @@ function check(sen: string) {
 
   const foundMatch = matchedGroups.find(group => group.find(l => l.addonLicenseId === sen));
   if (foundMatch) {
-    if (foundMatch.every(l => olderThan90Days(l.start))) {
-      log.info('Dev', sen, 'All matches > 90 days old');
-      return;
-    }
-
     const matches = foundMatch.filter(l => l.addonLicenseId !== sen);
     for (const otherLicense of matches) {
       log.warn('Dev', sen, `Checking matched license ${otherLicense.addonLicenseId}`);
