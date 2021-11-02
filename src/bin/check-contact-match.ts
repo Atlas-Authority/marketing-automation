@@ -19,7 +19,7 @@ const contact = db.contactManager.get(contactId);
 
 log.info('Dev', contact);
 
-const matchedGroups: ReturnType<typeof shorterLicenseInfo>[][] = DataDir.out.readJsonFile('matched-groups-all.json');
+const matchedGroups = DataDir.out.file<ReturnType<typeof shorterLicenseInfo>[][]>('matched-groups-all.json').readJson();
 
 const groups = matchedGroups.filter(g => g.some(l => l.tech_email === contact?.data.email));
 

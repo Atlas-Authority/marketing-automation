@@ -41,7 +41,7 @@ export default class LiveDownloader implements Downloader {
 
 function cache<T>(file: string, data: T): T {
   if (!config.isProduction) {
-    DataDir.in.writeJsonFile(file, data);
+    DataDir.in.file(file).writeJson(data);
   }
   return data;
 }

@@ -14,14 +14,14 @@ function saveArrayToCsv(filename: string, array: any[]) {
   array = array.map(o => flatten(o, { delimiter: '_' }));
 
   const out = csvStringify(array, { header: true });
-  DataDir.out.writeFile(filename, out);
+  DataDir.out.file(filename).writeText(out);
   log.info('Dev', 'Saved data to:', filename);
 }
 
 function saveToJson(filename: string, object: unknown) {
   if (config.isProduction || config.isTest) return;
 
-  DataDir.out.writeJsonFile(filename, object);
+  DataDir.out.file(filename).writeJson(object);
   log.info('Dev', 'Saved data to:', filename);
 }
 

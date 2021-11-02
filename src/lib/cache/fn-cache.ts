@@ -8,10 +8,12 @@ const cachedFns = cliParams.get('--cached-fns')?.split(',') || [];
 export function fnOrCache<T>(filename: string, fn: () => T): T {
   const skipCacheFully = (config.isProduction || config.isTest);
 
+  const file = DataDir.cache.file<T>(filename);
+
   const useCache = (
     !skipCacheFully &&
     cachedFns.includes(filename) &&
-    DataDir.cache.pathExists(filename)
+    file.exists()
   );
 
   if (useCache) {
@@ -20,12 +22,12 @@ export function fnOrCache<T>(filename: string, fn: () => T): T {
     log.warn('Dev', `${red}CACHED FUNCTION MODE ENABLED FOR:${reset}`);
     log.warn('Dev', fn.toString());
     log.warn('Dev', `${red}FUNCTION SKIPPED; RETURNING CACHED VALUE${reset}`);
-    return DataDir.cache.readJsonFile(filename);
+    return file.readJson();
   }
   else {
     const data = fn();
     if (!skipCacheFully) {
-      DataDir.cache.writeJsonFile(filename, data);
+      file.writeJson(data);
     }
     return data;
   }

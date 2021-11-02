@@ -27,9 +27,9 @@ const memoryRemote = new MemoryRemote({ verbose: true });
 const db = new Database(memoryRemote, memoryRemote);
 await db.downloadAllData();
 
-const ignored: (LicenseData & { reason: string })[][] = DataDir.out.readJsonFile('ignored.json');
+const ignored = DataDir.out.file<(LicenseData & { reason: string })[][]>('ignored.json').readJson();
 
-const matchedGroups: ReturnType<typeof shorterLicenseInfo>[][] = DataDir.out.readJsonFile('matched-groups-all.json');
+const matchedGroups = DataDir.out.file<ReturnType<typeof shorterLicenseInfo>[][]>('matched-groups-all.json').readJson();
 
 for (const sen of sens) {
   check(sen);

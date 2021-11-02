@@ -12,38 +12,62 @@ export default class DataDir {
   static readonly cache = new DataDir("cache");
 
   #base: URL;
+  #files = new Map<string, DataFile<any>>();
 
   constructor(place: string) {
     this.#base = new URL(`${place}/`, rootDataDir);
     if (!fs.existsSync(this.#base)) fs.mkdirSync(this.#base);
   }
 
-  writeFile(filename: string, contents: string | Buffer) {
-    fs.writeFileSync(this.url(filename), contents);
+  file<T>(filename: string): DataFile<T> {
+    let cache = this.#files.get(filename);
+    if (!cache) this.#files.set(filename, cache =
+      new DataFile<T>(this.#base, filename));
+    return cache;
   }
 
-  writeJsonFile(filename: string, contents: unknown) {
-    this.writeFile(filename, JSON.stringify(contents, null, 2));
+}
+
+export class DataFile<T> {
+
+  #url: URL;
+  #text?: string;
+  #json?: T;
+
+  constructor(base: URL, filename: string) {
+    this.#url = new URL(filename, base);
   }
 
-  private readFile(filename: string) {
-    if (!this.pathExists(filename)) {
-      log.error('Dev', `Data file doesn't exist yet; run engine to create`, this.url(filename));
-      process.exit(1);
+  exists() {
+    return fs.existsSync(this.#url);
+  }
+
+  readJson(): T {
+    if (this.#json === undefined) {
+      this.#json = JSON.parse(this.readText()) as T;
     }
-    return fs.readFileSync(this.url(filename), 'utf8');
+    return this.#json;
   }
 
-  readJsonFile(filename: string) {
-    return JSON.parse(this.readFile(filename));
+  readText() {
+    if (this.#text == undefined) {
+      if (!this.exists()) {
+        log.error('Dev', `Data file doesn't exist yet; run engine to create`, this.#url);
+        process.exit(1);
+      }
+      this.#text = fs.readFileSync(this.#url, 'utf8');
+    }
+    return this.#text;
   }
 
-  pathExists(filename: string) {
-    return fs.existsSync(this.url(filename));
+  writeJson(json: T) {
+    this.#json = json;
+    this.writeText(JSON.stringify(json, null, 2));
   }
 
-  private url(filename: string) {
-    return new URL(filename, this.#base);
+  writeText(text: string) {
+    this.#text = text;
+    fs.writeFileSync(this.#url, this.#text);
   }
 
 }

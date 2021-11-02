@@ -9,30 +9,21 @@ export class MemoryRemote implements Downloader, Uploader {
   verbose: boolean;
   ids = new Map<string, number>();
 
-  readonly contacts: FullEntity[];
-  readonly companies: FullEntity[];
-  readonly deals: FullEntity[];
-  readonly licensesWith: readonly RawLicense[];
-  readonly licensesWithout: readonly RawLicense[];
-  readonly transactions: readonly RawTransaction[];
-  readonly domains: readonly string[];
-  readonly tlds: readonly string[];
+  readonly deals = DataDir.in.file<FullEntity[]>(`deal.json`);
+  readonly companies = DataDir.in.file<FullEntity[]>(`company.json`);
+  readonly contacts = DataDir.in.file<FullEntity[]>(`contact.json`);
+
+  readonly licensesWith = DataDir.in.file<readonly RawLicense[]>('licenses-with.json');
+  readonly licensesWithout = DataDir.in.file<readonly RawLicense[]>('licenses-without.json');
+  readonly transactions = DataDir.in.file<readonly RawTransaction[]>('transactions.json');
+
+  readonly tlds = DataDir.in.file<readonly string[]>('tlds.json');
+  readonly domains = DataDir.in.file<readonly string[]>('domains.json');
 
   // Downloader
 
   constructor(opts?: { verbose?: boolean }) {
     this.verbose = opts?.verbose ?? logLevel >= LogLevel.Verbose;
-
-    this.deals = DataDir.in.readJsonFile(`deal.json`);
-    this.companies = DataDir.in.readJsonFile(`company.json`);
-    this.contacts = DataDir.in.readJsonFile(`contact.json`);
-
-    this.licensesWith = DataDir.in.readJsonFile('licenses-with.json');
-    this.licensesWithout = DataDir.in.readJsonFile('licenses-without.json');
-    this.transactions = DataDir.in.readJsonFile('transactions.json');
-
-    this.tlds = DataDir.in.readJsonFile('tlds.json');
-    this.domains = DataDir.in.readJsonFile('domains.json');
   }
 
   async downloadHubspotEntities(_progress: Progress, kind: EntityKind, apiProperties: string[], inputAssociations: string[]): Promise<readonly FullEntity[]> {
@@ -40,23 +31,23 @@ export class MemoryRemote implements Downloader, Uploader {
   }
 
   async downloadFreeEmailProviders(): Promise<readonly string[]> {
-    return this.domains;
+    return this.domains.readJson();
   }
 
   async downloadAllTlds(): Promise<readonly string[]> {
-    return this.tlds;
+    return this.tlds.readJson();
   }
 
   async downloadTransactions(): Promise<readonly RawTransaction[]> {
-    return this.transactions;
+    return this.transactions.readJson();
   }
 
   async downloadLicensesWithoutDataInsights(): Promise<readonly RawLicense[]> {
-    return this.licensesWithout;
+    return this.licensesWithout.readJson();
   }
 
   async downloadLicensesWithDataInsights(): Promise<readonly RawLicense[]> {
-    return this.licensesWith;
+    return this.licensesWith.readJson();
   }
 
   // Uploader
@@ -133,9 +124,9 @@ export class MemoryRemote implements Downloader, Uploader {
 
   private arrayFor(kind: EntityKind) {
     switch (kind) {
-      case 'company': return this.companies;
-      case 'contact': return this.contacts;
-      case 'deal': return this.deals;
+      case 'company': return this.companies.readJson();
+      case 'contact': return this.contacts.readJson();
+      case 'deal': return this.deals.readJson();
     }
   }
 
