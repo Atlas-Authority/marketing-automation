@@ -1,7 +1,8 @@
 import { Downloader, Uploader } from "../io/interfaces.js";
 import { MultiDownloadLogger } from "../log/download-logger.js";
 import log from "../log/logger.js";
-import { makeEmailValidationRegex, makeMultiProviderDomainsSet } from "../services/domains.js";
+import { makeEmailValidationRegex } from "../services/domains.js";
+import { makeMultiProviderDomainsSet } from "../services/email-providers.js";
 import { formatMoney, formatNumber } from "../util/formatters.js";
 import { CompanyManager } from "./company.js";
 import { ContactManager } from "./contact.js";
