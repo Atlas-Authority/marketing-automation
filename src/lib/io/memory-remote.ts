@@ -26,7 +26,7 @@ export class MemoryRemote implements Downloader, Uploader {
     this.verbose = opts?.verbose ?? logLevel >= LogLevel.Verbose;
   }
 
-  async downloadHubspotEntities(_progress: Progress, kind: EntityKind, apiProperties: string[], inputAssociations: string[]): Promise<readonly FullEntity[]> {
+  async downloadEntities(_progress: Progress, kind: EntityKind, apiProperties: string[], inputAssociations: string[]): Promise<readonly FullEntity[]> {
     return this.arrayFor(kind);
   }
 
@@ -52,7 +52,7 @@ export class MemoryRemote implements Downloader, Uploader {
 
   // Uploader
 
-  async createHubspotEntities(kind: EntityKind, inputs: NewEntity[]): Promise<ExistingEntity[]> {
+  async createEntities(kind: EntityKind, inputs: NewEntity[]): Promise<ExistingEntity[]> {
     const objects = inputs.map((o) => ({
       properties: o.properties,
       id: this.newUniqueId(kind),
@@ -72,7 +72,7 @@ export class MemoryRemote implements Downloader, Uploader {
     return `fake.${kind}.${id}`;
   }
 
-  async updateHubspotEntities(kind: EntityKind, inputs: ExistingEntity[]): Promise<ExistingEntity[]> {
+  async updateEntities(kind: EntityKind, inputs: ExistingEntity[]): Promise<ExistingEntity[]> {
     for (const input of inputs) {
       const entity = this.getEntity(kind, input.id);
       Object.assign(entity.properties, input.properties);
@@ -82,7 +82,7 @@ export class MemoryRemote implements Downloader, Uploader {
     return inputs;
   }
 
-  async createHubspotAssociations(fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void> {
+  async createAssociations(fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void> {
     for (const input of inputs) {
       const entity = this.getEntity(fromKind, input.fromId);
       const assoc: RelativeAssociation = `${toKind}:${input.toId}`;
@@ -94,7 +94,7 @@ export class MemoryRemote implements Downloader, Uploader {
     this.fakeApiConsoleLog(`Fake Associating ${fromKind}s to ${toKind}s:`, inputs);
   }
 
-  async deleteHubspotAssociations(fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void> {
+  async deleteAssociations(fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void> {
     for (const input of inputs) {
       const entity = this.getEntity(fromKind, input.fromId);
       const assoc: RelativeAssociation = `${toKind}:${input.toId}`;

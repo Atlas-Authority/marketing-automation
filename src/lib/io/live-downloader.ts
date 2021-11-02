@@ -14,7 +14,7 @@ export default class LiveDownloader implements Downloader {
   hubspot = new LiveHubspot();
   mpac = new Marketplace();
 
-  async downloadHubspotEntities(_progress: Progress, kind: EntityKind, apiProperties: string[], inputAssociations: string[]): Promise<FullEntity[]> {
+  async downloadEntities(_progress: Progress, kind: EntityKind, apiProperties: string[], inputAssociations: string[]): Promise<FullEntity[]> {
     return cache(`${kind}.json`, await this.hubspot.downloadEntities(kind, apiProperties, inputAssociations));
   }
 
