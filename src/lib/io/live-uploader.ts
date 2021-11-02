@@ -1,11 +1,11 @@
 import { Association, EntityKind, ExistingEntity, NewEntity } from '../model/hubspot/interfaces.js';
-import Hubspot from '../services/hubspot.js';
+import LiveHubspotService from '../services/hubspot.js';
 import { Uploader } from './interfaces.js';
 
 
 export default class LiveUploader implements Uploader {
 
-  hubspot = new Hubspot();
+  hubspot = new LiveHubspotService();
 
   async createEntities(kind: EntityKind, inputs: NewEntity[]): Promise<ExistingEntity[]> {
     return await this.hubspot.createEntities(kind, inputs);

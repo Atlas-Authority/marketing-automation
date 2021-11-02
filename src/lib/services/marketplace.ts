@@ -5,7 +5,7 @@ import { Progress } from '../io/interfaces.js';
 import { RawLicense, RawTransaction } from "../model/marketplace/raw";
 import { AttachableError } from '../util/errors.js';
 
-export class Marketplace {
+export class LiveMarketplaceService {
 
   async downloadTransactions(): Promise<RawTransaction[]> {
     return await this.downloadMarketplaceData('/sales/transactions/export');

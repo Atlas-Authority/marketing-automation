@@ -4,7 +4,7 @@ import config from '../config/index.js';
 import { Association, EntityKind, ExistingEntity, FullEntity, NewEntity, RelativeAssociation } from '../model/hubspot/interfaces.js';
 import { SimpleError } from '../util/errors.js';
 
-export default class Hubspot {
+export default class LiveHubspotService {
 
   client = new hubspot.Client({ apiKey: config.hubspot.apiKey });
 
