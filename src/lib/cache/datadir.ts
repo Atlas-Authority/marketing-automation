@@ -31,11 +31,11 @@ export default class DataDir {
       log.error('Dev', `Data file doesn't exist yet; run engine to create`, this.url(filename));
       process.exit(1);
     }
-    return fs.readFileSync(this.url(filename));
+    return fs.readFileSync(this.url(filename), 'utf8');
   }
 
   readJsonFile(filename: string) {
-    return JSON.parse(this.readFile(filename).toString('utf8'));
+    return JSON.parse(this.readFile(filename));
   }
 
   pathExists(filename: string) {
