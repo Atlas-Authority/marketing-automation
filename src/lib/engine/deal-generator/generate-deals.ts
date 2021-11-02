@@ -78,7 +78,13 @@ export class DealGenerator {
   }
 
   private associateDealContactsAndCompanies(groups: RelatedLicenseSet, deal: Deal) {
-    const contacts = contactsFor(this.db, groups);
+    const records = groups.flatMap(group => [group.license, ...group.transactions]);
+    const emails = [...new Set(records.flatMap(getEmails))];
+    const contacts = (emails
+      .map(email => this.db.contactManager.getByEmail(email))
+      .filter(isPresent));
+    contacts.sort(sorter(c => c.isCustomer ? -1 : 0));
+
     const companies = (contacts
       .filter(c => c.isCustomer)
       .flatMap(c => c.companies.getAll()));
@@ -144,14 +150,4 @@ export class DealGenerator {
     })));
   }
 
-}
-
-function contactsFor(db: Database, groups: RelatedLicenseSet) {
-  const records = groups.flatMap(group => [group.license, ...group.transactions]);
-  const emails = [...new Set(records.flatMap(getEmails))];
-  const contacts = (emails
-    .map(email => db.contactManager.getByEmail(email))
-    .filter(isPresent));
-  contacts.sort(sorter(c => c.isCustomer ? -1 : 0));
-  return contacts;
 }
