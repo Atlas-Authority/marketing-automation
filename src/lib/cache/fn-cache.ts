@@ -6,25 +6,27 @@ import { DataDir } from "./datadir.js";
 const cachedFns = cliParams.get('--cached-fns')?.split(',') || [];
 
 export function fnOrCache<T>(filename: string, fn: () => T): T {
-  if (config.isProduction || config.isTest) return fn();
+  const skipCacheFully = (config.isProduction || config.isTest);
 
-  let live = !cachedFns.includes(filename);
-  if (!live && !DataDir.cache.pathExists(filename)) live = true;
+  const useCache = (
+    !skipCacheFully &&
+    cachedFns.includes(filename) &&
+    DataDir.cache.pathExists(filename)
+  );
 
-  if (!live) {
+  if (useCache) {
     const red = '\x1b[31;1m';
     const reset = '\x1b[0m';
     log.warn('Dev', `${red}CACHED FUNCTION MODE ENABLED FOR:${reset}`);
     log.warn('Dev', fn.toString());
     log.warn('Dev', `${red}FUNCTION SKIPPED; RETURNING CACHED VALUE${reset}`);
-  }
-
-  if (live) {
-    const data = fn();
-    DataDir.cache.writeJsonFile(filename, data);
-    return data;
+    return DataDir.cache.readJsonFile(filename);
   }
   else {
-    return DataDir.cache.readJsonFile(filename);
+    const data = fn();
+    if (!skipCacheFully) {
+      DataDir.cache.writeJsonFile(filename, data);
+    }
+    return data;
   }
 }
