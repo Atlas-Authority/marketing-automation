@@ -1,4 +1,4 @@
-import { DataDir } from '../cache/datadir.js';
+import DataDir from '../cache/datadir.js';
 import config from '../config/index.js';
 import { EntityKind, FullEntity } from '../model/hubspot/interfaces.js';
 import { RawLicense, RawTransaction } from "../model/marketplace/raw";

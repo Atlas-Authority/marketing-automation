@@ -1,4 +1,4 @@
-import { DataDir } from '../lib/cache/datadir.js';
+import DataDir from '../lib/cache/datadir.js';
 import { shorterLicenseInfo } from '../lib/engine/license-matching/license-grouper.js';
 import { MemoryRemote } from '../lib/io/memory-remote.js';
 import log from '../lib/log/logger.js';

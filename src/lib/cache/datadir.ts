@@ -5,7 +5,7 @@ import log from '../log/logger.js';
 const rootDataDir = new URL(`../../../data/`, import.meta.url);
 if (!fs.existsSync(rootDataDir)) fs.mkdirSync(rootDataDir);
 
-export class DataDir {
+export default class DataDir {
 
   static readonly in = new DataDir("in");
   static readonly out = new DataDir("out");

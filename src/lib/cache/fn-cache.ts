@@ -1,7 +1,7 @@
 import { cliParams } from "../cli/arg-parser.js";
 import config from '../config/index.js';
 import log from '../log/logger.js';
-import { DataDir } from "./datadir.js";
+import DataDir from "./datadir.js";
 
 const cachedFns = cliParams.get('--cached-fns')?.split(',') || [];
 
