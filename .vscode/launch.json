@@ -14,7 +14,7 @@
       "args": [
         "--downloader=cached",
         "--uploader=console",
-        "--cached-fns=scorer.dat",
+        "--cached-fns=scorer.json",
         "--loglevel=info",
       ],
       "type": "pwa-node",
