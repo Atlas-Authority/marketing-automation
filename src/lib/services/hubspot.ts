@@ -1,6 +1,7 @@
 import * as hubspot from '@hubspot/api-client';
 import assert from 'assert';
 import config from '../config/index.js';
+import cache from '../io/cache.js';
 import { Association, EntityKind, ExistingEntity, FullEntity, NewEntity, RelativeAssociation } from '../model/hubspot/interfaces.js';
 import { SimpleError } from '../util/errors.js';
 
@@ -28,7 +29,7 @@ export default class LiveHubspotService {
             })
           )),
       }));
-      return normalizedEntities;
+      return cache(`${kind}.json`, normalizedEntities);
     }
     catch (e: any) {
       const body = e.response.body;

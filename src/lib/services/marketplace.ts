@@ -1,6 +1,7 @@
 import { DateTime, Duration, Interval } from 'luxon';
 import fetch from 'node-fetch';
 import config from '../config/index.js';
+import cache from '../io/cache.js';
 import { Progress } from '../io/interfaces.js';
 import { RawLicense, RawTransaction } from "../model/marketplace/raw";
 import { AttachableError } from '../util/errors.js';
@@ -8,11 +9,11 @@ import { AttachableError } from '../util/errors.js';
 export class LiveMarketplaceService {
 
   async downloadTransactions(): Promise<RawTransaction[]> {
-    return await this.downloadMarketplaceData('/sales/transactions/export');
+    return cache('transactions.json', await this.downloadMarketplaceData('/sales/transactions/export'));
   }
 
   async downloadLicensesWithoutDataInsights(): Promise<RawLicense[]> {
-    return await this.downloadMarketplaceData('/licenses/export?endDate=2018-07-01');
+    return cache('licenses-without.json', await this.downloadMarketplaceData('/licenses/export?endDate=2018-07-01'));
   }
 
   async downloadLicensesWithDataInsights(progress: Progress): Promise<RawLicense[]> {
@@ -23,7 +24,7 @@ export class LiveMarketplaceService {
       progress.tick(`${startDate}-${endDate}`);
       return json;
     });
-    return (await Promise.all(promises)).flat();
+    return cache('licenses-with.json', (await Promise.all(promises)).flat());
   }
 
   private async downloadMarketplaceData<T>(subpath: string): Promise<T[]> {

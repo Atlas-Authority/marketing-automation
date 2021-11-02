@@ -1,5 +1,3 @@
-import DataDir from '../cache/datadir.js';
-import config from '../config/index.js';
 import { EntityKind, FullEntity } from '../model/hubspot/interfaces.js';
 import { RawLicense, RawTransaction } from "../model/marketplace/raw";
 import { downloadAllTlds } from '../services/domains.js';
@@ -15,34 +13,27 @@ export default class LiveDownloader implements Downloader {
   mpac = new LiveMarketplaceService();
 
   async downloadEntities(_progress: Progress, kind: EntityKind, apiProperties: string[], inputAssociations: string[]): Promise<FullEntity[]> {
-    return cache(`${kind}.json`, await this.hubspot.downloadEntities(kind, apiProperties, inputAssociations));
+    return await this.hubspot.downloadEntities(kind, apiProperties, inputAssociations);
   }
 
   async downloadFreeEmailProviders(): Promise<string[]> {
-    return cache('domains.json', await downloadFreeEmailProviders());
+    return await downloadFreeEmailProviders();
   }
 
   async downloadAllTlds(): Promise<string[]> {
-    return cache('tlds.json', await downloadAllTlds());
+    return await downloadAllTlds();
   }
 
   async downloadTransactions(): Promise<RawTransaction[]> {
-    return cache('transactions.json', await this.mpac.downloadTransactions());
+    return await this.mpac.downloadTransactions();
   }
 
   async downloadLicensesWithoutDataInsights(): Promise<RawLicense[]> {
-    return cache('licenses-without.json', await this.mpac.downloadLicensesWithoutDataInsights());
+    return await this.mpac.downloadLicensesWithoutDataInsights();
   }
 
   async downloadLicensesWithDataInsights(progress: Progress): Promise<RawLicense[]> {
-    return cache('licenses-with.json', await this.mpac.downloadLicensesWithDataInsights(progress));
+    return await this.mpac.downloadLicensesWithDataInsights(progress);
   }
 
-}
-
-function cache<T>(file: string, data: T): T {
-  if (!config.isProduction) {
-    DataDir.in.file(file).writeJson(data);
-  }
-  return data;
 }
