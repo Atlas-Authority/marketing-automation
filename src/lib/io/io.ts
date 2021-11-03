@@ -11,6 +11,13 @@ import { MemoryMarketplace } from '../services/memory/marketplace.js';
 
 export class IO {
 
+  static fromCli() {
+    return new IO({
+      in: cli.getChoiceOrFail('--downloader', ['local', 'remote']),
+      out: cli.getChoiceOrFail('--uploader', ['local', 'remote']),
+    });
+  }
+
   public in: Remote;
   public out: Remote;
 
@@ -48,11 +55,4 @@ class LiveRemote implements Remote {
   marketplace = new LiveMarketplaceService();
   emailProviderLister = new LiveEmailProviderListerService();
   tldLister = new LiveTldListerService();
-}
-
-export function getIoFromCli() {
-  return new IO({
-    in: cli.getChoiceOrFail('--downloader', ['local', 'remote']),
-    out: cli.getChoiceOrFail('--uploader', ['local', 'remote']),
-  });
 }

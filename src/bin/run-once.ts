@@ -1,9 +1,9 @@
 import Engine from "../lib/engine/engine.js";
-import { getIoFromCli } from "../lib/io/io.js";
+import { IO } from "../lib/io/io.js";
 import { Database } from "../lib/model/database.js";
 import { cli } from "../lib/parameters/cli.js";
 
-const io = getIoFromCli();
+const io = IO.fromCli();
 cli.failIfExtraOpts();
 
 const db = new Database(io);
