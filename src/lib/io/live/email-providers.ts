@@ -1,3 +1,4 @@
+import fetch from 'node-fetch';
 import cache from '../cache.js';
 import { EmailProviderListerService } from '../interfaces.js';
 
