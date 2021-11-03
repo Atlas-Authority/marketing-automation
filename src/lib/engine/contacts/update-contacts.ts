@@ -1,5 +1,5 @@
-import config from '../../config/index.js';
 import { Database } from '../../model/database.js';
+import config from '../../parameters/env.js';
 import { SimpleError } from '../../util/errors.js';
 import { RelatedLicenseSet } from '../license-matching/license-grouper.js';
 import { flagPartnersViaCoworkers } from './contact-types.js';

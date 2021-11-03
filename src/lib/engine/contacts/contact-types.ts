@@ -1,8 +1,8 @@
-import config from '../../config/index.js';
 import { Contact } from '../../model/contact.js';
 import { Database } from '../../model/database.js';
 import { License } from '../../model/license.js';
 import { Transaction } from '../../model/transaction.js';
+import config from '../../parameters/env.js';
 
 export function identifyAndFlagContactTypes(db: Database) {
   // Identifying contact types

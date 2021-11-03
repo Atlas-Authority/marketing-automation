@@ -1,8 +1,8 @@
-import { cliParams } from "../lib/cli/arg-parser.js";
 import Engine from "../lib/engine/engine.js";
 import { IO } from "../lib/io/io.js";
 import log from "../lib/log/logger.js";
 import { Database } from "../lib/model/database.js";
+import { cliParams } from "../lib/parameters/cli.js";
 
 cliParams.failIfExtraOpts();
 log.level = log.Levels.Info;

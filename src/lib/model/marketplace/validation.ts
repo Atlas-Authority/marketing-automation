@@ -1,7 +1,7 @@
 import assert from 'assert';
 import util from 'util';
-import config from '../../config/index.js';
 import log from "../../log/logger.js";
+import config from '../../parameters/env.js';
 import { AttachableError } from "../../util/errors.js";
 import { isPresent } from '../../util/helpers.js';
 import { RawLicense, RawTransaction } from "./raw.js";

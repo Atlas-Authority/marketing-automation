@@ -1,5 +1,5 @@
 import util from 'util';
-import { cliParams } from '../cli/arg-parser.js';
+import { cliParams } from '../parameters/cli.js';
 
 enum LogLevel {
   Error,

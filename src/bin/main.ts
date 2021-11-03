@@ -1,8 +1,8 @@
-import { cliParams } from "../lib/cli/arg-parser.js";
-import config from "../lib/config/index.js";
 import Engine from "../lib/engine/engine.js";
 import { getIoFromCli } from "../lib/io/io.js";
 import { Database } from "../lib/model/database.js";
+import { cliParams } from "../lib/parameters/cli.js";
+import config from "../lib/parameters/env.js";
 import Slack from "../lib/services/slack.js";
 import { AttachableError, SimpleError } from '../lib/util/errors.js';
 import run from '../lib/util/runner.js';

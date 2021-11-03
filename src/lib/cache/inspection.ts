@@ -1,7 +1,7 @@
 import csvStringify from 'csv-stringify/lib/es5/sync.js';
 import flatten from 'flat';
-import config from '../config/index.js';
 import log from '../log/logger.js';
+import config from '../parameters/env.js';
 import DataDir from './datadir.js';
 
 function saveArrayToCsv(filename: string, array: any[]) {

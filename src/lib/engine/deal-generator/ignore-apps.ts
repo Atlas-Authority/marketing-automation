@@ -1,6 +1,6 @@
-import config from "../../config/index.js";
 import log from "../../log/logger.js";
 import { Database } from "../../model/database.js";
+import config from "../../parameters/env.js";
 import { formatMoney, formatNumber } from "../../util/formatters.js";
 import { RelatedLicenseSet } from "../license-matching/license-grouper.js";
 

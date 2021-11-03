@@ -1,4 +1,4 @@
-import config from "../config/index.js";
+import config from "../parameters/env.js";
 import { AttachableError } from "../util/errors.js";
 import { isPresent } from "../util/helpers.js";
 import { Company } from "./company.js";

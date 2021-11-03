@@ -1,4 +1,4 @@
-import config from "../config/index.js";
+import config from "../parameters/env.js";
 import { isPresent } from "../util/helpers.js";
 import { Company } from "./company.js";
 import { Entity } from "./hubspot/entity.js";

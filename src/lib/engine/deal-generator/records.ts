@@ -1,10 +1,10 @@
 import assert from 'assert';
 import mustache from 'mustache';
-import config from '../../config/index.js';
 import { Deal, DealData } from '../../model/deal.js';
 import { DealStage, Pipeline } from '../../model/hubspot/interfaces.js';
 import { License } from '../../model/license.js';
 import { Transaction } from '../../model/transaction.js';
+import config from '../../parameters/env.js';
 import { isPresent, sorter } from "../../util/helpers.js";
 import { RelatedLicenseSet } from '../license-matching/license-grouper.js';
 

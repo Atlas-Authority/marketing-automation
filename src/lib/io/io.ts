@@ -1,5 +1,5 @@
-import { cliParams } from "../cli/arg-parser.js";
 import { Remote } from "../io/interfaces.js";
+import { cliParams } from "../parameters/cli.js";
 import { LiveTldListerService } from '../services/live/domains.js';
 import { LiveEmailProviderListerService } from '../services/live/email-providers.js';
 import LiveHubspotService from '../services/live/hubspot.js';

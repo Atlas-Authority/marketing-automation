@@ -1,7 +1,7 @@
-import { cliParams } from "../lib/cli/arg-parser.js";
 import Engine from "../lib/engine/engine.js";
 import { getIoFromCli } from "../lib/io/io.js";
 import { Database } from "../lib/model/database.js";
+import { cliParams } from "../lib/parameters/cli.js";
 
 const io = getIoFromCli();
 cliParams.failIfExtraOpts();
