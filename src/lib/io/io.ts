@@ -52,21 +52,7 @@ class LiveRemote implements Remote {
 
 export function getIoFromCli() {
   return new IO({
-    in: input(cli.getChoiceOrFail('--downloader', ['live', 'cached'])),
-    out: output(cli.getChoiceOrFail('--uploader', ['live', 'console'])),
+    in: cli.getChoiceOrFail('--downloader', ['local', 'remote']),
+    out: cli.getChoiceOrFail('--uploader', ['local', 'remote']),
   });
-}
-
-function input(opt: 'live' | 'cached'): 'local' | 'remote' {
-  switch (opt) {
-    case 'cached': return 'local';
-    case 'live': return 'remote';
-  }
-}
-
-function output(opt: 'live' | 'console'): 'local' | 'remote' {
-  switch (opt) {
-    case 'console': return 'local';
-    case 'live': return 'remote';
-  }
 }
