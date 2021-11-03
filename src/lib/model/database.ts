@@ -28,9 +28,9 @@ export class Database {
   customerDomains = new Set<string>();
 
   constructor(private downloader: Downloader, uploader: Uploader) {
-    this.dealManager = new DealManager(downloader, uploader, this);
-    this.contactManager = new ContactManager(downloader, uploader, this);
-    this.companyManager = new CompanyManager(downloader, uploader, this);
+    this.dealManager = new DealManager(downloader.hubspot, uploader.hubspot, this);
+    this.contactManager = new ContactManager(downloader.hubspot, uploader.hubspot, this);
+    this.companyManager = new CompanyManager(downloader.hubspot, uploader.hubspot, this);
   }
 
   async downloadAllData() {
