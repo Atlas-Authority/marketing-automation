@@ -1,4 +1,4 @@
-import { Downloader, Uploader } from "../io/interfaces.js";
+import { Remote } from "../io/interfaces.js";
 import { MultiDownloadLogger } from "../log/download-logger.js";
 import log from "../log/logger.js";
 import { makeEmailValidationRegex } from "../services/live/domains.js";
@@ -27,7 +27,7 @@ export class Database {
   partnerDomains = new Set<string>();
   customerDomains = new Set<string>();
 
-  constructor(private downloader: Downloader, uploader: Uploader) {
+  constructor(private downloader: Remote, uploader: Remote) {
     this.dealManager = new DealManager(downloader.hubspot, uploader.hubspot, this);
     this.contactManager = new ContactManager(downloader.hubspot, uploader.hubspot, this);
     this.companyManager = new CompanyManager(downloader.hubspot, uploader.hubspot, this);

@@ -30,13 +30,9 @@ export interface MarketplaceService {
   downloadLicensesWithDataInsights(progress: Progress): Promise<readonly RawLicense[]>;
 }
 
-export interface Downloader {
+export interface Remote {
   hubspot: HubspotService;
   emailProviderLister: EmailProviderListerService;
   tldLister: TldListerService;
   marketplace: MarketplaceService;
-}
-
-export interface Uploader {
-  hubspot: HubspotService;
 }
