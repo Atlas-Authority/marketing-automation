@@ -42,17 +42,12 @@
       ]
     },
     {
-      "name": "Run cached-download twice",
+      "name": "Run cached-download multiple times",
       "request": "launch",
       "skipFiles": [
         "<node_internals>/**"
       ],
-      "program": "${workspaceFolder}/src/bin/verify-double-run.ts",
-      "args": [
-        "--in=local",
-        "--out=local",
-        "--loglevel=info",
-      ],
+      "program": "${workspaceFolder}/src/bin/verify-multiple-runs.ts",
       "type": "pwa-node",
       "outFiles": [
         "${workspaceFolder}/out/**/*.js",
