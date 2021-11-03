@@ -1,13 +1,13 @@
 import { Remote } from "../io/interfaces.js";
 import { cli } from "../parameters/cli.js";
-import { LiveTldListerService } from '../services/live/domains.js';
-import { LiveEmailProviderListerService } from '../services/live/email-providers.js';
-import LiveHubspotService from '../services/live/hubspot.js';
-import { LiveMarketplaceService } from '../services/live/marketplace.js';
-import { MemoryTldListerService } from '../services/memory/domains.js';
-import { MemoryEmailProviderListerService } from '../services/memory/email-providers.js';
-import { MemoryHubspot } from '../services/memory/hubspot.js';
-import { MemoryMarketplace } from '../services/memory/marketplace.js';
+import { LiveTldListerService } from './live/domains.js';
+import { LiveEmailProviderListerService } from './live/email-providers.js';
+import LiveHubspotService from './live/hubspot.js';
+import { LiveMarketplaceService } from './live/marketplace.js';
+import { MemoryTldListerService } from './memory/domains.js';
+import { MemoryEmailProviderListerService } from './memory/email-providers.js';
+import { MemoryHubspot } from './memory/hubspot.js';
+import { MemoryMarketplace } from './memory/marketplace.js';
 
 export class IO {
 

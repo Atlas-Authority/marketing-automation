@@ -1,9 +1,9 @@
 import Engine from "../lib/engine/engine.js";
 import { IO } from "../lib/io/io.js";
+import Slack from "../lib/io/slack.js";
 import { Database } from "../lib/model/database.js";
 import { cli } from "../lib/parameters/cli.js";
 import env from "../lib/parameters/env.js";
-import Slack from "../lib/services/slack.js";
 import { AttachableError, SimpleError } from '../lib/util/errors.js';
 import run from '../lib/util/runner.js';
 

@@ -17,9 +17,9 @@ $ npm start -- --downloader=live --uploader=live
 
 ## Development
 
-Running the engine live (steps above) will cache data locally in git-ignored `data` directory. After it's cached, you can use `--downloader=cached` for faster development and to avoid API calls.
+Running the engine live (steps above) will cache data locally in git-ignored `data` directory. After it's cached, you can use `--downloader=local` for faster development and to avoid API calls.
 
-Instead of uploading to Hubspot, you can use `--uploader=console` and `--loglevel=verbose` (the default) to print data to console that would have been uploaded, or `--loglevel=info` to just show array counts.
+Instead of uploading to Hubspot, you can use `--uploader=local` and `--loglevel=verbose` (the default) to print data to console that would have been uploaded, or `--loglevel=info` to just show array counts.
 
 After running the engine, to test logic *after* the Scoring Engine runs, pass `--cached-fns=scorer.json` to reuse the most recently results of the Scoring Engine.
 

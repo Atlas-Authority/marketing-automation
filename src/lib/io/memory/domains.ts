@@ -1,5 +1,5 @@
 import DataDir from "../../cache/datadir.js";
-import { TldListerService } from "../../io/interfaces.js";
+import { TldListerService } from "../interfaces.js";
 
 export class MemoryTldListerService implements TldListerService {
 

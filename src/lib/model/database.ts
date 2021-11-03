@@ -1,8 +1,8 @@
 import { IO } from "../io/io.js";
+import { makeEmailValidationRegex } from "../io/live/domains.js";
+import { makeMultiProviderDomainsSet } from "../io/live/email-providers.js";
 import { MultiDownloadLogger } from "../log/download-logger.js";
 import log from "../log/logger.js";
-import { makeEmailValidationRegex } from "../services/live/domains.js";
-import { makeMultiProviderDomainsSet } from "../services/live/email-providers.js";
 import { formatMoney, formatNumber } from "../util/formatters.js";
 import { CompanyManager } from "./company.js";
 import { ContactManager } from "./contact.js";

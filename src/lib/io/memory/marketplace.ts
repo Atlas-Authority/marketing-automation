@@ -1,6 +1,6 @@
 import DataDir from "../../cache/datadir.js";
-import { MarketplaceService } from "../../io/interfaces.js";
 import { RawLicense, RawTransaction } from "../../model/marketplace/raw.js";
+import { MarketplaceService } from "../interfaces.js";
 
 export class MemoryMarketplace implements MarketplaceService {
 
