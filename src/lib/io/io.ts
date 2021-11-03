@@ -1,3 +1,4 @@
+import { cliParams } from "../cli/arg-parser.js";
 import { Remote } from "../io/interfaces.js";
 import { LiveTldListerService } from '../services/live/domains.js';
 import { LiveEmailProviderListerService } from '../services/live/email-providers.js';
@@ -47,4 +48,25 @@ class LiveRemote implements Remote {
   marketplace = new LiveMarketplaceService();
   emailProviderLister = new LiveEmailProviderListerService();
   tldLister = new LiveTldListerService();
+}
+
+export function getIoFromCli() {
+  return new IO({
+    in: input(cliParams.getChoiceOrFail('--downloader', ['live', 'cached'])),
+    out: output(cliParams.getChoiceOrFail('--uploader', ['live', 'console'])),
+  });
+}
+
+function input(opt: 'live' | 'cached'): 'local' | 'remote' {
+  switch (opt) {
+    case 'cached': return 'local';
+    case 'live': return 'remote';
+  }
+}
+
+function output(opt: 'live' | 'console'): 'local' | 'remote' {
+  switch (opt) {
+    case 'console': return 'local';
+    case 'live': return 'remote';
+  }
 }
