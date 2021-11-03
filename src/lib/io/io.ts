@@ -1,6 +1,12 @@
 import { Remote } from "../io/interfaces.js";
-import { MemoryRemote } from "../io/memory-remote.js";
-import LiveRemote from './live-remote.js';
+import { LiveTldListerService } from '../services/live/domains.js';
+import { LiveEmailProviderListerService } from '../services/live/email-providers.js';
+import LiveHubspotService from '../services/live/hubspot.js';
+import { LiveMarketplaceService } from '../services/live/marketplace.js';
+import { MemoryTldListerService } from '../services/memory/domains.js';
+import { MemoryEmailProviderListerService } from '../services/memory/email-providers.js';
+import { MemoryHubspot } from '../services/memory/hubspot.js';
+import { MemoryMarketplace } from '../services/memory/marketplace.js';
 
 export class IO {
 
@@ -27,4 +33,18 @@ function remoteFor(opt: 'local' | 'remote'): Remote {
     case 'local': return new MemoryRemote();
     case 'remote': return new LiveRemote();
   }
+}
+
+class MemoryRemote implements Remote {
+  marketplace = new MemoryMarketplace();
+  tldLister = new MemoryTldListerService();
+  emailProviderLister = new MemoryEmailProviderListerService();
+  hubspot = new MemoryHubspot();
+}
+
+class LiveRemote implements Remote {
+  hubspot = new LiveHubspotService();
+  marketplace = new LiveMarketplaceService();
+  emailProviderLister = new LiveEmailProviderListerService();
+  tldLister = new LiveTldListerService();
 }
