@@ -162,14 +162,11 @@ export type UpdateDealAction = {
   properties: Partial<DealData>;
 };
 
-export type IgnoreDealAction = {
-  type: 'ignore';
-  details: string,
-  groups: RelatedLicenseSet;
-  reason: string;
+export type NoDealAction = {
+  type: 'noop';
 };
 
-export type Action = CreateDealAction | UpdateDealAction | IgnoreDealAction;
+export type Action = CreateDealAction | UpdateDealAction | NoDealAction;
 
 function makeCreateAction(event: DealRelevantEvent, record: License | Transaction, data: Pick<DealData, 'addonLicenseId' | 'transactionId' | 'dealStage'>): Action {
   return {
@@ -184,7 +181,8 @@ function makeUpdateAction(event: DealRelevantEvent, deal: Deal, record: License 
   if (record) updateDeal(deal, record);
 
   if (!deal.hasPropertyChanges()) {
-    return makeIgnoreAction(event, deal, 'No properties to update');
+    log.detailed('Deal Actions', 'No properties to update for deal', deal.id);
+    return { type: 'noop' };
   }
 
   return {
@@ -193,11 +191,6 @@ function makeUpdateAction(event: DealRelevantEvent, deal: Deal, record: License 
     deal,
     properties: deal.getPropertyChanges(),
   };
-}
-
-function makeIgnoreAction(event: DealRelevantEvent, deal: Deal, reason: string): Action {
-  log.detailed('Deal Actions', `No action: ${reason}`);
-  return { type: 'ignore', details: deal.id ?? '', reason, groups: event.groups };
 }
 
 function getLatestRecord(event: PurchaseEvent): License | Transaction {

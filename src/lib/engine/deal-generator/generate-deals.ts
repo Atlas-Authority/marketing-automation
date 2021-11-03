@@ -72,7 +72,7 @@ export class DealGenerator {
       switch (action.type) {
         case 'create': this.dealCreateActions.push(action); break;
         case 'update': this.dealUpdateActions.push(action); break;
-        case 'ignore': this.ignoreLicenses(action.reason, action.details, action.groups.map(g => g.license), action.groups.flatMap(g => g.transactions));
+        case 'noop': break;
       }
     }
   }
