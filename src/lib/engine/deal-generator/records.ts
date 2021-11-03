@@ -47,7 +47,7 @@ export function abbrRecordDetails(record: Transaction | License) {
   };
 }
 
-export function dealCreationProperties(record: License | Transaction, data: Pick<DealData, 'addonLicenseId' | 'transactionId' | 'dealstage'>): DealData {
+export function dealCreationProperties(record: License | Transaction, data: Pick<DealData, 'addonLicenseId' | 'transactionId' | 'dealStage'>): DealData {
   const dealNameTemplateProperties = {
     ...record.data,
     technicalContactEmail: record.data.technicalContact.email,
@@ -67,7 +67,7 @@ export function dealCreationProperties(record: License | Transaction, data: Pick
     dealName: mustache.render(env.hubspot.deals.dealDealName, dealNameTemplateProperties),
     pipeline: Pipeline.MPAC,
     hasActivity: false,
-    amount: (data.dealstage === DealStage.EVAL
+    amount: (data.dealStage === DealStage.EVAL
       ? null
       : record instanceof License
         ? 0
@@ -79,7 +79,7 @@ export function updateDeal(deal: Deal, record: License | Transaction) {
   const data = dealCreationProperties(record, {
     addonLicenseId: deal.data.addonLicenseId,
     transactionId: deal.data.transactionId,
-    dealstage: deal.data.dealstage,
+    dealStage: deal.data.dealStage,
   });
   Object.assign(deal.data, data);
   deal.data.licenseTier = Math.max(deal.data.licenseTier, record.tier);

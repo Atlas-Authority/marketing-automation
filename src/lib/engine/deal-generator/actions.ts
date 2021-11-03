@@ -32,7 +32,7 @@ export class ActionGenerator {
     const latestLicense = event.licenses[event.licenses.length - 1];
     if (!deal) {
       return makeCreateAction(event, latestLicense, {
-        dealstage: event.licenses.some(l => l.active)
+        dealStage: event.licenses.some(l => l.active)
           ? DealStage.EVAL
           : DealStage.CLOSED_LOST,
         addonLicenseId: latestLicense.data.addonLicenseId,
@@ -56,7 +56,7 @@ export class ActionGenerator {
     const record = getLatestRecord(event);
     if (!deal) {
       return makeCreateAction(event, record, {
-        dealstage: DealStage.CLOSED_WON,
+        dealStage: DealStage.CLOSED_WON,
         addonLicenseId: record.data.addonLicenseId,
         transactionId: null,
       });
@@ -79,7 +79,7 @@ export class ActionGenerator {
       return makeUpdateAction(event, deal, event.transaction);
     }
     return makeCreateAction(event, event.transaction, {
-      dealstage: DealStage.CLOSED_WON,
+      dealStage: DealStage.CLOSED_WON,
       addonLicenseId: null,
       transactionId: event.transaction.data.transactionId,
     });
@@ -88,7 +88,7 @@ export class ActionGenerator {
   private actionsForRefund(event: RefundEvent): Action[] {
     const deals = this.dealManager.getDealsForTransactions(event.refundedTxs);
     return ([...deals]
-      .filter(deal => deal.data.dealstage !== DealStage.CLOSED_LOST)
+      .filter(deal => deal.data.dealStage !== DealStage.CLOSED_LOST)
       .map(deal => makeUpdateAction(event, deal, null, DealStage.CLOSED_LOST))
       .filter(isPresent)
     );
@@ -171,7 +171,7 @@ export type IgnoreDealAction = {
 
 export type Action = CreateDealAction | UpdateDealAction | IgnoreDealAction;
 
-function makeCreateAction(event: DealRelevantEvent, record: License | Transaction, data: Pick<DealData, 'addonLicenseId' | 'transactionId' | 'dealstage'>): Action {
+function makeCreateAction(event: DealRelevantEvent, record: License | Transaction, data: Pick<DealData, 'addonLicenseId' | 'transactionId' | 'dealStage'>): Action {
   return {
     type: 'create',
     groups: event.groups,
@@ -180,7 +180,7 @@ function makeCreateAction(event: DealRelevantEvent, record: License | Transactio
 }
 
 function makeUpdateAction(event: DealRelevantEvent, deal: Deal, record: License | Transaction | null, dealstage?: DealStage): Action {
-  if (dealstage !== undefined) deal.data.dealstage = dealstage;
+  if (dealstage !== undefined) deal.data.dealStage = dealstage;
   if (record) updateDeal(deal, record);
 
   if (!deal.hasPropertyChanges()) {

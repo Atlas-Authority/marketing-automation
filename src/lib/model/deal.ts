@@ -26,7 +26,7 @@ export type DealData = {
   deployment: 'Server' | 'Cloud' | 'Data Center' | null;
   licenseTier: number;
   pipeline: Pipeline;
-  dealstage: DealStage;
+  dealStage: DealStage;
   amount: number | null;
   readonly hasActivity: boolean;
 };
@@ -36,11 +36,11 @@ export class Deal extends Entity<DealData> {
   contacts = this.makeDynamicAssociation<Contact>('contact');
   companies = this.makeDynamicAssociation<Company>('company');
 
-  isEval() { return this.data.dealstage === DealStage.EVAL; }
+  isEval() { return this.data.dealStage === DealStage.EVAL; }
   isClosed() {
     return (
-      this.data.dealstage === DealStage.CLOSED_LOST ||
-      this.data.dealstage === DealStage.CLOSED_WON
+      this.data.dealStage === DealStage.CLOSED_LOST ||
+      this.data.dealStage === DealStage.CLOSED_WON
     );
   }
 
@@ -102,7 +102,7 @@ export class DealManager extends EntityManager<DealData, Deal> {
       deployment: deploymentKey ? data[deploymentKey] as DealData['deployment'] : null,
       licenseTier: +(data['license_tier'] as string),
       pipeline: enumFromValue(pipelines, data['pipeline']),
-      dealstage: enumFromValue(dealstages, data['dealstage'] ?? ''),
+      dealStage: enumFromValue(dealstages, data['dealstage'] ?? ''),
       amount: !data['amount'] ? null : +data['amount'],
       hasActivity: (
         isNonBlankString(data['hs_user_ids_of_all_owners']) ||
@@ -130,7 +130,7 @@ export class DealManager extends EntityManager<DealData, Deal> {
     deployment: EntityManager.upSyncIfConfigured(deploymentKey, deployment => deployment ?? ''),
     licenseTier: licenseTier => ['license_tier', licenseTier.toFixed()],
     pipeline: pipeline => ['pipeline', pipelines[pipeline]],
-    dealstage: dealstage => ['dealstage', dealstages[dealstage]],
+    dealStage: dealstage => ['dealstage', dealstages[dealstage]],
     amount: amount => ['amount', amount?.toString() ?? ''],
     hasActivity: EntityManager.noUpSync,
   };
