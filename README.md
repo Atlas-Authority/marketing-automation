@@ -15,6 +15,19 @@
 $ npm start -- --in=live --out=live
 ```
 
+## CLI Options
+
+| Name         | Values                               | Notes                                                        |
+| ------------ | ------------------------------------ | ------------------------------------------------------------ |
+| --in         | local, remote                        | Whether to use disk-cached values, or download live data     |
+| --out        | local, remote                        | Whether to cache output to disk and log, or upload live data |
+| --cached-fns | scorer.json                          | (Optional) Use given cached function value                   |
+| --loglevel   | error, warn, info, verbose, detailed | What the engine should log to console.log()                  |
+
+## ENV variables
+
+See [`.env.sample`](./.env.sample) for what ENV variables to set and documentation on them.
+
 ## Development
 
 Running the engine live (steps above) will cache data locally in git-ignored `data` directory. After it's cached, you can use `--in=local` for faster development and to avoid API calls.
