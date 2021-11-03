@@ -1,4 +1,4 @@
-import { Remote } from "../io/interfaces.js";
+import { IO } from "../io/io.js";
 import { MultiDownloadLogger } from "../log/download-logger.js";
 import log from "../log/logger.js";
 import { makeEmailValidationRegex } from "../services/live/domains.js";
@@ -27,10 +27,10 @@ export class Database {
   partnerDomains = new Set<string>();
   customerDomains = new Set<string>();
 
-  constructor(private downloader: Remote, uploader: Remote) {
-    this.dealManager = new DealManager(downloader.hubspot, uploader.hubspot, this);
-    this.contactManager = new ContactManager(downloader.hubspot, uploader.hubspot, this);
-    this.companyManager = new CompanyManager(downloader.hubspot, uploader.hubspot, this);
+  constructor(private io: IO) {
+    this.dealManager = new DealManager(io.in.hubspot, io.out.hubspot, this);
+    this.contactManager = new ContactManager(io.in.hubspot, io.out.hubspot, this);
+    this.companyManager = new CompanyManager(io.in.hubspot, io.out.hubspot, this);
   }
 
   async downloadAllData() {
@@ -46,19 +46,19 @@ export class Database {
       transactions,
     ] = await Promise.all([
       logbox.wrap('Free Email Providers', (progress) =>
-        this.downloader.emailProviderLister.downloadFreeEmailProviders(progress)),
+        this.io.in.emailProviderLister.downloadFreeEmailProviders(progress)),
 
       logbox.wrap('Tlds', (progress) =>
-        this.downloader.tldLister.downloadAllTlds(progress)),
+        this.io.in.tldLister.downloadAllTlds(progress)),
 
       logbox.wrap('Licenses With Data Insights', (progress) =>
-        this.downloader.marketplace.downloadLicensesWithDataInsights(progress)),
+        this.io.in.marketplace.downloadLicensesWithDataInsights(progress)),
 
       logbox.wrap('Licenses Without Data Insights', (progress) =>
-        this.downloader.marketplace.downloadLicensesWithoutDataInsights(progress)),
+        this.io.in.marketplace.downloadLicensesWithoutDataInsights(progress)),
 
       logbox.wrap('Transactions', (progress) =>
-        this.downloader.marketplace.downloadTransactions(progress)),
+        this.io.in.marketplace.downloadTransactions(progress)),
 
       logbox.wrap('Deals', (progress) =>
         this.dealManager.downloadAllEntities(progress)),

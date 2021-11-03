@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import DataDir from '../lib/cache/datadir.js';
 import { shorterLicenseInfo } from '../lib/engine/license-matching/license-grouper.js';
-import { MemoryRemote } from '../lib/io/memory-remote.js';
+import { IO } from '../lib/io/io.js';
 import log from '../lib/log/logger.js';
 import { Database } from '../lib/model/database.js';
 import { LicenseData } from '../lib/model/license.js';
@@ -24,8 +24,7 @@ if (sens.length === 1 && sens[0].endsWith('.json')) {
 }
 
 log.level = log.Levels.Verbose;
-const memoryRemote = new MemoryRemote();
-const db = new Database(memoryRemote, memoryRemote);
+const db = new Database(new IO({ in: 'local', out: 'local' }));
 await db.downloadAllData();
 
 const ignored = DataDir.out.file<(LicenseData & { reason: string })[][]>('ignored.json').readJson();

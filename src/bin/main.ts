@@ -7,7 +7,7 @@ import Slack from "../lib/services/slack.js";
 import { AttachableError, SimpleError } from '../lib/util/errors.js';
 import run from '../lib/util/runner.js';
 
-const { downloader, uploader } = getIoFromCli();
+const io = getIoFromCli();
 cliParams.failIfExtraOpts();
 
 const slack = new Slack();
@@ -17,7 +17,7 @@ await slack.postToSlack(`Starting Marketing Engine`);
 await run({
 
   async work() {
-    const db = new Database(downloader, uploader);
+    const db = new Database(io);
     await new Engine().run(db);
   },
 

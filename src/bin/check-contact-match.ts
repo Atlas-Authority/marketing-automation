@@ -1,6 +1,6 @@
 import DataDir from '../lib/cache/datadir.js';
 import { shorterLicenseInfo } from '../lib/engine/license-matching/license-grouper.js';
-import { MemoryRemote } from '../lib/io/memory-remote.js';
+import { IO } from '../lib/io/io.js';
 import log from '../lib/log/logger.js';
 import { Database } from '../lib/model/database.js';
 
@@ -12,8 +12,7 @@ if (!contactId) {
 }
 
 log.level = log.Levels.Verbose;
-const memoryRemote = new MemoryRemote();
-const db = new Database(memoryRemote, memoryRemote);
+const db = new Database(new IO({ in: 'local', out: 'local' }));
 await db.downloadAllData();
 
 const contact = db.contactManager.get(contactId);

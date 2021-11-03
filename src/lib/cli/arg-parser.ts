@@ -15,15 +15,15 @@ class ArgParser {
     return value;
   }
 
-  getChoiceOrFail<T>(option: string, choices: { [opt: string]: () => T }): T {
-    const value = this.get(option);
-    if (!value || !choices[value]) {
+  getChoiceOrFail<T extends string>(option: string, choices: T[]): T {
+    const value = this.get(option) as T;
+    if (!value || !choices.includes(value)) {
       console.log(`Error: ${option} must be ${Object.keys(choices)
         .map(c => `'${c}'`)
         .join(' or ')}`);
       process.exit(1);
     }
-    return choices[value]();
+    return value;
   }
 
   failIfExtraOpts() {

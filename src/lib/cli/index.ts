@@ -1,23 +1,23 @@
-import { Remote } from "../io/interfaces.js";
-import LiveRemote from '../io/live-remote.js';
-import { MemoryRemote } from "../io/memory-remote.js";
+import { IO } from "../io/io.js";
 import { cliParams } from './arg-parser.js';
 
 export function getIoFromCli() {
-  return {
-    downloader: cliParams.getChoiceOrFail<Remote>('--downloader', {
-      'cached': getSingletonMemoryRemote,
-      'live': () => new LiveRemote(),
-    }),
-    uploader: cliParams.getChoiceOrFail<Remote>('--uploader', {
-      'console': getSingletonMemoryRemote,
-      'live': () => new LiveRemote(),
-    }),
-  };
+  return new IO({
+    in: input(cliParams.getChoiceOrFail('--downloader', ['live', 'cached'])),
+    out: output(cliParams.getChoiceOrFail('--uploader', ['live', 'console'])),
+  });
 }
 
-let memoryRemote: MemoryRemote | undefined;
-function getSingletonMemoryRemote() {
-  if (!memoryRemote) memoryRemote = new MemoryRemote();
-  return memoryRemote;
+function input(opt: 'live' | 'cached'): 'local' | 'remote' {
+  switch (opt) {
+    case 'cached': return 'local';
+    case 'live': return 'remote';
+  }
+}
+
+function output(opt: 'live' | 'console'): 'local' | 'remote' {
+  switch (opt) {
+    case 'console': return 'local';
+    case 'live': return 'remote';
+  }
 }
