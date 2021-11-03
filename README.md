@@ -25,7 +25,7 @@
         (Optional) Reuse cached results of given function
 
     --loglevel    error | warn | info | verbose | detailed
-        What the engine should log to console.log()
+        (Optional) What the engine should log to console.log()
 
 ## Developer NPM commands
 
