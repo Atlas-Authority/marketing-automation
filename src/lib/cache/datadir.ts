@@ -28,7 +28,7 @@ export default class DataDir {
 
 }
 
-export class DataFile<T> {
+class DataFile<T> {
 
   #url: URL;
   #text?: string;

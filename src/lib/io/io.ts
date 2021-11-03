@@ -22,11 +22,9 @@ export class IO {
   public out: Remote;
 
   constructor(opts: { in: 'local' | 'remote', out: 'local' | 'remote' }) {
-    if (opts.in === 'local' && opts.out === 'local') {
-      this.in = this.out = new MemoryRemote();
-    }
-    else if (opts.in === 'remote' && opts.out === 'remote') {
-      this.in = this.out = new LiveRemote();
+    if (opts.in === opts.out) {
+      // Important that it's the same instance!
+      this.in = this.out = remoteFor(opts.in);
     }
     else {
       this.in = remoteFor(opts.in);
