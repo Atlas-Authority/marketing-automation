@@ -6,27 +6,26 @@
 
 ## Setup
 
-1. Copy `.sample.env` to `.env` and set values.
+1. Copy [`.env.sample`](./.env.sample) to `.env` and set values.
 2. `npm install`
 
 ## Running
 
-```sh
-$ npm start -- --in=remote --out=remote
-```
+    $ npm start -- --in=remote --out=remote
 
 ## CLI Options
 
-| Name         | Values                               | Notes                                                        |
-| ------------ | ------------------------------------ | ------------------------------------------------------------ |
-| --in         | local, remote                        | Whether to use disk-cached values, or download live data     |
-| --out        | local, remote                        | Whether to cache output to disk and log, or upload live data |
-| --cached-fns | scorer.json                          | (Optional) Reuse cached results of given function            |
-| --loglevel   | error, warn, info, verbose, detailed | What the engine should log to console.log()                  |
+    --in   local | remote
+        Whether to use disk-cached values, or download live data
 
-## ENV variables
+    --out  local | remote
+        Whether to cache output to disk and log, or upload live data
 
-See [`.env.sample`](./.env.sample) for what ENV variables to set and documentation on them.
+    --cached-fns  scorer.json
+        (Optional) Reuse cached results of given function
+
+    --loglevel    error | warn | info | verbose | detailed
+        What the engine should log to console.log()
 
 ## Developer NPM commands
 
@@ -51,10 +50,10 @@ $ npm run multiple
 
 # Explain what the engine does given certain SENs or transactions
 # (Requires the engine to have been run on latest data locally)
-$ npm run explain -- <SEN1, SEN2, ...> | <transactions.json>
+$ npm run explain -- [--verbose] <SEN12345ABCDE>... | <transactions.json>
 ```
 
-## Development
+## Running during Development
 
 Running the engine live (steps above) will cache data locally in git-ignored `data` directory. After it's cached, you can use `--in=local` for faster development and to avoid API calls.
 
