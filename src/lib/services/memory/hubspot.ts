@@ -5,7 +5,6 @@ import { Association, EntityKind, ExistingEntity, FullEntity, NewEntity, Relativ
 
 export class MemoryHubspot implements HubspotService {
 
-  verbose = false;
   ids = new Map<string, number>();
 
   readonly deals = DataDir.in.file<FullEntity[]>(`deal.json`);
@@ -77,9 +76,7 @@ export class MemoryHubspot implements HubspotService {
 
   private fakeApiConsoleLog(title: string, data: unknown[]) {
     log.info('Fake Uploader', title, data.length);
-    if (this.verbose) {
-      log.verbose('Fake Uploader', title, data);
-    }
+    log.verbose('Fake Uploader', title, data);
   }
 
   private getEntity(kind: EntityKind, id: string) {

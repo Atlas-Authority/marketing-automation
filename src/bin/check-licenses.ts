@@ -23,7 +23,8 @@ if (sens.length === 1 && sens[0].endsWith('.json')) {
   sens = ts.map(t => t.addonLicenseId);
 }
 
-const memoryRemote = new MemoryRemote({ verbose: true });
+log.level = log.Levels.Verbose;
+const memoryRemote = new MemoryRemote();
 const db = new Database(memoryRemote, memoryRemote);
 await db.downloadAllData();
 

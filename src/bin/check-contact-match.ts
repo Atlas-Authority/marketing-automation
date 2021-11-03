@@ -11,7 +11,8 @@ if (!contactId) {
   process.exit(1);
 }
 
-const memoryRemote = new MemoryRemote({ verbose: true });
+log.level = log.Levels.Verbose;
+const memoryRemote = new MemoryRemote();
 const db = new Database(memoryRemote, memoryRemote);
 await db.downloadAllData();
 
