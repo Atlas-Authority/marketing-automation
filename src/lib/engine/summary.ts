@@ -1,6 +1,7 @@
 import log from "../log/logger.js";
 import { Database } from "../model/database.js";
 import { Deal } from "../model/deal.js";
+import env from "../parameters/env.js";
 import { formatMoney, formatNumber } from "../util/formatters.js";
 import { isPresent } from "../util/helpers.js";
 
@@ -38,5 +39,8 @@ export function printSummary(db: Database) {
 }
 
 function dealLink(deal: Deal) {
-  return `https://app.hubspot.com/contacts/3466897/deal/${deal.id}/`;
+  const hsAccountId = env.hubspot.accountId;
+  return (hsAccountId
+    ? `https://app.hubspot.com/contacts/${hsAccountId}/deal/${deal.id}/`
+    : `deal-id=${deal.id}`);
 }

@@ -16,6 +16,7 @@ export default {
   },
   hubspot: {
     apiKey: required('HUBSPOT_API_KEY'),
+    accountId: optional('HUBSPOT_ACCOUNT_ID'),
     pipeline: {
       mpac: required('HUBSPOT_PIPELINE_MPAC'),
     },

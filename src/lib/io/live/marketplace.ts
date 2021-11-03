@@ -9,11 +9,13 @@ import { MarketplaceService, Progress } from '../interfaces.js';
 export class LiveMarketplaceService implements MarketplaceService {
 
   async downloadTransactions(): Promise<RawTransaction[]> {
-    return cache('transactions.json', await this.downloadMarketplaceData('/sales/transactions/export'));
+    return cache('transactions.json',
+      await this.downloadMarketplaceData('/sales/transactions/export'));
   }
 
   async downloadLicensesWithoutDataInsights(): Promise<RawLicense[]> {
-    return cache('licenses-without.json', await this.downloadMarketplaceData('/licenses/export?endDate=2018-07-01'));
+    return cache('licenses-without.json',
+      await this.downloadMarketplaceData('/licenses/export?endDate=2018-07-01'));
   }
 
   async downloadLicensesWithDataInsights(progress: Progress): Promise<RawLicense[]> {
@@ -24,7 +26,8 @@ export class LiveMarketplaceService implements MarketplaceService {
       progress.tick(`${startDate}-${endDate}`);
       return json;
     });
-    return cache('licenses-with.json', (await Promise.all(promises)).flat());
+    return cache('licenses-with.json',
+      (await Promise.all(promises)).flat());
   }
 
   private async downloadMarketplaceData<T>(subpath: string): Promise<T[]> {
