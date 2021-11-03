@@ -74,3 +74,10 @@ After running the engine, to test logic *after* the Scoring Engine runs, pass `-
 5. Update Contacts based on match results
 6. Generate Deals based on match results
 7. Upsert HubSpot data entities
+
+## Changelog
+
+21.11.1
+
+- Started using CalVer
+- Started using Changelog
