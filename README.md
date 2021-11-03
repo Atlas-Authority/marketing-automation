@@ -40,6 +40,8 @@ $ npm start -- --in=local --out=local --cached-fns=scorer.json --loglevel=info
 $ npm run download
 
 # Run unit tests
+$ npm run build # either build once
+$ npm run watch # or watch and build
 $ npm test
 
 # Run engine multiple times,

@@ -55,8 +55,6 @@ export interface LicenseData {
   newEvalData: NewEvalData | null,
 }
 
-// event.groups.some(g => g.license.data.addonLicenseId === '3907452' || g.license.data.addonLicenseId === '3907453')
-
 export class License {
 
   public data: LicenseData;
