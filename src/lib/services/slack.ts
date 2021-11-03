@@ -1,14 +1,14 @@
 import slack from '@slack/web-api';
 import log from '../log/logger.js';
-import config from '../parameters/env.js';
+import env from '../parameters/env.js';
 
 export default class Slack {
 
   client?: slack.WebClient;
 
   constructor() {
-    if (config.slack.apiToken) {
-      this.client = new slack.WebClient(config.slack.apiToken);
+    if (env.slack.apiToken) {
+      this.client = new slack.WebClient(env.slack.apiToken);
     }
   }
 
@@ -20,9 +20,9 @@ export default class Slack {
   async postAttachmentToSlack({ title, content }: { title: string, content: string }) {
     log.info('Slack', title, content);
 
-    if (config.slack.errorChannelId) {
+    if (env.slack.errorChannelId) {
       await this.client?.files.upload({
-        channels: config.slack.errorChannelId,
+        channels: env.slack.errorChannelId,
         title: title,
         content: content,
       })
@@ -32,9 +32,9 @@ export default class Slack {
   async postToSlack(text: string) {
     log.info('Slack', text);
 
-    if (config.slack.errorChannelId) {
+    if (env.slack.errorChannelId) {
       await this.client?.chat.postMessage({
-        channel: config.slack.errorChannelId,
+        channel: env.slack.errorChannelId,
         text: text,
       });
     }

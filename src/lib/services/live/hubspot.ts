@@ -3,12 +3,12 @@ import assert from 'assert';
 import cache from '../../io/cache.js';
 import { HubspotService, Progress } from '../../io/interfaces.js';
 import { Association, EntityKind, ExistingEntity, FullEntity, NewEntity, RelativeAssociation } from '../../model/hubspot/interfaces.js';
-import config from '../../parameters/env.js';
+import env from '../../parameters/env.js';
 import { SimpleError } from '../../util/errors.js';
 
 export default class LiveHubspotService implements HubspotService {
 
-  client = new hubspot.Client({ apiKey: config.hubspot.apiKey });
+  client = new hubspot.Client({ apiKey: env.hubspot.apiKey });
 
   async downloadEntities(_progess: Progress, kind: EntityKind, apiProperties: string[], inputAssociations: string[]): Promise<FullEntity[]> {
     let associations = ((inputAssociations.length > 0)

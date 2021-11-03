@@ -1,6 +1,6 @@
 import log from "../../log/logger.js";
 import { Database } from "../../model/database.js";
-import config from "../../parameters/env.js";
+import env from "../../parameters/env.js";
 import { formatMoney, formatNumber } from "../../util/formatters.js";
 import { RelatedLicenseSet } from "../license-matching/license-grouper.js";
 
@@ -27,5 +27,5 @@ function removeAllFrom<T>(array: T[], get: (r: T) => { addonKey: string, vendorA
 }
 
 function hasIgnoredApp(record: { addonKey: string }) {
-  return config.engine.ignoredApps.has(record.addonKey);
+  return env.engine.ignoredApps.has(record.addonKey);
 }

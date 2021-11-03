@@ -1,12 +1,12 @@
 import log from '../log/logger.js';
 import { cliParams } from "../parameters/cli.js";
-import config from '../parameters/env.js';
+import env from '../parameters/env.js';
 import DataDir from "./datadir.js";
 
 const cachedFns = cliParams.get('--cached-fns')?.split(',') || [];
 
 export function fnOrCache<T>(filename: string, fn: () => T): T {
-  const skipCacheFully = (config.isProduction || config.isTest);
+  const skipCacheFully = (env.isProduction || env.isTest);
 
   const file = DataDir.cache.file<T>(filename);
 

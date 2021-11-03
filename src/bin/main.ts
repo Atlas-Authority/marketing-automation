@@ -2,7 +2,7 @@ import Engine from "../lib/engine/engine.js";
 import { getIoFromCli } from "../lib/io/io.js";
 import { Database } from "../lib/model/database.js";
 import { cliParams } from "../lib/parameters/cli.js";
-import config from "../lib/parameters/env.js";
+import env from "../lib/parameters/env.js";
 import Slack from "../lib/services/slack.js";
 import { AttachableError, SimpleError } from '../lib/util/errors.js';
 import run from '../lib/util/runner.js';
@@ -22,7 +22,7 @@ await run({
   },
 
   async failed(errors) {
-    await slack.postToSlack(`Failed ${config.engine.retryTimes} times. Below are the specific errors, in order. Trying again in ${config.engine.runInterval}.`);
+    await slack.postToSlack(`Failed ${env.engine.retryTimes} times. Below are the specific errors, in order. Trying again in ${env.engine.runInterval}.`);
     for (const error of errors) {
       if (error instanceof SimpleError) {
         await slack.postErrorToSlack(error.message);

@@ -1,4 +1,4 @@
-import config from "../parameters/env.js";
+import env from "../parameters/env.js";
 import { AttachableError } from "../util/errors.js";
 import { isPresent } from "../util/helpers.js";
 import { Company } from "./company.js";
@@ -9,10 +9,10 @@ import { EntityManager, PropertyTransformers } from "./hubspot/manager.js";
 import { License } from "./license.js";
 import { Transaction } from "./transaction.js";
 
-const addonLicenseIdKey = config.hubspot.attrs.deal.addonLicenseId;
-const transactionIdKey = config.hubspot.attrs.deal.transactionId;
-const deploymentKey = config.hubspot.attrs.deal.deployment;
-const appKey = config.hubspot.attrs.deal.app;
+const addonLicenseIdKey = env.hubspot.attrs.deal.addonLicenseId;
+const transactionIdKey = env.hubspot.attrs.deal.transactionId;
+const deploymentKey = env.hubspot.attrs.deal.deployment;
+const appKey = env.hubspot.attrs.deal.app;
 
 export type DealData = {
   relatedProducts: string | null;
@@ -89,7 +89,7 @@ export class DealManager extends EntityManager<DealData, Deal> {
   ];
 
   override fromAPI(data: { [key: string]: string | null }): DealData | null {
-    if (data['pipeline'] !== config.hubspot.pipeline.mpac) return null;
+    if (data['pipeline'] !== env.hubspot.pipeline.mpac) return null;
     return {
       relatedProducts: data['related_products'] || null,
       app: appKey ? data[appKey] as string : null,
@@ -183,11 +183,11 @@ function enumFromValue<T extends number>(mapping: Record<T, string>, apiValue: s
 }
 
 const pipelines: Record<Pipeline, string> = {
-  [Pipeline.MPAC]: config.hubspot.pipeline.mpac,
+  [Pipeline.MPAC]: env.hubspot.pipeline.mpac,
 };
 
 const dealstages: Record<DealStage, string> = {
-  [DealStage.EVAL]: config.hubspot.dealstage.eval,
-  [DealStage.CLOSED_WON]: config.hubspot.dealstage.closedWon,
-  [DealStage.CLOSED_LOST]: config.hubspot.dealstage.closedLost,
+  [DealStage.EVAL]: env.hubspot.dealstage.eval,
+  [DealStage.CLOSED_WON]: env.hubspot.dealstage.closedWon,
+  [DealStage.CLOSED_LOST]: env.hubspot.dealstage.closedLost,
 };

@@ -4,7 +4,7 @@ import { Deal, DealData } from '../../model/deal.js';
 import { DealStage, Pipeline } from '../../model/hubspot/interfaces.js';
 import { License } from '../../model/license.js';
 import { Transaction } from '../../model/transaction.js';
-import config from '../../parameters/env.js';
+import env from '../../parameters/env.js';
 import { isPresent, sorter } from "../../util/helpers.js";
 import { RelatedLicenseSet } from '../license-matching/license-grouper.js';
 
@@ -62,9 +62,9 @@ export function dealCreationProperties(record: License | Transaction, data: Pick
     app: record.data.addonKey,
     licenseTier: record.tier,
     country: record.data.country,
-    origin: config.hubspot.deals.dealOrigin ?? null,
-    relatedProducts: config.hubspot.deals.dealRelatedProducts ?? null,
-    dealName: mustache.render(config.hubspot.deals.dealDealName, dealNameTemplateProperties),
+    origin: env.hubspot.deals.dealOrigin ?? null,
+    relatedProducts: env.hubspot.deals.dealRelatedProducts ?? null,
+    dealName: mustache.render(env.hubspot.deals.dealDealName, dealNameTemplateProperties),
     pipeline: Pipeline.MPAC,
     hasActivity: false,
     amount: (data.dealstage === DealStage.EVAL

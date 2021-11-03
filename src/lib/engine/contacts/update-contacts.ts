@@ -1,5 +1,5 @@
 import { Database } from '../../model/database.js';
-import config from '../../parameters/env.js';
+import env from '../../parameters/env.js';
 import { SimpleError } from '../../util/errors.js';
 import { RelatedLicenseSet } from '../license-matching/license-grouper.js';
 import { flagPartnersViaCoworkers } from './contact-types.js';
@@ -30,7 +30,7 @@ export function updateContactsBasedOnMatchResults(db: Database, allMatches: Rela
       }
 
       const addonKey = group[0].license.data.addonKey;
-      const product = config.mpac.platforms[addonKey];
+      const product = env.mpac.platforms[addonKey];
       if (!product) {
         throw new SimpleError(`Add "${addonKey}" to ADDONKEY_PLATFORMS`);
       }

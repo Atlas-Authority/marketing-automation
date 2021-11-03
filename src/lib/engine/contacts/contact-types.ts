@@ -2,7 +2,7 @@ import { Contact } from '../../model/contact.js';
 import { Database } from '../../model/database.js';
 import { License } from '../../model/license.js';
 import { Transaction } from '../../model/transaction.js';
-import config from '../../parameters/env.js';
+import env from '../../parameters/env.js';
 
 export function identifyAndFlagContactTypes(db: Database) {
   // Identifying contact types
@@ -26,7 +26,7 @@ function identifyContactTypesFromRecordDomains(db: Database, records: (Transacti
 }
 
 function addPartnerDomainsFromEnv(db: Database) {
-  for (const domain of config.engine.partnerDomains) {
+  for (const domain of env.engine.partnerDomains) {
     db.partnerDomains.add(domain);
   }
 }

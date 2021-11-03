@@ -3,7 +3,7 @@ import fetch from 'node-fetch';
 import cache from '../../io/cache.js';
 import { MarketplaceService, Progress } from '../../io/interfaces.js';
 import { RawLicense, RawTransaction } from "../../model/marketplace/raw";
-import config from '../../parameters/env.js';
+import env from '../../parameters/env.js';
 import { AttachableError } from '../../util/errors.js';
 
 export class LiveMarketplaceService implements MarketplaceService {
@@ -28,9 +28,9 @@ export class LiveMarketplaceService implements MarketplaceService {
   }
 
   private async downloadMarketplaceData<T>(subpath: string): Promise<T[]> {
-    const res = await fetch(`https://marketplace.atlassian.com/rest/2/vendors/${config.mpac.sellerId}/reporting${subpath}`, {
+    const res = await fetch(`https://marketplace.atlassian.com/rest/2/vendors/${env.mpac.sellerId}/reporting${subpath}`, {
       headers: {
-        'Authorization': 'Basic ' + Buffer.from(config.mpac.user + ':' + config.mpac.pass).toString('base64'),
+        'Authorization': 'Basic ' + Buffer.from(env.mpac.user + ':' + env.mpac.pass).toString('base64'),
       },
     });
 
