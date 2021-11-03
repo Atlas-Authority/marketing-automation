@@ -1,5 +1,5 @@
 import { Remote } from "../io/interfaces.js";
-import { cliParams } from "../parameters/cli.js";
+import { cli } from "../parameters/cli.js";
 import { LiveTldListerService } from '../services/live/domains.js';
 import { LiveEmailProviderListerService } from '../services/live/email-providers.js';
 import LiveHubspotService from '../services/live/hubspot.js';
@@ -52,8 +52,8 @@ class LiveRemote implements Remote {
 
 export function getIoFromCli() {
   return new IO({
-    in: input(cliParams.getChoiceOrFail('--downloader', ['live', 'cached'])),
-    out: output(cliParams.getChoiceOrFail('--uploader', ['live', 'console'])),
+    in: input(cli.getChoiceOrFail('--downloader', ['live', 'cached'])),
+    out: output(cli.getChoiceOrFail('--uploader', ['live', 'console'])),
   });
 }
 

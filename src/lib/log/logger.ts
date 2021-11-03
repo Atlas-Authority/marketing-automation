@@ -1,5 +1,5 @@
 import util from 'util';
-import { cliParams } from '../parameters/cli.js';
+import { cli } from '../parameters/cli.js';
 
 enum LogLevel {
   Error,
@@ -11,7 +11,7 @@ enum LogLevel {
 
 class Logger {
 
-  public level = logLevelFromCliString(cliParams.get('--loglevel'));
+  public level = logLevelFromCliString(cli.get('--loglevel'));
   public readonly Levels = LogLevel;
 
   error(prefix: string, ...args: any[]) { this.print(LogLevel.Error, prefix, ...args); }
