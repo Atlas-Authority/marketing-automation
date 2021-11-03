@@ -6,7 +6,7 @@
 
 ## Setup
 
-1. Copy [`.env.sample`](./.env.sample) to `.env` and set values.
+1. Copy [`.sample.env`](./.sample.env) to `.env` and set values.
 2. `npm install`
 
 ## Running
