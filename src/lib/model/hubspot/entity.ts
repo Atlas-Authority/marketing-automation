@@ -19,7 +19,7 @@ export abstract class Entity<P extends { [key: string]: any }> {
   /** A copy of assocs, which all updates act on, whether an existing or new entity */
   private newAssocs = new Set<RelativeAssociation>();
 
-  data: { [K in keyof P]: P[K] };
+  readonly data: { [K in keyof P]: P[K] };
 
   constructor(
     private db: EntityDatabase,
