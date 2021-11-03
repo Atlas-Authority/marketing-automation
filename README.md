@@ -33,7 +33,7 @@
 # Run engine once
 $ npm start -- [options]
 
-# Example of running locally with cached scorer data and less verbosely
+# Example of dry-run, using local data and cached scorer data, with medium verbosity
 $ npm start -- --in=local --out=local --cached-fns=scorer.json --loglevel=info
 
 # Download live data and cache to disk
