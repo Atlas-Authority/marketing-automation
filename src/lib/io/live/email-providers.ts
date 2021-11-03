@@ -1,16 +1,5 @@
-import { emailBurnerList } from 'burner-email-providers';
-import allEmailProviders from 'email-providers';
 import cache from '../cache.js';
 import { EmailProviderListerService } from '../interfaces.js';
-
-/** A set of domains that host multiple unrelated email addresses */
-export function makeMultiProviderDomainsSet(freeDomains: readonly string[]) {
-  return new Set([
-    ...emailBurnerList,
-    ...allEmailProviders,
-    ...freeDomains,
-  ].map(d => d.toLowerCase()));
-}
 
 export class LiveEmailProviderListerService implements EmailProviderListerService {
 

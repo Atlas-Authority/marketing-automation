@@ -1,12 +1,12 @@
 import { IO } from "../io/io.js";
 import { makeEmailValidationRegex } from "../io/live/domains.js";
-import { makeMultiProviderDomainsSet } from "../io/live/email-providers.js";
 import { MultiDownloadLogger } from "../log/download-logger.js";
 import log from "../log/logger.js";
 import { formatMoney, formatNumber } from "../util/formatters.js";
 import { CompanyManager } from "./company.js";
 import { ContactManager } from "./contact.js";
 import { DealManager } from "./deal.js";
+import { EmailProviderLister } from "./email-providers/index.js";
 import { Entity } from "./hubspot/entity.js";
 import { EntityKind } from "./hubspot/interfaces.js";
 import { License } from "./license.js";
@@ -27,10 +27,13 @@ export class Database {
   partnerDomains = new Set<string>();
   customerDomains = new Set<string>();
 
+  emailProviderLister: EmailProviderLister;
+
   constructor(private io: IO) {
     this.dealManager = new DealManager(io.in.hubspot, io.out.hubspot, this);
     this.contactManager = new ContactManager(io.in.hubspot, io.out.hubspot, this);
     this.companyManager = new CompanyManager(io.in.hubspot, io.out.hubspot, this);
+    this.emailProviderLister = new EmailProviderLister(io.in.emailProviderLister);
   }
 
   async downloadAllData() {
@@ -39,15 +42,11 @@ export class Database {
     const logbox = new MultiDownloadLogger();
 
     const [
-      freeDomains,
       tlds,
       licensesWithDataInsights,
       licensesWithoutDataInsights,
       transactions,
     ] = await Promise.all([
-      logbox.wrap('Free Email Providers', (progress) =>
-        this.io.in.emailProviderLister.downloadFreeEmailProviders(progress)),
-
       logbox.wrap('Tlds', (progress) =>
         this.io.in.tldLister.downloadAllTlds(progress)),
 
@@ -59,6 +58,9 @@ export class Database {
 
       logbox.wrap('Transactions', (progress) =>
         this.io.in.marketplace.downloadTransactions(progress)),
+
+      logbox.wrap('Free Email Providers', (progress) =>
+        this.emailProviderLister.deriveMultiProviderDomainsSet(progress)),
 
       logbox.wrap('Deals', (progress) =>
         this.dealManager.downloadAllEntities(progress)),
@@ -74,7 +76,7 @@ export class Database {
 
     log.info('Downloader', 'Done');
 
-    this.providerDomains = makeMultiProviderDomainsSet(freeDomains);
+    this.providerDomains = this.emailProviderLister.set;
 
     const emailRe = makeEmailValidationRegex(tlds);
     const results = validateMarketplaceData(
