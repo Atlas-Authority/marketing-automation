@@ -12,8 +12,8 @@
       ],
       "program": "${workspaceFolder}/src/bin/run-once.ts",
       "args": [
-        "--downloader=local",
-        "--uploader=local",
+        "--in=local",
+        "--out=local",
         "--cached-fns=scorer.json",
         "--loglevel=info",
       ],
@@ -31,8 +31,8 @@
       ],
       "program": "${workspaceFolder}/src/bin/run-once.ts",
       "args": [
-        "--downloader=local",
-        "--uploader=local",
+        "--in=local",
+        "--out=local",
         "--loglevel=info",
       ],
       "type": "pwa-node",
@@ -49,8 +49,8 @@
       ],
       "program": "${workspaceFolder}/src/bin/verify-double-run.ts",
       "args": [
-        "--downloader=local",
-        "--uploader=local",
+        "--in=local",
+        "--out=local",
         "--loglevel=info",
       ],
       "type": "pwa-node",

@@ -13,8 +13,8 @@ export class IO {
 
   static fromCli() {
     return new IO({
-      in: cli.getChoiceOrFail('--downloader', ['local', 'remote']),
-      out: cli.getChoiceOrFail('--uploader', ['local', 'remote']),
+      in: cli.getChoiceOrFail('--in', ['local', 'remote']),
+      out: cli.getChoiceOrFail('--out', ['local', 'remote']),
     });
   }
 
