@@ -73,13 +73,13 @@ export default class LiveHubspotService implements HubspotService {
 
   async createAssociations(fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void> {
     await this.client.crm.associations.batchApi.create(fromKind, toKind, {
-      inputs: inputs.map(mapAssociationInput)
+      inputs: inputs.map(input => mapAssociationInput(fromKind, input))
     });
   }
 
   async deleteAssociations(fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void> {
     await this.client.crm.associations.batchApi.archive(fromKind, toKind, {
-      inputs: inputs.map(mapAssociationInput)
+      inputs: inputs.map(input => mapAssociationInput(fromKind, input))
     });
   }
 
@@ -93,10 +93,10 @@ export default class LiveHubspotService implements HubspotService {
 
 }
 
-function mapAssociationInput(input: Association) {
+function mapAssociationInput(fromKind: EntityKind, input: Association) {
   return {
     from: { id: input.fromId },
     to: { id: input.toId },
-    type: input.toType,
+    type: `${fromKind}_${input.toType}`,
   };
 }
