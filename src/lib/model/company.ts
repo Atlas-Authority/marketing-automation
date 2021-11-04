@@ -12,6 +12,8 @@ export class Company extends Entity<CompanyData> {
 
   contacts = this.makeDynamicAssociation<Contact>('contact');
 
+  override pseudoProperties: (keyof CompanyData)[] = [];
+
 }
 
 export class CompanyManager extends EntityManager<CompanyData, Company> {

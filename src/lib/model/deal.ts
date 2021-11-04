@@ -44,6 +44,10 @@ export class Deal extends Entity<DealData> {
     );
   }
 
+  override pseudoProperties: (keyof DealData)[] = [
+    'hasActivity',
+  ];
+
 }
 
 export class DealManager extends EntityManager<DealData, Deal> {

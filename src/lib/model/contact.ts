@@ -43,6 +43,10 @@ export class Contact extends Entity<ContactData> {
   get isPartner() { return this.data.contactType === 'Partner'; }
   get isCustomer() { return this.data.contactType === 'Customer'; }
 
+  override pseudoProperties: (keyof ContactData)[] = [
+    'otherEmails',
+  ];
+
 }
 
 export class ContactManager extends EntityManager<ContactData, Contact> {
