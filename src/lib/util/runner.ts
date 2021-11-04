@@ -1,14 +1,14 @@
-import config from '../config/index.js';
 import log from '../log/logger.js';
+import env from '../parameters/env.js';
 
 export default async function run({ work, failed }: {
   work: () => Promise<void>,
   failed: (errors: Error[]) => Promise<void>,
 }) {
-  log.info('Runner', 'Starting with options:', config.engine);
-  const normalInterval = config.engine.runInterval;
-  const errorInterval = config.engine.retryInterval;
-  const errorTries = config.engine.retryTimes;
+  log.info('Runner', 'Starting with options:', env.engine);
+  const normalInterval = env.engine.runInterval;
+  const errorInterval = env.engine.retryInterval;
+  const errorTries = env.engine.retryTimes;
 
   log.info('Runner', 'Running loop');
   const errors: Error[] = [];

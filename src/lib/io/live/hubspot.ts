@@ -1,14 +1,16 @@
 import * as hubspot from '@hubspot/api-client';
 import assert from 'assert';
-import config from '../config/index.js';
-import { Association, EntityKind, ExistingEntity, FullEntity, NewEntity, RelativeAssociation } from '../model/hubspot/interfaces.js';
-import { SimpleError } from '../util/errors.js';
+import { Association, EntityKind, ExistingEntity, FullEntity, NewEntity, RelativeAssociation } from '../../model/hubspot/interfaces.js';
+import env from '../../parameters/env.js';
+import { SimpleError } from '../../util/errors.js';
+import cache from '../cache.js';
+import { HubspotService, Progress } from '../interfaces.js';
 
-export default class Hubspot {
+export default class LiveHubspotService implements HubspotService {
 
-  client = new hubspot.Client({ apiKey: config.hubspot.apiKey });
+  client = new hubspot.Client({ apiKey: env.hubspot.apiKey });
 
-  async downloadEntities(kind: EntityKind, apiProperties: string[], inputAssociations: string[]): Promise<FullEntity[]> {
+  async downloadEntities(_progess: Progress, kind: EntityKind, apiProperties: string[], inputAssociations: string[]): Promise<FullEntity[]> {
     let associations = ((inputAssociations.length > 0)
       ? inputAssociations
       : undefined);
@@ -28,7 +30,7 @@ export default class Hubspot {
             })
           )),
       }));
-      return normalizedEntities;
+      return cache(`${kind}.json`, normalizedEntities);
     }
     catch (e: any) {
       const body = e.response.body;
@@ -71,13 +73,13 @@ export default class Hubspot {
 
   async createAssociations(fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void> {
     await this.client.crm.associations.batchApi.create(fromKind, toKind, {
-      inputs: inputs.map(mapAssociationInput)
+      inputs: inputs.map(input => mapAssociationInput(fromKind, input))
     });
   }
 
   async deleteAssociations(fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void> {
     await this.client.crm.associations.batchApi.archive(fromKind, toKind, {
-      inputs: inputs.map(mapAssociationInput)
+      inputs: inputs.map(input => mapAssociationInput(fromKind, input))
     });
   }
 
@@ -91,10 +93,10 @@ export default class Hubspot {
 
 }
 
-function mapAssociationInput(input: Association) {
+function mapAssociationInput(fromKind: EntityKind, input: Association) {
   return {
     from: { id: input.fromId },
     to: { id: input.toId },
-    type: input.toType,
+    type: `${fromKind}_${input.toType}`,
   };
 }

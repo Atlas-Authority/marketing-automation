@@ -1,12 +1,12 @@
-import config from "../config/index.js";
+import env from "../parameters/env.js";
 import { isPresent } from "../util/helpers.js";
 import { Company } from "./company.js";
 import { Entity } from "./hubspot/entity.js";
 import { EntityKind } from "./hubspot/interfaces.js";
 import { EntityManager, PropertyTransformers } from "./hubspot/manager.js";
 
-const deploymentKey = config.hubspot.attrs.contact.deployment;
-const productsKey = config.hubspot.attrs.contact.products;
+const deploymentKey = env.hubspot.attrs.contact.deployment;
+const productsKey = env.hubspot.attrs.contact.products;
 
 export type ContactType = 'Partner' | 'Customer';
 
@@ -42,6 +42,10 @@ export class Contact extends Entity<ContactData> {
   get allEmails() { return [this.data.email, ...this.data.otherEmails]; }
   get isPartner() { return this.data.contactType === 'Partner'; }
   get isCustomer() { return this.data.contactType === 'Customer'; }
+
+  override pseudoProperties: (keyof ContactData)[] = [
+    'otherEmails',
+  ];
 
 }
 

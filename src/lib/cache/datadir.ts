@@ -2,36 +2,72 @@ import fs from 'fs';
 import { URL } from 'url';
 import log from '../log/logger.js';
 
-type DataDirPlace = 'in' | 'out' | 'cache';
+const rootDataDir = new URL(`../../../data/`, import.meta.url);
+if (!fs.existsSync(rootDataDir)) fs.mkdirSync(rootDataDir);
 
-export function writeFile(place: DataDirPlace, filename: string, contents: string | Buffer) {
-  ensureDir(`../../../data`);
-  ensureDir(`../../../data/${place}`);
-  fs.writeFileSync(new URL(`../../../data/${place}/${filename}`, import.meta.url), contents);
-}
+export default class DataDir {
 
-export function readFile(place: DataDirPlace, filename: string) {
-  const dir = `../../../data/${place}`;
+  static readonly in = new DataDir("in");
+  static readonly out = new DataDir("out");
+  static readonly cache = new DataDir("cache");
 
-  if (!fs.existsSync(new URL(dir, import.meta.url))) {
-    log.error('Dev', `Data directory doesn't exist yet. First run the engine with --downloader=live`);
-    process.exit(1);
+  #base: URL;
+  #files = new Map<string, DataFile<any>>();
+
+  constructor(place: string) {
+    this.#base = new URL(`${place}/`, rootDataDir);
+    if (!fs.existsSync(this.#base)) fs.mkdirSync(this.#base);
   }
 
-  return fs.readFileSync(new URL(`${dir}/${filename}`, import.meta.url));
-}
-
-export function readJsonFile(place: DataDirPlace, filename: string) {
-  return JSON.parse(readFile(place, filename).toString('utf8'));
-}
-
-export function pathExists(place: DataDirPlace, filename: string) {
-  const path = `../../../data/${place}/${filename}`;
-  return fs.existsSync(new URL(path, import.meta.url));
-}
-
-function ensureDir(path: string) {
-  if (!fs.existsSync(new URL(path, import.meta.url))) {
-    fs.mkdirSync(new URL(path, import.meta.url));
+  file<T>(filename: string): DataFile<T> {
+    let cache = this.#files.get(filename);
+    if (!cache) this.#files.set(filename, cache =
+      new DataFile<T>(this.#base, filename));
+    return cache;
   }
+
+}
+
+class DataFile<T> {
+
+  #url: URL;
+  #text?: string;
+  #json?: T;
+
+  constructor(base: URL, filename: string) {
+    this.#url = new URL(filename, base);
+  }
+
+  exists() {
+    return fs.existsSync(this.#url);
+  }
+
+  readJson(): T {
+    if (this.#json === undefined) {
+      this.#json = JSON.parse(this.readText()) as T;
+    }
+    return this.#json;
+  }
+
+  readText() {
+    if (this.#text == undefined) {
+      if (!this.exists()) {
+        log.error('Dev', `Data file doesn't exist yet; run engine to create`, this.#url);
+        process.exit(1);
+      }
+      this.#text = fs.readFileSync(this.#url, 'utf8');
+    }
+    return this.#text;
+  }
+
+  writeJson(json: T) {
+    this.#json = json;
+    this.writeText(JSON.stringify(json, null, 2));
+  }
+
+  writeText(text: string) {
+    this.#text = text;
+    fs.writeFileSync(this.#url, this.#text);
+  }
+
 }

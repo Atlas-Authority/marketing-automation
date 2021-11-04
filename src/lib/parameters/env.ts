@@ -1,20 +1,35 @@
-import { optional, required } from './helpers.js';
-export { DealStage, Pipeline } from './dynamic-enums.js';
+import assert from 'assert';
+import * as dotenv from 'dotenv';
 
-export const ADDONKEY_TO_PLATFORM: { [addonKey: string]: string } = Object.fromEntries(
-  required('ADDONKEY_PLATFORMS')
-    .split(',')
-    .map(kv => kv.split('='))
-);
+dotenv.config();
 
 export default {
   mpac: {
     user: required('MPAC_USER'),
     pass: required('MPAC_PASS'),
     sellerId: required('MPAC_SELLER_ID'),
+    platforms: Object.fromEntries<string>(
+      required('ADDONKEY_PLATFORMS')
+        .split(',')
+        .map(kv => kv.split('=') as [string, string])
+    ),
   },
   hubspot: {
     apiKey: required('HUBSPOT_API_KEY'),
+    accountId: optional('HUBSPOT_ACCOUNT_ID'),
+    pipeline: {
+      mpac: required('HUBSPOT_PIPELINE_MPAC'),
+    },
+    dealstage: {
+      eval: required('HUBSPOT_DEALSTAGE_EVAL'),
+      closedWon: required('HUBSPOT_DEALSTAGE_CLOSED_WON'),
+      closedLost: required('HUBSPOT_DEALSTAGE_CLOSED_LOST'),
+    },
+    deals: {
+      dealOrigin: optional('DEAL_ORIGIN'),
+      dealRelatedProducts: optional('DEAL_RELATED_PRODUCTS'),
+      dealDealName: required('DEAL_DEALNAME'),
+    },
     attrs: {
       contact: {
         deployment: optional('HUBSPOT_CONTACT_DEPLOYMENT_ATTR'),
@@ -38,12 +53,18 @@ export default {
     retryTimes: +required('RETRY_TIMES'),
     partnerDomains: new Set(optional('PARTNER_DOMAINS')?.split(/\s*,\s*/g) ?? []),
     ignoredApps: new Set(optional('IGNORED_APPS')?.split(',') ?? []),
-  },
-  constants: {
-    dealOrigin: optional('DEAL_ORIGIN'),
-    dealRelatedProducts: optional('DEAL_RELATED_PRODUCTS'),
-    dealDealName: required('DEAL_DEALNAME'),
+    ignoredEmails: new Set((optional('IGNORED_EMAILS')?.split(',') ?? []).map(e => e.toLowerCase())),
   },
   isProduction: process.env.NODE_ENV === 'production',
   isTest: process.env.NODE_ENV === 'test',
 };
+
+function required(key: string) {
+  const value = process.env[key];
+  assert.ok(value, `ENV key ${key} is required`);
+  return value;
+}
+
+function optional(key: string) {
+  return process.env[key];
+}

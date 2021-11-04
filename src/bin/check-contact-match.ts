@@ -1,6 +1,6 @@
-import * as datadir from '../lib/cache/datadir.js';
+import DataDir from '../lib/cache/datadir.js';
 import { shorterLicenseInfo } from '../lib/engine/license-matching/license-grouper.js';
-import { MemoryRemote } from '../lib/io/memory-remote.js';
+import { IO } from '../lib/io/io.js';
 import log from '../lib/log/logger.js';
 import { Database } from '../lib/model/database.js';
 
@@ -11,15 +11,15 @@ if (!contactId) {
   process.exit(1);
 }
 
-const memoryRemote = new MemoryRemote({ verbose: true });
-const db = new Database(memoryRemote, memoryRemote);
+log.level = log.Levels.Verbose;
+const db = new Database(new IO({ in: 'local', out: 'local' }));
 await db.downloadAllData();
 
 const contact = db.contactManager.get(contactId);
 
 log.info('Dev', contact);
 
-const matchedGroups: ReturnType<typeof shorterLicenseInfo>[][] = datadir.readJsonFile('out', 'matched-groups-all.json');
+const matchedGroups = DataDir.out.file<ReturnType<typeof shorterLicenseInfo>[][]>('matched-groups-all.json').readJson();
 
 const groups = matchedGroups.filter(g => g.some(l => l.tech_email === contact?.data.email));
 

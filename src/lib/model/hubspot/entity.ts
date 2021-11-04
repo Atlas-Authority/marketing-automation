@@ -19,7 +19,7 @@ export abstract class Entity<P extends { [key: string]: any }> {
   /** A copy of assocs, which all updates act on, whether an existing or new entity */
   private newAssocs = new Set<RelativeAssociation>();
 
-  data: { [K in keyof P]: P[K] };
+  readonly data: { [K in keyof P]: P[K] };
 
   constructor(
     private db: EntityDatabase,
@@ -58,6 +58,8 @@ export abstract class Entity<P extends { [key: string]: any }> {
   }
 
   set<K extends keyof P>(key: K, val: P[K]) {
+    if (this.pseudoProperties.includes(key)) return;
+
     if (this.id === undefined) {
       this.props[key] = val;
       return;
@@ -85,6 +87,8 @@ export abstract class Entity<P extends { [key: string]: any }> {
     Object.assign(this.props, this.newProps);
     this.newProps = {};
   }
+
+  abstract pseudoProperties: (keyof P)[];
 
   // Associations
 

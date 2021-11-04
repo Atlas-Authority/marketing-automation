@@ -1,33 +1,34 @@
-import v8 from "v8";
-import { cliParams } from "../cli/arg-parser.js";
-import config from '../config/index.js';
 import log from '../log/logger.js';
-import * as datadir from './datadir.js';
+import { cli } from "../parameters/cli.js";
+import env from '../parameters/env.js';
+import DataDir from "./datadir.js";
 
-const cachedFns = cliParams.get('--cached-fns')?.split(',') || [];
+const cachedFns = cli.get('--cached-fns')?.split(',') || [];
 
 export function fnOrCache<T>(filename: string, fn: () => T): T {
-  if (config.isProduction || config.isTest) return fn();
+  const skipCacheFully = (env.isProduction || env.isTest);
 
-  let live = !cachedFns.includes(filename);
-  if (!live && !datadir.pathExists('cache', filename)) live = true;
+  const file = DataDir.cache.file<T>(filename);
 
-  if (!live) {
+  const useCache = (
+    !skipCacheFully &&
+    cachedFns.includes(filename) &&
+    file.exists()
+  );
+
+  if (useCache) {
     const red = '\x1b[31;1m';
     const reset = '\x1b[0m';
     log.warn('Dev', `${red}CACHED FUNCTION MODE ENABLED FOR:${reset}`);
     log.warn('Dev', fn.toString());
     log.warn('Dev', `${red}FUNCTION SKIPPED; RETURNING CACHED VALUE${reset}`);
-  }
-
-  if (live) {
-    const data = fn();
-    const buffer = v8.serialize(data);
-    datadir.writeFile('cache', filename, buffer);
-    return data;
+    return file.readJson();
   }
   else {
-    const buffer = datadir.readFile('cache', filename);
-    return v8.deserialize(buffer);
+    const data = fn();
+    if (!skipCacheFully) {
+      file.writeJson(data);
+    }
+    return data;
   }
 }

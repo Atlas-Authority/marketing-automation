@@ -1,14 +1,14 @@
-import { cliParams } from "../lib/cli/arg-parser.js";
-import { getIoFromCli } from "../lib/cli/index.js";
-import config from "../lib/config/index.js";
 import Engine from "../lib/engine/engine.js";
+import { IO } from "../lib/io/io.js";
+import Slack from "../lib/io/slack.js";
 import { Database } from "../lib/model/database.js";
-import Slack from "../lib/services/slack.js";
+import { cli } from "../lib/parameters/cli.js";
+import env from "../lib/parameters/env.js";
 import { AttachableError, SimpleError } from '../lib/util/errors.js';
 import run from '../lib/util/runner.js';
 
-const { downloader, uploader } = getIoFromCli();
-cliParams.failIfExtraOpts();
+const io = IO.fromCli();
+cli.failIfExtraOpts();
 
 const slack = new Slack();
 
@@ -17,12 +17,12 @@ await slack.postToSlack(`Starting Marketing Engine`);
 await run({
 
   async work() {
-    const db = new Database(downloader, uploader);
+    const db = new Database(io);
     await new Engine().run(db);
   },
 
   async failed(errors) {
-    await slack.postToSlack(`Failed ${config.engine.retryTimes} times. Below are the specific errors, in order. Trying again in ${config.engine.runInterval}.`);
+    await slack.postToSlack(`Failed ${env.engine.retryTimes} times. Below are the specific errors, in order. Trying again in ${env.engine.runInterval}.`);
     for (const error of errors) {
       if (error instanceof SimpleError) {
         await slack.postErrorToSlack(error.message);

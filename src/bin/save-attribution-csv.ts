@@ -1,10 +1,11 @@
 import { saveForInspection } from '../lib/cache/inspection.js';
-import { MemoryRemote } from '../lib/io/memory-remote.js';
+import { IO } from '../lib/io/io.js';
+import log from '../lib/log/logger.js';
 import { Database } from '../lib/model/database.js';
 import { isPresent, sorter } from '../lib/util/helpers.js';
 
-const memoryRemote = new MemoryRemote({ verbose: true });
-const db = new Database(memoryRemote, memoryRemote);
+log.level = log.Levels.Verbose;
+const db = new Database(new IO({ in: 'local', out: 'local' }));
 await db.downloadAllData();
 
 const attributions = (db

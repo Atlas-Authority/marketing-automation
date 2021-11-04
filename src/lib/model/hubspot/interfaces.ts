@@ -11,3 +11,13 @@ export type Association = {
 };
 
 export type EntityKind = 'deal' | 'contact' | 'company';
+
+export enum Pipeline {
+  MPAC,
+}
+
+export enum DealStage {
+  EVAL,
+  CLOSED_WON,
+  CLOSED_LOST,
+}

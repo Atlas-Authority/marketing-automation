@@ -25,9 +25,13 @@ export function matchIntoLikelyGroups(db: Database): RelatedLicenseSet[] {
   log.info('Scoring Engine', 'Grouping licenses/transactions by hosting and addonKey');
   const productGroupings: Iterable<{ addonKey: string; hosting: string; group: License[] }> = groupMappingByProduct(itemsByAddonLicenseId);
 
-  const { maybeMatches, unaccounted } = fnOrCache('scorer.dat', () => {
+  const { maybeMatches, unaccounted } = fnOrCache('scorer.json', () => {
     const scorer = new LicenseMatcher(db);
-    return scoreLicenseMatches(productGroupings, scorer);
+    const { maybeMatches, unaccounted } = scoreLicenseMatches(productGroupings, scorer);
+    return {
+      maybeMatches,
+      unaccounted: [...unaccounted],
+    };
   });
 
   saveForInspection('match-scores-all', maybeMatches

@@ -1,17 +1,15 @@
-import { ADDONKEY_TO_PLATFORM } from '../../config/index.js';
 import { Database } from '../../model/database.js';
+import env from '../../parameters/env.js';
 import { SimpleError } from '../../util/errors.js';
 import { RelatedLicenseSet } from '../license-matching/license-grouper.js';
 import { flagPartnersViaCoworkers } from './contact-types.js';
-
-const PLATFORMS = new Set(Object.values(ADDONKEY_TO_PLATFORM));
 
 
 export function updateContactsBasedOnMatchResults(db: Database, allMatches: RelatedLicenseSet[]) {
   for (const group of allMatches) {
     const contacts = new Set(group.map(m => db.contactManager.getByEmail(m.license.data.technicalContact.email)!));
 
-    flagPartnersViaCoworkers(db, [...contacts]);
+    flagPartnersViaCoworkers([...contacts]);
 
     for (const contact of contacts) {
       const items = [
@@ -32,8 +30,8 @@ export function updateContactsBasedOnMatchResults(db: Database, allMatches: Rela
       }
 
       const addonKey = group[0].license.data.addonKey;
-      const product = ADDONKEY_TO_PLATFORM[addonKey];
-      if (!PLATFORMS.has(product)) {
+      const product = env.mpac.platforms[addonKey];
+      if (!product) {
         throw new SimpleError(`Add "${addonKey}" to ADDONKEY_PLATFORMS`);
       }
       contact.data.relatedProducts.add(product);

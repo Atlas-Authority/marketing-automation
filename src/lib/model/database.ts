@@ -1,10 +1,12 @@
-import { Downloader, Uploader } from "../io/interfaces.js";
+import { IO } from "../io/io.js";
+import { makeEmailValidationRegex } from "../io/live/domains.js";
 import { MultiDownloadLogger } from "../log/download-logger.js";
 import log from "../log/logger.js";
-import { makeEmailValidationRegex, makeMultiProviderDomainsSet } from "../services/domains.js";
+import { formatMoney, formatNumber } from "../util/formatters.js";
 import { CompanyManager } from "./company.js";
 import { ContactManager } from "./contact.js";
 import { DealManager } from "./deal.js";
+import { EmailProviderLister } from "./email-providers/index.js";
 import { Entity } from "./hubspot/entity.js";
 import { EntityKind } from "./hubspot/interfaces.js";
 import { License } from "./license.js";
@@ -25,10 +27,13 @@ export class Database {
   partnerDomains = new Set<string>();
   customerDomains = new Set<string>();
 
-  constructor(private downloader: Downloader, uploader: Uploader) {
-    this.dealManager = new DealManager(downloader, uploader, this);
-    this.contactManager = new ContactManager(downloader, uploader, this);
-    this.companyManager = new CompanyManager(downloader, uploader, this);
+  emailProviderLister: EmailProviderLister;
+
+  constructor(private io: IO) {
+    this.dealManager = new DealManager(io.in.hubspot, io.out.hubspot, this);
+    this.contactManager = new ContactManager(io.in.hubspot, io.out.hubspot, this);
+    this.companyManager = new CompanyManager(io.in.hubspot, io.out.hubspot, this);
+    this.emailProviderLister = new EmailProviderLister(io.in.emailProviderLister);
   }
 
   async downloadAllData() {
@@ -37,26 +42,25 @@ export class Database {
     const logbox = new MultiDownloadLogger();
 
     const [
-      freeDomains,
       tlds,
       licensesWithDataInsights,
       licensesWithoutDataInsights,
       transactions,
     ] = await Promise.all([
-      logbox.wrap('Free Email Providers', (progress) =>
-        this.downloader.downloadFreeEmailProviders(progress)),
-
       logbox.wrap('Tlds', (progress) =>
-        this.downloader.downloadAllTlds(progress)),
+        this.io.in.tldLister.downloadAllTlds(progress)),
 
       logbox.wrap('Licenses With Data Insights', (progress) =>
-        this.downloader.downloadLicensesWithDataInsights(progress)),
+        this.io.in.marketplace.downloadLicensesWithDataInsights(progress)),
 
       logbox.wrap('Licenses Without Data Insights', (progress) =>
-        this.downloader.downloadLicensesWithoutDataInsights(progress)),
+        this.io.in.marketplace.downloadLicensesWithoutDataInsights(progress)),
 
       logbox.wrap('Transactions', (progress) =>
-        this.downloader.downloadTransactions(progress)),
+        this.io.in.marketplace.downloadTransactions(progress)),
+
+      logbox.wrap('Free Email Providers', (progress) =>
+        this.emailProviderLister.deriveMultiProviderDomainsSet(progress)),
 
       logbox.wrap('Deals', (progress) =>
         this.dealManager.downloadAllEntities(progress)),
@@ -72,7 +76,7 @@ export class Database {
 
     log.info('Downloader', 'Done');
 
-    this.providerDomains = makeMultiProviderDomainsSet(freeDomains);
+    this.providerDomains = this.emailProviderLister.set;
 
     const emailRe = makeEmailValidationRegex(tlds);
     const results = validateMarketplaceData(
@@ -83,6 +87,13 @@ export class Database {
 
     this.licenses = results.licenses.map(raw => new License(raw));
     this.transactions = results.transactions.map(raw => new Transaction(raw));
+
+    log.info('Dev', 'Licenses', formatNumber(this.licenses.length));
+    log.info('Dev', 'Transactions', formatNumber(this.transactions.length));
+    log.info('Dev', 'Amount in Transactions', formatMoney(
+      this.transactions
+        .map(t => t.data.vendorAmount)
+        .reduce((a, b) => a + b)));
   }
 
   async syncUpAllEntities() {

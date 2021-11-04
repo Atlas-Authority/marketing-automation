@@ -12,9 +12,9 @@
       ],
       "program": "${workspaceFolder}/src/bin/run-once.ts",
       "args": [
-        "--downloader=cached",
-        "--uploader=console",
-        "--cached-fns=scorer.dat",
+        "--in=local",
+        "--out=local",
+        "--cached-fns=scorer.json",
         "--loglevel=info",
       ],
       "type": "pwa-node",
@@ -31,8 +31,8 @@
       ],
       "program": "${workspaceFolder}/src/bin/run-once.ts",
       "args": [
-        "--downloader=cached",
-        "--uploader=console",
+        "--in=local",
+        "--out=local",
         "--loglevel=info",
       ],
       "type": "pwa-node",
@@ -42,17 +42,12 @@
       ]
     },
     {
-      "name": "Run cached-download twice",
+      "name": "Run cached-download multiple times",
       "request": "launch",
       "skipFiles": [
         "<node_internals>/**"
       ],
-      "program": "${workspaceFolder}/src/bin/verify-double-run.ts",
-      "args": [
-        "--downloader=cached",
-        "--uploader=console",
-        "--loglevel=info",
-      ],
+      "program": "${workspaceFolder}/src/bin/verify-multiple-runs.ts",
       "type": "pwa-node",
       "outFiles": [
         "${workspaceFolder}/out/**/*.js",

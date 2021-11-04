@@ -1,8 +1,8 @@
-import config from '../../config/index.js';
 import { Contact } from '../../model/contact.js';
 import { Database } from '../../model/database.js';
 import { License } from '../../model/license.js';
 import { Transaction } from '../../model/transaction.js';
+import env from '../../parameters/env.js';
 
 export function identifyAndFlagContactTypes(db: Database) {
   // Identifying contact types
@@ -12,11 +12,9 @@ export function identifyAndFlagContactTypes(db: Database) {
   removeProviderDomainsFromPartnerDomains(db);
   separatePartnerDomainsFromCustomerDomains(db);
 
-  // Both Identifying and Flagging
-  setPartnerDomainsViaCoworkers(db);
-
   // Flagging contacts and companies
   flagKnownContactTypesByDomain(db);
+  setPartnersViaCoworkers(db);
 }
 
 function identifyContactTypesFromRecordDomains(db: Database, records: (Transaction | License)[]) {
@@ -28,7 +26,7 @@ function identifyContactTypesFromRecordDomains(db: Database, records: (Transacti
 }
 
 function addPartnerDomainsFromEnv(db: Database) {
-  for (const domain of config.engine.partnerDomains) {
+  for (const domain of env.engine.partnerDomains) {
     db.partnerDomains.add(domain);
   }
 }
@@ -51,34 +49,26 @@ function flagKnownContactTypesByDomain(db: Database) {
     if (usesDomains(contact, db.partnerDomains)) {
       contact.data.contactType = 'Partner';
     }
-    else if (contact.isExternal && usesDomains(contact, db.customerDomains)) {
+    else if (usesDomains(contact, db.customerDomains)) {
       contact.data.contactType = 'Customer';
     }
   }
 }
 
-function setPartnerDomainsViaCoworkers(db: Database) {
+function setPartnersViaCoworkers(db: Database) {
   for (const contact of db.contactManager.getAll()) {
     const companies = contact.companies.getAll();
     const coworkers = companies.flatMap(company => company.contacts.getAll());
-    flagPartnersViaCoworkers(db, coworkers);
+    flagPartnersViaCoworkers(coworkers);
   }
 }
 
-export function flagPartnersViaCoworkers(db: Database, coworkers: Contact[]) {
+export function flagPartnersViaCoworkers(coworkers: Contact[]) {
   if (coworkers.some(c => c.isPartner)) {
     for (const coworker of coworkers) {
       coworker.data.contactType = 'Partner';
       for (const company of coworker.companies.getAll()) {
         company.data.type = 'Partner';
-      }
-    }
-
-    // Add all company domains (that aren't mass-providers) to partner domains
-    const domains = new Set(coworkers.flatMap(c => c.allEmails).map(domainFor));
-    for (const domain of domains) {
-      if (!db.providerDomains.has(domain)) {
-        db.partnerDomains.add(domain);
       }
     }
   }

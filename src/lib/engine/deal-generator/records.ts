@@ -1,9 +1,10 @@
 import assert from 'assert';
 import mustache from 'mustache';
-import config, { DealStage, Pipeline } from '../../config/index.js';
 import { Deal, DealData } from '../../model/deal.js';
+import { DealStage, Pipeline } from '../../model/hubspot/interfaces.js';
 import { License } from '../../model/license.js';
 import { Transaction } from '../../model/transaction.js';
+import env from '../../parameters/env.js';
 import { isPresent, sorter } from "../../util/helpers.js";
 import { RelatedLicenseSet } from '../license-matching/license-grouper.js';
 
@@ -46,7 +47,7 @@ export function abbrRecordDetails(record: Transaction | License) {
   };
 }
 
-export function dealCreationProperties(record: License | Transaction, data: Pick<DealData, 'addonLicenseId' | 'transactionId' | 'dealstage'>): DealData {
+export function dealCreationProperties(record: License | Transaction, data: Pick<DealData, 'addonLicenseId' | 'transactionId' | 'dealStage'>): DealData {
   const dealNameTemplateProperties = {
     ...record.data,
     technicalContactEmail: record.data.technicalContact.email,
@@ -54,17 +55,19 @@ export function dealCreationProperties(record: License | Transaction, data: Pick
 
   return {
     ...data,
-    closeDate: record.data.maintenanceStartDate,
+    closeDate: (record instanceof Transaction
+      ? record.data.saleDate
+      : record.data.maintenanceStartDate),
     deployment: record.data.hosting,
     app: record.data.addonKey,
     licenseTier: record.tier,
     country: record.data.country,
-    origin: config.constants.dealOrigin ?? null,
-    relatedProducts: config.constants.dealRelatedProducts ?? null,
-    dealName: mustache.render(config.constants.dealDealName, dealNameTemplateProperties),
-    pipeline: Pipeline.AtlassianMarketplace,
+    origin: env.hubspot.deals.dealOrigin ?? null,
+    relatedProducts: env.hubspot.deals.dealRelatedProducts ?? null,
+    dealName: mustache.render(env.hubspot.deals.dealDealName, dealNameTemplateProperties),
+    pipeline: Pipeline.MPAC,
     hasActivity: false,
-    amount: (data.dealstage === DealStage.EVAL
+    amount: (data.dealStage === DealStage.EVAL
       ? null
       : record instanceof License
         ? 0
@@ -73,17 +76,12 @@ export function dealCreationProperties(record: License | Transaction, data: Pick
 }
 
 export function updateDeal(deal: Deal, record: License | Transaction) {
-  if (record instanceof Transaction) {
-    deal.data.amount = Math.max(
-      deal.data.amount ?? 0,
-      record.data.vendorAmount);
-  }
-
-  if (!deal.data.amount) {
-    deal.data.amount = (deal.isClosed() ? 0 : null);
-  }
-
-  deal.data.closeDate = record.data.maintenanceStartDate;
+  const data = dealCreationProperties(record, {
+    addonLicenseId: deal.data.addonLicenseId,
+    transactionId: deal.data.transactionId,
+    dealStage: deal.data.dealStage,
+  });
+  Object.assign(deal.data, data);
   deal.data.licenseTier = Math.max(deal.data.licenseTier, record.tier);
 }
 

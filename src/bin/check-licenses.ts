@@ -1,8 +1,7 @@
 import * as fs from 'fs';
-import * as datadir from '../lib/cache/datadir.js';
-import { olderThan90Days } from '../lib/engine/deal-generator/generate-deals.js';
+import DataDir from '../lib/cache/datadir.js';
 import { shorterLicenseInfo } from '../lib/engine/license-matching/license-grouper.js';
-import { MemoryRemote } from '../lib/io/memory-remote.js';
+import { IO } from '../lib/io/io.js';
 import log from '../lib/log/logger.js';
 import { Database } from '../lib/model/database.js';
 import { LicenseData } from '../lib/model/license.js';
@@ -24,13 +23,13 @@ if (sens.length === 1 && sens[0].endsWith('.json')) {
   sens = ts.map(t => t.addonLicenseId);
 }
 
-const memoryRemote = new MemoryRemote({ verbose: true });
-const db = new Database(memoryRemote, memoryRemote);
+log.level = log.Levels.Verbose;
+const db = new Database(new IO({ in: 'local', out: 'local' }));
 await db.downloadAllData();
 
-const ignored: (LicenseData & { reason: string })[][] = datadir.readJsonFile('out', 'ignored.json');
+const ignored = DataDir.out.file<(LicenseData & { reason: string })[][]>('ignored.json').readJson();
 
-const matchedGroups: ReturnType<typeof shorterLicenseInfo>[][] = datadir.readJsonFile('out', 'matched-groups-all.json');
+const matchedGroups = DataDir.out.file<ReturnType<typeof shorterLicenseInfo>[][]>('matched-groups-all.json').readJson();
 
 for (const sen of sens) {
   check(sen);
@@ -52,11 +51,6 @@ function check(sen: string) {
 
   const foundMatch = matchedGroups.find(group => group.find(l => l.addonLicenseId === sen));
   if (foundMatch) {
-    if (foundMatch.every(l => olderThan90Days(l.start))) {
-      log.info('Dev', sen, 'All matches > 90 days old');
-      return;
-    }
-
     const matches = foundMatch.filter(l => l.addonLicenseId !== sen);
     for (const otherLicense of matches) {
       log.warn('Dev', sen, `Checking matched license ${otherLicense.addonLicenseId}`);

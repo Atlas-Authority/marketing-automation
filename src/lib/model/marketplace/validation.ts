@@ -1,6 +1,7 @@
 import assert from 'assert';
 import util from 'util';
 import log from "../../log/logger.js";
+import env from '../../parameters/env.js';
 import { AttachableError } from "../../util/errors.js";
 import { isPresent } from '../../util/helpers.js';
 import { RawLicense, RawTransaction } from "./raw.js";
@@ -21,8 +22,11 @@ export function validateMarketplaceData(
 
   const emailChecker = (kind: 'License' | 'Transaction') =>
     (item: RawLicense | RawTransaction) => {
-      const allGood = getEmails(item).every(e => emailRe.test(e));
-      if (!allGood) log.warn('Downloader', `${kind} has invalid email(s); will be skipped:`, item);
+      const allEmails = getEmails(item);
+      const allGood = allEmails.every(e => emailRe.test(e));
+      if (!allGood && !allEmails.every(e => env.engine.ignoredEmails.has(e.toLowerCase()))) {
+        log.warn('Downloader', `${kind} has invalid email(s); will be skipped:`, item);
+      }
       return allGood;
     };
 

@@ -6,6 +6,7 @@ type PersonProps = {
 };
 
 class Person extends Entity<PersonProps> {
+  pseudoProperties = [];
 }
 
 const db: EntityDatabase = {

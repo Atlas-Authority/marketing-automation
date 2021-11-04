@@ -1,18 +1,18 @@
-import { DealStage, Pipeline } from "../config/dynamic-enums.js";
-import config from "../config/index.js";
+import env from "../parameters/env.js";
+import { AttachableError } from "../util/errors.js";
 import { isPresent } from "../util/helpers.js";
 import { Company } from "./company.js";
 import { Contact } from "./contact.js";
 import { Entity } from "./hubspot/entity.js";
-import { EntityKind } from "./hubspot/interfaces.js";
+import { DealStage, EntityKind, Pipeline } from "./hubspot/interfaces.js";
 import { EntityManager, PropertyTransformers } from "./hubspot/manager.js";
 import { License } from "./license.js";
 import { Transaction } from "./transaction.js";
 
-const addonLicenseIdKey = config.hubspot.attrs.deal.addonLicenseId;
-const transactionIdKey = config.hubspot.attrs.deal.transactionId;
-const deploymentKey = config.hubspot.attrs.deal.deployment;
-const appKey = config.hubspot.attrs.deal.app;
+const addonLicenseIdKey = env.hubspot.attrs.deal.addonLicenseId;
+const transactionIdKey = env.hubspot.attrs.deal.transactionId;
+const deploymentKey = env.hubspot.attrs.deal.deployment;
+const appKey = env.hubspot.attrs.deal.app;
 
 export type DealData = {
   relatedProducts: string | null;
@@ -26,7 +26,7 @@ export type DealData = {
   deployment: 'Server' | 'Cloud' | 'Data Center' | null;
   licenseTier: number;
   pipeline: Pipeline;
-  dealstage: DealStage;
+  dealStage: DealStage;
   amount: number | null;
   readonly hasActivity: boolean;
 };
@@ -36,13 +36,17 @@ export class Deal extends Entity<DealData> {
   contacts = this.makeDynamicAssociation<Contact>('contact');
   companies = this.makeDynamicAssociation<Company>('company');
 
-  isEval() { return this.data.dealstage === DealStage.EVAL; }
+  isEval() { return this.data.dealStage === DealStage.EVAL; }
   isClosed() {
     return (
-      this.data.dealstage === DealStage.CLOSED_LOST ||
-      this.data.dealstage === DealStage.CLOSED_WON
+      this.data.dealStage === DealStage.CLOSED_LOST ||
+      this.data.dealStage === DealStage.CLOSED_WON
     );
   }
+
+  override pseudoProperties: (keyof DealData)[] = [
+    'hasActivity',
+  ];
 
 }
 
@@ -89,7 +93,7 @@ export class DealManager extends EntityManager<DealData, Deal> {
   ];
 
   override fromAPI(data: { [key: string]: string | null }): DealData | null {
-    if (data.pipeline !== Pipeline.AtlassianMarketplace) return null;
+    if (data['pipeline'] !== env.hubspot.pipeline.mpac) return null;
     return {
       relatedProducts: data['related_products'] || null,
       app: appKey ? data[appKey] as string : null,
@@ -101,8 +105,8 @@ export class DealManager extends EntityManager<DealData, Deal> {
       origin: data['origin'] || null,
       deployment: deploymentKey ? data[deploymentKey] as DealData['deployment'] : null,
       licenseTier: +(data['license_tier'] as string),
-      pipeline: data['pipeline'],
-      dealstage: data['dealstage'] as string,
+      pipeline: enumFromValue(pipelines, data['pipeline']),
+      dealStage: enumFromValue(dealstages, data['dealstage'] ?? ''),
       amount: !data['amount'] ? null : +data['amount'],
       hasActivity: (
         isNonBlankString(data['hs_user_ids_of_all_owners']) ||
@@ -129,8 +133,8 @@ export class DealManager extends EntityManager<DealData, Deal> {
     origin: origin => ['origin', origin ?? ''],
     deployment: EntityManager.upSyncIfConfigured(deploymentKey, deployment => deployment ?? ''),
     licenseTier: licenseTier => ['license_tier', licenseTier.toFixed()],
-    pipeline: pipeline => ['pipeline', pipeline],
-    dealstage: dealstage => ['dealstage', dealstage],
+    pipeline: pipeline => ['pipeline', pipelines[pipeline]],
+    dealStage: dealstage => ['dealstage', dealstages[dealstage]],
     amount: amount => ['amount', amount?.toString() ?? ''],
     hasActivity: EntityManager.noUpSync,
   };
@@ -174,3 +178,20 @@ function isNonBlankString(str: string | null) {
 function isNonZeroNumberString(str: string | null) {
   return +(str ?? '') > 0;
 }
+
+function enumFromValue<T extends number>(mapping: Record<T, string>, apiValue: string): T {
+  const found = Object.entries(mapping).find(([k, v]) => v === apiValue);
+  if (!found) throw new AttachableError('Cannot find ENV-configured mapping:',
+    JSON.stringify({ mapping, apiValue }, null, 2));
+  return +found[0] as T;
+}
+
+const pipelines: Record<Pipeline, string> = {
+  [Pipeline.MPAC]: env.hubspot.pipeline.mpac,
+};
+
+const dealstages: Record<DealStage, string> = {
+  [DealStage.EVAL]: env.hubspot.dealstage.eval,
+  [DealStage.CLOSED_WON]: env.hubspot.dealstage.closedWon,
+  [DealStage.CLOSED_LOST]: env.hubspot.dealstage.closedLost,
+};
