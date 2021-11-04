@@ -2,8 +2,12 @@ import * as assert from 'assert';
 import { HubspotService, Progress } from '../../io/interfaces.js';
 import { AttachableError } from '../../util/errors.js';
 import { batchesOf } from '../../util/helpers.js';
-import { Entity, EntityDatabase } from "./entity.js";
+import { Entity } from "./entity.js";
 import { EntityKind, RelativeAssociation } from './interfaces.js';
+
+export interface EntityDatabase {
+  getEntity(kind: EntityKind, id: string): Entity<any>;
+}
 
 export type PropertyTransformers<T> = {
   [P in keyof T]: (prop: T[P]) => [string, string]
@@ -34,7 +38,7 @@ export abstract class EntityManager<
   public createdCount = 0;
   public updatedCount = 0;
 
-  protected abstract Entity: new (db: EntityDatabase, id: string | null, props: P, associations: Set<RelativeAssociation>) => E;
+  protected abstract Entity: new (id: string | null, kind: EntityKind, props: P) => E;
   protected abstract kind: EntityKind;
   protected abstract associations: EntityKind[];
 
@@ -48,6 +52,8 @@ export abstract class EntityManager<
   private indexes: Index<E>[] = [];
   private entitiesById = this.makeIndex(e => e.id ? [e.id] : []);
 
+  private prelinkedAssociations = new Map<string, Set<RelativeAssociation>>();
+
   public async downloadAllEntities(progress: Progress) {
     const data = await this.downloader.downloadEntities(progress, this.kind, this.apiProperties, this.associations);
 
@@ -55,12 +61,13 @@ export abstract class EntityManager<
       const props = this.fromAPI(raw.properties);
       if (!props) continue;
 
-      const associations = new Set<RelativeAssociation>();
       for (const item of raw.associations) {
-        associations.add(item);
+        let set = this.prelinkedAssociations.get(raw.id);
+        if (!set) this.prelinkedAssociations.set(raw.id, set = new Set());
+        set.add(item);
       }
 
-      const entity = new this.Entity(this.db, raw.id, props, associations);
+      const entity = new this.Entity(raw.id, this.kind, props);
       this.entities.push(entity);
     }
 
@@ -70,8 +77,29 @@ export abstract class EntityManager<
     }
   }
 
+  public linkAssociations() {
+    for (const [meId, rawAssocs] of this.prelinkedAssociations) {
+      for (const rawAssoc of rawAssocs) {
+        const me = this.get(meId);
+        if (!me) throw new Error(`Couldn't find kind=${this.kind} id=${meId}`);
+
+        const { toKind, youId } = this.getAssocInfo(rawAssoc);
+        const you = this.db.getEntity(toKind, youId);
+        if (!you) throw new Error(`Couldn't find kind=${toKind} id=${youId}`);
+
+        me.addAssociation(you, { firstSide: true, initial: true });
+      }
+    }
+    this.prelinkedAssociations.clear();
+  }
+
+  private getAssocInfo(a: RelativeAssociation) {
+    const [kind, id] = a.split(':');
+    return { toKind: kind as EntityKind, youId: id };
+  }
+
   public create(props: P) {
-    const e = new this.Entity(this.db, null, props, new Set());
+    const e = new this.Entity(null, this.kind, props);
     this.entities.push(e);
     for (const index of this.indexes) {
       index.addIndexesFor([e]);
@@ -183,16 +211,16 @@ export abstract class EntityManager<
     const toSync = (this.entities
       .filter(e => e.hasAssociationChanges())
       .flatMap(e => e.getAssociationChanges()
-        .map(changes => ({ e, ...changes }))));
+        .map(({ op, other }) => ({ op, from: e, to: other }))));
 
     for (const otherKind of this.associations) {
       const toSyncInKind = (toSync
-        .filter(changes => changes.kind === otherKind)
+        .filter(changes => changes.to.kind === otherKind)
         .map(changes => ({
           ...changes,
           inputs: {
-            fromId: changes.e.guaranteedId(),
-            toId: changes.id,
+            fromId: changes.from.guaranteedId(),
+            toId: changes.to.guaranteedId(),
             toType: otherKind,
           }
         })));
@@ -218,7 +246,7 @@ export abstract class EntityManager<
     }
 
     for (const changes of toSync) {
-      changes.e.applyAssociationChanges();
+      changes.from.applyAssociationChanges();
     }
   }
 
