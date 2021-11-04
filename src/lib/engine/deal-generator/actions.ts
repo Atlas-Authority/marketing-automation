@@ -53,8 +53,8 @@ export class ActionGenerator {
   private actionForPurchase(event: PurchaseEvent): Action {
     const deal = this.getDealForLicenses(event.licenses);
 
-    const record = getLatestRecord(event);
     if (!deal) {
+      const record = getLatestRecord(event);
       return makeCreateAction(event, record, {
         dealStage: DealStage.CLOSED_WON,
         addonLicenseId: record.data.addonLicenseId,
@@ -62,12 +62,14 @@ export class ActionGenerator {
       });
     }
     else if (deal.isEval()) {
+      const record = getLatestRecord(event);
       return makeUpdateAction(event, deal, record, DealStage.CLOSED_WON);
     }
-    else if (event.transaction && event.transaction.data.vendorAmount > (deal.data.amount ?? 0)) {
+    else if (event.transaction) {
       return makeUpdateAction(event, deal, event.transaction);
     }
     else {
+      const record = getLatestRecord(event);
       return makeUpdateAction(event, deal, record);
     }
   }
