@@ -269,7 +269,7 @@ export abstract class EntityManager<
 
 }
 
-type ReadonlyIndex<T> = Pick<Index<T>, 'get' | 'delete'>;
+type ReadonlyIndex<T> = Pick<Index<T>, 'get'>;
 
 class Index<E> {
 
@@ -298,10 +298,6 @@ class Index<E> {
 
   get(key: string) {
     return this.map.get(key);
-  }
-
-  delete(key: string) {
-    return this.map.delete(key);
   }
 
 }
