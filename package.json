@@ -1,6 +1,6 @@
 {
   "name": "marketing-automation-engine",
-  "version": "21.11.1",
+  "version": "0.1.0",
   "description": "",
   "main": "out/bin/main.js",
   "scripts": {

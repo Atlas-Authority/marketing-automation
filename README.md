@@ -77,7 +77,4 @@ After running the engine, to test logic *after* the Scoring Engine runs, pass `-
 
 ## Changelog
 
-21.11.1
-
-- Started using CalVer
-- Started using Changelog
+- Coming soon
