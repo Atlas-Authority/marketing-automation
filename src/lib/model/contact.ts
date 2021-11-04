@@ -137,9 +137,4 @@ export class ContactManager extends EntityManager<ContactData, Contact> {
     return this.contactsByEmail.get(email);
   }
 
-  removeExternallyCreatedContacts() {
-    const externalContacts = this.getArray().filter(c => c.isExternal);
-    this.removeLocally(externalContacts);
-  }
-
 }

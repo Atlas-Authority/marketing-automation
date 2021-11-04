@@ -19,16 +19,10 @@ export default class Engine {
     log.step('Identifying and Flagging Contact Types');
     identifyAndFlagContactTypes(db);
 
-    log.step('Updating Contacts/Companies in Hubspot');
-    await db.syncUpAllEntities();
-
-    log.step('Removing externally created contacts from rest of engine run');
-    db.contactManager.removeExternallyCreatedContacts();
-
     log.step('Generating contacts');
     new ContactGenerator(db).run();
 
-    log.step('Upserting Generated Contacts in Hubspot');
+    log.step('Upsyncing Contacts/Companies in Hubspot');
     await db.syncUpAllEntities();
 
     log.step('Running Scoring Engine');
