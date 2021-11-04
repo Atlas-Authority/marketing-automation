@@ -40,7 +40,8 @@ export abstract class EntityManager<
 
   protected abstract Entity: new (id: string | null, kind: EntityKind, props: P) => E;
   protected abstract kind: EntityKind;
-  protected abstract associations: EntityKind[];
+  protected abstract downAssociations: EntityKind[];
+  protected abstract upAssociations: EntityKind[];
 
   protected abstract apiProperties: string[];
   protected abstract fromAPI(data: { [key: string]: string | null }): P | null;
@@ -55,7 +56,7 @@ export abstract class EntityManager<
   private prelinkedAssociations = new Map<string, Set<RelativeAssociation>>();
 
   public async downloadAllEntities(progress: Progress) {
-    const data = await this.downloader.downloadEntities(progress, this.kind, this.apiProperties, this.associations);
+    const data = await this.downloader.downloadEntities(progress, this.kind, this.apiProperties, this.downAssociations);
 
     for (const raw of data) {
       const props = this.fromAPI(raw.properties);
@@ -213,7 +214,7 @@ export abstract class EntityManager<
       .flatMap(e => e.getAssociationChanges()
         .map(({ op, other }) => ({ op, from: e, to: other }))));
 
-    for (const otherKind of this.associations) {
+    for (const otherKind of this.upAssociations) {
       const toSyncInKind = (toSync
         .filter(changes => changes.to.kind === otherKind)
         .map(changes => ({

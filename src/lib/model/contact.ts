@@ -54,7 +54,11 @@ export class ContactManager extends EntityManager<ContactData, Contact> {
   override Entity = Contact;
   override kind: EntityKind = 'contact';
 
-  override associations: EntityKind[] = [
+  override downAssociations: EntityKind[] = [
+    "company",
+  ];
+
+  override upAssociations: EntityKind[] = [
     "company",
   ];
 

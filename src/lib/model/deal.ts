@@ -55,7 +55,12 @@ export class DealManager extends EntityManager<DealData, Deal> {
   override Entity = Deal;
   override kind: EntityKind = "deal";
 
-  override associations: EntityKind[] = [
+  override downAssociations: EntityKind[] = [
+    "company",
+    "contact",
+  ];
+
+  override upAssociations: EntityKind[] = [
     "company",
     "contact",
   ];
