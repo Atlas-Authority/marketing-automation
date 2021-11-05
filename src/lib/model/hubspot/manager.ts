@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 import { HubspotService, Progress } from '../../io/interfaces.js';
 import { AttachableError } from '../../util/errors.js';
-import { batchesOf, isPresent } from '../../util/helpers.js';
+import { isPresent } from '../../util/helpers.js';
 import { Entity, Indexer } from "./entity.js";
 import { EntityKind, RelativeAssociation } from './interfaces.js';
 
@@ -141,63 +141,55 @@ export abstract class EntityManager<
     const toCreate = toSync.filter(e => e.id === undefined);
     const toUpdate = toSync.filter(e => e.id !== undefined);
 
-    const batchSize = this.kind === 'contact' ? 10 : 100;
-
     if (toCreate.length > 0) {
-      const groupsToCreate = batchesOf(toCreate, batchSize);
-      for (const entitiesToCreate of groupsToCreate) {
-        const results = await this.uploader.createEntities(
-          this.kind,
-          entitiesToCreate.map(e => ({
-            properties: this.getChangedProperties(e),
-          }))
-        );
+      const results = await this.uploader.createEntities(
+        this.kind,
+        toCreate.map(e => ({
+          properties: this.getChangedProperties(e),
+        }))
+      );
 
-        for (const e of entitiesToCreate) {
-          e.applyPropertyChanges();
-        }
+      for (const e of toCreate) {
+        e.applyPropertyChanges();
+      }
 
-        for (const e of entitiesToCreate) {
-          const found = results.find(result => {
-            for (const localIdKey of this.identifiers) {
-              const localVal = e.data[localIdKey];
-              const [remoteIdKey, hsLocal] = this.toAPI[localIdKey](localVal);
-              const hsRemote = result.properties[remoteIdKey] ?? '';
-              if (hsLocal !== hsRemote) return false;
-            }
-            return true;
-          });
-
-          if (!found) {
-            throw new AttachableError("Couldn't find ", JSON.stringify({
-              local: e.data,
-              remotes: results.map(r => ({
-                id: r.id,
-                properties: r.properties,
-              })),
-            }, null, 2));
+      for (const e of toCreate) {
+        const found = results.find(result => {
+          for (const localIdKey of this.identifiers) {
+            const localVal = e.data[localIdKey];
+            const [remoteIdKey, hsLocal] = this.toAPI[localIdKey](localVal);
+            const hsRemote = result.properties[remoteIdKey] ?? '';
+            if (hsLocal !== hsRemote) return false;
           }
+          return true;
+        });
 
-          assert.ok(found);
-          e.id = found.id;
+        if (!found) {
+          throw new AttachableError("Couldn't find ", JSON.stringify({
+            local: e.data,
+            remotes: results.map(r => ({
+              id: r.id,
+              properties: r.properties,
+            })),
+          }, null, 2));
         }
+
+        assert.ok(found);
+        e.id = found.id;
       }
     }
 
     if (toUpdate.length > 0) {
-      const groupsToUpdate = batchesOf(toUpdate, batchSize);
-      for (const entitiesToUpdate of groupsToUpdate) {
-        const results = await this.uploader.updateEntities(
-          this.kind,
-          entitiesToUpdate.map(e => ({
-            id: e.guaranteedId(),
-            properties: this.getChangedProperties(e),
-          }))
-        );
+      const results = await this.uploader.updateEntities(
+        this.kind,
+        toUpdate.map(e => ({
+          id: e.guaranteedId(),
+          properties: this.getChangedProperties(e),
+        }))
+      );
 
-        for (const e of entitiesToUpdate) {
-          e.applyPropertyChanges();
-        }
+      for (const e of toUpdate) {
+        e.applyPropertyChanges();
       }
     }
 
@@ -226,21 +218,17 @@ export abstract class EntityManager<
       const toAdd = toSyncInKind.filter(changes => changes.op === 'add');
       const toDel = toSyncInKind.filter(changes => changes.op === 'del');
 
-      for (const toAddSubset of batchesOf(toAdd, 100)) {
-        await this.uploader.createAssociations(
-          this.kind,
-          otherKind,
-          toAddSubset.map(changes => changes.inputs),
-        );
-      }
+      await this.uploader.createAssociations(
+        this.kind,
+        otherKind,
+        toAdd.map(changes => changes.inputs),
+      );
 
-      for (const toDelSubset of batchesOf(toDel, 100)) {
-        await this.uploader.deleteAssociations(
-          this.kind,
-          otherKind,
-          toDelSubset.map(changes => changes.inputs),
-        );
-      }
+      await this.uploader.deleteAssociations(
+        this.kind,
+        otherKind,
+        toDel.map(changes => changes.inputs),
+      );
     }
 
     for (const changes of toSync) {

@@ -3,6 +3,7 @@ import assert from 'assert';
 import { Association, EntityKind, ExistingEntity, FullEntity, NewEntity, RelativeAssociation } from '../../model/hubspot/interfaces.js';
 import env from '../../parameters/env.js';
 import { SimpleError } from '../../util/errors.js';
+import { batchesOf } from '../../util/helpers.js';
 import cache from '../cache.js';
 import { HubspotService, Progress } from '../interfaces.js';
 
@@ -53,34 +54,51 @@ export default class LiveHubspotService implements HubspotService {
     }
   }
 
-  async createEntities(kind: EntityKind, inputs: NewEntity[]): Promise<ExistingEntity[]> {
-    try {
-      return (await this.apiFor(kind).batchApi.create({ inputs })).body.results;
-    }
-    catch (e: any) {
-      throw new Error(e.response.body.message);
-    }
+  async createEntities(kind: EntityKind, entities: NewEntity[]): Promise<ExistingEntity[]> {
+    return await this.batchDo(kind, entities, async entities => {
+      const response = await this.apiFor(kind).batchApi.create({ inputs: entities });
+      return response.body.results;
+    });
   }
 
-  async updateEntities(kind: EntityKind, inputs: ExistingEntity[]): Promise<ExistingEntity[]> {
-    try {
-      return (await this.apiFor(kind).batchApi.update({ inputs })).body.results;
-    }
-    catch (e: any) {
-      throw new Error(e.response.body.message);
-    }
+  async updateEntities(kind: EntityKind, entities: ExistingEntity[]): Promise<ExistingEntity[]> {
+    return await this.batchDo(kind, entities, async entities => {
+      const response = await this.apiFor(kind).batchApi.update({ inputs: entities });
+      return response.body.results;
+    });
+  }
+
+  private async batchDo<T, U>(kind: EntityKind, entities: T[], fn: (array: T[]) => Promise<U[]>) {
+    const batchSize = kind === 'contact' ? 10 : 100;
+    const entityGroups = batchesOf(entities, batchSize);
+
+    const promises = entityGroups.map(async (entities) => {
+      try {
+        return await fn(entities);
+      }
+      catch (e: any) {
+        throw new Error(e.response.body.message);
+      }
+    });
+
+    const resultGroups = await Promise.all(promises);
+    return resultGroups.flat(1);
   }
 
   async createAssociations(fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void> {
-    await this.client.crm.associations.batchApi.create(fromKind, toKind, {
-      inputs: inputs.map(input => mapAssociationInput(fromKind, input))
-    });
+    for (const inputBatch of batchesOf(inputs, 100)) {
+      await this.client.crm.associations.batchApi.create(fromKind, toKind, {
+        inputs: inputBatch.map(input => mapAssociationInput(fromKind, input))
+      });
+    }
   }
 
   async deleteAssociations(fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void> {
-    await this.client.crm.associations.batchApi.archive(fromKind, toKind, {
-      inputs: inputs.map(input => mapAssociationInput(fromKind, input))
-    });
+    for (const inputBatch of batchesOf(inputs, 100)) {
+      await this.client.crm.associations.batchApi.archive(fromKind, toKind, {
+        inputs: inputBatch.map(input => mapAssociationInput(fromKind, input))
+      });
+    }
   }
 
   private apiFor(kind: EntityKind) {
