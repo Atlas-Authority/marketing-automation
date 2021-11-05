@@ -74,9 +74,11 @@ export class MemoryHubspot implements HubspotService {
     this.fakeApiConsoleLog(`Fake Unassociating ${fromKind}s to ${toKind}s:`, inputs);
   }
 
-  private fakeApiConsoleLog(title: string, data: unknown[]) {
-    log.info('Fake Uploader', title, data.length);
-    log.verbose('Fake Uploader', title, data);
+  private fakeApiConsoleLog(action: string, data: unknown[]) {
+    log.info('Fake Uploader', action, data.length);
+    if (data.length > 0) {
+      log.verbose('Fake Uploader', action, data);
+    }
   }
 
   private getEntity(kind: EntityKind, id: string) {
