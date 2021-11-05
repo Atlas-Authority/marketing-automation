@@ -48,11 +48,6 @@ export function abbrRecordDetails(record: Transaction | License) {
 }
 
 export function dealCreationProperties(record: License | Transaction, data: Pick<DealData, 'addonLicenseId' | 'transactionId' | 'dealStage'>): DealData {
-  const dealNameTemplateProperties = {
-    ...record.data,
-    technicalContactEmail: record.data.technicalContact.email,
-  };
-
   return {
     ...data,
     closeDate: (record instanceof Transaction
@@ -64,7 +59,7 @@ export function dealCreationProperties(record: License | Transaction, data: Pick
     country: record.data.country,
     origin: env.hubspot.deals.dealOrigin ?? null,
     relatedProducts: env.hubspot.deals.dealRelatedProducts ?? null,
-    dealName: mustache.render(env.hubspot.deals.dealDealName, dealNameTemplateProperties),
+    dealName: mustache.render(env.hubspot.deals.dealDealName, record.data),
     pipeline: Pipeline.MPAC,
     hasActivity: false,
     amount: (data.dealStage === DealStage.EVAL
