@@ -15,6 +15,9 @@ describe('entities', () => {
     const p = new Person('123', 'contact', {
       age: 20,
       name: 'Bob',
+    }, {
+      addIndexesFor() { },
+      removeIndexesFor() { },
     });
     expect(p.hasPropertyChanges()).toBe(false);
     expect(p.data.age).toEqual(20);

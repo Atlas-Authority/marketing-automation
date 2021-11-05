@@ -1,6 +1,11 @@
 import * as assert from 'assert';
 import { EntityKind } from './interfaces.js';
 
+export interface Indexer<P> {
+  removeIndexesFor<K extends keyof P>(key: K, val: P[K] | undefined): void;
+  addIndexesFor<K extends keyof P>(key: K, val: P[K] | undefined, entity: Entity<P>): void;
+}
+
 export abstract class Entity<P extends { [key: string]: any }> {
 
   id?: string;
@@ -20,7 +25,8 @@ export abstract class Entity<P extends { [key: string]: any }> {
   constructor(
     id: string | null,
     public kind: EntityKind,
-    props: P
+    props: P,
+    private indexer: Indexer<P>,
   ) {
     if (id) this.id = id;
     this.props = props;
@@ -54,10 +60,13 @@ export abstract class Entity<P extends { [key: string]: any }> {
     if (this.pseudoProperties.includes(key)) return;
 
     if (this.id === undefined) {
+      this.indexer.removeIndexesFor(key, this.props[key]);
       this.props[key] = val;
+      this.indexer.addIndexesFor(key, this.props[key], this);
       return;
     }
 
+    this.indexer.removeIndexesFor(key, this.newProps[key]);
     const oldVal = this.props[key];
     if (oldVal === val) {
       delete this.newProps[key];
@@ -65,6 +74,7 @@ export abstract class Entity<P extends { [key: string]: any }> {
     else {
       this.newProps[key] = val;
     }
+    this.indexer.addIndexesFor(key, this.newProps[key], this);
   }
 
   hasPropertyChanges() {

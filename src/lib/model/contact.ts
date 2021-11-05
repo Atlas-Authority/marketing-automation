@@ -135,6 +135,6 @@ export class ContactManager extends EntityManager<ContactData, Contact> {
     'email',
   ];
 
-  public getByEmail = this.makeIndex(c => c.allEmails);
+  public getByEmail = this.makeIndex(c => c.allEmails, ['email', 'otherEmails']);
 
 }
