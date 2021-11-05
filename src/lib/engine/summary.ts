@@ -29,9 +29,13 @@ export function printSummary(db: Database) {
 
     'DealsCreated': formatNumber(db.dealManager.createdCount),
     'DealsUpdated': formatNumber(db.dealManager.updatedCount),
+    'DealsAssociated': formatNumber(db.dealManager.associatedCount),
+    'DealsDisAssociated': formatNumber(db.dealManager.disassociatedCount),
 
     'ContactsCreated': formatNumber(db.contactManager.createdCount),
     'ContactsUpdated': formatNumber(db.contactManager.updatedCount),
+    'ContactsAssociated': formatNumber(db.contactManager.associatedCount),
+    'ContactsDisassociated': formatNumber(db.contactManager.disassociatedCount),
 
     'CompaniesUpdated': formatNumber(db.companyManager.updatedCount),
   });

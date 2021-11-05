@@ -37,6 +37,8 @@ export abstract class EntityManager<
 
   public createdCount = 0;
   public updatedCount = 0;
+  public associatedCount = 0;
+  public disassociatedCount = 0;
 
   protected abstract Entity: new (id: string | null, kind: EntityKind, props: P, indexer: Indexer<P>) => E;
   protected abstract kind: EntityKind;
@@ -229,6 +231,9 @@ export abstract class EntityManager<
         otherKind,
         toDel.map(changes => changes.inputs),
       );
+
+      this.associatedCount += toAdd.length;
+      this.disassociatedCount += toDel.length;
     }
 
     for (const changes of toSync) {
