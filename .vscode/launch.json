@@ -66,6 +66,19 @@
         "${workspaceFolder}/out/**/*.js",
         "!**/node_modules/**"
       ]
+    },
+    {
+      "name": "Investigate Data",
+      "program": "${workspaceFolder}/src/bin/investigate.ts",
+      "request": "launch",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "type": "pwa-node",
+      "outFiles": [
+        "${workspaceFolder}/out/**/*.js",
+        "!**/node_modules/**"
+      ]
     }
   ]
 }
