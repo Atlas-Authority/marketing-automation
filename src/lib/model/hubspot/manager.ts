@@ -51,7 +51,7 @@ export abstract class EntityManager<
 
   private entities: E[] = [];
   private indexes: Index<E>[] = [];
-  private entitiesById = this.makeIndex(e => e.id ? [e.id] : []);
+  public get = this.makeIndex(e => e.id ? [e.id] : []);
 
   private prelinkedAssociations = new Map<string, Set<RelativeAssociation>>();
 
@@ -116,10 +116,6 @@ export abstract class EntityManager<
       const idx = this.entities.indexOf(e);
       this.entities.splice(idx, 1);
     }
-  }
-
-  public get(id: string) {
-    return this.entitiesById.get(id);
   }
 
   public getAll(): Iterable<E> {
@@ -261,15 +257,13 @@ export abstract class EntityManager<
     return properties;
   }
 
-  protected makeIndex(keysFor: (e: E) => string[]): ReadonlyIndex<E> {
+  protected makeIndex(keysFor: (e: E) => string[]): (key: string) => E | undefined {
     const index = new Index(keysFor);
     this.indexes.push(index);
-    return index;
+    return index.get.bind(index);
   }
 
 }
-
-type ReadonlyIndex<T> = Pick<Index<T>, 'get'>;
 
 class Index<E> {
 
