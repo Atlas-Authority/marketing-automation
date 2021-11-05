@@ -1,9 +1,13 @@
 import * as assert from 'assert';
 import { HubspotService, Progress } from '../../io/interfaces.js';
 import { AttachableError } from '../../util/errors.js';
-import { batchesOf } from '../../util/helpers.js';
-import { Entity, EntityDatabase } from "./entity.js";
+import { batchesOf, isPresent } from '../../util/helpers.js';
+import { Entity, Indexer } from "./entity.js";
 import { EntityKind, RelativeAssociation } from './interfaces.js';
+
+export interface EntityDatabase {
+  getEntity(kind: EntityKind, id: string): Entity<any>;
+}
 
 export type PropertyTransformers<T> = {
   [P in keyof T]: (prop: T[P]) => [string, string]
@@ -34,9 +38,10 @@ export abstract class EntityManager<
   public createdCount = 0;
   public updatedCount = 0;
 
-  protected abstract Entity: new (db: EntityDatabase, id: string | null, props: P, associations: Set<RelativeAssociation>) => E;
+  protected abstract Entity: new (id: string | null, kind: EntityKind, props: P, indexer: Indexer<P>) => E;
   protected abstract kind: EntityKind;
-  protected abstract associations: EntityKind[];
+  protected abstract downAssociations: EntityKind[];
+  protected abstract upAssociations: EntityKind[];
 
   protected abstract apiProperties: string[];
   protected abstract fromAPI(data: { [key: string]: string | null }): P | null;
@@ -46,21 +51,25 @@ export abstract class EntityManager<
 
   private entities: E[] = [];
   private indexes: Index<E>[] = [];
-  private entitiesById = this.makeIndex(e => e.id ? [e.id] : []);
+  private indexIndex = new Map<keyof P, Index<E>>();
+  public get = this.makeIndex(e => [e.id].filter(isPresent), []);
+
+  private prelinkedAssociations = new Map<string, Set<RelativeAssociation>>();
 
   public async downloadAllEntities(progress: Progress) {
-    const data = await this.downloader.downloadEntities(progress, this.kind, this.apiProperties, this.associations);
+    const data = await this.downloader.downloadEntities(progress, this.kind, this.apiProperties, this.downAssociations);
 
     for (const raw of data) {
       const props = this.fromAPI(raw.properties);
       if (!props) continue;
 
-      const associations = new Set<RelativeAssociation>();
       for (const item of raw.associations) {
-        associations.add(item);
+        let set = this.prelinkedAssociations.get(raw.id);
+        if (!set) this.prelinkedAssociations.set(raw.id, set = new Set());
+        set.add(item);
       }
 
-      const entity = new this.Entity(this.db, raw.id, props, associations);
+      const entity = new this.Entity(raw.id, this.kind, props, this);
       this.entities.push(entity);
     }
 
@@ -70,8 +79,29 @@ export abstract class EntityManager<
     }
   }
 
+  public linkAssociations() {
+    for (const [meId, rawAssocs] of this.prelinkedAssociations) {
+      for (const rawAssoc of rawAssocs) {
+        const me = this.get(meId);
+        if (!me) throw new Error(`Couldn't find kind=${this.kind} id=${meId}`);
+
+        const { toKind, youId } = this.getAssocInfo(rawAssoc);
+        const you = this.db.getEntity(toKind, youId);
+        if (!you) throw new Error(`Couldn't find kind=${toKind} id=${youId}`);
+
+        me.addAssociation(you, { firstSide: true, initial: true });
+      }
+    }
+    this.prelinkedAssociations.clear();
+  }
+
+  private getAssocInfo(a: RelativeAssociation) {
+    const [kind, id] = a.split(':');
+    return { toKind: kind as EntityKind, youId: id };
+  }
+
   public create(props: P) {
-    const e = new this.Entity(this.db, null, props, new Set());
+    const e = new this.Entity(null, this.kind, props, this);
     this.entities.push(e);
     for (const index of this.indexes) {
       index.addIndexesFor([e]);
@@ -87,10 +117,6 @@ export abstract class EntityManager<
       const idx = this.entities.indexOf(e);
       this.entities.splice(idx, 1);
     }
-  }
-
-  public get(id: string) {
-    return this.entitiesById.get(id);
   }
 
   public getAll(): Iterable<E> {
@@ -183,16 +209,16 @@ export abstract class EntityManager<
     const toSync = (this.entities
       .filter(e => e.hasAssociationChanges())
       .flatMap(e => e.getAssociationChanges()
-        .map(changes => ({ e, ...changes }))));
+        .map(({ op, other }) => ({ op, from: e, to: other }))));
 
-    for (const otherKind of this.associations) {
+    for (const otherKind of this.upAssociations) {
       const toSyncInKind = (toSync
-        .filter(changes => changes.kind === otherKind)
+        .filter(changes => changes.to.kind === otherKind)
         .map(changes => ({
           ...changes,
           inputs: {
-            fromId: changes.e.guaranteedId(),
-            toId: changes.id,
+            fromId: changes.from.guaranteedId(),
+            toId: changes.to.guaranteedId(),
             toType: otherKind,
           }
         })));
@@ -218,7 +244,7 @@ export abstract class EntityManager<
     }
 
     for (const changes of toSync) {
-      changes.e.applyAssociationChanges();
+      changes.from.applyAssociationChanges();
     }
   }
 
@@ -232,15 +258,26 @@ export abstract class EntityManager<
     return properties;
   }
 
-  protected makeIndex(keysFor: (e: E) => string[]): ReadonlyIndex<E> {
+  protected makeIndex(keysFor: (e: E) => string[], deps: (keyof P)[]): (key: string) => E | undefined {
     const index = new Index(keysFor);
     this.indexes.push(index);
-    return index;
+    for (const depKey of deps) {
+      this.indexIndex.set(depKey, index);
+    }
+    return index.get.bind(index);
+  }
+
+  removeIndexesFor<K extends keyof P>(key: K, val: P[K] | undefined) {
+    if (!val) return;
+    this.indexIndex.get(key)?.removeIndex(val);
+  }
+
+  addIndexesFor<K extends keyof P>(key: K, val: P[K] | undefined, entity: E) {
+    if (!val) return;
+    this.indexIndex.get(key)?.addIndex(val, entity);
   }
 
 }
-
-type ReadonlyIndex<T> = Pick<Index<T>, 'get' | 'delete'>;
 
 class Index<E> {
 
@@ -251,10 +288,18 @@ class Index<E> {
     this.map.clear();
   }
 
+  addIndex(key: string, entity: E) {
+    this.map.set(key, entity);
+  }
+
+  removeIndex(key: string) {
+    this.map.delete(key);
+  }
+
   addIndexesFor(entities: Iterable<E>) {
     for (const e of entities) {
       for (const key of this.keysFor(e)) {
-        this.map.set(key, e);
+        this.addIndex(key, e);
       }
     }
   }
@@ -262,17 +307,13 @@ class Index<E> {
   removeIndexesFor(entities: Iterable<E>) {
     for (const e of entities) {
       for (const key of this.keysFor(e)) {
-        this.map.delete(key);
+        this.removeIndex(key);
       }
     }
   }
 
   get(key: string) {
     return this.map.get(key);
-  }
-
-  delete(key: string) {
-    return this.map.delete(key);
   }
 
 }

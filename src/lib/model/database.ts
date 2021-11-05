@@ -74,6 +74,10 @@ export class Database {
 
     logbox.done();
 
+    this.dealManager.linkAssociations();
+    this.companyManager.linkAssociations();
+    this.contactManager.linkAssociations();
+
     log.info('Downloader', 'Done');
 
     this.providerDomains = this.emailProviderLister.set;

@@ -54,7 +54,11 @@ export class ContactManager extends EntityManager<ContactData, Contact> {
   override Entity = Contact;
   override kind: EntityKind = 'contact';
 
-  override associations: EntityKind[] = [
+  override downAssociations: EntityKind[] = [
+    "company",
+  ];
+
+  override upAssociations: EntityKind[] = [
     "company",
   ];
 
@@ -131,10 +135,6 @@ export class ContactManager extends EntityManager<ContactData, Contact> {
     'email',
   ];
 
-  private contactsByEmail = this.makeIndex(c => c.allEmails);
-
-  getByEmail(email: string) {
-    return this.contactsByEmail.get(email);
-  }
+  public getByEmail = this.makeIndex(c => c.allEmails, ['email', 'otherEmails']);
 
 }

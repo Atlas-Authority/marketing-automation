@@ -1,4 +1,4 @@
-import { Entity, EntityDatabase } from './entity.js';
+import { Entity } from './entity.js';
 
 type PersonProps = {
   age: number;
@@ -9,19 +9,16 @@ class Person extends Entity<PersonProps> {
   pseudoProperties = [];
 }
 
-const db: EntityDatabase = {
-  getEntity(_kind, _id) {
-    throw new Error('should not be called during these tests');
-  }
-};
-
 describe('entities', () => {
 
   it('has dynamic data', () => {
-    const p = new Person(db, '123', {
+    const p = new Person('123', 'contact', {
       age: 20,
       name: 'Bob',
-    }, new Set());
+    }, {
+      addIndexesFor() { },
+      removeIndexesFor() { },
+    });
     expect(p.hasPropertyChanges()).toBe(false);
     expect(p.data.age).toEqual(20);
     expect(p.data.name).toEqual('Bob');

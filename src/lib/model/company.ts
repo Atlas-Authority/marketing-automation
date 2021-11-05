@@ -21,9 +21,11 @@ export class CompanyManager extends EntityManager<CompanyData, Company> {
   override Entity = Company;
   override kind: EntityKind = 'company';
 
-  override associations: EntityKind[] = [
+  override downAssociations: EntityKind[] = [
     'contact'
   ];
+
+  override upAssociations: EntityKind[] = [];
 
   override apiProperties: string[] = [
     'name',

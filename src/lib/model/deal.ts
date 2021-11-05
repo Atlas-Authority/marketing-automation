@@ -55,7 +55,12 @@ export class DealManager extends EntityManager<DealData, Deal> {
   override Entity = Deal;
   override kind: EntityKind = "deal";
 
-  override associations: EntityKind[] = [
+  override downAssociations: EntityKind[] = [
+    "company",
+    "contact",
+  ];
+
+  override upAssociations: EntityKind[] = [
     "company",
     "contact",
   ];
@@ -144,18 +149,10 @@ export class DealManager extends EntityManager<DealData, Deal> {
     'transactionId',
   ];
 
-  private dealsByAddonLicenseId = this.makeIndex(d => [d.data.addonLicenseId].filter(isPresent));
-  private dealsByTransactionId = this.makeIndex(d => [d.data.transactionId].filter(isPresent));
+  public getByAddonLicenseId = this.makeIndex(d => [d.data.addonLicenseId].filter(isPresent), ['addonLicenseId']);
+  public getByTransactionId = this.makeIndex(d => [d.data.transactionId].filter(isPresent), ['transactionId']);
 
   duplicatesToDelete = new Map<Deal, Set<Deal>>();
-
-  getByAddonLicenseId(id: string) {
-    return this.dealsByAddonLicenseId.get(id);
-  }
-
-  getByTransactionId(id: string) {
-    return this.dealsByTransactionId.get(id);
-  }
 
   getDealsForLicenses(licenses: License[]) {
     return new Set(licenses
