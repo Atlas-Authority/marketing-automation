@@ -82,7 +82,7 @@ export class ActionGenerator {
     }
     return makeCreateAction(event, event.transaction, {
       dealStage: DealStage.CLOSED_WON,
-      addonLicenseId: null,
+      addonLicenseId: event.transaction.data.addonLicenseId,
       transactionId: event.transaction.data.transactionId,
     });
   }
