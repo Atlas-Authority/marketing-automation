@@ -196,10 +196,10 @@ export class EventGenerator {
 
 function abbrEventDetails(e: DealRelevantEvent) {
   switch (e.type) {
-    case 'eval': return { type: e.type, ids: e.licenses.map(l => l.data.addonLicenseId) };
-    case 'purchase': return { type: e.type, ids: e.licenses.map(l => l.data.addonLicenseId), tx: e.transaction?.data.transactionId };
-    case 'refund': return { type: e.type, ids: e.refundedTxs.map(tx => tx.data.transactionId) };
-    case 'renewal': return { type: e.type, id: e.transaction.data.transactionId };
-    case 'upgrade': return { type: e.type, id: e.transaction.data.transactionId };
+    case 'eval': return { type: e.type, ids: e.licenses.map(l => l.id) };
+    case 'purchase': return { type: e.type, ids: e.licenses.map(l => l.id), tx: e.transaction?.id };
+    case 'refund': return { type: e.type, ids: e.refundedTxs.map(tx => tx.id) };
+    case 'renewal': return { type: e.type, id: e.transaction.id };
+    case 'upgrade': return { type: e.type, id: e.transaction.id };
   }
 }
