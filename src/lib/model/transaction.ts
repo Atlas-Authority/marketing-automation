@@ -71,7 +71,7 @@ export class Transaction {
       vendorAmount: rawTransaction.purchaseDetails.vendorAmount,
     };
 
-    this.id = `${this.data.transactionId}--${this.data.addonLicenseId}`;
+    this.id = `${this.data.transactionId}[${this.data.addonLicenseId}]`;
     this.tier = this.parseTier();
   }
 
