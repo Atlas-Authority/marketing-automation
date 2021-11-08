@@ -27,7 +27,7 @@ export class ActionGenerator {
   }
 
   private actionForEval(event: EvalEvent): Action {
-    const deal = this.getDealForLicenses(event.licenses);
+    const deal = this.singleDeal(this.dealManager.getDealsForRecords(event.licenses));
 
     const latestLicense = event.licenses[event.licenses.length - 1];
     if (!deal) {
@@ -51,7 +51,7 @@ export class ActionGenerator {
   }
 
   private actionForPurchase(event: PurchaseEvent): Action {
-    const deal = this.getDealForLicenses(event.licenses);
+    const deal = this.singleDeal(this.dealManager.getDealsForRecords(event.licenses));
 
     if (!deal) {
       const record = getLatestRecord(event);
@@ -75,7 +75,7 @@ export class ActionGenerator {
   }
 
   private actionForRenewal(event: RenewalEvent | UpgradeEvent): Action {
-    const deal = this.getDealForTransaction(event.transaction);
+    const deal = this.singleDeal(this.dealManager.getDealsForRecords([event.transaction]));
 
     if (deal) {
       return makeUpdateAction(event, deal, event.transaction);
@@ -88,20 +88,12 @@ export class ActionGenerator {
   }
 
   private actionsForRefund(event: RefundEvent): Action[] {
-    const deals = this.dealManager.getDealsForTransactions(event.refundedTxs);
+    const deals = this.dealManager.getDealsForRecords(event.refundedTxs);
     return ([...deals]
       .filter(deal => deal.data.dealStage !== DealStage.CLOSED_LOST)
       .map(deal => makeUpdateAction(event, deal, null, DealStage.CLOSED_LOST))
       .filter(isPresent)
     );
-  }
-
-  private getDealForLicenses(licenses: License[]) {
-    return this.singleDeal(this.dealManager.getDealsForLicenses(licenses));
-  }
-
-  private getDealForTransaction(transaction: Transaction) {
-    return this.singleDeal(this.dealManager.getDealsForTransactions([transaction]));
   }
 
   private singleDeal(foundDeals: Set<Deal>) {

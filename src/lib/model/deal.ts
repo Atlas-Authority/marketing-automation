@@ -36,6 +36,18 @@ export class Deal extends Entity<DealData> {
   contacts = this.makeDynamicAssociation<Contact>('contact');
   companies = this.makeDynamicAssociation<Company>('company');
 
+  mpacId() {
+    if (this.data.transactionId && this.data.addonLicenseId) {
+      return `${this.data.transactionId}[${this.data.addonLicenseId}]`;
+    }
+    else if (this.data.addonLicenseId) {
+      return this.data.addonLicenseId;
+    }
+    else {
+      return null;
+    }
+  }
+
   isEval() { return this.data.dealStage === DealStage.EVAL; }
   isClosed() {
     return (
@@ -149,20 +161,14 @@ export class DealManager extends EntityManager<DealData, Deal> {
     'transactionId',
   ];
 
-  public getByAddonLicenseId = this.makeIndex(d => [d.data.addonLicenseId].filter(isPresent), ['addonLicenseId']);
-  public getByTransactionId = this.makeIndex(d => [d.data.transactionId].filter(isPresent), ['transactionId']);
+  /** Either `License.addonLicenseId` or `Transaction.transactionId[Transacton.addonLicenseId]` */
+  public getByMpacId = this.makeIndex(d => [d.mpacId()].filter(isPresent), ['transactionId', 'addonLicenseId']);
 
   duplicatesToDelete = new Map<Deal, Set<Deal>>();
 
-  getDealsForLicenses(licenses: License[]) {
-    return new Set(licenses
-      .map(l => this.getByAddonLicenseId(l.data.addonLicenseId))
-      .filter(isPresent));
-  }
-
-  getDealsForTransactions(transactions: Transaction[]) {
-    return new Set(transactions
-      .map(tx => this.getByTransactionId(tx.data.transactionId))
+  getDealsForRecords(records: (License | Transaction)[]) {
+    return new Set(records
+      .map(record => this.getByMpacId(record.id))
       .filter(isPresent));
   }
 

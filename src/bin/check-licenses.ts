@@ -65,7 +65,7 @@ function check(sen: string) {
 }
 
 function checkSEN(sen: string) {
-  const foundDeal = db.dealManager.getByAddonLicenseId(sen);
+  const foundDeal = db.dealManager.getByMpacId(sen);
   if (foundDeal) {
     log.info('Dev', sen, 'Already has deal:', foundDeal.id);
     return true;
