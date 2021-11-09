@@ -194,7 +194,7 @@ export class EventGenerator {
 
 }
 
-function abbrEventDetails(e: DealRelevantEvent) {
+export function abbrEventDetails(e: DealRelevantEvent) {
   switch (e.type) {
     case 'eval': return { type: e.type, ids: e.licenses.map(l => l.id) };
     case 'purchase': return { type: e.type, ids: e.licenses.map(l => l.id), tx: e.transaction?.id };
