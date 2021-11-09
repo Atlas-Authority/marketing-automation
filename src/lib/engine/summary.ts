@@ -1,7 +1,5 @@
 import log from "../log/logger.js";
 import { Database } from "../model/database.js";
-import { Deal } from "../model/deal.js";
-import env from "../parameters/env.js";
 import { formatMoney, formatNumber } from "../util/formatters.js";
 import { isPresent } from "../util/helpers.js";
 
@@ -12,11 +10,11 @@ export function printSummary(db: Database) {
       'Found duplicate deals; delete them manually',
       [...db.dealManager.duplicatesToDelete].map(([dup, dupOf]) => ({
         "Primary": dupOf.size > 1
-          ? [...dupOf].map(dealLink)
+          ? [...dupOf].map(d => d.link())
           : dupOf.size === 0
             ? 'Unknown???'
-            : dealLink([...dupOf][0]),
-        "Duplicate": dealLink(dup),
+            : [...dupOf][0].link(),
+        "Duplicate": dup.link(),
       })));
   }
 
@@ -40,11 +38,4 @@ export function printSummary(db: Database) {
     'CompaniesUpdated': formatNumber(db.companyManager.updatedCount),
   });
 
-}
-
-function dealLink(deal: Deal) {
-  const hsAccountId = env.hubspot.accountId;
-  return (hsAccountId
-    ? `https://app.hubspot.com/contacts/${hsAccountId}/deal/${deal.id}/`
-    : `deal-id=${deal.id}`);
 }

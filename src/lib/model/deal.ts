@@ -56,6 +56,13 @@ export class Deal extends Entity<DealData> {
     );
   }
 
+  public link() {
+    const hsAccountId = env.hubspot.accountId;
+    return (hsAccountId
+      ? `https://app.hubspot.com/contacts/${hsAccountId}/deal/${this.id}/`
+      : `deal-id=${this.id}`);
+  }
+
   override pseudoProperties: (keyof DealData)[] = [
     'hasActivity',
   ];
