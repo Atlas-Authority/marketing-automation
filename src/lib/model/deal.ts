@@ -17,7 +17,7 @@ const appKey = env.hubspot.attrs.deal.app;
 export type DealData = {
   relatedProducts: string | null;
   app: string | null;
-  addonLicenseId: string | null;
+  addonLicenseId: string;
   transactionId: string | null;
   closeDate: string;
   country: string;
@@ -40,11 +40,8 @@ export class Deal extends Entity<DealData> {
     if (this.data.transactionId && this.data.addonLicenseId) {
       return `${this.data.transactionId}[${this.data.addonLicenseId}]`;
     }
-    else if (this.data.addonLicenseId) {
-      return this.data.addonLicenseId;
-    }
     else {
-      return null;
+      return this.data.addonLicenseId;
     }
   }
 
@@ -121,7 +118,7 @@ export class DealManager extends EntityManager<DealData, Deal> {
     return {
       relatedProducts: data['related_products'] || null,
       app: appKey ? data[appKey] as string : null,
-      addonLicenseId: data[addonLicenseIdKey],
+      addonLicenseId: data[addonLicenseIdKey] as string,
       transactionId: data[transactionIdKey],
       closeDate: (data['closedate'] as string).substr(0, 10),
       country: data['country'] as string,
