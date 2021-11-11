@@ -53,16 +53,26 @@ export class ActionGenerator {
   }
 
   private actionForPurchase(event: PurchaseEvent): Action {
-    const deal = this.singleDeal(this.dealManager.getDealsForRecords(event.licenses));
+    const recordsToSearch = [event.transaction, ...event.licenses].filter(isPresent);
+    const deal = this.singleDeal(this.dealManager.getDealsForRecords(recordsToSearch));
     if (deal) this.recordSeen(deal, event);
 
     if (!deal) {
-      const record = getLatestRecord(event);
-      return makeCreateAction(event, record, {
-        dealStage: DealStage.CLOSED_WON,
-        addonLicenseId: record.data.addonLicenseId,
-        transactionId: null,
-      });
+      if (event.transaction) {
+        return makeCreateAction(event, event.transaction, {
+          dealStage: DealStage.CLOSED_WON,
+          addonLicenseId: event.transaction.data.addonLicenseId,
+          transactionId: event.transaction.data.transactionId,
+        });
+      }
+      else {
+        const record = getLatestRecord(event);
+        return makeCreateAction(event, record, {
+          dealStage: DealStage.CLOSED_WON,
+          addonLicenseId: record.data.addonLicenseId,
+          transactionId: null,
+        });
+      }
     }
     else if (deal.isEval()) {
       const record = getLatestRecord(event);
