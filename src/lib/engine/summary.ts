@@ -19,11 +19,14 @@ export function printSummary(db: Database) {
   }
 
   const deals = db.dealManager.getArray();
+  const dealSum = (deals
+    .map(d => d.data.amount)
+    .filter(isPresent)
+    .reduce((a, b) => a + b));
+
   log.info('Summary', 'Results of this run:', {
     'TotalDealCount': formatNumber(deals.length),
-    'TotalDealSum': formatMoney(deals.map(d => d.data.amount)
-      .filter(isPresent)
-      .reduce((a, b) => a + b)),
+    'TotalDealSum': formatMoney(dealSum),
 
     'DealsCreated': formatNumber(db.dealManager.createdCount),
     'DealsUpdated': formatNumber(db.dealManager.updatedCount),
@@ -38,4 +41,7 @@ export function printSummary(db: Database) {
     'CompaniesUpdated': formatNumber(db.companyManager.updatedCount),
   });
 
+  db.tallier.less('Deal sum', dealSum);
+
+  db.tallier.printTable();
 }

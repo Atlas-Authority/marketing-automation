@@ -41,12 +41,11 @@ export class DealGenerator {
 
     saveForInspection('ignored', this.ignoredLicenseSets);
 
-    let ignoredTotal = 0;
     for (const [reason, amount] of this.ignoredAmounts) {
-      log.info('Deal Actions', 'Amount of Transactions Ignored', { reason, amount: formatMoney(amount) });
-      ignoredTotal += amount;
+      this.db.tallier.less(reason, amount);
     }
-    log.info('Deal Actions', 'Total Amount of Transactions Ignored', formatMoney(ignoredTotal));
+    log.info('Deal Actions', 'Amount of Transactions Ignored', [...this.ignoredAmounts].map(([reason, amount]) => [reason, formatMoney(amount)]));
+
     log.warn('Deal Actions', 'Partner amounts', '\n' + [...this.partnerTransactions].map(t =>
       `  ${t.id}\t  ${t.data.saleDate}\t${t.data.vendorAmount}\t${[...new Set(getEmails(t))].join(', ')}`).join('\n'));
 
