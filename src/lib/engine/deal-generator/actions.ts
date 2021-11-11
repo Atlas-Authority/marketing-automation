@@ -57,33 +57,24 @@ export class ActionGenerator {
     const deal = this.singleDeal(this.dealManager.getDealsForRecords(recordsToSearch));
     if (deal) this.recordSeen(deal, event);
 
-    if (!deal) {
-      if (event.transaction) {
-        return makeCreateAction(event, event.transaction, {
-          dealStage: DealStage.CLOSED_WON,
-          addonLicenseId: event.transaction.data.addonLicenseId,
-          transactionId: event.transaction.data.transactionId,
-        });
-      }
-      else {
-        const record = getLatestRecord(event);
-        return makeCreateAction(event, record, {
-          dealStage: DealStage.CLOSED_WON,
-          addonLicenseId: record.data.addonLicenseId,
-          transactionId: null,
-        });
-      }
-    }
-    else if (deal.isEval()) {
-      const record = getLatestRecord(event);
-      return makeUpdateAction(event, deal, record, DealStage.CLOSED_WON);
+    if (deal) {
+      const license = event.transaction || getLatestLicense(event);
+      return makeUpdateAction(event, deal, license, DealStage.CLOSED_WON);
     }
     else if (event.transaction) {
-      return makeUpdateAction(event, deal, event.transaction);
+      return makeCreateAction(event, event.transaction, {
+        dealStage: DealStage.CLOSED_WON,
+        addonLicenseId: event.transaction.data.addonLicenseId,
+        transactionId: event.transaction.data.transactionId,
+      });
     }
     else {
-      const record = getLatestRecord(event);
-      return makeUpdateAction(event, deal, record);
+      const license = getLatestLicense(event);
+      return makeCreateAction(event, license, {
+        dealStage: DealStage.CLOSED_WON,
+        addonLicenseId: license.data.addonLicenseId,
+        transactionId: null,
+      });
     }
   }
 
@@ -223,8 +214,6 @@ function makeUpdateAction(event: DealRelevantEvent, deal: Deal, record: License 
   };
 }
 
-function getLatestRecord(event: PurchaseEvent): License | Transaction {
-  const records: (License | Transaction)[] = [...event.licenses];
-  if (event.transaction) records.push(event.transaction);
-  return records.sort(sorter(item => item.data.maintenanceStartDate, 'DSC'))[0];
+function getLatestLicense(event: PurchaseEvent): License {
+  return [...event.licenses].sort(sorter(item => item.data.maintenanceStartDate, 'DSC'))[0];
 }
