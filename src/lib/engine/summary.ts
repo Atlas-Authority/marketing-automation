@@ -1,7 +1,6 @@
 import log from "../log/logger.js";
+import { Table } from "../log/table.js";
 import { Database } from "../model/database.js";
-import { Deal } from "../model/deal.js";
-import env from "../parameters/env.js";
 import { formatMoney, formatNumber } from "../util/formatters.js";
 import { isPresent } from "../util/helpers.js";
 
@@ -12,39 +11,44 @@ export function printSummary(db: Database) {
       'Found duplicate deals; delete them manually',
       [...db.dealManager.duplicatesToDelete].map(([dup, dupOf]) => ({
         "Primary": dupOf.size > 1
-          ? [...dupOf].map(dealLink)
+          ? [...dupOf].map(d => d.link())
           : dupOf.size === 0
             ? 'Unknown???'
-            : dealLink([...dupOf][0]),
-        "Duplicate": dealLink(dup),
+            : [...dupOf][0].link(),
+        "Duplicate": dup.link(),
       })));
   }
 
   const deals = db.dealManager.getArray();
-  log.info('Summary', 'Results of this run:', {
-    'TotalDealCount': formatNumber(deals.length),
-    'TotalDealSum': formatMoney(deals.map(d => d.data.amount)
-      .filter(isPresent)
-      .reduce((a, b) => a + b)),
+  const dealSum = (deals
+    .map(d => d.data.amount)
+    .filter(isPresent)
+    .reduce((a, b) => a + b));
 
-    'DealsCreated': formatNumber(db.dealManager.createdCount),
-    'DealsUpdated': formatNumber(db.dealManager.updatedCount),
-    'DealsAssociated': formatNumber(db.dealManager.associatedCount),
-    'DealsDisAssociated': formatNumber(db.dealManager.disassociatedCount),
+  log.info('Summary', 'Results of this run:');
 
-    'ContactsCreated': formatNumber(db.contactManager.createdCount),
-    'ContactsUpdated': formatNumber(db.contactManager.updatedCount),
-    'ContactsAssociated': formatNumber(db.contactManager.associatedCount),
-    'ContactsDisassociated': formatNumber(db.contactManager.disassociatedCount),
+  const table = new Table(2);
 
-    'CompaniesUpdated': formatNumber(db.companyManager.updatedCount),
-  });
+  table.addRow([['Total Deal Count'], [formatNumber(deals.length), 'right']]);
+  table.addRow([['Total Deal Sum'], [formatMoney(dealSum), 'right']]);
 
-}
+  table.addRow([['Deals Created'], [formatNumber(db.dealManager.createdCount), 'right']]);
+  table.addRow([['Deals Updated'], [formatNumber(db.dealManager.updatedCount), 'right']]);
+  table.addRow([['Deals Associated'], [formatNumber(db.dealManager.associatedCount), 'right']]);
+  table.addRow([['Deals DisAssociated'], [formatNumber(db.dealManager.disassociatedCount), 'right']]);
 
-function dealLink(deal: Deal) {
-  const hsAccountId = env.hubspot.accountId;
-  return (hsAccountId
-    ? `https://app.hubspot.com/contacts/${hsAccountId}/deal/${deal.id}/`
-    : `deal-id=${deal.id}`);
+  table.addRow([['Contacts Created'], [formatNumber(db.contactManager.createdCount), 'right']]);
+  table.addRow([['Contacts Updated'], [formatNumber(db.contactManager.updatedCount), 'right']]);
+  table.addRow([['Contacts Associated'], [formatNumber(db.contactManager.associatedCount), 'right']]);
+  table.addRow([['Contacts Disassociated'], [formatNumber(db.contactManager.disassociatedCount), 'right']]);
+
+  table.addRow([['Companies Updated'], [formatNumber(db.companyManager.updatedCount), 'right']]);
+
+  for (const row of table.eachRow()) {
+    log.info('Summary', '  ' + row);
+  }
+
+  db.tallier.less('Deal sum', dealSum);
+
+  db.tallier.printTable();
 }

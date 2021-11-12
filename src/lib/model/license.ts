@@ -57,6 +57,8 @@ export interface LicenseData {
 
 export class License {
 
+  /** Unique ID for this License. */
+  public id: string;
   public data: LicenseData;
   public tier: number;
   public active: boolean;
@@ -114,6 +116,7 @@ export class License {
       newEvalData,
     };
 
+    this.id = this.data.addonLicenseId;
     this.tier = Math.max(this.parseTier(), this.tierFromEvalOpportunity());
     this.active = this.data.status === 'active';
   }

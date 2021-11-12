@@ -23,13 +23,13 @@ export default class Engine {
     new ContactGenerator(db).run();
 
     log.step('Running Scoring Engine');
-    const allMatches = matchIntoLikelyGroups(db);
+    let allMatches = matchIntoLikelyGroups(db);
 
     log.step('Updating Contacts based on Match Results');
     updateContactsBasedOnMatchResults(db, allMatches);
 
     log.step('Removing ignored apps from rest of engine run');
-    removeIgnoredApps(db, allMatches);
+    allMatches = removeIgnoredApps(db, allMatches);
 
     log.step('Generating deals');
     new DealGenerator(db).run(allMatches);

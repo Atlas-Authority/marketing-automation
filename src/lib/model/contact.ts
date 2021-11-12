@@ -11,7 +11,7 @@ const productsKey = env.hubspot.attrs.contact.products;
 export type ContactType = 'Partner' | 'Customer';
 
 export type ContactData = {
-  email: string;
+  readonly email: string;
   firstName: string | null;
   lastName: string | null;
   phone: string | null;

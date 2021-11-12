@@ -35,6 +35,8 @@ export interface TransactionData {
 
 export class Transaction {
 
+  /** Unique ID for this Transaction. */
+  public id: string;
   public data: TransactionData;
   public tier: number;
 
@@ -69,6 +71,7 @@ export class Transaction {
       vendorAmount: rawTransaction.purchaseDetails.vendorAmount,
     };
 
+    this.id = `${this.data.transactionId}[${this.data.addonLicenseId}]`;
     this.tier = this.parseTier();
   }
 

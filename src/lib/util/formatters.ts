@@ -1,4 +1,5 @@
 export function formatNumber(n: number) {
+  if (n === 0) return '-';
   return new Intl.NumberFormat('en-US').format(n);
 }
 

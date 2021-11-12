@@ -2,6 +2,7 @@ import { IO } from "../io/io.js";
 import { makeEmailValidationRegex } from "../io/live/domains.js";
 import { MultiDownloadLogger } from "../log/download-logger.js";
 import log from "../log/logger.js";
+import { Tallier } from "../log/tallier.js";
 import { formatMoney, formatNumber } from "../util/formatters.js";
 import { CompanyManager } from "./company.js";
 import { ContactManager } from "./contact.js";
@@ -28,6 +29,8 @@ export class Database {
   customerDomains = new Set<string>();
 
   emailProviderLister: EmailProviderLister;
+
+  tallier = new Tallier();
 
   constructor(private io: IO) {
     this.dealManager = new DealManager(io.in.hubspot, io.out.hubspot, this);
@@ -92,12 +95,15 @@ export class Database {
     this.licenses = results.licenses.map(raw => new License(raw));
     this.transactions = results.transactions.map(raw => new Transaction(raw));
 
+    const transactionTotal = (this.transactions
+      .map(t => t.data.vendorAmount)
+      .reduce((a, b) => a + b));
+
     log.info('Dev', 'Licenses', formatNumber(this.licenses.length));
     log.info('Dev', 'Transactions', formatNumber(this.transactions.length));
-    log.info('Dev', 'Amount in Transactions', formatMoney(
-      this.transactions
-        .map(t => t.data.vendorAmount)
-        .reduce((a, b) => a + b)));
+    log.info('Dev', 'Amount in Transactions', formatMoney(transactionTotal));
+
+    this.tallier.first('Transaction total', transactionTotal);
   }
 
   async syncUpAllEntities() {

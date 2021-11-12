@@ -1,6 +1,7 @@
 import * as assert from 'assert';
 import { saveForInspection } from '../../cache/inspection.js';
 import log from '../../log/logger.js';
+import { Table } from '../../log/table.js';
 import { Database } from '../../model/database.js';
 import { Deal } from '../../model/deal.js';
 import { License, LicenseData } from '../../model/license.js';
@@ -41,14 +42,22 @@ export class DealGenerator {
 
     saveForInspection('ignored', this.ignoredLicenseSets);
 
-    let ignoredTotal = 0;
     for (const [reason, amount] of this.ignoredAmounts) {
-      log.info('Deal Actions', 'Amount of Transactions Ignored', { reason, amount: formatMoney(amount) });
-      ignoredTotal += amount;
+      this.db.tallier.less(reason, amount);
     }
-    log.info('Deal Actions', 'Total Amount of Transactions Ignored', formatMoney(ignoredTotal));
-    log.warn('Deal Actions', 'Partner amounts', '\n' + [...this.partnerTransactions].map(t =>
-      `  ${t.data.transactionId}\t  ${t.data.saleDate}\t${t.data.vendorAmount}\t${[...new Set(getEmails(t))].join(', ')}`).join('\n'));
+    log.info('Deal Actions', 'Amount of Transactions Ignored', [...this.ignoredAmounts].map(([reason, amount]) => [reason, formatMoney(amount)]));
+
+    const table = new Table(4);
+    for (const t of this.partnerTransactions) {
+      const emails = [...new Set(getEmails(t))].join(', ');
+      const amount = formatMoney(t.data.vendorAmount);
+      table.addRow([[t.id], [t.data.saleDate], [amount, 'right'], [emails]]);
+    }
+
+    log.warn('Deal Actions', 'Partner amounts');
+    for (const row of table.eachRow()) {
+      log.warn('Deal Actions', '  ' + row);
+    }
 
     for (const { groups, properties } of this.dealCreateActions) {
       const deal = this.db.dealManager.create(properties);

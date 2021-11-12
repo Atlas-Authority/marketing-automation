@@ -5,11 +5,12 @@ import { License } from '../../model/license.js';
 import { Transaction } from '../../model/transaction.js';
 import { isPresent, sorter } from '../../util/helpers.js';
 import { RelatedLicenseSet } from '../license-matching/license-grouper.js';
-import { DealRelevantEvent, EvalEvent, PurchaseEvent, RefundEvent, RenewalEvent, UpgradeEvent } from "./events.js";
+import { abbrEventDetails, DealRelevantEvent, EvalEvent, PurchaseEvent, RefundEvent, RenewalEvent, UpgradeEvent } from "./events.js";
 import { dealCreationProperties, updateDeal } from './records.js';
 
 export class ActionGenerator {
 
+  #handledDeals = new Map<Deal, DealRelevantEvent>();
   constructor(private dealManager: DealManager) { }
 
   generateFrom(events: DealRelevantEvent[]) {
@@ -27,7 +28,8 @@ export class ActionGenerator {
   }
 
   private actionForEval(event: EvalEvent): Action {
-    const deal = this.getDealForLicenses(event.licenses);
+    const deal = this.singleDeal(this.dealManager.getDealsForRecords(event.licenses));
+    if (deal) this.recordSeen(deal, event);
 
     const latestLicense = event.licenses[event.licenses.length - 1];
     if (!deal) {
@@ -51,44 +53,51 @@ export class ActionGenerator {
   }
 
   private actionForPurchase(event: PurchaseEvent): Action {
-    const deal = this.getDealForLicenses(event.licenses);
+    const recordsToSearch = [event.transaction, ...event.licenses].filter(isPresent);
+    const deal = this.singleDeal(this.dealManager.getDealsForRecords(recordsToSearch));
+    if (deal) this.recordSeen(deal, event);
 
-    if (!deal) {
-      const record = getLatestRecord(event);
-      return makeCreateAction(event, record, {
-        dealStage: DealStage.CLOSED_WON,
-        addonLicenseId: record.data.addonLicenseId,
-        transactionId: null,
-      });
-    }
-    else if (deal.isEval()) {
-      const record = getLatestRecord(event);
-      return makeUpdateAction(event, deal, record, DealStage.CLOSED_WON);
+    if (deal) {
+      const license = event.transaction || getLatestLicense(event);
+      return makeUpdateAction(event, deal, license, DealStage.CLOSED_WON);
     }
     else if (event.transaction) {
-      return makeUpdateAction(event, deal, event.transaction);
+      return makeCreateAction(event, event.transaction, {
+        dealStage: DealStage.CLOSED_WON,
+        addonLicenseId: event.transaction.data.addonLicenseId,
+        transactionId: event.transaction.data.transactionId,
+      });
     }
     else {
-      const record = getLatestRecord(event);
-      return makeUpdateAction(event, deal, record);
+      const license = getLatestLicense(event);
+      return makeCreateAction(event, license, {
+        dealStage: DealStage.CLOSED_WON,
+        addonLicenseId: license.data.addonLicenseId,
+        transactionId: null,
+      });
     }
   }
 
   private actionForRenewal(event: RenewalEvent | UpgradeEvent): Action {
-    const deal = this.getDealForTransaction(event.transaction);
+    const deal = this.singleDeal(this.dealManager.getDealsForRecords([event.transaction]));
+    if (deal) this.recordSeen(deal, event);
 
     if (deal) {
       return makeUpdateAction(event, deal, event.transaction);
     }
     return makeCreateAction(event, event.transaction, {
       dealStage: DealStage.CLOSED_WON,
-      addonLicenseId: null,
+      addonLicenseId: event.transaction.data.addonLicenseId,
       transactionId: event.transaction.data.transactionId,
     });
   }
 
   private actionsForRefund(event: RefundEvent): Action[] {
-    const deals = this.dealManager.getDealsForTransactions(event.refundedTxs);
+    const deals = this.dealManager.getDealsForRecords(event.refundedTxs);
+    for (const deal of deals) {
+      this.recordSeen(deal, event);
+    }
+
     return ([...deals]
       .filter(deal => deal.data.dealStage !== DealStage.CLOSED_LOST)
       .map(deal => makeUpdateAction(event, deal, null, DealStage.CLOSED_LOST))
@@ -96,12 +105,21 @@ export class ActionGenerator {
     );
   }
 
-  private getDealForLicenses(licenses: License[]) {
-    return this.singleDeal(this.dealManager.getDealsForLicenses(licenses));
-  }
-
-  private getDealForTransaction(transaction: Transaction) {
-    return this.singleDeal(this.dealManager.getDealsForTransactions([transaction]));
+  private recordSeen(deal: Deal, event: DealRelevantEvent) {
+    if (this.#handledDeals.has(deal)) {
+      const existing = this.#handledDeals.get(deal);
+      log.error('Deal Generator', 'Updating deal twice', {
+        firstEvent: existing && abbrEventDetails(existing),
+        currentEvent: abbrEventDetails(event),
+        deal: {
+          id: deal.id,
+          data: deal.data,
+        },
+      });
+    }
+    else {
+      this.#handledDeals.set(deal, event);
+    }
   }
 
   private singleDeal(foundDeals: Set<Deal>) {
@@ -166,6 +184,7 @@ export type UpdateDealAction = {
 
 export type NoDealAction = {
   type: 'noop';
+  deal: Deal;
 };
 
 export type Action = CreateDealAction | UpdateDealAction | NoDealAction;
@@ -184,7 +203,7 @@ function makeUpdateAction(event: DealRelevantEvent, deal: Deal, record: License 
 
   if (!deal.hasPropertyChanges()) {
     log.detailed('Deal Actions', 'No properties to update for deal', deal.id);
-    return { type: 'noop' };
+    return { type: 'noop', deal };
   }
 
   return {
@@ -195,8 +214,6 @@ function makeUpdateAction(event: DealRelevantEvent, deal: Deal, record: License 
   };
 }
 
-function getLatestRecord(event: PurchaseEvent): License | Transaction {
-  const records: (License | Transaction)[] = [...event.licenses];
-  if (event.transaction) records.push(event.transaction);
-  return records.sort(sorter(item => item.data.maintenanceStartDate, 'DSC'))[0];
+function getLatestLicense(event: PurchaseEvent): License {
+  return [...event.licenses].sort(sorter(item => item.data.maintenanceStartDate, 'DSC'))[0];
 }

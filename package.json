@@ -24,7 +24,6 @@
     "cli-progress": "^3.9.1",
     "colors": "^1.4.0",
     "csv-stringify": "^5.6.1",
-    "deep-object-diff": "^1.1.0",
     "dice-coefficient": "^2.0.0",
     "dotenv": "^8.2.0",
     "email-providers": "^1.0.3",

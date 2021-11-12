@@ -18,3 +18,13 @@ export function sorter<T>(fn: (o: T) => string | number, dir: 'ASC' | 'DSC' = 'A
     fn(a) < fn(b) ? down : up
   );
 }
+
+export function split<T>(array: T[], inFirstArray: (o: T) => boolean): [T[], T[]] {
+  const first: T[] = [];
+  const second: T[] = [];
+  for (const item of array) {
+    const which = (inFirstArray(item) ? first : second);
+    which.push(item);
+  }
+  return [first, second];
+}
