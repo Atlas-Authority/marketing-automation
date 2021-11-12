@@ -7,6 +7,7 @@ import { EntityManager, PropertyTransformers } from "./hubspot/manager.js";
 
 const deploymentKey = env.hubspot.attrs.contact.deployment;
 const productsKey = env.hubspot.attrs.contact.products;
+const licenseTierKey = env.hubspot.attrs.contact.licenseTier;
 
 export type ContactType = 'Partner' | 'Customer';
 
@@ -74,7 +75,6 @@ export class ContactManager extends EntityManager<ContactData, Contact> {
     'lastname',
     'phone',
     'related_products',
-    'license_tier',
     'last_mpac_event',
     'hs_additional_emails',
 
@@ -82,6 +82,7 @@ export class ContactManager extends EntityManager<ContactData, Contact> {
     ...[
       deploymentKey,
       productsKey,
+      licenseTierKey,
     ].filter(isPresent),
   ];
 
@@ -100,7 +101,7 @@ export class ContactManager extends EntityManager<ContactData, Contact> {
       state: data['state']?.trim() || null,
 
       relatedProducts: new Set(data['related_products'] ? data['related_products'].split(';') : []),
-      licenseTier: !data['license_tier'] ? null : +data['license_tier'],
+      licenseTier: licenseTierKey ? toNumber(data[licenseTierKey]) : null,
       deployment: deploymentKey ? data[deploymentKey] as ContactData['deployment'] : null,
       products: productsKey ? new Set(data[productsKey]?.split(';') || []) : null,
       lastMpacEvent: data['last_mpac_event'],
@@ -123,7 +124,7 @@ export class ContactManager extends EntityManager<ContactData, Contact> {
     state: state => ['state', state?.trim() || ''],
 
     relatedProducts: relatedProducts => ['related_products', [...relatedProducts].join(';')],
-    licenseTier: licenseTier => ['license_tier', licenseTier?.toFixed() ?? ''],
+    licenseTier: EntityManager.upSyncIfConfigured(licenseTierKey, licenseTier => licenseTier?.toFixed() ?? ''),
     deployment: EntityManager.upSyncIfConfigured(deploymentKey, deployment => deployment ?? ''),
     products: EntityManager.upSyncIfConfigured(productsKey, products => [...products ?? []].join(';')),
     lastMpacEvent: lastMpacEvent => ['last_mpac_event', lastMpacEvent ?? ''],
@@ -137,4 +138,9 @@ export class ContactManager extends EntityManager<ContactData, Contact> {
 
   public getByEmail = this.makeIndex(c => c.allEmails, ['email', 'otherEmails']);
 
+}
+
+/** Returns number, or null for `''`, `'0'`, and `null` */
+function toNumber(val: string | null): number | null {
+  return (val ? +val.trim() : null);
 }

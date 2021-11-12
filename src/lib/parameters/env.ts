@@ -33,6 +33,7 @@ export default {
     attrs: {
       contact: {
         deployment: optional('HUBSPOT_CONTACT_DEPLOYMENT_ATTR'),
+        licenseTier: optional('HUBSPOT_CONTACT_LICENSE_TIER_ATTR'),
         products: optional('HUBSPOT_CONTACT_PRODUCTS_ATTR'),
       },
       deal: {

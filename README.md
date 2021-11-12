@@ -10,15 +10,15 @@ Add these fields:
 
 ### Contacts
 
-| Field            | Type     | Allowed Values                           | ENV var                           | Required |
-| ---------------- | -------- | ---------------------------------------- | --------------------------------- | -------- |
-| License Tier     | Number   | *                                        | TBD                               | ❌        |
-| Last MPAC Event  | Date     | *                                        | TBD                               | ❌        |
-| Contact Type     | 1-Select | 'Partner' or 'Customer'                  | TBD                               | ❌        |
-| Region           | 1-Select | "region" of MPAC records                 | TBD                               | ❌        |
-| Related Products | N-Select | `ADDONKEY_PLATFORMS` rhs vals            | TBD                               | ❌        |
-| Products         | N-Select | "addonKey" of MPAC records               | `HUBSPOT_CONTACT_PRODUCTS_ATTR`   | ❌        |
-| Deployment       | 1-Select | "hosting" of MPAC records, or 'Multiple' | `HUBSPOT_CONTACT_DEPLOYMENT_ATTR` | ❌        |
+| Field            | Type     | Allowed Values                           | ENV var                             | Required |
+| ---------------- | -------- | ---------------------------------------- | ----------------------------------- | -------- |
+| License Tier     | Number   | *                                        | `HUBSPOT_CONTACT_LICENSE_TIER_ATTR` | ❌        |
+| Last MPAC Event  | Date     | *                                        | TBD                                 | ❌        |
+| Contact Type     | 1-Select | 'Partner' or 'Customer'                  | TBD                                 | ❌        |
+| Region           | 1-Select | "region" of MPAC records                 | TBD                                 | ❌        |
+| Related Products | N-Select | `ADDONKEY_PLATFORMS` rhs vals            | TBD                                 | ❌        |
+| Products         | N-Select | "addonKey" of MPAC records               | `HUBSPOT_CONTACT_PRODUCTS_ATTR`     | ❌        |
+| Deployment       | 1-Select | "hosting" of MPAC records, or 'Multiple' | `HUBSPOT_CONTACT_DEPLOYMENT_ATTR`   | ❌        |
 
 ### Deals
 
