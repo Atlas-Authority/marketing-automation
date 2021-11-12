@@ -1,5 +1,6 @@
 import { formatMoney } from "../util/formatters.js";
 import log from "./logger.js";
+import { Table } from "./table.js";
 
 export class Tallier {
 
@@ -12,13 +13,18 @@ export class Tallier {
       .map(([reason, amount, multiplier]) => amount * multiplier)
       .reduce((a, b) => a + b));
 
-    const rows = [...this.tally];
-    rows.push(['Unaccounted for', remainder, 0]);
+    const table = new Table(2);
 
-    const widest = Math.max(...rows.map(([reason,]) => reason.length));
+    for (const [reason, amount] of this.tally) {
+      table.addRow([[reason], [formatMoney(amount), 'right']]);
+    }
 
-    log.info('Totals', 'Transaction amount flow', '\n' + rows.map(([reason, amount]) =>
-      `  ${reason.padEnd(widest, ' ')}\t${formatMoney(amount)}`).join('\n'));
+    table.addRow([['Unaccounted for'], [formatMoney(remainder), 'right']]);
+
+    log.info('Totals', 'Transaction amount flow:');
+    for (const row of table.eachRow()) {
+      log.info('Totals', '  ' + row);
+    }
   }
 
 }

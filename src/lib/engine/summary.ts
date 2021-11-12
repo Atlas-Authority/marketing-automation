@@ -1,4 +1,5 @@
 import log from "../log/logger.js";
+import { Table } from "../log/table.js";
 import { Database } from "../model/database.js";
 import { formatMoney, formatNumber } from "../util/formatters.js";
 import { isPresent } from "../util/helpers.js";
@@ -24,22 +25,28 @@ export function printSummary(db: Database) {
     .filter(isPresent)
     .reduce((a, b) => a + b));
 
-  log.info('Summary', 'Results of this run:', {
-    'TotalDealCount': formatNumber(deals.length),
-    'TotalDealSum': formatMoney(dealSum),
+  log.info('Summary', 'Results of this run:');
 
-    'DealsCreated': formatNumber(db.dealManager.createdCount),
-    'DealsUpdated': formatNumber(db.dealManager.updatedCount),
-    'DealsAssociated': formatNumber(db.dealManager.associatedCount),
-    'DealsDisAssociated': formatNumber(db.dealManager.disassociatedCount),
+  const table = new Table(2);
 
-    'ContactsCreated': formatNumber(db.contactManager.createdCount),
-    'ContactsUpdated': formatNumber(db.contactManager.updatedCount),
-    'ContactsAssociated': formatNumber(db.contactManager.associatedCount),
-    'ContactsDisassociated': formatNumber(db.contactManager.disassociatedCount),
+  table.addRow([['Total Deal Count'], [formatNumber(deals.length), 'right']]);
+  table.addRow([['Total Deal Sum'], [formatMoney(dealSum), 'right']]);
 
-    'CompaniesUpdated': formatNumber(db.companyManager.updatedCount),
-  });
+  table.addRow([['Deals Created'], [formatNumber(db.dealManager.createdCount), 'right']]);
+  table.addRow([['Deals Updated'], [formatNumber(db.dealManager.updatedCount), 'right']]);
+  table.addRow([['Deals Associated'], [formatNumber(db.dealManager.associatedCount), 'right']]);
+  table.addRow([['Deals DisAssociated'], [formatNumber(db.dealManager.disassociatedCount), 'right']]);
+
+  table.addRow([['Contacts Created'], [formatNumber(db.contactManager.createdCount), 'right']]);
+  table.addRow([['Contacts Updated'], [formatNumber(db.contactManager.updatedCount), 'right']]);
+  table.addRow([['Contacts Associated'], [formatNumber(db.contactManager.associatedCount), 'right']]);
+  table.addRow([['Contacts Disassociated'], [formatNumber(db.contactManager.disassociatedCount), 'right']]);
+
+  table.addRow([['Companies Updated'], [formatNumber(db.companyManager.updatedCount), 'right']]);
+
+  for (const row of table.eachRow()) {
+    log.info('Summary', '  ' + row);
+  }
 
   db.tallier.less('Deal sum', dealSum);
 
