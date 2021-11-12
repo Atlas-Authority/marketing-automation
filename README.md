@@ -6,8 +6,9 @@
 
 ## Setup
 
-1. Copy [`.sample.env`](./.sample.env) to `.env` and set values.
-2. `npm install`
+1. Install Node.js 16+ and NPM 7+
+2. Copy [`.sample.env`](./.sample.env) to `.env` and set values.
+3. `npm install`
 
 ## Running
 
