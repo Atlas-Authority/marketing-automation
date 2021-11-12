@@ -4,5 +4,6 @@ export function formatNumber(n: number) {
 }
 
 export function formatMoney(n: number) {
+  if (n.toFixed(3) === '0.000') return '$0.--';
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n);
 }
