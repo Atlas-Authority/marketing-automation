@@ -46,8 +46,8 @@ export class DealGenerator {
     for (const [reason, amount] of this.ignoredAmounts) {
       this.db.tallier.less(reason, amount);
     }
-    log.info('Deal Actions', 'Amount of Transactions Ignored', [...this.ignoredAmounts].map(([reason, amount]) => [reason, formatMoney(amount)]));
 
+    this.printIgnoredTransactionsTable();
     this.printPartnerTransactionsTable();
 
     for (const { groups, properties } of this.dealCreateActions) {
@@ -57,6 +57,18 @@ export class DealGenerator {
 
     for (const { deal, groups } of this.dealUpdateActions) {
       this.associateDealContactsAndCompanies(groups, deal);
+    }
+  }
+
+  private printIgnoredTransactionsTable() {
+    const table = new Table(2);
+    for (const [reason, amount] of this.ignoredAmounts) {
+      table.addRow([[reason], [formatMoney(amount)]]);
+    }
+
+    log.info('Deal Actions', 'Amount of Transactions Ignored');
+    for (const row of table.eachRow()) {
+      log.info('Deal Actions', '  ' + row);
     }
   }
 
