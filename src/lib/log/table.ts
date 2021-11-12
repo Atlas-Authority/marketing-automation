@@ -2,6 +2,7 @@ type Row = string[];
 
 type ColSpec = {
   align?: 'left' | 'right';
+  title?: string;
 };
 
 export class Table {
@@ -11,6 +12,12 @@ export class Table {
   constructor(private colSpecs: ColSpec[]) { }
 
   eachRow() {
+    const useTitles = this.colSpecs.some(s => s.title);
+    if (useTitles) {
+      this.rows.unshift(this.colSpecs.map(s => s.title ? '-'.repeat(s.title.length) : ''));
+      this.rows.unshift(this.colSpecs.map(s => s.title ?? ''));
+    }
+
     const cols: number[] = [];
     for (let i = 0; i < this.colSpecs.length; i++) {
       cols.push(Math.max(...this.rows.map(row => row[i].length)));

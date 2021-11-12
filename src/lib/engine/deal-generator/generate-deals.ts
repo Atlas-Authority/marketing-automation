@@ -61,7 +61,10 @@ export class DealGenerator {
   }
 
   private printIgnoredTransactionsTable() {
-    const table = new Table([{}, { align: 'right' }]);
+    const table = new Table([
+      { title: 'Reason Ignored' },
+      { title: 'Amount Ignored', align: 'right' },
+    ]);
     for (const [reason, amount] of this.ignoredAmounts) {
       table.rows.push([reason, formatMoney(amount)]);
     }
@@ -73,7 +76,12 @@ export class DealGenerator {
   }
 
   private printPartnerTransactionsTable() {
-    const table = new Table([{}, {}, { align: 'right' }, {}]);
+    const table = new Table([
+      { title: 'Transaction[License]' },
+      { title: 'Sale Date' },
+      { title: 'Amount', align: 'right' },
+      { title: 'Emails used' },
+    ]);
     for (const t of this.partnerTransactions) {
       const emails = [...new Set(getEmails(t))].join(', ');
       const amount = formatMoney(t.data.vendorAmount);
