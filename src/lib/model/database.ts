@@ -2,6 +2,7 @@ import { IO } from "../io/io.js";
 import { makeEmailValidationRegex } from "../io/live/domains.js";
 import { MultiDownloadLogger } from "../log/download-logger.js";
 import log from "../log/logger.js";
+import { Table } from "../log/table.js";
 import { Tallier } from "../log/tallier.js";
 import { formatMoney, formatNumber } from "../util/formatters.js";
 import { CompanyManager } from "./company.js";
@@ -99,11 +100,32 @@ export class Database {
       .map(t => t.data.vendorAmount)
       .reduce((a, b) => a + b));
 
-    log.info('Dev', 'Licenses', formatNumber(this.licenses.length));
-    log.info('Dev', 'Transactions', formatNumber(this.transactions.length));
-    log.info('Dev', 'Amount in Transactions', formatMoney(transactionTotal));
+    this.printDownloadSummary(transactionTotal);
 
     this.tallier.first('Transaction total', transactionTotal);
+  }
+
+  printDownloadSummary(transactionTotal: number) {
+    const deals = this.dealManager.getArray();
+    const dealSum = (deals
+      .map(d => d.data.amount ?? 0)
+      .reduce((a, b) => a + b, 0));
+
+    const contacts = this.contactManager.getArray();
+
+    const table = new Table([{}, { align: 'right' }]);
+    table.rows.push(['# Licenses', formatNumber(this.licenses.length)]);
+    table.rows.push(['# Transactions', formatNumber(this.transactions.length)]);
+    table.rows.push(['$ Transactions', formatMoney(transactionTotal)]);
+    table.rows.push(['# Contacts', formatNumber(contacts.length)]);
+    table.rows.push(['# Deals', formatNumber(deals.length)]);
+    table.rows.push(['$ Deals', formatMoney(dealSum)]);
+
+    log.info('Downloader', 'Download Summary');
+    for (const row of table.eachRow()) {
+      log.info('Downloader', '  ' + row);
+    }
+
   }
 
   async syncUpAllEntities() {

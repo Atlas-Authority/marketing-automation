@@ -29,8 +29,8 @@ export function printSummary(db: Database) {
 
   const table = new Table([{}, { align: 'right' }]);
 
-  table.rows.push(['Total Deal Count', formatNumber(deals.length)]);
-  table.rows.push(['Total Deal Sum', formatMoney(dealSum)]);
+  table.rows.push(['# Total Deals', formatNumber(deals.length)]);
+  table.rows.push(['$ Total Deals', formatMoney(dealSum)]);
 
   table.rows.push(['Deals Created', formatNumber(db.dealManager.createdCount)]);
   table.rows.push(['Deals Updated', formatNumber(db.dealManager.updatedCount)]);
