@@ -77,15 +77,22 @@ export class DealGenerator {
 
   private printPartnerTransactionsTable() {
     const table = new Table([
-      { title: 'Transaction[License]' },
+      { title: 'Transaction' },
+      { title: 'SEN' },
+      { title: 'AddonLicId' },
       { title: 'Sale Date' },
       { title: 'Amount', align: 'right' },
       { title: 'Emails used' },
     ]);
     for (const t of this.partnerTransactions) {
-      const emails = [...new Set(getEmails(t))].join(', ');
-      const amount = formatMoney(t.data.vendorAmount);
-      table.rows.push([t.id, t.data.saleDate, amount, emails]);
+      table.rows.push([
+        t.data.transactionId,
+        t.data.licenseId,
+        t.data.addonLicenseId,
+        t.data.saleDate,
+        formatMoney(t.data.vendorAmount),
+        [...new Set(getEmails(t))].join(', '),
+      ]);
     }
 
     log.warn('Deal Actions', 'Partner amounts');
