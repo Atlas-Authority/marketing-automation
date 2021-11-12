@@ -1,6 +1,7 @@
 import log from "../log/logger.js";
 import { Table } from "../log/table.js";
 import { Database } from "../model/database.js";
+import { Deal } from "../model/deal.js";
 import { formatMoney, formatNumber } from "../util/formatters.js";
 import { isPresent } from "../util/helpers.js";
 
@@ -26,17 +27,15 @@ export function printSummary(db: Database) {
   }
 
   const deals = db.dealManager.getArray();
-  const dealSum = (deals
-    .map(d => d.data.amount)
-    .filter(isPresent)
-    .reduce((a, b) => a + b));
 
   log.info('Summary', 'Results of this run:');
 
   const table = new Table([{}, { align: 'right' }]);
 
   table.rows.push(['# Total Deals', formatNumber(deals.length)]);
-  table.rows.push(['$ Total Deals', formatMoney(dealSum)]);
+  table.rows.push(['$ Total Deals', formatMoney(sumDeals(deals))]);
+  table.rows.push(['$ Total Deals Won', formatMoney(sumDeals(deals.filter(d => d.isWon)))]);
+  table.rows.push(['$ Total Deals Lost', formatMoney(sumDeals(deals.filter(d => d.isLost)))]);
 
   table.rows.push(['Deals Created', formatNumber(db.dealManager.createdCount)]);
   table.rows.push(['Deals Updated', formatNumber(db.dealManager.updatedCount)]);
@@ -54,7 +53,14 @@ export function printSummary(db: Database) {
     log.info('Summary', '  ' + row);
   }
 
-  db.tallier.less('Deal sum', dealSum);
+  db.tallier.less('Deal sum', sumDeals(deals));
 
   db.tallier.printTable();
+}
+
+function sumDeals(deals: Deal[]) {
+  return (deals
+    .map(d => d.data.amount)
+    .filter(isPresent)
+    .reduce((a, b) => a + b, 0));
 }

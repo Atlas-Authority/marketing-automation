@@ -45,13 +45,11 @@ export class Deal extends Entity<DealData> {
     }
   }
 
+  get isWon() { return this.data.dealStage === DealStage.CLOSED_WON }
+  get isLost() { return this.data.dealStage === DealStage.CLOSED_LOST }
+
   isEval() { return this.data.dealStage === DealStage.EVAL; }
-  isClosed() {
-    return (
-      this.data.dealStage === DealStage.CLOSED_LOST ||
-      this.data.dealStage === DealStage.CLOSED_WON
-    );
-  }
+  isClosed() { return this.isWon || this.isLost; }
 
   public link() {
     const hsAccountId = env.hubspot.accountId;
