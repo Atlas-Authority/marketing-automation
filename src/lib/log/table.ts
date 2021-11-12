@@ -9,15 +9,15 @@ export class Table {
 
   rows: Row[] = [];
 
-  constructor(private colSpecs: ColSpec[]) { }
-
-  eachRow() {
+  constructor(private colSpecs: ColSpec[]) {
     const useTitles = this.colSpecs.some(s => s.title);
     if (useTitles) {
-      this.rows.unshift(this.colSpecs.map(s => s.title ? '-'.repeat(s.title.length) : ''));
-      this.rows.unshift(this.colSpecs.map(s => s.title ?? ''));
+      this.rows.push(this.colSpecs.map(s => s.title ?? ''));
+      this.rows.push(this.colSpecs.map(s => s.title ? '-'.repeat(s.title.length) : ''));
     }
+  }
 
+  eachRow() {
     const cols: number[] = [];
     for (let i = 0; i < this.colSpecs.length; i++) {
       cols.push(Math.max(...this.rows.map(row => row[i].length)));
