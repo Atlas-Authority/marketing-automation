@@ -19,7 +19,7 @@ export type ContactData = {
   city: string | null;
   state: string | null;
 
-  contactType: ContactType;
+  contactType: ContactType | null;
 
   country: string | null;
   region: string | null;
@@ -112,7 +112,7 @@ export class ContactManager extends EntityManager<ContactData, Contact> {
   }
 
   override toAPI: PropertyTransformers<ContactData> = {
-    contactType: contactType => ['contact_type', contactType],
+    contactType: contactType => ['contact_type', contactType ?? ''],
 
     email: email => ['email', email],
     country: country => ['country', country ?? ''],
@@ -141,7 +141,7 @@ export class ContactManager extends EntityManager<ContactData, Contact> {
 
 }
 
-/** Returns number, or null for `''`, `'0'`, and `null` */
+/** Returns number, or null for `''` and `null` */
 function toNumber(val: string | null): number | null {
   return (val ? +val.trim() : null);
 }
