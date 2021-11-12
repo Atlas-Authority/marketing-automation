@@ -6,6 +6,7 @@ import { Database } from '../../model/database.js';
 import { Deal } from '../../model/deal.js';
 import { License, LicenseData } from '../../model/license.js';
 import { Transaction } from '../../model/transaction.js';
+import env from '../../parameters/env.js';
 import { formatMoney } from '../../util/formatters.js';
 import { isPresent, sorter } from '../../util/helpers.js';
 import { RelatedLicenseSet } from '../license-matching/license-grouper.js';
@@ -47,6 +48,19 @@ export class DealGenerator {
     }
     log.info('Deal Actions', 'Amount of Transactions Ignored', [...this.ignoredAmounts].map(([reason, amount]) => [reason, formatMoney(amount)]));
 
+    this.printPartnerTransactionsTable();
+
+    for (const { groups, properties } of this.dealCreateActions) {
+      const deal = this.db.dealManager.create(properties);
+      this.associateDealContactsAndCompanies(groups, deal);
+    }
+
+    for (const { deal, groups } of this.dealUpdateActions) {
+      this.associateDealContactsAndCompanies(groups, deal);
+    }
+  }
+
+  private printPartnerTransactionsTable() {
     const table = new Table(4);
     for (const t of this.partnerTransactions) {
       const emails = [...new Set(getEmails(t))].join(', ');
@@ -57,15 +71,6 @@ export class DealGenerator {
     log.warn('Deal Actions', 'Partner amounts');
     for (const row of table.eachRow()) {
       log.warn('Deal Actions', '  ' + row);
-    }
-
-    for (const { groups, properties } of this.dealCreateActions) {
-      const deal = this.db.dealManager.create(properties);
-      this.associateDealContactsAndCompanies(groups, deal);
-    }
-
-    for (const { deal, groups } of this.dealUpdateActions) {
-      this.associateDealContactsAndCompanies(groups, deal);
     }
   }
 
@@ -112,8 +117,14 @@ export class DealGenerator {
   /** Ignore if every license's tech contact domain is partner or mass-provider */
   private ignoring(groups: RelatedLicenseSet) {
     const licenses = groups.map(g => g.license);
-    const records = groups.flatMap(g => [g.license, ...g.transactions]);
+    const transactions = groups.flatMap(g => g.transactions);
+    const records = [...licenses, ...transactions];
     const domains = new Set(records.map(license => license.data.technicalContact.email.toLowerCase().split('@')[1]));
+
+    if (records.every(r => hasIgnoredApp(r.data))) {
+      this.ignoreLicenses("Archived app", records[0].data.addonKey, licenses, transactions);
+      return true;
+    }
 
     const partnerDomains = [...domains].filter(domain => this.db.partnerDomains.has(domain));
     const providerDomains = [...domains].filter(domain => this.db.providerDomains.has(domain));
@@ -125,7 +136,7 @@ export class DealGenerator {
       }
       else if (partnerDomains.length > 0) {
         reason = 'Partner Domains';
-        for (const tx of groups.flatMap(g => g.transactions)) {
+        for (const tx of transactions) {
           this.partnerTransactions.add(tx);
         }
       }
@@ -136,7 +147,7 @@ export class DealGenerator {
         reason = 'Unknown domain issue';
       }
 
-      this.ignoreLicenses(reason, [...domains].join(','), licenses, groups.flatMap(g => g.transactions));
+      this.ignoreLicenses(reason, [...domains].join(','), licenses, transactions);
       return true;
     }
 
@@ -159,4 +170,8 @@ export class DealGenerator {
     })));
   }
 
+}
+
+function hasIgnoredApp(record: { addonKey: string }) {
+  return env.engine.ignoredApps.has(record.addonKey);
 }
