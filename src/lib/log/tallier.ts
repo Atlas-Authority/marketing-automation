@@ -13,13 +13,13 @@ export class Tallier {
       .map(([reason, amount, multiplier]) => amount * multiplier)
       .reduce((a, b) => a + b));
 
-    const table = new Table(2);
+    const table = new Table([{}, { align: 'right' }]);
 
     for (const [reason, amount] of this.tally) {
-      table.addRow([[reason], [formatMoney(amount), 'right']]);
+      table.addRow([reason, formatMoney(amount)]);
     }
 
-    table.addRow([['Unaccounted for'], [formatMoney(remainder), 'right']]);
+    table.addRow(['Unaccounted for', formatMoney(remainder)]);
 
     log.info('Totals', 'Transaction amount flow:');
     for (const row of table.eachRow()) {

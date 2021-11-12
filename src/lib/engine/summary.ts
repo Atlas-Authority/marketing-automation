@@ -27,22 +27,22 @@ export function printSummary(db: Database) {
 
   log.info('Summary', 'Results of this run:');
 
-  const table = new Table(2);
+  const table = new Table([{}, { align: 'right' }]);
 
-  table.addRow([['Total Deal Count'], [formatNumber(deals.length), 'right']]);
-  table.addRow([['Total Deal Sum'], [formatMoney(dealSum), 'right']]);
+  table.addRow(['Total Deal Count', formatNumber(deals.length)]);
+  table.addRow(['Total Deal Sum', formatMoney(dealSum)]);
 
-  table.addRow([['Deals Created'], [formatNumber(db.dealManager.createdCount), 'right']]);
-  table.addRow([['Deals Updated'], [formatNumber(db.dealManager.updatedCount), 'right']]);
-  table.addRow([['Deals Associated'], [formatNumber(db.dealManager.associatedCount), 'right']]);
-  table.addRow([['Deals DisAssociated'], [formatNumber(db.dealManager.disassociatedCount), 'right']]);
+  table.addRow(['Deals Created', formatNumber(db.dealManager.createdCount)]);
+  table.addRow(['Deals Updated', formatNumber(db.dealManager.updatedCount)]);
+  table.addRow(['Deals Associated', formatNumber(db.dealManager.associatedCount)]);
+  table.addRow(['Deals DisAssociated', formatNumber(db.dealManager.disassociatedCount)]);
 
-  table.addRow([['Contacts Created'], [formatNumber(db.contactManager.createdCount), 'right']]);
-  table.addRow([['Contacts Updated'], [formatNumber(db.contactManager.updatedCount), 'right']]);
-  table.addRow([['Contacts Associated'], [formatNumber(db.contactManager.associatedCount), 'right']]);
-  table.addRow([['Contacts Disassociated'], [formatNumber(db.contactManager.disassociatedCount), 'right']]);
+  table.addRow(['Contacts Created', formatNumber(db.contactManager.createdCount)]);
+  table.addRow(['Contacts Updated', formatNumber(db.contactManager.updatedCount)]);
+  table.addRow(['Contacts Associated', formatNumber(db.contactManager.associatedCount)]);
+  table.addRow(['Contacts Disassociated', formatNumber(db.contactManager.disassociatedCount)]);
 
-  table.addRow([['Companies Updated'], [formatNumber(db.companyManager.updatedCount), 'right']]);
+  table.addRow(['Companies Updated', formatNumber(db.companyManager.updatedCount)]);
 
   for (const row of table.eachRow()) {
     log.info('Summary', '  ' + row);

@@ -1,20 +1,23 @@
-type Cell = [string, ('left' | 'right')?];
-type Row = Cell[];
+type Row = string[];
+
+type ColSpec = {
+  align?: 'left' | 'right';
+};
 
 export class Table {
 
   private rows: Row[] = [];
 
-  constructor(private colCount: number) { }
+  constructor(private colSpecs: ColSpec[]) { }
 
-  addRow(row: Cell[]) {
+  addRow(row: string[]) {
     this.rows.push(row);
   }
 
   eachRow() {
     const cols: number[] = [];
-    for (let i = 0; i < this.colCount; i++) {
-      cols.push(Math.max(...this.rows.map(row => row[i][0].length)));
+    for (let i = 0; i < this.colSpecs.length; i++) {
+      cols.push(Math.max(...this.rows.map(row => row[i].length)));
     }
 
     const padders: { [key: string]: (s: string, colIdx: number) => string } = {
@@ -23,9 +26,10 @@ export class Table {
     };
 
     return this.rows.map(row => (
-      row.map((cell, colIndex) => (
-        padders[cell[1] ?? 'left'](cell[0], colIndex)
-      )).join('  ')
+      row.map((cell, colIndex) => {
+        const alignment = this.colSpecs[colIndex].align ?? 'left';
+        return padders[alignment](cell, colIndex);
+      }).join('  ')
     ));
   }
 

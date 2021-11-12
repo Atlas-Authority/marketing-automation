@@ -61,9 +61,9 @@ export class DealGenerator {
   }
 
   private printIgnoredTransactionsTable() {
-    const table = new Table(2);
+    const table = new Table([{}, { align: 'right' }]);
     for (const [reason, amount] of this.ignoredAmounts) {
-      table.addRow([[reason], [formatMoney(amount)]]);
+      table.addRow([reason, formatMoney(amount)]);
     }
 
     log.info('Deal Actions', 'Amount of Transactions Ignored');
@@ -73,11 +73,11 @@ export class DealGenerator {
   }
 
   private printPartnerTransactionsTable() {
-    const table = new Table(4);
+    const table = new Table([{}, {}, { align: 'right' }, {}]);
     for (const t of this.partnerTransactions) {
       const emails = [...new Set(getEmails(t))].join(', ');
       const amount = formatMoney(t.data.vendorAmount);
-      table.addRow([[t.id], [t.data.saleDate], [amount, 'right'], [emails]]);
+      table.addRow([t.id, t.data.saleDate, amount, emails]);
     }
 
     log.warn('Deal Actions', 'Partner amounts');
