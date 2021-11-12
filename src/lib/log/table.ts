@@ -32,7 +32,7 @@ export class Table {
       row.map((cell, colIndex) => {
         const alignment = this.colSpecs[colIndex].align ?? 'left';
         return padders[alignment](cell, colIndex);
-      }).join('  ')
+      }).join('   ')
     ));
   }
 
