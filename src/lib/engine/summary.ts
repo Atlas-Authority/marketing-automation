@@ -17,6 +17,12 @@ export function printSummary(db: Database) {
             : [...dupOf][0].link(),
         "Duplicate": dup.link(),
       })));
+
+    const dupTotal = ([...db.dealManager.duplicatesToDelete]
+      .map(([dup, dupOf]) => dup.data.amount ?? 0)
+      .reduce((a, b) => a + b));
+
+    log.warn('Deal Generator', 'Total of duplicates:', formatMoney(dupTotal));
   }
 
   const deals = db.dealManager.getArray();
