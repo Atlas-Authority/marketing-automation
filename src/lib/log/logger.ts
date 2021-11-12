@@ -1,3 +1,4 @@
+import chalk from 'chalk';
 import util from 'util';
 import { cli } from '../parameters/cli.js';
 
@@ -11,7 +12,7 @@ enum LogLevel {
 
 class Logger {
 
-  public level = logLevelFromCliString(cli.get('--loglevel'));
+  public level = logLevelFromCliString(cli.get('--loglevel')) ?? LogLevel.Verbose;
   public readonly Levels = LogLevel;
 
   error(prefix: string, ...args: any[]) { this.print(LogLevel.Error, prefix, ...args); }
@@ -24,14 +25,14 @@ class Logger {
     if (level > this.level) return;
 
     const first = levelPrefixes[level];
-    const styledPrefix = `${royal}${prefix}${reset}`;
+    const styledPrefix = chalk.magenta(prefix);
 
     const lastDataArg = args.pop();
     const printDataArg = (typeof lastDataArg !== 'string');
     if (!printDataArg) args.push(lastDataArg);
 
     const time = new Date().toLocaleString();
-    const styledTime = `${relax}${time}${reset}`;
+    const styledTime = chalk.dim.yellow(time);
 
     if (args.length > 0) {
       const firstLine = args.join(' ');
@@ -53,19 +54,12 @@ class Logger {
 
 }
 
-const great = '\x1b[32m';
-const nerve = '\x1b[43;30;1m';
-const scary = '\x1b[40;31;1m';
-const reset = '\x1b[0m';
-const royal = '\x1b[35m';
-const relax = '\x1b[33;2m';
-
 const levelPrefixes = {
-  [LogLevel.Error]: `${scary}ERR!${reset}`,
-  [LogLevel.Warn]: `${nerve}WARN${reset}`,
-  [LogLevel.Info]: `${great}info${reset}`,
-  [LogLevel.Verbose]: `${great}verb${reset}`,
-  [LogLevel.Detailed]: `${great}....${reset}`,
+  [LogLevel.Error]: chalk.red('ERR!'),
+  [LogLevel.Warn]: chalk.dim.redBright('WARN'),
+  [LogLevel.Info]: chalk.green('info'),
+  [LogLevel.Verbose]: chalk.green('more'),
+  [LogLevel.Detailed]: chalk.blue('....'),
 };
 
 function formatted(data: unknown, prefixLength: number) {
@@ -85,7 +79,7 @@ function logLevelFromCliString(level: string | undefined) {
     case 'info': return LogLevel.Info;
     case 'verbose': return LogLevel.Verbose;
     case 'detailed': return LogLevel.Detailed;
-    default: return LogLevel.Verbose;
+    default: return null;
   }
 }
 

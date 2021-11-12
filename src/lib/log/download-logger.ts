@@ -1,12 +1,12 @@
+import chalk from 'chalk';
 import { MultiBar, Presets, SingleBar } from 'cli-progress';
-import colors from 'colors';
 import { Progress } from '../io/interfaces.js';
 import log from './logger.js';
 
 export class MultiDownloadLogger {
 
   multibar = new MultiBar({
-    format: `${colors.cyan('[{bar}]')} {name}`,
+    format: `${chalk.cyan('[{bar}]')} {name}`,
   }, Presets.rect);
 
   async wrap<T>(name: string, fn: (progress: Progress) => Promise<T>): Promise<T> {
