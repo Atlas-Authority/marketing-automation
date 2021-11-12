@@ -10,6 +10,8 @@ type CompanyData = {
 
 export class Company extends Entity<CompanyData> {
 
+  static kind: EntityKind = 'company';
+
   contacts = this.makeDynamicAssociation<Contact>('contact');
 
   override pseudoProperties: (keyof CompanyData)[] = [];
@@ -19,7 +21,6 @@ export class Company extends Entity<CompanyData> {
 export class CompanyManager extends EntityManager<CompanyData, Company> {
 
   override Entity = Company;
-  override kind: EntityKind = 'company';
 
   override downAssociations: EntityKind[] = [
     'contact'

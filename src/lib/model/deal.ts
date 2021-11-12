@@ -33,6 +33,8 @@ export type DealData = {
 
 export class Deal extends Entity<DealData> {
 
+  static kind: EntityKind = 'deal';
+
   contacts = this.makeDynamicAssociation<Contact>('contact');
   companies = this.makeDynamicAssociation<Company>('company');
 
@@ -67,7 +69,6 @@ export class Deal extends Entity<DealData> {
 export class DealManager extends EntityManager<DealData, Deal> {
 
   override Entity = Deal;
-  override kind: EntityKind = "deal";
 
   override downAssociations: EntityKind[] = [
     "company",

@@ -13,6 +13,14 @@ export type PropertyTransformers<T> = {
   [P in keyof T]: (prop: T[P]) => [string, string]
 };
 
+interface EntitySubclass<
+  P extends { [key: string]: any },
+  E extends Entity<P>> {
+
+  new(id: string | null, kind: EntityKind, props: P, indexer: Indexer<P>): E;
+  kind: EntityKind;
+}
+
 export abstract class EntityManager<
   P extends { [key: string]: any },
   E extends Entity<P>>
@@ -40,8 +48,7 @@ export abstract class EntityManager<
   public associatedCount = 0;
   public disassociatedCount = 0;
 
-  protected abstract Entity: new (id: string | null, kind: EntityKind, props: P, indexer: Indexer<P>) => E;
-  protected abstract kind: EntityKind;
+  protected abstract Entity: EntitySubclass<P, E>;
   protected abstract downAssociations: EntityKind[];
   protected abstract upAssociations: EntityKind[];
 
@@ -59,7 +66,7 @@ export abstract class EntityManager<
   private prelinkedAssociations = new Map<string, Set<RelativeAssociation>>();
 
   public async downloadAllEntities(progress: Progress) {
-    const data = await this.downloader.downloadEntities(progress, this.kind, this.apiProperties, this.downAssociations);
+    const data = await this.downloader.downloadEntities(progress, this.Entity.kind, this.apiProperties, this.downAssociations);
 
     for (const raw of data) {
       const props = this.fromAPI(raw.properties);
@@ -71,7 +78,7 @@ export abstract class EntityManager<
         set.add(item);
       }
 
-      const entity = new this.Entity(raw.id, this.kind, props, this);
+      const entity = new this.Entity(raw.id, this.Entity.kind, props, this);
       this.entities.push(entity);
     }
 
@@ -85,7 +92,7 @@ export abstract class EntityManager<
     for (const [meId, rawAssocs] of this.prelinkedAssociations) {
       for (const rawAssoc of rawAssocs) {
         const me = this.get(meId);
-        if (!me) throw new Error(`Couldn't find kind=${this.kind} id=${meId}`);
+        if (!me) throw new Error(`Couldn't find kind=${this.Entity.kind} id=${meId}`);
 
         const { toKind, youId } = this.getAssocInfo(rawAssoc);
         const you = this.db.getEntity(toKind, youId);
@@ -103,7 +110,7 @@ export abstract class EntityManager<
   }
 
   public create(props: P) {
-    const e = new this.Entity(null, this.kind, props, this);
+    const e = new this.Entity(null, this.Entity.kind, props, this);
     this.entities.push(e);
     for (const index of this.indexes) {
       index.addIndexesFor([e]);
@@ -145,7 +152,7 @@ export abstract class EntityManager<
 
     if (toCreate.length > 0) {
       const results = await this.uploader.createEntities(
-        this.kind,
+        this.Entity.kind,
         toCreate.map(e => ({
           properties: this.getChangedProperties(e),
         }))
@@ -183,7 +190,7 @@ export abstract class EntityManager<
 
     if (toUpdate.length > 0) {
       const results = await this.uploader.updateEntities(
-        this.kind,
+        this.Entity.kind,
         toUpdate.map(e => ({
           id: e.guaranteedId(),
           properties: this.getChangedProperties(e),
@@ -221,13 +228,13 @@ export abstract class EntityManager<
       const toDel = toSyncInKind.filter(changes => changes.op === 'del');
 
       await this.uploader.createAssociations(
-        this.kind,
+        this.Entity.kind,
         otherKind,
         toAdd.map(changes => changes.inputs),
       );
 
       await this.uploader.deleteAssociations(
-        this.kind,
+        this.Entity.kind,
         otherKind,
         toDel.map(changes => changes.inputs),
       );

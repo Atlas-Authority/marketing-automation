@@ -36,6 +36,8 @@ export type ContactData = {
 
 export class Contact extends Entity<ContactData> {
 
+  static kind: EntityKind = 'contact';
+
   companies = this.makeDynamicAssociation<Company>('company');
 
   get isExternal() { return !this.data.email || !this.data.contactType; }
@@ -53,7 +55,6 @@ export class Contact extends Entity<ContactData> {
 export class ContactManager extends EntityManager<ContactData, Contact> {
 
   override Entity = Contact;
-  override kind: EntityKind = 'contact';
 
   override downAssociations: EntityKind[] = [
     "company",
