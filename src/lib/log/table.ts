@@ -6,13 +6,9 @@ type ColSpec = {
 
 export class Table {
 
-  private rows: Row[] = [];
+  rows: Row[] = [];
 
   constructor(private colSpecs: ColSpec[]) { }
-
-  addRow(row: string[]) {
-    this.rows.push(row);
-  }
 
   eachRow() {
     const cols: number[] = [];

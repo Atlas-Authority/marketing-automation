@@ -16,10 +16,10 @@ export class Tallier {
     const table = new Table([{}, { align: 'right' }]);
 
     for (const [reason, amount] of this.tally) {
-      table.addRow([reason, formatMoney(amount)]);
+      table.rows.push([reason, formatMoney(amount)]);
     }
 
-    table.addRow(['Unaccounted for', formatMoney(remainder)]);
+    table.rows.push(['Unaccounted for', formatMoney(remainder)]);
 
     log.info('Totals', 'Transaction amount flow:');
     for (const row of table.eachRow()) {

@@ -29,20 +29,20 @@ export function printSummary(db: Database) {
 
   const table = new Table([{}, { align: 'right' }]);
 
-  table.addRow(['Total Deal Count', formatNumber(deals.length)]);
-  table.addRow(['Total Deal Sum', formatMoney(dealSum)]);
+  table.rows.push(['Total Deal Count', formatNumber(deals.length)]);
+  table.rows.push(['Total Deal Sum', formatMoney(dealSum)]);
 
-  table.addRow(['Deals Created', formatNumber(db.dealManager.createdCount)]);
-  table.addRow(['Deals Updated', formatNumber(db.dealManager.updatedCount)]);
-  table.addRow(['Deals Associated', formatNumber(db.dealManager.associatedCount)]);
-  table.addRow(['Deals DisAssociated', formatNumber(db.dealManager.disassociatedCount)]);
+  table.rows.push(['Deals Created', formatNumber(db.dealManager.createdCount)]);
+  table.rows.push(['Deals Updated', formatNumber(db.dealManager.updatedCount)]);
+  table.rows.push(['Deals Associated', formatNumber(db.dealManager.associatedCount)]);
+  table.rows.push(['Deals DisAssociated', formatNumber(db.dealManager.disassociatedCount)]);
 
-  table.addRow(['Contacts Created', formatNumber(db.contactManager.createdCount)]);
-  table.addRow(['Contacts Updated', formatNumber(db.contactManager.updatedCount)]);
-  table.addRow(['Contacts Associated', formatNumber(db.contactManager.associatedCount)]);
-  table.addRow(['Contacts Disassociated', formatNumber(db.contactManager.disassociatedCount)]);
+  table.rows.push(['Contacts Created', formatNumber(db.contactManager.createdCount)]);
+  table.rows.push(['Contacts Updated', formatNumber(db.contactManager.updatedCount)]);
+  table.rows.push(['Contacts Associated', formatNumber(db.contactManager.associatedCount)]);
+  table.rows.push(['Contacts Disassociated', formatNumber(db.contactManager.disassociatedCount)]);
 
-  table.addRow(['Companies Updated', formatNumber(db.companyManager.updatedCount)]);
+  table.rows.push(['Companies Updated', formatNumber(db.companyManager.updatedCount)]);
 
   for (const row of table.eachRow()) {
     log.info('Summary', '  ' + row);
