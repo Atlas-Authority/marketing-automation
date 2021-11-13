@@ -9,11 +9,6 @@ import { EntityAdapter, EntityManager } from "./hubspot/manager.js";
 import { License } from "./license.js";
 import { Transaction } from "./transaction.js";
 
-const addonLicenseIdKey = env.hubspot.attrs.deal.addonLicenseId;
-const transactionIdKey = env.hubspot.attrs.deal.transactionId;
-const deploymentKey = env.hubspot.attrs.deal.deployment;
-const appKey = env.hubspot.attrs.deal.app;
-
 export type DealData = {
   relatedProducts: string | null;
   app: string | null;
@@ -81,18 +76,18 @@ const DealAdapter: EntityAdapter<DealData, DealComputed> = {
       up: relatedProducts => relatedProducts ?? '',
     },
     app: {
-      property: appKey,
+      property: env.hubspot.attrs.deal.app,
       down: app => app as string,
       up: app => app ?? '',
     },
     addonLicenseId: {
-      property: addonLicenseIdKey,
+      property: env.hubspot.attrs.deal.addonLicenseId,
       identifier: true,
       down: addonLicenseId => addonLicenseId as string,
       up: addonLicenseId => addonLicenseId || '',
     },
     transactionId: {
-      property: transactionIdKey,
+      property: env.hubspot.attrs.deal.transactionId,
       identifier: true,
       down: transactionId => transactionId,
       up: transactionId => transactionId || '',
@@ -118,7 +113,7 @@ const DealAdapter: EntityAdapter<DealData, DealComputed> = {
       up: origin => origin ?? '',
     },
     deployment: {
-      property: deploymentKey,
+      property: env.hubspot.attrs.deal.deployment,
       down: deployment => deployment as DealData['deployment'],
       up: deployment => deployment ?? '',
     },

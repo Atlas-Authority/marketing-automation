@@ -4,10 +4,6 @@ import { Entity } from "./hubspot/entity.js";
 import { EntityKind } from "./hubspot/interfaces.js";
 import { EntityAdapter, EntityManager } from "./hubspot/manager.js";
 
-const deploymentKey = env.hubspot.attrs.contact.deployment;
-const productsKey = env.hubspot.attrs.contact.products;
-const licenseTierKey = env.hubspot.attrs.contact.licenseTier;
-
 export type ContactType = 'Partner' | 'Customer';
 
 export type ContactData = {
@@ -109,17 +105,17 @@ const ContactAdapter: EntityAdapter<ContactData, ContactComputed> = {
       up: relatedProducts => [...relatedProducts].join(';'),
     },
     licenseTier: {
-      property: licenseTierKey,
+      property: env.hubspot.attrs.contact.licenseTier,
       down: licenseTier => toNumber(licenseTier) ?? null,
       up: licenseTier => licenseTier?.toFixed() ?? '',
     },
     deployment: {
-      property: deploymentKey,
+      property: env.hubspot.attrs.contact.deployment,
       down: deployment => deployment as ContactData['deployment'] ?? null,
       up: deployment => deployment ?? '',
     },
     products: {
-      property: productsKey,
+      property: env.hubspot.attrs.contact.products,
       down: products => new Set(products?.split(';') || []),
       up: products => [...products ?? []].join(';'),
     },
