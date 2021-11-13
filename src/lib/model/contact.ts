@@ -54,23 +54,23 @@ const ContactAdapter: EntityAdapter<ContactData, ContactComputed> = {
   ],
 
   data: {
-    contactType: { property: 'contact_type', down: data => data['contact_type'] as ContactData['contactType'], },
+    contactType: { property: 'contact_type', down: contact_type => contact_type as ContactData['contactType'], },
 
-    email: { property: 'email', down: data => data['email'] ?? '', },
-    country: { property: 'country', down: data => data['country'], },
-    region: { property: 'region', down: data => data['region'], },
+    email: { property: 'email', down: email => email ?? '', },
+    country: { property: 'country', down: country => country, },
+    region: { property: 'region', down: region => region, },
 
-    firstName: { property: 'firstname', down: data => data['firstname']?.trim() || null, },
-    lastName: { property: 'lastname', down: data => data['lastname']?.trim() || null, },
-    phone: { property: 'phone', down: data => data['phone']?.trim() || null, },
-    city: { property: 'city', down: data => data['city']?.trim() || null, },
-    state: { property: 'state', down: data => data['state']?.trim() || null, },
+    firstName: { property: 'firstname', down: firstname => firstname?.trim() || null, },
+    lastName: { property: 'lastname', down: lastname => lastname?.trim() || null, },
+    phone: { property: 'phone', down: phone => phone?.trim() || null, },
+    city: { property: 'city', down: city => city?.trim() || null, },
+    state: { property: 'state', down: state => state?.trim() || null, },
 
-    relatedProducts: { property: 'related_products', down: data => new Set(data['related_products'] ? data['related_products'].split(';') : []), },
-    licenseTier: { property: licenseTierKey, down: data => licenseTierKey ? toNumber(data[licenseTierKey]) : null, },
-    deployment: { property: deploymentKey, down: data => deploymentKey ? data[deploymentKey] as ContactData['deployment'] : null, },
-    products: { property: productsKey, down: data => productsKey ? new Set(data[productsKey]?.split(';') || []) : null, },
-    lastMpacEvent: { property: 'last_mpac_event', down: data => data['last_mpac_event'], },
+    relatedProducts: { property: 'related_products', down: related_products => new Set(related_products ? related_products.split(';') : []), },
+    licenseTier: { property: licenseTierKey, down: licenseTier => toNumber(licenseTier) ?? null, },
+    deployment: { property: deploymentKey, down: deployment => deployment as ContactData['deployment'] ?? null, },
+    products: { property: productsKey, down: products => new Set(products?.split(';') || []), },
+    lastMpacEvent: { property: 'last_mpac_event', down: last_mpac_event => last_mpac_event, },
   },
 
   computed: {
