@@ -1,43 +1,43 @@
 import * as assert from 'assert';
 import { EntityKind } from './interfaces.js';
 
-export interface Indexer<P> {
-  removeIndexesFor<K extends keyof P>(key: K, val: P[K] | undefined): void;
-  addIndexesFor<K extends keyof P>(key: K, val: P[K] | undefined, entity: Entity<P>): void;
+export interface Indexer<D> {
+  removeIndexesFor<K extends keyof D>(key: K, val: D[K] | undefined): void;
+  addIndexesFor<K extends keyof D>(key: K, val: D[K] | undefined, entity: Entity<D>): void;
 }
 
-export abstract class Entity<P extends { [key: string]: any }> {
+export abstract class Entity<D extends { [key: string]: any }> {
 
   id?: string;
 
   /** The most recently saved props, or all unsaved props */
-  private props: P;
+  private props: D;
   /** Contains only new changes, and only when an entity is saved */
-  private newProps: Partial<P> = {};
+  private newProps: Partial<D> = {};
 
   /** The associations this was created with, whether an existing or new entity */
   private assocs = new Set<Entity<any>>();
   /** A copy of assocs, which all updates act on, whether an existing or new entity */
   private newAssocs = new Set<Entity<any>>();
 
-  readonly data: { [K in keyof P]: P[K] };
+  readonly data: D;
 
   constructor(
     id: string | null,
     public kind: EntityKind,
-    props: P,
-    private indexer: Indexer<P>,
+    props: D,
+    private indexer: Indexer<D>,
   ) {
     if (id) this.id = id;
     this.props = props;
 
-    type K = keyof P;
+    type K = keyof D;
     this.data = new Proxy(props, {
       get: (_target, _key) => {
         return this.get(_key as K);
       },
       set: (_target, _key, _val) => {
-        this.set(_key as K, _val as P[K]);
+        this.set(_key as K, _val as D[K]);
         return true;
       },
     });
@@ -50,13 +50,13 @@ export abstract class Entity<P extends { [key: string]: any }> {
 
   // Properties
 
-  get<K extends keyof P>(key: K) {
+  get<K extends keyof D>(key: K) {
     if (this.id === undefined) return this.props[key];
     if (key in this.newProps) return this.newProps[key];
     return this.props[key];
   }
 
-  set<K extends keyof P>(key: K, val: P[K]) {
+  set<K extends keyof D>(key: K, val: D[K]) {
     if (this.pseudoProperties.includes(key)) return;
 
     if (this.id === undefined) {
@@ -91,7 +91,7 @@ export abstract class Entity<P extends { [key: string]: any }> {
     this.newProps = {};
   }
 
-  abstract pseudoProperties: (keyof P)[];
+  abstract pseudoProperties: (keyof D)[];
 
   // Associations
 

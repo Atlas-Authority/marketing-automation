@@ -10,20 +10,20 @@ export interface EntityDatabase {
 }
 
 export type PropertyTransformers<T> = {
-  [P in keyof T]: (prop: T[P]) => [string, string]
+  [K in keyof T]: (prop: T[K]) => [string, string]
 };
 
 interface EntitySubclass<
-  P extends { [key: string]: any },
-  E extends Entity<P>> {
+  D extends { [key: string]: any },
+  E extends Entity<D>> {
 
-  new(id: string | null, kind: EntityKind, props: P, indexer: Indexer<P>): E;
+  new(id: string | null, kind: EntityKind, props: D, indexer: Indexer<D>): E;
   kind: EntityKind;
 }
 
 export abstract class EntityManager<
-  P extends { [key: string]: any },
-  E extends Entity<P>>
+  D extends { [key: string]: any },
+  E extends Entity<D>>
 {
 
   protected static readonly noUpSync = (): [string, string] => ['', ''];
@@ -48,19 +48,19 @@ export abstract class EntityManager<
   public associatedCount = 0;
   public disassociatedCount = 0;
 
-  protected abstract Entity: EntitySubclass<P, E>;
+  protected abstract Entity: EntitySubclass<D, E>;
   protected abstract downAssociations: EntityKind[];
   protected abstract upAssociations: EntityKind[];
 
   protected abstract apiProperties: string[];
-  protected abstract fromAPI(data: { [key: string]: string | null }): P | null;
-  protected abstract toAPI: PropertyTransformers<P>;
+  protected abstract fromAPI(data: { [key: string]: string | null }): D | null;
+  protected abstract toAPI: PropertyTransformers<D>;
 
-  protected abstract identifiers: (keyof P)[];
+  protected abstract identifiers: (keyof D)[];
 
   private entities: E[] = [];
   private indexes: Index<E>[] = [];
-  private indexIndex = new Map<keyof P, Index<E>>();
+  private indexIndex = new Map<keyof D, Index<E>>();
   public get = this.makeIndex(e => [e.id].filter(isPresent), []);
 
   private prelinkedAssociations = new Map<string, Set<RelativeAssociation>>();
@@ -109,7 +109,7 @@ export abstract class EntityManager<
     return { toKind: kind as EntityKind, youId: id };
   }
 
-  public create(props: P) {
+  public create(props: D) {
     const e = new this.Entity(null, this.Entity.kind, props, this);
     this.entities.push(e);
     for (const index of this.indexes) {
@@ -258,7 +258,7 @@ export abstract class EntityManager<
     return properties;
   }
 
-  protected makeIndex(keysFor: (e: E) => string[], deps: (keyof P)[]): (key: string) => E | undefined {
+  protected makeIndex(keysFor: (e: E) => string[], deps: (keyof D)[]): (key: string) => E | undefined {
     const index = new Index(keysFor);
     this.indexes.push(index);
     for (const depKey of deps) {
@@ -267,12 +267,12 @@ export abstract class EntityManager<
     return index.get.bind(index);
   }
 
-  removeIndexesFor<K extends keyof P>(key: K, val: P[K] | undefined) {
+  removeIndexesFor<K extends keyof D>(key: K, val: D[K] | undefined) {
     if (!val) return;
     this.indexIndex.get(key)?.removeIndex(val);
   }
 
-  addIndexesFor<K extends keyof P>(key: K, val: P[K] | undefined, entity: E) {
+  addIndexesFor<K extends keyof D>(key: K, val: D[K] | undefined, entity: E) {
     if (!val) return;
     this.indexIndex.get(key)?.addIndex(val, entity);
   }
