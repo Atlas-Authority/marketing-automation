@@ -19,7 +19,7 @@ export type ContactData = {
   country: string | null;
   region: string | null;
 
-  products: Set<string> | null;
+  products: Set<string>;
   deployment: 'Cloud' | 'Data Center' | 'Server' | 'Multiple' | null;
 
   relatedProducts: Set<string>;
@@ -117,7 +117,7 @@ const ContactAdapter: EntityAdapter<ContactData, ContactComputed> = {
     products: {
       property: env.hubspot.attrs.contact.products,
       down: products => new Set(products?.split(';') || []),
-      up: products => [...products ?? []].join(';'),
+      up: products => [...products].join(';'),
     },
     lastMpacEvent: {
       property: 'last_mpac_event',
