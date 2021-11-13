@@ -120,7 +120,7 @@ const ContactAdapter: EntityAdapter<ContactData, ContactComputed> = {
       up: products => [...products].join(';'),
     },
     lastMpacEvent: {
-      property: 'last_mpac_event',
+      property: env.hubspot.attrs.contact.lastMpacEvent,
       down: last_mpac_event => last_mpac_event,
       up: lastMpacEvent => lastMpacEvent ?? '',
     },
