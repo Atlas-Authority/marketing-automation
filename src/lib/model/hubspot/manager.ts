@@ -17,9 +17,8 @@ export interface EntityAdapter<D, C> {
   data: { [K in keyof D]: {
     property: string | undefined,
     down: (data: string | null) => D[K],
+    up: (data: D[K]) => string,
   } };
-
-  toAPI: PropertyTransformers<D>;
 
   computed: { [K in keyof C]: {
     default: C[K],
@@ -30,26 +29,11 @@ export interface EntityAdapter<D, C> {
   identifiers: (keyof D)[];
 }
 
-export type PropertyTransformers<T> = {
-  [K in keyof T]: (prop: T[K]) => [string, string]
-};
-
 export abstract class EntityManager<
   D extends Record<string, any>,
   C extends Record<string, any>,
   E extends Entity<D, C>>
 {
-
-  static readonly noUpSync = (): [string, string] => ['', ''];
-
-  static upSyncIfConfigured<T>(
-    attributeKey: string | undefined,
-    transformer: (localValue: T) => string
-  ): (val: T) => [string, string] {
-    return (attributeKey ?
-      (value => [attributeKey, transformer(value)])
-      : this.noUpSync);
-  }
 
   constructor(
     private downloader: HubspotService,
@@ -189,9 +173,10 @@ export abstract class EntityManager<
       for (const e of toCreate) {
         const found = results.find(result => {
           for (const localIdKey of this.entityAdapter.identifiers) {
+            const spec = this.entityAdapter.data[localIdKey];
             const localVal = e.data[localIdKey];
-            const [remoteIdKey, hsLocal] = this.entityAdapter.toAPI[localIdKey](localVal);
-            const hsRemote = result.properties[remoteIdKey] ?? '';
+            const hsLocal = spec.up(localVal);
+            const hsRemote = result.properties[spec.property!] ?? '';
             if (hsLocal !== hsRemote) return false;
           }
           return true;
@@ -279,9 +264,10 @@ export abstract class EntityManager<
   private getChangedProperties(e: E) {
     const properties: Record<string, string> = {};
     for (const [k, v] of Object.entries(e.getPropertyChanges())) {
-      const fn = this.entityAdapter.toAPI[k];
-      const [newKey, newVal] = fn(v);
-      if (newKey) properties[newKey] = newVal;
+      const spec = this.entityAdapter.data[k];
+      if (spec.property) {
+        properties[spec.property] = spec.up(v);
+      }
     }
     return properties;
   }

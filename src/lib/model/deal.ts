@@ -78,54 +78,67 @@ const DealAdapter: EntityAdapter<DealData, DealComputed> = {
     relatedProducts: {
       property: 'related_products',
       down: related_products => related_products || null,
+      up: relatedProducts => relatedProducts ?? '',
     },
     app: {
       property: appKey,
       down: app => appKey ? app as string : null,
+      up: app => app ?? '',
     },
     addonLicenseId: {
       property: addonLicenseIdKey,
       down: addonLicenseId => addonLicenseId as string,
+      up: addonLicenseId => addonLicenseId || '',
     },
     transactionId: {
       property: transactionIdKey,
       down: transactionId => transactionId,
+      up: transactionId => transactionId || '',
     },
     closeDate: {
       property: 'closedate',
       down: closedate => (closedate as string).substr(0, 10),
+      up: closeDate => closeDate,
     },
     country: {
       property: 'country',
       down: country => country as string,
+      up: country => country,
     },
     dealName: {
       property: 'dealname',
       down: dealname => dealname as string,
+      up: dealName => dealName,
     },
     origin: {
       property: 'origin',
       down: origin => origin || null,
+      up: origin => origin ?? '',
     },
     deployment: {
       property: deploymentKey,
       down: deployment => deployment as DealData['deployment'],
+      up: deployment => deployment ?? '',
     },
     licenseTier: {
       property: 'license_tier',
       down: license_tier => +(license_tier as string),
+      up: licenseTier => licenseTier.toFixed(),
     },
     pipeline: {
       property: 'pipeline',
       down: data => Pipeline.MPAC,
+      up: pipeline => pipelines[pipeline],
     },
     dealStage: {
       property: 'dealstage',
       down: dealstage => enumFromValue(dealstages, dealstage ?? ''),
+      up: dealstage => dealstages[dealstage],
     },
     amount: {
       property: 'amount',
       down: amount => !amount ? null : +amount,
+      up: amount => amount?.toString() ?? '',
     },
   },
 
@@ -155,22 +168,6 @@ const DealAdapter: EntityAdapter<DealData, DealComputed> = {
         'hs_sales_email_last_replied',
       ]
     },
-  },
-
-  toAPI: {
-    relatedProducts: relatedProducts => ['related_products', relatedProducts ?? ''],
-    app: EntityManager.upSyncIfConfigured(appKey, app => app ?? ''),
-    addonLicenseId: addonLicenseId => [addonLicenseIdKey, addonLicenseId || ''],
-    transactionId: transactionId => [transactionIdKey, transactionId || ''],
-    closeDate: closeDate => ['closedate', closeDate],
-    country: country => ['country', country],
-    dealName: dealName => ['dealname', dealName],
-    origin: origin => ['origin', origin ?? ''],
-    deployment: EntityManager.upSyncIfConfigured(deploymentKey, deployment => deployment ?? ''),
-    licenseTier: licenseTier => ['license_tier', licenseTier.toFixed()],
-    pipeline: pipeline => ['pipeline', pipelines[pipeline]],
-    dealStage: dealstage => ['dealstage', dealstages[dealstage]],
-    amount: amount => ['amount', amount?.toString() ?? ''],
   },
 
   identifiers: [

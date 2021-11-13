@@ -57,61 +57,75 @@ const ContactAdapter: EntityAdapter<ContactData, ContactComputed> = {
     contactType: {
       property: 'contact_type',
       down: contact_type => contact_type as ContactData['contactType'],
+      up: contactType => contactType ?? '',
     },
 
     email: {
       property: 'email',
       down: email => email ?? '',
+      up: email => email,
     },
     country: {
       property: 'country',
       down: country => country,
+      up: country => country ?? '',
     },
     region: {
       property: 'region',
       down: region => region,
+      up: region => region ?? '',
     },
 
     firstName: {
       property: 'firstname',
       down: firstname => firstname?.trim() || null,
+      up: firstName => firstName?.trim() || '',
     },
     lastName: {
       property: 'lastname',
       down: lastname => lastname?.trim() || null,
+      up: lastName => lastName?.trim() || '',
     },
     phone: {
       property: 'phone',
       down: phone => phone?.trim() || null,
+      up: phone => phone?.trim() || '',
     },
     city: {
       property: 'city',
       down: city => city?.trim() || null,
+      up: city => city?.trim() || '',
     },
     state: {
       property: 'state',
       down: state => state?.trim() || null,
+      up: state => state?.trim() || '',
     },
 
     relatedProducts: {
       property: 'related_products',
       down: related_products => new Set(related_products ? related_products.split(';') : []),
+      up: relatedProducts => [...relatedProducts].join(';'),
     },
     licenseTier: {
       property: licenseTierKey,
       down: licenseTier => toNumber(licenseTier) ?? null,
+      up: licenseTier => licenseTier?.toFixed() ?? '',
     },
     deployment: {
       property: deploymentKey,
       down: deployment => deployment as ContactData['deployment'] ?? null,
+      up: deployment => deployment ?? '',
     },
     products: {
       property: productsKey,
       down: products => new Set(products?.split(';') || []),
+      up: products => [...products ?? []].join(';'),
     },
     lastMpacEvent: {
       property: 'last_mpac_event',
       down: last_mpac_event => last_mpac_event,
+      up: lastMpacEvent => lastMpacEvent ?? '',
     },
   },
 
@@ -121,26 +135,6 @@ const ContactAdapter: EntityAdapter<ContactData, ContactComputed> = {
       down: data => data['hs_additional_emails']?.split(';') || [],
       properties: ['hs_additional_emails'],
     },
-  },
-
-  toAPI: {
-    contactType: contactType => ['contact_type', contactType ?? ''],
-
-    email: email => ['email', email],
-    country: country => ['country', country ?? ''],
-    region: region => ['region', region ?? ''],
-
-    firstName: firstName => ['firstname', firstName?.trim() || ''],
-    lastName: lastName => ['lastname', lastName?.trim() || ''],
-    phone: phone => ['phone', phone?.trim() || ''],
-    city: city => ['city', city?.trim() || ''],
-    state: state => ['state', state?.trim() || ''],
-
-    relatedProducts: relatedProducts => ['related_products', [...relatedProducts].join(';')],
-    licenseTier: EntityManager.upSyncIfConfigured(licenseTierKey, licenseTier => licenseTier?.toFixed() ?? ''),
-    deployment: EntityManager.upSyncIfConfigured(deploymentKey, deployment => deployment ?? ''),
-    products: EntityManager.upSyncIfConfigured(productsKey, products => [...products ?? []].join(';')),
-    lastMpacEvent: lastMpacEvent => ['last_mpac_event', lastMpacEvent ?? ''],
   },
 
   identifiers: [

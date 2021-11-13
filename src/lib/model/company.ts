@@ -24,19 +24,16 @@ const CompanyAdapter: EntityAdapter<CompanyData, {}> = {
     name: {
       property: 'name',
       down: name => name ?? '',
+      up: name => name,
     },
     type: {
       property: 'type',
       down: type => type === 'PARTNER' ? 'Partner' : null,
+      up: type => type === 'Partner' ? 'PARTNER' : '',
     },
   },
 
   computed: {},
-
-  toAPI: {
-    name: name => ['name', name],
-    type: type => ['type', type === 'Partner' ? 'PARTNER' : ''],
-  },
 
   identifiers: [
   ],
