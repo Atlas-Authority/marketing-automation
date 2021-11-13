@@ -62,6 +62,7 @@ const ContactAdapter: EntityAdapter<ContactData, ContactComputed> = {
 
     email: {
       property: 'email',
+      identifier: true,
       down: email => email ?? '',
       up: email => email,
     },
@@ -136,10 +137,6 @@ const ContactAdapter: EntityAdapter<ContactData, ContactComputed> = {
       properties: ['hs_additional_emails'],
     },
   },
-
-  identifiers: [
-    'email',
-  ],
 
 };
 

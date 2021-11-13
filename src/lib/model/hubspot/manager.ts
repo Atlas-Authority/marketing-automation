@@ -18,6 +18,7 @@ export interface EntityAdapter<D, C> {
     property: string | undefined,
     down: (data: string | null) => D[K],
     up: (data: D[K]) => string,
+    identifier?: true,
   } };
 
   computed: { [K in keyof C]: {
@@ -26,7 +27,6 @@ export interface EntityAdapter<D, C> {
     properties: string[],
   } },
 
-  identifiers: (keyof D)[];
 }
 
 export abstract class EntityManager<
@@ -172,8 +172,8 @@ export abstract class EntityManager<
 
       for (const e of toCreate) {
         const found = results.find(result => {
-          for (const localIdKey of this.entityAdapter.identifiers) {
-            const spec = this.entityAdapter.data[localIdKey];
+          const identifiers = typedEntries(this.entityAdapter.data).filter(([k, v]) => v.identifier);
+          for (const [localIdKey, spec] of identifiers) {
             const localVal = e.data[localIdKey];
             const hsLocal = spec.up(localVal);
             const hsRemote = result.properties[spec.property!] ?? '';

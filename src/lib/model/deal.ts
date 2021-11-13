@@ -87,11 +87,13 @@ const DealAdapter: EntityAdapter<DealData, DealComputed> = {
     },
     addonLicenseId: {
       property: addonLicenseIdKey,
+      identifier: true,
       down: addonLicenseId => addonLicenseId as string,
       up: addonLicenseId => addonLicenseId || '',
     },
     transactionId: {
       property: transactionIdKey,
+      identifier: true,
       down: transactionId => transactionId,
       up: transactionId => transactionId || '',
     },
@@ -169,11 +171,6 @@ const DealAdapter: EntityAdapter<DealData, DealComputed> = {
       ]
     },
   },
-
-  identifiers: [
-    'addonLicenseId',
-    'transactionId',
-  ],
 
 };
 

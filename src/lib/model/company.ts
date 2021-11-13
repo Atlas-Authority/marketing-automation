@@ -35,9 +35,6 @@ const CompanyAdapter: EntityAdapter<CompanyData, {}> = {
 
   computed: {},
 
-  identifiers: [
-  ],
-
 };
 
 export class CompanyManager extends EntityManager<CompanyData, {}, Company> {
