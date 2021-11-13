@@ -29,7 +29,7 @@ Add these fields:
 | Origin           | 1-Select    | `DEAL_ORIGIN`              | `HUBSPOT_DEAL_ORIGIN_ATTR`           | ❌        |
 | Deployment       | 1-Select    | "hosting" of MPAC records  | `HUBSPOT_DEAL_DEPLOYMENT_ATTR`       | ❌        |
 | App              | 1-Select    | "addonKey" of MPAC records | `HUBSPOT_DEAL_APP_ATTR`              | ❌        |
-| Country          | 1-line Text | "country" of MPAC records  | TBD                                  | ❌        |
+| Country          | 1-line Text | "country" of MPAC records  | `HUBSPOT_DEAL_COUNTRY_ATTR`          | ❌        |
 | AddonLicenseId   | 1-line Text | (for engine use)           | `HUBSPOT_DEAL_ADDONLICENESID_ATTR`   | ✔️        |
 | TransactionId    | 1-line Text | (for engine use)           | `HUBSPOT_DEAL_TRANSACTIONID_ATTR`    | ✔️        |
 

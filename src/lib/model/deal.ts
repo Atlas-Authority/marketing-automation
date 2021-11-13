@@ -98,7 +98,7 @@ const DealAdapter: EntityAdapter<DealData, DealComputed> = {
       up: closeDate => closeDate,
     },
     country: {
-      property: 'country',
+      property: env.hubspot.attrs.deal.country,
       down: country => country as string,
       up: country => country,
     },
