@@ -16,7 +16,10 @@ export interface EntityAdapter<D, C> {
 
   apiProperties: string[];
 
-  fromAPI(data: HubspotProperties): D;
+  data: { [K in keyof D]: {
+    down: (data: HubspotProperties) => D[K],
+  } };
+
   toAPI: PropertyTransformers<D>;
 
   computed: { [K in keyof C]: {
@@ -86,7 +89,7 @@ export abstract class EntityManager<
     for (const rawEntity of rawEntities) {
       if (this.entityAdapter.shouldReject?.(rawEntity.properties)) continue;
 
-      const data = this.entityAdapter.fromAPI(rawEntity.properties);
+      const data = Object.fromEntries(typedEntries(this.entityAdapter.data).map(([k, v]) => [k, v.down(rawEntity.properties)])) as D;
       const computed = mapObject(this.entityAdapter.computed, (key, spec) => spec.down(rawEntity.properties)) as C;
 
       for (const item of rawEntity.associations) {

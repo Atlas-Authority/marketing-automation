@@ -76,26 +76,24 @@ const ContactAdapter: EntityAdapter<ContactData, ContactComputed> = {
     ].filter(isPresent),
   ],
 
-  fromAPI(data) {
-    return {
-      contactType: data['contact_type'] as ContactData['contactType'],
+  data: {
+    contactType: { down: data => data['contact_type'] as ContactData['contactType'], },
 
-      email: data['email'] ?? '',
-      country: data['country'],
-      region: data['region'],
+    email: { down: data => data['email'] ?? '', },
+    country: { down: data => data['country'], },
+    region: { down: data => data['region'], },
 
-      firstName: data['firstname']?.trim() || null,
-      lastName: data['lastname']?.trim() || null,
-      phone: data['phone']?.trim() || null,
-      city: data['city']?.trim() || null,
-      state: data['state']?.trim() || null,
+    firstName: { down: data => data['firstname']?.trim() || null, },
+    lastName: { down: data => data['lastname']?.trim() || null, },
+    phone: { down: data => data['phone']?.trim() || null, },
+    city: { down: data => data['city']?.trim() || null, },
+    state: { down: data => data['state']?.trim() || null, },
 
-      relatedProducts: new Set(data['related_products'] ? data['related_products'].split(';') : []),
-      licenseTier: licenseTierKey ? toNumber(data[licenseTierKey]) : null,
-      deployment: deploymentKey ? data[deploymentKey] as ContactData['deployment'] : null,
-      products: productsKey ? new Set(data[productsKey]?.split(';') || []) : null,
-      lastMpacEvent: data['last_mpac_event'],
-    };
+    relatedProducts: { down: data => new Set(data['related_products'] ? data['related_products'].split(';') : []), },
+    licenseTier: { down: data => licenseTierKey ? toNumber(data[licenseTierKey]) : null, },
+    deployment: { down: data => deploymentKey ? data[deploymentKey] as ContactData['deployment'] : null, },
+    products: { down: data => productsKey ? new Set(data[productsKey]?.split(';') || []) : null, },
+    lastMpacEvent: { down: data => data['last_mpac_event'], },
   },
 
   computed: {

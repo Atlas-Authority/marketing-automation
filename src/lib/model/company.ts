@@ -25,11 +25,9 @@ const CompanyAdapter: EntityAdapter<CompanyData, {}> = {
     'type',
   ],
 
-  fromAPI(data) {
-    return {
-      name: data['name'] ?? '',
-      type: data['type'] === 'PARTNER' ? 'Partner' : null,
-    };
+  data: {
+    name: { down: data => data['name'] ?? '', },
+    type: { down: data => data['type'] === 'PARTNER' ? 'Partner' : null, },
   },
 
   computed: {},

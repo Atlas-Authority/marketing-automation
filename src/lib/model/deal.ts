@@ -95,22 +95,20 @@ const DealAdapter: EntityAdapter<DealData, DealComputed> = {
     return (data['pipeline'] !== env.hubspot.pipeline.mpac);
   },
 
-  fromAPI(data) {
-    return {
-      relatedProducts: data['related_products'] || null,
-      app: appKey ? data[appKey] as string : null,
-      addonLicenseId: data[addonLicenseIdKey] as string,
-      transactionId: data[transactionIdKey],
-      closeDate: (data['closedate'] as string).substr(0, 10),
-      country: data['country'] as string,
-      dealName: data['dealname'] as string,
-      origin: data['origin'] || null,
-      deployment: deploymentKey ? data[deploymentKey] as DealData['deployment'] : null,
-      licenseTier: +(data['license_tier'] as string),
-      pipeline: Pipeline.MPAC,
-      dealStage: enumFromValue(dealstages, data['dealstage'] ?? ''),
-      amount: !data['amount'] ? null : +data['amount'],
-    };
+  data: {
+    relatedProducts: { down: data => data['related_products'] || null, },
+    app: { down: data => appKey ? data[appKey] as string : null, },
+    addonLicenseId: { down: data => data[addonLicenseIdKey] as string, },
+    transactionId: { down: data => data[transactionIdKey], },
+    closeDate: { down: data => (data['closedate'] as string).substr(0, 10), },
+    country: { down: data => data['country'] as string, },
+    dealName: { down: data => data['dealname'] as string, },
+    origin: { down: data => data['origin'] || null, },
+    deployment: { down: data => deploymentKey ? data[deploymentKey] as DealData['deployment'] : null, },
+    licenseTier: { down: data => +(data['license_tier'] as string), },
+    pipeline: { down: data => Pipeline.MPAC, },
+    dealStage: { down: data => enumFromValue(dealstages, data['dealstage'] ?? ''), },
+    amount: { down: data => !data['amount'] ? null : +data['amount'], },
   },
 
   computed: {
