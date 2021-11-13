@@ -6,16 +6,19 @@ import { Entity, Indexer } from "./entity.js";
 import { EntityKind, RelativeAssociation } from './interfaces.js';
 
 export interface EntityDatabase {
-  getEntity(kind: EntityKind, id: string): Entity<any>;
+  getEntity(kind: EntityKind, id: string): Entity<any, any>;
 }
 
-export interface EntityAdapter<D> {
+export interface EntityAdapter<D, C> {
   downAssociations: EntityKind[];
   upAssociations: EntityKind[];
 
   apiProperties: string[];
   fromAPI(data: { [key: string]: string | null }): D | null;
   toAPI: PropertyTransformers<D>;
+
+  computedFromAPI(data: { [key: string]: string | null }): C;
+  defaultComputed: C;
 
   identifiers: (keyof D)[];
 }
@@ -26,15 +29,17 @@ export type PropertyTransformers<T> = {
 
 interface EntitySubclass<
   D extends { [key: string]: any },
-  E extends Entity<D>> {
+  C extends { [key: string]: any },
+  E extends Entity<D, C>> {
 
-  new(id: string | null, kind: EntityKind, data: D, indexer: Indexer<D>): E;
+  new(id: string | null, kind: EntityKind, data: D, computed: C, indexer: Indexer<D>): E;
   kind: EntityKind;
 }
 
 export abstract class EntityManager<
   D extends { [key: string]: any },
-  E extends Entity<D>>
+  C extends { [key: string]: any },
+  E extends Entity<D, C>>
 {
 
   static readonly noUpSync = (): [string, string] => ['', ''];
@@ -59,8 +64,8 @@ export abstract class EntityManager<
   public associatedCount = 0;
   public disassociatedCount = 0;
 
-  protected abstract Entity: EntitySubclass<D, E>;
-  protected abstract entityAdapter: EntityAdapter<D>;
+  protected abstract Entity: EntitySubclass<D, C, E>;
+  protected abstract entityAdapter: EntityAdapter<D, C>;
 
   private entities: E[] = [];
   private indexes: Index<E>[] = [];
@@ -76,13 +81,15 @@ export abstract class EntityManager<
       const data = this.entityAdapter.fromAPI(rawEntity.properties);
       if (!data) continue;
 
+      const computed = this.entityAdapter.computedFromAPI(rawEntity.properties);
+
       for (const item of rawEntity.associations) {
         let set = this.prelinkedAssociations.get(rawEntity.id);
         if (!set) this.prelinkedAssociations.set(rawEntity.id, set = new Set());
         set.add(item);
       }
 
-      const entity = new this.Entity(rawEntity.id, this.Entity.kind, data, this);
+      const entity = new this.Entity(rawEntity.id, this.Entity.kind, data, computed, this);
       this.entities.push(entity);
     }
 
@@ -114,7 +121,7 @@ export abstract class EntityManager<
   }
 
   public create(data: D) {
-    const e = new this.Entity(null, this.Entity.kind, data, this);
+    const e = new this.Entity(null, this.Entity.kind, data, this.entityAdapter.defaultComputed, this);
     this.entities.push(e);
     for (const index of this.indexes) {
       index.addIndexesFor([e]);

@@ -209,7 +209,6 @@ function fakeContact(props: Partial<GeneratedContact>): GeneratedContact {
     products: new Set(),
     lastMpacEvent: null,
     licenseTier: null,
-    otherEmails: [],
     relatedProducts: new Set(),
     ...props
   };

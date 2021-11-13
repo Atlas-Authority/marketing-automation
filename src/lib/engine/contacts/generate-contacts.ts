@@ -78,7 +78,6 @@ export class ContactGenerator {
       relatedProducts: new Set(),
       deployment: item.data.hosting,
       products: new Set([item.data.addonKey]),
-      otherEmails: [],
       licenseTier: null,
       lastMpacEvent: '',
       lastUpdated: (item instanceof License ? item.data.lastUpdated : item.data.saleDate),

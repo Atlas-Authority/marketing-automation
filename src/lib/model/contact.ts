@@ -30,11 +30,13 @@ export type ContactData = {
   relatedProducts: Set<string>;
   licenseTier: number | null;
   lastMpacEvent: string | null;
+};
 
+type ContactComputed = {
   readonly otherEmails: readonly string[];
 };
 
-export class Contact extends Entity<ContactData> {
+export class Contact extends Entity<ContactData, ContactComputed> {
 
   static kind: EntityKind = 'contact';
 
@@ -42,17 +44,13 @@ export class Contact extends Entity<ContactData> {
 
   get isExternal() { return !this.data.email || !this.data.contactType; }
 
-  get allEmails() { return [this.data.email, ...this.data.otherEmails]; }
+  get allEmails() { return [this.data.email, ...this.computed.otherEmails]; }
   get isPartner() { return this.data.contactType === 'Partner'; }
   get isCustomer() { return this.data.contactType === 'Customer'; }
 
-  override pseudoProperties: (keyof ContactData)[] = [
-    'otherEmails',
-  ];
-
 }
 
-const ContactAdapter: EntityAdapter<ContactData> = {
+const ContactAdapter: EntityAdapter<ContactData, ContactComputed> = {
 
   downAssociations: [
     "company",
@@ -104,9 +102,17 @@ const ContactAdapter: EntityAdapter<ContactData> = {
       deployment: deploymentKey ? data[deploymentKey] as ContactData['deployment'] : null,
       products: productsKey ? new Set(data[productsKey]?.split(';') || []) : null,
       lastMpacEvent: data['last_mpac_event'],
+    };
+  },
 
+  computedFromAPI(data) {
+    return {
       otherEmails: data['hs_additional_emails']?.split(';') || [],
     };
+  },
+
+  defaultComputed: {
+    otherEmails: [],
   },
 
   toAPI: {
@@ -127,8 +133,6 @@ const ContactAdapter: EntityAdapter<ContactData> = {
     deployment: EntityManager.upSyncIfConfigured(deploymentKey, deployment => deployment ?? ''),
     products: EntityManager.upSyncIfConfigured(productsKey, products => [...products ?? []].join(';')),
     lastMpacEvent: lastMpacEvent => ['last_mpac_event', lastMpacEvent ?? ''],
-
-    otherEmails: EntityManager.noUpSync,
   },
 
   identifiers: [
@@ -137,12 +141,12 @@ const ContactAdapter: EntityAdapter<ContactData> = {
 
 };
 
-export class ContactManager extends EntityManager<ContactData, Contact> {
+export class ContactManager extends EntityManager<ContactData, ContactComputed, Contact> {
 
   override Entity = Contact;
   override entityAdapter = ContactAdapter;
 
-  public getByEmail = this.makeIndex(c => c.allEmails, ['email', 'otherEmails']);
+  public getByEmail = this.makeIndex(c => c.allEmails, ['email']);
 
 }
 

@@ -8,17 +8,15 @@ type CompanyData = {
   type: 'Partner' | null;
 };
 
-export class Company extends Entity<CompanyData> {
+export class Company extends Entity<CompanyData, {}> {
 
   static kind: EntityKind = 'company';
 
   contacts = this.makeDynamicAssociation<Contact>('contact');
 
-  override pseudoProperties: (keyof CompanyData)[] = [];
-
 }
 
-const CompanyAdapter: EntityAdapter<CompanyData> = {
+const CompanyAdapter: EntityAdapter<CompanyData, {}> = {
 
   downAssociations: [
     'contact'
@@ -38,6 +36,12 @@ const CompanyAdapter: EntityAdapter<CompanyData> = {
     };
   },
 
+  computedFromAPI(data) {
+    return {};
+  },
+
+  defaultComputed: {},
+
   toAPI: {
     name: name => ['name', name],
     type: type => ['type', type === 'Partner' ? 'PARTNER' : ''],
@@ -48,7 +52,7 @@ const CompanyAdapter: EntityAdapter<CompanyData> = {
 
 };
 
-export class CompanyManager extends EntityManager<CompanyData, Company> {
+export class CompanyManager extends EntityManager<CompanyData, {}, Company> {
 
   override Entity = Company;
   override entityAdapter = CompanyAdapter;

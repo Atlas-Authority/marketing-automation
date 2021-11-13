@@ -28,10 +28,13 @@ export type DealData = {
   pipeline: Pipeline;
   dealStage: DealStage;
   amount: number | null;
+};
+
+type DealComputed = {
   readonly hasActivity: boolean;
 };
 
-export class Deal extends Entity<DealData> {
+export class Deal extends Entity<DealData, DealComputed> {
 
   static kind: EntityKind = 'deal';
 
@@ -60,13 +63,9 @@ export class Deal extends Entity<DealData> {
       : `deal-id=${this.id}`);
   }
 
-  override pseudoProperties: (keyof DealData)[] = [
-    'hasActivity',
-  ];
-
 }
 
-const DealAdapter: EntityAdapter<DealData> = {
+const DealAdapter: EntityAdapter<DealData, DealComputed> = {
 
   downAssociations: [
     "company",
@@ -126,6 +125,11 @@ const DealAdapter: EntityAdapter<DealData> = {
       pipeline: enumFromValue(pipelines, data['pipeline']),
       dealStage: enumFromValue(dealstages, data['dealstage'] ?? ''),
       amount: !data['amount'] ? null : +data['amount'],
+    };
+  },
+
+  computedFromAPI(data) {
+    return {
       hasActivity: (
         isNonBlankString(data['hs_user_ids_of_all_owners']) ||
         isNonBlankString(data['engagements_last_meeting_booked']) ||
@@ -138,6 +142,10 @@ const DealAdapter: EntityAdapter<DealData> = {
         isNonZeroNumberString(data['num_notes'])
       ),
     };
+  },
+
+  defaultComputed: {
+    hasActivity: false,
   },
 
   toAPI: {
@@ -154,7 +162,6 @@ const DealAdapter: EntityAdapter<DealData> = {
     pipeline: pipeline => ['pipeline', pipelines[pipeline]],
     dealStage: dealstage => ['dealstage', dealstages[dealstage]],
     amount: amount => ['amount', amount?.toString() ?? ''],
-    hasActivity: EntityManager.noUpSync,
   },
 
   identifiers: [
@@ -164,7 +171,7 @@ const DealAdapter: EntityAdapter<DealData> = {
 
 };
 
-export class DealManager extends EntityManager<DealData, Deal> {
+export class DealManager extends EntityManager<DealData, DealComputed, Deal> {
 
   override Entity = Deal;
   override entityAdapter = DealAdapter;

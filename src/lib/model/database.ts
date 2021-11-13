@@ -134,7 +134,7 @@ export class Database {
     await this.companyManager.syncUpAllEntities();
   }
 
-  getEntity(kind: EntityKind, id: string): Entity<any> {
+  getEntity(kind: EntityKind, id: string): Entity<any, any> {
     const found = this.getManager(kind).get(id);
     // There's only two ways to set associations:
     // 1. They were already set in HubSpot when we downloaded them, or

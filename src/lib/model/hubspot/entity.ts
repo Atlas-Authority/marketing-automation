@@ -3,10 +3,10 @@ import { EntityKind } from './interfaces.js';
 
 export interface Indexer<D> {
   removeIndexesFor<K extends keyof D>(key: K, val: D[K] | undefined): void;
-  addIndexesFor<K extends keyof D>(key: K, val: D[K] | undefined, entity: Entity<D>): void;
+  addIndexesFor<K extends keyof D>(key: K, val: D[K] | undefined, entity: Entity<D, any>): void;
 }
 
-export abstract class Entity<D extends { [key: string]: any }> {
+export abstract class Entity<D extends { [key: string]: any }, C extends { [key: string]: any }> {
 
   id?: string;
 
@@ -16,9 +16,9 @@ export abstract class Entity<D extends { [key: string]: any }> {
   private newData: Partial<D> = {};
 
   /** The associations this was created with, whether an existing or new entity */
-  private assocs = new Set<Entity<any>>();
+  private assocs = new Set<Entity<any, any>>();
   /** A copy of assocs, which all updates act on, whether an existing or new entity */
-  private newAssocs = new Set<Entity<any>>();
+  private newAssocs = new Set<Entity<any, any>>();
 
   readonly data: D;
 
@@ -26,6 +26,7 @@ export abstract class Entity<D extends { [key: string]: any }> {
     id: string | null,
     public kind: EntityKind,
     data: D,
+    public computed: C,
     private indexer: Indexer<D>,
   ) {
     if (id) this.id = id;
@@ -57,8 +58,6 @@ export abstract class Entity<D extends { [key: string]: any }> {
   }
 
   set<K extends keyof D>(key: K, val: D[K]) {
-    if (this.pseudoProperties.includes(key)) return;
-
     if (this.id === undefined) {
       this.indexer.removeIndexesFor(key, this._data[key]);
       this._data[key] = val;
@@ -91,11 +90,9 @@ export abstract class Entity<D extends { [key: string]: any }> {
     this.newData = {};
   }
 
-  abstract pseudoProperties: (keyof D)[];
-
   // Associations
 
-  protected makeDynamicAssociation<T extends Entity<any>>(kind: EntityKind) {
+  protected makeDynamicAssociation<T extends Entity<any, any>>(kind: EntityKind) {
     return {
       getAll: () => this.getAssociations(kind) as T[],
       has: (entity: T) => this.hasAssociation(entity),
@@ -106,20 +103,20 @@ export abstract class Entity<D extends { [key: string]: any }> {
   }
 
   /** Don't use directly; use deal.contacts.add(c) etc. */
-  addAssociation(entity: Entity<any>, meta: { firstSide: boolean, initial: boolean }) {
+  addAssociation(entity: Entity<any, any>, meta: { firstSide: boolean, initial: boolean }) {
     if (meta.initial) this.assocs.add(entity);
     this.newAssocs.add(entity);
 
     if (meta.firstSide) entity.addAssociation(this, { firstSide: false, initial: meta.initial });
   }
 
-  private removeAssociation(entity: Entity<any>, meta: { firstSide: boolean }) {
+  private removeAssociation(entity: Entity<any, any>, meta: { firstSide: boolean }) {
     this.newAssocs.delete(entity);
 
     if (meta.firstSide) entity.removeAssociation(this, { firstSide: false });
   }
 
-  private hasAssociation(entity: Entity<any>) {
+  private hasAssociation(entity: Entity<any, any>) {
     return this.newAssocs.has(entity);
   }
 
@@ -148,7 +145,7 @@ export abstract class Entity<D extends { [key: string]: any }> {
     return [
       ...toAdd.map(e => ({ op: 'add', other: e })),
       ...toDel.map(e => ({ op: 'del', other: e })),
-    ] as { op: 'add' | 'del', other: Entity<any> }[];
+    ] as { op: 'add' | 'del', other: Entity<any, any> }[];
   }
 
   applyAssociationChanges() {

@@ -5,7 +5,7 @@ type PersonProps = {
   name: string;
 };
 
-class Person extends Entity<PersonProps> {
+class Person extends Entity<PersonProps, {}> {
   pseudoProperties = [];
 }
 
@@ -15,7 +15,7 @@ describe('entities', () => {
     const p = new Person('123', 'contact', {
       age: 20,
       name: 'Bob',
-    }, {
+    }, {}, {
       addIndexesFor() { },
       removeIndexesFor() { },
     });
