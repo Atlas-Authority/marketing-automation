@@ -1,5 +1,4 @@
 import env from "../parameters/env.js";
-import { isPresent } from "../util/helpers.js";
 import { Company } from "./company.js";
 import { Entity } from "./hubspot/entity.js";
 import { EntityKind } from "./hubspot/interfaces.js";
@@ -54,46 +53,24 @@ const ContactAdapter: EntityAdapter<ContactData, ContactComputed> = {
     ['company', 'down/up'],
   ],
 
-  apiProperties: [
-    // Required
-    'email',
-    'city',
-    'state',
-    'country',
-    'region',
-    'contact_type',
-    'firstname',
-    'lastname',
-    'phone',
-    'related_products',
-    'last_mpac_event',
-
-    // User-configurable
-    ...[
-      deploymentKey,
-      productsKey,
-      licenseTierKey,
-    ].filter(isPresent),
-  ],
-
   data: {
-    contactType: { down: data => data['contact_type'] as ContactData['contactType'], },
+    contactType: { property: 'contact_type', down: data => data['contact_type'] as ContactData['contactType'], },
 
-    email: { down: data => data['email'] ?? '', },
-    country: { down: data => data['country'], },
-    region: { down: data => data['region'], },
+    email: { property: 'email', down: data => data['email'] ?? '', },
+    country: { property: 'country', down: data => data['country'], },
+    region: { property: 'region', down: data => data['region'], },
 
-    firstName: { down: data => data['firstname']?.trim() || null, },
-    lastName: { down: data => data['lastname']?.trim() || null, },
-    phone: { down: data => data['phone']?.trim() || null, },
-    city: { down: data => data['city']?.trim() || null, },
-    state: { down: data => data['state']?.trim() || null, },
+    firstName: { property: 'firstname', down: data => data['firstname']?.trim() || null, },
+    lastName: { property: 'lastname', down: data => data['lastname']?.trim() || null, },
+    phone: { property: 'phone', down: data => data['phone']?.trim() || null, },
+    city: { property: 'city', down: data => data['city']?.trim() || null, },
+    state: { property: 'state', down: data => data['state']?.trim() || null, },
 
-    relatedProducts: { down: data => new Set(data['related_products'] ? data['related_products'].split(';') : []), },
-    licenseTier: { down: data => licenseTierKey ? toNumber(data[licenseTierKey]) : null, },
-    deployment: { down: data => deploymentKey ? data[deploymentKey] as ContactData['deployment'] : null, },
-    products: { down: data => productsKey ? new Set(data[productsKey]?.split(';') || []) : null, },
-    lastMpacEvent: { down: data => data['last_mpac_event'], },
+    relatedProducts: { property: 'related_products', down: data => new Set(data['related_products'] ? data['related_products'].split(';') : []), },
+    licenseTier: { property: licenseTierKey, down: data => licenseTierKey ? toNumber(data[licenseTierKey]) : null, },
+    deployment: { property: deploymentKey, down: data => deploymentKey ? data[deploymentKey] as ContactData['deployment'] : null, },
+    products: { property: productsKey, down: data => productsKey ? new Set(data[productsKey]?.split(';') || []) : null, },
+    lastMpacEvent: { property: 'last_mpac_event', down: data => data['last_mpac_event'], },
   },
 
   computed: {

@@ -14,9 +14,8 @@ export interface EntityAdapter<D, C> {
 
   shouldReject?: (data: HubspotProperties) => boolean;
 
-  apiProperties: string[];
-
   data: { [K in keyof D]: {
+    property: string | undefined,
     down: (data: HubspotProperties) => D[K],
   } };
 
@@ -80,8 +79,8 @@ export abstract class EntityManager<
       .map(([kind, dir]) => kind));
 
     const apiProperties = [
-      ...this.entityAdapter.apiProperties,
-      ...typedEntries(this.entityAdapter.computed).map(([k, v]) => v.properties).flat(),
+      ...typedEntries(this.entityAdapter.data).map(([k, v]) => v.property).filter(isPresent),
+      ...typedEntries(this.entityAdapter.computed).flatMap(([k, v]) => v.properties),
     ];
 
     const rawEntities = await this.downloader.downloadEntities(progress, this.kind, apiProperties, downAssociations);

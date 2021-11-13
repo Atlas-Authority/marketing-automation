@@ -70,45 +70,24 @@ const DealAdapter: EntityAdapter<DealData, DealComputed> = {
     ['contact', 'down/up'],
   ],
 
-  apiProperties: [
-    // Required
-    'closedate',
-    'license_tier',
-    'country',
-    'origin',
-    'related_products',
-    'dealname',
-    'dealstage',
-    'pipeline',
-    'amount',
-
-    // User-configurable
-    addonLicenseIdKey,
-    transactionIdKey,
-    ...[
-      deploymentKey,
-      appKey,
-    ].filter(isPresent),
-  ],
-
   shouldReject(data) {
     return (data['pipeline'] !== env.hubspot.pipeline.mpac);
   },
 
   data: {
-    relatedProducts: { down: data => data['related_products'] || null, },
-    app: { down: data => appKey ? data[appKey] as string : null, },
-    addonLicenseId: { down: data => data[addonLicenseIdKey] as string, },
-    transactionId: { down: data => data[transactionIdKey], },
-    closeDate: { down: data => (data['closedate'] as string).substr(0, 10), },
-    country: { down: data => data['country'] as string, },
-    dealName: { down: data => data['dealname'] as string, },
-    origin: { down: data => data['origin'] || null, },
-    deployment: { down: data => deploymentKey ? data[deploymentKey] as DealData['deployment'] : null, },
-    licenseTier: { down: data => +(data['license_tier'] as string), },
-    pipeline: { down: data => Pipeline.MPAC, },
-    dealStage: { down: data => enumFromValue(dealstages, data['dealstage'] ?? ''), },
-    amount: { down: data => !data['amount'] ? null : +data['amount'], },
+    relatedProducts: { property: 'related_products', down: data => data['related_products'] || null, },
+    app: { property: appKey, down: data => appKey ? data[appKey] as string : null, },
+    addonLicenseId: { property: addonLicenseIdKey, down: data => data[addonLicenseIdKey] as string, },
+    transactionId: { property: transactionIdKey, down: data => data[transactionIdKey], },
+    closeDate: { property: 'closedate', down: data => (data['closedate'] as string).substr(0, 10), },
+    country: { property: 'country', down: data => data['country'] as string, },
+    dealName: { property: 'dealname', down: data => data['dealname'] as string, },
+    origin: { property: 'origin', down: data => data['origin'] || null, },
+    deployment: { property: deploymentKey, down: data => deploymentKey ? data[deploymentKey] as DealData['deployment'] : null, },
+    licenseTier: { property: 'license_tier', down: data => +(data['license_tier'] as string), },
+    pipeline: { property: 'pipeline', down: data => Pipeline.MPAC, },
+    dealStage: { property: 'dealstage', down: data => enumFromValue(dealstages, data['dealstage'] ?? ''), },
+    amount: { property: 'amount', down: data => !data['amount'] ? null : +data['amount'], },
   },
 
   computed: {
