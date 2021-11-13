@@ -154,25 +154,27 @@ export abstract class EntityManager<
   }
 
   private async syncUpAllEntitiesProperties() {
-    const toSync = this.entities.filter(e => e.hasPropertyChanges());
-    const toCreate = toSync.filter(e => e.id === undefined);
-    const toUpdate = toSync.filter(e => e.id !== undefined);
+    const entitiesWithChanges = this.entities.map(e => ({ e, changes: this.getChangedProperties(e) }));
+    const toSync = entitiesWithChanges.filter(({ changes }) => Object.keys(changes).length > 0);
+
+    const toCreate = toSync.filter(({ e }) => e.id === undefined);
+    const toUpdate = toSync.filter(({ e }) => e.id !== undefined);
 
     if (toCreate.length > 0) {
       const results = await this.uploader.createEntities(
         this.kind,
-        toCreate.map(e => ({
-          properties: this.getChangedProperties(e),
+        toCreate.map(({ changes }) => ({
+          properties: changes,
         }))
       );
 
-      for (const e of toCreate) {
+      for (const { e } of toCreate) {
         e.applyPropertyChanges();
       }
 
       const identifiers = typedEntries(this.entityAdapter.data).filter(([k, v]) => v.identifier);
 
-      for (const e of toCreate) {
+      for (const { e } of toCreate) {
         const found = results.find(result => {
           for (const [localIdKey, spec] of identifiers) {
             const localVal = e.data[localIdKey];
@@ -201,13 +203,13 @@ export abstract class EntityManager<
     if (toUpdate.length > 0) {
       const results = await this.uploader.updateEntities(
         this.kind,
-        toUpdate.map(e => ({
+        toUpdate.map(({ e, changes }) => ({
           id: e.guaranteedId(),
-          properties: this.getChangedProperties(e),
+          properties: changes,
         }))
       );
 
-      for (const e of toUpdate) {
+      for (const { e } of toUpdate) {
         e.applyPropertyChanges();
       }
     }
