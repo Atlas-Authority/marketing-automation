@@ -10,8 +10,6 @@ type CompanyData = {
 
 export class Company extends Entity<CompanyData, {}> {
 
-  static kind: EntityKind = 'company';
-
   contacts = this.makeDynamicAssociation<Contact>('contact');
 
 }
@@ -49,6 +47,7 @@ const CompanyAdapter: EntityAdapter<CompanyData, {}> = {
 export class CompanyManager extends EntityManager<CompanyData, {}, Company> {
 
   override Entity = Company;
+  override kind: EntityKind = 'company';
   override entityAdapter = CompanyAdapter;
 
 }

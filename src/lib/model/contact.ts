@@ -38,8 +38,6 @@ type ContactComputed = {
 
 export class Contact extends Entity<ContactData, ContactComputed> {
 
-  static kind: EntityKind = 'contact';
-
   companies = this.makeDynamicAssociation<Company>('company');
 
   get isExternal() { return !this.data.email || !this.data.contactType; }
@@ -137,6 +135,7 @@ const ContactAdapter: EntityAdapter<ContactData, ContactComputed> = {
 export class ContactManager extends EntityManager<ContactData, ContactComputed, Contact> {
 
   override Entity = Contact;
+  override kind: EntityKind = 'contact';
   override entityAdapter = ContactAdapter;
 
   public getByEmail = this.makeIndex(c => c.allEmails, ['email']);

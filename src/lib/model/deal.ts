@@ -36,8 +36,6 @@ type DealComputed = {
 
 export class Deal extends Entity<DealData, DealComputed> {
 
-  static kind: EntityKind = 'deal';
-
   contacts = this.makeDynamicAssociation<Contact>('contact');
   companies = this.makeDynamicAssociation<Company>('company');
 
@@ -169,6 +167,7 @@ const DealAdapter: EntityAdapter<DealData, DealComputed> = {
 export class DealManager extends EntityManager<DealData, DealComputed, Deal> {
 
   override Entity = Deal;
+  override kind: EntityKind = 'deal';
   override entityAdapter = DealAdapter;
 
   /** Either `License.addonLicenseId` or `Transaction.transactionId[Transacton.addonLicenseId]` */
