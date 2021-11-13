@@ -88,12 +88,12 @@ export abstract class EntityManager<
     for (const rawEntity of rawEntities) {
       if (this.entityAdapter.shouldReject?.(rawEntity.properties)) continue;
 
-      const data = mapObject(this.entityAdapter.data, (k, v) => {
-        const remoteValue = v.property ? rawEntity.properties[v.property] : null;
-        return v.down(remoteValue);
+      const data = mapObject(this.entityAdapter.data, spec => {
+        const remoteValue = spec.property ? rawEntity.properties[spec.property] : null;
+        return spec.down(remoteValue);
       }) as D;
 
-      const computed = mapObject(this.entityAdapter.computed, (key, spec) => spec.down(rawEntity.properties)) as C;
+      const computed = mapObject(this.entityAdapter.computed, spec => spec.down(rawEntity.properties)) as C;
 
       for (const item of rawEntity.associations) {
         let set = this.prelinkedAssociations.get(rawEntity.id);
@@ -133,7 +133,7 @@ export abstract class EntityManager<
   }
 
   public create(data: D) {
-    const computed = mapObject(this.entityAdapter.computed, (key, spec) => spec.default) as C;
+    const computed = mapObject(this.entityAdapter.computed, spec => spec.default) as C;
     const e = new this.Entity(null, this.kind, data, computed, this);
     this.entities.push(e);
     for (const index of this.indexes) {
@@ -346,8 +346,8 @@ class Index<E> {
 
 }
 
-function mapObject<T, K extends keyof T, O>(o: T, fn: (key: K, e: T[K]) => O): { [K in keyof T]: O } {
-  const mapped = typedEntries(o).map(([k, v]) => [k, fn(k as K, v as T[K])]);
+function mapObject<T, K extends keyof T, O>(o: T, fn: (e: T[K]) => O): { [K in keyof T]: O } {
+  const mapped = typedEntries(o).map(([k, v]) => [k, fn(v as T[K])]);
   return Object.fromEntries(mapped);
 }
 
