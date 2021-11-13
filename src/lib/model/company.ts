@@ -18,11 +18,9 @@ export class Company extends Entity<CompanyData, {}> {
 
 const CompanyAdapter: EntityAdapter<CompanyData, {}> = {
 
-  downAssociations: [
-    'contact'
+  associations: [
+    ['contact', 'down']
   ],
-
-  upAssociations: [],
 
   apiProperties: [
     'name',

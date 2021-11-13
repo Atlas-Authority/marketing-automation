@@ -67,14 +67,9 @@ export class Deal extends Entity<DealData, DealComputed> {
 
 const DealAdapter: EntityAdapter<DealData, DealComputed> = {
 
-  downAssociations: [
-    "company",
-    "contact",
-  ],
-
-  upAssociations: [
-    "company",
-    "contact",
+  associations: [
+    ['company', 'down/up'],
+    ['contact', 'down/up'],
   ],
 
   apiProperties: [

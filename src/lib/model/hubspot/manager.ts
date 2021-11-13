@@ -10,8 +10,7 @@ export interface EntityDatabase {
 }
 
 export interface EntityAdapter<D, C> {
-  downAssociations: EntityKind[];
-  upAssociations: EntityKind[];
+  associations: [EntityKind, 'down' | 'down/up'][];
 
   shouldReject?: (data: Record<string, string | null>) => boolean;
 
@@ -78,7 +77,11 @@ export abstract class EntityManager<
   private prelinkedAssociations = new Map<string, Set<RelativeAssociation>>();
 
   public async downloadAllEntities(progress: Progress) {
-    const rawEntities = await this.downloader.downloadEntities(progress, this.Entity.kind, this.entityAdapter.apiProperties, this.entityAdapter.downAssociations);
+    const downAssociations = (this.entityAdapter.associations
+      .filter(([kind, dir]) => dir.includes('down'))
+      .map(([kind, dir]) => kind));
+
+    const rawEntities = await this.downloader.downloadEntities(progress, this.Entity.kind, this.entityAdapter.apiProperties, downAssociations);
 
     for (const rawEntity of rawEntities) {
       if (this.entityAdapter.shouldReject?.(rawEntity.properties)) continue;
@@ -226,7 +229,11 @@ export abstract class EntityManager<
       .flatMap(e => e.getAssociationChanges()
         .map(({ op, other }) => ({ op, from: e, to: other }))));
 
-    for (const otherKind of this.entityAdapter.upAssociations) {
+    const upAssociations = (this.entityAdapter.associations
+      .filter(([kind, dir]) => dir.includes('up'))
+      .map(([kind, dir]) => kind));
+
+    for (const otherKind of upAssociations) {
       const toSyncInKind = (toSync
         .filter(changes => changes.to.kind === otherKind)
         .map(changes => ({

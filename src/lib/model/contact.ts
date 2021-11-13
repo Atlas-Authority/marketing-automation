@@ -52,12 +52,8 @@ export class Contact extends Entity<ContactData, ContactComputed> {
 
 const ContactAdapter: EntityAdapter<ContactData, ContactComputed> = {
 
-  downAssociations: [
-    "company",
-  ],
-
-  upAssociations: [
-    "company",
+  associations: [
+    ['company', 'down/up'],
   ],
 
   apiProperties: [
