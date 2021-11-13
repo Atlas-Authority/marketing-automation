@@ -109,8 +109,11 @@ const DealAdapter: EntityAdapter<DealData, DealComputed> = {
     'hs_sales_email_last_replied',
   ],
 
+  shouldReject(data) {
+    return (data['pipeline'] !== env.hubspot.pipeline.mpac);
+  },
+
   fromAPI(data) {
-    if (data['pipeline'] !== env.hubspot.pipeline.mpac) return null;
     return {
       relatedProducts: data['related_products'] || null,
       app: appKey ? data[appKey] as string : null,
@@ -122,7 +125,7 @@ const DealAdapter: EntityAdapter<DealData, DealComputed> = {
       origin: data['origin'] || null,
       deployment: deploymentKey ? data[deploymentKey] as DealData['deployment'] : null,
       licenseTier: +(data['license_tier'] as string),
-      pipeline: enumFromValue(pipelines, data['pipeline']),
+      pipeline: Pipeline.MPAC,
       dealStage: enumFromValue(dealstages, data['dealstage'] ?? ''),
       amount: !data['amount'] ? null : +data['amount'],
     };

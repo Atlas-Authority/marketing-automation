@@ -13,8 +13,11 @@ export interface EntityAdapter<D, C> {
   downAssociations: EntityKind[];
   upAssociations: EntityKind[];
 
+  shouldReject?: (data: Record<string, string | null>) => boolean;
+
   apiProperties: string[];
-  fromAPI(data: { [key: string]: string | null }): D | null;
+
+  fromAPI(data: { [key: string]: string | null }): D;
   toAPI: PropertyTransformers<D>;
 
   computedFromAPI(data: { [key: string]: string | null }): C;
@@ -78,9 +81,9 @@ export abstract class EntityManager<
     const rawEntities = await this.downloader.downloadEntities(progress, this.Entity.kind, this.entityAdapter.apiProperties, this.entityAdapter.downAssociations);
 
     for (const rawEntity of rawEntities) {
-      const data = this.entityAdapter.fromAPI(rawEntity.properties);
-      if (!data) continue;
+      if (this.entityAdapter.shouldReject?.(rawEntity.properties)) continue;
 
+      const data = this.entityAdapter.fromAPI(rawEntity.properties);
       const computed = this.entityAdapter.computedFromAPI(rawEntity.properties);
 
       for (const item of rawEntity.associations) {
