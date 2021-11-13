@@ -106,7 +106,7 @@ const ContactAdapter: EntityAdapter<ContactData, ContactComputed> = {
     },
     licenseTier: {
       property: env.hubspot.attrs.contact.licenseTier,
-      down: licenseTier => toNumber(licenseTier) ?? null,
+      down: licenseTier => (licenseTier ? +licenseTier.trim() : null) ?? null,
       up: licenseTier => licenseTier?.toFixed() ?? '',
     },
     deployment: {
@@ -144,9 +144,4 @@ export class ContactManager extends EntityManager<ContactData, ContactComputed, 
 
   public getByEmail = this.makeIndex(c => c.allEmails, ['email']);
 
-}
-
-/** Returns number, or null for `''` and `null` */
-function toNumber(val: string | null): number | null {
-  return (val ? +val.trim() : null);
 }
