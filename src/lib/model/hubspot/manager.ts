@@ -17,7 +17,7 @@ interface EntitySubclass<
   D extends { [key: string]: any },
   E extends Entity<D>> {
 
-  new(id: string | null, kind: EntityKind, props: D, indexer: Indexer<D>): E;
+  new(id: string | null, kind: EntityKind, data: D, indexer: Indexer<D>): E;
   kind: EntityKind;
 }
 
@@ -66,19 +66,19 @@ export abstract class EntityManager<
   private prelinkedAssociations = new Map<string, Set<RelativeAssociation>>();
 
   public async downloadAllEntities(progress: Progress) {
-    const data = await this.downloader.downloadEntities(progress, this.Entity.kind, this.apiProperties, this.downAssociations);
+    const rawEntities = await this.downloader.downloadEntities(progress, this.Entity.kind, this.apiProperties, this.downAssociations);
 
-    for (const raw of data) {
-      const props = this.fromAPI(raw.properties);
-      if (!props) continue;
+    for (const rawEntity of rawEntities) {
+      const data = this.fromAPI(rawEntity.properties);
+      if (!data) continue;
 
-      for (const item of raw.associations) {
-        let set = this.prelinkedAssociations.get(raw.id);
-        if (!set) this.prelinkedAssociations.set(raw.id, set = new Set());
+      for (const item of rawEntity.associations) {
+        let set = this.prelinkedAssociations.get(rawEntity.id);
+        if (!set) this.prelinkedAssociations.set(rawEntity.id, set = new Set());
         set.add(item);
       }
 
-      const entity = new this.Entity(raw.id, this.Entity.kind, props, this);
+      const entity = new this.Entity(rawEntity.id, this.Entity.kind, data, this);
       this.entities.push(entity);
     }
 
@@ -109,8 +109,8 @@ export abstract class EntityManager<
     return { toKind: kind as EntityKind, youId: id };
   }
 
-  public create(props: D) {
-    const e = new this.Entity(null, this.Entity.kind, props, this);
+  public create(data: D) {
+    const e = new this.Entity(null, this.Entity.kind, data, this);
     this.entities.push(e);
     for (const index of this.indexes) {
       index.addIndexesFor([e]);

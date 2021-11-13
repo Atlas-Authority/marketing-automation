@@ -11,9 +11,9 @@ export abstract class Entity<D extends { [key: string]: any }> {
   id?: string;
 
   /** The most recently saved props, or all unsaved props */
-  private props: D;
+  private _data: D;
   /** Contains only new changes, and only when an entity is saved */
-  private newProps: Partial<D> = {};
+  private newData: Partial<D> = {};
 
   /** The associations this was created with, whether an existing or new entity */
   private assocs = new Set<Entity<any>>();
@@ -25,14 +25,14 @@ export abstract class Entity<D extends { [key: string]: any }> {
   constructor(
     id: string | null,
     public kind: EntityKind,
-    props: D,
+    data: D,
     private indexer: Indexer<D>,
   ) {
     if (id) this.id = id;
-    this.props = props;
+    this._data = data;
 
     type K = keyof D;
-    this.data = new Proxy(props, {
+    this.data = new Proxy(data, {
       get: (_target, _key) => {
         return this.get(_key as K);
       },
@@ -51,44 +51,44 @@ export abstract class Entity<D extends { [key: string]: any }> {
   // Properties
 
   get<K extends keyof D>(key: K) {
-    if (this.id === undefined) return this.props[key];
-    if (key in this.newProps) return this.newProps[key];
-    return this.props[key];
+    if (this.id === undefined) return this._data[key];
+    if (key in this.newData) return this.newData[key];
+    return this._data[key];
   }
 
   set<K extends keyof D>(key: K, val: D[K]) {
     if (this.pseudoProperties.includes(key)) return;
 
     if (this.id === undefined) {
-      this.indexer.removeIndexesFor(key, this.props[key]);
-      this.props[key] = val;
-      this.indexer.addIndexesFor(key, this.props[key], this);
+      this.indexer.removeIndexesFor(key, this._data[key]);
+      this._data[key] = val;
+      this.indexer.addIndexesFor(key, this._data[key], this);
       return;
     }
 
-    this.indexer.removeIndexesFor(key, this.newProps[key]);
-    const oldVal = this.props[key];
+    this.indexer.removeIndexesFor(key, this.newData[key]);
+    const oldVal = this._data[key];
     if (oldVal === val) {
-      delete this.newProps[key];
+      delete this.newData[key];
     }
     else {
-      this.newProps[key] = val;
+      this.newData[key] = val;
     }
-    this.indexer.addIndexesFor(key, this.newProps[key], this);
+    this.indexer.addIndexesFor(key, this.newData[key], this);
   }
 
   hasPropertyChanges() {
-    return this.id === undefined || Object.keys(this.newProps).length > 0;
+    return this.id === undefined || Object.keys(this.newData).length > 0;
   }
 
   getPropertyChanges() {
-    if (this.id === undefined) return this.props;
-    return this.newProps;
+    if (this.id === undefined) return this._data;
+    return this.newData;
   }
 
   applyPropertyChanges() {
-    Object.assign(this.props, this.newProps);
-    this.newProps = {};
+    Object.assign(this._data, this.newData);
+    this.newData = {};
   }
 
   abstract pseudoProperties: (keyof D)[];
