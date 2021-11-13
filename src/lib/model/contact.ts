@@ -51,7 +51,7 @@ const ContactAdapter: EntityAdapter<ContactData, ContactComputed> = {
 
   data: {
     contactType: {
-      property: 'contact_type',
+      property: env.hubspot.attrs.contact.contactType,
       down: contact_type => contact_type as ContactData['contactType'],
       up: contactType => contactType ?? '',
     },

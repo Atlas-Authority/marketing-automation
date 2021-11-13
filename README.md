@@ -14,7 +14,7 @@ Add these fields:
 | ---------------- | -------- | ---------------------------------------- | -------------------------------------- | -------- |
 | License Tier     | Number   | *                                        | `HUBSPOT_CONTACT_LICENSE_TIER_ATTR`    | ❌        |
 | Last MPAC Event  | Date     | *                                        | `HUBSPOT_CONTACT_LAST_MPAC_EVENT_ATTR` | ❌        |
-| Contact Type     | 1-Select | 'Partner' or 'Customer'                  | TBD                                    | ❌        |
+| Contact Type     | 1-Select | 'Partner' or 'Customer'                  | `HUBSPOT_CONTACT_CONTACT_TYPE_ATTR`    | ❌        |
 | Region           | 1-Select | "region" of MPAC records                 | TBD                                    | ❌        |
 | Related Products | N-Select | `ADDONKEY_PLATFORMS` rhs vals            | TBD                                    | ❌        |
 | Products         | N-Select | "addonKey" of MPAC records               | `HUBSPOT_CONTACT_PRODUCTS_ATTR`        | ❌        |

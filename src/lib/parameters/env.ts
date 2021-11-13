@@ -36,6 +36,7 @@ export default {
         licenseTier: optional('HUBSPOT_CONTACT_LICENSE_TIER_ATTR'),
         products: optional('HUBSPOT_CONTACT_PRODUCTS_ATTR'),
         lastMpacEvent: optional('HUBSPOT_CONTACT_LAST_MPAC_EVENT_ATTR'),
+        contactType: optional('HUBSPOT_CONTACT_CONTACT_TYPE_ATTR'),
       },
       deal: {
         app: optional('HUBSPOT_DEAL_APP_ATTR'),
