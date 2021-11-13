@@ -170,9 +170,10 @@ export abstract class EntityManager<
         e.applyPropertyChanges();
       }
 
+      const identifiers = typedEntries(this.entityAdapter.data).filter(([k, v]) => v.identifier);
+
       for (const e of toCreate) {
         const found = results.find(result => {
-          const identifiers = typedEntries(this.entityAdapter.data).filter(([k, v]) => v.identifier);
           for (const [localIdKey, spec] of identifiers) {
             const localVal = e.data[localIdKey];
             const hsLocal = spec.up(localVal);
