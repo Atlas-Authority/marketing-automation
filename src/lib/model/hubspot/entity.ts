@@ -6,7 +6,10 @@ export interface Indexer<D> {
   addIndexesFor<K extends keyof D>(key: K, val: D[K] | undefined, entity: Entity<D, any>): void;
 }
 
-export abstract class Entity<D extends { [key: string]: any }, C extends { [key: string]: any }> {
+export abstract class Entity<
+  D extends Record<string, any>,
+  C extends Record<string, any>>
+{
 
   id?: string;
 

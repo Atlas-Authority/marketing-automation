@@ -3,7 +3,7 @@ import { HubspotService, Progress } from '../../io/interfaces.js';
 import { AttachableError } from '../../util/errors.js';
 import { isPresent } from '../../util/helpers.js';
 import { Entity, Indexer } from "./entity.js";
-import { EntityKind, RelativeAssociation } from './interfaces.js';
+import { EntityKind, HubspotProperties, RelativeAssociation } from './interfaces.js';
 
 export interface EntityDatabase {
   getEntity(kind: EntityKind, id: string): Entity<any, any>;
@@ -12,16 +12,16 @@ export interface EntityDatabase {
 export interface EntityAdapter<D, C> {
   associations: [EntityKind, 'down' | 'down/up'][];
 
-  shouldReject?: (data: Record<string, string | null>) => boolean;
+  shouldReject?: (data: HubspotProperties) => boolean;
 
   apiProperties: string[];
 
-  fromAPI(data: { [key: string]: string | null }): D;
+  fromAPI(data: HubspotProperties): D;
   toAPI: PropertyTransformers<D>;
 
   computed: { [K in keyof C]: {
     default: C[K],
-    down: (data: Record<string, string | null>) => C[K],
+    down: (data: HubspotProperties) => C[K],
   } },
 
   identifiers: (keyof D)[];
@@ -32,8 +32,8 @@ export type PropertyTransformers<T> = {
 };
 
 interface EntitySubclass<
-  D extends { [key: string]: any },
-  C extends { [key: string]: any },
+  D extends Record<string, any>,
+  C extends Record<string, any>,
   E extends Entity<D, C>> {
 
   new(id: string | null, kind: EntityKind, data: D, computed: C, indexer: Indexer<D>): E;
@@ -41,8 +41,8 @@ interface EntitySubclass<
 }
 
 export abstract class EntityManager<
-  D extends { [key: string]: any },
-  C extends { [key: string]: any },
+  D extends Record<string, any>,
+  C extends Record<string, any>,
   E extends Entity<D, C>>
 {
 
@@ -273,7 +273,7 @@ export abstract class EntityManager<
   }
 
   private getChangedProperties(e: E) {
-    const properties: { [key: string]: string } = {};
+    const properties: Record<string, string> = {};
     for (const [k, v] of Object.entries(e.getPropertyChanges())) {
       const fn = this.entityAdapter.toAPI[k];
       const [newKey, newVal] = fn(v);
