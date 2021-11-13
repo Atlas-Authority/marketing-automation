@@ -68,7 +68,7 @@ const ContactAdapter: EntityAdapter<ContactData, ContactComputed> = {
       up: country => country ?? '',
     },
     region: {
-      property: 'region',
+      property: env.hubspot.attrs.contact.region,
       down: region => region,
       up: region => region ?? '',
     },
