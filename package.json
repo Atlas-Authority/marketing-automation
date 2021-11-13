@@ -11,7 +11,7 @@
     "download": "env TS_NODE_TRANSPILE_ONLY=true TS_NODE_FILES=true node --loader ts-node/esm src/bin/download.ts",
     "explain": "env TS_NODE_TRANSPILE_ONLY=true TS_NODE_FILES=true node --loader ts-node/esm src/bin/check-licenses.ts",
     "ts-node": "env TS_NODE_TRANSPILE_ONLY=true TS_NODE_FILES=true node --loader ts-node/esm",
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js out",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "test-watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js out --watch --watchPathIgnorePatterns='src/'"
   },
   "dependencies": {
@@ -28,6 +28,7 @@
     "dotenv": "^8.2.0",
     "email-providers": "^1.0.3",
     "flat": "^5.0.2",
+    "jest-ts-webcompat-resolver": "^1.0.0",
     "luxon": "^1.25.0",
     "mustache": "^4.2.0",
     "node-fetch": "^3.0.0"
@@ -44,6 +45,7 @@
     "path-parse": ">=1.0.7",
     "set-value": "^4.1.0",
     "tmpl": "^1.0.5",
+    "ts-jest": "^27.0.7",
     "ts-node": "^10.2.1",
     "typescript": "^4.4.2",
     "ws": ">=7.4.6"
