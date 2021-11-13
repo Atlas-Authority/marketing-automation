@@ -41,6 +41,7 @@ export default {
         deployment: optional('HUBSPOT_DEAL_DEPLOYMENT_ATTR'),
         addonLicenseId: required('HUBSPOT_DEAL_ADDONLICENESID_ATTR'),
         transactionId: required('HUBSPOT_DEAL_TRANSACTIONID_ATTR'),
+        licenseTier: optional('HUBSPOT_DEAL_LICENSE_TIER_ATTR'),
       },
     },
   },

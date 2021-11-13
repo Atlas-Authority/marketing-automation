@@ -118,7 +118,7 @@ const DealAdapter: EntityAdapter<DealData, DealComputed> = {
       up: deployment => deployment ?? '',
     },
     licenseTier: {
-      property: 'license_tier',
+      property: env.hubspot.attrs.deal.licenseTier,
       down: license_tier => +(license_tier as string),
       up: licenseTier => licenseTier.toFixed(),
     },

@@ -24,7 +24,7 @@ Add these fields:
 
 | Field            | Type        | Allowed Values             | ENV var                            | Required |
 | ---------------- | ----------- | -------------------------- | ---------------------------------- | -------- |
-| License Tier     | Number      | *                          | TBD                                | ❌        |
+| License Tier     | Number      | *                          | `HUBSPOT_DEAL_LICENSE_TIER_ATTR`   | ❌        |
 | Related Products | 1-Select    | `DEAL_RELATED_PRODUCTS`    | TBD                                | ❌        |
 | Origin           | 1-Select    | `DEAL_ORIGIN`              | TBD                                | ❌        |
 | Deployment       | 1-Select    | "hosting" of MPAC records  | `HUBSPOT_DEAL_DEPLOYMENT_ATTR`     | ❌        |
