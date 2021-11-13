@@ -82,7 +82,7 @@ const DealAdapter: EntityAdapter<DealData, DealComputed> = {
     },
     app: {
       property: appKey,
-      down: app => appKey ? app as string : null,
+      down: app => app as string,
       up: app => app ?? '',
     },
     addonLicenseId: {
