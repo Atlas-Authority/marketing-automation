@@ -71,7 +71,7 @@ const DealAdapter: EntityAdapter<DealData, DealComputed> = {
 
   data: {
     relatedProducts: {
-      property: 'related_products',
+      property: env.hubspot.attrs.deal.relatedProducts,
       down: related_products => related_products || null,
       up: relatedProducts => relatedProducts ?? '',
     },

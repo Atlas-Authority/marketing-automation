@@ -22,16 +22,16 @@ Add these fields:
 
 ### Deals
 
-| Field            | Type        | Allowed Values             | ENV var                            | Required |
-| ---------------- | ----------- | -------------------------- | ---------------------------------- | -------- |
-| License Tier     | Number      | *                          | `HUBSPOT_DEAL_LICENSE_TIER_ATTR`   | ❌        |
-| Related Products | 1-Select    | `DEAL_RELATED_PRODUCTS`    | TBD                                | ❌        |
-| Origin           | 1-Select    | `DEAL_ORIGIN`              | TBD                                | ❌        |
-| Deployment       | 1-Select    | "hosting" of MPAC records  | `HUBSPOT_DEAL_DEPLOYMENT_ATTR`     | ❌        |
-| App              | 1-Select    | "addonKey" of MPAC records | `HUBSPOT_DEAL_APP_ATTR`            | ❌        |
-| Country          | 1-line Text | "country" of MPAC records  | TBD                                | ❌        |
-| AddonLicenseId   | 1-line Text | (for engine use)           | `HUBSPOT_DEAL_ADDONLICENESID_ATTR` | ✔️        |
-| TransactionId    | 1-line Text | (for engine use)           | `HUBSPOT_DEAL_TRANSACTIONID_ATTR`  | ✔️        |
+| Field            | Type        | Allowed Values             | ENV var                              | Required |
+| ---------------- | ----------- | -------------------------- | ------------------------------------ | -------- |
+| License Tier     | Number      | *                          | `HUBSPOT_DEAL_LICENSE_TIER_ATTR`     | ❌        |
+| Related Products | 1-Select    | `DEAL_RELATED_PRODUCTS`    | `HUBSPOT_DEAL_RELATED_PRODUCTS_ATTR` | ❌        |
+| Origin           | 1-Select    | `DEAL_ORIGIN`              | TBD                                  | ❌        |
+| Deployment       | 1-Select    | "hosting" of MPAC records  | `HUBSPOT_DEAL_DEPLOYMENT_ATTR`       | ❌        |
+| App              | 1-Select    | "addonKey" of MPAC records | `HUBSPOT_DEAL_APP_ATTR`              | ❌        |
+| Country          | 1-line Text | "country" of MPAC records  | TBD                                  | ❌        |
+| AddonLicenseId   | 1-line Text | (for engine use)           | `HUBSPOT_DEAL_ADDONLICENESID_ATTR`   | ✔️        |
+| TransactionId    | 1-line Text | (for engine use)           | `HUBSPOT_DEAL_TRANSACTIONID_ATTR`    | ✔️        |
 
 
 ## Dev Setup

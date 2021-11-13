@@ -46,6 +46,7 @@ export default {
         addonLicenseId: required('HUBSPOT_DEAL_ADDONLICENESID_ATTR'),
         transactionId: required('HUBSPOT_DEAL_TRANSACTIONID_ATTR'),
         licenseTier: optional('HUBSPOT_DEAL_LICENSE_TIER_ATTR'),
+        relatedProducts: optional('HUBSPOT_DEAL_RELATED_PRODUCTS_ATTR'),
       },
     },
   },
