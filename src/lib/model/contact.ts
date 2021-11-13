@@ -3,7 +3,7 @@ import { isPresent } from "../util/helpers.js";
 import { Company } from "./company.js";
 import { Entity } from "./hubspot/entity.js";
 import { EntityKind } from "./hubspot/interfaces.js";
-import { EntityManager, PropertyTransformers } from "./hubspot/manager.js";
+import { EntityAdapter, EntityManager } from "./hubspot/manager.js";
 
 const deploymentKey = env.hubspot.attrs.contact.deployment;
 const productsKey = env.hubspot.attrs.contact.products;
@@ -52,19 +52,17 @@ export class Contact extends Entity<ContactData> {
 
 }
 
-export class ContactManager extends EntityManager<ContactData, Contact> {
+const ContactAdapter: EntityAdapter<ContactData> = {
 
-  override Entity = Contact;
-
-  override downAssociations: EntityKind[] = [
+  downAssociations: [
     "company",
-  ];
+  ],
 
-  override upAssociations: EntityKind[] = [
+  upAssociations: [
     "company",
-  ];
+  ],
 
-  override apiProperties: string[] = [
+  apiProperties: [
     // Required
     'email',
     'city',
@@ -85,9 +83,9 @@ export class ContactManager extends EntityManager<ContactData, Contact> {
       productsKey,
       licenseTierKey,
     ].filter(isPresent),
-  ];
+  ],
 
-  override fromAPI(data: { [key: string]: string | null }): ContactData | null {
+  fromAPI(data) {
     return {
       contactType: data['contact_type'] as ContactData['contactType'],
 
@@ -109,9 +107,9 @@ export class ContactManager extends EntityManager<ContactData, Contact> {
 
       otherEmails: data['hs_additional_emails']?.split(';') || [],
     };
-  }
+  },
 
-  override toAPI: PropertyTransformers<ContactData> = {
+  toAPI: {
     contactType: contactType => ['contact_type', contactType ?? ''],
 
     email: email => ['email', email],
@@ -131,11 +129,18 @@ export class ContactManager extends EntityManager<ContactData, Contact> {
     lastMpacEvent: lastMpacEvent => ['last_mpac_event', lastMpacEvent ?? ''],
 
     otherEmails: EntityManager.noUpSync,
-  };
+  },
 
-  override identifiers: (keyof ContactData)[] = [
+  identifiers: [
     'email',
-  ];
+  ],
+
+};
+
+export class ContactManager extends EntityManager<ContactData, Contact> {
+
+  override Entity = Contact;
+  override entityAdapter = ContactAdapter;
 
   public getByEmail = this.makeIndex(c => c.allEmails, ['email', 'otherEmails']);
 

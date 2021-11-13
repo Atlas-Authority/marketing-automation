@@ -1,7 +1,7 @@
 import { Contact } from "./contact.js";
 import { Entity } from "./hubspot/entity.js";
 import { EntityKind } from "./hubspot/interfaces.js";
-import { EntityManager, PropertyTransformers } from "./hubspot/manager.js";
+import { EntityAdapter, EntityManager } from "./hubspot/manager.js";
 
 type CompanyData = {
   name: string;
@@ -18,34 +18,39 @@ export class Company extends Entity<CompanyData> {
 
 }
 
-export class CompanyManager extends EntityManager<CompanyData, Company> {
+const CompanyAdapter: EntityAdapter<CompanyData> = {
 
-  override Entity = Company;
-
-  override downAssociations: EntityKind[] = [
+  downAssociations: [
     'contact'
-  ];
+  ],
 
-  override upAssociations: EntityKind[] = [];
+  upAssociations: [],
 
-  override apiProperties: string[] = [
+  apiProperties: [
     'name',
     'type',
-  ];
+  ],
 
-  override fromAPI(data: { [key: string]: string | null }): CompanyData | null {
+  fromAPI(data) {
     return {
       name: data['name'] ?? '',
       type: data['type'] === 'PARTNER' ? 'Partner' : null,
     };
-  }
+  },
 
-  override toAPI: PropertyTransformers<CompanyData> = {
+  toAPI: {
     name: name => ['name', name],
     type: type => ['type', type === 'Partner' ? 'PARTNER' : ''],
-  };
+  },
 
-  override identifiers: (keyof CompanyData)[] = [
-  ];
+  identifiers: [
+  ],
+
+};
+
+export class CompanyManager extends EntityManager<CompanyData, Company> {
+
+  override Entity = Company;
+  override entityAdapter = CompanyAdapter;
 
 }

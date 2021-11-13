@@ -9,6 +9,17 @@ export interface EntityDatabase {
   getEntity(kind: EntityKind, id: string): Entity<any>;
 }
 
+export interface EntityAdapter<D> {
+  downAssociations: EntityKind[];
+  upAssociations: EntityKind[];
+
+  apiProperties: string[];
+  fromAPI(data: { [key: string]: string | null }): D | null;
+  toAPI: PropertyTransformers<D>;
+
+  identifiers: (keyof D)[];
+}
+
 export type PropertyTransformers<T> = {
   [K in keyof T]: (prop: T[K]) => [string, string]
 };
@@ -26,9 +37,9 @@ export abstract class EntityManager<
   E extends Entity<D>>
 {
 
-  protected static readonly noUpSync = (): [string, string] => ['', ''];
+  static readonly noUpSync = (): [string, string] => ['', ''];
 
-  protected static upSyncIfConfigured<T>(
+  static upSyncIfConfigured<T>(
     attributeKey: string | undefined,
     transformer: (localValue: T) => string
   ): (val: T) => [string, string] {
@@ -49,14 +60,7 @@ export abstract class EntityManager<
   public disassociatedCount = 0;
 
   protected abstract Entity: EntitySubclass<D, E>;
-  protected abstract downAssociations: EntityKind[];
-  protected abstract upAssociations: EntityKind[];
-
-  protected abstract apiProperties: string[];
-  protected abstract fromAPI(data: { [key: string]: string | null }): D | null;
-  protected abstract toAPI: PropertyTransformers<D>;
-
-  protected abstract identifiers: (keyof D)[];
+  protected abstract entityAdapter: EntityAdapter<D>;
 
   private entities: E[] = [];
   private indexes: Index<E>[] = [];
@@ -66,10 +70,10 @@ export abstract class EntityManager<
   private prelinkedAssociations = new Map<string, Set<RelativeAssociation>>();
 
   public async downloadAllEntities(progress: Progress) {
-    const rawEntities = await this.downloader.downloadEntities(progress, this.Entity.kind, this.apiProperties, this.downAssociations);
+    const rawEntities = await this.downloader.downloadEntities(progress, this.Entity.kind, this.entityAdapter.apiProperties, this.entityAdapter.downAssociations);
 
     for (const rawEntity of rawEntities) {
-      const data = this.fromAPI(rawEntity.properties);
+      const data = this.entityAdapter.fromAPI(rawEntity.properties);
       if (!data) continue;
 
       for (const item of rawEntity.associations) {
@@ -164,9 +168,9 @@ export abstract class EntityManager<
 
       for (const e of toCreate) {
         const found = results.find(result => {
-          for (const localIdKey of this.identifiers) {
+          for (const localIdKey of this.entityAdapter.identifiers) {
             const localVal = e.data[localIdKey];
-            const [remoteIdKey, hsLocal] = this.toAPI[localIdKey](localVal);
+            const [remoteIdKey, hsLocal] = this.entityAdapter.toAPI[localIdKey](localVal);
             const hsRemote = result.properties[remoteIdKey] ?? '';
             if (hsLocal !== hsRemote) return false;
           }
@@ -212,7 +216,7 @@ export abstract class EntityManager<
       .flatMap(e => e.getAssociationChanges()
         .map(({ op, other }) => ({ op, from: e, to: other }))));
 
-    for (const otherKind of this.upAssociations) {
+    for (const otherKind of this.entityAdapter.upAssociations) {
       const toSyncInKind = (toSync
         .filter(changes => changes.to.kind === otherKind)
         .map(changes => ({
@@ -251,7 +255,7 @@ export abstract class EntityManager<
   private getChangedProperties(e: E) {
     const properties: { [key: string]: string } = {};
     for (const [k, v] of Object.entries(e.getPropertyChanges())) {
-      const fn = this.toAPI[k];
+      const fn = this.entityAdapter.toAPI[k];
       const [newKey, newVal] = fn(v);
       if (newKey) properties[newKey] = newVal;
     }

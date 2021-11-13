@@ -5,7 +5,7 @@ import { Company } from "./company.js";
 import { Contact } from "./contact.js";
 import { Entity } from "./hubspot/entity.js";
 import { DealStage, EntityKind, Pipeline } from "./hubspot/interfaces.js";
-import { EntityManager, PropertyTransformers } from "./hubspot/manager.js";
+import { EntityAdapter, EntityManager } from "./hubspot/manager.js";
 import { License } from "./license.js";
 import { Transaction } from "./transaction.js";
 
@@ -66,21 +66,19 @@ export class Deal extends Entity<DealData> {
 
 }
 
-export class DealManager extends EntityManager<DealData, Deal> {
+const DealAdapter: EntityAdapter<DealData> = {
 
-  override Entity = Deal;
-
-  override downAssociations: EntityKind[] = [
+  downAssociations: [
     "company",
     "contact",
-  ];
+  ],
 
-  override upAssociations: EntityKind[] = [
+  upAssociations: [
     "company",
     "contact",
-  ];
+  ],
 
-  override apiProperties: string[] = [
+  apiProperties: [
     // Required
     'closedate',
     'license_tier',
@@ -110,9 +108,9 @@ export class DealManager extends EntityManager<DealData, Deal> {
     'num_contacted_notes',
     'num_notes',
     'hs_sales_email_last_replied',
-  ];
+  ],
 
-  override fromAPI(data: { [key: string]: string | null }): DealData | null {
+  fromAPI(data) {
     if (data['pipeline'] !== env.hubspot.pipeline.mpac) return null;
     return {
       relatedProducts: data['related_products'] || null,
@@ -140,9 +138,9 @@ export class DealManager extends EntityManager<DealData, Deal> {
         isNonZeroNumberString(data['num_notes'])
       ),
     };
-  }
+  },
 
-  override toAPI: PropertyTransformers<DealData> = {
+  toAPI: {
     relatedProducts: relatedProducts => ['related_products', relatedProducts ?? ''],
     app: EntityManager.upSyncIfConfigured(appKey, app => app ?? ''),
     addonLicenseId: addonLicenseId => [addonLicenseIdKey, addonLicenseId || ''],
@@ -157,12 +155,19 @@ export class DealManager extends EntityManager<DealData, Deal> {
     dealStage: dealstage => ['dealstage', dealstages[dealstage]],
     amount: amount => ['amount', amount?.toString() ?? ''],
     hasActivity: EntityManager.noUpSync,
-  };
+  },
 
-  override identifiers: (keyof DealData)[] = [
+  identifiers: [
     'addonLicenseId',
     'transactionId',
-  ];
+  ],
+
+};
+
+export class DealManager extends EntityManager<DealData, Deal> {
+
+  override Entity = Deal;
+  override entityAdapter = DealAdapter;
 
   /** Either `License.addonLicenseId` or `Transaction.transactionId[Transacton.addonLicenseId]` */
   public getByMpacId = this.makeIndex(d => [d.mpacId()].filter(isPresent), ['transactionId', 'addonLicenseId']);
