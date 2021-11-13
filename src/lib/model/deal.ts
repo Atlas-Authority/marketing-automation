@@ -126,9 +126,10 @@ const DealAdapter: EntityAdapter<DealData, DealComputed> = {
     };
   },
 
-  computedFromAPI(data) {
-    return {
-      hasActivity: (
+  computed: {
+    hasActivity: {
+      default: false,
+      down: data => (
         isNonBlankString(data['hs_user_ids_of_all_owners']) ||
         isNonBlankString(data['engagements_last_meeting_booked']) ||
         isNonBlankString(data['hs_latest_meeting_activity']) ||
@@ -139,11 +140,7 @@ const DealAdapter: EntityAdapter<DealData, DealComputed> = {
         isNonZeroNumberString(data['num_contacted_notes']) ||
         isNonZeroNumberString(data['num_notes'])
       ),
-    };
-  },
-
-  defaultComputed: {
-    hasActivity: false,
+    },
   },
 
   toAPI: {

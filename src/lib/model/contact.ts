@@ -101,14 +101,11 @@ const ContactAdapter: EntityAdapter<ContactData, ContactComputed> = {
     };
   },
 
-  computedFromAPI(data) {
-    return {
-      otherEmails: data['hs_additional_emails']?.split(';') || [],
-    };
-  },
-
-  defaultComputed: {
-    otherEmails: [],
+  computed: {
+    otherEmails: {
+      default: [],
+      down: data => data['hs_additional_emails']?.split(';') || [],
+    },
   },
 
   toAPI: {

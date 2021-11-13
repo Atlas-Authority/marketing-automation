@@ -19,8 +19,10 @@ export interface EntityAdapter<D, C> {
   fromAPI(data: { [key: string]: string | null }): D;
   toAPI: PropertyTransformers<D>;
 
-  computedFromAPI(data: { [key: string]: string | null }): C;
-  defaultComputed: C;
+  computed: { [K in keyof C]: {
+    default: C[K],
+    down: (data: Record<string, string | null>) => C[K],
+  } },
 
   identifiers: (keyof D)[];
 }
@@ -87,7 +89,7 @@ export abstract class EntityManager<
       if (this.entityAdapter.shouldReject?.(rawEntity.properties)) continue;
 
       const data = this.entityAdapter.fromAPI(rawEntity.properties);
-      const computed = this.entityAdapter.computedFromAPI(rawEntity.properties);
+      const computed = mapObject(this.entityAdapter.computed, (key, spec) => spec.down(rawEntity.properties)) as C;
 
       for (const item of rawEntity.associations) {
         let set = this.prelinkedAssociations.get(rawEntity.id);
@@ -127,7 +129,8 @@ export abstract class EntityManager<
   }
 
   public create(data: D) {
-    const e = new this.Entity(null, this.Entity.kind, data, this.entityAdapter.defaultComputed, this);
+    const computed = mapObject(this.entityAdapter.computed, (key, spec) => spec.default) as C;
+    const e = new this.Entity(null, this.Entity.kind, data, computed, this);
     this.entities.push(e);
     for (const index of this.indexes) {
       index.addIndexesFor([e]);
@@ -337,4 +340,10 @@ class Index<E> {
     return this.map.get(key);
   }
 
+}
+
+function mapObject<T, K extends keyof T, O>(o: T, fn: (key: K, e: T[K]) => O): { [K in keyof T]: O } {
+  const entries = Object.entries(o);
+  const mapped = entries.map(([k, v]) => [k, fn(k as K, v)]);
+  return Object.fromEntries(mapped);
 }

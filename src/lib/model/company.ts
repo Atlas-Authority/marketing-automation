@@ -34,11 +34,7 @@ const CompanyAdapter: EntityAdapter<CompanyData, {}> = {
     };
   },
 
-  computedFromAPI(data) {
-    return {};
-  },
-
-  defaultComputed: {},
+  computed: {},
 
   toAPI: {
     name: name => ['name', name],
