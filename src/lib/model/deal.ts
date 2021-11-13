@@ -15,11 +15,11 @@ export type DealData = {
   addonLicenseId: string;
   transactionId: string | null;
   closeDate: string;
-  country: string;
+  country: string | null;
   dealName: string;
   origin: string | null;
   deployment: 'Server' | 'Cloud' | 'Data Center' | null;
-  licenseTier: number;
+  licenseTier: number | null;
   pipeline: Pipeline;
   dealStage: DealStage;
   amount: number | null;
@@ -77,13 +77,13 @@ const DealAdapter: EntityAdapter<DealData, DealComputed> = {
     },
     app: {
       property: env.hubspot.attrs.deal.app,
-      down: app => app as string,
+      down: app => app,
       up: app => app ?? '',
     },
     addonLicenseId: {
       property: env.hubspot.attrs.deal.addonLicenseId,
       identifier: true,
-      down: addonLicenseId => addonLicenseId as string,
+      down: addonLicenseId => addonLicenseId!,
       up: addonLicenseId => addonLicenseId || '',
     },
     transactionId: {
@@ -94,22 +94,22 @@ const DealAdapter: EntityAdapter<DealData, DealComputed> = {
     },
     closeDate: {
       property: 'closedate',
-      down: closedate => (closedate as string).substr(0, 10),
+      down: closedate => closedate!.substr(0, 10),
       up: closeDate => closeDate,
     },
     country: {
       property: env.hubspot.attrs.deal.country,
-      down: country => country as string,
-      up: country => country,
+      down: country => country,
+      up: country => country ?? '',
     },
     dealName: {
       property: 'dealname',
-      down: dealname => dealname as string,
+      down: dealname => dealname!,
       up: dealName => dealName,
     },
     origin: {
       property: env.hubspot.attrs.deal.origin,
-      down: origin => origin || null,
+      down: origin => origin,
       up: origin => origin ?? '',
     },
     deployment: {
@@ -119,8 +119,8 @@ const DealAdapter: EntityAdapter<DealData, DealComputed> = {
     },
     licenseTier: {
       property: env.hubspot.attrs.deal.licenseTier,
-      down: license_tier => +(license_tier as string),
-      up: licenseTier => licenseTier.toFixed(),
+      down: license_tier => license_tier ? +license_tier : null,
+      up: licenseTier => licenseTier?.toFixed() ?? '',
     },
     pipeline: {
       property: 'pipeline',

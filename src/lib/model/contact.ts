@@ -52,7 +52,7 @@ const ContactAdapter: EntityAdapter<ContactData, ContactComputed> = {
   data: {
     contactType: {
       property: env.hubspot.attrs.contact.contactType,
-      down: contact_type => contact_type as ContactData['contactType'],
+      down: contact_type => contact_type as ContactType,
       up: contactType => contactType ?? '',
     },
 
@@ -106,7 +106,7 @@ const ContactAdapter: EntityAdapter<ContactData, ContactComputed> = {
     },
     licenseTier: {
       property: env.hubspot.attrs.contact.licenseTier,
-      down: licenseTier => (licenseTier ? +licenseTier.trim() : null) ?? null,
+      down: licenseTier => licenseTier ? +licenseTier.trim() : null,
       up: licenseTier => licenseTier?.toFixed() ?? '',
     },
     deployment: {

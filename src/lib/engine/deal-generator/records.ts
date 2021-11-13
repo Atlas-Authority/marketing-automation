@@ -76,7 +76,7 @@ export function updateDeal(deal: Deal, record: License | Transaction) {
     dealStage: deal.data.dealStage,
   });
   Object.assign(deal.data, data);
-  deal.data.licenseTier = Math.max(deal.data.licenseTier, record.tier);
+  deal.data.licenseTier = Math.max(deal.data.licenseTier ?? -1, record.tier);
 }
 
 export function getEmails(item: Transaction | License) {
