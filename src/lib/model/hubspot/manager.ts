@@ -22,6 +22,7 @@ export interface EntityAdapter<D, C> {
   computed: { [K in keyof C]: {
     default: C[K],
     down: (data: HubspotProperties) => C[K],
+    properties: string[],
   } },
 
   identifiers: (keyof D)[];
@@ -75,7 +76,12 @@ export abstract class EntityManager<
       .filter(([kind, dir]) => dir.includes('down'))
       .map(([kind, dir]) => kind));
 
-    const rawEntities = await this.downloader.downloadEntities(progress, this.kind, this.entityAdapter.apiProperties, downAssociations);
+    const apiProperties = [
+      ...this.entityAdapter.apiProperties,
+      ...typedEntries(this.entityAdapter.computed).map(([k, v]) => v.properties).flat(),
+    ];
+
+    const rawEntities = await this.downloader.downloadEntities(progress, this.kind, apiProperties, downAssociations);
 
     for (const rawEntity of rawEntities) {
       if (this.entityAdapter.shouldReject?.(rawEntity.properties)) continue;
@@ -335,7 +341,10 @@ class Index<E> {
 }
 
 function mapObject<T, K extends keyof T, O>(o: T, fn: (key: K, e: T[K]) => O): { [K in keyof T]: O } {
-  const entries = Object.entries(o);
-  const mapped = entries.map(([k, v]) => [k, fn(k as K, v)]);
+  const mapped = typedEntries(o).map(([k, v]) => [k, fn(k as K, v as T[K])]);
   return Object.fromEntries(mapped);
+}
+
+function typedEntries<T, K extends keyof T, O>(o: T) {
+  return Object.entries(o) as [K, T[K]][];
 }

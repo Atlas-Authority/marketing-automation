@@ -89,17 +89,6 @@ const DealAdapter: EntityAdapter<DealData, DealComputed> = {
       deploymentKey,
       appKey,
     ].filter(isPresent),
-
-    // For checking activity in duplicates
-    'hs_user_ids_of_all_owners',
-    'engagements_last_meeting_booked',
-    'hs_latest_meeting_activity',
-    'notes_last_contacted',
-    'notes_last_updated',
-    'notes_next_activity_date',
-    'num_contacted_notes',
-    'num_notes',
-    'hs_sales_email_last_replied',
   ],
 
   shouldReject(data) {
@@ -138,6 +127,17 @@ const DealAdapter: EntityAdapter<DealData, DealComputed> = {
         isNonZeroNumberString(data['num_contacted_notes']) ||
         isNonZeroNumberString(data['num_notes'])
       ),
+      properties: [
+        'hs_user_ids_of_all_owners',
+        'engagements_last_meeting_booked',
+        'hs_latest_meeting_activity',
+        'notes_last_contacted',
+        'notes_last_updated',
+        'notes_next_activity_date',
+        'num_contacted_notes',
+        'num_notes',
+        'hs_sales_email_last_replied',
+      ]
     },
   },
 

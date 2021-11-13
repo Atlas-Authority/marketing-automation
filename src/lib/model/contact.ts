@@ -67,7 +67,6 @@ const ContactAdapter: EntityAdapter<ContactData, ContactComputed> = {
     'phone',
     'related_products',
     'last_mpac_event',
-    'hs_additional_emails',
 
     // User-configurable
     ...[
@@ -103,6 +102,7 @@ const ContactAdapter: EntityAdapter<ContactData, ContactComputed> = {
     otherEmails: {
       default: [],
       down: data => data['hs_additional_emails']?.split(';') || [],
+      properties: ['hs_additional_emails'],
     },
   },
 
