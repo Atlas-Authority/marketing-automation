@@ -100,7 +100,7 @@ const ContactAdapter: EntityAdapter<ContactData, ContactComputed> = {
     },
 
     relatedProducts: {
-      property: 'related_products',
+      property: env.hubspot.attrs.contact.relatedProducts,
       down: related_products => new Set(related_products ? related_products.split(';') : []),
       up: relatedProducts => [...relatedProducts].join(';'),
     },
