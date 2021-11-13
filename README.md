@@ -26,7 +26,7 @@ Add these fields:
 | ---------------- | ----------- | -------------------------- | ------------------------------------ | -------- |
 | License Tier     | Number      | *                          | `HUBSPOT_DEAL_LICENSE_TIER_ATTR`     | ❌        |
 | Related Products | 1-Select    | `DEAL_RELATED_PRODUCTS`    | `HUBSPOT_DEAL_RELATED_PRODUCTS_ATTR` | ❌        |
-| Origin           | 1-Select    | `DEAL_ORIGIN`              | TBD                                  | ❌        |
+| Origin           | 1-Select    | `DEAL_ORIGIN`              | `HUBSPOT_DEAL_ORIGIN_ATTR`           | ❌        |
 | Deployment       | 1-Select    | "hosting" of MPAC records  | `HUBSPOT_DEAL_DEPLOYMENT_ATTR`       | ❌        |
 | App              | 1-Select    | "addonKey" of MPAC records | `HUBSPOT_DEAL_APP_ATTR`              | ❌        |
 | Country          | 1-line Text | "country" of MPAC records  | TBD                                  | ❌        |

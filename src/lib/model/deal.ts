@@ -108,7 +108,7 @@ const DealAdapter: EntityAdapter<DealData, DealComputed> = {
       up: dealName => dealName,
     },
     origin: {
-      property: 'origin',
+      property: env.hubspot.attrs.deal.origin,
       down: origin => origin || null,
       up: origin => origin ?? '',
     },
