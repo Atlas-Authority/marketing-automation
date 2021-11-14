@@ -18,7 +18,7 @@ class ArgParser {
   getChoiceOrFail<T extends string>(option: string, choices: T[]): T {
     const value = this.get(option) as T;
     if (!value || !choices.includes(value)) {
-      console.log(`Error: ${option} must be ${Object.keys(choices)
+      console.log(`Error: ${option} must be ${choices
         .map(c => `'${c}'`)
         .join(' or ')}`);
       process.exit(1);
