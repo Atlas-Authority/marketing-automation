@@ -12,7 +12,7 @@
     "explain": "env TS_NODE_TRANSPILE_ONLY=true TS_NODE_FILES=true node --loader ts-node/esm src/bin/check-licenses.ts",
     "ts-node": "env TS_NODE_TRANSPILE_ONLY=true TS_NODE_FILES=true node --loader ts-node/esm",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
-    "test-watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js out --watch --watchPathIgnorePatterns='src/'"
+    "test-watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch"
   },
   "dependencies": {
     "@hubspot/api-client": "^3.2.6",
