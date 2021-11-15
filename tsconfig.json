@@ -4,6 +4,7 @@
     "allowJs": true,
     "module": "ESNext",
     "target": "ESNext",
+    "sourceMap": true,
     "moduleResolution": "Node",
     "lib": [
       "ES2020"
@@ -13,7 +14,7 @@
     "strictNullChecks": true,
     "strictPropertyInitialization": true,
     "strict": true,
-    "noEmit": true,
+    "outDir": "./out",
     "noImplicitReturns": true,
     "noImplicitThis": true,
     "noImplicitAny": true,
