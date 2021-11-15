@@ -146,11 +146,14 @@ export abstract class EntityManager<
 
   public async syncUpAllEntities() {
     await this.syncUpAllEntitiesProperties();
-    await this.syncUpAllEntitiesAssociations();
     for (const index of this.indexes) {
       index.clear();
       index.addIndexesFor(this.entities);
     }
+  }
+
+  public async syncUpAllAssociations() {
+    await this.syncUpAllEntitiesAssociations();
   }
 
   private async syncUpAllEntitiesProperties() {

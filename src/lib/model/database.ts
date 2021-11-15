@@ -132,6 +132,10 @@ export class Database {
     await this.dealManager.syncUpAllEntities();
     await this.contactManager.syncUpAllEntities();
     await this.companyManager.syncUpAllEntities();
+
+    await this.dealManager.syncUpAllAssociations();
+    await this.contactManager.syncUpAllAssociations();
+    await this.companyManager.syncUpAllAssociations();
   }
 
   getEntity(kind: EntityKind, id: string): Entity<any, any> {

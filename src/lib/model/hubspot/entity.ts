@@ -48,7 +48,7 @@ export abstract class Entity<
   }
 
   guaranteedId() {
-    assert.ok(this.id);
+    if (!this.id) throw new Error('Trying to access null deal id!');
     return this.id;
   }
 
