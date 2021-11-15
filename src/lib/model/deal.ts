@@ -5,14 +5,9 @@ import { Company } from "./company.js";
 import { Contact } from "./contact.js";
 import { Entity } from "./hubspot/entity.js";
 import { DealStage, EntityKind, Pipeline } from "./hubspot/interfaces.js";
-import { EntityManager, PropertyTransformers } from "./hubspot/manager.js";
+import { EntityAdapter, EntityManager } from "./hubspot/manager.js";
 import { License } from "./license.js";
 import { Transaction } from "./transaction.js";
-
-const addonLicenseIdKey = env.hubspot.attrs.deal.addonLicenseId;
-const transactionIdKey = env.hubspot.attrs.deal.transactionId;
-const deploymentKey = env.hubspot.attrs.deal.deployment;
-const appKey = env.hubspot.attrs.deal.app;
 
 export type DealData = {
   relatedProducts: string | null;
@@ -20,18 +15,21 @@ export type DealData = {
   addonLicenseId: string;
   transactionId: string | null;
   closeDate: string;
-  country: string;
+  country: string | null;
   dealName: string;
   origin: string | null;
   deployment: 'Server' | 'Cloud' | 'Data Center' | null;
-  licenseTier: number;
+  licenseTier: number | null;
   pipeline: Pipeline;
   dealStage: DealStage;
   amount: number | null;
+};
+
+type DealComputed = {
   readonly hasActivity: boolean;
 };
 
-export class Deal extends Entity<DealData> {
+export class Deal extends Entity<DealData, DealComputed> {
 
   contacts = this.makeDynamicAssociation<Contact>('contact');
   companies = this.makeDynamicAssociation<Company>('company');
@@ -58,76 +56,93 @@ export class Deal extends Entity<DealData> {
       : `deal-id=${this.id}`);
   }
 
-  override pseudoProperties: (keyof DealData)[] = [
-    'hasActivity',
-  ];
-
 }
 
-export class DealManager extends EntityManager<DealData, Deal> {
+const DealAdapter: EntityAdapter<DealData, DealComputed> = {
 
-  override Entity = Deal;
-  override kind: EntityKind = "deal";
+  associations: [
+    ['company', 'down/up'],
+    ['contact', 'down/up'],
+  ],
 
-  override downAssociations: EntityKind[] = [
-    "company",
-    "contact",
-  ];
+  shouldReject(data) {
+    return (data['pipeline'] !== env.hubspot.pipeline.mpac);
+  },
 
-  override upAssociations: EntityKind[] = [
-    "company",
-    "contact",
-  ];
+  data: {
+    relatedProducts: {
+      property: env.hubspot.attrs.deal.relatedProducts,
+      down: related_products => related_products || null,
+      up: relatedProducts => relatedProducts ?? '',
+    },
+    app: {
+      property: env.hubspot.attrs.deal.app,
+      down: app => app,
+      up: app => app ?? '',
+    },
+    addonLicenseId: {
+      property: env.hubspot.attrs.deal.addonLicenseId,
+      identifier: true,
+      down: addonLicenseId => addonLicenseId!,
+      up: addonLicenseId => addonLicenseId || '',
+    },
+    transactionId: {
+      property: env.hubspot.attrs.deal.transactionId,
+      identifier: true,
+      down: transactionId => transactionId,
+      up: transactionId => transactionId || '',
+    },
+    closeDate: {
+      property: 'closedate',
+      down: closedate => closedate!.substr(0, 10),
+      up: closeDate => closeDate,
+    },
+    country: {
+      property: env.hubspot.attrs.deal.country,
+      down: country => country,
+      up: country => country ?? '',
+    },
+    dealName: {
+      property: 'dealname',
+      down: dealname => dealname!,
+      up: dealName => dealName,
+    },
+    origin: {
+      property: env.hubspot.attrs.deal.origin,
+      down: origin => origin,
+      up: origin => origin ?? '',
+    },
+    deployment: {
+      property: env.hubspot.attrs.deal.deployment,
+      down: deployment => deployment as DealData['deployment'],
+      up: deployment => deployment ?? '',
+    },
+    licenseTier: {
+      property: env.hubspot.attrs.deal.licenseTier,
+      down: license_tier => license_tier ? +license_tier : null,
+      up: licenseTier => licenseTier?.toFixed() ?? '',
+    },
+    pipeline: {
+      property: 'pipeline',
+      down: data => Pipeline.MPAC,
+      up: pipeline => pipelines[pipeline],
+    },
+    dealStage: {
+      property: 'dealstage',
+      down: dealstage => enumFromValue(dealstages, dealstage ?? ''),
+      up: dealstage => dealstages[dealstage],
+    },
+    amount: {
+      property: 'amount',
+      down: amount => !amount ? null : +amount,
+      up: amount => amount?.toString() ?? '',
+    },
+  },
 
-  override apiProperties: string[] = [
-    // Required
-    'closedate',
-    'license_tier',
-    'country',
-    'origin',
-    'related_products',
-    'dealname',
-    'dealstage',
-    'pipeline',
-    'amount',
-
-    // User-configurable
-    addonLicenseIdKey,
-    transactionIdKey,
-    ...[
-      deploymentKey,
-      appKey,
-    ].filter(isPresent),
-
-    // For checking activity in duplicates
-    'hs_user_ids_of_all_owners',
-    'engagements_last_meeting_booked',
-    'hs_latest_meeting_activity',
-    'notes_last_contacted',
-    'notes_last_updated',
-    'notes_next_activity_date',
-    'num_contacted_notes',
-    'num_notes',
-    'hs_sales_email_last_replied',
-  ];
-
-  override fromAPI(data: { [key: string]: string | null }): DealData | null {
-    if (data['pipeline'] !== env.hubspot.pipeline.mpac) return null;
-    return {
-      relatedProducts: data['related_products'] || null,
-      app: appKey ? data[appKey] as string : null,
-      addonLicenseId: data[addonLicenseIdKey] as string,
-      transactionId: data[transactionIdKey],
-      closeDate: (data['closedate'] as string).substr(0, 10),
-      country: data['country'] as string,
-      dealName: data['dealname'] as string,
-      origin: data['origin'] || null,
-      deployment: deploymentKey ? data[deploymentKey] as DealData['deployment'] : null,
-      licenseTier: +(data['license_tier'] as string),
-      pipeline: enumFromValue(pipelines, data['pipeline']),
-      dealStage: enumFromValue(dealstages, data['dealstage'] ?? ''),
-      amount: !data['amount'] ? null : +data['amount'],
-      hasActivity: (
+  computed: {
+    hasActivity: {
+      default: false,
+      down: data => (
         isNonBlankString(data['hs_user_ids_of_all_owners']) ||
         isNonBlankString(data['engagements_last_meeting_booked']) ||
         isNonBlankString(data['hs_latest_meeting_activity']) ||
@@ -138,30 +153,27 @@ export class DealManager extends EntityManager<DealData, Deal> {
         isNonZeroNumberString(data['num_contacted_notes']) ||
         isNonZeroNumberString(data['num_notes'])
       ),
-    };
-  }
+      properties: [
+        'hs_user_ids_of_all_owners',
+        'engagements_last_meeting_booked',
+        'hs_latest_meeting_activity',
+        'notes_last_contacted',
+        'notes_last_updated',
+        'notes_next_activity_date',
+        'num_contacted_notes',
+        'num_notes',
+        'hs_sales_email_last_replied',
+      ]
+    },
+  },
 
-  override toAPI: PropertyTransformers<DealData> = {
-    relatedProducts: relatedProducts => ['related_products', relatedProducts ?? ''],
-    app: EntityManager.upSyncIfConfigured(appKey, app => app ?? ''),
-    addonLicenseId: addonLicenseId => [addonLicenseIdKey, addonLicenseId || ''],
-    transactionId: transactionId => [transactionIdKey, transactionId || ''],
-    closeDate: closeDate => ['closedate', closeDate],
-    country: country => ['country', country],
-    dealName: dealName => ['dealname', dealName],
-    origin: origin => ['origin', origin ?? ''],
-    deployment: EntityManager.upSyncIfConfigured(deploymentKey, deployment => deployment ?? ''),
-    licenseTier: licenseTier => ['license_tier', licenseTier.toFixed()],
-    pipeline: pipeline => ['pipeline', pipelines[pipeline]],
-    dealStage: dealstage => ['dealstage', dealstages[dealstage]],
-    amount: amount => ['amount', amount?.toString() ?? ''],
-    hasActivity: EntityManager.noUpSync,
-  };
+};
 
-  override identifiers: (keyof DealData)[] = [
-    'addonLicenseId',
-    'transactionId',
-  ];
+export class DealManager extends EntityManager<DealData, DealComputed, Deal> {
+
+  override Entity = Deal;
+  override kind: EntityKind = 'deal';
+  override entityAdapter = DealAdapter;
 
   /** Either `License.addonLicenseId` or `Transaction.transactionId[Transacton.addonLicenseId]` */
   public getByMpacId = this.makeIndex(d => [d.mpacId()].filter(isPresent), ['transactionId', 'addonLicenseId']);

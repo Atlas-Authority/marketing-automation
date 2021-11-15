@@ -61,7 +61,6 @@ export function dealCreationProperties(record: License | Transaction, data: Pick
     relatedProducts: env.hubspot.deals.dealRelatedProducts ?? null,
     dealName: mustache.render(env.hubspot.deals.dealDealName, record.data),
     pipeline: Pipeline.MPAC,
-    hasActivity: false,
     amount: (data.dealStage === DealStage.EVAL
       ? null
       : record instanceof License
@@ -77,7 +76,7 @@ export function updateDeal(deal: Deal, record: License | Transaction) {
     dealStage: deal.data.dealStage,
   });
   Object.assign(deal.data, data);
-  deal.data.licenseTier = Math.max(deal.data.licenseTier, record.tier);
+  deal.data.licenseTier = Math.max(deal.data.licenseTier ?? -1, record.tier);
 }
 
 export function getEmails(item: Transaction | License) {

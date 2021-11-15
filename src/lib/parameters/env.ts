@@ -33,13 +33,22 @@ export default {
     attrs: {
       contact: {
         deployment: optional('HUBSPOT_CONTACT_DEPLOYMENT_ATTR'),
+        licenseTier: optional('HUBSPOT_CONTACT_LICENSE_TIER_ATTR'),
         products: optional('HUBSPOT_CONTACT_PRODUCTS_ATTR'),
+        lastMpacEvent: optional('HUBSPOT_CONTACT_LAST_MPAC_EVENT_ATTR'),
+        contactType: optional('HUBSPOT_CONTACT_CONTACT_TYPE_ATTR'),
+        region: optional('HUBSPOT_CONTACT_REGION_ATTR'),
+        relatedProducts: optional('HUBSPOT_CONTACT_RELATED_PRODUCTS_ATTR'),
       },
       deal: {
         app: optional('HUBSPOT_DEAL_APP_ATTR'),
+        origin: optional('HUBSPOT_DEAL_ORIGIN_ATTR'),
+        country: optional('HUBSPOT_DEAL_COUNTRY_ATTR'),
         deployment: optional('HUBSPOT_DEAL_DEPLOYMENT_ATTR'),
         addonLicenseId: required('HUBSPOT_DEAL_ADDONLICENESID_ATTR'),
         transactionId: required('HUBSPOT_DEAL_TRANSACTIONID_ATTR'),
+        licenseTier: optional('HUBSPOT_DEAL_LICENSE_TIER_ATTR'),
+        relatedProducts: optional('HUBSPOT_DEAL_RELATED_PRODUCTS_ATTR'),
       },
     },
   },

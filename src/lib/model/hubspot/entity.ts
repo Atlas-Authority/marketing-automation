@@ -1,43 +1,47 @@
 import * as assert from 'assert';
 import { EntityKind } from './interfaces.js';
 
-export interface Indexer<P> {
-  removeIndexesFor<K extends keyof P>(key: K, val: P[K] | undefined): void;
-  addIndexesFor<K extends keyof P>(key: K, val: P[K] | undefined, entity: Entity<P>): void;
+export interface Indexer<D> {
+  removeIndexesFor<K extends keyof D>(key: K, val: D[K] | undefined): void;
+  addIndexesFor<K extends keyof D>(key: K, val: D[K] | undefined, entity: Entity<D, any>): void;
 }
 
-export abstract class Entity<P extends { [key: string]: any }> {
+export abstract class Entity<
+  D extends Record<string, any>,
+  C extends Record<string, any>>
+{
 
   id?: string;
 
   /** The most recently saved props, or all unsaved props */
-  private props: P;
+  private _data: D;
   /** Contains only new changes, and only when an entity is saved */
-  private newProps: Partial<P> = {};
+  private newData: Partial<D> = {};
 
   /** The associations this was created with, whether an existing or new entity */
-  private assocs = new Set<Entity<any>>();
+  private assocs = new Set<Entity<any, any>>();
   /** A copy of assocs, which all updates act on, whether an existing or new entity */
-  private newAssocs = new Set<Entity<any>>();
+  private newAssocs = new Set<Entity<any, any>>();
 
-  readonly data: { [K in keyof P]: P[K] };
+  readonly data: D;
 
   constructor(
     id: string | null,
     public kind: EntityKind,
-    props: P,
-    private indexer: Indexer<P>,
+    data: D,
+    public computed: C,
+    private indexer: Indexer<D>,
   ) {
     if (id) this.id = id;
-    this.props = props;
+    this._data = data;
 
-    type K = keyof P;
-    this.data = new Proxy(props, {
+    type K = keyof D;
+    this.data = new Proxy(data, {
       get: (_target, _key) => {
         return this.get(_key as K);
       },
       set: (_target, _key, _val) => {
-        this.set(_key as K, _val as P[K]);
+        this.set(_key as K, _val as D[K]);
         return true;
       },
     });
@@ -50,52 +54,48 @@ export abstract class Entity<P extends { [key: string]: any }> {
 
   // Properties
 
-  get<K extends keyof P>(key: K) {
-    if (this.id === undefined) return this.props[key];
-    if (key in this.newProps) return this.newProps[key];
-    return this.props[key];
+  get<K extends keyof D>(key: K) {
+    if (this.id === undefined) return this._data[key];
+    if (key in this.newData) return this.newData[key];
+    return this._data[key];
   }
 
-  set<K extends keyof P>(key: K, val: P[K]) {
-    if (this.pseudoProperties.includes(key)) return;
-
+  set<K extends keyof D>(key: K, val: D[K]) {
     if (this.id === undefined) {
-      this.indexer.removeIndexesFor(key, this.props[key]);
-      this.props[key] = val;
-      this.indexer.addIndexesFor(key, this.props[key], this);
+      this.indexer.removeIndexesFor(key, this._data[key]);
+      this._data[key] = val;
+      this.indexer.addIndexesFor(key, this._data[key], this);
       return;
     }
 
-    this.indexer.removeIndexesFor(key, this.newProps[key]);
-    const oldVal = this.props[key];
+    this.indexer.removeIndexesFor(key, this.newData[key]);
+    const oldVal = this._data[key];
     if (oldVal === val) {
-      delete this.newProps[key];
+      delete this.newData[key];
     }
     else {
-      this.newProps[key] = val;
+      this.newData[key] = val;
     }
-    this.indexer.addIndexesFor(key, this.newProps[key], this);
+    this.indexer.addIndexesFor(key, this.newData[key], this);
   }
 
   hasPropertyChanges() {
-    return this.id === undefined || Object.keys(this.newProps).length > 0;
+    return this.id === undefined || Object.keys(this.newData).length > 0;
   }
 
   getPropertyChanges() {
-    if (this.id === undefined) return this.props;
-    return this.newProps;
+    if (this.id === undefined) return this._data;
+    return this.newData;
   }
 
   applyPropertyChanges() {
-    Object.assign(this.props, this.newProps);
-    this.newProps = {};
+    Object.assign(this._data, this.newData);
+    this.newData = {};
   }
-
-  abstract pseudoProperties: (keyof P)[];
 
   // Associations
 
-  protected makeDynamicAssociation<T extends Entity<any>>(kind: EntityKind) {
+  protected makeDynamicAssociation<T extends Entity<any, any>>(kind: EntityKind) {
     return {
       getAll: () => this.getAssociations(kind) as T[],
       has: (entity: T) => this.hasAssociation(entity),
@@ -106,20 +106,20 @@ export abstract class Entity<P extends { [key: string]: any }> {
   }
 
   /** Don't use directly; use deal.contacts.add(c) etc. */
-  addAssociation(entity: Entity<any>, meta: { firstSide: boolean, initial: boolean }) {
+  addAssociation(entity: Entity<any, any>, meta: { firstSide: boolean, initial: boolean }) {
     if (meta.initial) this.assocs.add(entity);
     this.newAssocs.add(entity);
 
     if (meta.firstSide) entity.addAssociation(this, { firstSide: false, initial: meta.initial });
   }
 
-  private removeAssociation(entity: Entity<any>, meta: { firstSide: boolean }) {
+  private removeAssociation(entity: Entity<any, any>, meta: { firstSide: boolean }) {
     this.newAssocs.delete(entity);
 
     if (meta.firstSide) entity.removeAssociation(this, { firstSide: false });
   }
 
-  private hasAssociation(entity: Entity<any>) {
+  private hasAssociation(entity: Entity<any, any>) {
     return this.newAssocs.has(entity);
   }
 
@@ -148,7 +148,7 @@ export abstract class Entity<P extends { [key: string]: any }> {
     return [
       ...toAdd.map(e => ({ op: 'add', other: e })),
       ...toDel.map(e => ({ op: 'del', other: e })),
-    ] as { op: 'add' | 'del', other: Entity<any> }[];
+    ] as { op: 'add' | 'del', other: Entity<any, any> }[];
   }
 
   applyAssociationChanges() {

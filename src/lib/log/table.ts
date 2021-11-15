@@ -23,7 +23,7 @@ export class Table {
       cols.push(Math.max(...this.rows.map(row => row[i].length)));
     }
 
-    const padders: { [key: string]: (s: string, colIdx: number) => string } = {
+    const padders: Record<string, (s: string, colIdx: number) => string> = {
       left: (s, i) => s.padEnd(cols[i], ' '),
       right: (s, i) => s.padStart(cols[i], ' '),
     };

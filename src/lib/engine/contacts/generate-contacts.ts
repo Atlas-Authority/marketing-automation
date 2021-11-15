@@ -78,7 +78,6 @@ export class ContactGenerator {
       relatedProducts: new Set(),
       deployment: item.data.hosting,
       products: new Set([item.data.addonKey]),
-      otherEmails: [],
       licenseTier: null,
       lastMpacEvent: '',
       lastUpdated: (item instanceof License ? item.data.lastUpdated : item.data.saleDate),
@@ -134,8 +133,8 @@ export function mergeContactInfo(contact: ContactData, contacts: GeneratedContac
   }
 
   for (const other of contacts) {
-    for (const product of other.products ?? []) {
-      contact.products?.add(product);
+    for (const product of other.products) {
+      contact.products.add(product);
     }
   }
 }
