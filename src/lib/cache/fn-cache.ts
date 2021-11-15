@@ -1,3 +1,4 @@
+import chalk from 'chalk';
 import log from '../log/logger.js';
 import { cli } from "../parameters/cli.js";
 import env from '../parameters/env.js';
@@ -17,11 +18,9 @@ export function fnOrCache<T>(filename: string, fn: () => T): T {
   );
 
   if (useCache) {
-    const red = '\x1b[31;1m';
-    const reset = '\x1b[0m';
-    log.warn('Dev', `${red}CACHED FUNCTION MODE ENABLED FOR:${reset}`);
+    log.warn('Dev', chalk.bold.red(`CACHED FUNCTION MODE ENABLED FOR:`));
     log.warn('Dev', fn.toString());
-    log.warn('Dev', `${red}FUNCTION SKIPPED; RETURNING CACHED VALUE${reset}`);
+    log.warn('Dev', chalk.bold.red(`FUNCTION SKIPPED; RETURNING CACHED VALUE`));
     return file.readJson();
   }
   else {
