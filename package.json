@@ -4,7 +4,7 @@
   "description": "",
   "main": "out/bin/main.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc --noEmit false --outDir ./out --sourceMap true",
     "watch": "tsc --watch",
     "start": "env TS_NODE_TRANSPILE_ONLY=true TS_NODE_FILES=true node --loader ts-node/esm src/bin/run-once.ts",
     "multiple": "env TS_NODE_TRANSPILE_ONLY=true TS_NODE_FILES=true node --loader ts-node/esm src/bin/verify-multiple-runs.ts",
