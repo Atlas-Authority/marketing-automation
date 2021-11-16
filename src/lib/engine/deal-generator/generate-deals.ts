@@ -44,7 +44,7 @@ export class DealGenerator {
     saveForInspection('ignored', this.ignoredLicenseSets);
 
     for (const [reason, amount] of this.ignoredAmounts) {
-      this.db.tallier.less(reason, amount);
+      this.db.tallier.less('Ignored: ' + reason, amount);
     }
 
     this.printIgnoredTransactionsTable();

@@ -151,7 +151,7 @@ function buildMappingStructure(db: Database) {
     }
   }
 
-  db.tallier.less('Transactions without licenses', badBalances
+  db.tallier.less('Ignored: Transactions without licenses', badBalances
     .map(({ tx }) => tx.data.vendorAmount)
     .reduce((a, b) => a + b, 0));
 
