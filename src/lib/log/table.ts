@@ -7,6 +7,22 @@ type ColSpec = {
 
 export class Table {
 
+  static print<T>(opts: {
+    log: (s: string) => void,
+    title: string,
+    rows: Iterable<T>,
+    cols: [ColSpec, (t: T) => string][],
+  }) {
+    opts.log(opts.title);
+    const table = new Table(opts.cols.map(([spec,]) => spec));
+    for (const row of opts.rows) {
+      table.rows.push(opts.cols.map(([, fn]) => fn(row)));
+    }
+    for (const row of table.eachRow()) {
+      opts.log('  ' + row);
+    }
+  }
+
   rows: Row[] = [];
 
   constructor(private colSpecs: ColSpec[]) {

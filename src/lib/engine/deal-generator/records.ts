@@ -36,32 +36,28 @@ export function getLicense(addonLicenseId: string, groups: RelatedLicenseSet) {
   return license;
 }
 
+
+
 export function printDetailedRecords(records: (License | Transaction)[]) {
+  const ifTx = (fn: (r: Transaction) => string) =>
+    (r: License | Transaction) =>
+      r instanceof Transaction ? fn(r) : '';
+
   log.detailed('Deal Actions', '\n');
-  log.detailed('Deal Actions', 'Records');
-  const table = new Table([
-    { title: 'Hosting' },
-    { title: 'AddonLicenseId' },
-    { title: 'Date' },
-    { title: 'LicenseType' },
-    { title: 'SaleType' },
-    { title: 'Transaction' },
-    { title: 'Amount', align: 'right' },
-  ]);
-  for (const record of records) {
-    table.rows.push([
-      record.data.hosting,
-      record.data.addonLicenseId,
-      record.data.maintenanceStartDate,
-      record.data.licenseType,
-      record instanceof Transaction ? record.data.saleType : '',
-      record instanceof Transaction ? record.data.transactionId : '',
-      record instanceof Transaction ? formatMoney(record.data.vendorAmount) : '',
-    ]);
-  }
-  for (const row of table.eachRow()) {
-    log.detailed('Deal Actions', '  ' + row);
-  }
+  Table.print({
+    log: str => log.detailed('Deal Actions', str),
+    title: 'Records',
+    rows: records,
+    cols: [
+      [{ title: 'Hosting' }, record => record.data.hosting],
+      [{ title: 'AddonLicenseId' }, record => record.data.addonLicenseId],
+      [{ title: 'Date' }, record => record.data.maintenanceStartDate],
+      [{ title: 'LicenseType' }, record => record.data.licenseType],
+      [{ title: 'SaleType' }, ifTx(record => record.data.saleType)],
+      [{ title: 'Transaction' }, ifTx(record => record.data.transactionId)],
+      [{ title: 'Amount', align: 'right' }, ifTx(record => formatMoney(record.data.vendorAmount))],
+    ],
+  });
 }
 
 export function dealCreationProperties(record: License | Transaction, data: Pick<DealData, 'addonLicenseId' | 'transactionId' | 'dealStage'>): DealData {
