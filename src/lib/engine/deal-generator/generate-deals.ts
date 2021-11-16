@@ -158,10 +158,7 @@ export class DealGenerator {
 
     if (domains.size == partnerDomains.length + providerDomains.length) {
       let reason;
-      if (partnerDomains.length > 0 && providerDomains.length > 0) {
-        reason = 'Partner & Mass-Provider Domains';
-      }
-      else if (partnerDomains.length > 0) {
+      if (partnerDomains.length > 0) {
         reason = 'Partner Domains';
         for (const tx of transactions) {
           this.partnerTransactions.add(tx);
