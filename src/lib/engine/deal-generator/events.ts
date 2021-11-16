@@ -1,9 +1,10 @@
 import log from '../../log/logger.js';
+import { Table } from '../../log/table.js';
 import { License } from '../../model/license.js';
 import { Transaction } from '../../model/transaction.js';
 import { sorter } from "../../util/helpers.js";
 import { RelatedLicenseSet } from '../license-matching/license-grouper.js';
-import { getLicense, isEvalOrOpenSourceLicense, isPaidLicense, printDetailedRecords } from "./records.js";
+import { getLicense, isEvalOrOpenSourceLicense, isPaidLicense, printRecordDetails } from "./records.js";
 
 export type RefundEvent = { type: 'refund', groups: RelatedLicenseSet, refundedTxs: Transaction[] };
 export type EvalEvent = { type: 'eval', groups: RelatedLicenseSet, licenses: License[] };
@@ -55,12 +56,8 @@ export class EventGenerator {
 
     this.normalizeEvalAndPurchaseEvents();
 
-    printDetailedRecords(records);
-
-    log.detailed('Deal Actions', 'Events');
-    for (const e of this.events) {
-      log.detailed('Deal Actions', abbrEventDetails(e))
-    }
+    printRecordDetails(records);
+    printEventDetails(this.events);
 
     return this.events;
   }
@@ -189,6 +186,29 @@ export class EventGenerator {
     return transactions;
   }
 
+}
+
+function printEventDetails(events: DealRelevantEvent[]) {
+  const rows = events.map(e => {
+    switch (e.type) {
+      case 'eval': return { type: e.type, lics: e.licenses.map(l => l.id) };
+      case 'purchase': return { type: e.type, lics: e.licenses.map(l => l.id), txs: [e.transaction?.id] };
+      case 'refund': return { type: e.type, txs: e.refundedTxs.map(tx => tx.id) };
+      case 'renewal': return { type: e.type, txs: [e.transaction.id] };
+      case 'upgrade': return { type: e.type, txs: [e.transaction.id] };
+    }
+  });
+
+  Table.print({
+    title: 'Events',
+    log: str => log.detailed('Deal Actions', str),
+    rows: rows,
+    cols: [
+      [{ title: 'Type' }, row => row.type],
+      [{ title: 'Licenses' }, row => row.lics?.join(', ') ?? ''],
+      [{ title: 'Transactions' }, row => row.txs?.join(', ') ?? ''],
+    ],
+  });
 }
 
 export function abbrEventDetails(e: DealRelevantEvent) {

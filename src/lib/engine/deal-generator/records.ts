@@ -38,7 +38,7 @@ export function getLicense(addonLicenseId: string, groups: RelatedLicenseSet) {
 
 
 
-export function printDetailedRecords(records: (License | Transaction)[]) {
+export function printRecordDetails(records: (License | Transaction)[]) {
   const ifTx = (fn: (r: Transaction) => string) =>
     (r: License | Transaction) =>
       r instanceof Transaction ? fn(r) : '';
