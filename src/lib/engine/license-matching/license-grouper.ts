@@ -2,6 +2,7 @@ import * as assert from 'assert';
 import { fnOrCache } from '../../cache/fn-cache.js';
 import { saveForInspection } from '../../cache/inspection.js';
 import log from '../../log/logger.js';
+import { Table } from '../../log/table.js';
 import { Database } from '../../model/database.js';
 import { License } from '../../model/license.js';
 import { AddonLicenseId } from '../../model/marketplace/common.js';
@@ -139,13 +140,20 @@ function buildMappingStructure(db: Database) {
   }
 
   const badBalances = (Object.values(oddBalances)
-    .filter(({ balance }) => (balance !== 0))
-    .map(({ tx }) => [tx.data.transactionId, tx.data.addonLicenseId]));
+    .filter(({ balance }) => (balance !== 0)));
 
   if (badBalances.length > 0) {
-    log.warn('Scoring Engine', "The following transactions have no accompanying licenses:",
-      badBalances.map(([transaction, license]) => ({ transaction, license })));
+    log.warn('Scoring Engine', "The following transactions have no accompanying licenses:");
+    const table = new Table([{ title: 'Transaction' }, { title: 'License', align: 'right' }]);
+    for (const { tx } of badBalances) { table.rows.push([tx.data.transactionId, tx.data.addonLicenseId]); }
+    for (const row of table.eachRow()) {
+      log.warn('Scoring Engine', '  ' + row);
+    }
   }
+
+  db.tallier.less('Transactions without licenses', badBalances
+    .map(({ tx }) => tx.data.vendorAmount)
+    .reduce((a, b) => a + b, 0));
 
   return mapping;
 }
