@@ -189,6 +189,14 @@ export type NoDealAction = {
 
 export type Action = CreateDealAction | UpdateDealAction | NoDealAction;
 
+export function abbrActionDetails(action: Action) {
+  switch (action.type) {
+    case 'create': return ['create', action.properties];
+    case 'update': return ['update', action.deal.id, action.properties];
+    case 'noop': return ['noop', action.deal.id];
+  }
+}
+
 function makeCreateAction(event: DealRelevantEvent, record: License | Transaction, data: Pick<DealData, 'addonLicenseId' | 'transactionId' | 'dealStage'>): Action {
   return {
     type: 'create',

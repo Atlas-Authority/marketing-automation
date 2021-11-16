@@ -10,7 +10,7 @@ import env from '../../parameters/env.js';
 import { formatMoney } from '../../util/formatters.js';
 import { isPresent, sorter } from '../../util/helpers.js';
 import { RelatedLicenseSet } from '../license-matching/license-grouper.js';
-import { ActionGenerator, CreateDealAction, UpdateDealAction } from './actions.js';
+import { abbrActionDetails, ActionGenerator, CreateDealAction, UpdateDealAction } from './actions.js';
 import { EventGenerator } from './events.js';
 import { getEmails } from './records.js';
 
@@ -107,7 +107,7 @@ export class DealGenerator {
 
     const events = new EventGenerator().interpretAsEvents(groups);
     const actions = this.actionGenerator.generateFrom(events);
-    log.detailed('Deal Actions', 'Generated deal actions', actions);
+    log.detailed('Deal Actions', 'Generated deal actions', actions.map(action => abbrActionDetails(action)));
 
     for (const action of actions) {
       switch (action.type) {
