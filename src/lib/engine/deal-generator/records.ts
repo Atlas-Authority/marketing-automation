@@ -1,10 +1,13 @@
 import assert from 'assert';
 import mustache from 'mustache';
+import log from '../../log/logger.js';
+import { Table } from '../../log/table.js';
 import { Deal, DealData } from '../../model/deal.js';
 import { DealStage, Pipeline } from '../../model/hubspot/interfaces.js';
 import { License } from '../../model/license.js';
 import { Transaction } from '../../model/transaction.js';
 import env from '../../parameters/env.js';
+import { formatMoney } from '../../util/formatters.js';
 import { isPresent, sorter } from "../../util/helpers.js";
 import { RelatedLicenseSet } from '../license-matching/license-grouper.js';
 
@@ -33,18 +36,32 @@ export function getLicense(addonLicenseId: string, groups: RelatedLicenseSet) {
   return license;
 }
 
-export function abbrRecordDetails(record: Transaction | License) {
-  return {
-    hosting: record.data.hosting,
-    sen: record.data.addonLicenseId,
-    date: record.data.maintenanceStartDate,
-    type: record.data.licenseType,
-    ...(record instanceof Transaction && {
-      sale: record.data.saleType,
-      at: record.data.transactionId,
-      amt: record.data.vendorAmount,
-    }),
-  };
+export function printDetailedRecords(records: (License | Transaction)[]) {
+  log.detailed('Deal Actions', '\n');
+  log.detailed('Deal Actions', 'Records');
+  const table = new Table([
+    { title: 'Hosting' },
+    { title: 'AddonLicenseId' },
+    { title: 'Date' },
+    { title: 'LicenseType' },
+    { title: 'SaleType' },
+    { title: 'Transaction' },
+    { title: 'Amount', align: 'right' },
+  ]);
+  for (const record of records) {
+    table.rows.push([
+      record.data.hosting,
+      record.data.addonLicenseId,
+      record.data.maintenanceStartDate,
+      record.data.licenseType,
+      record instanceof Transaction ? record.data.saleType : '',
+      record instanceof Transaction ? record.data.transactionId : '',
+      record instanceof Transaction ? formatMoney(record.data.vendorAmount) : '',
+    ]);
+  }
+  for (const row of table.eachRow()) {
+    log.detailed('Deal Actions', '  ' + row);
+  }
 }
 
 export function dealCreationProperties(record: License | Transaction, data: Pick<DealData, 'addonLicenseId' | 'transactionId' | 'dealStage'>): DealData {

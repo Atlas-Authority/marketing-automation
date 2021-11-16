@@ -3,7 +3,7 @@ import { License } from '../../model/license.js';
 import { Transaction } from '../../model/transaction.js';
 import { sorter } from "../../util/helpers.js";
 import { RelatedLicenseSet } from '../license-matching/license-grouper.js';
-import { abbrRecordDetails, getLicense, isEvalOrOpenSourceLicense, isPaidLicense } from "./records.js";
+import { getLicense, isEvalOrOpenSourceLicense, isPaidLicense, printDetailedRecords } from "./records.js";
 
 export type RefundEvent = { type: 'refund', groups: RelatedLicenseSet, refundedTxs: Transaction[] };
 export type EvalEvent = { type: 'eval', groups: RelatedLicenseSet, licenses: License[] };
@@ -55,11 +55,8 @@ export class EventGenerator {
 
     this.normalizeEvalAndPurchaseEvents();
 
-    log.detailed('Deal Actions', '\n');
-    log.detailed('Deal Actions', 'Records');
-    for (const record of records) {
-      log.detailed('Deal Actions', abbrRecordDetails(record));
-    }
+    printDetailedRecords(records);
+
     log.detailed('Deal Actions', 'Events');
     for (const e of this.events) {
       log.detailed('Deal Actions', abbrEventDetails(e))
