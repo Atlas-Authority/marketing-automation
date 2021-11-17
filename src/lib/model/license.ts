@@ -20,7 +20,7 @@ type ParentProductInfo = {
 
 type NewEvalData = {
   evaluationLicense: string;
-  daysToConvertEval: string;
+  daysToConvertEval: number;
   evaluationStartDate: string;
   evaluationEndDate: string;
   evaluationSaleDate: string;
@@ -68,7 +68,7 @@ export class License {
     if (rawLicense.evaluationLicense) {
       newEvalData = {
         evaluationLicense: rawLicense.evaluationLicense,
-        daysToConvertEval: rawLicense.daysToConvertEval as string,
+        daysToConvertEval: +rawLicense.daysToConvertEval!,
         evaluationStartDate: rawLicense.evaluationStartDate as string,
         evaluationEndDate: rawLicense.evaluationEndDate as string,
         evaluationSaleDate: rawLicense.evaluationSaleDate as string,
