@@ -4,7 +4,7 @@ import Slack from "../lib/io/slack.js";
 import { Database } from "../lib/model/database.js";
 import { cli } from "../lib/parameters/cli.js";
 import env from "../lib/parameters/env.js";
-import { AttachableError, SimpleError } from '../lib/util/errors.js';
+import { AttachableError, KnownError } from '../lib/util/errors.js';
 import run from '../lib/util/runner.js';
 
 const io = IO.fromCli();
@@ -24,7 +24,7 @@ await run({
   async failed(errors) {
     await slack.postToSlack(`Failed ${env.engine.retryTimes} times. Below are the specific errors, in order. Trying again in ${env.engine.runInterval}.`);
     for (const error of errors) {
-      if (error instanceof SimpleError) {
+      if (error instanceof KnownError) {
         await slack.postErrorToSlack(error.message);
       }
       else if (error instanceof AttachableError) {

@@ -5,7 +5,7 @@ export class AttachableError extends Error {
   }
 }
 
-export class SimpleError extends Error {
+export class KnownError extends Error {
   simple: boolean;
   constructor(msg: string) {
     super(msg);

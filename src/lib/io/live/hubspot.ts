@@ -2,7 +2,7 @@ import * as hubspot from '@hubspot/api-client';
 import assert from 'assert';
 import { Association, EntityKind, ExistingEntity, FullEntity, NewEntity, RelativeAssociation } from '../../model/hubspot/interfaces.js';
 import env from '../../parameters/env.js';
-import { SimpleError } from '../../util/errors.js';
+import { KnownError } from '../../util/errors.js';
 import { batchesOf } from '../../util/helpers.js';
 import cache from '../cache.js';
 import { HubspotService, Progress } from '../interfaces.js';
@@ -46,7 +46,7 @@ export default class LiveHubspotService implements HubspotService {
           body.message === 'internal error'
         )
       ) {
-        throw new SimpleError(`Hubspot v3 API for "${kind}" had internal error.`);
+        throw new KnownError(`Hubspot v3 API for "${kind}" had internal error.`);
       }
       else {
         throw new Error(`Failed downloading ${kind}s: ${JSON.stringify(body)}`);
