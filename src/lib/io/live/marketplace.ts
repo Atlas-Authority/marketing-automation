@@ -2,15 +2,16 @@ import { DateTime, Duration, Interval } from 'luxon';
 import fetch from 'node-fetch';
 import { RawLicense, RawTransaction } from "../../model/marketplace/raw";
 import env from '../../parameters/env.js';
-import { AttachableError } from '../../util/errors.js';
+import { AttachableError, SimpleError } from '../../util/errors.js';
 import cache from '../cache.js';
 import { MarketplaceService, Progress } from '../interfaces.js';
 
 export class LiveMarketplaceService implements MarketplaceService {
 
   async downloadTransactions(): Promise<RawTransaction[]> {
-    return cache('transactions.json',
-      await this.downloadMarketplaceData('/sales/transactions/export'));
+    const transactions = await this.downloadMarketplaceData('/sales/transactions/export');
+    if ((transactions as any).code === 401) throw new SimpleError("MPAC_PASS is an invalid API key or an actual password.");
+    return cache('transactions.json', transactions as RawTransaction[]);
   }
 
   async downloadLicensesWithoutDataInsights(): Promise<RawLicense[]> {
