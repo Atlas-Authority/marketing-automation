@@ -10,7 +10,7 @@ import env from '../../parameters/env.js';
 import { formatMoney } from '../../util/formatters.js';
 import { isPresent, sorter } from '../../util/helpers.js';
 import { RelatedLicenseSet } from '../license-matching/license-grouper.js';
-import { abbrActionDetails, ActionGenerator, CreateDealAction, NoDealAction, UpdateDealAction } from './actions.js';
+import { abbrActionDetails, ActionGenerator } from './actions.js';
 import { EventGenerator } from './events.js';
 import { getEmails } from './records.js';
 
