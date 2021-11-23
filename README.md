@@ -1,6 +1,18 @@
-# Marketing Automation
+# Marketing Automation Engine
 
-*Node.js app for automating marketing.*
+Analyzes all your Atlassian Marketplace data, generates contacts/deals, and puts them into HubSpot.
+
+More specifically:
+
+1. Downloads and analyzes Atlassian Marketplace data
+2. Generates contacts from tech/billing/partner contacts
+3. Flags partner vs. customer types
+4. Matches related MPAC events up with each other
+5. Generates deals from these matches
+6. Upserts all of this into HubSpot
+7. Runs this in a configurable loop
+
+Uses Node.js and Docker.
 
 ---
 
