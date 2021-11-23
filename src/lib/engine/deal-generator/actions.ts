@@ -184,6 +184,7 @@ export type UpdateDealAction = {
 
 export type NoDealAction = {
   type: 'noop';
+  groups: RelatedLicenseSet;
   deal: Deal;
 };
 
@@ -211,7 +212,7 @@ function makeUpdateAction(event: DealRelevantEvent, deal: Deal, record: License 
 
   if (!deal.hasPropertyChanges()) {
     log.detailed('Deal Actions', 'No properties to update for deal', deal.id);
-    return { type: 'noop', deal };
+    return { type: 'noop', deal, groups: event.groups };
   }
 
   return {

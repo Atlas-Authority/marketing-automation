@@ -10,7 +10,7 @@ import env from '../../parameters/env.js';
 import { formatMoney } from '../../util/formatters.js';
 import { isPresent, sorter } from '../../util/helpers.js';
 import { RelatedLicenseSet } from '../license-matching/license-grouper.js';
-import { abbrActionDetails, ActionGenerator, CreateDealAction, UpdateDealAction } from './actions.js';
+import { abbrActionDetails, ActionGenerator, CreateDealAction, NoDealAction, UpdateDealAction } from './actions.js';
 import { EventGenerator } from './events.js';
 import { getEmails } from './records.js';
 
@@ -25,7 +25,7 @@ export class DealGenerator {
   private actionGenerator: ActionGenerator;
 
   private dealCreateActions: CreateDealAction[] = [];
-  private dealUpdateActions: UpdateDealAction[] = [];
+  private dealUpdateActions: (UpdateDealAction | NoDealAction)[] = [];
 
   private ignoredLicenseSets: (IgnoredLicense)[][] = [];
   private ignoredAmounts = new Map<string, number>();
@@ -113,7 +113,7 @@ export class DealGenerator {
       switch (action.type) {
         case 'create': this.dealCreateActions.push(action); break;
         case 'update': this.dealUpdateActions.push(action); break;
-        case 'noop': break;
+        case 'noop': this.dealUpdateActions.push(action); break;
       }
     }
   }
