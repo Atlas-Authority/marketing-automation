@@ -115,6 +115,6 @@ function mapAssociationInput(fromKind: EntityKind, input: Association) {
   return {
     from: { id: input.fromId },
     to: { id: input.toId },
-    type: `${fromKind}_${input.toType}`,
+    type: `${fromKind}_to_${input.toType}`,
   };
 }
