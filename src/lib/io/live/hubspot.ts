@@ -10,7 +10,9 @@ import { HubspotService, Progress } from '../interfaces.js';
 
 export default class LiveHubspotService implements HubspotService {
 
-  client = new hubspot.Client({ apiKey: env.hubspot.apiKey });
+  client = new hubspot.Client(env.hubspot.accessToken
+    ? { accessToken: env.hubspot.accessToken }
+    : { apiKey: env.hubspot.apiKey });
 
   async downloadEntities(_progess: Progress, kind: EntityKind, apiProperties: string[], inputAssociations: string[]): Promise<FullEntity[]> {
     let associations = ((inputAssociations.length > 0)

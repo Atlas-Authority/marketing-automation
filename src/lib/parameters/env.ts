@@ -15,7 +15,10 @@ export default {
     ),
   },
   hubspot: {
-    apiKey: required('HUBSPOT_API_KEY'),
+    ...requireOneOf([
+      { accessToken: 'HUBSPOT_ACCESS_TOKEN' },
+      { apiKey: 'HUBSPOT_API_KEY' },
+    ]),
     accountId: optional('HUBSPOT_ACCOUNT_ID'),
     pipeline: {
       mpac: required('HUBSPOT_PIPELINE_MPAC'),
@@ -76,4 +79,18 @@ function required(key: string) {
 
 function optional(key: string) {
   return process.env[key];
+}
+
+function requireOneOf<T>(opts: T[]): T {
+  const all = opts.flatMap(opt => Object.entries(opt).map(([localKey, envKey]) => ({
+    localKey,
+    envKey,
+    value: process.env[envKey],
+  })));
+
+  const firstValid = all.find(opt => opt.value);
+  assert.ok(firstValid, `One of ENV keys ${all.map(o => o.envKey).join(' or ')} are required`);
+
+  const { localKey, value } = firstValid;
+  return { [localKey]: value } as unknown as T;
 }
