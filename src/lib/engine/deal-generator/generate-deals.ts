@@ -24,9 +24,6 @@ export class DealGenerator {
 
   private actionGenerator: ActionGenerator;
 
-  private dealCreateActions: CreateDealAction[] = [];
-  private dealUpdateActions: (UpdateDealAction | NoDealAction)[] = [];
-
   private ignoredLicenseSets: (IgnoredLicense)[][] = [];
   private ignoredAmounts = new Map<string, number>();
 
@@ -38,7 +35,15 @@ export class DealGenerator {
 
   run(matches: RelatedLicenseSet[]) {
     for (const relatedLicenseIds of matches) {
-      this.generateActionsForMatchedGroup(relatedLicenseIds);
+      for (const action of this.generateActionsForMatchedGroup(relatedLicenseIds)) {
+        if (action.type === 'create') {
+          const deal = this.db.dealManager.create(action.properties);
+          this.associateDealContactsAndCompanies(action.groups, deal);
+        }
+        else {
+          this.associateDealContactsAndCompanies(action.groups, action.deal);
+        }
+      }
     }
 
     saveForInspection('ignored', this.ignoredLicenseSets);
@@ -49,15 +54,6 @@ export class DealGenerator {
 
     this.printIgnoredTransactionsTable();
     this.printPartnerTransactionsTable();
-
-    for (const { groups, properties } of this.dealCreateActions) {
-      const deal = this.db.dealManager.create(properties);
-      this.associateDealContactsAndCompanies(groups, deal);
-    }
-
-    for (const { deal, groups } of this.dealUpdateActions) {
-      this.associateDealContactsAndCompanies(groups, deal);
-    }
   }
 
   private printIgnoredTransactionsTable() {
@@ -103,19 +99,13 @@ export class DealGenerator {
 
   private generateActionsForMatchedGroup(groups: RelatedLicenseSet) {
     assert.ok(groups.length > 0);
-    if (this.ignoring(groups)) return;
+    if (this.ignoring(groups)) return [];
 
     const events = new EventGenerator().interpretAsEvents(groups);
     const actions = this.actionGenerator.generateFrom(events);
     log.detailed('Deal Actions', 'Generated deal actions', actions.map(action => abbrActionDetails(action)));
 
-    for (const action of actions) {
-      switch (action.type) {
-        case 'create': this.dealCreateActions.push(action); break;
-        case 'update': this.dealUpdateActions.push(action); break;
-        case 'noop': this.dealUpdateActions.push(action); break;
-      }
-    }
+    return actions;
   }
 
   private associateDealContactsAndCompanies(groups: RelatedLicenseSet, deal: Deal) {
