@@ -1,5 +1,6 @@
 import * as hubspot from '@hubspot/api-client';
 import assert from 'assert';
+import log from '../../log/logger.js';
 import { Association, EntityKind, ExistingEntity, FullEntity, NewEntity, RelativeAssociation } from '../../model/hubspot/interfaces.js';
 import env from '../../parameters/env.js';
 import { KnownError } from '../../util/errors.js';
@@ -87,9 +88,12 @@ export default class LiveHubspotService implements HubspotService {
 
   async createAssociations(fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void> {
     for (const inputBatch of batchesOf(inputs, 100)) {
-      await this.client.crm.associations.batchApi.create(fromKind, toKind, {
+      const response = await this.client.crm.associations.batchApi.create(fromKind, toKind, {
         inputs: inputBatch.map(input => mapAssociationInput(fromKind, input))
       });
+      for (const e of response.body.errors ?? []) {
+        log.error('Live Hubspot', e.message);
+      }
     }
   }
 
