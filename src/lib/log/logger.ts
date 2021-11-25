@@ -15,11 +15,11 @@ class Logger {
   public level = logLevelFromCliString(cli.get('--loglevel')) ?? LogLevel.Verbose;
   public readonly Levels = LogLevel;
 
-  error(prefix: string, ...args: any[]) { this.print(LogLevel.Error, prefix, ...args); }
-  warn(prefix: string, ...args: any[]) { this.print(LogLevel.Warn, prefix, ...args); }
-  info(prefix: string, ...args: any[]) { this.print(LogLevel.Info, prefix, ...args); }
-  verbose(prefix: string, ...args: any[]) { this.print(LogLevel.Verbose, prefix, ...args); }
-  detailed(prefix: string, ...args: any[]) { this.print(LogLevel.Detailed, prefix, ...args); }
+  public error(prefix: string, ...args: any[]) { this.print(LogLevel.Error, prefix, ...args); }
+  public warn(prefix: string, ...args: any[]) { this.print(LogLevel.Warn, prefix, ...args); }
+  public info(prefix: string, ...args: any[]) { this.print(LogLevel.Info, prefix, ...args); }
+  public verbose(prefix: string, ...args: any[]) { this.print(LogLevel.Verbose, prefix, ...args); }
+  public detailed(prefix: string, ...args: any[]) { this.print(LogLevel.Detailed, prefix, ...args); }
 
   private print(level: LogLevel, prefix: string, ...args: any[]) {
     if (level > this.level) return;

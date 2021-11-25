@@ -4,11 +4,11 @@ import { SimilarityScorer } from './similarity-scorer.js';
 
 export class LicenseMatcher {
 
-  similarityScorer = new SimilarityScorer();
+  private similarityScorer = new SimilarityScorer();
 
-  constructor(private db: Database) { }
+  public constructor(private db: Database) { }
 
-  score(license1: License, license2: License): null | { item1: string, item2: string, score: number, reasons: string[] } {
+  public score(license1: License, license2: License): null | { item1: string, item2: string, score: number, reasons: string[] } {
     const item1 = license1.data.addonLicenseId;
     const item2 = license2.data.addonLicenseId;
 

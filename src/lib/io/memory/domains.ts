@@ -3,9 +3,9 @@ import { TldListerService } from "../interfaces.js";
 
 export class MemoryTldListerService implements TldListerService {
 
-  readonly tlds = DataDir.in.file<readonly string[]>('tlds.json');
+  private readonly tlds = DataDir.in.file<readonly string[]>('tlds.json');
 
-  async downloadAllTlds(): Promise<readonly string[]> {
+  public async downloadAllTlds(): Promise<readonly string[]> {
     return this.tlds.readJson();
   }
 

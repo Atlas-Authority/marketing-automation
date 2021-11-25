@@ -5,21 +5,21 @@ import { HubspotService, Progress } from "../interfaces.js";
 
 export class MemoryHubspot implements HubspotService {
 
-  ids = new Map<string, number>();
+  private ids = new Map<string, number>();
 
-  readonly deals = DataDir.in.file<FullEntity[]>(`deal.json`);
-  readonly companies = DataDir.in.file<FullEntity[]>(`company.json`);
-  readonly contacts = DataDir.in.file<FullEntity[]>(`contact.json`);
+  private readonly deals = DataDir.in.file<FullEntity[]>(`deal.json`);
+  private readonly companies = DataDir.in.file<FullEntity[]>(`company.json`);
+  private readonly contacts = DataDir.in.file<FullEntity[]>(`contact.json`);
 
   // Downloader
 
-  async downloadEntities(_progress: Progress, kind: EntityKind, apiProperties: string[], inputAssociations: string[]): Promise<readonly FullEntity[]> {
+  public async downloadEntities(_progress: Progress, kind: EntityKind, apiProperties: string[], inputAssociations: string[]): Promise<readonly FullEntity[]> {
     return this.arrayFor(kind);
   }
 
   // Uploader
 
-  async createEntities(kind: EntityKind, inputs: NewEntity[]): Promise<ExistingEntity[]> {
+  public async createEntities(kind: EntityKind, inputs: NewEntity[]): Promise<ExistingEntity[]> {
     const objects = inputs.map((o) => ({
       properties: o.properties,
       id: this.newUniqueId(kind),
@@ -39,7 +39,7 @@ export class MemoryHubspot implements HubspotService {
     return `fake.${kind}.${id}`;
   }
 
-  async updateEntities(kind: EntityKind, inputs: ExistingEntity[]): Promise<ExistingEntity[]> {
+  public async updateEntities(kind: EntityKind, inputs: ExistingEntity[]): Promise<ExistingEntity[]> {
     for (const input of inputs) {
       const entity = this.getEntity(kind, input.id);
       Object.assign(entity.properties, input.properties);
@@ -49,7 +49,7 @@ export class MemoryHubspot implements HubspotService {
     return inputs;
   }
 
-  async createAssociations(fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void> {
+  public async createAssociations(fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void> {
     for (const input of inputs) {
       const entity = this.getEntity(fromKind, input.fromId);
       const assoc: RelativeAssociation = `${toKind}:${input.toId}`;
@@ -61,7 +61,7 @@ export class MemoryHubspot implements HubspotService {
     this.fakeApiConsoleLog(`Fake Associating ${fromKind}s to ${toKind}s:`, inputs);
   }
 
-  async deleteAssociations(fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void> {
+  public async deleteAssociations(fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void> {
     for (const input of inputs) {
       const entity = this.getEntity(fromKind, input.fromId);
       const assoc: RelativeAssociation = `${toKind}:${input.toId}`;

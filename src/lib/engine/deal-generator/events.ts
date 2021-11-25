@@ -22,9 +22,9 @@ export type DealRelevantEvent = (
 
 export class EventGenerator {
 
-  events: DealRelevantEvent[] = [];
+  private events: DealRelevantEvent[] = [];
 
-  interpretAsEvents(groups: RelatedLicenseSet) {
+  public interpretAsEvents(groups: RelatedLicenseSet) {
     const records = this.getRecords(groups);
     this.sortRecords(records);
 

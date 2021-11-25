@@ -40,7 +40,7 @@ export class Transaction {
   public data: TransactionData;
   public tier: number;
 
-  constructor(rawTransaction: RawTransaction) {
+  public constructor(rawTransaction: RawTransaction) {
     this.data = {
       transactionId: rawTransaction.transactionId,
 

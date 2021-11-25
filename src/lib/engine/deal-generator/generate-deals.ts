@@ -29,11 +29,11 @@ export class DealGenerator {
 
   private partnerTransactions = new Set<Transaction>();
 
-  constructor(private db: Database) {
+  public constructor(private db: Database) {
     this.actionGenerator = new ActionGenerator(db.dealManager);
   }
 
-  run(matches: RelatedLicenseSet[]) {
+  public run(matches: RelatedLicenseSet[]) {
     for (const relatedLicenseIds of matches) {
       for (const action of this.generateActionsForMatchedGroup(relatedLicenseIds)) {
         if (action.type === 'create') {

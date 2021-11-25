@@ -11,9 +11,9 @@ import { dealCreationProperties, updateDeal } from './records.js';
 export class ActionGenerator {
 
   #handledDeals = new Map<Deal, DealRelevantEvent>();
-  constructor(private dealManager: DealManager) { }
+  public constructor(private dealManager: DealManager) { }
 
-  generateFrom(events: DealRelevantEvent[]) {
+  public generateFrom(events: DealRelevantEvent[]) {
     return events.flatMap(event => this.actionsFor(event));
   }
 

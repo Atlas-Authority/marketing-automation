@@ -9,7 +9,7 @@ import { printSummary } from './summary.js';
 
 export default class Engine {
 
-  async run(db: Database) {
+  public async run(db: Database) {
     const log = new EngineLogger();
 
     log.step('Starting to download data');

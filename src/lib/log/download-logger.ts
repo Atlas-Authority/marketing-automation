@@ -5,11 +5,11 @@ import log from './logger.js';
 
 export class MultiDownloadLogger {
 
-  multibar = new MultiBar({
+  private multibar = new MultiBar({
     format: `${chalk.cyan('[{bar}]')} {name}`,
   }, Presets.rect);
 
-  async wrap<T>(name: string, fn: (progress: Progress) => Promise<T>): Promise<T> {
+  public async wrap<T>(name: string, fn: (progress: Progress) => Promise<T>): Promise<T> {
     const line = this.makeLine(name);
     const result = await fn(line);
     line.done();
@@ -22,7 +22,7 @@ export class MultiDownloadLogger {
     return new SimpleLogProgress(name);
   }
 
-  done() {
+  public done() {
     this.multibar.stop();
   }
 
@@ -34,20 +34,20 @@ interface InternalProgress extends Progress {
 
 class AnimatedProgressBar {
 
-  called = 0;
-  constructor(private bar: SingleBar) { }
+  private called = 0;
+  public constructor(private bar: SingleBar) { }
 
-  setCount(count: number) {
+  public setCount(count: number) {
     this.bar.setTotal(count);
     this.called++;
   }
 
-  tick(moreInfo?: string) {
+  public tick(moreInfo?: string) {
     this.bar.increment();
     this.called++;
   }
 
-  done() {
+  public done() {
     if (this.called === 0) {
       this.bar.increment();
     }
@@ -57,18 +57,18 @@ class AnimatedProgressBar {
 
 class SimpleLogProgress {
 
-  constructor(private name: string) { }
+  public constructor(private name: string) { }
 
-  setCount(count: number) {
+  public setCount(count: number) {
     log.info('Downloader', `Downloading ${this.name} (${count} call${count === 1 ? '' : 's'})`);
   }
 
-  tick(moreInfo?: string) {
+  public tick(moreInfo?: string) {
     moreInfo = moreInfo ? ` (${moreInfo})` : '';
     log.info('Downloader', `Downloading ${this.name} ${moreInfo}`);
   }
 
-  done() {
+  public done() {
     log.info('Downloader', `Done downloading ${this.name}`);
   }
 

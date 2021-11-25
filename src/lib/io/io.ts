@@ -11,7 +11,7 @@ import { MemoryMarketplace } from './memory/marketplace.js';
 
 export class IO {
 
-  static fromCli() {
+  public static fromCli() {
     return new IO({
       in: cli.getChoiceOrFail('--in', ['local', 'remote']),
       out: cli.getChoiceOrFail('--out', ['local', 'remote']),
@@ -21,7 +21,7 @@ export class IO {
   public in: Remote;
   public out: Remote;
 
-  constructor(opts: { in: 'local' | 'remote', out: 'local' | 'remote' }) {
+  public constructor(opts: { in: 'local' | 'remote', out: 'local' | 'remote' }) {
     if (opts.in === opts.out) {
       // Important that it's the same instance!
       this.in = this.out = remoteFor(opts.in);

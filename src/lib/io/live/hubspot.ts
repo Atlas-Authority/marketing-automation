@@ -10,11 +10,11 @@ import { HubspotService, Progress } from '../interfaces.js';
 
 export default class LiveHubspotService implements HubspotService {
 
-  client = new hubspot.Client(env.hubspot.accessToken
+  private client = new hubspot.Client(env.hubspot.accessToken
     ? { accessToken: env.hubspot.accessToken }
     : { apiKey: env.hubspot.apiKey });
 
-  async downloadEntities(_progess: Progress, kind: EntityKind, apiProperties: string[], inputAssociations: string[]): Promise<FullEntity[]> {
+  public async downloadEntities(_progess: Progress, kind: EntityKind, apiProperties: string[], inputAssociations: string[]): Promise<FullEntity[]> {
     let associations = ((inputAssociations.length > 0)
       ? inputAssociations
       : undefined);
@@ -57,14 +57,14 @@ export default class LiveHubspotService implements HubspotService {
     }
   }
 
-  async createEntities(kind: EntityKind, entities: NewEntity[]): Promise<ExistingEntity[]> {
+  public async createEntities(kind: EntityKind, entities: NewEntity[]): Promise<ExistingEntity[]> {
     return await this.batchDo(kind, entities, async entities => {
       const response = await this.apiFor(kind).batchApi.create({ inputs: entities });
       return response.body.results;
     });
   }
 
-  async updateEntities(kind: EntityKind, entities: ExistingEntity[]): Promise<ExistingEntity[]> {
+  public async updateEntities(kind: EntityKind, entities: ExistingEntity[]): Promise<ExistingEntity[]> {
     return await this.batchDo(kind, entities, async entities => {
       const response = await this.apiFor(kind).batchApi.update({ inputs: entities });
       return response.body.results;
@@ -88,7 +88,7 @@ export default class LiveHubspotService implements HubspotService {
     return resultGroups.flat(1);
   }
 
-  async createAssociations(fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void> {
+  public async createAssociations(fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void> {
     for (const inputBatch of batchesOf(inputs, 100)) {
       const response = await this.client.crm.associations.batchApi.create(fromKind, toKind, {
         inputs: inputBatch.map(input => mapAssociationInput(fromKind, input))
@@ -99,7 +99,7 @@ export default class LiveHubspotService implements HubspotService {
     }
   }
 
-  async deleteAssociations(fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void> {
+  public async deleteAssociations(fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void> {
     for (const inputBatch of batchesOf(inputs, 100)) {
       await this.client.crm.associations.batchApi.archive(fromKind, toKind, {
         inputs: inputBatch.map(input => mapAssociationInput(fromKind, input))

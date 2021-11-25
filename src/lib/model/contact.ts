@@ -33,13 +33,13 @@ type ContactComputed = {
 
 export class Contact extends Entity<ContactData, ContactComputed> {
 
-  companies = this.makeDynamicAssociation<Company>('company');
+  public companies = this.makeDynamicAssociation<Company>('company');
 
-  get isExternal() { return !this.data.email || !this.data.contactType; }
+  public get isExternal() { return !this.data.email || !this.data.contactType; }
 
-  get allEmails() { return [this.data.email, ...this.computed.otherEmails]; }
-  get isPartner() { return this.data.contactType === 'Partner'; }
-  get isCustomer() { return this.data.contactType === 'Customer'; }
+  public get allEmails() { return [this.data.email, ...this.computed.otherEmails]; }
+  public get isPartner() { return this.data.contactType === 'Partner'; }
+  public get isCustomer() { return this.data.contactType === 'Customer'; }
 
 }
 
@@ -138,9 +138,9 @@ const ContactAdapter: EntityAdapter<ContactData, ContactComputed> = {
 
 export class ContactManager extends EntityManager<ContactData, ContactComputed, Contact> {
 
-  override Entity = Contact;
-  override kind: EntityKind = 'contact';
-  override entityAdapter = ContactAdapter;
+  protected override Entity = Contact;
+  protected override kind: EntityKind = 'contact';
+  protected override entityAdapter = ContactAdapter;
 
   public getByEmail = this.makeIndex(c => c.allEmails, ['email']);
 

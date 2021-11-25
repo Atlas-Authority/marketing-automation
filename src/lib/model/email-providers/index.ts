@@ -4,12 +4,12 @@ import { EmailProviderListerService, Progress } from '../../io/interfaces.js';
 
 export class EmailProviderLister {
 
-  set = new Set<string>();
+  public set = new Set<string>();
 
-  constructor(private service: EmailProviderListerService) { }
+  public constructor(private service: EmailProviderListerService) { }
 
   /** A set of domains that host multiple unrelated email addresses */
-  async deriveMultiProviderDomainsSet(progress: Progress) {
+  public async deriveMultiProviderDomainsSet(progress: Progress) {
     const freeDomains = await this.service.downloadFreeEmailProviders(progress);
 
     this.set = new Set([

@@ -31,10 +31,10 @@ type DealComputed = {
 
 export class Deal extends Entity<DealData, DealComputed> {
 
-  contacts = this.makeDynamicAssociation<Contact>('contact');
-  companies = this.makeDynamicAssociation<Company>('company');
+  public contacts = this.makeDynamicAssociation<Contact>('contact');
+  public companies = this.makeDynamicAssociation<Company>('company');
 
-  mpacId() {
+  public mpacId() {
     if (this.data.transactionId && this.data.addonLicenseId) {
       return `${this.data.transactionId}[${this.data.addonLicenseId}]`;
     }
@@ -43,11 +43,11 @@ export class Deal extends Entity<DealData, DealComputed> {
     }
   }
 
-  get isWon() { return this.data.dealStage === DealStage.CLOSED_WON }
-  get isLost() { return this.data.dealStage === DealStage.CLOSED_LOST }
+  public get isWon() { return this.data.dealStage === DealStage.CLOSED_WON }
+  public get isLost() { return this.data.dealStage === DealStage.CLOSED_LOST }
 
-  isEval() { return this.data.dealStage === DealStage.EVAL; }
-  isClosed() { return this.isWon || this.isLost; }
+  public isEval() { return this.data.dealStage === DealStage.EVAL; }
+  public isClosed() { return this.isWon || this.isLost; }
 
   public link() {
     const hsAccountId = env.hubspot.accountId;
@@ -171,16 +171,16 @@ const DealAdapter: EntityAdapter<DealData, DealComputed> = {
 
 export class DealManager extends EntityManager<DealData, DealComputed, Deal> {
 
-  override Entity = Deal;
-  override kind: EntityKind = 'deal';
-  override entityAdapter = DealAdapter;
+  protected override Entity = Deal;
+  protected override kind: EntityKind = 'deal';
+  protected override entityAdapter = DealAdapter;
 
   /** Either `License.addonLicenseId` or `Transaction.transactionId[Transacton.addonLicenseId]` */
   public getByMpacId = this.makeIndex(d => [d.mpacId()].filter(isPresent), ['transactionId', 'addonLicenseId']);
 
-  duplicatesToDelete = new Map<Deal, Set<Deal>>();
+  public duplicatesToDelete = new Map<Deal, Set<Deal>>();
 
-  getDealsForRecords(records: (License | Transaction)[]) {
+  public getDealsForRecords(records: (License | Transaction)[]) {
     return new Set(records
       .map(record => this.getByMpacId(record.id))
       .filter(isPresent));

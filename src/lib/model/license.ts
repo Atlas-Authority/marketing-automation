@@ -63,7 +63,7 @@ export class License {
   public tier: number;
   public active: boolean;
 
-  constructor(rawLicense: RawLicense) {
+  public constructor(rawLicense: RawLicense) {
     let newEvalData: NewEvalData | null = null;
     if (rawLicense.evaluationLicense) {
       newEvalData = {

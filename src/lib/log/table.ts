@@ -7,7 +7,7 @@ type ColSpec = {
 
 export class Table {
 
-  static print<T>(opts: {
+  public static print<T>(opts: {
     log: (s: string) => void,
     title: string,
     rows: Iterable<T>,
@@ -23,9 +23,9 @@ export class Table {
     }
   }
 
-  rows: Row[] = [];
+  public rows: Row[] = [];
 
-  constructor(private colSpecs: ColSpec[]) {
+  public constructor(private colSpecs: ColSpec[]) {
     const useTitles = this.colSpecs.some(s => s.title);
     if (useTitles) {
       this.rows.push(this.colSpecs.map(s => s.title ?? ''));
@@ -33,7 +33,7 @@ export class Table {
     }
   }
 
-  eachRow() {
+  public eachRow() {
     const cols: number[] = [];
     for (let i = 0; i < this.colSpecs.length; i++) {
       cols.push(Math.max(...this.rows.map(row => row[i].length)));

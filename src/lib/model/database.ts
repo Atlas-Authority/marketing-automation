@@ -17,30 +17,30 @@ import { Transaction } from "./transaction.js";
 
 export class Database {
 
-  dealManager: DealManager;
-  contactManager: ContactManager;
-  companyManager: CompanyManager;
+  public dealManager: DealManager;
+  public contactManager: ContactManager;
+  public companyManager: CompanyManager;
 
-  licenses: License[] = [];
-  transactions: Transaction[] = [];
+  public licenses: License[] = [];
+  public transactions: Transaction[] = [];
 
   /** Domains that provide spam or free email accounts for masses. */
-  providerDomains = new Set<string>();
-  partnerDomains = new Set<string>();
-  customerDomains = new Set<string>();
+  public providerDomains = new Set<string>();
+  public partnerDomains = new Set<string>();
+  public customerDomains = new Set<string>();
 
-  emailProviderLister: EmailProviderLister;
+  private emailProviderLister: EmailProviderLister;
 
-  tallier = new Tallier();
+  public tallier = new Tallier();
 
-  constructor(private io: IO) {
+  public constructor(private io: IO) {
     this.dealManager = new DealManager(io.in.hubspot, io.out.hubspot, this);
     this.contactManager = new ContactManager(io.in.hubspot, io.out.hubspot, this);
     this.companyManager = new CompanyManager(io.in.hubspot, io.out.hubspot, this);
     this.emailProviderLister = new EmailProviderLister(io.in.emailProviderLister);
   }
 
-  async downloadAllData() {
+  public async downloadAllData() {
     log.info('Downloader', 'Starting downloads with API');
 
     const logbox = new MultiDownloadLogger();
@@ -105,7 +105,7 @@ export class Database {
     this.tallier.first('Transaction total', transactionTotal);
   }
 
-  printDownloadSummary(transactionTotal: number) {
+  private printDownloadSummary(transactionTotal: number) {
     const deals = this.dealManager.getArray();
     const dealSum = (deals
       .map(d => d.data.amount ?? 0)
@@ -128,7 +128,7 @@ export class Database {
 
   }
 
-  async syncUpAllEntities() {
+  public async syncUpAllEntities() {
     await this.dealManager.syncUpAllEntities();
     await this.contactManager.syncUpAllEntities();
     await this.companyManager.syncUpAllEntities();
@@ -138,7 +138,7 @@ export class Database {
     await this.companyManager.syncUpAllAssociations();
   }
 
-  getEntity(kind: EntityKind, id: string): Entity<any, any> {
+  public getEntity(kind: EntityKind, id: string): Entity<any, any> {
     const found = this.getManager(kind).get(id);
     // There's only two ways to set associations:
     // 1. They were already set in HubSpot when we downloaded them, or

@@ -8,18 +8,18 @@ import { MarketplaceService, Progress } from '../interfaces.js';
 
 export class LiveMarketplaceService implements MarketplaceService {
 
-  async downloadTransactions(): Promise<RawTransaction[]> {
+  public async downloadTransactions(): Promise<RawTransaction[]> {
     const transactions = await this.downloadMarketplaceData('/sales/transactions/export');
     if ((transactions as any).code === 401) throw new KnownError("MPAC_PASS is an invalid API key or an actual password.");
     return cache('transactions.json', transactions as RawTransaction[]);
   }
 
-  async downloadLicensesWithoutDataInsights(): Promise<RawLicense[]> {
+  public async downloadLicensesWithoutDataInsights(): Promise<RawLicense[]> {
     return cache('licenses-without.json',
       await this.downloadMarketplaceData('/licenses/export?endDate=2018-07-01'));
   }
 
-  async downloadLicensesWithDataInsights(progress: Progress): Promise<RawLicense[]> {
+  public async downloadLicensesWithDataInsights(progress: Progress): Promise<RawLicense[]> {
     const dates = dataInsightDateRanges();
     progress.setCount(dates.length);
     const promises = dates.map(async ({ startDate, endDate }) => {

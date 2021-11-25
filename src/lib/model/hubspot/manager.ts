@@ -35,7 +35,7 @@ export abstract class EntityManager<
   E extends Entity<D, C>>
 {
 
-  constructor(
+  public constructor(
     private downloader: HubspotService,
     private uploader: HubspotService,
     private db: EntityDatabase
@@ -287,12 +287,12 @@ export abstract class EntityManager<
     return index.get.bind(index);
   }
 
-  removeIndexesFor<K extends keyof D>(key: K, val: D[K] | undefined) {
+  public removeIndexesFor<K extends keyof D>(key: K, val: D[K] | undefined) {
     if (!val) return;
     this.indexIndex.get(key)?.removeIndex(val);
   }
 
-  addIndexesFor<K extends keyof D>(key: K, val: D[K] | undefined, entity: E) {
+  public addIndexesFor<K extends keyof D>(key: K, val: D[K] | undefined, entity: E) {
     if (!val) return;
     this.indexIndex.get(key)?.addIndex(val, entity);
   }
@@ -302,21 +302,21 @@ export abstract class EntityManager<
 class Index<E> {
 
   private map = new Map<string, E>();
-  constructor(private keysFor: (e: E) => string[]) { }
+  public constructor(private keysFor: (e: E) => string[]) { }
 
-  clear() {
+  public clear() {
     this.map.clear();
   }
 
-  addIndex(key: string, entity: E) {
+  public addIndex(key: string, entity: E) {
     this.map.set(key, entity);
   }
 
-  removeIndex(key: string) {
+  public removeIndex(key: string) {
     this.map.delete(key);
   }
 
-  addIndexesFor(entities: Iterable<E>) {
+  public addIndexesFor(entities: Iterable<E>) {
     for (const e of entities) {
       for (const key of this.keysFor(e)) {
         this.addIndex(key, e);
@@ -324,7 +324,7 @@ class Index<E> {
     }
   }
 
-  removeIndexesFor(entities: Iterable<E>) {
+  public removeIndexesFor(entities: Iterable<E>) {
     for (const e of entities) {
       for (const key of this.keysFor(e)) {
         this.removeIndex(key);
@@ -332,7 +332,7 @@ class Index<E> {
     }
   }
 
-  get(key: string) {
+  public get(key: string) {
     return this.map.get(key);
   }
 

@@ -12,9 +12,9 @@ export class ContactGenerator {
 
   private toMerge = new Map<Contact, GeneratedContact[]>();
 
-  constructor(private db: Database) { }
+  public constructor(private db: Database) { }
 
-  run() {
+  public run() {
     this.generateContacts();
     this.mergeGeneratedContacts();
   }
@@ -86,6 +86,7 @@ export class ContactGenerator {
 
 }
 
+/** Don't use directly; only exported for tests; use ContactGenerator instead. */
 export function mergeContactInfo(contact: ContactData, contacts: GeneratedContact[]) {
   const currentContactProps = {
     ...contact,
