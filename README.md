@@ -54,7 +54,7 @@ Add these fields:
 
 ## Running
 
-    $ npm start -- --in=remote --out=remote
+    $ npm run once -- --in=remote --out=remote
 
 ## CLI Options
 
@@ -74,10 +74,10 @@ Add these fields:
 
 ```sh
 # Run engine once
-$ npm start -- [options]
+$ npm run once -- [options]
 
 # Example of dry-run, using local data and cached scorer data, with medium verbosity
-$ npm start -- --in=local --out=local --cached-fns=scorer.json --loglevel=info
+$ npm run once -- --in=local --out=local --cached-fns=scorer.json --loglevel=info
 
 # Download live data and cache to disk
 $ npm run download
@@ -122,6 +122,7 @@ After running the engine, to test logic *after* the Scoring Engine runs, pass `-
 
 ### Unreleased
 
+- Renamed `npm start` to `npm run once` (Use Docker image for continuous background processing)
 - Renamed ENV variables `MPAC_PASS` to `MPAC_API_KEY`
 
 ### 0.1.0 (2021-11-25)
