@@ -20,33 +20,7 @@ Uses Node.js and Docker.
 
 ## HubSpot Setup
 
-Add these fields:
-
-### Contacts
-
-| Field            | Type     | Allowed Values                           | ENV var                                 | Required |
-| ---------------- | -------- | ---------------------------------------- | --------------------------------------- | -------- |
-| License Tier     | Number   | *                                        | `HUBSPOT_CONTACT_LICENSE_TIER_ATTR`     | ❌        |
-| Last MPAC Event  | Date     | *                                        | `HUBSPOT_CONTACT_LAST_MPAC_EVENT_ATTR`  | ❌        |
-| Contact Type     | 1-Select | 'Partner' or 'Customer'                  | `HUBSPOT_CONTACT_CONTACT_TYPE_ATTR`     | ❌        |
-| Region           | 1-Select | "region" of MPAC records                 | `HUBSPOT_CONTACT_REGION_ATTR`           | ❌        |
-| Related Products | N-Select | `ADDONKEY_PLATFORMS` rhs vals            | `HUBSPOT_CONTACT_RELATED_PRODUCTS_ATTR` | ❌        |
-| Products         | N-Select | "addonKey" of MPAC records               | `HUBSPOT_CONTACT_PRODUCTS_ATTR`         | ❌        |
-| Deployment       | 1-Select | "hosting" of MPAC records, or 'Multiple' | `HUBSPOT_CONTACT_DEPLOYMENT_ATTR`       | ❌        |
-
-### Deals
-
-| Field            | Type        | Allowed Values             | ENV var                              | Required |
-| ---------------- | ----------- | -------------------------- | ------------------------------------ | -------- |
-| License Tier     | Number      | *                          | `HUBSPOT_DEAL_LICENSE_TIER_ATTR`     | ❌        |
-| Related Products | 1-Select    | `DEAL_RELATED_PRODUCTS`    | `HUBSPOT_DEAL_RELATED_PRODUCTS_ATTR` | ❌        |
-| Origin           | 1-Select    | `DEAL_ORIGIN`              | `HUBSPOT_DEAL_ORIGIN_ATTR`           | ❌        |
-| Deployment       | 1-Select    | "hosting" of MPAC records  | `HUBSPOT_DEAL_DEPLOYMENT_ATTR`       | ❌        |
-| App              | 1-Select    | "addonKey" of MPAC records | `HUBSPOT_DEAL_APP_ATTR`              | ❌        |
-| Country          | 1-line Text | "country" of MPAC records  | `HUBSPOT_DEAL_COUNTRY_ATTR`          | ❌        |
-| AddonLicenseId   | 1-line Text | (for engine use)           | `HUBSPOT_DEAL_ADDONLICENESID_ATTR`   | ✔️        |
-| TransactionId    | 1-line Text | (for engine use)           | `HUBSPOT_DEAL_TRANSACTIONID_ATTR`    | ✔️        |
-
+See the [HubSpot Setup](./docs/hubspot-setup.md) page.
 
 ## Dev Setup
 
@@ -54,9 +28,11 @@ Add these fields:
 2. Copy [`.sample.env`](./.sample.env) to `.env` and set values.
 3. `npm install`
 
+
 ## Running
 
     $ npm run once -- --in=remote --out=remote
+
 
 ## CLI Options
 
@@ -71,6 +47,7 @@ Add these fields:
 
     --loglevel    error | warn | info | verbose | detailed
         (Optional) What the engine should log to console.log()
+
 
 ## Developer NPM commands
 
@@ -100,6 +77,7 @@ $ npm run multiple
 $ npm run explain -- [--verbose] <SEN12345ABCDE>... | <transactions.json>
 ```
 
+
 ## Running during Development
 
 Running the engine live (steps above) will cache data locally in git-ignored `data` directory. After it's cached, you can use `--in=local` for faster development and to avoid API calls.
@@ -107,6 +85,7 @@ Running the engine live (steps above) will cache data locally in git-ignored `da
 Instead of uploading to Hubspot, you can use `--out=local` and `--loglevel=verbose` (the default) to print data to console that would have been uploaded, or `--loglevel=info` to just show array counts.
 
 After running the engine, to test logic *after* the Scoring Engine runs, pass `--cached-fns=scorer.json` to reuse the most recently results of the Scoring Engine.
+
 
 ## Changelog
 
