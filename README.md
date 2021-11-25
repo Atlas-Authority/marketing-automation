@@ -120,4 +120,8 @@ After running the engine, to test logic *after* the Scoring Engine runs, pass `-
 
 ## Changelog
 
-- Coming soon
+
+
+### 0.1.0 (2021-11-25)
+
+- First public version
