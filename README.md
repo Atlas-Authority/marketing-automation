@@ -4,13 +4,15 @@ Analyzes all your Atlassian Marketplace data, generates contacts/deals, and puts
 
 More specifically:
 
-1. Downloads and analyzes Atlassian Marketplace data
-2. Generates contacts from tech/billing/partner contacts
-3. Flags partner vs. customer types
-4. Matches related MPAC events up with each other
-5. Generates deals from these matches
-6. Upserts all of this into HubSpot
-7. Runs this in a configurable loop
+1. Downloads and analyzes HubSpot and Atlassian Marketplace data
+2. Generates contacts from all License/Transaction contact info
+3. Identifies and flags Contact-Type for each Contact/Company
+4. Matches up related MPAC events via similarity-scoring
+5. Updates Contacts based on match results
+6. Generates Deals based on match results
+7. Upserts all generated/updated HubSpot data entities
+
+All this runs in an ENV-configurable loop.
 
 Uses Node.js and Docker.
 
@@ -105,18 +107,6 @@ Running the engine live (steps above) will cache data locally in git-ignored `da
 Instead of uploading to Hubspot, you can use `--out=local` and `--loglevel=verbose` (the default) to print data to console that would have been uploaded, or `--loglevel=info` to just show array counts.
 
 After running the engine, to test logic *after* the Scoring Engine runs, pass `--cached-fns=scorer.json` to reuse the most recently results of the Scoring Engine.
-
-## Engine Logic
-
-### High-level Overview
-
-1. Download HubSpot and Marketplace data
-2. Generate contacts from all Licenses/Transactions
-3. Identify and flag Contact Type for each Contact/Company
-4. Match License/Transaction groups via similarity-scoring
-5. Update Contacts based on match results
-6. Generate Deals based on match results
-7. Upsert HubSpot data entities
 
 ## Changelog
 
