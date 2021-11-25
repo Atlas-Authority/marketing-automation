@@ -6,7 +6,7 @@ dotenv.config();
 export default {
   mpac: {
     user: required('MPAC_USER'),
-    pass: required('MPAC_PASS'),
+    apiKey: required('MPAC_API_KEY'),
     sellerId: required('MPAC_SELLER_ID'),
     platforms: Object.fromEntries<string>(
       required('ADDONKEY_PLATFORMS')

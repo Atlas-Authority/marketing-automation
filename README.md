@@ -120,7 +120,9 @@ After running the engine, to test logic *after* the Scoring Engine runs, pass `-
 
 ## Changelog
 
+### Unreleased
 
+- Renamed ENV variables `MPAC_PASS` to `MPAC_API_KEY`
 
 ### 0.1.0 (2021-11-25)
 

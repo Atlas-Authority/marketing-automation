@@ -10,7 +10,7 @@ export class LiveMarketplaceService implements MarketplaceService {
 
   public async downloadTransactions(): Promise<RawTransaction[]> {
     const transactions = await this.downloadMarketplaceData('/sales/transactions/export');
-    if ((transactions as any).code === 401) throw new KnownError("MPAC_PASS is an invalid API key or an actual password.");
+    if ((transactions as any).code === 401) throw new KnownError("MPAC_API_KEY is an invalid API key.");
     return cache('transactions.json', transactions as RawTransaction[]);
   }
 
@@ -34,7 +34,7 @@ export class LiveMarketplaceService implements MarketplaceService {
   private async downloadMarketplaceData<T>(subpath: string): Promise<T[]> {
     const res = await fetch(`https://marketplace.atlassian.com/rest/2/vendors/${env.mpac.sellerId}/reporting${subpath}`, {
       headers: {
-        'Authorization': 'Basic ' + Buffer.from(env.mpac.user + ':' + env.mpac.pass).toString('base64'),
+        'Authorization': 'Basic ' + Buffer.from(env.mpac.user + ':' + env.mpac.apiKey).toString('base64'),
       },
     });
 
