@@ -7,37 +7,42 @@ import env from "../lib/parameters/env.js";
 import { AttachableError, KnownError } from '../lib/util/errors.js';
 import run from '../lib/util/runner.js';
 
-const io = IO.fromCli();
-cli.failIfExtraOpts();
+main();
+async function main() {
 
-const slack = new Slack();
+  const io = IO.fromCli();
+  cli.failIfExtraOpts();
 
-await slack.postToSlack(`Starting Marketing Engine`);
+  const slack = new Slack();
 
-await run({
+  await slack.postToSlack(`Starting Marketing Engine`);
 
-  async work() {
-    const db = new Database(io);
-    await new Engine().run(db);
-  },
+  await run({
 
-  async failed(errors) {
-    await slack.postToSlack(`Failed ${env.engine.retryTimes} times. Below are the specific errors, in order. Trying again in ${env.engine.runInterval}.`);
-    for (const error of errors) {
-      if (error instanceof KnownError) {
-        await slack.postErrorToSlack(error.message);
+    async work() {
+      const db = new Database(io);
+      await new Engine().run(db);
+    },
+
+    async failed(errors) {
+      await slack.postToSlack(`Failed ${env.engine.retryTimes} times. Below are the specific errors, in order. Trying again in ${env.engine.runInterval}.`);
+      for (const error of errors) {
+        if (error instanceof KnownError) {
+          await slack.postErrorToSlack(error.message);
+        }
+        else if (error instanceof AttachableError) {
+          await slack.postErrorToSlack(`\`\`\`\n${error.stack}\n\`\`\``);
+          await slack.postAttachmentToSlack({
+            title: 'Error attachment for ^',
+            content: error.attachment,
+          });
+        }
+        else {
+          await slack.postErrorToSlack(`\`\`\`\n${error.stack}\n\`\`\``);
+        }
       }
-      else if (error instanceof AttachableError) {
-        await slack.postErrorToSlack(`\`\`\`\n${error.stack}\n\`\`\``);
-        await slack.postAttachmentToSlack({
-          title: 'Error attachment for ^',
-          content: error.attachment,
-        });
-      }
-      else {
-        await slack.postErrorToSlack(`\`\`\`\n${error.stack}\n\`\`\``);
-      }
-    }
-  },
+    },
 
-});
+  });
+
+}

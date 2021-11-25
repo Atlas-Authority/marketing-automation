@@ -4,35 +4,40 @@ import { IO } from '../lib/io/io.js';
 import log from '../lib/log/logger.js';
 import { Database } from '../lib/model/database.js';
 
-const [contactId] = process.argv.slice(2);
+main();
+async function main() {
 
-if (!contactId) {
-  console.log('Usage: node bin/check-licenses.js [--verbose] <SEN-L12345ABCDE>...');
-  process.exit(1);
-}
+  const [contactId] = process.argv.slice(2);
 
-log.level = log.Levels.Verbose;
-const db = new Database(new IO({ in: 'local', out: 'local' }));
-await db.downloadAllData();
+  if (!contactId) {
+    console.log('Usage: node bin/check-licenses.js [--verbose] <SEN-L12345ABCDE>...');
+    process.exit(1);
+  }
 
-const contact = db.contactManager.get(contactId);
+  log.level = log.Levels.Verbose;
+  const db = new Database(new IO({ in: 'local', out: 'local' }));
+  await db.downloadAllData();
 
-log.info('Dev', contact);
+  const contact = db.contactManager.get(contactId);
 
-const matchedGroups = DataDir.out.file<ReturnType<typeof shorterLicenseInfo>[][]>('matched-groups-all.json').readJson();
+  log.info('Dev', contact);
 
-const groups = matchedGroups.filter(g => g.some(l => l.tech_email === contact?.data.email));
+  const matchedGroups = DataDir.out.file<ReturnType<typeof shorterLicenseInfo>[][]>('matched-groups-all.json').readJson();
 
-const keys: (keyof typeof matchedGroups[0][0])[] = ['company', 'tech_email', 'tech_name', 'tech_address', 'tech_city', 'tech_phone', 'tech_state', 'tech_zip', 'tech_country'];
+  const groups = matchedGroups.filter(g => g.some(l => l.tech_email === contact?.data.email));
 
-for (const group of groups) {
-  const first = group[0];
-  if (first) {
-    for (const key of keys) {
-      log.info(key, '');
-      for (const l of group) {
-        log.info(key, l[key]);
+  const keys: (keyof typeof matchedGroups[0][0])[] = ['company', 'tech_email', 'tech_name', 'tech_address', 'tech_city', 'tech_phone', 'tech_state', 'tech_zip', 'tech_country'];
+
+  for (const group of groups) {
+    const first = group[0];
+    if (first) {
+      for (const key of keys) {
+        log.info(key, '');
+        for (const l of group) {
+          log.info(key, l[key]);
+        }
       }
     }
   }
+
 }

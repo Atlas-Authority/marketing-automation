@@ -1,5 +1,5 @@
-import csvStringify from 'csv-stringify/lib/es5/sync.js';
-import flatten from 'flat';
+import * as csvStringify from 'csv-stringify/lib/es5/sync.js';
+import * as flatten from 'flat';
 import log from '../log/logger.js';
 import env from '../parameters/env.js';
 import DataDir from './datadir.js';

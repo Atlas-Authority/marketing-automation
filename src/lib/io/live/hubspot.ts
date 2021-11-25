@@ -1,5 +1,5 @@
 import * as hubspot from '@hubspot/api-client';
-import assert from 'assert';
+import * as assert from 'assert';
 import log from '../../log/logger.js';
 import { Association, EntityKind, ExistingEntity, FullEntity, NewEntity, RelativeAssociation } from '../../model/hubspot/interfaces.js';
 import env from '../../parameters/env.js';

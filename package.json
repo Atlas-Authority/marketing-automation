@@ -6,32 +6,28 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc --watch",
-    "once": "env TS_NODE_TRANSPILE_ONLY=true TS_NODE_FILES=true node --loader ts-node/esm src/bin/run-once.ts",
-    "multiple": "env TS_NODE_TRANSPILE_ONLY=true TS_NODE_FILES=true node --loader ts-node/esm src/bin/verify-multiple-runs.ts",
-    "download": "env TS_NODE_TRANSPILE_ONLY=true TS_NODE_FILES=true node --loader ts-node/esm src/bin/download.ts",
-    "explain": "env TS_NODE_TRANSPILE_ONLY=true TS_NODE_FILES=true node --loader ts-node/esm src/bin/check-licenses.ts",
-    "ts-node": "env TS_NODE_TRANSPILE_ONLY=true TS_NODE_FILES=true node --loader ts-node/esm",
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
-    "test-watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js out --watch --watchPathIgnorePatterns='src/'"
+    "once": "node out/bin/run-once.js",
+    "multiple": "node out/bin/verify-multiple-runs.js",
+    "download": "node out/bin/download.js",
+    "explain": "node out/bin/check-licenses.js",
+    "test": "jest",
+    "test-watch": "jest --watch"
   },
   "dependencies": {
     "@hubspot/api-client": "^3.2.6",
     "@slack/web-api": "^6.0.0",
     "ansi-regex": "^6.0.1",
-    "axios": "^0.21.4",
     "burner-email-providers": "^1.0.42",
     "capitalize": "^2.0.3",
     "chalk": "^4.1.2",
     "cli-progress": "^3.9.1",
     "csv-stringify": "^5.6.1",
-    "dice-coefficient": "^2.0.0",
     "dotenv": "^8.2.0",
     "email-providers": "^1.0.3",
     "flat": "^5.0.2",
-    "jest-ts-webcompat-resolver": "^1.0.0",
+    "got": "^11.8.3",
     "luxon": "^1.25.0",
-    "mustache": "^4.2.0",
-    "node-fetch": "^3.0.0"
+    "mustache": "^4.2.0"
   },
   "devDependencies": {
     "@types/capitalize": "^2.0.0",
@@ -45,12 +41,9 @@
     "path-parse": ">=1.0.7",
     "set-value": "^4.1.0",
     "tmpl": "^1.0.5",
-    "ts-jest": "^27.0.7",
-    "ts-node": "^10.2.1",
     "typescript": "^4.4.2",
     "ws": ">=7.4.6"
   },
-  "type": "module",
   "keywords": [],
   "author": "",
   "license": "ISC"

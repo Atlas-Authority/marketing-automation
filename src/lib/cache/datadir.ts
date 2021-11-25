@@ -1,8 +1,8 @@
-import fs from 'fs';
-import { URL } from 'url';
+import * as fs from 'fs';
+import { URL, pathToFileURL } from 'url';
 import log from '../log/logger.js';
 
-const rootDataDir = new URL(`../../../data/`, import.meta.url);
+const rootDataDir = new URL(`../../data/`, pathToFileURL(__dirname));
 if (!fs.existsSync(rootDataDir)) fs.mkdirSync(rootDataDir);
 
 export default class DataDir {

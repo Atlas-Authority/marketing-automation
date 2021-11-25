@@ -1,5 +1,5 @@
-import assert from 'assert';
-import util from 'util';
+import * as assert from 'assert';
+import * as util from 'util';
 import log from "../../log/logger.js";
 import env from '../../parameters/env.js';
 import { AttachableError } from "../../util/errors.js";

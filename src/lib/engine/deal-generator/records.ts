@@ -1,5 +1,5 @@
-import assert from 'assert';
-import mustache from 'mustache';
+import * as assert from 'assert';
+import * as mustache from 'mustache';
 import log from '../../log/logger.js';
 import { Table } from '../../log/table.js';
 import { Deal, DealData } from '../../model/deal.js';

@@ -1,4 +1,4 @@
-import capitalize from 'capitalize';
+import * as capitalize from 'capitalize';
 import { Contact, ContactData, ContactType } from '../../model/contact.js';
 import { Database } from '../../model/database.js';
 import { License } from '../../model/license.js';

@@ -1,10 +1,11 @@
+import got from 'got';
 import { DateTime, Duration, Interval } from 'luxon';
-import fetch from 'node-fetch';
 import { RawLicense, RawTransaction } from "../../model/marketplace/raw";
 import env from '../../parameters/env.js';
 import { AttachableError, KnownError } from '../../util/errors.js';
 import cache from '../cache.js';
 import { MarketplaceService, Progress } from '../interfaces.js';
+
 
 export class LiveMarketplaceService implements MarketplaceService {
 
@@ -32,7 +33,7 @@ export class LiveMarketplaceService implements MarketplaceService {
   }
 
   private async downloadMarketplaceData<T>(subpath: string): Promise<T[]> {
-    const res = await fetch(`https://marketplace.atlassian.com/rest/2/vendors/${env.mpac.sellerId}/reporting${subpath}`, {
+    const res = await got.get(`https://marketplace.atlassian.com/rest/2/vendors/${env.mpac.sellerId}/reporting${subpath}`, {
       headers: {
         'Authorization': 'Basic ' + Buffer.from(env.mpac.user + ':' + env.mpac.apiKey).toString('base64'),
       },
@@ -40,7 +41,7 @@ export class LiveMarketplaceService implements MarketplaceService {
 
     let text;
     try {
-      text = await res.text();
+      text = res.body;
       return JSON.parse(text);
     }
     catch (e) {
