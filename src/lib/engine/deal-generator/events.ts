@@ -1,10 +1,9 @@
-import { LogWriteStream } from '../../cache/datadir.js';
-import { Table } from '../../log/table.js';
 import { License } from '../../model/license.js';
 import { Transaction } from '../../model/transaction.js';
 import { sorter } from "../../util/helpers.js";
 import { RelatedLicenseSet } from '../license-matching/license-grouper.js';
-import { getLicense, isEvalOrOpenSourceLicense, isPaidLicense, printRecordDetails } from "./records.js";
+import { DealDataLogger } from './logger.js';
+import { getLicense, isEvalOrOpenSourceLicense, isPaidLicense } from "./records.js";
 
 export type RefundEvent = { type: 'refund', groups: RelatedLicenseSet, refundedTxs: Transaction[] };
 export type EvalEvent = { type: 'eval', groups: RelatedLicenseSet, licenses: License[] };
@@ -22,14 +21,14 @@ export type DealRelevantEvent = (
 
 export class EventGenerator {
 
-  constructor(private log: LogWriteStream) { }
+  constructor(private log: DealDataLogger) { }
 
   private events: DealRelevantEvent[] = [];
 
   public interpretAsEvents(groups: RelatedLicenseSet) {
     const records = this.getRecords(groups);
     this.sortRecords(records);
-    printRecordDetails(this.log, records);
+    this.log.logRecords(records);
 
     for (const record of records) {
       if (record instanceof License) {
@@ -59,7 +58,8 @@ export class EventGenerator {
 
     this.normalizeEvalAndPurchaseEvents();
 
-    printEventDetails(this.log, this.events);
+    this.log.logEvents(this.events);
+
     return this.events;
   }
 
@@ -189,35 +189,12 @@ export class EventGenerator {
 
 }
 
-function printEventDetails(log: LogWriteStream, events: DealRelevantEvent[]) {
-  const rows = events.map(e => {
-    switch (e.type) {
-      case 'eval': return { type: e.type, lics: e.licenses.map(l => l.id) };
-      case 'purchase': return { type: e.type, lics: e.licenses.map(l => l.id), txs: [e.transaction?.id] };
-      case 'refund': return { type: e.type, txs: e.refundedTxs.map(tx => tx.id) };
-      case 'renewal': return { type: e.type, txs: [e.transaction.id] };
-      case 'upgrade': return { type: e.type, txs: [e.transaction.id] };
-    }
-  });
-
-  Table.print({
-    title: 'Events',
-    log: str => log.writeLine(str),
-    rows: rows,
-    cols: [
-      [{ title: 'Type' }, row => row.type],
-      [{ title: 'Licenses' }, row => row.lics?.join(', ') ?? ''],
-      [{ title: 'Transactions' }, row => row.txs?.join(', ') ?? ''],
-    ],
-  });
-}
-
 export function abbrEventDetails(e: DealRelevantEvent) {
   switch (e.type) {
-    case 'eval': return { type: e.type, ids: e.licenses.map(l => l.id) };
-    case 'purchase': return { type: e.type, ids: e.licenses.map(l => l.id), tx: e.transaction?.id };
-    case 'refund': return { type: e.type, ids: e.refundedTxs.map(tx => tx.id) };
-    case 'renewal': return { type: e.type, id: e.transaction.id };
-    case 'upgrade': return { type: e.type, id: e.transaction.id };
+    case 'eval': return { type: e.type, lics: e.licenses.map(l => l.id) };
+    case 'purchase': return { type: e.type, lics: e.licenses.map(l => l.id), txs: [e.transaction?.id] };
+    case 'refund': return { type: e.type, txs: e.refundedTxs.map(tx => tx.id) };
+    case 'renewal': return { type: e.type, txs: [e.transaction.id] };
+    case 'upgrade': return { type: e.type, txs: [e.transaction.id] };
   }
 }

@@ -1,5 +1,4 @@
 import * as assert from 'assert';
-import DataDir, { LogWriteStream } from '../../cache/datadir.js';
 import { saveForInspection } from '../../cache/inspection.js';
 import log from '../../log/logger.js';
 import { Table } from '../../log/table.js';
@@ -11,8 +10,9 @@ import env from '../../parameters/env.js';
 import { formatMoney } from '../../util/formatters.js';
 import { isPresent, sorter } from '../../util/helpers.js';
 import { RelatedLicenseSet } from '../license-matching/license-grouper.js';
-import { ActionGenerator, printDealActionDetails } from './actions.js';
+import { ActionGenerator } from './actions.js';
 import { EventGenerator } from './events.js';
+import { DealDataLogger } from './logger.js';
 import { getEmails } from './records.js';
 
 export type IgnoredLicense = LicenseData & {
@@ -35,10 +35,10 @@ export class DealGenerator {
   }
 
   public run(matches: RelatedLicenseSet[]) {
-    const dealGeneratorLog = DataDir.out.file('deal-generator.txt').writeStream();
+    const logger = new DealDataLogger();
 
     for (const relatedLicenseIds of matches) {
-      const actions = this.generateActionsForMatchedGroup(dealGeneratorLog, relatedLicenseIds);
+      const actions = this.generateActionsForMatchedGroup(logger, relatedLicenseIds);
       for (const action of actions) {
         const deal = (action.type === 'create'
           ? this.db.dealManager.create(action.properties)
@@ -57,7 +57,7 @@ export class DealGenerator {
     this.printIgnoredTransactionsTable();
     this.printPartnerTransactionsTable();
 
-    dealGeneratorLog.close();
+    logger.close();
   }
 
   private printIgnoredTransactionsTable() {
@@ -101,14 +101,14 @@ export class DealGenerator {
     }
   }
 
-  private generateActionsForMatchedGroup(dealGeneratorLog: LogWriteStream, groups: RelatedLicenseSet) {
+  private generateActionsForMatchedGroup(logger: DealDataLogger, groups: RelatedLicenseSet) {
     assert.ok(groups.length > 0);
     if (this.ignoring(groups)) return [];
 
-    const events = new EventGenerator(dealGeneratorLog).interpretAsEvents(groups);
+    const events = new EventGenerator(logger).interpretAsEvents(groups);
     const actions = this.actionGenerator.generateFrom(events);
 
-    printDealActionDetails(dealGeneratorLog, actions);
+    logger.logActions(actions);
 
     return actions;
   }
