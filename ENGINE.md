@@ -54,7 +54,98 @@ After this, the engine has a combination of all existing and new Contacts, ready
 
 ### Matching MPAC events
 
-(Coming soon.)
+#### Context
+
+This phase assumes a few things:
+
+1. Each `addonLicenseId` uniquely points to exactly one License
+2. Each transaction points to exactly one `addonLicenseId`
+3. Some transactions point to the same `addonLicenseId`
+4. Therefore, we can match up every license with 0-N transactions
+5. The engine calls this a License Context (naming things is hard)
+6. We can always map back each license to its transactions
+7. So we can work with licenses, and be able to traverse their transactions
+
+So, using TypeScript for context, we start with this:
+
+```typescript
+type LicenseContext = {
+  license: License;
+  transactions: Transaction[];
+};
+
+let toMatchUp: LicenseContext[];
+```
+
+#### Motivation
+
+The goal of this phase is to match up each license with all other licenses that they are *probably related to*, meaning, probably part of the same series of MPAC events by the same person/people.
+
+An example might be a Project Lead getting evals for a team, and then a separate Product Manager in the same company purchasing licenses but with a different email, and maybe a QA team getting evals for testing afterwards.
+
+Once we have this match info, we'll be able to generate deals from them. So it's important to make sure we don't get false positives, so we don't send a deal intended for one company to another unrelated customer.
+
+#### Logs
+
+Since this phase of engine logic is very dependent on data, and requires a lot of fine tuning via trial/error, copious logs are output to data/out, all prefixed with the string "match" or "matched" for inspection.
+
+For a deeper understanding of this phase, run the engine with out=local, and inspect the logs. For convenience, they're output in both JSON and CSV formats, but they're the same data.
+
+#### Logic
+
+First, we group licenses by app and hosting, since each Deal must be for one product on one Atlassian platform.
+
+In each group, we score every license with every other license. This phase can take a few minutes overall, so it's a good time to grab a cup of coffee.
+
+Sometimes we're certain about a match or non-match:
+
+1. If the licenses are >90 days apart, we assume they're not part of the same series of MPAC events, so we never match them.
+2. If they have exactly the same tech or billing emails, or are part of the exact same HubSpot contact, they're definitely a match.
+
+In all other case, match scoring is based on a threshold. Certain factors add to the threshold:
+
+- Similar domain has a low score
+- Similar email has a low score
+- Similar address has a high score
+- Similar company has a high score
+- Similar tech contact name has a low score
+- Similar tech contact phone has a low score
+
+At this point, we have a bunch of scores. The engine then matches groups up by related scores, given a probability threshold.
+
+Given the following table:
+
+| L1  | L2  | Score |
+| --- | --- | ----- |
+| `a` | `b` | 50    |
+| `a` | `c` | 50    |
+| `b` | `c` | 30    |
+| `d` | `a` | 20    |
+| `d` | `b` | 20    |
+| `d` | `c` | 20    |
+
+If we use threshold=40, we'll have these groups:
+
+- `[a, b, c]`
+- `[d]`
+
+As expected, `d` will be in a group by itself, since it wasn't related enough to anything else.
+
+But even though `b` and `c` didn't seem directly related, they were connected through `a`, which they're both related to based on the threshold.
+
+In practice, this means that if 2 licenses are 100 days apart, but matched with one in common 50 days between each, they'll all be matched up together.
+
+#### Match results
+
+At the end of this phase, we have a set of matched License Contexts, which the engine calls uncreatively Related License Sets.
+
+To continue the TypeScript reference from above, at the end of this phase, we have:
+
+```typescript
+type RelatedLicenseSet = LicenseContext[];
+
+let matchedUp: RelatedLicenseSet[];
+```
 
 ### Updating contacts based on matches
 
