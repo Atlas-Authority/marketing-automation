@@ -14,7 +14,7 @@ More specifically:
 
 This runs in an ENV-configurable loop.
 
-[More details on engine logic.](./ENGINE.md)
+Read about the engine logic in detail in [ENGINE.md](./ENGINE.md).
 
 Implemented in Node.js (TypeScript) and can build a Docker image.
 

@@ -18,6 +18,10 @@ It then transforms all these into in-memory representations to more easily work 
 
 These in-memory HubSpot entities will be operated on throughout the rest of the engine run, and upsynced in the final step.
 
+At this phase, MPAC contact fields are normalized, e.g. the literal string `"null"` is removed, newlines are removed, and fields are trimmed.
+
+We calculate on each record anything we can ahead of time here (currently only MPAC max-tier), and remove MPAC records with invalid emails.
+
 ### Identifying contact types by MPAC data
 
 The two types of contact types are Partner and Customer. This phase identifies all known domains as being one or the other.
@@ -28,9 +32,9 @@ We also add partner domains from an optional ENV variable if you have some you k
 
 We remove from the partners list any mass email providers such as gmail and hotmail, and all known burner (throwaway) email providers. A list of such domains is gathered from 3 different sources:
 
-1. The NPM lib `burner-email-providers`
-2. The NPM lib `email-providers`
-3. The URL `https://f.hubspotusercontent40.net/hubfs/2832391/Marketing/Lead-Capture/free-domains-1.csv`
+1. The NPM lib [burner-email-providers](https://www.npmjs.com/package/burner-email-providers)
+2. The NPM lib [email-providers](https://www.npmjs.com/package/email-providers)
+3. The URL https://f.hubspotusercontent40.net/hubfs/2832391/Marketing/Lead-Capture/free-domains-1.csv
 
 After all this, we finally have a set of domains that are known to be Partners. The rest are Contacts.
 
@@ -40,9 +44,13 @@ We also flag all contacts in the same HubSpot Company as a partner as also being
 
 ### Generating contacts
 
-Each MPAC record is used to lookup an existing HubSpot Contact and potentially update it, or generate a new one.
+Every MPAC record (licenses and transactions) is used to create or update a HubSpot Contact, based on tech contact, billing contact, and partner contact.
 
-(Coming soon.)
+Since multiple MPAC records will relate to the same HubSpot contact, these are merged so that the latest set of data is used to update the HubSpot contact.
+
+If possible, related pairs of data are updated together, e.g. firstname + lastname, city + state. When these can't be set in pairs, we at least set them separately to avoid having no value.
+
+After this, the engine has a combination of all existing and new Contacts, ready for further engine processing, and finally upsyncing in the last phase.
 
 ### Matching MPAC events
 
