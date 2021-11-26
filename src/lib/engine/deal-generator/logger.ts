@@ -17,18 +17,41 @@ export class DealDataLogger {
   }
 
   logActions(actions: Action[]) {
-    this.plainLog.writeLine('Actions');
-    this.plainLog.writeLine(JSON.stringify(actions.map(action => abbrActionDetails(action)), null, 2));
+    this._logActions(false, actions);
+    this._logActions(true, actions);
+  }
+
+  private _logActions(redacted: boolean, actions: Action[]) {
+    const log = this.loggerFor(redacted);
+
+    function abbrActionDetails(action: Action) {
+      const { type } = action;
+      switch (type) {
+        case 'create': return { type, data: action.properties };
+        case 'update': return { type, id: action.deal.id, data: action.properties };
+        case 'noop': return { type, id: action.deal.id };
+      }
+    }
+
+    log.writeLine('Actions');
+    log.writeLine(JSON.stringify(actions.map(action => abbrActionDetails(action)), null, 2));
   }
 
   logRecords(records: (License | Transaction)[]) {
+    this._logRecords(false, records);
+    this._logRecords(true, records);
+  }
+
+  private _logRecords(redacted: boolean, records: (License | Transaction)[]) {
+    const log = this.loggerFor(redacted);
+
     const ifTx = (fn: (r: Transaction) => string) =>
       (r: License | Transaction) =>
         r instanceof Transaction ? fn(r) : '';
 
-    this.plainLog.writeLine('\n');
+    log.writeLine('\n');
     Table.print({
-      log: str => this.plainLog.writeLine(str),
+      log: str => log.writeLine(str),
       title: 'Records',
       rows: records,
       cols: [
@@ -44,11 +67,18 @@ export class DealDataLogger {
   }
 
   logEvents(events: DealRelevantEvent[]) {
+    this._logEvents(false, events);
+    this._logEvents(true, events);
+  }
+
+  private _logEvents(redacted: boolean, events: DealRelevantEvent[]) {
+    const log = this.loggerFor(redacted);
+
     const rows = events.map(abbrEventDetails);
 
     Table.print({
       title: 'Events',
-      log: str => this.plainLog.writeLine(str),
+      log: str => log.writeLine(str),
       rows: rows,
       cols: [
         [{ title: 'Type' }, row => row.type],
@@ -58,13 +88,11 @@ export class DealDataLogger {
     });
   }
 
-}
-
-function abbrActionDetails(action: Action) {
-  const { type } = action;
-  switch (type) {
-    case 'create': return { type, data: action.properties };
-    case 'update': return { type, id: action.deal.id, data: action.properties };
-    case 'noop': return { type, id: action.deal.id };
+  private loggerFor(redacted: boolean) {
+    if (redacted)
+      return this.rededLog;
+    else
+      return this.plainLog;
   }
+
 }
