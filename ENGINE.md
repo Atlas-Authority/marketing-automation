@@ -164,6 +164,31 @@ Then, for each contact in each group, we set these fields, if configured via Hub
 
 ### Generating deals based on matches
 
+The following logic all runs on each Related License Set.
+
+During this phase, run the engine with `--loglevel=detailed` to see what events and actions are generated. (In the future, we may output them to the data/our dir also.)
+
+#### Events
+
+First, the deal generator normalizes all the MPAC records in the set, into a series of "events".
+
+- If it's an eval or an open source license, it's an "eval"
+- If it's a paid license, or a transaction, it's a "purchase"
+- If it's a transaction with sale type Renewal, it's a "renewal"
+- If it's a transaction with sale type Upgrade, it's an "upgrade"
+
+Now that we have a list of events for a group of records, we normalize it so that every event reflects some potential *separate* action to be taken by the deal generator.
+
+- We merge all evals into the following purchase.
+- If it's only evals, we merge all evals into one.
+- Delete any trailing evals not followed by purchase.
+
+Now we have a list of events where each one will correspond to a create/update deal action.
+
+As part of this phase's normalization, we also *apply* refunds to in-memory MPAC records, by removing ones that have been refunded, and reducing amounts of those that have been partially refunded.
+
+#### Actions
+
 (Coming soon.)
 
 ### Upsyncing all changes to HubSpot
