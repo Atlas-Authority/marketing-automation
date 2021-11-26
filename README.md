@@ -22,7 +22,7 @@ Implemented in Node.js (TypeScript) and can build a Docker image.
 
 ## HubSpot Setup
 
-See [./docs/hubspot-setup.md](./docs/hubspot-setup.md).
+See [docs/HUBSPOT.md](./docs/HUBSPOT.md).
 
 ## Dev Setup
 
