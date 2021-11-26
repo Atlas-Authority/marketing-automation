@@ -12,9 +12,11 @@ More specifically:
 6. Generates Deals based on match results
 7. Upserts all generated/updated HubSpot data entities
 
-All this runs in an ENV-configurable loop.
+This runs in an ENV-configurable loop.
 
-Uses Node.js and Docker.
+[More details on engine logic.](./ENGINE.md)
+
+Implemented in Node.js (TypeScript) and can build a Docker image.
 
 ---
 
