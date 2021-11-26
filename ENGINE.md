@@ -189,7 +189,34 @@ As part of this phase's normalization, we also *apply* refunds to in-memory MPAC
 
 #### Generating Actions
 
-(Coming soon.)
+##### Eval events
+
+- Create or update deal
+- DealStage = Eval, or Closed-Lost if inactive
+- Set all properties
+
+##### Purchase events
+
+- Create or update deal
+- DealStage = Closed-Won
+- Set all properties
+
+##### Renewal events
+
+- Create or update deal
+- DealStage = Closed-Won if creating
+- Set all properties
+
+##### Upgrade events
+
+- Same as Renewal
+
+##### Refund events
+
+- Find all deals for transactions this has refunded
+- For any that exist, and aren't Closed-Lost:
+  - DealStage = Closed-Lost
+  - Set all properties
 
 ### Applying Actions
 

@@ -58,6 +58,9 @@ export class ActionGenerator {
     if (deal) this.recordSeen(deal, event);
 
     if (deal) {
+      // TODO: This should probably check for closed-lost
+      //       (i.e. refunded) and if set, avoid changing.
+      //       Or rather, update to closed-won only if eval.
       const license = event.transaction || getLatestLicense(event);
       return makeUpdateAction(event, deal, license, DealStage.CLOSED_WON);
     }
