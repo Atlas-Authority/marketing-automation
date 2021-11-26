@@ -149,7 +149,18 @@ let matchedUp: RelatedLicenseSet[];
 
 ### Updating contacts based on matches
 
-(Coming soon.)
+Now that we have matched sets, we can update HubSpot contacts more reliably.
+
+In each matched group of licenses, we gather all the contacts based on their tech emails.
+
+- We flag contacts via partner coworkers again, this time using these contacts.
+
+Then, for each contact in each group, we set these fields, if configured via HubSpot ENV vras:
+
+- license-tier = the highest one found in their group
+- last-mpac-event = the latest one found in their group
+- related-products += app key
+- deployment = app hosting, or "Multiple" if different from contact's current hosting
 
 ### Generating deals based on matches
 
