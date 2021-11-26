@@ -214,7 +214,6 @@ function makeUpdateAction(event: DealRelevantEvent, deal: Deal, record: License 
   if (record) updateDeal(deal, record);
 
   if (!deal.hasPropertyChanges()) {
-    log.detailed('Deal Actions', 'No properties to update for deal', deal.id);
     return { type: 'noop', deal, groups: event.groups };
   }
 
