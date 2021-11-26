@@ -14,7 +14,7 @@ More specifically:
 
 This runs in an ENV-configurable loop.
 
-Read about the engine logic in detail in [ENGINE.md](./ENGINE.md).
+Read about the engine logic in detail in [docs/ENGINE.md](./docs/ENGINE.md).
 
 Implemented in Node.js (TypeScript) and can build a Docker image.
 
@@ -22,7 +22,7 @@ Implemented in Node.js (TypeScript) and can build a Docker image.
 
 ## HubSpot Setup
 
-See the [HubSpot Setup](./docs/hubspot-setup.md) page.
+See [./docs/hubspot-setup.md](./docs/hubspot-setup.md).
 
 ## Dev Setup
 
