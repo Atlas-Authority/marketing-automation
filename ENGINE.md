@@ -157,10 +157,10 @@ In each matched group of licenses, we gather all the contacts based on their tec
 
 Then, for each contact in each group, we set these fields, if configured via HubSpot ENV vras:
 
-- license-tier = the highest one found in their group
-- last-mpac-event = the latest one found in their group
-- related-products += app key
-- deployment = app hosting, or "Multiple" if different from contact's current hosting
+- License Tier is set to the highest one found in their group
+- Last MPAC Event is set to the latest one found in their group
+- Related Products has the app key added
+- Deployment is set to app hosting, or "Multiple" if different from contact's current hosting
 
 ### Generating deals based on matches
 
@@ -168,4 +168,7 @@ Then, for each contact in each group, we set these fields, if configured via Hub
 
 ### Upsyncing all changes to HubSpot
 
-(Coming soon.)
+- All entities are created or updated in HubSpot.
+- Then all associations are created or removed.
+
+Finally, a convenient summary of some engine run details is printed to console.
