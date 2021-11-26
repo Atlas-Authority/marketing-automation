@@ -2,7 +2,7 @@
   "compilerOptions": {
     "checkJs": true,
     "allowJs": true,
-    "module": "ESNext",
+    "module": "CommonJS",
     "target": "ESNext",
     "sourceMap": true,
     "moduleResolution": "Node",
@@ -20,8 +20,7 @@
     "noImplicitAny": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": false,
-    "skipLibCheck": true,
-    "allowSyntheticDefaultImports": true
+    "skipLibCheck": true
   },
   "include": [
     "src/**/*.js",

@@ -1,4 +1,4 @@
-import chalk from 'chalk';
+import * as chalk from 'chalk';
 import log from '../log/logger.js';
 import { cli } from "../parameters/cli.js";
 import env from '../parameters/env.js';

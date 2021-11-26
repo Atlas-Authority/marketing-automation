@@ -1,4 +1,4 @@
-import chalk from 'chalk';
+import * as chalk from 'chalk';
 import { MultiBar, Presets, SingleBar } from 'cli-progress';
 import { Progress } from '../io/interfaces.js';
 import log from './logger.js';

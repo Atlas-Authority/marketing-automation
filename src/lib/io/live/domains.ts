@@ -1,4 +1,4 @@
-import fetch from 'node-fetch';
+import got from 'got';
 import cache from '../cache.js';
 import { TldListerService } from '../interfaces.js';
 
@@ -9,9 +9,8 @@ export function makeEmailValidationRegex(tlds: readonly string[]) {
 export class LiveTldListerService implements TldListerService {
 
   public async downloadAllTlds(): Promise<string[]> {
-    const res = await fetch(`https://data.iana.org/TLD/tlds-alpha-by-domain.txt`);
-    const text = await res.text();
-    const tlds = text.trim().split('\n').splice(1).map(s => s.toLowerCase());
+    const res = await got.get(`https://data.iana.org/TLD/tlds-alpha-by-domain.txt`);
+    const tlds = res.body.trim().split('\n').splice(1).map(s => s.toLowerCase());
     return cache('tlds.json', tlds);
   }
 
