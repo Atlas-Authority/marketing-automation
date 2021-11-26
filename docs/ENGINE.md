@@ -198,7 +198,7 @@ As part of this phase's normalization, we also *apply* refunds to in-memory MPAC
 ##### Purchase events
 
 - Create or update deal
-- DealStage = Closed-Won
+- DealStage = Closed-Won if creating or deal was Eval
 - Set all properties
 
 ##### Renewal events
