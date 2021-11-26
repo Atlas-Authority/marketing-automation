@@ -166,7 +166,7 @@ Then, for each contact in each group, we set these fields, if configured via Hub
 
 The following logic all runs on each Related License Set.
 
-During this phase, run the engine with `--loglevel=detailed` to see what events and actions are generated. (In the future, we may output them to the data/our dir also.)
+During this phase, generated events and actions are saved for inspection in data/out/deal-generator.txt. Examining this file after a local run will help make sense of what this phase is doing and how it works.
 
 #### Generating Events
 

@@ -1,4 +1,4 @@
-import log from '../../log/logger.js';
+import { LogWriteStream } from '../../cache/datadir.js';
 import { Table } from '../../log/table.js';
 import { License } from '../../model/license.js';
 import { Transaction } from '../../model/transaction.js';
@@ -22,11 +22,14 @@ export type DealRelevantEvent = (
 
 export class EventGenerator {
 
+  constructor(private log: LogWriteStream) { }
+
   private events: DealRelevantEvent[] = [];
 
   public interpretAsEvents(groups: RelatedLicenseSet) {
     const records = this.getRecords(groups);
     this.sortRecords(records);
+    printRecordDetails(this.log, records);
 
     for (const record of records) {
       if (record instanceof License) {
@@ -56,9 +59,7 @@ export class EventGenerator {
 
     this.normalizeEvalAndPurchaseEvents();
 
-    printRecordDetails(records);
-    printEventDetails(this.events);
-
+    printEventDetails(this.log, this.events);
     return this.events;
   }
 
@@ -188,7 +189,7 @@ export class EventGenerator {
 
 }
 
-function printEventDetails(events: DealRelevantEvent[]) {
+function printEventDetails(log: LogWriteStream, events: DealRelevantEvent[]) {
   const rows = events.map(e => {
     switch (e.type) {
       case 'eval': return { type: e.type, lics: e.licenses.map(l => l.id) };
@@ -201,7 +202,7 @@ function printEventDetails(events: DealRelevantEvent[]) {
 
   Table.print({
     title: 'Events',
-    log: str => log.detailed('Deal Actions', str),
+    log: str => log.writeLine(str),
     rows: rows,
     cols: [
       [{ title: 'Type' }, row => row.type],

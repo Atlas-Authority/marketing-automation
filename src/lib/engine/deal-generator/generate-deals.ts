@@ -1,4 +1,5 @@
 import * as assert from 'assert';
+import DataDir, { LogWriteStream } from '../../cache/datadir.js';
 import { saveForInspection } from '../../cache/inspection.js';
 import log from '../../log/logger.js';
 import { Table } from '../../log/table.js';
@@ -34,8 +35,10 @@ export class DealGenerator {
   }
 
   public run(matches: RelatedLicenseSet[]) {
+    const dealGeneratorLog = DataDir.out.file('deal-generator.txt').writeStream();
+
     for (const relatedLicenseIds of matches) {
-      const actions = this.generateActionsForMatchedGroup(relatedLicenseIds);
+      const actions = this.generateActionsForMatchedGroup(dealGeneratorLog, relatedLicenseIds);
       for (const action of actions) {
         const deal = (action.type === 'create'
           ? this.db.dealManager.create(action.properties)
@@ -53,6 +56,8 @@ export class DealGenerator {
 
     this.printIgnoredTransactionsTable();
     this.printPartnerTransactionsTable();
+
+    dealGeneratorLog.close();
   }
 
   private printIgnoredTransactionsTable() {
@@ -96,13 +101,14 @@ export class DealGenerator {
     }
   }
 
-  private generateActionsForMatchedGroup(groups: RelatedLicenseSet) {
+  private generateActionsForMatchedGroup(dealGeneratorLog: LogWriteStream, groups: RelatedLicenseSet) {
     assert.ok(groups.length > 0);
     if (this.ignoring(groups)) return [];
 
-    const events = new EventGenerator().interpretAsEvents(groups);
+    const events = new EventGenerator(dealGeneratorLog).interpretAsEvents(groups);
     const actions = this.actionGenerator.generateFrom(events);
-    log.detailed('Deal Actions', 'Generated deal actions', actions.map(action => abbrActionDetails(action)));
+
+    dealGeneratorLog.writeLine(JSON.stringify(actions.map(action => abbrActionDetails(action))));
 
     return actions;
   }

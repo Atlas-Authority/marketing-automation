@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import { URL, pathToFileURL } from 'url';
 import log from '../log/logger.js';
+import env from '../parameters/env.js';
 
 const rootDataDir = new URL(`../../data/`, pathToFileURL(__dirname));
 if (!fs.existsSync(rootDataDir)) fs.mkdirSync(rootDataDir);
@@ -71,4 +72,39 @@ class DataFile<T> {
     fs.writeFileSync(this.#url, this.#text);
   }
 
+  public writeStream(): LogWriteStream {
+    if (env.isTest || env.isProduction)
+      return noopWriteStream;
+    else
+      return new FileLogWriteStream(this.#url);
+  }
+
 }
+
+export interface LogWriteStream {
+  close(): void;
+  writeLine(text: string): void;
+}
+
+export class FileLogWriteStream {
+
+  stream: fs.WriteStream;
+
+  constructor(url: URL) {
+    this.stream = fs.createWriteStream(url);
+  }
+
+  close() {
+    this.stream.end();
+  }
+
+  writeLine(text: string) {
+    this.stream.write(text + '\n');
+  }
+
+}
+
+const noopWriteStream: LogWriteStream = {
+  writeLine() { },
+  close() { },
+};
