@@ -35,14 +35,13 @@ export class DealGenerator {
 
   public run(matches: RelatedLicenseSet[]) {
     for (const relatedLicenseIds of matches) {
-      for (const action of this.generateActionsForMatchedGroup(relatedLicenseIds)) {
-        if (action.type === 'create') {
-          const deal = this.db.dealManager.create(action.properties);
-          this.associateDealContactsAndCompanies(action.groups, deal);
-        }
-        else {
-          this.associateDealContactsAndCompanies(action.groups, action.deal);
-        }
+      const actions = this.generateActionsForMatchedGroup(relatedLicenseIds);
+      for (const action of actions) {
+        const deal = (action.type === 'create'
+          ? this.db.dealManager.create(action.properties)
+          : action.deal);
+
+        this.associateDealContactsAndCompanies(action.groups, deal);
       }
     }
 
