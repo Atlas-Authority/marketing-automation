@@ -168,7 +168,7 @@ The following logic all runs on each Related License Set.
 
 During this phase, run the engine with `--loglevel=detailed` to see what events and actions are generated. (In the future, we may output them to the data/our dir also.)
 
-#### Events
+#### Generating Events
 
 First, the deal generator normalizes all the MPAC records in the set, into a series of "events".
 
@@ -187,9 +187,19 @@ Now we have a list of events where each one will correspond to a create/update d
 
 As part of this phase's normalization, we also *apply* refunds to in-memory MPAC records, by removing ones that have been refunded, and reducing amounts of those that have been partially refunded.
 
-#### Actions
+#### Generating Actions
 
 (Coming soon.)
+
+### Applying Actions
+
+If it's a create-deal action, we create it.
+
+Whether we created or updated the deal, we now associate all contacts and companies with this deal:
+
+1. Get all contacts via MPAC records in the Related License Set
+2. Add all these contacts to the deal
+3. Of the customer contacts, add their companies to the deal
 
 ### Upsyncing all changes to HubSpot
 
