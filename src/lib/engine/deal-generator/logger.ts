@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from "uuid";
+import Chance from 'chance';
 import DataDir, { LogWriteStream } from "../../cache/datadir.js";
 import { Table } from "../../log/table.js";
 import { DealData } from "../../model/deal.js";
@@ -151,6 +151,8 @@ class NonRedactor implements Redactor {
 
 class PrivacyRedactor implements Redactor {
 
+  private chance = new Chance();
+
   private redactions = new Map<string, string>();
   private newIds = new Set<string>();
 
@@ -167,7 +169,13 @@ class PrivacyRedactor implements Redactor {
   }
 
   private shortUUID() {
-    return uuidv4().replace(/-/g, '').slice(0, 10);
+    return this.chance.string({
+      length: 10,
+      alpha: true,
+      numeric: true,
+      symbols: false,
+      casing: 'lower'
+    });
   }
 
   public addonLicenseId<T extends R>(val: T): T {
@@ -183,15 +191,15 @@ class PrivacyRedactor implements Redactor {
   }
 
   public appName<T extends R>(val: T): T {
-    return this.redact(val, () => `AppName[${this.shortUUID()}]`);
+    return this.redact(val, () => `AppName[${this.chance.word({ capitalize: true, syllables: 2 })}]`);
   }
 
   public dealName<T extends R>(val: T): T {
-    return this.redact(val, () => `DealName[${this.shortUUID()}]`);
+    return this.redact(val, () => `DealName[${this.chance.word({ capitalize: true, syllables: 2 })}]`);
   }
 
   public product<T extends R>(val: T): T {
-    return this.redact(val, () => `Product[${this.shortUUID()}]`);
+    return this.redact(val, () => `Product[${this.chance.word({ capitalize: true, syllables: 2 })}]`);
   }
 
 }
