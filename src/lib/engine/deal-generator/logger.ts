@@ -7,9 +7,9 @@ import { Action } from "./actions.js";
 import { abbrEventDetails, DealRelevantEvent } from "./events.js";
 import { v4 as uuidv4 } from "uuid";
 
-type RedactIdFn = <T extends string | undefined>(id: T) => T;
+type RedactIdFn = <T extends string | undefined>(prefix: string, id: T) => T;
 
-const sameId = <T extends string | undefined>(x: T) => x;
+const sameId = <T extends string | undefined>(prefix: string, x: T) => x;
 
 export class DealDataLogger {
 
@@ -24,12 +24,12 @@ export class DealDataLogger {
     this.rededLog.close();
   }
 
-  redact<T extends string | undefined>(id: T): T {
+  redact<T extends string | undefined>(prefix: string, id: T): T {
     if (typeof id === 'undefined') return id;
 
     let rid = this.redactions.get(id);
     if (!rid) {
-      do { rid = uuidv4().replace(/-/g, '').slice(0, 10); }
+      do { rid = prefix + uuidv4().replace(/-/g, '').slice(0, 10); }
       while (this.newIds.has(rid));
       this.newIds.add(rid);
       this.redactions.set(id, rid)
@@ -48,8 +48,8 @@ export class DealDataLogger {
       const { type } = action;
       switch (type) {
         case 'create': return { type, data: action.properties };
-        case 'update': return { type, id: redact(action.deal.id), data: action.properties };
-        case 'noop': return { type, id: redact(action.deal.id) };
+        case 'update': return { type, id: redact('D_', action.deal.id), data: action.properties };
+        case 'noop': return { type, id: redact('D_', action.deal.id) };
       }
     }
 
@@ -75,11 +75,11 @@ export class DealDataLogger {
       rows: records,
       cols: [
         [{ title: 'Hosting' }, record => record.data.hosting],
-        [{ title: 'AddonLicenseId' }, record => redact(record.data.addonLicenseId)],
+        [{ title: 'AddonLicenseId' }, record => redact('L_', record.data.addonLicenseId)],
         [{ title: 'Date' }, record => record.data.maintenanceStartDate],
         [{ title: 'LicenseType' }, record => record.data.licenseType],
         [{ title: 'SaleType' }, ifTx(record => record.data.saleType)],
-        [{ title: 'Transaction' }, ifTx(record => redact(record.data.transactionId))],
+        [{ title: 'Transaction' }, ifTx(record => redact('TX_', record.data.transactionId))],
         [{ title: 'Amount', align: 'right' }, ifTx(record => formatMoney(record.data.vendorAmount))],
       ],
     });
@@ -94,8 +94,8 @@ export class DealDataLogger {
   private _logEvents(log: LogWriteStream, redact: RedactIdFn, events: DealRelevantEvent[]) {
     const rows = events.map(abbrEventDetails).map(({ type, lics, txs }) => ({
       type,
-      lics: lics.map(redact),
-      txs: txs.map(redact),
+      lics: lics.map(l => redact('L_', l)),
+      txs: txs.map(tx => redact('TX_', tx)),
     }));
 
     Table.print({
