@@ -9,14 +9,9 @@
     "lib": [
       "ES2020"
     ],
-    "strictFunctionTypes": true,
-    "strictBindCallApply": true,
-    "strictNullChecks": true,
-    "strictPropertyInitialization": true,
     "strict": true,
     "outDir": "./out",
     "noImplicitReturns": true,
-    "noImplicitThis": true,
     "noImplicitAny": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": false,
