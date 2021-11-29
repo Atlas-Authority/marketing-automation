@@ -1,3 +1,4 @@
+import 'source-map-support/register';
 import { saveForInspection } from "../lib/cache/inspection";
 import { IO } from "../lib/io/io";
 import log from "../lib/log/logger";

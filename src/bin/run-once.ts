@@ -1,3 +1,4 @@
+import 'source-map-support/register';
 import Engine from "../lib/engine/engine";
 import { IO } from "../lib/io/io";
 import { Database } from "../lib/model/database";

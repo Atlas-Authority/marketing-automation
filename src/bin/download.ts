@@ -1,3 +1,4 @@
+import 'source-map-support/register';
 import { IO } from "../lib/io/io";
 import log from "../lib/log/logger";
 import { Database } from "../lib/model/database";

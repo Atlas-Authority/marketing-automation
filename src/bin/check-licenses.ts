@@ -1,3 +1,4 @@
+import 'source-map-support/register';
 import fs from "fs";
 import DataDir from "../lib/cache/datadir";
 import { shorterLicenseInfo } from "../lib/engine/license-matching/license-grouper";

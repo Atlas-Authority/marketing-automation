@@ -1,3 +1,4 @@
+import 'source-map-support/register';
 import Engine from "../lib/engine/engine";
 import { IO } from "../lib/io/io";
 import log from "../lib/log/logger";
