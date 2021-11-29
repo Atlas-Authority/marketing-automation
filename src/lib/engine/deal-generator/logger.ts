@@ -12,7 +12,7 @@ const dealPropertyRedactors: {
   [K in keyof DealData]: (redact: Redactor, val: Partial<DealData>[K]) => Partial<DealData>[K]
 } = {
   addonLicenseId: (redact, addonLicenseId) => redact.addonLicenseId(addonLicenseId),
-  amount: (redact, amount) => amount,
+  amount: (redact, amount) => redact.amount(amount),
   app: (redact, app) => redact.appName(app),
   closeDate: (redact, closeDate) => closeDate,
   country: (redact, country) => country,
@@ -94,7 +94,7 @@ export class DealDataLogger {
         [{ title: 'LicenseType' }, record => record.data.licenseType],
         [{ title: 'SaleType' }, ifTx(record => record.data.saleType)],
         [{ title: 'Transaction' }, ifTx(record => redact.transactionId(record.data.transactionId))],
-        [{ title: 'Amount', align: 'right' }, ifTx(record => formatMoney(record.data.vendorAmount))],
+        [{ title: 'Amount', align: 'right' }, ifTx(record => formatMoney(redact.amount(record.data.vendorAmount)))],
       ],
     });
   }
@@ -125,7 +125,7 @@ export class DealDataLogger {
 
 }
 
-type R = string | undefined | null;
+type R = string | number | undefined | null;
 
 interface Redactor {
 
@@ -135,6 +135,7 @@ interface Redactor {
   appName<T extends R>(val: T): T;
   dealName<T extends R>(val: T): T;
   product<T extends R>(val: T): T;
+  amount<T extends R>(val: T): T;
 
 }
 
@@ -146,6 +147,7 @@ class NonRedactor implements Redactor {
   public appName<T extends R>(val: T): T { return val; }
   public dealName<T extends R>(val: T): T { return val; }
   public product<T extends R>(val: T): T { return val; }
+  public amount<T extends R>(val: T): T { return val; }
 
 }
 
@@ -153,10 +155,10 @@ class PrivacyRedactor implements Redactor {
 
   private chance = new Chance();
 
-  private redactions = new Map<string, string>();
-  private newIds = new Set<string>();
+  private redactions = new Map<string | number, string | number>();
+  private newIds = new Set<string | number>();
 
-  private redact<T extends R>(id: T, idgen: () => string): T {
+  private redact<T extends R>(id: T, idgen: () => string | number): T {
     if (id === undefined || id === null) return id;
     let rid = this.redactions.get(id);
     if (!rid) {
@@ -200,6 +202,10 @@ class PrivacyRedactor implements Redactor {
 
   public product<T extends R>(val: T): T {
     return this.redact(val, () => `Product[${this.chance.word({ capitalize: true, syllables: 2 })}]`);
+  }
+
+  public amount<T extends R>(val: T): T {
+    return this.redact(val, () => this.chance.floating({ min: 0, max: 1_000 }));
   }
 
 }
