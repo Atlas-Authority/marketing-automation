@@ -8,9 +8,9 @@ import { formatMoney } from "../../util/formatters.js";
 import { Action } from "./actions.js";
 import { abbrEventDetails, DealRelevantEvent } from "./events.js";
 
-type RedactIdFn = <T extends string | undefined>(prefix: string, id: T) => T;
+type RedactIdFn = <T extends string | undefined | null>(prefix: string, id: T) => T;
 
-const sameId = <T extends string | undefined>(prefix: string, x: T) => x;
+const sameId = <T extends string | undefined | null>(prefix: string, x: T) => x;
 
 export class DealDataLogger {
 
@@ -25,8 +25,8 @@ export class DealDataLogger {
     this.rededLog.close();
   }
 
-  redact<T extends string | undefined>(prefix: string, id: T): T {
-    if (typeof id === 'undefined') return id;
+  redact<T extends string | undefined | null>(prefix: string, id: T): T {
+    if (id === undefined || id === null) return id;
 
     let rid = this.redactions.get(id);
     if (!rid) {
@@ -44,8 +44,22 @@ export class DealDataLogger {
     this._logActions(this.rededLog, redact, actions);
   }
 
-  redactedDealProperties(data: Partial<DealData>) {
-    return data;
+  redactedDealProperties(redact: RedactIdFn, data: Partial<DealData>): Partial<DealData> {
+    return {
+      addonLicenseId: redact('L_', data.addonLicenseId),
+      amount: data.amount,
+      app: data.app,
+      closeDate: data.closeDate,
+      country: data.country,
+      dealName: data.dealName,
+      dealStage: data.dealStage,
+      deployment: data.deployment,
+      licenseTier: data.licenseTier,
+      origin: data.origin,
+      pipeline: data.pipeline,
+      relatedProducts: data.relatedProducts,
+      transactionId: redact('TX_', data.transactionId),
+    };
   }
 
   printDealProperties(log: LogWriteStream, data: Partial<DealData>) {
@@ -60,11 +74,11 @@ export class DealDataLogger {
       switch (action.type) {
         case 'create':
           log.writeLine('  Create:');
-          this.printDealProperties(log, this.redactedDealProperties(action.properties));
+          this.printDealProperties(log, this.redactedDealProperties(redact, action.properties));
           break;
         case 'update':
           log.writeLine(`  Update: ${redact('D_', action.deal.id)}`);
-          this.printDealProperties(log, this.redactedDealProperties(action.properties));
+          this.printDealProperties(log, this.redactedDealProperties(redact, action.properties));
           break;
         case 'noop':
           log.writeLine(`  Nothing: ${redact('D_', action.deal.id)}`);
