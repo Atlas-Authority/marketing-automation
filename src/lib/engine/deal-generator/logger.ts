@@ -1,11 +1,12 @@
+import { v4 as uuidv4 } from "uuid";
 import DataDir, { LogWriteStream } from "../../cache/datadir.js";
 import { Table } from "../../log/table.js";
+import { DealData } from "../../model/deal.js";
 import { License } from "../../model/license.js";
 import { Transaction } from "../../model/transaction.js";
 import { formatMoney } from "../../util/formatters.js";
 import { Action } from "./actions.js";
 import { abbrEventDetails, DealRelevantEvent } from "./events.js";
-import { v4 as uuidv4 } from "uuid";
 
 type RedactIdFn = <T extends string | undefined>(prefix: string, id: T) => T;
 
@@ -43,18 +44,33 @@ export class DealDataLogger {
     this._logActions(this.rededLog, redact, actions);
   }
 
+  redactedDealProperties(data: Partial<DealData>) {
+    return data;
+  }
+
+  printDealProperties(log: LogWriteStream, data: Partial<DealData>) {
+    for (const [k, v] of Object.entries(data)) {
+      log.writeLine(`    ${k}: ${v}`);
+    }
+  }
+
   private _logActions(log: LogWriteStream, redact: RedactIdFn, actions: Action[]) {
-    function abbrActionDetails(action: Action) {
-      const { type } = action;
-      switch (type) {
-        case 'create': return { type, data: action.properties };
-        case 'update': return { type, id: redact('D_', action.deal.id), data: action.properties };
-        case 'noop': return { type, id: redact('D_', action.deal.id) };
+    log.writeLine('Actions');
+    for (const action of actions) {
+      switch (action.type) {
+        case 'create':
+          log.writeLine('  Create:');
+          this.printDealProperties(log, this.redactedDealProperties(action.properties));
+          break;
+        case 'update':
+          log.writeLine(`  Update: ${redact('D_', action.deal.id)}`);
+          this.printDealProperties(log, this.redactedDealProperties(action.properties));
+          break;
+        case 'noop':
+          log.writeLine(`  Nothing: ${redact('D_', action.deal.id)}`);
+          break;
       }
     }
-
-    log.writeLine('Actions');
-    log.writeLine(JSON.stringify(actions.map(action => abbrActionDetails(action)), null, 2));
   }
 
   logRecords(records: (License | Transaction)[]) {
