@@ -1,6 +1,6 @@
 import got from 'got';
-import cache from '../cache.js';
-import { EmailProviderListerService } from '../interfaces.js';
+import cache from '../cache';
+import { EmailProviderListerService } from '../interfaces';
 
 export class LiveEmailProviderListerService implements EmailProviderListerService {
 

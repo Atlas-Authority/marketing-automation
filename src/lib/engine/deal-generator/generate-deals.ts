@@ -1,19 +1,19 @@
-import * as assert from 'assert';
-import DataDir, { LogWriteStream } from '../../cache/datadir.js';
-import { saveForInspection } from '../../cache/inspection.js';
-import log from '../../log/logger.js';
-import { Table } from '../../log/table.js';
-import { Database } from '../../model/database.js';
-import { Deal } from '../../model/deal.js';
-import { License, LicenseData } from '../../model/license.js';
-import { Transaction } from '../../model/transaction.js';
-import env from '../../parameters/env.js';
-import { formatMoney } from '../../util/formatters.js';
-import { isPresent, sorter } from '../../util/helpers.js';
-import { RelatedLicenseSet } from '../license-matching/license-grouper.js';
-import { ActionGenerator, printDealActionDetails } from './actions.js';
-import { EventGenerator } from './events.js';
-import { getEmails } from './records.js';
+import assert from 'assert';
+import DataDir, { LogWriteStream } from '../../cache/datadir';
+import { saveForInspection } from '../../cache/inspection';
+import log from '../../log/logger';
+import { Table } from '../../log/table';
+import { Database } from '../../model/database';
+import { Deal } from '../../model/deal';
+import { License, LicenseData } from '../../model/license';
+import { Transaction } from '../../model/transaction';
+import env from '../../parameters/env';
+import { formatMoney } from '../../util/formatters';
+import { isPresent, sorter } from '../../util/helpers';
+import { RelatedLicenseSet } from '../license-matching/license-grouper';
+import { ActionGenerator, printDealActionDetails } from './actions';
+import { EventGenerator } from './events';
+import { getEmails } from './records';
 
 export type IgnoredLicense = LicenseData & {
   reason: string;

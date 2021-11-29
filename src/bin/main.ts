@@ -1,11 +1,11 @@
-import Engine from "../lib/engine/engine.js";
-import { IO } from "../lib/io/io.js";
-import Slack from "../lib/io/slack.js";
-import { Database } from "../lib/model/database.js";
-import { cli } from "../lib/parameters/cli.js";
-import env from "../lib/parameters/env.js";
-import { AttachableError, KnownError } from '../lib/util/errors.js';
-import run from '../lib/util/runner.js';
+import Engine from "../lib/engine/engine";
+import { IO } from "../lib/io/io";
+import Slack from "../lib/io/slack";
+import { Database } from "../lib/model/database";
+import { cli } from "../lib/parameters/cli";
+import env from "../lib/parameters/env";
+import { AttachableError, KnownError } from "../lib/util/errors";
+import run from "../lib/util/runner";
 
 main();
 async function main() {

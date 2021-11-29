@@ -1,8 +1,8 @@
-import * as chalk from 'chalk';
-import log from '../log/logger.js';
-import { cli } from "../parameters/cli.js";
-import env from '../parameters/env.js';
-import DataDir from "./datadir.js";
+import chalk from "chalk";
+import log from "../log/logger";
+import { cli } from "../parameters/cli";
+import env from "../parameters/env";
+import DataDir from "./datadir";
 
 const cachedFns = cli.get('--cached-fns')?.split(',') || [];
 

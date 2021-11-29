@@ -1,8 +1,8 @@
-import * as csvStringify from 'csv-stringify/lib/es5/sync.js';
-import * as flatten from 'flat';
-import log from '../log/logger.js';
-import env from '../parameters/env.js';
-import DataDir from './datadir.js';
+import csvStringify from "csv-stringify/lib/es5/sync.js";
+import flatten from "flat";
+import log from "../log/logger";
+import env from "../parameters/env";
+import DataDir from "./datadir";
 
 function saveArrayToCsv(filename: string, array: any[]) {
   if (env.isProduction || env.isTest) return;

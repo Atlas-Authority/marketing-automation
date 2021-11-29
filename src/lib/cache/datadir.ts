@@ -1,7 +1,7 @@
-import * as fs from 'fs';
-import { URL, pathToFileURL } from 'url';
-import log from '../log/logger.js';
-import env from '../parameters/env.js';
+import fs from "fs";
+import { pathToFileURL, URL } from "url";
+import log from "../log/logger";
+import env from "../parameters/env";
 
 const rootDataDir = new URL(`../../data/`, pathToFileURL(__dirname));
 if (!fs.existsSync(rootDataDir)) fs.mkdirSync(rootDataDir);

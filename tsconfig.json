@@ -20,7 +20,8 @@
     "noImplicitAny": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": false,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "esModuleInterop": true
   },
   "include": [
     "src/**/*.js",

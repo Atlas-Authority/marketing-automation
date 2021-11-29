@@ -1,4 +1,4 @@
-import { batchesOf } from "../util/helpers.js";
+import { batchesOf } from "../util/helpers";
 
 class ArgParser {
 

@@ -1,6 +1,6 @@
-import * as assert from 'assert';
-import { AddonLicenseId, ContactInfo, getContactInfo, getPartnerInfo, maybeGetContactInfo, PartnerInfo } from "./marketplace/common.js";
-import { RawTransaction } from "./marketplace/raw.js";
+import assert from "assert";
+import { AddonLicenseId, ContactInfo, getContactInfo, getPartnerInfo, maybeGetContactInfo, PartnerInfo } from "./marketplace/common";
+import { RawTransaction } from "./marketplace/raw";
 
 export interface TransactionData {
   addonLicenseId: AddonLicenseId,

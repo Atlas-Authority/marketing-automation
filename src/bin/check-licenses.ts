@@ -1,11 +1,11 @@
-import * as fs from 'fs';
-import DataDir from '../lib/cache/datadir.js';
-import { shorterLicenseInfo } from '../lib/engine/license-matching/license-grouper.js';
-import { IO } from '../lib/io/io.js';
-import log from '../lib/log/logger.js';
-import { Database } from '../lib/model/database.js';
-import { LicenseData } from '../lib/model/license.js';
-import { RawTransaction } from '../lib/model/marketplace/raw.js';
+import fs from "fs";
+import DataDir from "../lib/cache/datadir";
+import { shorterLicenseInfo } from "../lib/engine/license-matching/license-grouper";
+import { IO } from "../lib/io/io";
+import log from "../lib/log/logger";
+import { Database } from "../lib/model/database";
+import { LicenseData } from "../lib/model/license";
+import { RawTransaction } from "../lib/model/marketplace/raw";
 
 main();
 async function main() {

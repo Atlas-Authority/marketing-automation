@@ -1,6 +1,6 @@
 import got from 'got';
-import cache from '../cache.js';
-import { TldListerService } from '../interfaces.js';
+import cache from '../cache';
+import { TldListerService } from '../interfaces';
 
 export function makeEmailValidationRegex(tlds: readonly string[]) {
   return new RegExp(`.+@.+\\.(${tlds.join('|')})`);

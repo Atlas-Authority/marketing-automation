@@ -1,8 +1,8 @@
-import DataDir from '../lib/cache/datadir.js';
-import { shorterLicenseInfo } from '../lib/engine/license-matching/license-grouper.js';
-import { IO } from '../lib/io/io.js';
-import log from '../lib/log/logger.js';
-import { Database } from '../lib/model/database.js';
+import DataDir from "../lib/cache/datadir";
+import { shorterLicenseInfo } from "../lib/engine/license-matching/license-grouper";
+import { IO } from "../lib/io/io";
+import log from "../lib/log/logger";
+import { Database } from "../lib/model/database";
 
 main();
 async function main() {

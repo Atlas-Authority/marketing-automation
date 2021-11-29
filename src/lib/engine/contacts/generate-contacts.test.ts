@@ -1,5 +1,4 @@
-import { ContactType } from "../../model/contact.js";
-import { GeneratedContact, mergeContactInfo } from "./generate-contacts.js";
+import { GeneratedContact, mergeContactInfo } from "./generate-contacts";
 
 describe('updating latest contact properties', () => {
 

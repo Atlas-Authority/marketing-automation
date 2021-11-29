@@ -1,13 +1,13 @@
-import env from "../parameters/env.js";
-import { AttachableError } from "../util/errors.js";
-import { isPresent } from "../util/helpers.js";
-import { Company } from "./company.js";
-import { Contact } from "./contact.js";
-import { Entity } from "./hubspot/entity.js";
-import { DealStage, EntityKind, Pipeline } from "./hubspot/interfaces.js";
-import { EntityAdapter, EntityManager } from "./hubspot/manager.js";
-import { License } from "./license.js";
-import { Transaction } from "./transaction.js";
+import env from "../parameters/env";
+import { AttachableError } from "../util/errors";
+import { isPresent } from "../util/helpers";
+import { Company } from "./company";
+import { Contact } from "./contact";
+import { Entity } from "./hubspot/entity";
+import { DealStage, EntityKind, Pipeline } from "./hubspot/interfaces";
+import { EntityAdapter, EntityManager } from "./hubspot/manager";
+import { License } from "./license";
+import { Transaction } from "./transaction";
 
 export type DealData = {
   relatedProducts: string | null;

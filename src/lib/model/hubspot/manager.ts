@@ -1,9 +1,9 @@
-import * as assert from 'assert';
-import { HubspotService, Progress } from '../../io/interfaces.js';
-import { AttachableError } from '../../util/errors.js';
-import { isPresent } from '../../util/helpers.js';
-import { Entity, Indexer } from "./entity.js";
-import { EntityKind, HubspotProperties, RelativeAssociation } from './interfaces.js';
+import assert from 'assert';
+import { HubspotService, Progress } from '../../io/interfaces';
+import { AttachableError } from '../../util/errors';
+import { isPresent } from '../../util/helpers';
+import { Entity, Indexer } from './entity';
+import { EntityKind, HubspotProperties, RelativeAssociation } from './interfaces';
 
 export interface EntityDatabase {
   getEntity(kind: EntityKind, id: string): Entity<any, any>;

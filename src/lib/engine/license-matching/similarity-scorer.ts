@@ -1,4 +1,4 @@
-import { diceCoefficient } from "../../external/words/dice-coefficient.js";
+import { diceCoefficient } from "../../external/words/dice-coefficient";
 
 export class SimilarityScorer {
 

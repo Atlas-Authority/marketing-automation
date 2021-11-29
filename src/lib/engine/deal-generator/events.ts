@@ -1,10 +1,10 @@
-import { LogWriteStream } from '../../cache/datadir.js';
-import { Table } from '../../log/table.js';
-import { License } from '../../model/license.js';
-import { Transaction } from '../../model/transaction.js';
-import { sorter } from "../../util/helpers.js";
-import { RelatedLicenseSet } from '../license-matching/license-grouper.js';
-import { getLicense, isEvalOrOpenSourceLicense, isPaidLicense, printRecordDetails } from "./records.js";
+import { LogWriteStream } from "../../cache/datadir";
+import { Table } from "../../log/table";
+import { License } from "../../model/license";
+import { Transaction } from "../../model/transaction";
+import { sorter } from "../../util/helpers";
+import { RelatedLicenseSet } from "../license-matching/license-grouper";
+import { getLicense, isEvalOrOpenSourceLicense, isPaidLicense, printRecordDetails } from "./records";
 
 export type RefundEvent = { type: 'refund', groups: RelatedLicenseSet, refundedTxs: Transaction[] };
 export type EvalEvent = { type: 'eval', groups: RelatedLicenseSet, licenses: License[] };

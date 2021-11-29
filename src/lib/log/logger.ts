@@ -1,6 +1,6 @@
-import * as chalk from 'chalk';
-import * as util from 'util';
-import { cli } from '../parameters/cli.js';
+import chalk from "chalk";
+import util from "util";
+import { cli } from "../parameters/cli";
 
 enum LogLevel {
   Error,

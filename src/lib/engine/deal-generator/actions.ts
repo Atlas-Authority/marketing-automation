@@ -1,13 +1,13 @@
-import { LogWriteStream } from '../../cache/datadir.js';
-import log from '../../log/logger.js';
-import { Deal, DealData, DealManager } from '../../model/deal.js';
-import { DealStage } from '../../model/hubspot/interfaces.js';
-import { License } from '../../model/license.js';
-import { Transaction } from '../../model/transaction.js';
-import { isPresent, sorter } from '../../util/helpers.js';
-import { RelatedLicenseSet } from '../license-matching/license-grouper.js';
-import { abbrEventDetails, DealRelevantEvent, EvalEvent, PurchaseEvent, RefundEvent, RenewalEvent, UpgradeEvent } from "./events.js";
-import { dealCreationProperties, updateDeal } from './records.js';
+import { LogWriteStream } from "../../cache/datadir";
+import log from "../../log/logger";
+import { Deal, DealData, DealManager } from "../../model/deal";
+import { DealStage } from "../../model/hubspot/interfaces";
+import { License } from "../../model/license";
+import { Transaction } from "../../model/transaction";
+import { isPresent, sorter } from "../../util/helpers";
+import { RelatedLicenseSet } from "../license-matching/license-grouper";
+import { abbrEventDetails, DealRelevantEvent, EvalEvent, PurchaseEvent, RefundEvent, RenewalEvent, UpgradeEvent } from "./events";
+import { dealCreationProperties, updateDeal } from "./records";
 
 export class ActionGenerator {
 

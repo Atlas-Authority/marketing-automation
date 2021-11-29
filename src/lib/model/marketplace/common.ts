@@ -1,4 +1,4 @@
-import { RawLicenseContact, RawPartnerDetails, RawTransactionContact } from "./raw.js";
+import { RawLicenseContact, RawPartnerDetails, RawTransactionContact } from "./raw";
 
 export type AddonLicenseId = string;
 

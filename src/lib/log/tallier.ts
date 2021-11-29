@@ -1,6 +1,6 @@
-import { formatMoney } from "../util/formatters.js";
-import log from "./logger.js";
-import { Table } from "./table.js";
+import { formatMoney } from "../util/formatters";
+import log from "./logger";
+import { Table } from "./table";
 
 export class Tallier {
 
