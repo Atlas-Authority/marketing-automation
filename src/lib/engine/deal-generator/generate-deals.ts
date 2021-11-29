@@ -1,4 +1,5 @@
 import * as assert from 'assert';
+import DataDir, { LogWriteStream } from '../../cache/datadir.js';
 import { saveForInspection } from '../../cache/inspection.js';
 import log from '../../log/logger.js';
 import { Table } from '../../log/table.js';
@@ -10,7 +11,7 @@ import env from '../../parameters/env.js';
 import { formatMoney } from '../../util/formatters.js';
 import { isPresent, sorter } from '../../util/helpers.js';
 import { RelatedLicenseSet } from '../license-matching/license-grouper.js';
-import { abbrActionDetails, ActionGenerator } from './actions.js';
+import { ActionGenerator, printDealActionDetails } from './actions.js';
 import { EventGenerator } from './events.js';
 import { getEmails } from './records.js';
 
@@ -34,15 +35,16 @@ export class DealGenerator {
   }
 
   public run(matches: RelatedLicenseSet[]) {
+    const dealGeneratorLog = DataDir.out.file('deal-generator.txt').writeStream();
+
     for (const relatedLicenseIds of matches) {
-      for (const action of this.generateActionsForMatchedGroup(relatedLicenseIds)) {
-        if (action.type === 'create') {
-          const deal = this.db.dealManager.create(action.properties);
-          this.associateDealContactsAndCompanies(action.groups, deal);
-        }
-        else {
-          this.associateDealContactsAndCompanies(action.groups, action.deal);
-        }
+      const actions = this.generateActionsForMatchedGroup(dealGeneratorLog, relatedLicenseIds);
+      for (const action of actions) {
+        const deal = (action.type === 'create'
+          ? this.db.dealManager.create(action.properties)
+          : action.deal);
+
+        this.associateDealContactsAndCompanies(action.groups, deal);
       }
     }
 
@@ -54,6 +56,8 @@ export class DealGenerator {
 
     this.printIgnoredTransactionsTable();
     this.printPartnerTransactionsTable();
+
+    dealGeneratorLog.close();
   }
 
   private printIgnoredTransactionsTable() {
@@ -97,13 +101,14 @@ export class DealGenerator {
     }
   }
 
-  private generateActionsForMatchedGroup(groups: RelatedLicenseSet) {
+  private generateActionsForMatchedGroup(dealGeneratorLog: LogWriteStream, groups: RelatedLicenseSet) {
     assert.ok(groups.length > 0);
     if (this.ignoring(groups)) return [];
 
-    const events = new EventGenerator().interpretAsEvents(groups);
+    const events = new EventGenerator(dealGeneratorLog).interpretAsEvents(groups);
     const actions = this.actionGenerator.generateFrom(events);
-    log.detailed('Deal Actions', 'Generated deal actions', actions.map(action => abbrActionDetails(action)));
+
+    printDealActionDetails(dealGeneratorLog, actions);
 
     return actions;
   }

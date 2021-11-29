@@ -1,6 +1,6 @@
 import * as assert from 'assert';
 import * as mustache from 'mustache';
-import log from '../../log/logger.js';
+import { LogWriteStream } from '../../cache/datadir.js';
 import { Table } from '../../log/table.js';
 import { Deal, DealData } from '../../model/deal.js';
 import { DealStage, Pipeline } from '../../model/hubspot/interfaces.js';
@@ -38,14 +38,14 @@ export function getLicense(addonLicenseId: string, groups: RelatedLicenseSet) {
 
 
 
-export function printRecordDetails(records: (License | Transaction)[]) {
+export function printRecordDetails(log: LogWriteStream, records: (License | Transaction)[]) {
   const ifTx = (fn: (r: Transaction) => string) =>
     (r: License | Transaction) =>
       r instanceof Transaction ? fn(r) : '';
 
-  log.detailed('Deal Actions', '\n');
+  log.writeLine('\n');
   Table.print({
-    log: str => log.detailed('Deal Actions', str),
+    log: str => log.writeLine(str),
     title: 'Records',
     rows: records,
     cols: [

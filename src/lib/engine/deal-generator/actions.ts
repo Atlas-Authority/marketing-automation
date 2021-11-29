@@ -1,3 +1,4 @@
+import { LogWriteStream } from '../../cache/datadir.js';
 import log from '../../log/logger.js';
 import { Deal, DealData, DealManager } from '../../model/deal.js';
 import { DealStage } from '../../model/hubspot/interfaces.js';
@@ -194,11 +195,17 @@ export type NoDealAction = {
 export type Action = CreateDealAction | UpdateDealAction | NoDealAction;
 
 export function abbrActionDetails(action: Action) {
-  switch (action.type) {
-    case 'create': return ['create', action.properties];
-    case 'update': return ['update', action.deal.id, action.properties];
-    case 'noop': return ['noop', action.deal.id];
+  const { type } = action;
+  switch (type) {
+    case 'create': return { type, data: action.properties };
+    case 'update': return { type, id: action.deal.id, data: action.properties };
+    case 'noop': return { type, id: action.deal.id };
   }
+}
+
+export function printDealActionDetails(dealGeneratorLog: LogWriteStream, actions: Action[]) {
+  dealGeneratorLog.writeLine('Actions');
+  dealGeneratorLog.writeLine(JSON.stringify(actions.map(action => abbrActionDetails(action)), null, 2));
 }
 
 function makeCreateAction(event: DealRelevantEvent, record: License | Transaction, data: Pick<DealData, 'addonLicenseId' | 'transactionId' | 'dealStage'>): Action {
@@ -214,7 +221,6 @@ function makeUpdateAction(event: DealRelevantEvent, deal: Deal, record: License 
   if (record) updateDeal(deal, record);
 
   if (!deal.hasPropertyChanges()) {
-    log.detailed('Deal Actions', 'No properties to update for deal', deal.id);
     return { type: 'noop', deal, groups: event.groups };
   }
 
