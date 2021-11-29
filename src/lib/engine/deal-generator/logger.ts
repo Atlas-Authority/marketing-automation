@@ -12,6 +12,24 @@ type RedactIdFn = <T extends string | undefined | null>(prefix: string, id: T) =
 
 const sameId = <T extends string | undefined | null>(prefix: string, x: T) => x;
 
+const dealPropertyRedactors: {
+  [K in keyof DealData]: (redact: RedactIdFn, val: Partial<DealData>[K]) => Partial<DealData>[K]
+} = {
+  addonLicenseId: (redact, addonLicenseId) => redact('L_', addonLicenseId),
+  amount: (redact, amount) => amount,
+  app: (redact, app) => redact('App:', app),
+  closeDate: (redact, closeDate) => closeDate,
+  country: (redact, country) => country,
+  dealName: (redact, dealName) => redact('DealName:', dealName),
+  dealStage: (redact, dealStage) => dealStage,
+  deployment: (redact, deployment) => deployment,
+  licenseTier: (redact, licenseTier) => licenseTier,
+  origin: (redact, origin) => origin,
+  pipeline: (redact, pipeline) => pipeline,
+  relatedProducts: (redact, relatedProducts) => redact('RelatedProducts:', relatedProducts),
+  transactionId: (redact, transactionId) => redact('TX_', transactionId),
+};
+
 export class DealDataLogger {
 
   plainLog = DataDir.out.file('deal-generator.txt').writeStream();
@@ -44,27 +62,12 @@ export class DealDataLogger {
     this._logActions(this.rededLog, redact, actions);
   }
 
-  redactedDealProperties(redact: RedactIdFn, data: Partial<DealData>): Partial<DealData> {
-    return {
-      addonLicenseId: redact('L_', data.addonLicenseId),
-      amount: data.amount,
-      app: data.app,
-      closeDate: data.closeDate,
-      country: data.country,
-      dealName: data.dealName,
-      dealStage: data.dealStage,
-      deployment: data.deployment,
-      licenseTier: data.licenseTier,
-      origin: data.origin,
-      pipeline: data.pipeline,
-      relatedProducts: data.relatedProducts,
-      transactionId: redact('TX_', data.transactionId),
-    };
-  }
-
-  printDealProperties(log: LogWriteStream, data: Partial<DealData>) {
+  printDealProperties(log: LogWriteStream, redact: RedactIdFn, data: Partial<DealData>) {
     for (const [k, v] of Object.entries(data)) {
-      log.writeLine(`    ${k}: ${v}`);
+      const key = k as keyof DealData;
+      const fn = dealPropertyRedactors[key] as <T>(redact: RedactIdFn, val: T) => T;
+      const val = fn(redact, v);
+      log.writeLine(`    ${k}: ${val}`);
     }
   }
 
@@ -74,11 +77,11 @@ export class DealDataLogger {
       switch (action.type) {
         case 'create':
           log.writeLine('  Create:');
-          this.printDealProperties(log, this.redactedDealProperties(redact, action.properties));
+          this.printDealProperties(log, redact, action.properties);
           break;
         case 'update':
           log.writeLine(`  Update: ${redact('D_', action.deal.id)}`);
-          this.printDealProperties(log, this.redactedDealProperties(redact, action.properties));
+          this.printDealProperties(log, redact, action.properties);
           break;
         case 'noop':
           log.writeLine(`  Nothing: ${redact('D_', action.deal.id)}`);
