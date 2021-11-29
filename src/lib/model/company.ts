@@ -1,7 +1,7 @@
-import { Contact } from "./contact.js";
-import { Entity } from "./hubspot/entity.js";
-import { EntityKind } from "./hubspot/interfaces.js";
-import { EntityAdapter, EntityManager } from "./hubspot/manager.js";
+import { Contact } from "./contact";
+import { Entity } from "./hubspot/entity";
+import { EntityKind } from "./hubspot/interfaces";
+import { EntityAdapter, EntityManager } from "./hubspot/manager";
 
 type CompanyData = {
   name: string;

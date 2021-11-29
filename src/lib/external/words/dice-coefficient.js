@@ -25,7 +25,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import { bigram } from './n-gram.js'
+import { bigram } from './n-gram'
 
 /**
  * Get the edit-distance according to Dice between two values.

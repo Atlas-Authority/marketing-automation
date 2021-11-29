@@ -1,6 +1,6 @@
-import { emailBurnerList } from 'burner-email-providers';
-import * as allEmailProviders from 'email-providers';
-import { EmailProviderListerService, Progress } from '../../io/interfaces.js';
+import { emailBurnerList } from "burner-email-providers";
+import allEmailProviders from "email-providers";
+import { EmailProviderListerService, Progress } from "../../io/interfaces";
 
 export class EmailProviderLister {
 

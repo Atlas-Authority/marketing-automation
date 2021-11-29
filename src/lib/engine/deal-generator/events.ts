@@ -1,9 +1,9 @@
-import { License } from '../../model/license.js';
-import { Transaction } from '../../model/transaction.js';
-import { sorter } from "../../util/helpers.js";
-import { RelatedLicenseSet } from '../license-matching/license-grouper.js';
-import { DealDataLogger } from './logger.js';
-import { getLicense, isEvalOrOpenSourceLicense, isPaidLicense } from "./records.js";
+import { License } from "../../model/license";
+import { Transaction } from "../../model/transaction";
+import { sorter } from "../../util/helpers";
+import { RelatedLicenseSet } from "../license-matching/license-grouper";
+import { DealDataLogger } from "./logger";
+import { getLicense, isEvalOrOpenSourceLicense, isPaidLicense } from "./records";
 
 export type RefundEvent = { type: 'refund', groups: RelatedLicenseSet, refundedTxs: Transaction[] };
 export type EvalEvent = { type: 'eval', groups: RelatedLicenseSet, licenses: License[] };

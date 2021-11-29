@@ -1,12 +1,12 @@
-import * as assert from 'assert';
-import * as mustache from 'mustache';
-import { Deal, DealData } from '../../model/deal.js';
-import { DealStage, Pipeline } from '../../model/hubspot/interfaces.js';
-import { License } from '../../model/license.js';
-import { Transaction } from '../../model/transaction.js';
-import env from '../../parameters/env.js';
-import { isPresent, sorter } from "../../util/helpers.js";
-import { RelatedLicenseSet } from '../license-matching/license-grouper.js';
+import assert from 'assert';
+import mustache from 'mustache';
+import { Deal, DealData } from '../../model/deal';
+import { DealStage, Pipeline } from '../../model/hubspot/interfaces';
+import { License } from '../../model/license';
+import { Transaction } from '../../model/transaction';
+import env from '../../parameters/env';
+import { isPresent, sorter } from '../../util/helpers';
+import { RelatedLicenseSet } from '../license-matching/license-grouper';
 
 export function isEvalOrOpenSourceLicense(record: License) {
   return (

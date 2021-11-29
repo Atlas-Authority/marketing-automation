@@ -1,7 +1,7 @@
-import DataDir from "../../cache/datadir.js";
-import log from "../../log/logger.js";
-import { Association, EntityKind, ExistingEntity, FullEntity, NewEntity, RelativeAssociation } from "../../model/hubspot/interfaces.js";
-import { HubspotService, Progress } from "../interfaces.js";
+import DataDir from "../../cache/datadir";
+import log from "../../log/logger";
+import { Association, EntityKind, ExistingEntity, FullEntity, NewEntity, RelativeAssociation } from "../../model/hubspot/interfaces";
+import { HubspotService, Progress } from "../interfaces";
 
 export class MemoryHubspot implements HubspotService {
 

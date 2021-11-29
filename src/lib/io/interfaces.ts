@@ -1,4 +1,4 @@
-import { Association, EntityKind, ExistingEntity, FullEntity, NewEntity } from "../model/hubspot/interfaces.js";
+import { Association, EntityKind, ExistingEntity, FullEntity, NewEntity } from "../model/hubspot/interfaces";
 import { RawLicense, RawTransaction } from "../model/marketplace/raw";
 
 export interface Progress {

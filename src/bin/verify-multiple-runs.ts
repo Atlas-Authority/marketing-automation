@@ -1,8 +1,9 @@
-import Engine from "../lib/engine/engine.js";
-import { IO } from "../lib/io/io.js";
-import log from "../lib/log/logger.js";
-import { Database } from "../lib/model/database.js";
-import { cli } from "../lib/parameters/cli.js";
+import 'source-map-support/register';
+import Engine from "../lib/engine/engine";
+import { IO } from "../lib/io/io";
+import log from "../lib/log/logger";
+import { Database } from "../lib/model/database";
+import { cli } from "../lib/parameters/cli";
 
 main();
 async function main() {

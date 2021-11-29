@@ -1,6 +1,7 @@
-import { printSummary } from '../lib/engine/summary.js';
-import { IO } from '../lib/io/io.js';
-import { Database } from '../lib/model/database.js';
+import 'source-map-support/register';
+import { printSummary } from "../lib/engine/summary";
+import { IO } from "../lib/io/io";
+import { Database } from "../lib/model/database";
 
 main();
 async function main() {

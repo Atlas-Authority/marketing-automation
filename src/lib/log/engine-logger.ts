@@ -1,5 +1,5 @@
-import * as chalk from "chalk";
-import log from "./logger.js";
+import chalk from "chalk";
+import log from "./logger";
 
 export class EngineLogger {
 

@@ -17,11 +17,7 @@
         "--cached-fns=scorer.json",
         "--loglevel=info",
       ],
-      "type": "pwa-node",
-      "outFiles": [
-        "${workspaceFolder}/out/**/*.js",
-        "!**/node_modules/**"
-      ]
+      "type": "pwa-node"
     },
     {
       "name": "Run cached-download",
@@ -35,11 +31,7 @@
         "--out=local",
         "--loglevel=info",
       ],
-      "type": "pwa-node",
-      "outFiles": [
-        "${workspaceFolder}/out/**/*.js",
-        "!**/node_modules/**"
-      ]
+      "type": "pwa-node"
     },
     {
       "name": "Run cached-download multiple times",
@@ -48,11 +40,7 @@
         "<node_internals>/**"
       ],
       "program": "${workspaceFolder}/src/bin/verify-multiple-runs.ts",
-      "type": "pwa-node",
-      "outFiles": [
-        "${workspaceFolder}/out/**/*.js",
-        "!**/node_modules/**"
-      ]
+      "type": "pwa-node"
     },
     {
       "name": "Downloader",
@@ -61,11 +49,7 @@
       "skipFiles": [
         "<node_internals>/**"
       ],
-      "type": "pwa-node",
-      "outFiles": [
-        "${workspaceFolder}/out/**/*.js",
-        "!**/node_modules/**"
-      ]
+      "type": "pwa-node"
     },
     {
       "name": "Investigate Data",
@@ -74,11 +58,7 @@
       "skipFiles": [
         "<node_internals>/**"
       ],
-      "type": "pwa-node",
-      "outFiles": [
-        "${workspaceFolder}/out/**/*.js",
-        "!**/node_modules/**"
-      ]
+      "type": "pwa-node"
     }
   ]
 }

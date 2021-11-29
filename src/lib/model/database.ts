@@ -1,19 +1,19 @@
-import { IO } from "../io/io.js";
-import { makeEmailValidationRegex } from "../io/live/domains.js";
-import { MultiDownloadLogger } from "../log/download-logger.js";
-import log from "../log/logger.js";
-import { Table } from "../log/table.js";
-import { Tallier } from "../log/tallier.js";
-import { formatMoney, formatNumber } from "../util/formatters.js";
-import { CompanyManager } from "./company.js";
-import { ContactManager } from "./contact.js";
-import { DealManager } from "./deal.js";
-import { EmailProviderLister } from "./email-providers/index.js";
-import { Entity } from "./hubspot/entity.js";
-import { EntityKind } from "./hubspot/interfaces.js";
-import { License } from "./license.js";
-import { validateMarketplaceData } from "./marketplace/validation.js";
-import { Transaction } from "./transaction.js";
+import { IO } from "../io/io";
+import { makeEmailValidationRegex } from "../io/live/domains";
+import { MultiDownloadLogger } from "../log/download-logger";
+import log from "../log/logger";
+import { Table } from "../log/table";
+import { Tallier } from "../log/tallier";
+import { formatMoney, formatNumber } from "../util/formatters";
+import { CompanyManager } from "./company";
+import { ContactManager } from "./contact";
+import { DealManager } from "./deal";
+import { EmailProviderLister } from "./email-providers";
+import { Entity } from "./hubspot/entity";
+import { EntityKind } from "./hubspot/interfaces";
+import { License } from "./license";
+import { validateMarketplaceData } from "./marketplace/validation";
+import { Transaction } from "./transaction";
 
 export class Database {
 

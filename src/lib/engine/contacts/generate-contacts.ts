@@ -1,10 +1,10 @@
-import * as capitalize from 'capitalize';
-import { Contact, ContactData, ContactType } from '../../model/contact.js';
-import { Database } from '../../model/database.js';
-import { License } from '../../model/license.js';
-import { ContactInfo, PartnerBillingInfo } from '../../model/marketplace/common.js';
-import { Transaction } from '../../model/transaction.js';
-import { sorter } from '../../util/helpers.js';
+import capitalize from "capitalize";
+import { Contact, ContactData, ContactType } from '../../model/contact';
+import { Database } from '../../model/database';
+import { License } from '../../model/license';
+import { ContactInfo, PartnerBillingInfo } from '../../model/marketplace/common';
+import { Transaction } from '../../model/transaction';
+import { sorter } from '../../util/helpers';
 
 export type GeneratedContact = ContactData & { lastUpdated: string };
 

@@ -1,14 +1,14 @@
-import * as assert from 'assert';
-import { fnOrCache } from '../../cache/fn-cache.js';
-import { saveForInspection } from '../../cache/inspection.js';
-import log from '../../log/logger.js';
-import { Table } from '../../log/table.js';
-import { Database } from '../../model/database.js';
-import { License } from '../../model/license.js';
-import { AddonLicenseId } from '../../model/marketplace/common.js';
-import { Transaction } from '../../model/transaction.js';
-import { sorter } from '../../util/helpers.js';
-import { LicenseMatcher } from './license-matcher.js';
+import assert from 'assert';
+import { fnOrCache } from '../../cache/fn-cache';
+import { saveForInspection } from '../../cache/inspection';
+import log from '../../log/logger';
+import { Table } from '../../log/table';
+import { Database } from '../../model/database';
+import { License } from '../../model/license';
+import { AddonLicenseId } from '../../model/marketplace/common';
+import { Transaction } from '../../model/transaction';
+import { sorter } from '../../util/helpers';
+import { LicenseMatcher } from './license-matcher';
 
 export type LicenseContext = {
   license: License;

@@ -1,6 +1,7 @@
-import { IO } from '../lib/io/io.js';
-import log from '../lib/log/logger.js';
-import { Database } from '../lib/model/database.js';
+import 'source-map-support/register';
+import { IO } from "../lib/io/io";
+import log from "../lib/log/logger";
+import { Database } from "../lib/model/database";
 
 main();
 async function main() {

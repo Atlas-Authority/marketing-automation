@@ -1,7 +1,7 @@
-import * as chalk from 'chalk';
-import { MultiBar, Presets, SingleBar } from 'cli-progress';
-import { Progress } from '../io/interfaces.js';
-import log from './logger.js';
+import chalk from "chalk";
+import { MultiBar, Presets, SingleBar } from "cli-progress";
+import { Progress } from "../io/interfaces";
+import log from "./logger";
 
 export class MultiDownloadLogger {
 

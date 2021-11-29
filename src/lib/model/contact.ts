@@ -1,8 +1,8 @@
-import env from "../parameters/env.js";
-import { Company } from "./company.js";
-import { Entity } from "./hubspot/entity.js";
-import { EntityKind } from "./hubspot/interfaces.js";
-import { EntityAdapter, EntityManager } from "./hubspot/manager.js";
+import env from "../parameters/env";
+import { Company } from "./company";
+import { Entity } from "./hubspot/entity";
+import { EntityKind } from "./hubspot/interfaces";
+import { EntityAdapter, EntityManager } from "./hubspot/manager";
 
 export type ContactType = 'Partner' | 'Customer';
 

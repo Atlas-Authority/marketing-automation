@@ -1,8 +1,9 @@
-import { saveForInspection } from '../lib/cache/inspection.js';
-import { IO } from '../lib/io/io.js';
-import log from '../lib/log/logger.js';
-import { Database } from '../lib/model/database.js';
-import { isPresent, sorter } from '../lib/util/helpers.js';
+import 'source-map-support/register';
+import { saveForInspection } from "../lib/cache/inspection";
+import { IO } from "../lib/io/io";
+import log from "../lib/log/logger";
+import { Database } from "../lib/model/database";
+import { isPresent, sorter } from "../lib/util/helpers";
 
 main();
 async function main() {

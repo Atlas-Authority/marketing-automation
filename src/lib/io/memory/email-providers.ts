@@ -1,5 +1,5 @@
-import DataDir from "../../cache/datadir.js";
-import { EmailProviderListerService } from "../interfaces.js";
+import DataDir from "../../cache/datadir";
+import { EmailProviderListerService } from "../interfaces";
 
 export class MemoryEmailProviderListerService implements EmailProviderListerService {
 

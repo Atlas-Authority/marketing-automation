@@ -1,5 +1,5 @@
-import DataDir from '../cache/datadir.js';
-import env from '../parameters/env.js';
+import DataDir from "../cache/datadir";
+import env from "../parameters/env";
 
 export default function cache<T>(file: string, data: T): T {
   if (!env.isProduction) {

@@ -1,4 +1,4 @@
-import { EntityKind } from './interfaces.js';
+import { EntityKind } from "./interfaces";
 
 export interface Indexer<D> {
   removeIndexesFor<K extends keyof D>(key: K, val: D[K] | undefined): void;
