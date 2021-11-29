@@ -1,4 +1,4 @@
-import hubspot from '@hubspot/api-client';
+import * as hubspot from '@hubspot/api-client';
 import assert from 'assert';
 import log from '../../log/logger';
 import { Association, EntityKind, ExistingEntity, FullEntity, NewEntity, RelativeAssociation } from '../../model/hubspot/interfaces';
