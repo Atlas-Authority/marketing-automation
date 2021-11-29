@@ -1,4 +1,4 @@
-import slack from '@slack/web-api';
+import * as slack from '@slack/web-api';
 import log from '../log/logger';
 import env from '../parameters/env';
 
