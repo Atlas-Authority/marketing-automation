@@ -34,6 +34,7 @@ function addPartnerDomainsFromEnv(db: Database) {
 function removeProviderDomainsFromPartnerDomains(db: Database) {
   for (const domain of db.providerDomains) {
     db.partnerDomains.delete(domain);
+    db.customerDomains.add(domain);
   }
 }
 
