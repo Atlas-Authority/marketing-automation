@@ -28,92 +28,109 @@ const dealPropertyRedactors: {
 
 export class DealDataLogger {
 
-  plainLog = DataDir.out.file('deal-generator.txt').writeStream();
-  rededLog = DataDir.out.file('deal-generator-redacted.txt').writeStream();
+  plainLogger = new FileDealDataLogger(
+    DataDir.out.file('deal-generator.txt').writeStream(),
+    new NonRedactor(),
+  );
 
-  nonRedactor = new NonRedactor();
-  shhRedactor = new PrivacyRedactor();
+  rededLogger = new FileDealDataLogger(
+    DataDir.out.file('deal-generator-redacted.txt').writeStream(),
+    new PrivacyRedactor(),
+  );
 
   close() {
-    this.plainLog.close();
-    this.rededLog.close();
+    this.plainLogger.close();
+    this.rededLogger.close();
   }
 
   logActions(actions: Action[]) {
-    this._logActions(this.plainLog, this.nonRedactor, actions);
-    this._logActions(this.rededLog, this.shhRedactor, actions);
+    this.plainLogger.logActions(actions);
+    this.rededLogger.logActions(actions);
   }
 
-  printDealProperties(log: LogWriteStream, redact: Redactor, data: Partial<DealData>) {
+  logRecords(records: (License | Transaction)[]) {
+    this.plainLogger.logRecords(records);
+    this.rededLogger.logRecords(records);
+  }
+
+  logEvents(events: DealRelevantEvent[]) {
+    this.plainLogger.logEvents(events);
+    this.rededLogger.logEvents(events);
+  }
+
+}
+
+export class FileDealDataLogger {
+
+  constructor(
+    private log: LogWriteStream,
+    private redact: Redactor,
+  ) { }
+
+  close() {
+    this.log.close();
+  }
+
+  private printDealProperties(data: Partial<DealData>) {
     for (const [k, v] of Object.entries(data)) {
       const key = k as keyof DealData;
       const fn = dealPropertyRedactors[key] as <T>(redact: Redactor, val: T) => T;
-      const val = fn(redact, v);
-      log.writeLine(`    ${k}: ${val}`);
+      const val = fn(this.redact, v);
+      this.log.writeLine(`    ${k}: ${val}`);
     }
   }
 
-  private _logActions(log: LogWriteStream, redact: Redactor, actions: Action[]) {
-    log.writeLine('Actions');
+  logActions(actions: Action[]) {
+    this.log.writeLine('Actions');
     for (const action of actions) {
       switch (action.type) {
         case 'create':
-          log.writeLine('  Create:');
-          this.printDealProperties(log, redact, action.properties);
+          this.log.writeLine('  Create:');
+          this.printDealProperties(action.properties);
           break;
         case 'update':
-          log.writeLine(`  Update: ${redact.dealId(action.deal.id)}`);
-          this.printDealProperties(log, redact, action.properties);
+          this.log.writeLine(`  Update: ${this.redact.dealId(action.deal.id)}`);
+          this.printDealProperties(action.properties);
           break;
         case 'noop':
-          log.writeLine(`  Nothing: ${redact.dealId(action.deal.id)}`);
+          this.log.writeLine(`  Nothing: ${this.redact.dealId(action.deal.id)}`);
           break;
       }
     }
   }
 
   logRecords(records: (License | Transaction)[]) {
-    this._logRecords(this.plainLog, this.nonRedactor, records);
-    this._logRecords(this.rededLog, this.shhRedactor, records);
-  }
-
-  private _logRecords(log: LogWriteStream, redact: Redactor, records: (License | Transaction)[]) {
     const ifTx = (fn: (r: Transaction) => string) =>
       (r: License | Transaction) =>
         r instanceof Transaction ? fn(r) : '';
 
-    log.writeLine('\n');
+    this.log.writeLine('\n');
     Table.print({
-      log: str => log.writeLine(str),
+      log: str => this.log.writeLine(str),
       title: 'Records',
       rows: records,
       cols: [
         [{ title: 'Hosting' }, record => record.data.hosting],
-        [{ title: 'AddonLicenseId' }, record => redact.addonLicenseId(record.data.addonLicenseId)],
+        [{ title: 'AddonLicenseId' }, record => this.redact.addonLicenseId(record.data.addonLicenseId)],
         [{ title: 'Date' }, record => record.data.maintenanceStartDate],
         [{ title: 'LicenseType' }, record => record.data.licenseType],
         [{ title: 'SaleType' }, ifTx(record => record.data.saleType)],
-        [{ title: 'Transaction' }, ifTx(record => redact.transactionId(record.data.transactionId))],
-        [{ title: 'Amount', align: 'right' }, ifTx(record => formatMoney(redact.amount(record.data.vendorAmount)))],
+        [{ title: 'Transaction' }, ifTx(record => this.redact.transactionId(record.data.transactionId))],
+        [{ title: 'Amount', align: 'right' }, ifTx(record => formatMoney(this.redact.amount(record.data.vendorAmount)))],
       ],
     });
   }
 
   logEvents(events: DealRelevantEvent[]) {
-    this._logEvents(this.plainLog, this.nonRedactor, events);
-    this._logEvents(this.rededLog, this.shhRedactor, events);
-  }
-
-  private _logEvents(log: LogWriteStream, redact: Redactor, events: DealRelevantEvent[]) {
     const rows = events.map(abbrEventDetails).map(({ type, lics, txs }) => ({
       type,
-      lics: lics.map(l => redact.addonLicenseId(l)),
-      txs: txs.map(tx => redact.transactionId(tx)),
+      lics: lics.map(l => this.redact.addonLicenseId(l)),
+      txs: txs.map(tx => this.redact.transactionId(tx)),
     }));
 
     Table.print({
       title: 'Events',
-      log: str => log.writeLine(str),
+      log: str => this.log.writeLine(str),
       rows: rows,
       cols: [
         [{ title: 'Type' }, row => row.type],
