@@ -202,7 +202,7 @@ class PrivacyRedactor implements Redactor {
   private newIds = new Set<string | number>();
 
   private redact<T extends R>(id: T, idgen: () => string | number, mustBeUnique = true): T {
-    if (id === undefined || id === null) return id;
+    if (id === undefined || id === null || id === 0) return id;
     let rid = this.redactions.get(id);
     if (!rid) {
       do { rid = idgen(); }
@@ -240,7 +240,7 @@ class PrivacyRedactor implements Redactor {
   }
 
   public amount<T extends R>(val: T): T {
-    return this.redact(val, () => this.chance.integer({ min: 0, max: 1000 }), false);
+    return this.redact(val, () => this.chance.integer({ min: 1, max: 1000 }), false);
   }
 
 }
