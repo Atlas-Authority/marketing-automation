@@ -201,12 +201,12 @@ class PrivacyRedactor implements Redactor {
   private redactions = new Map<string | number, string | number>();
   private newIds = new Set<string | number>();
 
-  private redact<T extends R>(id: T, idgen: () => string | number): T {
+  private redact<T extends R>(id: T, idgen: () => string | number, mustBeUnique = true): T {
     if (id === undefined || id === null) return id;
     let rid = this.redactions.get(id);
     if (!rid) {
       do { rid = idgen(); }
-      while (this.newIds.has(rid));
+      while (mustBeUnique && this.newIds.has(rid));
       this.newIds.add(rid);
       this.redactions.set(id, rid)
     };
@@ -240,7 +240,7 @@ class PrivacyRedactor implements Redactor {
   }
 
   public amount<T extends R>(val: T): T {
-    return this.redact(val, () => this.chance.floating({ min: 0, max: 1000 }));
+    return this.redact(val, () => this.chance.floating({ min: 0, max: 1000 }), false);
   }
 
 }
