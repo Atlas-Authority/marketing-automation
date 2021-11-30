@@ -8,24 +8,6 @@ import { formatMoney } from "../../util/formatters.js";
 import { Action } from "./actions.js";
 import { DealRelevantEvent } from "./events.js";
 
-const dealPropertyRedactors: {
-  [K in keyof DealData]: (redact: Redactor, val: Partial<DealData>[K]) => Partial<DealData>[K]
-} = {
-  addonLicenseId: (redact, addonLicenseId) => redact.addonLicenseId(addonLicenseId),
-  amount: (redact, amount) => redact.amount(amount),
-  app: (redact, app) => redact.appName(app),
-  closeDate: (redact, closeDate) => closeDate,
-  country: (redact, country) => country,
-  dealName: (redact, dealName) => redact.dealName(dealName),
-  dealStage: (redact, dealStage) => dealStage,
-  deployment: (redact, deployment) => deployment,
-  licenseTier: (redact, licenseTier) => licenseTier,
-  origin: (redact, origin) => origin,
-  pipeline: (redact, pipeline) => pipeline,
-  relatedProducts: (redact, relatedProducts) => redact.product(relatedProducts),
-  transactionId: (redact, transactionId) => redact.transactionId(transactionId),
-};
-
 export class DealDataLogger {
 
   plainLogger = new FileDealDataLogger(
@@ -71,15 +53,6 @@ export class FileDealDataLogger {
     this.log.close();
   }
 
-  private printDealProperties(data: Partial<DealData>) {
-    for (const [k, v] of Object.entries(data)) {
-      const key = k as keyof DealData;
-      const fn = dealPropertyRedactors[key] as <T>(redact: Redactor, val: T) => T;
-      const val = fn(this.redact, v);
-      this.log.writeLine(`    ${k}: ${val}`);
-    }
-  }
-
   logActions(actions: Action[]) {
     this.log.writeLine('Actions');
     for (const action of actions) {
@@ -96,6 +69,15 @@ export class FileDealDataLogger {
           this.log.writeLine(`  Nothing: ${this.redact.dealId(action.deal.id)}`);
           break;
       }
+    }
+  }
+
+  private printDealProperties(data: Partial<DealData>) {
+    for (const [k, v] of Object.entries(data)) {
+      const key = k as keyof DealData;
+      const fn = dealPropertyRedactors[key] as <T>(redact: Redactor, val: T) => T;
+      const val = fn(this.redact, v);
+      this.log.writeLine(`    ${k}: ${val}`);
     }
   }
 
@@ -257,3 +239,21 @@ class PrivacyRedactor implements Redactor {
   }
 
 }
+
+const dealPropertyRedactors: {
+  [K in keyof DealData]: (redact: Redactor, val: Partial<DealData>[K]) => Partial<DealData>[K]
+} = {
+  addonLicenseId: (redact, addonLicenseId) => redact.addonLicenseId(addonLicenseId),
+  amount: (redact, amount) => redact.amount(amount),
+  app: (redact, app) => redact.appName(app),
+  closeDate: (redact, closeDate) => closeDate,
+  country: (redact, country) => country,
+  dealName: (redact, dealName) => redact.dealName(dealName),
+  dealStage: (redact, dealStage) => dealStage,
+  deployment: (redact, deployment) => deployment,
+  licenseTier: (redact, licenseTier) => licenseTier,
+  origin: (redact, origin) => origin,
+  pipeline: (redact, pipeline) => pipeline,
+  relatedProducts: (redact, relatedProducts) => redact.product(relatedProducts),
+  transactionId: (redact, transactionId) => redact.transactionId(transactionId),
+};
