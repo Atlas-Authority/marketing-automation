@@ -4,6 +4,17 @@ on:
     branches:
       - main
 jobs:
+  test:
+    name: Run tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+      - run: npm ci
+      - run: npm test
   push_to_registry:
     name: Push Docker image to GitHub Packages
     runs-on: ubuntu-latest
