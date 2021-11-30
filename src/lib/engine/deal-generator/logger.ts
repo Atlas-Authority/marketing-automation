@@ -6,7 +6,7 @@ import { License } from "../../model/license.js";
 import { Transaction } from "../../model/transaction.js";
 import { formatMoney } from "../../util/formatters.js";
 import { Action } from "./actions.js";
-import { abbrEventDetails, DealRelevantEvent } from "./events.js";
+import { DealRelevantEvent } from "./events.js";
 
 const dealPropertyRedactors: {
   [K in keyof DealData]: (redact: Redactor, val: Partial<DealData>[K]) => Partial<DealData>[K]
@@ -122,11 +122,35 @@ export class FileDealDataLogger {
   }
 
   logEvents(events: DealRelevantEvent[]) {
-    const rows = events.map(abbrEventDetails).map(({ type, lics, txs }) => ({
-      type,
-      lics: lics.map(l => this.redact.addonLicenseId(l)),
-      txs: txs.map(tx => this.redact.transactionId(tx)),
-    }));
+    const rows = events.map(e => {
+      switch (e.type) {
+        case 'eval': return {
+          type: e.type,
+          lics: e.licenses.map(l => this.redact.addonLicenseId(l.id)),
+          txs: [],
+        };
+        case 'purchase': return {
+          type: e.type,
+          lics: e.licenses.map(l => this.redact.addonLicenseId(l.id)),
+          txs: [this.redactedTransaction(e.transaction)],
+        };
+        case 'refund': return {
+          type: e.type,
+          lics: [],
+          txs: e.refundedTxs.map(tx => tx.id),
+        };
+        case 'renewal': return {
+          type: e.type,
+          lics: [],
+          txs: [this.redactedTransaction(e.transaction)],
+        };
+        case 'upgrade': return {
+          type: e.type,
+          lics: [],
+          txs: [this.redactedTransaction(e.transaction)],
+        };
+      }
+    });
 
     Table.print({
       title: 'Events',
@@ -138,6 +162,13 @@ export class FileDealDataLogger {
         [{ title: 'Transactions' }, row => row.txs?.join(', ') ?? ''],
       ],
     });
+  }
+
+  private redactedTransaction(transaction: Transaction | undefined) {
+    if (!transaction) return undefined;
+    const txid = this.redact.transactionId(transaction.data.transactionId);
+    const lid = this.redact.addonLicenseId(transaction.data.addonLicenseId);
+    return `${txid}[${lid}]`;
   }
 
 }
