@@ -200,38 +200,30 @@ class PrivacyRedactor implements Redactor {
     return rid as T;
   }
 
-  private shortUUID() {
-    return this.chance.string({
-      length: 10,
-      alpha: true,
-      numeric: true,
-      symbols: false,
-      casing: 'lower'
-    });
-  }
-
   public addonLicenseId<T extends R>(val: T): T {
-    return this.redact(val, () => `L[${this.shortUUID()}]`);
+    if (typeof val !== 'string') return val;
+    const L = val.startsWith('L') ? 'L' : '';
+    return this.redact(val, () => `${L}${this.chance.integer({ min: 10000000, max: 99999999 })}`);
   }
 
   public transactionId<T extends R>(val: T): T {
-    return this.redact(val, () => `TX[${this.shortUUID()}]`);
+    return this.redact(val, () => `AT-${this.chance.integer({ min: 10000000, max: 999999999 })}`);
   }
 
   public dealId<T extends R>(val: T): T {
-    return this.redact(val, () => `D[${this.shortUUID()}]`);
+    return this.redact(val, () => `${this.chance.integer({ min: 1000000000, max: 9999999999 })}`);
   }
 
   public appName<T extends R>(val: T): T {
-    return this.redact(val, () => `AppName[${this.chance.word({ capitalize: true, syllables: 2 })}]`);
+    return this.redact(val, () => `AppName_${this.chance.word({ capitalize: true, syllables: 2 })}`);
   }
 
   public dealName<T extends R>(val: T): T {
-    return this.redact(val, () => `DealName[${this.chance.word({ capitalize: true, syllables: 2 })}]`);
+    return this.redact(val, () => `DealName_${this.chance.word({ capitalize: true, syllables: 2 })}`);
   }
 
   public product<T extends R>(val: T): T {
-    return this.redact(val, () => `Product[${this.chance.word({ capitalize: true, syllables: 2 })}]`);
+    return this.redact(val, () => `Product_${this.chance.word({ capitalize: true, syllables: 2 })}`);
   }
 
   public amount<T extends R>(val: T): T {
