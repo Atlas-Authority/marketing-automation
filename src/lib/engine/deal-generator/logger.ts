@@ -240,7 +240,7 @@ class PrivacyRedactor implements Redactor {
   }
 
   public amount<T extends R>(val: T): T {
-    return this.redact(val, () => this.chance.floating({ min: 0, max: 100_000 }));
+    return this.redact(val, () => this.chance.floating({ min: 0, max: 1000 }));
   }
 
 }
