@@ -71,11 +71,12 @@ export class FileDealDataLogger {
         }
         case 'noop': {
           const dealId = this.redact.dealId(action.deal.id);
-          const { amount, addonLicenseId, transactionId, dealStage } = action.deal.data;
+          const { amount: realAmount, addonLicenseId, transactionId, dealStage } = action.deal.data;
           const recordId = (transactionId
             ? this.redactedTransaction({ transactionId, addonLicenseId })
             : this.redact.addonLicenseId(addonLicenseId)
           );
+          const amount = this.redact.amount(realAmount);
           const stage = DealStage[dealStage];
           this.log.writeLine(`  Nothing: ${dealId}, via ${recordId}, stage=${stage}, amount=${amount}`);
           break;
