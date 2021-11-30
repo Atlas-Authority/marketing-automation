@@ -1,13 +1,10 @@
 import assert from 'assert';
 import mustache from 'mustache';
-import { LogWriteStream } from '../../cache/datadir';
-import { Table } from '../../log/table';
 import { Deal, DealData } from '../../model/deal';
 import { DealStage, Pipeline } from '../../model/hubspot/interfaces';
 import { License } from '../../model/license';
 import { Transaction } from '../../model/transaction';
 import env from '../../parameters/env';
-import { formatMoney } from '../../util/formatters';
 import { isPresent, sorter } from '../../util/helpers';
 import { RelatedLicenseSet } from '../license-matching/license-grouper';
 
@@ -34,30 +31,6 @@ export function getLicense(addonLicenseId: string, groups: RelatedLicenseSet) {
     .find(l => l.data.addonLicenseId === addonLicenseId));
   assert.ok(license);
   return license;
-}
-
-
-
-export function printRecordDetails(log: LogWriteStream, records: (License | Transaction)[]) {
-  const ifTx = (fn: (r: Transaction) => string) =>
-    (r: License | Transaction) =>
-      r instanceof Transaction ? fn(r) : '';
-
-  log.writeLine('\n');
-  Table.print({
-    log: str => log.writeLine(str),
-    title: 'Records',
-    rows: records,
-    cols: [
-      [{ title: 'Hosting' }, record => record.data.hosting],
-      [{ title: 'AddonLicenseId' }, record => record.data.addonLicenseId],
-      [{ title: 'Date' }, record => record.data.maintenanceStartDate],
-      [{ title: 'LicenseType' }, record => record.data.licenseType],
-      [{ title: 'SaleType' }, ifTx(record => record.data.saleType)],
-      [{ title: 'Transaction' }, ifTx(record => record.data.transactionId)],
-      [{ title: 'Amount', align: 'right' }, ifTx(record => formatMoney(record.data.vendorAmount))],
-    ],
-  });
 }
 
 export function dealCreationProperties(record: License | Transaction, data: Pick<DealData, 'addonLicenseId' | 'transactionId' | 'dealStage'>): DealData {

@@ -1,19 +1,20 @@
-import assert from 'assert';
-import DataDir, { LogWriteStream } from '../../cache/datadir';
-import { saveForInspection } from '../../cache/inspection';
-import log from '../../log/logger';
-import { Table } from '../../log/table';
-import { Database } from '../../model/database';
-import { Deal } from '../../model/deal';
-import { License, LicenseData } from '../../model/license';
-import { Transaction } from '../../model/transaction';
-import env from '../../parameters/env';
-import { formatMoney } from '../../util/formatters';
-import { isPresent, sorter } from '../../util/helpers';
-import { RelatedLicenseSet } from '../license-matching/license-grouper';
-import { ActionGenerator, printDealActionDetails } from './actions';
-import { EventGenerator } from './events';
-import { getEmails } from './records';
+import assert from "assert";
+import { saveForInspection } from "../../cache/inspection";
+import log from "../../log/logger";
+import { Table } from "../../log/table";
+import { Database } from "../../model/database";
+import { Deal } from "../../model/deal";
+import { License, LicenseData } from "../../model/license";
+import { Transaction } from "../../model/transaction";
+import env from "../../parameters/env";
+import { formatMoney } from "../../util/formatters";
+import { isPresent, sorter } from "../../util/helpers";
+import { RelatedLicenseSet } from "../license-matching/license-grouper";
+import { ActionGenerator } from "./actions";
+import { EventGenerator } from "./events";
+import { DealDataLogger } from "./logger";
+import { getEmails } from "./records";
+
 
 export type IgnoredLicense = LicenseData & {
   reason: string;
@@ -35,10 +36,10 @@ export class DealGenerator {
   }
 
   public run(matches: RelatedLicenseSet[]) {
-    const dealGeneratorLog = DataDir.out.file('deal-generator.txt').writeStream();
+    const logger = new DealDataLogger();
 
     for (const relatedLicenseIds of matches) {
-      const actions = this.generateActionsForMatchedGroup(dealGeneratorLog, relatedLicenseIds);
+      const actions = this.generateActionsForMatchedGroup(logger, relatedLicenseIds);
       for (const action of actions) {
         const deal = (action.type === 'create'
           ? this.db.dealManager.create(action.properties)
@@ -57,7 +58,7 @@ export class DealGenerator {
     this.printIgnoredTransactionsTable();
     this.printPartnerTransactionsTable();
 
-    dealGeneratorLog.close();
+    logger.close();
   }
 
   private printIgnoredTransactionsTable() {
@@ -101,14 +102,14 @@ export class DealGenerator {
     }
   }
 
-  private generateActionsForMatchedGroup(dealGeneratorLog: LogWriteStream, groups: RelatedLicenseSet) {
+  private generateActionsForMatchedGroup(logger: DealDataLogger, groups: RelatedLicenseSet) {
     assert.ok(groups.length > 0);
     if (this.ignoring(groups)) return [];
 
-    const events = new EventGenerator(dealGeneratorLog).interpretAsEvents(groups);
+    const events = new EventGenerator(logger).interpretAsEvents(groups);
     const actions = this.actionGenerator.generateFrom(events);
 
-    printDealActionDetails(dealGeneratorLog, actions);
+    logger.logActions(actions);
 
     return actions;
   }

@@ -20,6 +20,7 @@
     "burner-email-providers": "^1.0.42",
     "capitalize": "^2.0.3",
     "chalk": "^4.1.2",
+    "chance": "^1.1.8",
     "cli-progress": "^3.9.1",
     "csv-stringify": "^5.6.1",
     "dotenv": "^8.2.0",
@@ -32,6 +33,7 @@
   },
   "devDependencies": {
     "@types/capitalize": "^2.0.0",
+    "@types/chance": "^1.1.3",
     "@types/cli-progress": "^3.9.2",
     "@types/flat": "^5.0.1",
     "@types/jest": "^27.0.2",
