@@ -71,7 +71,7 @@ export class Transaction {
       vendorAmount: rawTransaction.purchaseDetails.vendorAmount,
     };
 
-    this.id = `${this.data.transactionId}[${this.data.addonLicenseId}]`;
+    this.id = uniqueTransactionId(this);
     this.tier = this.parseTier();
   }
 
@@ -91,4 +91,8 @@ export class Transaction {
     assert.fail(`Unknown transaction tier: ${tier}`);
   }
 
+}
+
+export function uniqueTransactionId(transaction: { data: { transactionId: string, addonLicenseId: string } }) {
+  return `${transaction.data.transactionId}[${transaction.data.addonLicenseId}]`
 }

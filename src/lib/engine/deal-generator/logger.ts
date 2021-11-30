@@ -3,7 +3,7 @@ import DataDir, { LogWriteStream } from "../../cache/datadir.js";
 import { Table } from "../../log/table.js";
 import { DealData } from "../../model/deal.js";
 import { License } from "../../model/license.js";
-import { Transaction } from "../../model/transaction.js";
+import { uniqueTransactionId, Transaction } from "../../model/transaction.js";
 import { formatMoney } from "../../util/formatters.js";
 import { Action } from "./actions.js";
 import { DealRelevantEvent } from "./events.js";
@@ -148,9 +148,9 @@ export class FileDealDataLogger {
 
   private redactedTransaction(transaction: Transaction | undefined) {
     if (!transaction) return undefined;
-    const txid = this.redact.transactionId(transaction.data.transactionId);
-    const lid = this.redact.addonLicenseId(transaction.data.addonLicenseId);
-    return `${txid}[${lid}]`;
+    const transactionId = this.redact.transactionId(transaction.data.transactionId);
+    const addonLicenseId = this.redact.addonLicenseId(transaction.data.addonLicenseId);
+    return uniqueTransactionId({ data: { transactionId, addonLicenseId } });
   }
 
 }
