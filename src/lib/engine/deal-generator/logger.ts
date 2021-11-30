@@ -2,6 +2,7 @@ import Chance from 'chance';
 import DataDir, { LogWriteStream } from "../../cache/datadir.js";
 import { Table } from "../../log/table.js";
 import { DealData } from "../../model/deal.js";
+import { DealStage } from '../../model/hubspot/interfaces.js';
 import { License } from "../../model/license.js";
 import { uniqueTransactionId, Transaction } from "../../model/transaction.js";
 import { formatMoney } from "../../util/formatters.js";
@@ -70,12 +71,13 @@ export class FileDealDataLogger {
         }
         case 'noop': {
           const dealId = this.redact.dealId(action.deal.id);
-          const { addonLicenseId, transactionId } = action.deal.data;
+          const { amount, addonLicenseId, transactionId, dealStage } = action.deal.data;
           const recordId = (transactionId
             ? this.redactedTransaction({ transactionId, addonLicenseId })
             : this.redact.addonLicenseId(addonLicenseId)
           );
-          this.log.writeLine(`  Nothing: ${dealId} (via ${recordId})`);
+          const stage = DealStage[dealStage];
+          this.log.writeLine(`  Nothing: ${dealId}, via ${recordId}, stage=${stage}, amount=${amount}`);
           break;
         }
       }
