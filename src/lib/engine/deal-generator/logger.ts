@@ -70,14 +70,10 @@ export class FileDealDataLogger {
         }
         case 'noop': {
           const dealId = this.redact.dealId(action.deal.id);
-          const recordId = (action.deal.data.transactionId
-            ? this.redactedTransaction({
-              data: {
-                transactionId: action.deal.data.transactionId,
-                addonLicenseId: action.deal.data.addonLicenseId,
-              }
-            })
-            : this.redact.addonLicenseId(action.deal.data.addonLicenseId)
+          const { addonLicenseId, transactionId } = action.deal.data;
+          const recordId = (transactionId
+            ? this.redactedTransaction({ transactionId, addonLicenseId })
+            : this.redact.addonLicenseId(addonLicenseId)
           );
           this.log.writeLine(`  Nothing: ${dealId} (via ${recordId})`);
           break;
@@ -128,7 +124,7 @@ export class FileDealDataLogger {
         case 'purchase': return {
           type: e.type,
           lics: e.licenses.map(l => this.redact.addonLicenseId(l.id)),
-          txs: [this.redactedTransaction(e.transaction)],
+          txs: [this.redactedTransaction(e.transaction?.data)],
         };
         case 'refund': return {
           type: e.type,
@@ -138,12 +134,12 @@ export class FileDealDataLogger {
         case 'renewal': return {
           type: e.type,
           lics: [],
-          txs: [this.redactedTransaction(e.transaction)],
+          txs: [this.redactedTransaction(e.transaction.data)],
         };
         case 'upgrade': return {
           type: e.type,
           lics: [],
-          txs: [this.redactedTransaction(e.transaction)],
+          txs: [this.redactedTransaction(e.transaction.data)],
         };
       }
     });
@@ -160,11 +156,12 @@ export class FileDealDataLogger {
     });
   }
 
-  private redactedTransaction(transaction: { data: { transactionId: string, addonLicenseId: string } } | undefined) {
+  private redactedTransaction(transaction: { transactionId: string, addonLicenseId: string } | undefined) {
     if (!transaction) return undefined;
-    const transactionId = this.redact.transactionId(transaction.data.transactionId);
-    const addonLicenseId = this.redact.addonLicenseId(transaction.data.addonLicenseId);
-    return uniqueTransactionId({ data: { transactionId, addonLicenseId } });
+    return uniqueTransactionId({
+      transactionId: this.redact.transactionId(transaction.transactionId),
+      addonLicenseId: this.redact.addonLicenseId(transaction.addonLicenseId),
+    });
   }
 
 }

@@ -71,7 +71,7 @@ export class Transaction {
       vendorAmount: rawTransaction.purchaseDetails.vendorAmount,
     };
 
-    this.id = uniqueTransactionId(this);
+    this.id = uniqueTransactionId(this.data);
     this.tier = this.parseTier();
   }
 
@@ -93,6 +93,6 @@ export class Transaction {
 
 }
 
-export function uniqueTransactionId(transaction: { data: { transactionId: string, addonLicenseId: string } }) {
-  return `${transaction.data.transactionId}[${transaction.data.addonLicenseId}]`
+export function uniqueTransactionId(data: { transactionId: string, addonLicenseId: string }) {
+  return `${data.transactionId}[${data.addonLicenseId}]`
 }
