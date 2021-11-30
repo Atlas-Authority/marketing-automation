@@ -57,17 +57,31 @@ export class FileDealDataLogger {
     this.log.writeLine('Actions');
     for (const action of actions) {
       switch (action.type) {
-        case 'create':
+        case 'create': {
           this.log.writeLine('  Create:');
           this.printDealProperties(action.properties);
           break;
-        case 'update':
-          this.log.writeLine(`  Update: ${this.redact.dealId(action.deal.id)}`);
+        }
+        case 'update': {
+          const dealId = this.redact.dealId(action.deal.id);
+          this.log.writeLine(`  Update: ${dealId}`);
           this.printDealProperties(action.properties);
           break;
-        case 'noop':
-          this.log.writeLine(`  Nothing: ${this.redact.dealId(action.deal.id)}`);
+        }
+        case 'noop': {
+          const dealId = this.redact.dealId(action.deal.id);
+          const recordId = (action.deal.data.transactionId
+            ? this.redactedTransaction({
+              data: {
+                transactionId: action.deal.data.transactionId,
+                addonLicenseId: action.deal.data.addonLicenseId,
+              }
+            })
+            : this.redact.addonLicenseId(action.deal.data.addonLicenseId)
+          );
+          this.log.writeLine(`  Nothing: ${dealId} (via ${recordId})`);
           break;
+        }
       }
     }
   }
@@ -146,7 +160,7 @@ export class FileDealDataLogger {
     });
   }
 
-  private redactedTransaction(transaction: Transaction | undefined) {
+  private redactedTransaction(transaction: { data: { transactionId: string, addonLicenseId: string } } | undefined) {
     if (!transaction) return undefined;
     const transactionId = this.redact.transactionId(transaction.data.transactionId);
     const addonLicenseId = this.redact.addonLicenseId(transaction.data.addonLicenseId);
