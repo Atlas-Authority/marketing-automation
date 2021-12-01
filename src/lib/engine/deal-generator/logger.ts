@@ -2,124 +2,168 @@ import Chance from 'chance';
 import DataDir, { LogWriteStream } from "../../cache/datadir.js";
 import { Table } from "../../log/table.js";
 import { DealData } from "../../model/deal.js";
+import { DealStage } from '../../model/hubspot/interfaces.js';
 import { License } from "../../model/license.js";
-import { Transaction } from "../../model/transaction.js";
+import { uniqueTransactionId, Transaction } from "../../model/transaction.js";
 import { formatMoney } from "../../util/formatters.js";
 import { Action } from "./actions.js";
-import { abbrEventDetails, DealRelevantEvent } from "./events.js";
-
-const dealPropertyRedactors: {
-  [K in keyof DealData]: (redact: Redactor, val: Partial<DealData>[K]) => Partial<DealData>[K]
-} = {
-  addonLicenseId: (redact, addonLicenseId) => redact.addonLicenseId(addonLicenseId),
-  amount: (redact, amount) => redact.amount(amount),
-  app: (redact, app) => redact.appName(app),
-  closeDate: (redact, closeDate) => closeDate,
-  country: (redact, country) => country,
-  dealName: (redact, dealName) => redact.dealName(dealName),
-  dealStage: (redact, dealStage) => dealStage,
-  deployment: (redact, deployment) => deployment,
-  licenseTier: (redact, licenseTier) => licenseTier,
-  origin: (redact, origin) => origin,
-  pipeline: (redact, pipeline) => pipeline,
-  relatedProducts: (redact, relatedProducts) => redact.product(relatedProducts),
-  transactionId: (redact, transactionId) => redact.transactionId(transactionId),
-};
+import { DealRelevantEvent } from "./events.js";
 
 export class DealDataLogger {
 
-  plainLog = DataDir.out.file('deal-generator.txt').writeStream();
-  rededLog = DataDir.out.file('deal-generator-redacted.txt').writeStream();
+  plainLogger = new FileDealDataLogger(
+    DataDir.out.file('deal-generator.txt').writeStream(),
+    new NonRedactor(),
+  );
 
-  nonRedactor = new NonRedactor();
-  shhRedactor = new PrivacyRedactor();
+  rededLogger = new FileDealDataLogger(
+    DataDir.out.file('deal-generator-redacted.txt').writeStream(),
+    new PrivacyRedactor(),
+  );
 
   close() {
-    this.plainLog.close();
-    this.rededLog.close();
+    this.plainLogger.close();
+    this.rededLogger.close();
   }
 
   logActions(actions: Action[]) {
-    this._logActions(this.plainLog, this.nonRedactor, actions);
-    this._logActions(this.rededLog, this.shhRedactor, actions);
+    this.plainLogger.logActions(actions);
+    this.rededLogger.logActions(actions);
   }
 
-  printDealProperties(log: LogWriteStream, redact: Redactor, data: Partial<DealData>) {
-    for (const [k, v] of Object.entries(data)) {
-      const key = k as keyof DealData;
-      const fn = dealPropertyRedactors[key] as <T>(redact: Redactor, val: T) => T;
-      const val = fn(redact, v);
-      log.writeLine(`    ${k}: ${val}`);
-    }
+  logRecords(records: (License | Transaction)[]) {
+    this.plainLogger.logRecords(records);
+    this.rededLogger.logRecords(records);
   }
 
-  private _logActions(log: LogWriteStream, redact: Redactor, actions: Action[]) {
-    log.writeLine('Actions');
+  logEvents(events: DealRelevantEvent[]) {
+    this.plainLogger.logEvents(events);
+    this.rededLogger.logEvents(events);
+  }
+
+}
+
+export class FileDealDataLogger {
+
+  constructor(
+    private log: LogWriteStream,
+    private redact: Redactor,
+  ) { }
+
+  close() {
+    this.log.close();
+  }
+
+  logActions(actions: Action[]) {
+    this.log.writeLine('Actions');
     for (const action of actions) {
       switch (action.type) {
-        case 'create':
-          log.writeLine('  Create:');
-          this.printDealProperties(log, redact, action.properties);
+        case 'create': {
+          this.log.writeLine('  Create:');
+          this.printDealProperties(action.properties);
           break;
-        case 'update':
-          log.writeLine(`  Update: ${redact.dealId(action.deal.id)}`);
-          this.printDealProperties(log, redact, action.properties);
+        }
+        case 'update': {
+          const dealId = this.redact.dealId(action.deal.id);
+          this.log.writeLine(`  Update: ${dealId}`);
+          this.printDealProperties(action.properties);
           break;
-        case 'noop':
-          log.writeLine(`  Nothing: ${redact.dealId(action.deal.id)}`);
+        }
+        case 'noop': {
+          const dealId = this.redact.dealId(action.deal.id);
+          const { amount: realAmount, addonLicenseId, transactionId, dealStage } = action.deal.data;
+          const recordId = (transactionId
+            ? this.redactedTransaction({ transactionId, addonLicenseId })
+            : this.redact.addonLicenseId(addonLicenseId)
+          );
+          const amount = this.redact.amount(realAmount);
+          const stage = DealStage[dealStage];
+          this.log.writeLine(`  Nothing: ${dealId}, via ${recordId}, stage=${stage}, amount=${amount}`);
           break;
+        }
       }
     }
   }
 
-  logRecords(records: (License | Transaction)[]) {
-    this._logRecords(this.plainLog, this.nonRedactor, records);
-    this._logRecords(this.rededLog, this.shhRedactor, records);
+  private printDealProperties(data: Partial<DealData>) {
+    for (const [k, v] of Object.entries(data)) {
+      const key = k as keyof DealData;
+      const fn = dealPropertyRedactors[key] as <T>(redact: Redactor, val: T) => T;
+      const val = fn(this.redact, v);
+      this.log.writeLine(`    ${k}: ${val}`);
+    }
   }
 
-  private _logRecords(log: LogWriteStream, redact: Redactor, records: (License | Transaction)[]) {
+  logRecords(records: (License | Transaction)[]) {
     const ifTx = (fn: (r: Transaction) => string) =>
       (r: License | Transaction) =>
         r instanceof Transaction ? fn(r) : '';
 
-    log.writeLine('\n');
+    this.log.writeLine('\n');
     Table.print({
-      log: str => log.writeLine(str),
+      log: str => this.log.writeLine(str),
       title: 'Records',
       rows: records,
       cols: [
         [{ title: 'Hosting' }, record => record.data.hosting],
-        [{ title: 'AddonLicenseId' }, record => redact.addonLicenseId(record.data.addonLicenseId)],
+        [{ title: 'AddonLicenseId' }, record => this.redact.addonLicenseId(record.data.addonLicenseId)],
         [{ title: 'Date' }, record => record.data.maintenanceStartDate],
         [{ title: 'LicenseType' }, record => record.data.licenseType],
         [{ title: 'SaleType' }, ifTx(record => record.data.saleType)],
-        [{ title: 'Transaction' }, ifTx(record => redact.transactionId(record.data.transactionId))],
-        [{ title: 'Amount', align: 'right' }, ifTx(record => formatMoney(redact.amount(record.data.vendorAmount)))],
+        [{ title: 'Transaction' }, ifTx(record => this.redact.transactionId(record.data.transactionId))],
+        [{ title: 'Amount', align: 'right' }, ifTx(record => formatMoney(this.redact.amount(record.data.vendorAmount)))],
       ],
     });
   }
 
   logEvents(events: DealRelevantEvent[]) {
-    this._logEvents(this.plainLog, this.nonRedactor, events);
-    this._logEvents(this.rededLog, this.shhRedactor, events);
-  }
-
-  private _logEvents(log: LogWriteStream, redact: Redactor, events: DealRelevantEvent[]) {
-    const rows = events.map(abbrEventDetails).map(({ type, lics, txs }) => ({
-      type,
-      lics: lics.map(l => redact.addonLicenseId(l)),
-      txs: txs.map(tx => redact.transactionId(tx)),
-    }));
+    const rows = events.map(e => {
+      switch (e.type) {
+        case 'eval': return {
+          type: e.type,
+          lics: e.licenses.map(l => this.redact.addonLicenseId(l.id)),
+          txs: [],
+        };
+        case 'purchase': return {
+          type: e.type,
+          lics: e.licenses.map(l => this.redact.addonLicenseId(l.id)),
+          txs: [this.redactedTransaction(e.transaction?.data)],
+        };
+        case 'refund': return {
+          type: e.type,
+          lics: [],
+          txs: e.refundedTxs.map(tx => tx.id),
+        };
+        case 'renewal': return {
+          type: e.type,
+          lics: [],
+          txs: [this.redactedTransaction(e.transaction.data)],
+        };
+        case 'upgrade': return {
+          type: e.type,
+          lics: [],
+          txs: [this.redactedTransaction(e.transaction.data)],
+        };
+      }
+    });
 
     Table.print({
       title: 'Events',
-      log: str => log.writeLine(str),
+      log: str => this.log.writeLine(str),
       rows: rows,
       cols: [
         [{ title: 'Type' }, row => row.type],
         [{ title: 'Licenses' }, row => row.lics?.join(', ') ?? ''],
         [{ title: 'Transactions' }, row => row.txs?.join(', ') ?? ''],
       ],
+    });
+  }
+
+  private redactedTransaction(transaction: { transactionId: string, addonLicenseId: string } | undefined) {
+    if (!transaction) return undefined;
+    return uniqueTransactionId({
+      transactionId: this.redact.transactionId(transaction.transactionId),
+      addonLicenseId: this.redact.addonLicenseId(transaction.addonLicenseId),
     });
   }
 
@@ -158,54 +202,64 @@ class PrivacyRedactor implements Redactor {
   private redactions = new Map<string | number, string | number>();
   private newIds = new Set<string | number>();
 
-  private redact<T extends R>(id: T, idgen: () => string | number): T {
-    if (id === undefined || id === null) return id;
+  private redact<T extends R>(id: T, idgen: () => string | number, mustBeUnique = true): T {
+    if (id === undefined || id === null || id === 0) return id;
     let rid = this.redactions.get(id);
     if (!rid) {
       do { rid = idgen(); }
-      while (this.newIds.has(rid));
+      while (mustBeUnique && this.newIds.has(rid));
       this.newIds.add(rid);
       this.redactions.set(id, rid)
     };
     return rid as T;
   }
 
-  private shortUUID() {
-    return this.chance.string({
-      length: 10,
-      alpha: true,
-      numeric: true,
-      symbols: false,
-      casing: 'lower'
-    });
-  }
-
   public addonLicenseId<T extends R>(val: T): T {
-    return this.redact(val, () => `L[${this.shortUUID()}]`);
+    if (typeof val !== 'string') return val;
+    const L = val.startsWith('L') ? 'L' : '';
+    return this.redact(val, () => `${L}${this.chance.integer({ min: 10000000, max: 99999999 })}`);
   }
 
   public transactionId<T extends R>(val: T): T {
-    return this.redact(val, () => `TX[${this.shortUUID()}]`);
+    return this.redact(val, () => `AT-${this.chance.integer({ min: 10000000, max: 999999999 })}`);
   }
 
   public dealId<T extends R>(val: T): T {
-    return this.redact(val, () => `D[${this.shortUUID()}]`);
+    return this.redact(val, () => `${this.chance.integer({ min: 1000000000, max: 9999999999 })}`);
   }
 
   public appName<T extends R>(val: T): T {
-    return this.redact(val, () => `AppName[${this.chance.word({ capitalize: true, syllables: 2 })}]`);
+    return this.redact(val, () => `AppName_${this.chance.word({ capitalize: true, syllables: 2 })}`);
   }
 
   public dealName<T extends R>(val: T): T {
-    return this.redact(val, () => `DealName[${this.chance.word({ capitalize: true, syllables: 2 })}]`);
+    return this.redact(val, () => `DealName_${this.chance.word({ capitalize: true, syllables: 2 })}`);
   }
 
   public product<T extends R>(val: T): T {
-    return this.redact(val, () => `Product[${this.chance.word({ capitalize: true, syllables: 2 })}]`);
+    return this.redact(val, () => `Product_${this.chance.word({ capitalize: true, syllables: 2 })}`);
   }
 
   public amount<T extends R>(val: T): T {
-    return this.redact(val, () => this.chance.floating({ min: 0, max: 1_000 }));
+    return this.redact(val, () => this.chance.integer({ min: 1, max: 1000 }), false);
   }
 
 }
+
+const dealPropertyRedactors: {
+  [K in keyof DealData]: (redact: Redactor, val: Partial<DealData>[K]) => Partial<DealData>[K]
+} = {
+  addonLicenseId: (redact, addonLicenseId) => redact.addonLicenseId(addonLicenseId),
+  amount: (redact, amount) => redact.amount(amount),
+  app: (redact, app) => redact.appName(app),
+  closeDate: (redact, closeDate) => closeDate,
+  country: (redact, country) => country,
+  dealName: (redact, dealName) => redact.dealName(dealName),
+  dealStage: (redact, dealStage) => dealStage,
+  deployment: (redact, deployment) => deployment,
+  licenseTier: (redact, licenseTier) => licenseTier,
+  origin: (redact, origin) => origin,
+  pipeline: (redact, pipeline) => pipeline,
+  relatedProducts: (redact, relatedProducts) => redact.product(relatedProducts),
+  transactionId: (redact, transactionId) => redact.transactionId(transactionId),
+};
