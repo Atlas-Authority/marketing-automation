@@ -33,7 +33,9 @@ export function updateContactsBasedOnMatchResults(db: Database, allMatches: Rela
       if (!product) {
         throw new KnownError(`Add "${addonKey}" to ADDONKEY_PLATFORMS`);
       }
-      contact.data.relatedProducts.add(product);
+      if (!env.engine.ignoredApps.has(addonKey)) {
+        contact.data.relatedProducts.add(product);
+      }
 
       const hosting = group[0].license.data.hosting;
       if (!contact.data.deployment) {
