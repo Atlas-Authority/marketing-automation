@@ -93,8 +93,8 @@ export class Database {
       transactions,
       emailRe);
 
-    this.licenses = results.licenses.map(raw => new License(raw));
-    this.transactions = results.transactions.map(raw => new Transaction(raw));
+    this.licenses = results.licenses.map(raw => License.fromRaw(raw));
+    this.transactions = results.transactions.map(raw => Transaction.fromRaw(raw));
 
     const transactionTotal = (this.transactions
       .map(t => t.data.vendorAmount)

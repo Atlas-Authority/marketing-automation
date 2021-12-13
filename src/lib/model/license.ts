@@ -59,11 +59,10 @@ export class License {
 
   /** Unique ID for this License. */
   public id: string;
-  public data: LicenseData;
   public tier: number;
   public active: boolean;
 
-  public constructor(rawLicense: RawLicense) {
+  static fromRaw(rawLicense: RawLicense) {
     let newEvalData: NewEvalData | null = null;
     if (rawLicense.evaluationLicense) {
       newEvalData = {
@@ -88,7 +87,7 @@ export class License {
       } as ParentProductInfo;
     }
 
-    this.data = {
+    return new License({
       addonLicenseId: rawLicense.addonLicenseId,
       licenseId: rawLicense.licenseId,
       addonKey: rawLicense.addonKey,
@@ -114,8 +113,10 @@ export class License {
       attribution: rawLicense.attribution ?? null,
       parentInfo,
       newEvalData,
-    };
+    });
+  }
 
+  public constructor(public data: LicenseData) {
     this.id = this.data.addonLicenseId;
     this.tier = Math.max(this.parseTier(), this.tierFromEvalOpportunity());
     this.active = this.data.status === 'active';
