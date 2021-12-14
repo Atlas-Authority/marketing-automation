@@ -1,8 +1,29 @@
 # Engine logic
 
-See the [README](./README.md) for a high-level overview of each engine run.
+See the [README](../README.md) for a high-level overview of each engine run.
 
 The following sections describe those high-level steps, in order, in full semantic detail.
+
+### Lower-level overview
+
+The engine uses both HubSpot data and MPAC data as inputs.
+
+(On the first run, HubSpot data will be empty, so the engine will populate it.)
+
+Contacts and Companies:
+
+1. MPAC records are used to create and update Contacts as-needed
+2. MPAC records are used to determine Contact Types
+3. Contact Types are assigned to Contacts and Companies
+4. Contact Types are used to associate Contacts and Companies
+
+Deals:
+
+3. MPAC records are used to generate Deal Actions
+4. Deal Actions are used to generate Deal Events
+5. Deal Events are used to create or update Deals as-needed
+
+Finally: Deals, Companies, and Contacts are upserted to HubSpot.
 
 ### Downloading data to operate on
 
