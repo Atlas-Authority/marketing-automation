@@ -19,11 +19,11 @@ Contacts and Companies:
 
 Deals:
 
-3. MPAC records are used to generate Deal Actions
-4. Deal Actions are used to generate Deal Events
-5. Deal Events are used to create or update Deals as-needed
+1. MPAC records are used to generate Deal Actions
+2. Deal Actions are used to generate Deal Events
+3. Deal Events are used to create or update Deals as-needed
 
-Finally: Deals, Companies, and Contacts are upserted to HubSpot.
+Finally: Deal, Company, and Contact changes are upsynced to HubSpot.
 
 ### Downloading data to operate on
 
