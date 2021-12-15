@@ -56,7 +56,6 @@ async function main() {
 function check(k1: K, k2: K, map: Map<string, string>, records: readonly (RawLicense | RawTransaction)[]) {
 
   for (const r of records) {
-    if (!r.appEntitlementId || !r.appEntitlementNumber) continue;
     if (!(k1 in r) || !(k2 in r)) continue;
 
     const key = (r as any)[k1] as string;
