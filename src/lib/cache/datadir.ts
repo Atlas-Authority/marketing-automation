@@ -3,8 +3,11 @@ import { pathToFileURL, URL } from "url";
 import log from "../log/logger";
 import env from "../parameters/env";
 
-const rootDataDir = new URL(`../../data/`, pathToFileURL(__dirname));
-if (!fs.existsSync(rootDataDir)) fs.mkdirSync(rootDataDir);
+function createRootDataDir(rootDataDir?: URL) {
+  const dataDir = rootDataDir ?? new URL(`../../data/`, pathToFileURL(__dirname));
+  if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir);
+  return dataDir;
+}
 
 export default class DataDir {
 
@@ -15,7 +18,8 @@ export default class DataDir {
   #base: URL;
   #files = new Map<string, DataFile<any>>();
 
-  private constructor(place: string) {
+  public constructor(place: string, customRootDataDir?: URL) {
+    const rootDataDir = createRootDataDir(customRootDataDir);
     this.#base = new URL(`${place}/`, rootDataDir);
     if (!fs.existsSync(this.#base)) fs.mkdirSync(this.#base);
   }
@@ -29,7 +33,7 @@ export default class DataDir {
 
 }
 
-class DataFile<T> {
+export class DataFile<T> {
 
   #url: URL;
   #text?: string;

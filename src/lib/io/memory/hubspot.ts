@@ -1,15 +1,22 @@
-import DataDir from "../../cache/datadir";
+import DataDir, {DataFile} from "../../cache/datadir";
 import log from "../../log/logger";
 import { Association, EntityKind, ExistingEntity, FullEntity, NewEntity, RelativeAssociation } from "../../model/hubspot/interfaces";
 import { HubspotService, Progress } from "../interfaces";
+import {URL} from "url";
 
 export class MemoryHubspot implements HubspotService {
 
   private ids = new Map<string, number>();
 
-  private readonly deals = DataDir.in.file<FullEntity[]>(`deal.json`);
-  private readonly companies = DataDir.in.file<FullEntity[]>(`company.json`);
-  private readonly contacts = DataDir.in.file<FullEntity[]>(`contact.json`);
+  private readonly deals: DataFile<FullEntity[]>;
+  private readonly companies: DataFile<FullEntity[]>;
+  private readonly contacts: DataFile<FullEntity[]>;
+
+  public constructor(rootDataDir?: URL, place: string = 'in') {
+    this.deals = new DataDir(place, rootDataDir).file('deal.json');
+    this.companies = new DataDir(place, rootDataDir).file('company.json');
+    this.contacts = new DataDir(place, rootDataDir).file('contact.json');
+  }
 
   // Downloader
 

@@ -34,9 +34,9 @@ export class Database {
   public tallier = new Tallier();
 
   public constructor(private io: IO) {
-    this.dealManager = new DealManager(io.in.hubspot, io.out.hubspot, this);
-    this.contactManager = new ContactManager(io.in.hubspot, io.out.hubspot, this);
-    this.companyManager = new CompanyManager(io.in.hubspot, io.out.hubspot, this);
+    this.dealManager = new DealManager(io.in.hubspot, io.out.hubspot);
+    this.contactManager = new ContactManager(io.in.hubspot, io.out.hubspot);
+    this.companyManager = new CompanyManager(io.in.hubspot, io.out.hubspot);
     this.emailProviderLister = new EmailProviderLister(io.in.emailProviderLister);
   }
 
@@ -82,9 +82,9 @@ export class Database {
 
     logbox.done();
 
-    this.dealManager.linkAssociations();
-    this.companyManager.linkAssociations();
-    this.contactManager.linkAssociations();
+    this.dealManager.linkAssociations(this);
+    this.companyManager.linkAssociations(this);
+    this.contactManager.linkAssociations(this);
 
     log.info('Downloader', 'Done');
 
@@ -115,7 +115,7 @@ export class Database {
     const logbox = new MultiDownloadLogger();
 
     const [
-      tlds,
+      ,
       licenses,
       transactions,
     ] = await Promise.all([
@@ -143,9 +143,9 @@ export class Database {
 
     logbox.done();
 
-    this.dealManager.linkAssociations();
-    this.companyManager.linkAssociations();
-    this.contactManager.linkAssociations();
+    this.dealManager.linkAssociations(this);
+    this.companyManager.linkAssociations(this);
+    this.contactManager.linkAssociations(this);
 
     log.info('Downloader', 'Done');
 
