@@ -21,14 +21,11 @@ export type DealRelevantEvent = (
 
 export class EventGenerator {
 
-  constructor(private log: DealDataLogger) { }
-
   private events: DealRelevantEvent[] = [];
 
   public interpretAsEvents(groups: RelatedLicenseSet) {
     const records = this.getRecords(groups);
     this.sortRecords(records);
-    this.log.logRecords(records);
 
     for (const record of records) {
       if (record instanceof License) {
@@ -57,8 +54,6 @@ export class EventGenerator {
     }
 
     this.normalizeEvalAndPurchaseEvents();
-
-    this.log.logEvents(this.events);
 
     return this.events;
   }

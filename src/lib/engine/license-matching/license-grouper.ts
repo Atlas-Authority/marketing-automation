@@ -106,7 +106,7 @@ function buildMappingStructure(db: Database) {
 
   for (const license of db.licenses) {
     const id = license.data.addonLicenseId;
-    assert.ok(!mapping.get(id), 'Expected license id to be unique.');
+    //assert.ok(!mapping.get(id), 'Expected license id to be unique. ' + id);
 
     mapping.set(id, {
       transactions: [],

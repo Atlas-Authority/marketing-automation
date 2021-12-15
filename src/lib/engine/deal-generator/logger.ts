@@ -1,19 +1,41 @@
 import DataDir from "../../cache/datadir.js";
 import { Table } from "../../log/table.js";
 import { DealData } from "../../model/deal.js";
-import { DealStage } from '../../model/hubspot/interfaces.js';
+import {DealStage, FullEntity} from '../../model/hubspot/interfaces.js';
 import { License } from "../../model/license.js";
 import { Transaction, uniqueTransactionId } from "../../model/transaction.js";
 import { formatMoney } from "../../util/formatters.js";
 import { Action } from "./actions.js";
 import { DealRelevantEvent } from "./events.js";
+import {RelatedLicenseSet} from "../license-matching/license-grouper";
 
 export class DealDataLogger {
 
   private readonly log = DataDir.out.file('deal-generator.txt').writeStream();
+  private readonly jsonLog = DataDir.out.file('deal-generator-json.txt').jsonWriteStream();
 
   close() {
     this.log.close();
+  }
+
+  logRawDeals(dealsFetcher: () => FullEntity[]) {
+    this.log.writeLine('Deals');
+    if(this.log.enabled) {
+      const deals = dealsFetcher();
+      for (const deal of deals) {
+        this.log.writeLine(`Deal #${deal.id}`);
+        this.printDealProperties(deal.properties);
+      }
+    }
+    this.log.writeLine();
+
+    // Json log
+    this.jsonLog.writeLine('Deals');
+    if (this.jsonLog.enabled) {
+      const deals = dealsFetcher();
+      this.jsonLog.writeJson(deals);
+    }
+    this.jsonLog.writeLine();
   }
 
   logActions(actions: Action[]) {
@@ -45,6 +67,12 @@ export class DealDataLogger {
         }
       }
     }
+    this.log.writeLine();
+
+    // Json log
+    this.jsonLog.writeLine('Actions');
+    this.jsonLog.writeJson(actions);
+    this.jsonLog.writeLine()
   }
 
   private printDealProperties(data: Partial<DealData>) {
@@ -53,24 +81,49 @@ export class DealDataLogger {
     }
   }
 
-  logRecords(records: (License | Transaction)[]) {
-    const ifTx = (fn: (r: Transaction) => string) =>
-      (r: License | Transaction) =>
-        r instanceof Transaction ? fn(r) : '';
+  logRecords(relatedLicenseSet: RelatedLicenseSet) {
+    this.log.writeLine('Related License Set');
+    for(const licenseContext of relatedLicenseSet) {
+      this.logLicense(licenseContext.license);
+      this.logTransactions(licenseContext.transactions);
+      this.log.writeLine();
+    }
 
-    this.log.writeLine('\n');
+    // Json log
+    this.jsonLog.writeLine('Related License Set');
+    this.jsonLog.writeJson(relatedLicenseSet);
+    this.jsonLog.writeLine();
+  }
+
+  logLicense(license: License) {
+    this.log.writeLine();
     Table.print({
       log: str => this.log.writeLine(str),
-      title: 'Records',
-      rows: records,
+      title: 'License',
+      rows: [license],
       cols: [
-        [{ title: 'Hosting' }, record => record.data.hosting],
-        [{ title: 'AddonLicenseId' }, record => record.data.addonLicenseId],
-        [{ title: 'Date' }, record => record.data.maintenanceStartDate],
-        [{ title: 'LicenseType' }, record => record.data.licenseType],
-        [{ title: 'SaleType' }, ifTx(record => record.data.saleType)],
-        [{ title: 'Transaction' }, ifTx(record => record.data.transactionId)],
-        [{ title: 'Amount', align: 'right' }, ifTx(record => formatMoney(record.data.vendorAmount))],
+        [{ title: 'Hosting' }, license => license.data.hosting],
+        [{ title: 'AddonLicenseId' }, license => license.data.addonLicenseId],
+        [{ title: 'Date' }, license => license.data.maintenanceStartDate],
+        [{ title: 'LicenseType' }, license => license.data.licenseType],
+      ],
+    });
+  }
+
+  logTransactions(transactions: Transaction[]) {
+    this.log.writeLine();
+    Table.print({
+      log: str => this.log.writeLine(str),
+      title: 'Transactions',
+      rows: transactions,
+      cols: [
+        [{ title: 'Hosting' }, transaction => transaction.data.hosting],
+        [{ title: 'AddonLicenseId' }, transaction => transaction.data.addonLicenseId],
+        [{ title: 'Date' }, transaction => transaction.data.maintenanceStartDate],
+        [{ title: 'LicenseType' }, transaction => transaction.data.licenseType],
+        [{ title: 'SaleType' }, transaction => transaction.data.saleType],
+        [{ title: 'Transaction' }, transaction => transaction.data.transactionId],
+        [{ title: 'Amount', align: 'right' }, transaction => formatMoney(transaction.data.vendorAmount)],
       ],
     });
   }
@@ -116,6 +169,12 @@ export class DealDataLogger {
         [{ title: 'Transactions' }, row => row.txs?.join(', ') ?? ''],
       ],
     });
+    this.log.writeLine();
+
+    // Json log
+    this.jsonLog.writeLine('Events');
+    this.jsonLog.writeJson(events);
+    this.jsonLog.writeLine();
   }
 
 }

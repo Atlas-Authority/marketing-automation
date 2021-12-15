@@ -79,18 +79,32 @@ class DataFile<T> {
       return new FileLogWriteStream(this.#url);
   }
 
+  public jsonWriteStream(): JsonLogWriteStream {
+    if (env.isTest || env.isProduction)
+      return noopJsonWriteStream;
+    else
+      return new FileJsonLogWriteStream(this.#url);
+  }
+
 }
 
 export interface LogWriteStream {
+  enabled: boolean;
   close(): void;
-  writeLine(text: string): void;
+  writeLine(text?: string): void;
 }
 
-export class FileLogWriteStream {
+export interface JsonLogWriteStream extends LogWriteStream {
+  writeJson(json: any): void;
+}
 
+export class FileLogWriteStream implements LogWriteStream{
+
+  enabled: boolean;
   stream: fs.WriteStream;
 
   constructor(url: URL) {
+    this.enabled = true;
     this.stream = fs.createWriteStream(url);
   }
 
@@ -98,13 +112,27 @@ export class FileLogWriteStream {
     this.stream.end();
   }
 
-  writeLine(text: string) {
-    this.stream.write(text + '\n');
+  writeLine(text?: string) {
+    this.stream.write((text ?? '') + '\n');
   }
 
 }
 
+export class FileJsonLogWriteStream extends FileLogWriteStream implements JsonLogWriteStream {
+  writeJson(json: any) {
+    this.stream.write(JSON.stringify(json, null, 2) + '\n');
+  }
+}
+
 const noopWriteStream: LogWriteStream = {
+  enabled: false,
   writeLine() { },
   close() { },
 };
+
+const noopJsonWriteStream: JsonLogWriteStream = {
+  enabled: false,
+  writeLine() { },
+  writeJson() { },
+  close() { },
+}

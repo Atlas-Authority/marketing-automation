@@ -41,6 +41,10 @@ export class Database {
   }
 
   public async downloadAllData() {
+    if (this.io.precomputed) {
+      return this.downloadPrecomputedData();
+    }
+
     log.info('Downloader', 'Starting downloads with API');
 
     const logbox = new MultiDownloadLogger();
@@ -98,7 +102,61 @@ export class Database {
 
     const transactionTotal = (this.transactions
       .map(t => t.data.vendorAmount)
-      .reduce((a, b) => a + b));
+      .reduce((a, b) => a + b, 0));
+
+    this.printDownloadSummary(transactionTotal);
+
+    this.tallier.first('Transaction total', transactionTotal);
+  }
+
+  public async downloadPrecomputedData() {
+    log.info('Downloader', 'Starting downloads with API');
+
+    const logbox = new MultiDownloadLogger();
+
+    const [
+      tlds,
+      licenses,
+      transactions,
+    ] = await Promise.all([
+      logbox.wrap('Tlds', (progress) =>
+          this.io.in.tldLister.downloadAllTlds(progress)),
+
+      logbox.wrap('Precomputed Licenses', (progress) =>
+          this.io.in.marketplace.downloadPrecomputedLicenses(progress)),
+
+      logbox.wrap('Precomputed Transactions', (progress) =>
+          this.io.in.marketplace.downloadPrecomputedTransactions(progress)),
+
+      logbox.wrap('Free Email Providers', (progress) =>
+          this.emailProviderLister.deriveMultiProviderDomainsSet(progress)),
+
+      logbox.wrap('Deals', (progress) =>
+          this.dealManager.downloadAllEntities(progress)),
+
+      logbox.wrap('Companies', (progress) =>
+          this.companyManager.downloadAllEntities(progress)),
+
+      logbox.wrap('Contacts', (progress) =>
+          this.contactManager.downloadAllEntities(progress)),
+    ]);
+
+    logbox.done();
+
+    this.dealManager.linkAssociations();
+    this.companyManager.linkAssociations();
+    this.contactManager.linkAssociations();
+
+    log.info('Downloader', 'Done');
+
+    this.providerDomains = this.emailProviderLister.set;
+
+    this.licenses = licenses.map(license => new License(license.data));
+    this.transactions = transactions.map(transaction => new Transaction(transaction.data));
+
+    const transactionTotal = (this.transactions
+        .map(t => t.data.vendorAmount)
+        .reduce((a, b) => a + b, 0));
 
     this.printDownloadSummary(transactionTotal);
 
