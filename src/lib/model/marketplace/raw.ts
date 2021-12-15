@@ -39,6 +39,10 @@ export interface RawTransaction {
     maintenanceEndDate: string;
   };
   partnerDetails?: RawPartnerDetails;
+
+  appEntitlementId?: string;
+  appEntitlementNumber?: string;
+
 }
 
 export type RawLicenseContact = {
@@ -94,4 +98,8 @@ export interface RawLicense {
   evaluationStartDate?: string;
   evaluationEndDate?: string;
   evaluationSaleDate?: string;
+
+  appEntitlementId?: string;
+  appEntitlementNumber?: string;
+
 }
