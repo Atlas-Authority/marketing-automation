@@ -8,6 +8,7 @@ import {License, LicenseData} from "../../model/license";
 import DataDir from "../../cache/datadir";
 import {Transaction, TransactionData} from "../../model/transaction";
 import * as fs from 'fs';
+import {actionStringifyReplacer} from "./logger";
 
 type RecordJson = {
   transactions: { data: TransactionData }[],
@@ -30,10 +31,10 @@ const getTestData = <T>(scenario: string, fileName: string): T => {
 }
 
 describe('Test deal generation', () => {
-  test.each(scenarios)('$scenarioName: $scenarioDesc', ({scenario}) => {
+  test.each(scenarios)('$scenarioName: $scenarioDesc', async ({scenario}) => {
     const hubspotService = new MemoryHubspot(testDataDir, scenario);
     const dealManager = new DealManager(hubspotService, hubspotService);
-    dealManager.downloadAllEntities({setCount() {}, tick() {}});
+    await dealManager.downloadAllEntities({setCount() {}, tick() {}});
 
     const recordJson = getTestData<RecordJson>(scenario, 'record.json');
     const records: RelatedLicenseSet = recordJson.map(json => {
@@ -50,6 +51,7 @@ describe('Test deal generation', () => {
 
     const actions = new ActionGenerator(dealManager).generateFrom(events);
     const expectedActions = getTestData<Action[]>(scenario, 'action.json');
-    expect(actions).toEqual(expectedActions);
+    expect(JSON.parse(JSON.stringify(actions, actionStringifyReplacer))).toEqual(expectedActions);
+    //console.log(JSON.stringify(actions, actionStringifyReplacer, 2));
   });
 });

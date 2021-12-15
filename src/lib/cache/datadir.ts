@@ -15,6 +15,10 @@ export default class DataDir {
   public static readonly out = new DataDir("out");
   public static readonly cache = new DataDir("cache");
 
+  static inDir(rootDataDir?: URL) {
+    return new DataDir('in', rootDataDir);
+  }
+
   #base: URL;
   #files = new Map<string, DataFile<any>>();
 
@@ -99,7 +103,7 @@ export interface LogWriteStream {
 }
 
 export interface JsonLogWriteStream extends LogWriteStream {
-  writeJson(json: any): void;
+  writeJson(json: any, replacer?: (key: string, value: any) => any): void;
 }
 
 export class FileLogWriteStream implements LogWriteStream{
@@ -123,8 +127,8 @@ export class FileLogWriteStream implements LogWriteStream{
 }
 
 export class FileJsonLogWriteStream extends FileLogWriteStream implements JsonLogWriteStream {
-  writeJson(json: any) {
-    this.stream.write(JSON.stringify(json, null, 2) + '\n');
+  writeJson(json: any, replacer?: (key: string, value: any) => any) {
+    this.stream.write(JSON.stringify(json, replacer, 2) + '\n');
   }
 }
 

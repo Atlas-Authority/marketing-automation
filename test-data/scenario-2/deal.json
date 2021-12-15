@@ -1,0 +1,21 @@
+[
+  {
+    "properties": {
+      "dealstage": "1234569   # Hubspot DealStage ID",
+      "addonlicenseid": "10023587",
+      "transactionid": "",
+      "closedate": "2021-09-22",
+      "deployment": "Server",
+      "aa_app": "ucvok",
+      "license_tier": "10001",
+      "country": "GN",
+      "origin": "MPAC Lead                  # Optional",
+      "related_products": "Marketplace Apps # Optional",
+      "dealname": "Net at Torchmark Corporation",
+      "pipeline": "1234567          # Hubspot Pipeline ID",
+      "amount": "0"
+    },
+    "id": "fake.deal.1",
+    "associations": []
+  }
+]

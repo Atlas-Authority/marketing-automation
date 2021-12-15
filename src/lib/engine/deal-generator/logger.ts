@@ -1,13 +1,13 @@
-import DataDir from "../../cache/datadir.js";
-import { Table } from "../../log/table.js";
-import { DealData } from "../../model/deal.js";
-import {DealStage, FullEntity} from '../../model/hubspot/interfaces.js';
-import { License } from "../../model/license.js";
-import { Transaction, uniqueTransactionId } from "../../model/transaction.js";
-import { formatMoney } from "../../util/formatters.js";
-import { Action } from "./actions.js";
-import { DealRelevantEvent } from "./events.js";
-import {RelatedLicenseSet} from "../license-matching/license-grouper";
+import DataDir from "../../cache/datadir";
+import { Table } from "../../log/table";
+import { DealData} from "../../model/deal";
+import { DealStage, FullEntity } from '../../model/hubspot/interfaces';
+import { License } from "../../model/license";
+import { Transaction, uniqueTransactionId } from "../../model/transaction";
+import { formatMoney } from "../../util/formatters";
+import { Action } from "./actions";
+import { DealRelevantEvent } from "./events";
+import { RelatedLicenseSet } from "../license-matching/license-grouper";
 
 export class DealDataLogger {
 
@@ -71,7 +71,7 @@ export class DealDataLogger {
 
     // Json log
     this.jsonLog.writeLine('Actions');
-    this.jsonLog.writeJson(actions);
+    this.jsonLog.writeJson(actions, actionStringifyReplacer);
     this.jsonLog.writeLine()
   }
 
@@ -177,4 +177,8 @@ export class DealDataLogger {
     this.jsonLog.writeLine();
   }
 
+}
+
+export const actionStringifyReplacer = (key: string, value: any) => {
+  return key === 'deal' ? value?.id : value;
 }
