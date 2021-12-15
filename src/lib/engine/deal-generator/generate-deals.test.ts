@@ -52,6 +52,5 @@ describe('Test deal generation', () => {
     const actions = new ActionGenerator(dealManager).generateFrom(events);
     const expectedActions = getTestData<Action[]>(scenario, 'action.json');
     expect(JSON.parse(JSON.stringify(actions, actionStringifyReplacer))).toEqual(expectedActions);
-    //console.log(JSON.stringify(actions, actionStringifyReplacer, 2));
   });
 });
