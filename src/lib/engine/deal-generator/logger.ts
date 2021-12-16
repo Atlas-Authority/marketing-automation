@@ -55,12 +55,11 @@ export class DealDataLogger {
         }
         case 'noop': {
           const dealId = action.deal.id;
-          const { amount: realAmount, addonLicenseId, transactionId, dealStage } = action.deal.data;
+          const { amount, addonLicenseId, transactionId, dealStage } = action.deal.data;
           const recordId = (transactionId
             ? uniqueTransactionId({ transactionId, addonLicenseId })
             : addonLicenseId
           );
-          const amount = realAmount;
           const stage = DealStage[dealStage];
           this.log.writeLine(`  Nothing: ${dealId}, via ${recordId}, stage=${stage}, amount=${amount}`);
           break;
@@ -71,7 +70,11 @@ export class DealDataLogger {
 
     // Json log
     this.jsonLog.writeLine('Actions');
-    this.jsonLog.writeJson(actions, actionStringifyReplacer);
+    const actionsLog = actions.map(action => ({
+      type: action.type,
+      properties: action.type === 'noop' ? action.deal.data : action.properties,
+    }));
+    this.jsonLog.writeJson(actionsLog);
     this.jsonLog.writeLine()
   }
 
@@ -173,7 +176,7 @@ export class DealDataLogger {
 
     // Json log
     this.jsonLog.writeLine('Events');
-    this.jsonLog.writeJson(events);
+    this.jsonLog.writeJson(rows);
     this.jsonLog.writeLine();
   }
 
