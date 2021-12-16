@@ -4,19 +4,6 @@
 
 **Note**: The licenses/transactions input is the result of scoring engine. Deal generator test engine does not verify the scoring mechanism.
 
-### Test cases
-All test cases are defined in `test-data` directory at the root of project. Each sub-directory is a test scenario which contains:
-
-| File          | Description                                                                                         |
-|---------------|-----------------------------------------------------------------------------------------------------|
-| `desc.txt`    | Test scenario description. The first line is scenario name, the second line is scenario description.|
-| `deal.json`   | The HubSpot deal data. Must conform to `FullEntity[]` format.                                       |
-| `record.json` | Marketplace data. Must conform to `RelatedLicenseSet` format.                                       |
-| `event.json`  | The expected events output. Must conform to `DealRelevantEvent[]`                                   |
-| `action.json` | The expected actions output. Must conform to `Action[]` format                                      |
-
-The test engine will loop over all sub-directories and execute the test.
-
 ### Generate test cases
 - Prepare redacted marketplace data:
   ```
