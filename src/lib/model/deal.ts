@@ -1,3 +1,4 @@
+import { RelatedLicenseSet } from "../engine/license-matching/license-grouper";
 import env from "../parameters/env";
 import { AttachableError } from "../util/errors";
 import { isPresent } from "../util/helpers";
@@ -30,6 +31,8 @@ type DealComputed = {
 };
 
 export class Deal extends Entity<DealData, DealComputed> {
+
+  groups?: RelatedLicenseSet[];
 
   public contacts = this.makeDynamicAssociation<Contact>('contact');
   public companies = this.makeDynamicAssociation<Company>('company');

@@ -45,6 +45,8 @@ export class DealGenerator {
           ? this.db.dealManager.create(action.properties)
           : action.deal);
 
+        deal.groups = matches;
+
         this.associateDealContactsAndCompanies(action.groups, deal);
       }
     }
