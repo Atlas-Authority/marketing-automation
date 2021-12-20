@@ -37,7 +37,7 @@ export default class LiveHubspotService implements HubspotService {
       return cache(`${kind}.json`, normalizedEntities);
     }
     catch (e: any) {
-      const body = e.response.body;
+      const body = e.response?.body;
       if (
         (
           typeof body === 'string' && (
