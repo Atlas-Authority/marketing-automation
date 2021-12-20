@@ -45,6 +45,8 @@ export class Transaction {
   public billingContact: Contact | null = null;
   public partnerContact: Contact | null = null;
 
+  public refunded = false;
+
   public constructor(rawTransaction: RawTransaction) {
     this.data = {
       transactionId: rawTransaction.transactionId,

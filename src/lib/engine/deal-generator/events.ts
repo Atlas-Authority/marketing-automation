@@ -153,6 +153,8 @@ export class EventGenerator {
         if (fullyRefundedTx) {
           refundedTxs.push(fullyRefundedTx);
 
+          fullyRefundedTx.refunded = true;
+
           // Remove it from the list
           transactions = transactions.filter(tx =>
             tx !== transaction && tx !== fullyRefundedTx
