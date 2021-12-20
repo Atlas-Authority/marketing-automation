@@ -1,0 +1,45 @@
+[
+  {
+    "type": "noop",
+    "deal": "fake.deal.1",
+    "groups": [
+      {
+        "transactions": [],
+        "license": {
+          "data": {
+            "addonLicenseId": "10023587",
+            "licenseId": "SEN-72924873",
+            "addonKey": "ucvok",
+            "addonName": "Net",
+            "lastUpdated": "2021-09-22",
+            "technicalContact": {
+              "email": "niga@beja.je",
+              "name": "Fred Hines"
+            },
+            "billingContact": {
+              "email": "niga@beja.je",
+              "name": "Fred Hines"
+            },
+            "partnerDetails": null,
+            "company": "Torchmark Corporation",
+            "country": "GN",
+            "region": "Unknown",
+            "tier": "Unlimited Users",
+            "licenseType": "COMMUNITY",
+            "hosting": "Server",
+            "maintenanceStartDate": "2021-09-22",
+            "maintenanceEndDate": "2022-09-22",
+            "status": "active",
+            "evaluationOpportunitySize": "NA",
+            "attribution": null,
+            "parentInfo": null,
+            "newEvalData": null
+          },
+          "id": "10023587",
+          "tier": 10001,
+          "active": true
+        }
+      }
+    ]
+  }
+]

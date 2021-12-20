@@ -1,5 +1,7 @@
 import { Association, EntityKind, ExistingEntity, FullEntity, NewEntity } from "../model/hubspot/interfaces";
 import { RawLicense, RawTransaction } from "../model/marketplace/raw";
+import {Transaction, TransactionData} from "../model/transaction";
+import {License, LicenseData} from "../model/license";
 
 export interface Progress {
   setCount: (count: number) => void;
@@ -26,8 +28,11 @@ export interface EmailProviderListerService {
 
 export interface MarketplaceService {
   downloadTransactions(progress: Progress): Promise<readonly RawTransaction[]>;
+  downloadPrecomputedTransactions(progress: Progress): Promise<readonly Transaction[]>;
+
   downloadLicensesWithoutDataInsights(progress: Progress): Promise<readonly RawLicense[]>;
   downloadLicensesWithDataInsights(progress: Progress): Promise<readonly RawLicense[]>;
+  downloadPrecomputedLicenses(progress: Progress): Promise<readonly License[]>;
 }
 
 export interface Remote {

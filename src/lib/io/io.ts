@@ -15,13 +15,16 @@ export class IO {
     return new IO({
       in: cli.getChoiceOrFail('--in', ['local', 'remote']),
       out: cli.getChoiceOrFail('--out', ['local', 'remote']),
+      precomputed: cli.has('--precomputed'),
     });
   }
 
   public in: Remote;
   public out: Remote;
+  public precomputed: boolean;
 
-  public constructor(opts: { in: 'local' | 'remote', out: 'local' | 'remote' }) {
+  public constructor(opts: { in: 'local' | 'remote', out: 'local' | 'remote', precomputed?: boolean }) {
+    this.precomputed = opts.precomputed ?? false;
     if (opts.in === opts.out) {
       // Important that it's the same instance!
       this.in = this.out = remoteFor(opts.in);

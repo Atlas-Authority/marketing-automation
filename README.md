@@ -43,6 +43,9 @@ See [docs/HUBSPOT.md](./docs/HUBSPOT.md).
 
     --out  local | remote
         Whether to cache output to disk and log, or upload live data
+    
+    --precomputed
+        (Optional) Whether to parse marketplace disk-cached values as precomputed data. Applicable only for in=local
 
     --cached-fns  scorer.json
         (Optional) Reuse cached results of given function

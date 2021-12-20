@@ -34,9 +34,9 @@ export class Database {
   public tallier = new Tallier();
 
   public constructor(private io: IO) {
-    this.dealManager = new DealManager(io.in.hubspot, io.out.hubspot, this);
-    this.contactManager = new ContactManager(io.in.hubspot, io.out.hubspot, this);
-    this.companyManager = new CompanyManager(io.in.hubspot, io.out.hubspot, this);
+    this.dealManager = new DealManager(io.in.hubspot, io.out.hubspot);
+    this.contactManager = new ContactManager(io.in.hubspot, io.out.hubspot);
+    this.companyManager = new CompanyManager(io.in.hubspot, io.out.hubspot);
     this.emailProviderLister = new EmailProviderLister(io.in.emailProviderLister);
   }
 
@@ -45,6 +45,48 @@ export class Database {
 
     const logbox = new MultiDownloadLogger();
 
+    await Promise.all([
+      this.downloadMarketPlaceData(logbox),
+
+      logbox.wrap('Free Email Providers', (progress) =>
+        this.emailProviderLister.deriveMultiProviderDomainsSet(progress)),
+
+      logbox.wrap('Deals', (progress) =>
+        this.dealManager.downloadAllEntities(progress)),
+
+      logbox.wrap('Companies', (progress) =>
+        this.companyManager.downloadAllEntities(progress)),
+
+      logbox.wrap('Contacts', (progress) =>
+        this.contactManager.downloadAllEntities(progress)),
+    ]);
+
+    logbox.done();
+
+    this.dealManager.linkAssociations(this);
+    this.companyManager.linkAssociations(this);
+    this.contactManager.linkAssociations(this);
+
+    log.info('Downloader', 'Done');
+
+    this.providerDomains = this.emailProviderLister.set;
+
+    const transactionTotal = (this.transactions
+      .map(t => t.data.vendorAmount)
+      .reduce((a, b) => a + b, 0));
+
+    this.printDownloadSummary(transactionTotal);
+
+    this.tallier.first('Transaction total', transactionTotal);
+  }
+
+  private async downloadMarketPlaceData(logbox: MultiDownloadLogger) {
+    return this.io.precomputed
+      ? this.downloadPrecomputedMarketplaceData(logbox)
+      : this.downloadRawMarketPlaceData(logbox);
+  }
+
+  private async downloadRawMarketPlaceData(logbox: MultiDownloadLogger) {
     const [
       tlds,
       licensesWithDataInsights,
@@ -62,29 +104,7 @@ export class Database {
 
       logbox.wrap('Transactions', (progress) =>
         this.io.in.marketplace.downloadTransactions(progress)),
-
-      logbox.wrap('Free Email Providers', (progress) =>
-        this.emailProviderLister.deriveMultiProviderDomainsSet(progress)),
-
-      logbox.wrap('Deals', (progress) =>
-        this.dealManager.downloadAllEntities(progress)),
-
-      logbox.wrap('Companies', (progress) =>
-        this.companyManager.downloadAllEntities(progress)),
-
-      logbox.wrap('Contacts', (progress) =>
-        this.contactManager.downloadAllEntities(progress)),
     ]);
-
-    logbox.done();
-
-    this.dealManager.linkAssociations();
-    this.companyManager.linkAssociations();
-    this.contactManager.linkAssociations();
-
-    log.info('Downloader', 'Done');
-
-    this.providerDomains = this.emailProviderLister.set;
 
     const emailRe = makeEmailValidationRegex(tlds);
     const results = validateMarketplaceData(
@@ -95,14 +115,26 @@ export class Database {
 
     this.licenses = results.licenses.map(raw => License.fromRaw(raw));
     this.transactions = results.transactions.map(raw => Transaction.fromRaw(raw));
+  }
 
-    const transactionTotal = (this.transactions
-      .map(t => t.data.vendorAmount)
-      .reduce((a, b) => a + b));
+  private async downloadPrecomputedMarketplaceData(logbox: MultiDownloadLogger) {
+    const [
+      ,
+      licenses,
+      transactions,
+    ] = await Promise.all([
+      logbox.wrap('Tlds', (progress) =>
+        this.io.in.tldLister.downloadAllTlds(progress)),
 
-    this.printDownloadSummary(transactionTotal);
+      logbox.wrap('Precomputed Licenses', (progress) =>
+        this.io.in.marketplace.downloadPrecomputedLicenses(progress)),
 
-    this.tallier.first('Transaction total', transactionTotal);
+      logbox.wrap('Precomputed Transactions', (progress) =>
+        this.io.in.marketplace.downloadPrecomputedTransactions(progress)),
+    ]);
+
+    this.licenses = licenses.map(license => new License(license.data));
+    this.transactions = transactions.map(transaction => new Transaction(transaction.data));
   }
 
   private printDownloadSummary(transactionTotal: number) {

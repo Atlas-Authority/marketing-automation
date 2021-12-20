@@ -3,7 +3,7 @@ import { HubspotService, Progress } from '../../io/interfaces';
 import { AttachableError } from '../../util/errors';
 import { isPresent } from '../../util/helpers';
 import { Entity, Indexer } from './entity';
-import { EntityKind, HubspotProperties, RelativeAssociation } from './interfaces';
+import {EntityKind, FullEntity, HubspotProperties, RelativeAssociation} from './interfaces';
 
 export interface EntityDatabase {
   getEntity(kind: EntityKind, id: string): Entity<any, any>;
@@ -38,7 +38,6 @@ export abstract class EntityManager<
   public constructor(
     private downloader: HubspotService,
     private uploader: HubspotService,
-    private db: EntityDatabase
   ) { }
 
   public createdCount = 0;
@@ -50,6 +49,7 @@ export abstract class EntityManager<
   protected abstract kind: EntityKind;
   protected abstract entityAdapter: EntityAdapter<D, C>;
 
+  private rawEntities: FullEntity[] = [];
   private entities: E[] = [];
   private indexes: Index<E>[] = [];
   private indexIndex = new Map<keyof D, Index<E>>();
@@ -68,6 +68,7 @@ export abstract class EntityManager<
     ];
 
     const rawEntities = await this.downloader.downloadEntities(progress, this.kind, apiProperties, downAssociations);
+    this.rawEntities.push(...rawEntities);
 
     for (const rawEntity of rawEntities) {
       if (this.entityAdapter.shouldReject?.(rawEntity.properties)) continue;
@@ -95,14 +96,14 @@ export abstract class EntityManager<
     }
   }
 
-  public linkAssociations() {
+  public linkAssociations(db: EntityDatabase) {
     for (const [meId, rawAssocs] of this.prelinkedAssociations) {
       for (const rawAssoc of rawAssocs) {
         const me = this.get(meId);
         if (!me) throw new Error(`Couldn't find kind=${this.kind} id=${meId}`);
 
         const { toKind, youId } = this.getAssocInfo(rawAssoc);
-        const you = this.db.getEntity(toKind, youId);
+        const you = db.getEntity(toKind, youId);
         if (!you) throw new Error(`Couldn't find kind=${toKind} id=${youId}`);
 
         me.addAssociation(you, { firstSide: true, initial: true });
@@ -295,6 +296,10 @@ export abstract class EntityManager<
   public addIndexesFor<K extends keyof D>(key: K, val: D[K] | undefined, entity: E) {
     if (!val) return;
     this.indexIndex.get(key)?.addIndex(val, entity);
+  }
+
+  public getRawEntities() {
+    return [...this.rawEntities];
   }
 
 }
