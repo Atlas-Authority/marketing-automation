@@ -1,4 +1,5 @@
 import assert from "assert";
+import { Contact } from "./contact";
 import { AddonLicenseId, ContactInfo, getContactInfo, getPartnerInfo, maybeGetContactInfo, PartnerInfo } from "./marketplace/common";
 import { RawTransaction } from "./marketplace/raw";
 
@@ -39,6 +40,10 @@ export class Transaction {
   public id: string;
   public data: TransactionData;
   public tier: number;
+
+  public techContact!: Contact;
+  public billingContact: Contact | null = null;
+  public partnerContact: Contact | null = null;
 
   public constructor(rawTransaction: RawTransaction) {
     this.data = {

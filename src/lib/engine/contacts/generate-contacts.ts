@@ -18,18 +18,15 @@ export class ContactGenerator {
   public run() {
     this.generateContacts();
     this.mergeGeneratedContacts();
+    this.associateContacts();
   }
 
   private generateContacts() {
     for (const license of this.db.licenses) {
-      this.generateContact(license, license.data.technicalContact);
-      this.generateContact(license, license.data.billingContact);
-      this.generateContact(license, license.data.partnerDetails?.billingContact ?? null);
+      this.generateContactsFrom(license);
     }
     for (const transaction of this.db.transactions) {
-      this.generateContact(transaction, transaction.data.technicalContact);
-      this.generateContact(transaction, transaction.data.billingContact);
-      this.generateContact(transaction, transaction.data.partnerDetails?.billingContact ?? null);
+      this.generateContactsFrom(transaction);
     }
   }
 
@@ -38,6 +35,32 @@ export class ContactGenerator {
       contacts.sort(sorter(c => c.lastUpdated, 'DSC'));
       mergeContactInfo(contact.data, contacts);
     }
+  }
+
+  private generateContactsFrom(record: License | Transaction) {
+    this.generateContact(record, record.data.technicalContact);
+    this.generateContact(record, record.data.billingContact);
+    this.generateContact(record, record.data.partnerDetails?.billingContact ?? null);
+  }
+
+  private associateContacts() {
+    for (const license of this.db.licenses) {
+      this.associateContactsIn(license);
+    }
+    for (const transaction of this.db.transactions) {
+      this.associateContactsIn(transaction);
+    }
+  }
+
+  private associateContactsIn(record: License | Transaction) {
+    record.techContact = this.findContact(record.data.technicalContact.email)!;
+    record.billingContact = this.findContact(record.data.billingContact?.email);
+    record.partnerContact = this.findContact(record.data.partnerDetails?.billingContact.email);
+  }
+
+  private findContact(email: string | undefined): Contact | null {
+    if (!email) return null;
+    return this.db.contactManager.getByEmail(email)!;
   }
 
   private generateContact(item: License | Transaction, info: ContactInfo | PartnerBillingInfo | null) {

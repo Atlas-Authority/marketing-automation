@@ -1,4 +1,5 @@
 import * as assert from 'assert';
+import { Contact } from './contact.js';
 import { AddonLicenseId, ContactInfo, getContactInfo, getPartnerInfo, maybeGetContactInfo, PartnerInfo } from "./marketplace/common.js";
 import { RawLicense } from "./marketplace/raw.js";
 
@@ -62,6 +63,10 @@ export class License {
   public data: LicenseData;
   public tier: number;
   public active: boolean;
+
+  public techContact!: Contact;
+  public billingContact: Contact | null = null;
+  public partnerContact: Contact | null = null;
 
   public constructor(rawLicense: RawLicense) {
     let newEvalData: NewEvalData | null = null;
