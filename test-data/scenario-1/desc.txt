@@ -1,2 +1,0 @@
-Scenario 1
-Test deal creation
