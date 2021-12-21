@@ -1,6 +1,6 @@
 import { verifyDealGeneration } from '../utils';
 
-describe('License deal create', () => {
+it('License deal create', () => {
   verifyDealGeneration(
     [],
     [
@@ -45,7 +45,7 @@ describe('License deal create', () => {
   );
 });
 
-describe('License deal noop', () => {
+it('License deal noop', () => {
   verifyDealGeneration(
     [
       {
@@ -106,7 +106,7 @@ describe('License deal noop', () => {
   );
 });
 
-describe('License deal update', () => {
+it('License deal update', () => {
   verifyDealGeneration(
     [
       {
@@ -167,7 +167,7 @@ describe('License deal update', () => {
   );
 });
 
-describe('Create deal with transaction', () => {
+it('Create deal with transaction', () => {
   verifyDealGeneration(
     [],
     [

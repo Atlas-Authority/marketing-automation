@@ -69,14 +69,10 @@ export const verifyDealGeneration = (
 
   const events = new EventGenerator().interpretAsEvents(records);
 
-  it('Verify generated events', () => {
-    assertEvents(events, expectedEvents);
-  });
+  assertEvents(events, expectedEvents);
 
-  it('Verify generated actions', () => {
-    const actions = new ActionGenerator(dealManager).generateFrom(events);
-    assertActions(actions, expectedActions);
-  });
+  const actions = new ActionGenerator(dealManager).generateFrom(events);
+  assertActions(actions, expectedActions);
 }
 
 const createTestDealManager = (deals: FullEntity[]): DealManager => {
