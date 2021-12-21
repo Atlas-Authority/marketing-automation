@@ -5,8 +5,6 @@ import env from '../../parameters/env';
 import { AttachableError, KnownError } from '../../util/errors';
 import cache from '../cache';
 import { MarketplaceService, Progress } from '../interfaces';
-import { License } from "../../model/license";
-import { Transaction } from "../../model/transaction";
 
 
 export class LiveMarketplaceService implements MarketplaceService {
@@ -49,14 +47,6 @@ export class LiveMarketplaceService implements MarketplaceService {
     catch (e) {
       throw new AttachableError('Probably invalid Marketplace JSON.', text as string);
     }
-  }
-
-  public async downloadPrecomputedLicenses(progress: Progress): Promise<readonly License[]> {
-    return Promise.reject('Unsupported operation');
-  }
-
-  public async downloadPrecomputedTransactions(progress: Progress): Promise<readonly Transaction[]> {
-    return Promise.reject('Unsupported operation');
   }
 
 }

@@ -1,11 +1,17 @@
-import DataDir, {DataFile} from "../../cache/datadir";
+import DataDir from "../../cache/datadir";
 import log from "../../log/logger";
 import { Association, EntityKind, ExistingEntity, FullEntity, NewEntity, RelativeAssociation } from "../../model/hubspot/interfaces";
 import { HubspotService, Progress } from "../interfaces";
-import {URL} from "url";
 
-export abstract class AbstractMemoryHubspot implements HubspotService {
+export class MemoryHubspot implements HubspotService {
+
   private ids = new Map<string, number>();
+
+  private readonly deals = DataDir.in.file<FullEntity[]>(`deal.json`);
+  private readonly companies = DataDir.in.file<FullEntity[]>(`company.json`);
+  private readonly contacts = DataDir.in.file<FullEntity[]>(`contact.json`);
+
+  // Downloader
 
   public async downloadEntities(_progress: Progress, kind: EntityKind, apiProperties: string[], inputAssociations: string[]): Promise<readonly FullEntity[]> {
     return this.arrayFor(kind);
@@ -83,24 +89,7 @@ export abstract class AbstractMemoryHubspot implements HubspotService {
 
   // Both
 
-  protected abstract arrayFor(kind: EntityKind): FullEntity[];
-
-}
-
-export class MemoryHubspot extends AbstractMemoryHubspot {
-
-  private readonly deals: DataFile<FullEntity[]>;
-  private readonly companies: DataFile<FullEntity[]>;
-  private readonly contacts: DataFile<FullEntity[]>;
-
-  public constructor() {
-    super();
-    this.deals = DataDir.in.file<FullEntity[]>(`deal.json`);
-    this.companies = DataDir.in.file<FullEntity[]>(`company.json`);
-    this.contacts = DataDir.in.file<FullEntity[]>(`contact.json`);
-  }
-
-  protected arrayFor(kind: EntityKind) {
+  private arrayFor(kind: EntityKind) {
     switch (kind) {
       case 'company': return this.companies.readJson();
       case 'contact': return this.contacts.readJson();

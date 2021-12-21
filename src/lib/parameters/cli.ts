@@ -17,12 +17,6 @@ class ArgParser {
     return value;
   }
 
-  has(option: string): boolean {
-    const hasOption = this.#opts.hasOwnProperty(option);
-    delete this.#opts[option];
-    return hasOption;
-  }
-
   getChoiceOrFail<T extends string>(option: string, choices: T[]): T {
     const value = this.get(option) as T;
     if (!value || !choices.includes(value)) {

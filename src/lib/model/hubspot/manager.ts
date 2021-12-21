@@ -3,7 +3,7 @@ import { HubspotService, Progress } from '../../io/interfaces';
 import { AttachableError } from '../../util/errors';
 import { isPresent } from '../../util/helpers';
 import { Entity, Indexer } from './entity';
-import {EntityKind, FullEntity, HubspotProperties, RelativeAssociation} from './interfaces';
+import { EntityKind, HubspotProperties, RelativeAssociation } from './interfaces';
 
 export interface EntityDatabase {
   getEntity(kind: EntityKind, id: string): Entity<any, any>;
@@ -49,7 +49,6 @@ export abstract class EntityManager<
   protected abstract kind: EntityKind;
   protected abstract entityAdapter: EntityAdapter<D, C>;
 
-  private rawEntities: FullEntity[] = [];
   private entities: E[] = [];
   private indexes: Index<E>[] = [];
   private indexIndex = new Map<keyof D, Index<E>>();
@@ -68,7 +67,6 @@ export abstract class EntityManager<
     ];
 
     const rawEntities = await this.downloader.downloadEntities(progress, this.kind, apiProperties, downAssociations);
-    this.rawEntities.push(...rawEntities);
 
     for (const rawEntity of rawEntities) {
       if (this.entityAdapter.shouldReject?.(rawEntity.properties)) continue;
@@ -296,10 +294,6 @@ export abstract class EntityManager<
   public addIndexesFor<K extends keyof D>(key: K, val: D[K] | undefined, entity: E) {
     if (!val) return;
     this.indexIndex.get(key)?.addIndex(val, entity);
-  }
-
-  public getRawEntities() {
-    return [...this.rawEntities];
   }
 
 }

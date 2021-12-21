@@ -45,8 +45,23 @@ export class Database {
 
     const logbox = new MultiDownloadLogger();
 
-    await Promise.all([
-      this.downloadMarketPlaceData(logbox),
+    const [
+      tlds,
+      licensesWithDataInsights,
+      licensesWithoutDataInsights,
+      transactions,
+    ] = await Promise.all([
+      logbox.wrap('Tlds', (progress) =>
+        this.io.in.tldLister.downloadAllTlds(progress)),
+
+      logbox.wrap('Licenses With Data Insights', (progress) =>
+        this.io.in.marketplace.downloadLicensesWithDataInsights(progress)),
+
+      logbox.wrap('Licenses Without Data Insights', (progress) =>
+        this.io.in.marketplace.downloadLicensesWithoutDataInsights(progress)),
+
+      logbox.wrap('Transactions', (progress) =>
+        this.io.in.marketplace.downloadTransactions(progress)),
 
       logbox.wrap('Free Email Providers', (progress) =>
         this.emailProviderLister.deriveMultiProviderDomainsSet(progress)),
@@ -71,41 +86,6 @@ export class Database {
 
     this.providerDomains = this.emailProviderLister.set;
 
-    const transactionTotal = (this.transactions
-      .map(t => t.data.vendorAmount)
-      .reduce((a, b) => a + b, 0));
-
-    this.printDownloadSummary(transactionTotal);
-
-    this.tallier.first('Transaction total', transactionTotal);
-  }
-
-  private async downloadMarketPlaceData(logbox: MultiDownloadLogger) {
-    return this.io.precomputed
-      ? this.downloadPrecomputedMarketplaceData(logbox)
-      : this.downloadRawMarketPlaceData(logbox);
-  }
-
-  private async downloadRawMarketPlaceData(logbox: MultiDownloadLogger) {
-    const [
-      tlds,
-      licensesWithDataInsights,
-      licensesWithoutDataInsights,
-      transactions,
-    ] = await Promise.all([
-      logbox.wrap('Tlds', (progress) =>
-        this.io.in.tldLister.downloadAllTlds(progress)),
-
-      logbox.wrap('Licenses With Data Insights', (progress) =>
-        this.io.in.marketplace.downloadLicensesWithDataInsights(progress)),
-
-      logbox.wrap('Licenses Without Data Insights', (progress) =>
-        this.io.in.marketplace.downloadLicensesWithoutDataInsights(progress)),
-
-      logbox.wrap('Transactions', (progress) =>
-        this.io.in.marketplace.downloadTransactions(progress)),
-    ]);
-
     const emailRe = makeEmailValidationRegex(tlds);
     const results = validateMarketplaceData(
       licensesWithDataInsights,
@@ -115,26 +95,14 @@ export class Database {
 
     this.licenses = results.licenses.map(raw => License.fromRaw(raw));
     this.transactions = results.transactions.map(raw => Transaction.fromRaw(raw));
-  }
 
-  private async downloadPrecomputedMarketplaceData(logbox: MultiDownloadLogger) {
-    const [
-      ,
-      licenses,
-      transactions,
-    ] = await Promise.all([
-      logbox.wrap('Tlds', (progress) =>
-        this.io.in.tldLister.downloadAllTlds(progress)),
+    const transactionTotal = (this.transactions
+      .map(t => t.data.vendorAmount)
+      .reduce((a, b) => a + b));
 
-      logbox.wrap('Precomputed Licenses', (progress) =>
-        this.io.in.marketplace.downloadPrecomputedLicenses(progress)),
+    this.printDownloadSummary(transactionTotal);
 
-      logbox.wrap('Precomputed Transactions', (progress) =>
-        this.io.in.marketplace.downloadPrecomputedTransactions(progress)),
-    ]);
-
-    this.licenses = licenses.map(license => new License(license.data));
-    this.transactions = transactions.map(transaction => new Transaction(transaction.data));
+    this.tallier.first('Transaction total', transactionTotal);
   }
 
   private printDownloadSummary(transactionTotal: number) {
