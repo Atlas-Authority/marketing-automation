@@ -1,4 +1,5 @@
 import 'source-map-support/register';
+import { redactedLicense, redactedTransaction } from '../lib/engine/deal-generator/redact';
 import { RelatedLicenseSet } from '../lib/engine/license-matching/license-grouper';
 import { IO } from "../lib/io/io";
 import { Database } from "../lib/model/database";
@@ -14,9 +15,10 @@ async function main(testId: string) {
 
   const group: RelatedLicenseSet = ids.map(([licenseId, transactionIds]) => {
     return {
-      license: db.licenses.find(l => l.id === licenseId)!,
+      license: redactedLicense(db.licenses.find(l => l.id === licenseId)!),
       transactions: transactionIds.map(id =>
-        db.transactions.find(t => t.id === id)!)
+        redactedTransaction(db.transactions.find(t => t.id === id)!)
+      )
     }
   });
 
