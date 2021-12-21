@@ -24,12 +24,16 @@ export type IgnoredLicense = LicenseData & {
 /** Generates deal actions based on match data */
 export class DealGenerator {
 
+  private actionGenerator: ActionGenerator;
+
   private ignoredLicenseSets: (IgnoredLicense)[][] = [];
   private ignoredAmounts = new Map<string, number>();
 
   private partnerTransactions = new Set<Transaction>();
 
-  public constructor(private db: Database) { }
+  public constructor(private db: Database) {
+    this.actionGenerator = new ActionGenerator(db.dealManager);
+  }
 
   public run(matches: RelatedLicenseSet[]) {
     const logger = new DealDataLogger();
@@ -102,21 +106,15 @@ export class DealGenerator {
     assert.ok(groups.length > 0);
     if (this.ignoring(groups)) return [];
 
-    logger.logRawDeals(() => {
-      const records = groups.flatMap(context => [context.license, ...context.transactions]);
-      const rawDealEntityIds = Array
-          .from(this.db.dealManager.getDealsForRecords(records))
-          .map(deal => deal.id);
-      const rawDealEntityIdSet = new Set(rawDealEntityIds);
-      return this.db.dealManager.getRawEntities().filter(deal => rawDealEntityIdSet.has(deal.id));
-    });
+    const eventGenerator = new EventGenerator();
 
-    logger.logRecords(groups);
+    const records = eventGenerator.getSortedRecords(groups);
+    logger.logRecords(records);
 
-    const events = new EventGenerator().interpretAsEvents(groups);
+    const events = eventGenerator.interpretAsEvents(records);
     logger.logEvents(events);
 
-    const actions = new ActionGenerator(this.db.dealManager).generateFrom(events);
+    const actions = this.actionGenerator.generateFrom(events);
     logger.logActions(actions);
 
     return actions;

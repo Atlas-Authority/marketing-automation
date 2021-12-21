@@ -29,7 +29,7 @@ export default class DataDir {
 
 }
 
-export class DataFile<T> {
+class DataFile<T> {
 
   #url: URL;
   #text?: string;
@@ -79,32 +79,18 @@ export class DataFile<T> {
       return new FileLogWriteStream(this.#url);
   }
 
-  public jsonWriteStream(): JsonLogWriteStream {
-    if (env.isTest || env.isProduction)
-      return noopJsonWriteStream;
-    else
-      return new FileJsonLogWriteStream(this.#url);
-  }
-
 }
 
 export interface LogWriteStream {
-  enabled: boolean;
   close(): void;
-  writeLine(text?: string): void;
+  writeLine(text: string): void;
 }
 
-export interface JsonLogWriteStream extends LogWriteStream {
-  writeJson(json: any, replacer?: (key: string, value: any) => any): void;
-}
+export class FileLogWriteStream {
 
-export class FileLogWriteStream implements LogWriteStream{
-
-  enabled: boolean;
   stream: fs.WriteStream;
 
   constructor(url: URL) {
-    this.enabled = true;
     this.stream = fs.createWriteStream(url);
   }
 
@@ -112,27 +98,13 @@ export class FileLogWriteStream implements LogWriteStream{
     this.stream.end();
   }
 
-  writeLine(text?: string) {
-    this.stream.write((text ?? '') + '\n');
+  writeLine(text: string) {
+    this.stream.write(text + '\n');
   }
 
-}
-
-export class FileJsonLogWriteStream extends FileLogWriteStream implements JsonLogWriteStream {
-  writeJson(json: any, replacer?: (key: string, value: any) => any) {
-    this.stream.write(JSON.stringify(json, replacer, 2) + '\n');
-  }
 }
 
 const noopWriteStream: LogWriteStream = {
-  enabled: false,
   writeLine() { },
   close() { },
 };
-
-const noopJsonWriteStream: JsonLogWriteStream = {
-  enabled: false,
-  writeLine() { },
-  writeJson() { },
-  close() { },
-}

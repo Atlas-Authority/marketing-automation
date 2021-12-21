@@ -2,7 +2,6 @@ import { License } from "../../model/license";
 import { Transaction } from "../../model/transaction";
 import { sorter } from "../../util/helpers";
 import { RelatedLicenseSet } from "../license-matching/license-grouper";
-import { DealDataLogger } from "./logger";
 import { getLicense, isEvalOrOpenSourceLicense, isPaidLicense } from "./records";
 
 export type RefundEvent = { type: 'refund', groups: RelatedLicenseSet, refundedTxs: Transaction[] };
@@ -23,31 +22,28 @@ export class EventGenerator {
 
   private events: DealRelevantEvent[] = [];
 
-  public interpretAsEvents(groups: RelatedLicenseSet) {
-    const records = this.getRecords(groups);
-    this.sortRecords(records);
-
+  public interpretAsEvents(records: (License | Transaction)[]) {
     for (const record of records) {
       if (record instanceof License) {
         if (isEvalOrOpenSourceLicense(record)) {
-          this.events.push({ type: 'eval', groups, licenses: [record] });
+          this.events.push({ type: 'eval', groups: record.matches, licenses: [record] });
         }
         else if (isPaidLicense(record)) {
-          this.events.push({ type: 'purchase', groups, licenses: [record] });
+          this.events.push({ type: 'purchase', groups: record.matches, licenses: [record] });
         }
       }
       else {
         switch (record.data.saleType) {
           case 'New': {
-            const license = getLicense(record.data.addonLicenseId, groups);
-            this.events.push({ type: 'purchase', groups, licenses: [license], transaction: record });
+            const license = getLicense(record.data.addonLicenseId, record.matches);
+            this.events.push({ type: 'purchase', groups: record.matches, licenses: [license], transaction: record });
             break;
           }
           case 'Renewal':
-            this.events.push({ type: 'renewal', groups, transaction: record });
+            this.events.push({ type: 'renewal', groups: record.matches, transaction: record });
             break;
           case 'Upgrade':
-            this.events.push({ type: 'upgrade', groups, transaction: record });
+            this.events.push({ type: 'upgrade', groups: record.matches, transaction: record });
             break;
         }
       }
@@ -92,7 +88,7 @@ export class EventGenerator {
     }
   }
 
-  private getRecords(groups: RelatedLicenseSet) {
+  public getSortedRecords(groups: RelatedLicenseSet) {
     return groups.flatMap(group => {
       const transactions = this.applyRefunds(group.transactions, groups);
       const records: (License | Transaction)[] = [...transactions];
@@ -103,11 +99,7 @@ export class EventGenerator {
       }
 
       return records;
-    });
-  }
-
-  private sortRecords(records: (License | Transaction)[]) {
-    records.sort((a, b) => {
+    }).sort((a, b) => {
       // First sort by date
       const date1 = a.data.maintenanceStartDate;
       const date2 = b.data.maintenanceStartDate;

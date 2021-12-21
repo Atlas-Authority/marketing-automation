@@ -1,12 +1,12 @@
 import { Chance } from 'chance';
-import {FullEntity} from "../../../model/hubspot/interfaces";
-import {DealData, DealManager} from "../../../model/deal";
-import {InMemoryHubspot} from "./in-memory-hubspot";
-import {Transaction, TransactionData} from "../../../model/transaction";
-import {License, LicenseData} from "../../../model/license";
-import {RelatedLicenseSet} from "../../license-matching/license-grouper";
-import {DealRelevantEvent, EventGenerator} from "../events";
-import {Action, ActionGenerator} from "../actions";
+import { FullEntity } from "../../../model/hubspot/interfaces";
+import { DealData, DealManager } from "../../../model/deal";
+import { InMemoryHubspot } from "./in-memory-hubspot";
+import { Transaction, TransactionData } from "../../../model/transaction";
+import { License, LicenseData } from "../../../model/license";
+import { RelatedLicenseSet } from "../../license-matching/license-grouper";
+import { DealRelevantEvent, EventGenerator } from "../events";
+import { Action, ActionGenerator } from "../actions";
 import env from "../../../parameters/env";
 
 const chance = new Chance();
@@ -29,7 +29,7 @@ export type RecordJson = {
     'addonKey' |
     'addonName' |
     'tier'
-    >[],
+  >[],
   license: Pick<
     LicenseData,
     'addonLicenseId' |
@@ -45,7 +45,7 @@ export type RecordJson = {
     'maintenanceEndDate' |
     'status' |
     'evaluationOpportunitySize'
-    >,
+  >,
 }[]
 
 export type ExpectedEvent = {
@@ -96,8 +96,8 @@ const buildDeals = (dealJson: Record<string, string>[]): FullEntity[] => {
   }));
 }
 
-const buildRecords = (recordJson: RecordJson): RelatedLicenseSet => {
-  return recordJson.map(json => {
+const buildRecords = (recordJson: RecordJson): (License | Transaction)[] => {
+  return recordJson.flatMap(json => {
     const { transactions, license } = json;
     const technicalContact = {
       email: chance.email(),
@@ -107,8 +107,8 @@ const buildRecords = (recordJson: RecordJson): RelatedLicenseSet => {
       email: chance.email(),
       name: chance.name(),
     };
-    return {
-      license: new License({
+    return [
+      new License({
         ...license,
         lastUpdated: chance.date().toDateString(),
         technicalContact,
@@ -119,7 +119,7 @@ const buildRecords = (recordJson: RecordJson): RelatedLicenseSet => {
         parentInfo: null,
         newEvalData: null,
       }),
-      transactions: transactions.map(transaction => new Transaction({
+      ...transactions.map(transaction => new Transaction({
         ...transaction,
         lastUpdated: chance.date().toDateString(),
         technicalContact,
@@ -129,7 +129,7 @@ const buildRecords = (recordJson: RecordJson): RelatedLicenseSet => {
         purchasePrice: chance.integer(),
         billingPeriod: chance.string(),
       })),
-    };
+    ];
   });
 }
 
@@ -170,7 +170,7 @@ const assertActions = (actualActions: Action[], expectedActions: ExpectedAction[
   }
 }
 
-const getRecordIds = (event: DealRelevantEvent): { licenseIds: (string | undefined)[], transactionIds: (string | undefined)[]} => {
+const getRecordIds = (event: DealRelevantEvent): { licenseIds: (string | undefined)[], transactionIds: (string | undefined)[] } => {
   switch (event.type) {
     case 'eval': return {
       licenseIds: event.licenses.map(license => license.id),
