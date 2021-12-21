@@ -22,6 +22,9 @@ async function main(testId: string) {
     }
   });
 
-  console.dir(group, { depth: null });
+  console.dir(group.map(g => ({
+    license: g.license.data,
+    transactions: g.transactions.map(t => t.data),
+  })), { depth: null });
 
 }
