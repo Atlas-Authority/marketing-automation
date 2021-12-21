@@ -7,7 +7,6 @@
     "build": "tsc",
     "watch": "tsc --watch",
     "once": "node out/bin/run-once.js",
-    "redact": "node out/bin/redact.js",
     "multiple": "node out/bin/verify-multiple-runs.js",
     "download": "node out/bin/download.js",
     "entitlements": "node out/bin/entitlements.js",

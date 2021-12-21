@@ -1,45 +1,11 @@
 import Chance from 'chance';
 import 'source-map-support/register';
-import DataDir from '../lib/cache/datadir';
-import { IO } from "../lib/io/io";
-import { Database } from "../lib/model/database";
-import { License } from '../lib/model/license';
-import { ContactInfo, PartnerInfo } from '../lib/model/marketplace/common';
-import { Transaction } from '../lib/model/transaction';
+import { License } from '../../model/license';
+import { ContactInfo, PartnerInfo } from '../../model/marketplace/common';
+import { Transaction } from '../../model/transaction';
 
 
-async function main() {
-
-  const db = new Database(new IO({ in: 'local', out: 'local' }));
-  await db.downloadAllData();
-
-  const scores = DataDir.cache.file('scorer.json').readJson();
-  const redactedScores = redactCachedScores(scores as Scores);
-  DataDir.out.file('redacted-scorer.json').writeJson(redactedScores);
-
-  const redactedTransactions = db.transactions.map(t => redactedTransaction(t));
-  DataDir.out.file('redacted-transactions.json').writeJson(redactedTransactions);
-
-  const redactedLicenses = db.licenses.map(l => redactedLicense(l));
-  DataDir.out.file('redacted-licenses.json').writeJson(redactedLicenses);
-
-}
-
-
-function redactCachedScores(s: Scores): Scores {
-  return {
-    maybeMatches: s.maybeMatches.map(m => ({
-      item1: Redact.licenseId(m.item1),
-      item2: Redact.licenseId(m.item2),
-      score: m.score,
-      reasons: m.reasons,
-    })),
-    unaccounted: s.unaccounted.map(id =>
-      Redact.licenseId(id))
-  };
-}
-
-function redactedLicense(t: License): License {
+export function redactedLicense(t: License): License {
   return new License({
     addonLicenseId: Redact.licenseId(t.data.addonLicenseId),
     licenseId: Redact.licenseId(t.data.licenseId),
@@ -70,7 +36,7 @@ function redactedLicense(t: License): License {
   });
 }
 
-function redactedTransaction(t: Transaction): Transaction {
+export function redactedTransaction(t: Transaction): Transaction {
   return new Transaction({
     addonLicenseId: Redact.licenseId(t.data.addonLicenseId),
     licenseId: Redact.licenseId(t.data.licenseId),
@@ -192,15 +158,3 @@ function maybeRedactContactInfo(contact: ContactInfo | null): ContactInfo | null
     ? redactContactInfo(contact)
     : null);
 }
-
-type Scores = {
-  maybeMatches: {
-    item1: string;
-    item2: string;
-    score: number;
-    reasons: string[];
-  }[];
-  unaccounted: string[];
-};
-
-main();
