@@ -1,13 +1,12 @@
 import { Chance } from 'chance';
-import { FullEntity } from "../../../model/hubspot/interfaces";
 import { DealData, DealManager } from "../../../model/deal";
-import { InMemoryHubspot } from "./in-memory-hubspot";
-import { Transaction, TransactionData } from "../../../model/transaction";
+import { FullEntity } from "../../../model/hubspot/interfaces";
 import { License, LicenseData } from "../../../model/license";
-import { RelatedLicenseSet } from "../../license-matching/license-grouper";
-import { DealRelevantEvent, EventGenerator } from "../events";
-import { Action, ActionGenerator } from "../actions";
+import { Transaction, TransactionData } from "../../../model/transaction";
 import env from "../../../parameters/env";
+import { Action, ActionGenerator } from "../actions";
+import { DealRelevantEvent, EventGenerator } from "../events";
+import { InMemoryHubspot } from "./in-memory-hubspot";
 
 const chance = new Chance();
 
@@ -59,27 +58,24 @@ export type ExpectedAction = Omit<DealData, 'relatedProducts' | 'origin'> & {
 }
 
 export const verifyDealGeneration = (
-  scenarioName: string,
   dealData: Record<string, string>[],
   recordData: RecordJson,
   expectedEvents: ExpectedEvent[],
   expectedActions: ExpectedAction[],
 ) => {
-  describe(scenarioName, () => {
-    const dealEntities = buildDeals(dealData);
-    const dealManager = createTestDealManager(dealEntities);
-    const records = buildRecords(recordData);
+  const dealEntities = buildDeals(dealData);
+  const dealManager = createTestDealManager(dealEntities);
+  const records = buildRecords(recordData);
 
-    const events = new EventGenerator().interpretAsEvents(records);
+  const events = new EventGenerator().interpretAsEvents(records);
 
-    it('Verify generated events', () => {
-      assertEvents(events, expectedEvents);
-    });
+  it('Verify generated events', () => {
+    assertEvents(events, expectedEvents);
+  });
 
-    it('Verify generated actions', () => {
-      const actions = new ActionGenerator(dealManager).generateFrom(events);
-      assertActions(actions, expectedActions);
-    });
+  it('Verify generated actions', () => {
+    const actions = new ActionGenerator(dealManager).generateFrom(events);
+    assertActions(actions, expectedActions);
   });
 }
 
