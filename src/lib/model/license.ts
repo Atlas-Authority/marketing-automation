@@ -1,4 +1,5 @@
 import * as assert from 'assert';
+import { LicenseContext, RelatedLicenseSet } from '../engine/license-matching/license-grouper';
 import { AddonLicenseId, ContactInfo, getContactInfo, getPartnerInfo, maybeGetContactInfo, PartnerInfo } from "./marketplace/common";
 import { RawLicense } from "./marketplace/raw";
 
@@ -61,6 +62,9 @@ export class License {
   public id: string;
   public tier: number;
   public active: boolean;
+
+  public context!: LicenseContext;
+  public matches!: RelatedLicenseSet;
 
   static fromRaw(rawLicense: RawLicense) {
     let newEvalData: NewEvalData | null = null;
