@@ -109,12 +109,12 @@ export class DealGenerator {
     const eventGenerator = new EventGenerator();
 
     const records = eventGenerator.getSortedRecords(groups);
-    logger.logRecords(records);
-
     const events = eventGenerator.interpretAsEvents(records);
-    logger.logEvents(events);
-
     const actions = this.actionGenerator.generateFrom(events);
+
+    logger.logTestID(groups);
+    logger.logRecords(records);
+    logger.logEvents(events);
     logger.logActions(actions);
 
     return actions;

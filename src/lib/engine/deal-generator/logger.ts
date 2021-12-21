@@ -5,6 +5,7 @@ import { DealStage } from '../../model/hubspot/interfaces.js';
 import { License } from "../../model/license.js";
 import { Transaction, uniqueTransactionId } from "../../model/transaction.js";
 import { formatMoney } from "../../util/formatters.js";
+import { RelatedLicenseSet } from "../license-matching/license-grouper.js";
 import { Action } from "./actions.js";
 import { DealRelevantEvent } from "./events.js";
 
@@ -53,12 +54,17 @@ export class DealDataLogger {
     }
   }
 
+  public logTestID(groups: RelatedLicenseSet) {
+    const ids = groups.map(g => [g.license.id, g.transactions.map(t => t.id)]);
+    this.log.writeLine('\n');
+    this.log.writeLine(Buffer.from(JSON.stringify(ids), 'utf8').toString('base64'));
+  }
+
   logRecords(records: (License | Transaction)[]) {
     const ifTx = (fn: (r: Transaction) => string) =>
       (r: License | Transaction) =>
         r instanceof Transaction ? fn(r) : '';
 
-    this.log.writeLine('\n');
     Table.print({
       log: str => this.log.writeLine(str),
       title: 'Records',

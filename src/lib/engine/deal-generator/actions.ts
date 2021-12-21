@@ -1,4 +1,3 @@
-import { LogWriteStream } from "../../cache/datadir";
 import log from "../../log/logger";
 import { Deal, DealData, DealManager } from "../../model/deal";
 import { DealStage } from "../../model/hubspot/interfaces";
