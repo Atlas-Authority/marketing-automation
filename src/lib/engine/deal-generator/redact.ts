@@ -7,8 +7,8 @@ import { Transaction } from '../../model/transaction';
 
 export function redactedLicense(t: License): License {
   return new License({
-    addonLicenseId: Redact.licenseId(t.data.addonLicenseId),
-    licenseId: Redact.licenseId(t.data.licenseId),
+    addonLicenseId: t.data.addonLicenseId,
+    licenseId: t.data.licenseId,
     addonKey: Redact.addonKey(t.data.addonKey),
     addonName: Redact.addonName(t.data.addonName),
     lastUpdated: t.data.lastUpdated,
@@ -38,8 +38,8 @@ export function redactedLicense(t: License): License {
 
 export function redactedTransaction(t: Transaction): Transaction {
   return new Transaction({
-    addonLicenseId: Redact.licenseId(t.data.addonLicenseId),
-    licenseId: Redact.licenseId(t.data.licenseId),
+    addonLicenseId: t.data.addonLicenseId,
+    licenseId: t.data.licenseId,
     addonKey: Redact.addonKey(t.data.addonKey),
     addonName: Redact.addonName(t.data.addonName),
     lastUpdated: t.data.lastUpdated,
@@ -58,7 +58,7 @@ export function redactedTransaction(t: Transaction): Transaction {
     maintenanceStartDate: t.data.maintenanceStartDate,
     maintenanceEndDate: t.data.maintenanceEndDate,
 
-    transactionId: Redact.transactionId(t.data.transactionId),
+    transactionId: t.data.transactionId,
     saleDate: t.data.saleDate,
     saleType: t.data.saleType,
 
@@ -70,18 +70,6 @@ export function redactedTransaction(t: Transaction): Transaction {
 }
 
 const Redact = {
-
-  transactionId: makeRedactor<string>((old, chance) => {
-    return `AT-${chance.integer({ min: 10000000, max: 999999999 })}`;
-  }),
-
-  licenseId: makeRedactor<string>((old, chance) => {
-    const SEN = old.startsWith('SEN-') ? 'SEN-' : '';
-    old = old.replace(/^SEN-/, '');
-    const L = old.startsWith('L') ? 'L' : '';
-    const number = chance.integer({ min: 10000000, max: 99999999 });
-    return `${SEN}${L}${number}`;
-  }),
 
   amount: makeRedactor<number>((old, chance) => {
     return chance.integer({ min: 1, max: 1000 });
