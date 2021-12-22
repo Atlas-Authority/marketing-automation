@@ -6,7 +6,6 @@ import { Transaction, TransactionData } from "../../../model/transaction";
 import env from "../../../parameters/env";
 import { Action, ActionGenerator } from "../actions";
 import { DealRelevantEvent, EventGenerator } from "../events";
-import { InMemoryHubspot } from "./in-memory-hubspot";
 
 const chance = new Chance();
 

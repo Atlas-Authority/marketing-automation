@@ -39,7 +39,12 @@ export class DealGenerator {
     const logger = new DealDataLogger();
 
     for (const relatedLicenseIds of matches) {
-      const actions = this.generateActionsForMatchedGroup(logger, relatedLicenseIds);
+      const { records, events, actions } = this.generateActionsForMatchedGroup(relatedLicenseIds);
+
+      logger.logRecords(records);
+      logger.logEvents(events);
+      logger.logActions(actions);
+
       for (const action of actions) {
         const deal = (action.type === 'create'
           ? this.db.dealManager.create(action.properties)
@@ -102,9 +107,9 @@ export class DealGenerator {
     }
   }
 
-  private generateActionsForMatchedGroup(logger: DealDataLogger, groups: RelatedLicenseSet) {
+  public generateActionsForMatchedGroup(groups: RelatedLicenseSet) {
     assert.ok(groups.length > 0);
-    if (this.ignoring(groups)) return [];
+    if (this.ignoring(groups)) return { records: [], actions: [], events: [] };
 
     const eventGenerator = new EventGenerator();
 
@@ -112,12 +117,7 @@ export class DealGenerator {
     const events = eventGenerator.interpretAsEvents(records);
     const actions = this.actionGenerator.generateFrom(events);
 
-    logger.logTestID(groups);
-    logger.logRecords(records);
-    logger.logEvents(events);
-    logger.logActions(actions);
-
-    return actions;
+    return { records, events, actions };
   }
 
   private associateDealContactsAndCompanies(groups: RelatedLicenseSet, deal: Deal) {

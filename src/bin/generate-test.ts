@@ -1,30 +1,46 @@
 import 'source-map-support/register';
+import { identifyAndFlagContactTypes } from '../lib/engine/contacts/contact-types';
+import { ContactGenerator } from '../lib/engine/contacts/generate-contacts';
+import { abbrActionDetails } from '../lib/engine/deal-generator/actions';
+import { abbrEventDetails } from '../lib/engine/deal-generator/events';
+import { DealGenerator } from '../lib/engine/deal-generator/generate-deals';
 import { redactedLicense, redactedTransaction } from '../lib/engine/deal-generator/redact';
-import { RelatedLicenseSet } from '../lib/engine/license-matching/license-grouper';
+import { matchIntoLikelyGroups, RelatedLicenseSet } from '../lib/engine/license-matching/license-grouper';
 import { IO } from "../lib/io/io";
 import { Database } from "../lib/model/database";
 
-main(process.argv[2]);
-async function main(testId: string) {
-
-  const json = Buffer.from(testId, 'base64').toString('utf8');
-  const ids: [string, string[]][] = JSON.parse(json);
+main(process.argv.pop()!);
+async function main(licenseId: string) {
 
   const db = new Database(new IO({ in: 'local', out: 'local' }));
   await db.downloadAllData();
+  identifyAndFlagContactTypes(db);
+  new ContactGenerator(db).run();
+  const allMatches = matchIntoLikelyGroups(db);
 
-  const group: RelatedLicenseSet = ids.map(([licenseId, transactionIds]) => {
-    return {
-      license: redactedLicense(db.licenses.find(l => l.id === licenseId)!),
-      transactions: transactionIds.map(id =>
-        redactedTransaction(db.transactions.find(t => t.id === id)!)
-      )
-    }
-  });
+  const match = (allMatches
+    .find(group =>
+      group.some(g => g.license.id === licenseId))!
+    .map(g => ({
+      license: redactedLicense(g.license),
+      transactions: g.transactions.map(redactedTransaction),
+    }))
+  );
 
-  console.dir(group.map(g => ({
+  console.log('Input:');
+
+  console.dir(match.map(g => ({
     license: g.license.data,
     transactions: g.transactions.map(t => t.data),
   })), { depth: null });
+
+  console.log('Output:');
+
+  const dealGenerator = new DealGenerator(db);
+
+  const { events, actions } = dealGenerator.generateActionsForMatchedGroup(match);
+
+  console.dir(events.map(abbrEventDetails), { depth: null });
+  console.dir(actions.map(abbrActionDetails), { depth: null });
 
 }
