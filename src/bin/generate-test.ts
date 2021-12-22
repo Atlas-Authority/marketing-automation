@@ -1,4 +1,5 @@
 import 'source-map-support/register';
+import util from 'util';
 import { abbrActionDetails } from '../lib/engine/deal-generator/actions';
 import { abbrEventDetails } from '../lib/engine/deal-generator/events';
 import { DealGenerator } from '../lib/engine/deal-generator/generate-deals';
@@ -7,15 +8,25 @@ import { LicenseContext, RelatedLicenseSet } from '../lib/engine/license-matchin
 import { IO } from "../lib/io/io";
 import { Database } from "../lib/model/database";
 
-main(process.argv.pop()!);
-async function main(testId: string) {
+function TEMPLATE({ runDealGenerator, MATCH_GROUP, EVENTS, ACTIONS }: any) {
+  it(`describe test`, () => {
+    const { events, actions } = runDealGenerator({
+      deals: [],
+      matchGroup: MATCH_GROUP
+    });
+    expect(events).toEqual(EVENTS);
+    expect(actions).toEqual(ACTIONS);
+  });
+}
+
+async function main(template: string, testId: string) {
+  console.log("Using template:\n", template);
 
   const json = Buffer.from(testId, 'base64').toString('utf8');
   const ids: [string, string[]][] = JSON.parse(json);
   const match = await getRedactedMatchGroup(ids);
 
   const db = new Database(new IO({ in: 'local', out: 'local' }));
-  await db.downloadAllData();
 
   db.licenses.length = 0;
   db.licenses.push(...match.map(g => g.license));
@@ -23,22 +34,19 @@ async function main(testId: string) {
   db.transactions.length = 0;
   db.transactions.push(...match.flatMap(g => g.transactions));
 
-  console.log('Input:');
-
-  console.dir(match.map(g => ({
+  const matchGroup = match.map(g => ({
     license: g.license.data,
     transactions: g.transactions.map(t => t.data),
-  })), { depth: null });
-
-  console.log('Output:');
+  }));
 
   const dealGenerator = new DealGenerator(db);
-
   const { events, actions } = dealGenerator.generateActionsForMatchedGroup(match);
 
-  console.dir(events.map(abbrEventDetails), { depth: null });
-  console.dir(actions.map(abbrActionDetails), { depth: null });
-
+  console.log(template
+    .replace('MATCH_GROUP', util.inspect(matchGroup, { depth: null }))
+    .replace('EVENTS', util.inspect(events.map(abbrEventDetails), { depth: null }))
+    .replace('ACTIONS', util.inspect(actions.map(abbrActionDetails), { depth: null }))
+  );
 }
 
 async function getRedactedMatchGroup(ids: [string, string[]][]): Promise<RelatedLicenseSet> {
@@ -61,3 +69,13 @@ async function getRedactedMatchGroup(ids: [string, string[]][]): Promise<Related
   }
   return group;
 }
+
+const template = (TEMPLATE
+  .toString()
+  .split(/\n/g)
+  .slice(1, -1)
+  .join('\n'));
+
+const testId = process.argv.pop()!;
+
+main(template, testId);

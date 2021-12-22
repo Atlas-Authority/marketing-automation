@@ -1,195 +1,58 @@
-import { Chance } from 'chance';
-import { DealData, DealManager } from "../../../model/deal";
-import { FullEntity } from "../../../model/hubspot/interfaces";
+import { IO } from '../../../io/io';
+import { Database } from '../../../model/database';
+import { DealData } from "../../../model/deal";
 import { License, LicenseData } from "../../../model/license";
 import { Transaction, TransactionData } from "../../../model/transaction";
-import env from "../../../parameters/env";
-import { Action, ActionGenerator } from "../actions";
-import { DealRelevantEvent, EventGenerator } from "../events";
+import { LicenseContext, RelatedLicenseSet } from '../../license-matching/license-grouper';
+import { abbrActionDetails } from "../actions";
+import { abbrEventDetails } from "../events";
+import { DealGenerator } from '../generate-deals';
 
-const chance = new Chance();
 
-export type RecordJson = {
-  transactions: Pick<
-    TransactionData,
-    'licenseId' |
-    'hosting' |
-    'addonLicenseId' |
-    'maintenanceStartDate' |
-    'maintenanceEndDate' |
-    'licenseType' |
-    'saleType' |
-    'saleDate' |
-    'transactionId' |
-    'vendorAmount' |
-    'company' |
-    'country' |
-    'addonKey' |
-    'addonName' |
-    'tier'
-  >[],
-  license: Pick<
-    LicenseData,
-    'addonLicenseId' |
-    'licenseId' |
-    'addonKey' |
-    'addonName' |
-    'company' |
-    'country' |
-    'tier' |
-    'licenseType' |
-    'hosting' |
-    'maintenanceStartDate' |
-    'maintenanceEndDate' |
-    'status' |
-    'evaluationOpportunitySize'
-  >,
-}[]
+export function runDealGenerator(input: TypeInput) {
+  const io = new IO({ in: 'local', out: 'local' });
+  const db = new Database(io);
 
-export type ExpectedEvent = {
-  type: DealRelevantEvent['type'],
-  licenseIds: (string | undefined)[],
-  transactionIds: (string | undefined)[],
-}
+  const group = rebuildMatchGroup(input.matchGroup);
+  db.licenses = group.map(g => g.license);
+  db.transactions = group.flatMap(g => g.transactions);
 
-export type ExpectedAction = Omit<DealData, 'relatedProducts' | 'origin'> & {
-  type: Action['type'],
-}
-
-export const verifyDealGeneration = (
-  dealData: Record<string, string>[],
-  recordData: RecordJson,
-  expectedEvents: ExpectedEvent[],
-  expectedActions: ExpectedAction[],
-) => {
-  const dealEntities = buildDeals(dealData);
-  const dealManager = createTestDealManager(dealEntities);
-  const records = buildRecords(recordData);
-
-  const events = new EventGenerator().interpretAsEvents(records);
-
-  assertEvents(events, expectedEvents);
-
-  const actions = new ActionGenerator(dealManager).generateFrom(events);
-  assertActions(actions, expectedActions);
-}
-
-const createTestDealManager = (deals: FullEntity[]): DealManager => {
-  const hubspotService = new InMemoryHubspot(deals, [], []);
-  return new DealManager(hubspotService, hubspotService);
-}
-
-const buildDeals = (dealJson: Record<string, string>[]): FullEntity[] => {
-  return dealJson.map(properties => ({
-    id: uniqueId('DEAL-'),
-    properties,
-    associations: [],
-  }));
-}
-
-const buildRecords = (recordJson: RecordJson): (License | Transaction)[] => {
-  return recordJson.flatMap(json => {
-    const { transactions, license } = json;
-    const technicalContact = {
-      email: chance.email(),
-      name: chance.name(),
-    };
-    const billingContact = {
-      email: chance.email(),
-      name: chance.name(),
-    };
-    return [
-      new License({
-        ...license,
-        lastUpdated: chance.date().toDateString(),
-        technicalContact,
-        billingContact,
-        partnerDetails: null,
-        region: chance.string(),
-        attribution: null,
-        parentInfo: null,
-        newEvalData: null,
-      }),
-      ...transactions.map(transaction => new Transaction({
-        ...transaction,
-        lastUpdated: chance.date().toDateString(),
-        technicalContact,
-        billingContact,
-        partnerDetails: null,
-        region: chance.string(),
-        purchasePrice: chance.integer(),
-        billingPeriod: chance.string(),
-      })),
-    ];
-  });
-}
-
-const assertEvents = (actualEvents: DealRelevantEvent[], expectedEvents: ExpectedEvent[]) => {
-  expect(actualEvents).toHaveLength(expectedEvents.length);
-
-  for (const [index, actual] of actualEvents.entries()) {
-    const expected = expectedEvents[index];
-
-    expect(actual.type).toEqual(expected.type);
-
-    const { licenseIds, transactionIds } = getRecordIds(actual);
-
-    expect(licenseIds).toEqual(expected.licenseIds);
-
-    expect(transactionIds).toEqual(expected.transactionIds);
+  for (const [i, dealData] of input.deals.entries()) {
+    const deal = db.dealManager.create(dealData);
+    deal.id = `deal-${i}`;
+    deal.applyPropertyChanges();
   }
+
+  const dealGenerator = new DealGenerator(db);
+  const { events, actions } = dealGenerator.generateActionsForMatchedGroup(group);
+  return {
+    events: events.map(abbrEventDetails),
+    actions: actions.map(abbrActionDetails),
+  };
 }
 
-const assertActions = (actualActions: Action[], expectedActions: ExpectedAction[]) => {
-  expect(actualActions).toHaveLength(expectedActions.length);
-
-  for (const [index, actual] of actualActions.entries()) {
-    const expected = expectedActions[index];
-
-    expect(actual.type).toEqual(expected.type);
-
-    let actualProperties = actual.type === 'noop' ? actual.deal.data : actual.properties;
-    for (const [field, expectedValue] of Object.entries(expected)) {
-      if (field !== 'type') {
-        // @ts-ignore
-        expect(actualProperties[field]).toEqual(expectedValue);
-      }
+function rebuildMatchGroup(input: { license: LicenseData, transactions: TransactionData[] }[]): RelatedLicenseSet {
+  const group: RelatedLicenseSet = [];
+  for (const { license: licenseData, transactions: transactionsDatas } of input) {
+    const license = new License(licenseData);
+    const context: LicenseContext = { license, transactions: [] };
+    for (const transactionData of transactionsDatas) {
+      const transaction = new Transaction(transactionData);
+      transaction.context = context;
+      transaction.matches = group;
+      context.transactions.push(transaction);
     }
-
-    expect(actualProperties.relatedProducts).toEqual(env.hubspot.deals.dealRelatedProducts);
-    expect(actualProperties.origin).toEqual(env.hubspot.deals.dealOrigin);
+    license.context = context;
+    license.matches = group;
+    group.push(context);
   }
+  return group;
 }
 
-const getRecordIds = (event: DealRelevantEvent): { licenseIds: (string | undefined)[], transactionIds: (string | undefined)[] } => {
-  switch (event.type) {
-    case 'eval': return {
-      licenseIds: event.licenses.map(license => license.id),
-      transactionIds: [],
-    };
-    case 'purchase': return {
-      licenseIds: event.licenses.map(license => license.id),
-      transactionIds: event.transaction ? [event.transaction.id] : [],
-    };
-    case 'refund': return {
-      licenseIds: [],
-      transactionIds: event.refundedTxs.map(tx => tx.id),
-    };
-    case 'renewal': return {
-      licenseIds: [],
-      transactionIds: [event.transaction.id],
-    };
-    case 'upgrade': return {
-      licenseIds: [],
-      transactionIds: [event.transaction.id],
-    };
-  }
-}
-
-const ids = new Set<string>();
-const uniqueId = (prefix: string): string => {
-  let key: string;
-  do { key = prefix + chance.string() } while (ids.has(key));
-  ids.add(key);
-  return key;
-}
+type TypeInput = {
+  deals: DealData[],
+  matchGroup: {
+    license: LicenseData;
+    transactions: TransactionData[];
+  }[],
+};

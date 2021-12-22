@@ -1,229 +1,113 @@
-import { verifyDealGeneration } from '../utils';
+import { runDealGenerator } from "../utils";
 
-it('License deal create', () => {
-  verifyDealGeneration(
-    [],
-    [
+it(`Creates deal from purchase`, () => {
+  const { events, actions } = runDealGenerator({
+    deals: [],
+    matchGroup: [
       {
-        transactions: [],
         license: {
-          addonLicenseId: '10023587',
-          licenseId: 'SEN-72924873',
-          addonKey: 'ucvok',
-          addonName: 'Net',
-          company: 'Torchmark Corporation',
-          country: 'GN',
-          tier: 'Unlimited Users',
-          licenseType: 'COMMUNITY',
-          hosting: 'Server',
-          maintenanceStartDate: '2021-09-22',
-          maintenanceEndDate: '2022-09-22',
-          status: 'active',
-          evaluationOpportunitySize: 'NA',
-        }
-      }
-    ],
-    [{
-      type: 'purchase',
-      licenseIds: ['10023587'],
-      transactionIds: [],
-    }],
-    [{
-      type: 'create',
-      dealStage: 1,
-      addonLicenseId: '10023587',
-      transactionId: null,
-      closeDate: '2021-09-22',
-      deployment: 'Server',
-      app: 'ucvok',
-      licenseTier: 10001,
-      country: 'GN',
-      dealName: 'Net at Torchmark Corporation',
-      pipeline: 0,
-      amount: 0
-    }],
-  );
-});
-
-it('License deal noop', () => {
-  verifyDealGeneration(
-    [
-      {
-        dealstage: '1234569   # Hubspot DealStage ID',
-        addonlicenseid: '10023587',
-        transactionid: '',
-        closedate: '2021-09-22',
-        deployment: 'Server',
-        aa_app: 'ucvok',
-        license_tier: '10001',
-        country: 'GN',
-        origin: 'MPAC Lead                  # Optional',
-        related_products: 'Marketplace Apps # Optional',
-        dealname: 'Net at Torchmark Corporation',
-        pipeline: '1234567          # Hubspot Pipeline ID',
-        amount: '0'
-      }
-    ],
-    [
-      {
-        transactions: [],
-        license: {
-          addonLicenseId: '10023587',
-          licenseId: 'SEN-72924873',
-          addonKey: 'ucvok',
-          addonName: 'Net',
-          company: 'Torchmark Corporation',
-          country: 'GN',
-          tier: 'Unlimited Users',
-          licenseType: 'COMMUNITY',
-          hosting: 'Server',
-          maintenanceStartDate: '2021-09-22',
-          maintenanceEndDate: '2022-09-22',
-          status: 'active',
-          evaluationOpportunitySize: 'NA',
-        }
-      }
-    ],
-    [{
-      type: 'purchase',
-      licenseIds: ['10023587'],
-      transactionIds: [],
-    }],
-    [{
-      type: 'create',
-      dealStage: 1,
-      addonLicenseId: '10023587',
-      transactionId: null,
-      closeDate: '2021-09-22',
-      deployment: 'Server',
-      app: 'ucvok',
-      licenseTier: 10001,
-      country: 'GN',
-      dealName: 'Net at Torchmark Corporation',
-      pipeline: 0,
-      amount: 0
-    }],
-  );
-});
-
-it('License deal update', () => {
-  verifyDealGeneration(
-    [
-      {
-        dealstage: '1234569   # Hubspot DealStage ID',
-        addonlicenseid: '10023587',
-        transactionid: '',
-        closedate: '2021-09-22',
-        deployment: 'Server',
-        aa_app: 'ucvok',
-        license_tier: '10001',
-        country: 'GN',
-        origin: 'MPAC Lead                  # Optional',
-        related_products: 'Marketplace Apps # Optional',
-        dealname: 'Net at Torchmark Corporation',
-        pipeline: '1234567          # Hubspot Pipeline ID',
-        amount: '0'
-      }
-    ],
-    [
-      {
-        transactions: [],
-        license: {
-          addonLicenseId: '10023587',
-          licenseId: 'SEN-72924873',
-          addonKey: 'ucvok',
-          addonName: 'Net',
-          company: 'Torchmark Corporation',
-          country: 'GN',
-          tier: 'Unlimited Users',
-          licenseType: 'COMMUNITY',
-          hosting: 'Server',
-          maintenanceStartDate: '2021-09-23',
-          maintenanceEndDate: '2022-09-23',
-          status: 'active',
-          evaluationOpportunitySize: 'NA',
-        }
-      }
-    ],
-    [{
-      type: 'purchase',
-      licenseIds: ['10023587'],
-      transactionIds: [],
-    }],
-    [{
-      type: 'create',
-      dealStage: 1,
-      addonLicenseId: '10023587',
-      transactionId: null,
-      closeDate: '2021-09-23',
-      deployment: 'Server',
-      app: 'ucvok',
-      licenseTier: 10001,
-      country: 'GN',
-      dealName: 'Net at Torchmark Corporation',
-      pipeline: 0,
-      amount: 0
-    }],
-  );
-});
-
-it('Create deal with transaction', () => {
-  verifyDealGeneration(
-    [],
-    [
-      {
-        transactions: [{
-          addonLicenseId: '68407053',
-          licenseId: 'SEN-91550153',
-          hosting: 'Server',
-          maintenanceStartDate: "2021-05-06",
-          maintenanceEndDate: "2022-05-06",
-          licenseType: 'COMMERCIAL',
-          saleType: 'New',
-          saleDate: '2021-05-06',
-          transactionId: 'AT-177995905',
-          vendorAmount: 918,
-          company: 'Torchmark Corporation',
-          country: 'DG',
-          addonKey: "ucvok",
-          addonName: "Net",
-          tier: 'Unlimited Users'
-        }],
-        license: {
-          addonLicenseId: '68407053',
-          licenseId: 'SEN-91550153',
-          addonKey: 'ucvok',
-          addonName: 'Net',
-          company: 'Torchmark Corporation',
-          country: 'DG',
+          addonLicenseId: '2454822',
+          licenseId: 'SEN-2454822',
+          addonKey: 'naok',
+          addonName: 'Buowsi',
+          lastUpdated: '2015-11-14',
+          technicalContact: { email: 'zoj@kig.tr', name: 'Landon Williams' },
+          billingContact: { email: 'zoj@kig.tr', name: 'Landon Williams' },
+          partnerDetails: null,
+          company: 'Quanta Services Inc.',
+          country: 'NU',
+          region: 'Americas',
           tier: 'Unlimited Users',
           licenseType: 'COMMERCIAL',
           hosting: 'Server',
-          maintenanceStartDate: '2021-05-06',
-          maintenanceEndDate: '2021-05-06',
-          status: 'active',
+          maintenanceStartDate: '2012-12-27',
+          maintenanceEndDate: '2013-12-27',
+          status: 'inactive',
           evaluationOpportunitySize: 'NA',
-        }
+          attribution: null,
+          parentInfo: null,
+          newEvalData: null
+        },
+        transactions: []
+      }
+    ]
+  });
+  expect(events).toEqual([{ type: 'purchase', lics: ['2454822'], txs: [undefined] }]);
+  expect(actions).toEqual([
+    {
+      type: 'create',
+      data: {
+        dealStage: 1,
+        addonLicenseId: '2454822',
+        transactionId: null,
+        closeDate: '2012-12-27',
+        deployment: 'Server',
+        app: 'naok',
+        licenseTier: 10001,
+        country: 'NU',
+        origin: 'MPAC Lead',
+        relatedProducts: 'Marketplace Apps',
+        dealName: 'Buowsi at Quanta Services Inc.',
+        pipeline: 0,
+        amount: 0
+      }
+    }
+  ]);
+});
+
+it(`Does nothing when deal exists for purchase`, () => {
+  const { events, actions } = runDealGenerator({
+    deals: [
+      {
+        dealStage: 1,
+        addonLicenseId: '2454822',
+        transactionId: null,
+        closeDate: '2012-12-27',
+        deployment: 'Server',
+        app: 'naok',
+        licenseTier: 10001,
+        country: 'NU',
+        origin: 'MPAC Lead',
+        relatedProducts: 'Marketplace Apps',
+        dealName: 'Buowsi at Quanta Services Inc.',
+        pipeline: 0,
+        amount: 0
       }
     ],
-    [{
-      type: 'purchase',
-      licenseIds: ['68407053'],
-      transactionIds: ['AT-177995905[68407053]'],
-    }],
-    [{
-      type: 'create',
-      dealStage: 1,
-      addonLicenseId: '68407053',
-      transactionId: 'AT-177995905',
-      closeDate: '2021-05-06',
-      deployment: 'Server',
-      app: 'ucvok',
-      licenseTier: 10001,
-      country: 'DG',
-      dealName: 'Net at Torchmark Corporation',
-      pipeline: 0,
-      amount: 918,
-    }],
-  );
+    matchGroup: [
+      {
+        license: {
+          addonLicenseId: '2454822',
+          licenseId: 'SEN-2454822',
+          addonKey: 'naok',
+          addonName: 'Buowsi',
+          lastUpdated: '2015-11-14',
+          technicalContact: { email: 'zoj@kig.tr', name: 'Landon Williams' },
+          billingContact: { email: 'zoj@kig.tr', name: 'Landon Williams' },
+          partnerDetails: null,
+          company: 'Quanta Services Inc.',
+          country: 'NU',
+          region: 'Americas',
+          tier: 'Unlimited Users',
+          licenseType: 'COMMERCIAL',
+          hosting: 'Server',
+          maintenanceStartDate: '2012-12-27',
+          maintenanceEndDate: '2013-12-27',
+          status: 'inactive',
+          evaluationOpportunitySize: 'NA',
+          attribution: null,
+          parentInfo: null,
+          newEvalData: null
+        },
+        transactions: []
+      }
+    ]
+  });
+  expect(events).toEqual([{ type: 'purchase', lics: ['2454822'], txs: [undefined] }]);
+  expect(actions).toEqual([
+    {
+      deal: "deal-0",
+      type: "noop",
+    },
+  ]);
 });

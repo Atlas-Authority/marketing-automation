@@ -1,19 +1,21 @@
 # Deal Generator Test Engine
 
-`generate-deals.test.js` verifies the deal generation logic. It takes the HubSpot and Marketplace license/transaction data as input, execute the deal generation logic and then verify the generated actions and events.
-
-**Note**: The licenses/transactions input is the result of scoring engine. Deal generator test engine does not verify the scoring mechanism.
-
 ### Generate test cases
-- Prepare redacted marketplace data:
-  ```
-  npm run redact
-  ```
-- Start system in local mode, feed it with redacted data:
-  ```
-  npm run once -- --in=local --out=local --precomputed
-  ```
-- Deals, records, events and actions data should be logged in `/data/out`:
-    - `deal-generator.txt` human-friendly log.
-    - `deal-generator-json.txt` computer-friendly log.
-- Use the generated data, make some tweak if needed to create test scenarios.
+
+1. Run engine on real data: `npm run once -- [options]`
+
+2. Look through `data/out/deal-generator.txt` for test cases.
+
+3. Copy the ID of an interesting one. It'll be in base64 form just above the Records table, e.g. `W1siMjUwODg4NSIsW11dXQ==`.
+
+4. Run `npm run generate-test -- W1siMjQ1NDgyMiIsW11dXQ==`.
+
+5. Copy the printed test-case into the test suite. Auto-format it. Give it a name. Tweak as needed.
+
+6. To create tests with deals:
+   1. Copy an existing test into a new one
+   2. Copy its deals from its output to its input
+   3. Run it and see what changes
+   4. Put the new expected results into the test
+   5. Make sure it makes sense
+   6. Repeat until expected output is no-op
