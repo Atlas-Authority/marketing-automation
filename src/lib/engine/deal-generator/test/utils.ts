@@ -10,7 +10,7 @@ import { DealGenerator } from '../generate-deals';
 
 
 export function runDealGenerator(input: TypeInput) {
-  const io = new IO({ in: 'local', out: 'local' });
+  const io = new IO();
   const db = new Database(io);
 
   const group = rebuildMatchGroup(input.matchGroup);

@@ -26,7 +26,7 @@ async function main(template: string, testId: string) {
   const ids: [string, string[]][] = JSON.parse(json);
   const match = await getRedactedMatchGroup(ids);
 
-  const db = new Database(new IO({ in: 'local', out: 'local' }));
+  const db = new Database(new IO());
 
   db.licenses.length = 0;
   db.licenses.push(...match.map(g => g.license));

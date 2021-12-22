@@ -18,17 +18,19 @@ export class IO {
     });
   }
 
-  public in: Remote;
-  public out: Remote;
+  public in: Remote = NoOpRemote;
+  public out: Remote = NoOpRemote;
 
-  public constructor(opts: { in: 'local' | 'remote', out: 'local' | 'remote' }) {
-    if (opts.in === opts.out) {
-      // Important that it's the same instance!
-      this.in = this.out = remoteFor(opts.in);
-    }
-    else {
-      this.in = remoteFor(opts.in);
-      this.out = remoteFor(opts.out);
+  public constructor(opts?: { in: 'local' | 'remote', out: 'local' | 'remote' }) {
+    if (opts) {
+      if (opts.in === opts.out) {
+        // Important that it's the same instance!
+        this.in = this.out = remoteFor(opts.in);
+      }
+      else {
+        this.in = remoteFor(opts.in);
+        this.out = remoteFor(opts.out);
+      }
     }
   }
 
@@ -54,3 +56,24 @@ class LiveRemote implements Remote {
   emailProviderLister = new LiveEmailProviderListerService();
   tldLister = new LiveTldListerService();
 }
+
+const NoOpRemote: Remote = {
+  emailProviderLister: {
+    async downloadFreeEmailProviders() { return [] },
+  },
+  hubspot: {
+    async downloadEntities() { return [] },
+    async createAssociations() { },
+    async deleteAssociations() { },
+    async createEntities() { return [] },
+    async updateEntities() { return [] },
+  },
+  marketplace: {
+    async downloadLicensesWithDataInsights() { return [] },
+    async downloadLicensesWithoutDataInsights() { return [] },
+    async downloadTransactions() { return [] },
+  },
+  tldLister: {
+    async downloadAllTlds() { return [] },
+  },
+};
