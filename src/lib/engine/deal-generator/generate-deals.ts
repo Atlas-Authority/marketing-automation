@@ -41,6 +41,7 @@ export class DealGenerator {
     for (const relatedLicenseIds of matches) {
       const { records, events, actions } = this.generateActionsForMatchedGroup(relatedLicenseIds);
 
+      logger.logTestID(relatedLicenseIds);
       logger.logRecords(records);
       logger.logEvents(events);
       logger.logActions(actions);

@@ -1,31 +1,27 @@
 import 'source-map-support/register';
-import { identifyAndFlagContactTypes } from '../lib/engine/contacts/contact-types';
-import { ContactGenerator } from '../lib/engine/contacts/generate-contacts';
 import { abbrActionDetails } from '../lib/engine/deal-generator/actions';
 import { abbrEventDetails } from '../lib/engine/deal-generator/events';
 import { DealGenerator } from '../lib/engine/deal-generator/generate-deals';
 import { redactedLicense, redactedTransaction } from '../lib/engine/deal-generator/redact';
-import { matchIntoLikelyGroups, RelatedLicenseSet } from '../lib/engine/license-matching/license-grouper';
+import { LicenseContext, RelatedLicenseSet } from '../lib/engine/license-matching/license-grouper';
 import { IO } from "../lib/io/io";
 import { Database } from "../lib/model/database";
 
 main(process.argv.pop()!);
-async function main(licenseId: string) {
+async function main(testId: string) {
+
+  const json = Buffer.from(testId, 'base64').toString('utf8');
+  const ids: [string, string[]][] = JSON.parse(json);
+  const match = await getRedactedMatchGroup(ids);
 
   const db = new Database(new IO({ in: 'local', out: 'local' }));
   await db.downloadAllData();
-  identifyAndFlagContactTypes(db);
-  new ContactGenerator(db).run();
-  const allMatches = matchIntoLikelyGroups(db);
 
-  const match = (allMatches
-    .find(group =>
-      group.some(g => g.license.id === licenseId))!
-    .map(g => ({
-      license: redactedLicense(g.license),
-      transactions: g.transactions.map(redactedTransaction),
-    }))
-  );
+  db.licenses.length = 0;
+  db.licenses.push(...match.map(g => g.license));
+
+  db.transactions.length = 0;
+  db.transactions.push(...match.flatMap(g => g.transactions));
 
   console.log('Input:');
 
@@ -43,4 +39,25 @@ async function main(licenseId: string) {
   console.dir(events.map(abbrEventDetails), { depth: null });
   console.dir(actions.map(abbrActionDetails), { depth: null });
 
+}
+
+async function getRedactedMatchGroup(ids: [string, string[]][]): Promise<RelatedLicenseSet> {
+  const db = new Database(new IO({ in: 'local', out: 'local' }));
+  await db.downloadAllData();
+
+  const group: RelatedLicenseSet = [];
+  for (const [lid, txids] of ids) {
+    const license = redactedLicense(db.licenses.find(l => l.id === lid)!);
+    const context: LicenseContext = { license, transactions: [] };
+    for (const tid of txids) {
+      const transaction = redactedTransaction(db.transactions.find(t => t.id === tid)!);
+      transaction.context = context;
+      transaction.matches = group;
+      context.transactions.push(transaction);
+    }
+    license.context = context;
+    license.matches = group;
+    group.push(context);
+  }
+  return group;
 }
