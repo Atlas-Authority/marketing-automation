@@ -38,12 +38,8 @@ function rebuildMatchGroup(input: { license: LicenseData, transactions: Transact
     const context: LicenseContext = { license, transactions: [] };
     for (const transactionData of transactionsDatas) {
       const transaction = new Transaction(transactionData);
-      transaction.context = context;
-      transaction.matches = group;
       context.transactions.push(transaction);
     }
-    license.context = context;
-    license.matches = group;
     group.push(context);
   }
   return group;

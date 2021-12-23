@@ -51,7 +51,7 @@ export class DealGenerator {
           ? this.db.dealManager.create(action.properties)
           : action.deal);
 
-        this.associateDealContactsAndCompanies(action.groups, deal);
+        this.associateDealContactsAndCompanies(relatedLicenseIds, deal);
       }
     }
 

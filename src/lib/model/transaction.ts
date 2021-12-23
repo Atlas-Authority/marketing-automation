@@ -1,5 +1,4 @@
 import assert from "assert";
-import { LicenseContext, RelatedLicenseSet } from "../engine/license-matching/license-grouper";
 import { AddonLicenseId, ContactInfo, getContactInfo, getPartnerInfo, maybeGetContactInfo, PartnerInfo } from "./marketplace/common";
 import { RawTransaction } from "./marketplace/raw";
 
@@ -39,9 +38,6 @@ export class Transaction {
   /** Unique ID for this Transaction. */
   public id: string;
   public tier: number;
-
-  public context!: LicenseContext;
-  public matches!: RelatedLicenseSet;
 
   static fromRaw(rawTransaction: RawTransaction) {
     return new Transaction({

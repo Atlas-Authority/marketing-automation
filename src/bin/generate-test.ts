@@ -61,12 +61,8 @@ async function getRedactedMatchGroup(ids: [string, string[]][]): Promise<Related
     const context: LicenseContext = { license, transactions: [] };
     for (const tid of txids) {
       const transaction = redactedTransaction(db.transactions.find(t => t.id === tid)!);
-      transaction.context = context;
-      transaction.matches = group;
       context.transactions.push(transaction);
     }
-    license.context = context;
-    license.matches = group;
     group.push(context);
   }
   return group;

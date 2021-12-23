@@ -93,18 +93,6 @@ export function matchIntoLikelyGroups(db: Database): RelatedLicenseSet[] {
       .map(id => itemsByAddonLicenseId.get(id)!)
       .sort(sorter(m => m.license.data.maintenanceStartDate)));
 
-  for (const matchGroup of matchGroups) {
-    for (const licenseContext of matchGroup) {
-      const { license, transactions } = licenseContext;
-      license.context = licenseContext;
-      license.matches = matchGroup;
-      for (const transaction of transactions) {
-        transaction.context = licenseContext;
-        transaction.matches = matchGroup;
-      }
-    }
-  }
-
   return matchGroups;
 }
 
