@@ -42,10 +42,12 @@ async function main(template: string, testId: string) {
   const dealGenerator = new DealGenerator(db);
   const { events, actions } = dealGenerator.generateActionsForMatchedGroup(match);
 
+  const format = (o: any) => util.inspect(o, { depth: null, breakLength: 50 });
+
   console.log(template
-    .replace('MATCH_GROUP', util.inspect(matchGroup, { depth: null }))
-    .replace('EVENTS', util.inspect(events.map(abbrEventDetails), { depth: null }))
-    .replace('ACTIONS', util.inspect(actions.map(abbrActionDetails), { depth: null }))
+    .replace('MATCH_GROUP', format(matchGroup))
+    .replace('EVENTS', format(events.map(abbrEventDetails)))
+    .replace('ACTIONS', format(actions.map(abbrActionDetails)))
   );
 }
 
