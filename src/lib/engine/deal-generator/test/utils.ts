@@ -1,19 +1,26 @@
+import Chance from 'chance';
 import { IO } from '../../../io/io';
 import { Database } from '../../../model/database';
 import { DealData } from "../../../model/deal";
+import { DealStage } from '../../../model/hubspot/interfaces';
 import { License, LicenseData } from "../../../model/license";
+import { ContactInfo } from '../../../model/marketplace/common';
 import { Transaction, TransactionData } from "../../../model/transaction";
 import { LicenseContext, RelatedLicenseSet } from '../../license-matching/license-grouper';
 import { Action } from "../actions";
 import { DealRelevantEvent } from '../events';
 import { DealGenerator } from '../generate-deals';
 
+const chance = new Chance();
 
-export function runDealGenerator(input: TypeInput) {
+export function runDealGenerator(input: {
+  deals: DealData[],
+  records: (License | Transaction)[],
+  group: [string, string[]][],
+}) {
   const io = new IO();
   const db = new Database(io);
-
-  const group = rebuildMatchGroup(input.matchGroup);
+  const group = reassembleMatchGroup(input.group, input.records);
   db.licenses = group.map(g => g.license);
   db.transactions = group.flatMap(g => g.transactions);
 
@@ -31,13 +38,18 @@ export function runDealGenerator(input: TypeInput) {
   };
 }
 
-function rebuildMatchGroup(input: { license: LicenseData, transactions: TransactionData[] }[]): RelatedLicenseSet {
+type RecordFilter<T extends License | Transaction> = (r: (License | Transaction)) => r is T;
+
+function reassembleMatchGroup(ids: [string, string[]][], records: (License | Transaction)[]) {
+  const licenses: License[] = records.filter((r => r instanceof License) as RecordFilter<License>);
+  const transactions: Transaction[] = records.filter((r => r instanceof Transaction) as RecordFilter<Transaction>);
+
   const group: RelatedLicenseSet = [];
-  for (const { license: licenseData, transactions: transactionsDatas } of input) {
-    const license = new License(licenseData);
+  for (const [lid, txids] of ids) {
+    const license = licenses.find(l => l.id === lid)!;
     const context: LicenseContext = { license, transactions: [] };
-    for (const transactionData of transactionsDatas) {
-      const transaction = new Transaction(transactionData);
+    for (const tid of txids) {
+      const transaction = transactions.find(t => t.id === tid)!;
       context.transactions.push(transaction);
     }
     group.push(context);
@@ -45,84 +57,115 @@ function rebuildMatchGroup(input: { license: LicenseData, transactions: Transact
   return group;
 }
 
-type TypeInput = {
-  deals: DealData[],
-  matchGroup: {
-    license: LicenseData;
-    transactions: TransactionData[];
-  }[],
-};
-
-export function testDeal(dealData: Partial<DealData>): DealData {
+function fakeContact(): ContactInfo {
   return {
-    dealStage: 1,
-    addonLicenseId: '2454822',
-    transactionId: null,
-    closeDate: '2012-12-27',
-    deployment: 'Server',
-    app: 'naok',
-    licenseTier: 10001,
-    country: 'NU',
-    origin: 'MPAC Lead',
-    relatedProducts: 'Marketplace Apps',
-    dealName: 'Buowsi at Quanta Services Inc.',
-    pipeline: 0,
-    amount: 0,
-    ...dealData,
+    email: chance.email(),
+    name: chance.name(),
   };
 }
 
-export function testLicense(licenseData: Partial<LicenseData>): LicenseData {
-  return {
-    addonLicenseId: '2454822',
-    licenseId: 'SEN-2454822',
-    addonKey: 'naok',
-    addonName: 'Buowsi',
-    lastUpdated: '2015-11-14',
-    technicalContact: { email: 'zoj@kig.tr', name: 'Landon Williams' },
-    billingContact: { email: 'zoj@kig.tr', name: 'Landon Williams' },
-    partnerDetails: null,
-    company: 'Quanta Services Inc.',
-    country: 'NU',
-    region: 'Americas',
+export function testTransaction(
+  addonLicenseId: string,
+  maintenanceStartDate: string,
+  licenseType: string,
+  saleType: string,
+  transactionId: string,
+  vendorAmount: number,
+) {
+  return new Transaction({
+    ...testRecordCommon(addonLicenseId, maintenanceStartDate),
+
     tier: 'Unlimited Users',
-    licenseType: 'COMMERCIAL',
+    licenseType: licenseType as TransactionData['licenseType'],
     hosting: 'Server',
-    maintenanceStartDate: '2012-12-27',
-    maintenanceEndDate: '2013-12-27',
-    status: 'inactive',
+    maintenanceStartDate,
+    maintenanceEndDate: maintenanceStartDate,
+
+    transactionId,
+    saleDate: maintenanceStartDate,
+    saleType: saleType as TransactionData['saleType'],
+
+    billingPeriod: "Monthly",
+
+    purchasePrice: vendorAmount! + 111,
+    vendorAmount: vendorAmount!,
+  });
+}
+
+export function testLicense(
+  addonLicenseId: string,
+  maintenanceStartDate: string,
+  licenseType: string,
+  status: string,
+) {
+  return new License({
+    ...testRecordCommon(addonLicenseId, maintenanceStartDate),
+
+    tier: 'Unlimited Users',
+    licenseType: licenseType as LicenseData['licenseType'],
+    hosting: 'Server',
+    maintenanceStartDate,
+    maintenanceEndDate: maintenanceStartDate,
+
+    status: status as LicenseData['status'],
+
     evaluationOpportunitySize: 'NA',
     attribution: null,
     parentInfo: null,
     newEvalData: null,
-    ...licenseData,
+  });
+}
+
+function testRecordCommon(addonLicenseId: string, maintenanceStartDate: string) {
+  return {
+    addonLicenseId,
+    licenseId: addonLicenseId,
+    addonKey: chance.word({ capitalize: false, syllables: 3 }),
+    addonName: chance.sentence({ words: 3, punctuation: false }),
+    lastUpdated: maintenanceStartDate,
+
+    technicalContact: fakeContact(),
+    billingContact: null,
+    partnerDetails: null,
+
+    company: chance.company(),
+    country: chance.country(),
+    region: chance.pickone(['EMEA', 'Americas', 'APAC', 'Unknown']),
   };
 }
 
 export function abbrEventDetails(e: DealRelevantEvent) {
   switch (e.type) {
-    case 'eval': return { type: e.type, lics: e.licenses.map(l => l.id) };
-    case 'purchase': return { type: e.type, lics: e.licenses.map(l => l.id), txs: [e.transaction?.id] };
-    case 'refund': return { type: e.type, txs: e.refundedTxs.map(tx => tx.id) };
-    case 'renewal': return { type: e.type, txs: [e.transaction.id] };
-    case 'upgrade': return { type: e.type, txs: [e.transaction.id] };
+    case 'eval': return [e.type, ...e.licenses.map(l => l.id)];
+    case 'purchase': return [e.type, ...e.licenses.map(l => l.id), ... (e.transaction ? [e.transaction.id] : [])];
+    case 'refund': return [e.type, ...e.refundedTxs.map(tx => tx.id)];
+    case 'renewal': return [e.type, ...[e.transaction.id]];
+    case 'upgrade': return [e.type, ...[e.transaction.id]];
   }
 }
 
 export function abbrActionDetails(action: Action) {
   switch (action.type) {
-    case 'create': return {
-      type: action.type,
-      data: action.properties,
-    };
-    case 'update': return {
-      type: action.type,
-      deal: action.deal.id,
-      data: action.properties,
-    };
-    case 'noop': return {
-      type: action.type,
-      deal: action.deal.id,
-    };
+    case 'create': return [
+      "Create",
+      {
+        dealStage: DealStage[action.properties.dealStage],
+        addonLicenseId: action.properties.addonLicenseId,
+        transactionId: action.properties.transactionId,
+        closeDate: action.properties.closeDate,
+        amount: action.properties.amount,
+      },
+    ];
+    case 'update': return [
+      "Update",
+      action.deal.id,
+      action.properties,
+    ];
+    case 'noop': return [
+      "Nothing",
+      action.deal.mpacId(),
+      DealStage[action.deal.data.dealStage],
+      action.deal.data.amount,
+    ];
   }
 }

@@ -1,76 +1,79 @@
-import { DealStage } from "../../../../model/hubspot/interfaces";
-import { runDealGenerator, testDeal, testLicense } from "../utils";
+import { runDealGenerator, testLicense, testTransaction } from "../utils";
+
 
 it(`Creates deal from purchase`, () => {
   const { events, actions } = runDealGenerator({
+    group: [['2454822', []]],
     deals: [],
-    matchGroup: [
-      {
-        license: testLicense({
-          addonLicenseId: '2454822',
-          licenseType: 'COMMERCIAL',
-          lastUpdated: '2015-11-14',
-          maintenanceStartDate: '2012-12-27',
-          maintenanceEndDate: '2013-12-27',
-          status: 'inactive',
-        }),
-        transactions: []
-      }
-    ]
+    records: [
+      testLicense("2454822", "2012-12-27", "COMMERCIAL", "inactive")
+    ],
   });
-  expect(events).toEqual([{
-    type: 'purchase',
-    lics: ['2454822'],
-    txs: [undefined],
-  }]);
+  expect(events).toEqual([
+    ['purchase', '2454822']
+  ]);
   expect(actions).toEqual([
-    {
-      type: 'create',
-      data: testDeal({
-        dealStage: DealStage.CLOSED_WON,
+    [
+      'Create',
+      {
+        dealStage: 'CLOSED_WON',
         addonLicenseId: '2454822',
         transactionId: null,
         closeDate: '2012-12-27',
         amount: 0
-      })
-    }
+      }
+    ]
   ]);
 });
 
-it(`Does nothing when deal exists for purchase`, () => {
+it(`Creates deals for renewals and upgrades separately from purchases`, () => {
   const { events, actions } = runDealGenerator({
-    deals: [
-      testDeal({
-        dealStage: DealStage.CLOSED_WON,
-        addonLicenseId: '2454822',
-        transactionId: null,
-        closeDate: '2012-12-27',
-        amount: 0
-      })
+    group: [['L2169473', []], ['2479625', ['AT-131949332[2479625]', 'AT-97165138[2479625]']]],
+    deals: [],
+    records: [
+      testLicense("L2169473", "2013-01-21", "EVALUATION", "inactive"),
+      testLicense("2479625", "2013-01-23", "COMMERCIAL", "active"),
+      testTransaction("2479625", "2020-04-07", "COMMERCIAL", "Upgrade", "AT-97165138", 807),
+      testTransaction("2479625", "2021-04-07", "COMMERCIAL", "Renewal", "AT-131949332", 222)
     ],
-    matchGroup: [
+  });
+  expect(events).toEqual([
+    ['purchase', 'L2169473', '2479625'],
+    ['upgrade', 'AT-97165138[2479625]'],
+    ['renewal', 'AT-131949332[2479625]']
+  ]);
+  expect(actions).toEqual([
+    [
+      'Create',
       {
-        license: testLicense({
-          addonLicenseId: '2454822',
-          licenseType: 'COMMERCIAL',
-          lastUpdated: '2015-11-14',
-          maintenanceStartDate: '2012-12-27',
-          maintenanceEndDate: '2013-12-27',
-          status: 'inactive',
-        }),
-        transactions: []
+        dealStage: 'CLOSED_WON',
+        addonLicenseId: '2479625',
+        transactionId: null,
+        closeDate: '2013-01-23',
+        amount: 0
+      }
+    ],
+    [
+      'Create',
+      {
+        dealStage: 'CLOSED_WON',
+        addonLicenseId: '2479625',
+        transactionId: 'AT-97165138',
+        closeDate: '2020-04-07',
+        amount: 807
+      }
+    ],
+    [
+      'Create',
+      {
+        dealStage: 'CLOSED_WON',
+        addonLicenseId: '2479625',
+        transactionId: 'AT-131949332',
+        closeDate: '2021-03-25',
+        amount: 222
       }
     ]
-  });
-  expect(events).toEqual([{
-    type: 'purchase',
-    lics: ['2454822'],
-    txs: [undefined],
-  }]);
-  expect(actions).toEqual([
-    {
-      deal: "deal-0",
-      type: "noop",
-    },
   ]);
 });
+
+
