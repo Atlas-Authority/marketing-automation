@@ -34,12 +34,8 @@ export class DealDataLogger {
         }
         case 'noop': {
           const dealId = action.deal.id;
-          const { amount: realAmount, addonLicenseId, transactionId, dealStage } = action.deal.data;
-          const recordId = (transactionId
-            ? uniqueTransactionId({ transactionId, addonLicenseId })
-            : addonLicenseId
-          );
-          const amount = realAmount;
+          const { amount, dealStage } = action.deal.data;
+          const recordId = action.deal.mpacId();
           const stage = DealStage[dealStage];
           this.log.writeLine(`  Nothing: ${dealId}, via ${recordId}, stage=${stage}, amount=${amount}`);
           break;
