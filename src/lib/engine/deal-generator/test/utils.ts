@@ -57,6 +57,52 @@ type TypeInput = {
   }[],
 };
 
+export function testDeal(dealData: Partial<DealData>): DealData {
+  return {
+    dealStage: 1,
+    addonLicenseId: '2454822',
+    transactionId: null,
+    closeDate: '2012-12-27',
+    deployment: 'Server',
+    app: 'naok',
+    licenseTier: 10001,
+    country: 'NU',
+    origin: 'MPAC Lead',
+    relatedProducts: 'Marketplace Apps',
+    dealName: 'Buowsi at Quanta Services Inc.',
+    pipeline: 0,
+    amount: 0,
+    ...dealData,
+  };
+}
+
+export function testLicense(licenseData: Partial<LicenseData>): LicenseData {
+  return {
+    addonLicenseId: '2454822',
+    licenseId: 'SEN-2454822',
+    addonKey: 'naok',
+    addonName: 'Buowsi',
+    lastUpdated: '2015-11-14',
+    technicalContact: { email: 'zoj@kig.tr', name: 'Landon Williams' },
+    billingContact: { email: 'zoj@kig.tr', name: 'Landon Williams' },
+    partnerDetails: null,
+    company: 'Quanta Services Inc.',
+    country: 'NU',
+    region: 'Americas',
+    tier: 'Unlimited Users',
+    licenseType: 'COMMERCIAL',
+    hosting: 'Server',
+    maintenanceStartDate: '2012-12-27',
+    maintenanceEndDate: '2013-12-27',
+    status: 'inactive',
+    evaluationOpportunitySize: 'NA',
+    attribution: null,
+    parentInfo: null,
+    newEvalData: null,
+    ...licenseData,
+  };
+}
+
 export function abbrEventDetails(e: DealRelevantEvent) {
   switch (e.type) {
     case 'eval': return { type: e.type, lics: e.licenses.map(l => l.id) };
