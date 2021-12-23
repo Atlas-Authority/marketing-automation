@@ -1,4 +1,3 @@
-import { DealStage, Pipeline } from "../../../../model/hubspot/interfaces";
 import { License } from "../../../../model/license";
 import { runDealGenerator } from "../utils";
 

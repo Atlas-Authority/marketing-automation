@@ -13,11 +13,13 @@ import { DealGenerator } from '../generate-deals';
 
 const chance = new Chance();
 
-export function runDealGenerator(input: {
-  deals: DealData[],
-  records: (License | Transaction)[],
-  group: [string, string[]][],
-}) {
+export type TestInput = {
+  deals: DealData[];
+  records: (License | Transaction)[];
+  group: [string, string[]][];
+};
+
+export function runDealGenerator(input: TestInput) {
   const io = new IO();
   const db = new Database(io);
   const group = reassembleMatchGroup(input.group, input.records);
@@ -32,9 +34,18 @@ export function runDealGenerator(input: {
 
   const dealGenerator = new DealGenerator(db);
   const { events, actions } = dealGenerator.generateActionsForMatchedGroup(group);
+
+  const createdDeals: DealData[] = [];
+  for (const [i, action] of actions.entries()) {
+    if (action.type === 'create') {
+      createdDeals.push(action.properties);
+    }
+  }
+
   return {
     events: events.map(abbrEventDetails),
     actions: actions.map(abbrActionDetails),
+    createdDeals,
   };
 }
 

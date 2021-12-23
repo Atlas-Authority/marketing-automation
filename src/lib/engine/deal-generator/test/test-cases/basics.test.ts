@@ -1,4 +1,4 @@
-import { runDealGenerator, testLicense, testTransaction } from "../utils";
+import { runDealGenerator, TestInput, testLicense, testTransaction } from "../utils";
 
 
 it(`Creates deal from purchase`, () => {
@@ -22,6 +22,31 @@ it(`Creates deal from purchase`, () => {
         closeDate: '2012-12-27',
         amount: 0
       }
+    ]
+  ]);
+});
+
+it(`Does not create deal from purchase when one already exists`, () => {
+  const input: TestInput = {
+    group: [['2454822', []]],
+    deals: [],
+    records: [
+      testLicense("2454822", "2012-12-27", "COMMERCIAL", "inactive")
+    ],
+  };
+  const { createdDeals } = runDealGenerator(input);
+  input.deals = createdDeals;
+  const { events, actions } = runDealGenerator(input);
+
+  expect(events).toEqual([
+    ['purchase', '2454822']
+  ]);
+  expect(actions).toEqual([
+    [
+      'Nothing',
+      '2454822',
+      'CLOSED_WON',
+      0,
     ]
   ]);
 });
