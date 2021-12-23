@@ -19,6 +19,11 @@ export type TestInput = {
   group: [string, string[]][];
 };
 
+export function runDealGeneratorTwice(input: TestInput) {
+  const output = runDealGenerator(input);
+  return runDealGenerator({ ...input, deals: output.createdDeals });
+}
+
 export function runDealGenerator(input: TestInput) {
   const io = new IO();
   const db = new Database(io);
