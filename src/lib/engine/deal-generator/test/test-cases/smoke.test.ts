@@ -35,15 +35,14 @@ it(`Sets deal properties correctly`, () => {
     ["purchase", "2454822"]
   ]);
   expect(actions).toEqual([
-    [
-      "Create",
-      {
+    {
+      Create: {
         addonLicenseId: "2454822",
         amount: 0,
         closeDate: "2012-12-27",
         dealStage: "CLOSED_WON",
         transactionId: null,
       },
-    ]
+    }
   ]);
 });

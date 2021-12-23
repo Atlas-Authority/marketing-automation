@@ -14,7 +14,7 @@ import { DealGenerator } from '../generate-deals';
 const chance = new Chance();
 
 export type TestInput = {
-  deals: DealData[];
+  deals?: DealData[];
   records: (License | Transaction)[];
   group: [string, string[]][];
 };
@@ -31,7 +31,7 @@ export function runDealGenerator(input: TestInput) {
   db.licenses = group.map(g => g.license);
   db.transactions = group.flatMap(g => g.transactions);
 
-  for (const [i, dealData] of input.deals.entries()) {
+  for (const [i, dealData] of (input.deals ?? []).entries()) {
     const deal = db.dealManager.create(dealData);
     deal.id = `deal-${i}`;
     deal.applyPropertyChanges();
@@ -162,26 +162,26 @@ export function abbrEventDetails(e: DealRelevantEvent) {
 
 export function abbrActionDetails(action: Action) {
   switch (action.type) {
-    case 'create': return [
-      "Create",
-      {
+    case 'create': return {
+      "Create": {
         dealStage: DealStage[action.properties.dealStage],
         addonLicenseId: action.properties.addonLicenseId,
         transactionId: action.properties.transactionId,
         closeDate: action.properties.closeDate,
         amount: action.properties.amount,
       },
-    ];
-    case 'update': return [
-      "Update",
-      action.deal.id,
-      action.properties,
-    ];
-    case 'noop': return [
-      "Nothing",
-      action.deal.mpacId(),
-      DealStage[action.deal.data.dealStage],
-      action.deal.data.amount,
-    ];
+    };
+    case 'update': return {
+      "Update":
+        [action.deal.id,
+        action.properties,]
+    };
+    case 'noop': return {
+      "Nothing": [
+        action.deal.mpacId(),
+        DealStage[action.deal.data.dealStage],
+        action.deal.data.amount,
+      ]
+    };
   }
 }
