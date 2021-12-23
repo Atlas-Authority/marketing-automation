@@ -33,8 +33,8 @@ it(`Creates deals for renewals and upgrades separately from purchases`, () => {
     records: [
       testLicense("L2169473", "2013-01-21", "EVALUATION", "inactive"),
       testLicense("2479625", "2013-01-23", "COMMERCIAL", "active"),
-      testTransaction("2479625", "2020-04-07", "COMMERCIAL", "Upgrade", "AT-97165138", 807),
-      testTransaction("2479625", "2021-04-07", "COMMERCIAL", "Renewal", "AT-131949332", 222)
+      testTransaction("2479625", "2020-04-07", "COMMERCIAL", "Upgrade", "AT-97165138", 411),
+      testTransaction("2479625", "2021-03-25", "COMMERCIAL", "Renewal", "AT-131949332", 274)
     ],
   });
   expect(events).toEqual([
@@ -60,7 +60,7 @@ it(`Creates deals for renewals and upgrades separately from purchases`, () => {
         addonLicenseId: '2479625',
         transactionId: 'AT-97165138',
         closeDate: '2020-04-07',
-        amount: 807
+        amount: 411
       }
     ],
     [
@@ -70,10 +70,8 @@ it(`Creates deals for renewals and upgrades separately from purchases`, () => {
         addonLicenseId: '2479625',
         transactionId: 'AT-131949332',
         closeDate: '2021-03-25',
-        amount: 222
+        amount: 274
       }
     ]
   ]);
 });
-
-
