@@ -1,9 +1,9 @@
 import 'source-map-support/register';
 import util from 'util';
-import { abbrActionDetails } from '../lib/engine/deal-generator/actions';
 import { abbrEventDetails } from '../lib/engine/deal-generator/events';
 import { DealGenerator } from '../lib/engine/deal-generator/generate-deals';
 import { redactedLicense, redactedTransaction } from '../lib/engine/deal-generator/redact';
+import { abbrActionDetails } from '../lib/engine/deal-generator/test/utils';
 import { LicenseContext, RelatedLicenseSet } from '../lib/engine/license-matching/license-grouper';
 import { IO } from "../lib/io/io";
 import { Database } from "../lib/model/database";

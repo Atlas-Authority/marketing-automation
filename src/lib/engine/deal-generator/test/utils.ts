@@ -4,8 +4,8 @@ import { DealData } from "../../../model/deal";
 import { License, LicenseData } from "../../../model/license";
 import { Transaction, TransactionData } from "../../../model/transaction";
 import { LicenseContext, RelatedLicenseSet } from '../../license-matching/license-grouper';
-import { abbrActionDetails } from "../actions";
-import { abbrEventDetails } from "../events";
+import { Action } from "../actions";
+import { DealRelevantEvent } from '../events';
 import { DealGenerator } from '../generate-deals';
 
 
@@ -56,3 +56,31 @@ type TypeInput = {
     transactions: TransactionData[];
   }[],
 };
+
+export function abbrEventDetails(e: DealRelevantEvent) {
+  switch (e.type) {
+    case 'eval': return { type: e.type, lics: e.licenses.map(l => l.id) };
+    case 'purchase': return { type: e.type, lics: e.licenses.map(l => l.id), txs: [e.transaction?.id] };
+    case 'refund': return { type: e.type, txs: e.refundedTxs.map(tx => tx.id) };
+    case 'renewal': return { type: e.type, txs: [e.transaction.id] };
+    case 'upgrade': return { type: e.type, txs: [e.transaction.id] };
+  }
+}
+
+export function abbrActionDetails(action: Action) {
+  switch (action.type) {
+    case 'create': return {
+      type: action.type,
+      data: action.properties,
+    };
+    case 'update': return {
+      type: action.type,
+      deal: action.deal.id,
+      data: action.properties,
+    };
+    case 'noop': return {
+      type: action.type,
+      deal: action.deal.id,
+    };
+  }
+}
