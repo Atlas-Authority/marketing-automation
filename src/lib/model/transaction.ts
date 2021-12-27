@@ -38,7 +38,6 @@ export class Transaction {
 
   /** Unique ID for this Transaction. */
   public id: string;
-  public data: TransactionData;
   public tier: number;
 
   public techContact!: Contact;
@@ -47,8 +46,8 @@ export class Transaction {
 
   public refunded = false;
 
-  public constructor(rawTransaction: RawTransaction) {
-    this.data = {
+  static fromRaw(rawTransaction: RawTransaction) {
+    return new Transaction({
       transactionId: rawTransaction.transactionId,
 
       addonLicenseId: rawTransaction.addonLicenseId,
@@ -76,8 +75,10 @@ export class Transaction {
       billingPeriod: rawTransaction.purchaseDetails.billingPeriod,
       purchasePrice: rawTransaction.purchaseDetails.purchasePrice,
       vendorAmount: rawTransaction.purchaseDetails.vendorAmount,
-    };
+    });
+  }
 
+  public constructor(public data: TransactionData) {
     this.id = uniqueTransactionId(this.data);
     this.tier = this.parseTier();
   }

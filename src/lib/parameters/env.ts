@@ -89,6 +89,7 @@ export default new Env();
 
 function required(key: string) {
   const value = process.env[key];
+  if (process.env.NODE_ENV === 'test') return value ?? '';
   assert.ok(value, `ENV key ${key} is required`);
   return value;
 }
@@ -105,6 +106,7 @@ function requireOneOf<T>(opts: T[]): T {
   })));
 
   const firstValid = all.find(opt => opt.value);
+  if (process.env.NODE_ENV === 'test') return opts[0];
   assert.ok(firstValid, `One of ENV keys ${all.map(o => o.envKey).join(' or ')} are required`);
 
   const { localKey, value } = firstValid;

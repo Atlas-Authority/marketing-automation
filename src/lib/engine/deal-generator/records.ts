@@ -24,9 +24,10 @@ export function isPaidLicense(license: License) {
   );
 }
 
-export function getLicense(addonLicenseId: string, groups: RelatedLicenseSet) {
-  const license = (groups
-    .map(g => g.license)
+export function getLicense(addonLicenseId: string, records: (License | Transaction)[]) {
+  const license = (records
+    .filter((r => r instanceof License) as
+      (r: License | Transaction) => r is License)
     .sort(sorter(l => l.data.maintenanceStartDate, 'DSC'))
     .find(l => l.data.addonLicenseId === addonLicenseId));
   assert.ok(license);

@@ -38,7 +38,6 @@ export abstract class EntityManager<
   public constructor(
     private downloader: HubspotService,
     private uploader: HubspotService,
-    private db: EntityDatabase
   ) { }
 
   public createdCount = 0;
@@ -95,14 +94,14 @@ export abstract class EntityManager<
     }
   }
 
-  public linkAssociations() {
+  public linkAssociations(db: EntityDatabase) {
     for (const [meId, rawAssocs] of this.prelinkedAssociations) {
       for (const rawAssoc of rawAssocs) {
         const me = this.get(meId);
         if (!me) throw new Error(`Couldn't find kind=${this.kind} id=${meId}`);
 
         const { toKind, youId } = this.getAssocInfo(rawAssoc);
-        const you = this.db.getEntity(toKind, youId);
+        const you = db.getEntity(toKind, youId);
         if (!you) throw new Error(`Couldn't find kind=${toKind} id=${youId}`);
 
         me.addAssociation(you, { firstSide: true, initial: true });

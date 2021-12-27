@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 import { Contact } from './contact.js';
-import { AddonLicenseId, ContactInfo, getContactInfo, getPartnerInfo, maybeGetContactInfo, PartnerInfo } from "./marketplace/common.js";
-import { RawLicense } from "./marketplace/raw.js";
+import { AddonLicenseId, ContactInfo, getContactInfo, getPartnerInfo, maybeGetContactInfo, PartnerInfo } from "./marketplace/common";
+import { RawLicense } from "./marketplace/raw";
 
 type AttributionData = {
   channel: string;
@@ -60,7 +60,6 @@ export class License {
 
   /** Unique ID for this License. */
   public id: string;
-  public data: LicenseData;
   public tier: number;
   public active: boolean;
 
@@ -68,7 +67,7 @@ export class License {
   public billingContact: Contact | null = null;
   public partnerContact: Contact | null = null;
 
-  public constructor(rawLicense: RawLicense) {
+  static fromRaw(rawLicense: RawLicense) {
     let newEvalData: NewEvalData | null = null;
     if (rawLicense.evaluationLicense) {
       newEvalData = {
@@ -93,7 +92,7 @@ export class License {
       } as ParentProductInfo;
     }
 
-    this.data = {
+    return new License({
       addonLicenseId: rawLicense.addonLicenseId,
       licenseId: rawLicense.licenseId,
       addonKey: rawLicense.addonKey,
@@ -119,8 +118,10 @@ export class License {
       attribution: rawLicense.attribution ?? null,
       parentInfo,
       newEvalData,
-    };
+    });
+  }
 
+  public constructor(public data: LicenseData) {
     this.id = this.data.addonLicenseId;
     this.tier = Math.max(this.parseTier(), this.tierFromEvalOpportunity());
     this.active = this.data.status === 'active';

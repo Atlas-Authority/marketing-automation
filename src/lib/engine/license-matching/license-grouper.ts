@@ -88,12 +88,12 @@ export function matchIntoLikelyGroups(db: Database): RelatedLicenseSet[] {
 
   log.info('Scoring Engine', 'Done');
 
-  return (
-    Array.from(new Set(Object.values(normalizedMatches)))
-      .map(group => Array.from(group)
-        .map(id => itemsByAddonLicenseId.get(id)!)
-        .sort(sorter(m => m.license.data.maintenanceStartDate)))
-  );
+  const matchGroups = Array.from(new Set(Object.values(normalizedMatches)))
+    .map(group => Array.from(group)
+      .map(id => itemsByAddonLicenseId.get(id)!)
+      .sort(sorter(m => m.license.data.maintenanceStartDate)));
+
+  return matchGroups;
 }
 
 function buildMappingStructure(db: Database) {
