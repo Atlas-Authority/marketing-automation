@@ -7,7 +7,7 @@ import { Entity } from "./hubspot/entity";
 import { DealStage, EntityKind, Pipeline } from "./hubspot/interfaces";
 import { EntityAdapter, EntityManager } from "./hubspot/manager";
 import { License } from "./license";
-import { Transaction } from "./transaction";
+import { Transaction, uniqueTransactionId } from "./transaction";
 
 export type DealData = {
   relatedProducts: string | null;
@@ -36,7 +36,10 @@ export class Deal extends Entity<DealData, DealComputed> {
 
   public mpacId() {
     if (this.data.transactionId && this.data.addonLicenseId) {
-      return `${this.data.transactionId}[${this.data.addonLicenseId}]`;
+      return uniqueTransactionId({
+        transactionId: this.data.transactionId,
+        addonLicenseId: this.data.addonLicenseId,
+      });
     }
     else {
       return this.data.addonLicenseId;

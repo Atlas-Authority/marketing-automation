@@ -1,11 +1,9 @@
-import { LogWriteStream } from "../../cache/datadir";
 import log from "../../log/logger";
 import { Deal, DealData, DealManager } from "../../model/deal";
 import { DealStage } from "../../model/hubspot/interfaces";
 import { License } from "../../model/license";
 import { Transaction } from "../../model/transaction";
 import { isPresent, sorter } from "../../util/helpers";
-import { RelatedLicenseSet } from "../license-matching/license-grouper";
 import { abbrEventDetails, DealRelevantEvent, EvalEvent, PurchaseEvent, RefundEvent, RenewalEvent, UpgradeEvent } from "./events";
 import { dealCreationProperties, updateDeal } from "./records";
 
@@ -173,20 +171,17 @@ export class ActionGenerator {
 
 export type CreateDealAction = {
   type: 'create';
-  groups: RelatedLicenseSet;
   properties: DealData;
 };
 
 export type UpdateDealAction = {
   type: 'update';
-  groups: RelatedLicenseSet;
   deal: Deal;
   properties: Partial<DealData>;
 };
 
 export type NoDealAction = {
   type: 'noop';
-  groups: RelatedLicenseSet;
   deal: Deal;
 };
 
@@ -195,7 +190,6 @@ export type Action = CreateDealAction | UpdateDealAction | NoDealAction;
 function makeCreateAction(event: DealRelevantEvent, record: License | Transaction, data: Pick<DealData, 'addonLicenseId' | 'transactionId' | 'dealStage'>): Action {
   return {
     type: 'create',
-    groups: event.groups,
     properties: dealCreationProperties(record, data),
   };
 }
@@ -205,12 +199,11 @@ function makeUpdateAction(event: DealRelevantEvent, deal: Deal, record: License 
   if (record) updateDeal(deal, record);
 
   if (!deal.hasPropertyChanges()) {
-    return { type: 'noop', deal, groups: event.groups };
+    return { type: 'noop', deal };
   }
 
   return {
     type: 'update',
-    groups: event.groups,
     deal,
     properties: deal.getPropertyChanges(),
   };

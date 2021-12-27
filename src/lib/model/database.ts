@@ -34,9 +34,9 @@ export class Database {
   public tallier = new Tallier();
 
   public constructor(private io: IO) {
-    this.dealManager = new DealManager(io.in.hubspot, io.out.hubspot, this);
-    this.contactManager = new ContactManager(io.in.hubspot, io.out.hubspot, this);
-    this.companyManager = new CompanyManager(io.in.hubspot, io.out.hubspot, this);
+    this.dealManager = new DealManager(io.in.hubspot, io.out.hubspot);
+    this.contactManager = new ContactManager(io.in.hubspot, io.out.hubspot);
+    this.companyManager = new CompanyManager(io.in.hubspot, io.out.hubspot);
     this.emailProviderLister = new EmailProviderLister(io.in.emailProviderLister);
   }
 
@@ -78,9 +78,9 @@ export class Database {
 
     logbox.done();
 
-    this.dealManager.linkAssociations();
-    this.companyManager.linkAssociations();
-    this.contactManager.linkAssociations();
+    this.dealManager.linkAssociations(this);
+    this.companyManager.linkAssociations(this);
+    this.contactManager.linkAssociations(this);
 
     log.info('Downloader', 'Done');
 
@@ -93,8 +93,8 @@ export class Database {
       transactions,
       emailRe);
 
-    this.licenses = results.licenses.map(raw => new License(raw));
-    this.transactions = results.transactions.map(raw => new Transaction(raw));
+    this.licenses = results.licenses.map(raw => License.fromRaw(raw));
+    this.transactions = results.transactions.map(raw => Transaction.fromRaw(raw));
 
     const transactionTotal = (this.transactions
       .map(t => t.data.vendorAmount)
