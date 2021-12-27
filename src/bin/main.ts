@@ -11,7 +11,10 @@ import run from "../lib/util/runner";
 main();
 async function main() {
 
-  const io = IO.fromCli();
+  const io = new IO({
+    in: cli.getChoiceOrFail('--in', ['local', 'remote']),
+    out: cli.getChoiceOrFail('--out', ['local', 'remote']),
+  });
   cli.failIfExtraOpts();
 
   const slack = new Slack();

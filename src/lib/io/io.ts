@@ -1,4 +1,3 @@
-import { cli } from "../parameters/cli";
 import { Remote } from "./interfaces";
 import { LiveTldListerService } from "./live/domains";
 import { LiveEmailProviderListerService } from "./live/email-providers";
@@ -10,13 +9,6 @@ import { MemoryHubspot } from "./memory/hubspot";
 import { MemoryMarketplace } from "./memory/marketplace";
 
 export class IO {
-
-  public static fromCli() {
-    return new IO({
-      in: cli.getChoiceOrFail('--in', ['local', 'remote']),
-      out: cli.getChoiceOrFail('--out', ['local', 'remote']),
-    });
-  }
 
   public in: Remote = NoOpRemote;
   public out: Remote = NoOpRemote;

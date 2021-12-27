@@ -7,7 +7,10 @@ import { cli } from "../lib/parameters/cli";
 main();
 async function main() {
 
-  const io = IO.fromCli();
+  const io = new IO({
+    in: cli.getChoiceOrFail('--in', ['local', 'remote']),
+    out: cli.getChoiceOrFail('--out', ['local', 'remote']),
+  });
   cli.failIfExtraOpts();
 
   const db = new Database(io);
