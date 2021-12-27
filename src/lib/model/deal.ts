@@ -24,6 +24,7 @@ export type DealData = {
   pipeline: Pipeline;
   dealStage: DealStage;
   amount: number | null;
+  associatedPartner: string | null;
 };
 
 type DealComputed = {
@@ -142,6 +143,11 @@ const DealAdapter: EntityAdapter<DealData, DealComputed> = {
       property: 'amount',
       down: amount => !amount ? null : +amount,
       up: amount => amount?.toString() ?? '',
+    },
+    associatedPartner: {
+      property: env.hubspot.attrs.deal.associatedPartner,
+      down: partner => partner,
+      up: partner => partner ?? '',
     },
   },
 

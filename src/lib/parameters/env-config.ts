@@ -44,6 +44,7 @@ export default {
         contactType: optional('HUBSPOT_CONTACT_CONTACT_TYPE_ATTR'),
         region: optional('HUBSPOT_CONTACT_REGION_ATTR'),
         relatedProducts: optional('HUBSPOT_CONTACT_RELATED_PRODUCTS_ATTR'),
+        lastAssociatedPartner: optional('HUBSPOT_CONTACT_LAST_ASSOCIATED_PARTNER'),
       },
       deal: {
         app: optional('HUBSPOT_DEAL_APP_ATTR'),
@@ -54,6 +55,7 @@ export default {
         transactionId: required('HUBSPOT_DEAL_TRANSACTIONID_ATTR'),
         licenseTier: optional('HUBSPOT_DEAL_LICENSE_TIER_ATTR'),
         relatedProducts: optional('HUBSPOT_DEAL_RELATED_PRODUCTS_ATTR'),
+        associatedPartner: optional('HUBSPOT_DEAL_ASSOCIATED_PARTNER'),
       },
     },
   },

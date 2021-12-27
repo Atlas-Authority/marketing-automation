@@ -25,6 +25,8 @@ export type ContactData = {
   relatedProducts: Set<string>;
   licenseTier: number | null;
   lastMpacEvent: string | null;
+
+  lastAssociatedPartner: string | null;
 };
 
 type ContactComputed = {
@@ -123,6 +125,11 @@ const ContactAdapter: EntityAdapter<ContactData, ContactComputed> = {
       property: env.hubspot.attrs.contact.lastMpacEvent,
       down: last_mpac_event => last_mpac_event,
       up: lastMpacEvent => lastMpacEvent ?? '',
+    },
+    lastAssociatedPartner: {
+      property: env.hubspot.attrs.contact.lastAssociatedPartner,
+      down: partner => partner,
+      up: partner => partner ?? '',
     },
   },
 

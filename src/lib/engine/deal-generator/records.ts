@@ -48,6 +48,7 @@ export function dealCreationProperties(record: License | Transaction, data: Pick
     relatedProducts: env.hubspot.deals.dealRelatedProducts ?? null,
     dealName: mustache.render(env.hubspot.deals.dealDealName, record.data),
     pipeline: Pipeline.MPAC,
+    associatedPartner: null,
     amount: (data.dealStage === DealStage.EVAL
       ? null
       : record instanceof License

@@ -105,6 +105,7 @@ export class ContactGenerator {
       licenseTier: null,
       lastMpacEvent: '',
       lastUpdated: (item instanceof License ? item.data.lastUpdated : item.data.saleDate),
+      lastAssociatedPartner: null,
     };
   }
 
