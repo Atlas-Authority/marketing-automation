@@ -5,7 +5,7 @@ import { IO } from "../lib/io/io";
 import Slack from "../lib/io/slack";
 import log from '../lib/log/logger';
 import { Database } from "../lib/model/database";
-import { cli } from "../lib/parameters/cli";
+import { cli } from "../lib/parameters/cli-args";
 import env from "../lib/parameters/env";
 import { AttachableError, KnownError } from "../lib/util/errors";
 import run from "../lib/util/runner";
