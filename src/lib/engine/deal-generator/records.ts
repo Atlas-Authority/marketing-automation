@@ -4,7 +4,7 @@ import { Deal, DealData } from '../../model/deal';
 import { DealStage, Pipeline } from '../../model/hubspot/interfaces';
 import { License } from '../../model/license';
 import { Transaction } from '../../model/transaction';
-import env from '../../parameters/env';
+import env from '../../parameters/env-config';
 import { isPresent, sorter } from '../../util/helpers';
 import { RelatedLicenseSet } from '../license-matching/license-grouper';
 

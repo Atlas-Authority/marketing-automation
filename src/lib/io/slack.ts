@@ -1,6 +1,6 @@
 import * as slack from '@slack/web-api';
 import log from '../log/logger';
-import env from '../parameters/env';
+import env from '../parameters/env-config';
 
 export default class Slack {
 

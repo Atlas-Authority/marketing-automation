@@ -1,5 +1,5 @@
 import log from "../log/logger";
-import env from "../parameters/env";
+import env from "../parameters/env-config";
 
 export default async function run({ work, failed }: {
   work: () => Promise<void>,

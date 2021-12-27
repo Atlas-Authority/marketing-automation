@@ -2,7 +2,7 @@ import { Contact } from "../../model/contact";
 import { Database } from "../../model/database";
 import { License } from "../../model/license";
 import { Transaction } from "../../model/transaction";
-import env from "../../parameters/env";
+import env from "../../parameters/env-config";
 
 export function identifyAndFlagContactTypes(db: Database) {
   // Identifying contact types

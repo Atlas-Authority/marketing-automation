@@ -1,4 +1,4 @@
-import env from "../parameters/env";
+import env from "../parameters/env-config";
 import { Company } from "./company";
 import { Entity } from "./hubspot/entity";
 import { EntityKind } from "./hubspot/interfaces";

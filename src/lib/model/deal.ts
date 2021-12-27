@@ -1,5 +1,5 @@
 import { RelatedLicenseSet } from "../engine/license-matching/license-grouper";
-import env from "../parameters/env";
+import env from "../parameters/env-config";
 import { AttachableError } from "../util/errors";
 import { isPresent } from "../util/helpers";
 import { Company } from "./company";

@@ -6,7 +6,7 @@ import { Database } from "../../model/database";
 import { Deal } from "../../model/deal";
 import { License, LicenseData } from "../../model/license";
 import { Transaction } from "../../model/transaction";
-import env from "../../parameters/env";
+import env from "../../parameters/env-config";
 import { formatMoney } from "../../util/formatters";
 import { isPresent, sorter } from "../../util/helpers";
 import { RelatedLicenseSet } from "../license-matching/license-grouper";

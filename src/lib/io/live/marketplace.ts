@@ -1,7 +1,7 @@
 import got from 'got';
 import { DateTime, Duration, Interval } from 'luxon';
 import { RawLicense, RawTransaction } from '../../model/marketplace/raw';
-import env from '../../parameters/env';
+import env from '../../parameters/env-config';
 import { AttachableError, KnownError } from '../../util/errors';
 import cache from '../cache';
 import { MarketplaceService, Progress } from '../interfaces';

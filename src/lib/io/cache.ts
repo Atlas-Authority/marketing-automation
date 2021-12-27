@@ -1,5 +1,5 @@
 import DataDir from "../cache/datadir";
-import env from "../parameters/env";
+import env from "../parameters/env-config";
 
 export default function cache<T>(file: string, data: T): T {
   if (!env.isProduction) {

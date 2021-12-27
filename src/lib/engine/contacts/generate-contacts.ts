@@ -4,7 +4,7 @@ import { Database } from '../../model/database';
 import { License } from '../../model/license';
 import { ContactInfo, PartnerBillingInfo } from '../../model/marketplace/common';
 import { Transaction } from '../../model/transaction';
-import env from "../../parameters/env";
+import env from "../../parameters/env-config";
 import { sorter } from '../../util/helpers';
 
 export type GeneratedContact = ContactData & { lastUpdated: string };

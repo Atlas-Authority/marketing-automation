@@ -1,6 +1,6 @@
 import chalk from "chalk";
 import log from "../log/logger";
-import env from "../parameters/env";
+import env from "../parameters/env-config";
 import DataDir from "./datadir";
 
 let cachedFns: string[] = [];
