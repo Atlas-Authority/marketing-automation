@@ -2,6 +2,7 @@ import 'source-map-support/register';
 import Engine from "../lib/engine/engine";
 import { IO } from "../lib/io/io";
 import Slack from "../lib/io/slack";
+import log from '../lib/log/logger';
 import { Database } from "../lib/model/database";
 import { cli } from "../lib/parameters/cli";
 import env from "../lib/parameters/env";
@@ -10,6 +11,8 @@ import run from "../lib/util/runner";
 
 main();
 async function main() {
+
+  log.setLevelFrom(cli.get('--loglevel'));
 
   const io = new IO({
     in: cli.getChoiceOrFail('--in', ['local', 'remote']),
