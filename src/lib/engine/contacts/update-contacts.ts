@@ -5,15 +5,15 @@ import { RelatedLicenseSet } from "../license-matching/license-grouper";
 import { flagPartnersViaCoworkers } from "./contact-types";
 
 export function updateContactsBasedOnMatchResults(db: Database, allMatches: RelatedLicenseSet[]) {
-  for (const group of allMatches) {
-    const contacts = new Set(group.map(m => db.contactManager.getByEmail(m.license.data.technicalContact.email)!));
+  for (const license of allMatches) {
+    const contacts = new Set(license.map(license => db.contactManager.getByEmail(license.data.technicalContact.email)!));
 
     flagPartnersViaCoworkers([...contacts]);
 
     for (const contact of contacts) {
       const items = [
-        ...group.map(g => g.license),
-        ...group.flatMap(g => g.transactions)
+        ...license,
+        ...license.flatMap(l => l.transactions)
       ];
 
       for (const tier of items.map(item => item.tier)) {
@@ -28,7 +28,7 @@ export function updateContactsBasedOnMatchResults(db: Database, allMatches: Rela
         }
       }
 
-      const addonKey = group[0].license.data.addonKey;
+      const addonKey = license[0].data.addonKey;
       const product = env.mpac.platforms[addonKey];
       if (!product) {
         throw new KnownError(`Add "${addonKey}" to ADDONKEY_PLATFORMS`);
@@ -37,7 +37,7 @@ export function updateContactsBasedOnMatchResults(db: Database, allMatches: Rela
         contact.data.relatedProducts.add(product);
       }
 
-      const hosting = group[0].license.data.hosting;
+      const hosting = license[0].data.hosting;
       if (!contact.data.deployment) {
         contact.data.deployment = hosting;
       }

@@ -88,14 +88,14 @@ export class EventGenerator {
     }
   }
 
-  public getSortedRecords(groups: RelatedLicenseSet) {
-    return groups.flatMap(group => {
-      const transactions = this.applyRefunds(group.transactions);
+  public getSortedRecords(group: RelatedLicenseSet) {
+    return group.flatMap(license => {
+      const transactions = this.applyRefunds(license.transactions);
       const records: (License | Transaction)[] = [...transactions];
 
       // Include the License unless it's based on a 'New' Transaction
       if (!transactions.some(t => t.data.saleType === 'New')) {
-        records.push(group.license);
+        records.push(license);
       }
 
       return records;

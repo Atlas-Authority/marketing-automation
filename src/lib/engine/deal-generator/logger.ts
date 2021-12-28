@@ -50,8 +50,8 @@ export class DealDataLogger {
     }
   }
 
-  public logTestID(groups: RelatedLicenseSet) {
-    const ids = groups.map(g => [g.license.id, g.transactions.map(t => t.id)]);
+  public logTestID(group: RelatedLicenseSet) {
+    const ids = group.map(l => [l.id, l.transactions.map(t => t.id)]);
     this.log.writeLine('\n');
     this.log.writeLine(Buffer.from(JSON.stringify(ids), 'utf8').toString('base64'));
   }
