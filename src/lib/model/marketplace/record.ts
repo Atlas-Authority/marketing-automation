@@ -12,4 +12,12 @@ export abstract class MpacRecord<T> {
 
   public constructor(public data: T) { }
 
+  public getPartnerDomain(partnerDomains: Set<string>) {
+    return ([...this.allContacts]
+      .reverse()
+      .filter(c => c.isPartner)
+      .map(c => c.getPartnerDomain(partnerDomains))
+    )[0];
+  }
+
 }

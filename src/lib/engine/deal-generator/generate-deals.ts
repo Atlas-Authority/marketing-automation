@@ -218,19 +218,6 @@ export class DealGenerator {
       .find(c => c.isPartner));
 
     deal.data.associatedPartner = lastPartner?.getPartnerDomain(this.db.partnerDomains) ?? null;
-
-
-
-    /**
-     * For contacts:
-     * 
-     *   If the contact's most recent record has a partner,
-     *   set that partner's domain as last associated partner.
-     *   Otherwise set it to blank, ignoring previous records.
-     * 
-     *   (Probably has to happen in another spot in the code.)
-     * 
-     */
   }
 
 }
