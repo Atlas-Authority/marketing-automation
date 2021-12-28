@@ -7,6 +7,7 @@ import { License, LicenseData } from "../../../model/license";
 import { ContactInfo } from '../../../model/marketplace/common';
 import { Transaction, TransactionData } from "../../../model/transaction";
 import { emptyConfig } from '../../../parameters/env-config';
+import { ContactGenerator } from '../../contacts/generate-contacts';
 import { RelatedLicenseSet } from '../../license-matching/license-grouper';
 import { Action } from "../actions";
 import { DealRelevantEvent } from '../events';
@@ -36,15 +37,21 @@ export function runDealGenerator(input: TestInput) {
   db.licenses = group;
   db.transactions = group.flatMap(g => g.transactions);
 
+  new ContactGenerator(db).run();
+
   for (const [i, dealData] of (input.deals ?? []).entries()) {
     const deal = db.dealManager.create(dealData);
     deal.id = `deal-${i}`;
     deal.applyPropertyChanges();
-    deal.records = input.records;
   }
 
   const dealGenerator = new DealGenerator(db);
-  const { events, actions } = dealGenerator.generateActionsForMatchedGroup(group);
+  const { records, events, actions } = dealGenerator.generateActionsForMatchedGroup(group);
+
+  for (const deal of db.dealManager.getAll()) {
+    deal.records = records;
+    dealGenerator.flagPartnerTransacted(deal);
+  }
 
   const createdDeals: DealData[] = [];
   for (const [i, action] of actions.entries()) {

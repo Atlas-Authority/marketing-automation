@@ -200,7 +200,7 @@ export class DealGenerator {
     })));
   }
 
-  private flagPartnerTransacted(deal: Deal) {
+  public flagPartnerTransacted(deal: Deal) {
     if (deal.records.length === 0) {
       log.error('Deal Actions', "Deal has no associated MPAC records:", deal.id);
       return;
