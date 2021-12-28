@@ -110,21 +110,21 @@ export class DealGenerator {
     }
   }
 
-  public generateActionsForMatchedGroup(groups: RelatedLicenseSet) {
-    assert.ok(groups.length > 0);
-    if (this.ignoring(groups)) return { records: [], actions: [], events: [] };
+  public generateActionsForMatchedGroup(group: RelatedLicenseSet) {
+    assert.ok(group.length > 0);
+    if (this.ignoring(group)) return { records: [], actions: [], events: [] };
 
     const eventGenerator = new EventGenerator();
 
-    const records = eventGenerator.getSortedRecords(groups);
+    const records = eventGenerator.getSortedRecords(group);
     const events = eventGenerator.interpretAsEvents(records);
     const actions = this.actionGenerator.generateFrom(events);
 
     return { records, events, actions };
   }
 
-  private associateDealContactsAndCompanies(groups: RelatedLicenseSet, deal: Deal) {
-    const records = groups.flatMap(group => [group.license, ...group.transactions]);
+  private associateDealContactsAndCompanies(group: RelatedLicenseSet, deal: Deal) {
+    const records = group.flatMap(license => [license, ...license.transactions]);
     const emails = [...new Set(records.flatMap(getEmails))];
     const contacts = (emails
       .map(email => this.db.contactManager.getByEmail(email))
@@ -147,9 +147,9 @@ export class DealGenerator {
   }
 
   /** Ignore if every license's tech contact domain is partner or mass-provider */
-  private ignoring(groups: RelatedLicenseSet) {
-    const licenses = groups.map(g => g.license);
-    const transactions = groups.flatMap(g => g.transactions);
+  private ignoring(group: RelatedLicenseSet) {
+    const licenses = group;
+    const transactions = group.flatMap(license => license.transactions);
     const records = [...licenses, ...transactions];
     const domains = new Set(records.map(license => license.data.technicalContact.email.toLowerCase().split('@')[1]));
 

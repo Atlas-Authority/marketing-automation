@@ -6,7 +6,7 @@ import { DealStage } from '../../../model/hubspot/interfaces';
 import { License, LicenseData } from "../../../model/license";
 import { ContactInfo } from '../../../model/marketplace/common';
 import { Transaction, TransactionData } from "../../../model/transaction";
-import { LicenseContext, RelatedLicenseSet } from '../../license-matching/license-grouper';
+import { RelatedLicenseSet } from '../../license-matching/license-grouper';
 import { Action } from "../actions";
 import { DealRelevantEvent } from '../events';
 import { DealGenerator } from '../generate-deals';
@@ -28,7 +28,7 @@ export function runDealGenerator(input: TestInput) {
   const io = new IO();
   const db = new Database(io);
   const group = reassembleMatchGroup(input.group, input.records);
-  db.licenses = group.map(g => g.license);
+  db.licenses = group;
   db.transactions = group.flatMap(g => g.transactions);
 
   for (const [i, dealData] of (input.deals ?? []).entries()) {
@@ -63,12 +63,13 @@ function reassembleMatchGroup(ids: [string, string[]][], records: (License | Tra
   const group: RelatedLicenseSet = [];
   for (const [lid, txids] of ids) {
     const license = licenses.find(l => l.id === lid)!;
-    const context: LicenseContext = { license, transactions: [] };
+    license.transactions = [];
     for (const tid of txids) {
       const transaction = transactions.find(t => t.id === tid)!;
-      context.transactions.push(transaction);
+      license.transactions.push(transaction);
+      transaction.license = license;
     }
-    group.push(context);
+    group.push(license);
   }
   return group;
 }

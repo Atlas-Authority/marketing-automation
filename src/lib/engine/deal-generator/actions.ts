@@ -7,6 +7,11 @@ import { isPresent, sorter } from "../../util/helpers";
 import { abbrEventDetails, DealRelevantEvent, EvalEvent, PurchaseEvent, RefundEvent, RenewalEvent, UpgradeEvent } from "./events";
 import { dealCreationProperties, updateDeal } from "./records";
 
+export type Action = CreateDealAction | UpdateDealAction | IgnoreDealAction;
+export type CreateDealAction = { type: 'create'; properties: DealData };
+export type UpdateDealAction = { type: 'update'; deal: Deal; properties: Partial<DealData> };
+export type IgnoreDealAction = { type: 'noop'; deal: Deal };
+
 export class ActionGenerator {
 
   #handledDeals = new Map<Deal, DealRelevantEvent>();
@@ -168,24 +173,6 @@ export class ActionGenerator {
   }
 
 }
-
-export type CreateDealAction = {
-  type: 'create';
-  properties: DealData;
-};
-
-export type UpdateDealAction = {
-  type: 'update';
-  deal: Deal;
-  properties: Partial<DealData>;
-};
-
-export type NoDealAction = {
-  type: 'noop';
-  deal: Deal;
-};
-
-export type Action = CreateDealAction | UpdateDealAction | NoDealAction;
 
 function makeCreateAction(event: DealRelevantEvent, record: License | Transaction, data: Pick<DealData, 'addonLicenseId' | 'transactionId' | 'dealStage'>): Action {
   return {

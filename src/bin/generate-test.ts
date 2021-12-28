@@ -3,7 +3,7 @@ import util from 'util';
 import { DealGenerator } from '../lib/engine/deal-generator/generate-deals';
 import { redactedLicense, redactedTransaction } from '../lib/engine/deal-generator/redact';
 import { abbrActionDetails, abbrEventDetails } from '../lib/engine/deal-generator/test/utils';
-import { LicenseContext, RelatedLicenseSet } from '../lib/engine/license-matching/license-grouper';
+import { RelatedLicenseSet } from '../lib/engine/license-matching/license-grouper';
 import { IO } from "../lib/io/io";
 import { Database } from "../lib/model/database";
 import { License } from '../lib/model/license';
@@ -30,7 +30,7 @@ async function main(template: string, testId: string) {
   const db = new Database(new IO());
 
   db.licenses.length = 0;
-  db.licenses.push(...group.map(g => g.license));
+  db.licenses.push(...group);
 
   db.transactions.length = 0;
   db.transactions.push(...group.flatMap(g => g.transactions));
@@ -57,12 +57,11 @@ async function getRedactedMatchGroup(ids: [string, string[]][]) {
   const group: RelatedLicenseSet = [];
   for (const [lid, txids] of ids) {
     const license = redactedLicense(db.licenses.find(l => l.id === lid)!);
-    const transactions: Transaction[] = [];
-    const context: LicenseContext = { license, transactions };
-    group.push(context);
+    group.push(license);
     for (const tid of txids) {
       const transaction = redactedTransaction(db.transactions.find(t => t.id === tid)!);
-      transactions.push(transaction);
+      license.transactions.push(transaction);
+      transaction.license = license;
     }
   }
   return group;
