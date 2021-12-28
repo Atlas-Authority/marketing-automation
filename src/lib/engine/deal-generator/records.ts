@@ -1,12 +1,10 @@
-import assert from 'assert';
 import mustache from 'mustache';
 import { Deal, DealData } from '../../model/deal';
 import { DealStage, Pipeline } from '../../model/hubspot/interfaces';
 import { License } from '../../model/license';
 import { Transaction } from '../../model/transaction';
 import env from '../../parameters/env';
-import { isPresent, sorter } from '../../util/helpers';
-import { RelatedLicenseSet } from '../license-matching/license-grouper';
+import { isPresent } from '../../util/helpers';
 
 export function isEvalOrOpenSourceLicense(record: License) {
   return (
@@ -22,16 +20,6 @@ export function isPaidLicense(license: License) {
     license.data.licenseType === 'COMMUNITY' ||
     license.data.licenseType === 'DEMONSTRATION'
   );
-}
-
-export function getLicense(addonLicenseId: string, records: (License | Transaction)[]) {
-  const license = (records
-    .filter((r => r instanceof License) as
-      (r: License | Transaction) => r is License)
-    .sort(sorter(l => l.data.maintenanceStartDate, 'DSC'))
-    .find(l => l.data.addonLicenseId === addonLicenseId));
-  assert.ok(license);
-  return license;
 }
 
 export function dealCreationProperties(record: License | Transaction, data: Pick<DealData, 'addonLicenseId' | 'transactionId' | 'dealStage'>): DealData {

@@ -2,7 +2,7 @@ import { License } from "../../model/license";
 import { Transaction } from "../../model/transaction";
 import { sorter } from "../../util/helpers";
 import { RelatedLicenseSet } from "../license-matching/license-grouper";
-import { getLicense, isEvalOrOpenSourceLicense, isPaidLicense } from "./records";
+import { isEvalOrOpenSourceLicense, isPaidLicense } from "./records";
 
 export type RefundEvent = { type: 'refund', refundedTxs: Transaction[] };
 export type EvalEvent = { type: 'eval', licenses: License[] };
@@ -22,7 +22,7 @@ export class EventGenerator {
 
   private events: DealRelevantEvent[] = [];
 
-  public interpretAsEvents(records: (License | Transaction)[]) {
+  public interpretAsEvents(records: (License | Transaction)[], getLicense: (id: string) => License) {
     for (const record of records) {
       if (record instanceof License) {
         if (isEvalOrOpenSourceLicense(record)) {
@@ -35,7 +35,7 @@ export class EventGenerator {
       else {
         switch (record.data.saleType) {
           case 'New': {
-            const license = getLicense(record.data.addonLicenseId, records);
+            const license = getLicense(record.data.addonLicenseId);
             this.events.push({ type: 'purchase', licenses: [license], transaction: record });
             break;
           }

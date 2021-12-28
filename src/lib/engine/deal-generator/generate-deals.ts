@@ -112,10 +112,19 @@ export class DealGenerator {
     assert.ok(groups.length > 0);
     if (this.ignoring(groups)) return { records: [], actions: [], events: [] };
 
+    const getLicense = (addonLicenseId: string) => {
+      const license = (groups
+        .map(g => g.license)
+        .sort(sorter(l => l.data.maintenanceStartDate, 'DSC'))
+        .find(l => l.data.addonLicenseId === addonLicenseId));
+      assert.ok(license);
+      return license;
+    }
+
     const eventGenerator = new EventGenerator();
 
     const records = eventGenerator.getSortedRecords(groups);
-    const events = eventGenerator.interpretAsEvents(records);
+    const events = eventGenerator.interpretAsEvents(records, getLicense);
     const actions = this.actionGenerator.generateFrom(events);
 
     return { records, events, actions };
