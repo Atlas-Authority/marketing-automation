@@ -52,6 +52,7 @@ export class Contact extends Entity<ContactData, ContactComputed> {
         partnerDomains.has(domain)));
   }
 
+  /** Sorted newest first */
   public records: (License | Transaction)[] = [];
 
 }

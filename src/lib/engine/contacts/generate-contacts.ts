@@ -19,6 +19,7 @@ export class ContactGenerator {
     this.generateContacts();
     this.mergeGeneratedContacts();
     this.associateContacts();
+    this.sortContactRecords();
   }
 
   private generateContacts() {
@@ -49,6 +50,12 @@ export class ContactGenerator {
       for (const contact of record.allContacts) {
         contact.records.push(record);
       }
+    }
+  }
+
+  private sortContactRecords() {
+    for (const contact of this.db.contactManager.getAll()) {
+      contact.records.sort(sorter(r => r.data.maintenanceStartDate, 'DSC'));
     }
   }
 
