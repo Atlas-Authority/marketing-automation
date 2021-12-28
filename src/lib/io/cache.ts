@@ -1,8 +1,8 @@
 import DataDir from "../cache/datadir";
-import env from "../parameters/env-config";
+import { isProduction } from "../parameters/env-config";
 
 export default function cache<T>(file: string, data: T): T {
-  if (!env.isProduction) {
+  if (!isProduction) {
     DataDir.in.file(file).writeJson(data);
   }
   return data;

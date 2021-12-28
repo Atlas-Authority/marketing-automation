@@ -3,6 +3,9 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+export const isProduction = process.env.NODE_ENV === 'production';
+export const isTest = process.env.NODE_ENV === 'test';
+
 export default {
 
   mpac: {
@@ -74,14 +77,11 @@ export default {
     ignoredEmails: new Set((optional('IGNORED_EMAILS')?.split(',') ?? []).map(e => e.toLowerCase())),
   },
 
-  isProduction: process.env.NODE_ENV === 'production',
-  isTest: process.env.NODE_ENV === 'test',
-
 };
 
 function required(key: string) {
   const value = process.env[key];
-  if (process.env.NODE_ENV === 'test') return value ?? '';
+  if (isTest) return value ?? '';
   assert.ok(value, `ENV key ${key} is required`);
   return value;
 }
@@ -98,7 +98,7 @@ function requireOneOf<T>(opts: T[]): T {
   })));
 
   const firstValid = all.find(opt => opt.value);
-  if (process.env.NODE_ENV === 'test') return opts[0];
+  if (isTest) return opts[0];
   assert.ok(firstValid, `One of ENV keys ${all.map(o => o.envKey).join(' or ')} are required`);
 
   const { localKey, value } = firstValid;
