@@ -53,6 +53,8 @@ export class DealGenerator {
         deal.groups = matches;
 
         this.associateDealContactsAndCompanies(relatedLicenseIds, deal);
+
+        this.flagPartnerTransacted(deal);
       }
     }
 
@@ -196,6 +198,31 @@ export class DealGenerator {
       details,
       ...license.data,
     })));
+  }
+
+  private flagPartnerTransacted(deal: Deal) {
+    if (!deal.groups) {
+      log.error('Deal Actions', "Deal has no associated licenses:", deal.id);
+      return;
+    }
+
+    /**
+     * The plan:
+     * 
+     * For deals:
+     * 
+     *   If any record in any of the deal's groups have partner contacts
+     *   then use the most recent record's partner contact's domain.
+     *   Otherwise set this to null.
+     * 
+     * For contacts:
+     * 
+     *   If the contact's most recent record has a partner,
+     *   set that partner's domain as last associated partner.
+     *   Otherwise set it to blank, ignoring previous records.
+     *   (Probably has to happen in another spot in the code.)
+     * 
+     */
   }
 
 }
