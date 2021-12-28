@@ -5,6 +5,7 @@ import { IO } from "../lib/io/io";
 import log from '../lib/log/logger';
 import { Database } from "../lib/model/database";
 import { cli } from "../lib/parameters/cli-args";
+import { envConfig } from '../lib/parameters/env-config';
 
 main();
 async function main() {
@@ -18,7 +19,7 @@ async function main() {
   });
   cli.failIfExtraOpts();
 
-  const db = new Database(io);
+  const db = new Database(io, envConfig);
 
   await new Engine().run(db);
 

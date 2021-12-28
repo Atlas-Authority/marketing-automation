@@ -6,6 +6,7 @@ import { DealStage } from '../../../model/hubspot/interfaces';
 import { License, LicenseData } from "../../../model/license";
 import { ContactInfo } from '../../../model/marketplace/common';
 import { Transaction, TransactionData } from "../../../model/transaction";
+import { emptyConfig } from '../../../parameters/env-config';
 import { RelatedLicenseSet } from '../../license-matching/license-grouper';
 import { Action } from "../actions";
 import { DealRelevantEvent } from '../events';
@@ -26,7 +27,7 @@ export function runDealGeneratorTwice(input: TestInput) {
 
 export function runDealGenerator(input: TestInput) {
   const io = new IO();
-  const db = new Database(io);
+  const db = new Database(io, emptyConfig);
   const group = reassembleMatchGroup(input.group, input.records);
   db.licenses = group;
   db.transactions = group.flatMap(g => g.transactions);

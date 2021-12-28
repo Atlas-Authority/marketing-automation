@@ -6,7 +6,7 @@ import Slack from "../lib/io/slack";
 import log from '../lib/log/logger';
 import { Database } from "../lib/model/database";
 import { cli } from "../lib/parameters/cli-args";
-import env from "../lib/parameters/env-config";
+import env, { envConfig } from "../lib/parameters/env-config";
 import { AttachableError, KnownError } from "../lib/util/errors";
 import run from "../lib/util/runner";
 
@@ -29,7 +29,7 @@ async function main() {
   await run({
 
     async work() {
-      const db = new Database(io);
+      const db = new Database(io, envConfig);
       await new Engine().run(db);
     },
 

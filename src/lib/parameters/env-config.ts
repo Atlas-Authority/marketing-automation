@@ -6,8 +6,11 @@ dotenv.config();
 export const isProduction = process.env.NODE_ENV === 'production';
 export const isTest = process.env.NODE_ENV === 'test';
 
-export default {
+export interface Config {
+  partnerDomains: string[];
+}
 
+const env = {
   mpac: {
     user: required('MPAC_USER'),
     apiKey: required('MPAC_API_KEY'),
@@ -72,11 +75,20 @@ export default {
     runInterval: required('RUN_INTERVAL'),
     retryInterval: required('RETRY_INTERVAL'),
     retryTimes: +required('RETRY_TIMES'),
-    partnerDomains: new Set(optional('PARTNER_DOMAINS')?.split(/\s*,\s*/g) ?? []),
+    partnerDomains: optional('PARTNER_DOMAINS')?.split(/\s*,\s*/g),
     ignoredApps: new Set(optional('IGNORED_APPS')?.split(',') ?? []),
     ignoredEmails: new Set((optional('IGNORED_EMAILS')?.split(',') ?? []).map(e => e.toLowerCase())),
   },
+};
 
+export default env;
+
+export const emptyConfig: Config = {
+  partnerDomains: [],
+};
+
+export const envConfig: Config = {
+  partnerDomains: env.engine.partnerDomains ?? [],
 };
 
 function required(key: string) {

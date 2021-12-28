@@ -2,13 +2,11 @@ import { Contact, domainFor } from "../../model/contact";
 import { Database } from "../../model/database";
 import { License } from "../../model/license";
 import { Transaction } from "../../model/transaction";
-import env from "../../parameters/env-config";
 
 export function identifyAndFlagContactTypes(db: Database) {
   // Identifying contact types
   identifyContactTypesFromRecordDomains(db, db.licenses);
   identifyContactTypesFromRecordDomains(db, db.transactions);
-  addPartnerDomainsFromEnv(db);
   removeProviderDomainsFromPartnerDomains(db);
   separatePartnerDomainsFromCustomerDomains(db);
 
@@ -22,12 +20,6 @@ function identifyContactTypesFromRecordDomains(db: Database, records: (Transacti
     maybeAddDomain(db.partnerDomains, record.data.partnerDetails?.billingContact.email);
     maybeAddDomain(db.customerDomains, record.data.billingContact?.email);
     maybeAddDomain(db.customerDomains, record.data.technicalContact.email);
-  }
-}
-
-function addPartnerDomainsFromEnv(db: Database) {
-  for (const domain of env.engine.partnerDomains) {
-    db.partnerDomains.add(domain);
   }
 }
 
