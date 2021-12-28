@@ -22,7 +22,7 @@ export class EventGenerator {
 
   private events: DealRelevantEvent[] = [];
 
-  public interpretAsEvents(records: (License | Transaction)[], getLicense: (id: string) => License) {
+  public interpretAsEvents(records: (License | Transaction)[]) {
     for (const record of records) {
       if (record instanceof License) {
         if (isEvalOrOpenSourceLicense(record)) {
@@ -35,8 +35,7 @@ export class EventGenerator {
       else {
         switch (record.data.saleType) {
           case 'New': {
-            const license = getLicense(record.data.addonLicenseId);
-            this.events.push({ type: 'purchase', licenses: [license], transaction: record });
+            this.events.push({ type: 'purchase', licenses: [record.license], transaction: record });
             break;
           }
           case 'Renewal':
