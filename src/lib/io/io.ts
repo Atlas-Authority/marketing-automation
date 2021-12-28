@@ -11,7 +11,7 @@ import { MemoryMarketplace } from "./memory/marketplace";
 export class IO {
 
   public in: Remote = NoOpRemote;
-  public out: Remote = NoOpRemote;
+  public out: Remote = this.in;
 
   public constructor(opts?: { in: 'local' | 'remote', out: 'local' | 'remote' }) {
     if (opts) {

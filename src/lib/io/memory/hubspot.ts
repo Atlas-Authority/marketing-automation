@@ -7,9 +7,17 @@ export class MemoryHubspot implements HubspotService {
 
   private ids = new Map<string, number>();
 
-  private readonly deals = DataDir.in.file<FullEntity[]>(`deal.json`);
-  private readonly companies = DataDir.in.file<FullEntity[]>(`company.json`);
-  private readonly contacts = DataDir.in.file<FullEntity[]>(`contact.json`);
+  private readonly deals: FullEntity[] = [];
+  private readonly companies: FullEntity[] = [];
+  private readonly contacts: FullEntity[] = [];
+
+  constructor(useDiskCache = true) {
+    if (useDiskCache) {
+      this.deals = DataDir.in.file<FullEntity[]>(`deal.json`).readJson();
+      this.companies = DataDir.in.file<FullEntity[]>(`company.json`).readJson();
+      this.contacts = DataDir.in.file<FullEntity[]>(`contact.json`).readJson();
+    }
+  }
 
   // Downloader
 
@@ -91,9 +99,9 @@ export class MemoryHubspot implements HubspotService {
 
   private arrayFor(kind: EntityKind) {
     switch (kind) {
-      case 'company': return this.companies.readJson();
-      case 'contact': return this.contacts.readJson();
-      case 'deal': return this.deals.readJson();
+      case 'company': return this.companies;
+      case 'contact': return this.contacts;
+      case 'deal': return this.deals;
     }
   }
 
