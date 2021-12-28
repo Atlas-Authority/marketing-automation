@@ -18,6 +18,7 @@ export type TestInput = {
   deals?: DealData[];
   records: (License | Transaction)[];
   group: [string, string[]][];
+  partnerDomains?: string[],
 };
 
 export function runDealGeneratorTwice(input: TestInput) {
@@ -27,7 +28,10 @@ export function runDealGeneratorTwice(input: TestInput) {
 
 export function runDealGenerator(input: TestInput) {
   const io = new IO();
-  const db = new Database(io, emptyConfig);
+  const db = new Database(io, {
+    ...emptyConfig,
+    partnerDomains: input.partnerDomains ?? [],
+  });
   const group = reassembleMatchGroup(input.group, input.records);
   db.licenses = group;
   db.transactions = group.flatMap(g => g.transactions);
@@ -36,6 +40,7 @@ export function runDealGenerator(input: TestInput) {
     const deal = db.dealManager.create(dealData);
     deal.id = `deal-${i}`;
     deal.applyPropertyChanges();
+    deal.records = input.records;
   }
 
   const dealGenerator = new DealGenerator(db);
@@ -52,6 +57,7 @@ export function runDealGenerator(input: TestInput) {
     events: events.map(abbrEventDetails),
     actions: actions.map(abbrActionDetails),
     createdDeals,
+    db,
   };
 }
 
