@@ -99,7 +99,7 @@ export class DealGenerator {
         t.data.addonLicenseId,
         t.data.saleDate,
         formatMoney(t.data.vendorAmount),
-        [...new Set(getEmails(t))].join(', '),
+        [...new Set(t.allContacts.map(c => c.data.email))].join(', '),
       ]);
     }
 
@@ -124,7 +124,7 @@ export class DealGenerator {
 
   private associateDealContactsAndCompanies(group: RelatedLicenseSet, deal: Deal) {
     const records = group.flatMap(license => [license, ...license.transactions]);
-    const emails = [...new Set(records.flatMap(getEmails))];
+    const emails = [...new Set(records.flatMap(r => r.allContacts.map(c => c.data.email)))];
     const contacts = (emails
       .map(email => this.db.contactManager.getByEmail(email))
       .filter(isPresent));
@@ -202,12 +202,4 @@ export class DealGenerator {
 
 function hasIgnoredApp(record: { addonKey: string }) {
   return env.engine.ignoredApps.has(record.addonKey);
-}
-
-function getEmails(item: Transaction | License) {
-  return [
-    item.data.technicalContact.email,
-    item.data.billingContact?.email,
-    item.data.partnerDetails?.billingContact.email,
-  ].filter(isPresent);
 }

@@ -56,6 +56,10 @@ export class ContactGenerator {
     record.techContact = this.findContact(record.data.technicalContact.email)!;
     record.billingContact = this.findContact(record.data.billingContact?.email);
     record.partnerContact = this.findContact(record.data.partnerDetails?.billingContact.email);
+
+    record.allContacts.push(record.techContact);
+    if (record.billingContact) record.allContacts.push(record.billingContact);
+    if (record.partnerContact) record.allContacts.push(record.partnerContact);
   }
 
   private findContact(email: string | undefined): Contact | null {

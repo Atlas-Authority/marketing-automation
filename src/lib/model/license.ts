@@ -69,6 +69,7 @@ export class License {
   public techContact!: Contact;
   public billingContact: Contact | null = null;
   public partnerContact: Contact | null = null;
+  public allContacts: Contact[] = [];
 
   static fromRaw(rawLicense: RawLicense) {
     let newEvalData: NewEvalData | null = null;

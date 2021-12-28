@@ -46,6 +46,7 @@ export class Transaction {
   public techContact!: Contact;
   public billingContact: Contact | null = null;
   public partnerContact: Contact | null = null;
+  public allContacts: Contact[] = [];
 
   public refunded = false;
 
