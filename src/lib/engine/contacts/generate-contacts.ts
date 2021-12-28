@@ -22,11 +22,10 @@ export class ContactGenerator {
   }
 
   private generateContacts() {
-    for (const license of this.db.licenses) {
-      this.generateContactsFrom(license);
-    }
-    for (const transaction of this.db.transactions) {
-      this.generateContactsFrom(transaction);
+    for (const record of [...this.db.licenses, ...this.db.transactions]) {
+      this.generateContact(record, record.data.technicalContact);
+      this.generateContact(record, record.data.billingContact);
+      this.generateContact(record, record.data.partnerDetails?.billingContact ?? null);
     }
   }
 
@@ -37,29 +36,16 @@ export class ContactGenerator {
     }
   }
 
-  private generateContactsFrom(record: License | Transaction) {
-    this.generateContact(record, record.data.technicalContact);
-    this.generateContact(record, record.data.billingContact);
-    this.generateContact(record, record.data.partnerDetails?.billingContact ?? null);
-  }
-
   private associateContacts() {
-    for (const license of this.db.licenses) {
-      this.associateContactsIn(license);
-    }
-    for (const transaction of this.db.transactions) {
-      this.associateContactsIn(transaction);
-    }
-  }
+    for (const record of [...this.db.licenses, ...this.db.transactions]) {
+      record.techContact = this.findContact(record.data.technicalContact.email)!;
+      record.billingContact = this.findContact(record.data.billingContact?.email);
+      record.partnerContact = this.findContact(record.data.partnerDetails?.billingContact.email);
 
-  private associateContactsIn(record: License | Transaction) {
-    record.techContact = this.findContact(record.data.technicalContact.email)!;
-    record.billingContact = this.findContact(record.data.billingContact?.email);
-    record.partnerContact = this.findContact(record.data.partnerDetails?.billingContact.email);
-
-    record.allContacts.push(record.techContact);
-    if (record.billingContact) record.allContacts.push(record.billingContact);
-    if (record.partnerContact) record.allContacts.push(record.partnerContact);
+      record.allContacts.push(record.techContact);
+      if (record.billingContact) record.allContacts.push(record.billingContact);
+      if (record.partnerContact) record.allContacts.push(record.partnerContact);
+    }
   }
 
   private findContact(email: string | undefined): Contact | null {
