@@ -10,15 +10,13 @@ import { Transaction } from '../../model/transaction';
 import { sorter } from '../../util/helpers';
 import { LicenseMatcher } from './license-matcher';
 
-export type LicenseContext = License;
-
 /** Related via the matching engine. */
-export type RelatedLicenseSet = LicenseContext[];
+export type RelatedLicenseSet = License[];
 
 
 export function matchIntoLikelyGroups(db: Database): RelatedLicenseSet[] {
   log.info('Scoring Engine', 'Storing licenses/transactions by id');
-  const itemsByAddonLicenseId: Map<AddonLicenseId, LicenseContext> = buildMappingStructure(db);
+  const itemsByAddonLicenseId: Map<AddonLicenseId, License> = buildMappingStructure(db);
 
   log.info('Scoring Engine', 'Grouping licenses/transactions by hosting and addonKey');
   const productGroupings: Iterable<{ addonKey: string; hosting: string; group: License[] }> = groupMappingByProduct(itemsByAddonLicenseId);
@@ -150,7 +148,7 @@ function buildMappingStructure(db: Database) {
   return mapping;
 }
 
-function groupMappingByProduct(mapping: Map<AddonLicenseId, LicenseContext>) {
+function groupMappingByProduct(mapping: Map<AddonLicenseId, License>) {
   const productMapping = new Map<string, {
     addonKey: string,
     hosting: string,
