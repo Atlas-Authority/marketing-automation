@@ -11,7 +11,7 @@ export class MemoryHubspot implements HubspotService {
   private readonly companies: FullEntity[] = [];
   private readonly contacts: FullEntity[] = [];
 
-  constructor(useDiskCache = true) {
+  constructor(useDiskCache: boolean) {
     if (useDiskCache) {
       this.deals = DataDir.in.file<FullEntity[]>(`deal.json`).readJson();
       this.companies = DataDir.in.file<FullEntity[]>(`company.json`).readJson();

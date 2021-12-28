@@ -8,7 +8,7 @@ export class MemoryMarketplace implements MarketplaceService {
   private readonly licensesWithout: readonly RawLicense[] = [];
   private readonly transactions: readonly RawTransaction[] = [];
 
-  constructor(useDiskCache = true) {
+  constructor(useDiskCache: boolean) {
     if (useDiskCache) {
       this.licensesWith = DataDir.in.file<readonly RawLicense[]>('licenses-with.json').readJson();
       this.licensesWithout = DataDir.in.file<readonly RawLicense[]>('licenses-without.json').readJson();

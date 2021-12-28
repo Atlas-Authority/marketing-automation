@@ -30,16 +30,16 @@ export class IO {
 
 function remoteFor(opt: 'local' | 'remote'): Remote {
   switch (opt) {
-    case 'local': return new MemoryRemote();
+    case 'local': return new CachedMemoryRemote();
     case 'remote': return new LiveRemote();
   }
 }
 
-class MemoryRemote implements Remote {
-  marketplace = new MemoryMarketplace();
-  tldLister = new MemoryTldListerService();
-  emailProviderLister = new MemoryEmailProviderListerService();
-  hubspot = new MemoryHubspot();
+class CachedMemoryRemote implements Remote {
+  marketplace = new MemoryMarketplace(true);
+  tldLister = new MemoryTldListerService(true);
+  emailProviderLister = new MemoryEmailProviderListerService(true);
+  hubspot = new MemoryHubspot(true);
 }
 
 class LiveRemote implements Remote {
