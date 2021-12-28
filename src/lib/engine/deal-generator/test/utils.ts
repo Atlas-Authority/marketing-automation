@@ -63,9 +63,11 @@ function reassembleMatchGroup(ids: [string, string[]][], records: (License | Tra
   const group: RelatedLicenseSet = [];
   for (const [lid, txids] of ids) {
     const license = licenses.find(l => l.id === lid)!;
+    license.transactions = [];
     for (const tid of txids) {
       const transaction = transactions.find(t => t.id === tid)!;
       license.transactions.push(transaction);
+      transaction.license = license;
     }
     group.push(license);
   }

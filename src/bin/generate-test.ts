@@ -57,11 +57,11 @@ async function getRedactedMatchGroup(ids: [string, string[]][]) {
   const group: RelatedLicenseSet = [];
   for (const [lid, txids] of ids) {
     const license = redactedLicense(db.licenses.find(l => l.id === lid)!);
-    const transactions: Transaction[] = [];
     group.push(license);
     for (const tid of txids) {
       const transaction = redactedTransaction(db.transactions.find(t => t.id === tid)!);
-      transactions.push(transaction);
+      license.transactions.push(transaction);
+      transaction.license = license;
     }
   }
   return group;
