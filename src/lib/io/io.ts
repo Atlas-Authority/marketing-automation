@@ -10,7 +10,7 @@ import { MemoryMarketplace } from "./memory/marketplace";
 
 export class IO {
 
-  public in: Remote = NoOpRemote;
+  public in: Remote = new MemoryRemote();
   public out: Remote = this.in;
 
   public constructor(opts?: { in: 'local' | 'remote', out: 'local' | 'remote' }) {
@@ -42,30 +42,16 @@ class CachedMemoryRemote implements Remote {
   hubspot = new MemoryHubspot(true);
 }
 
+class MemoryRemote implements Remote {
+  marketplace = new MemoryMarketplace(false);
+  tldLister = new MemoryTldListerService(false);
+  emailProviderLister = new MemoryEmailProviderListerService(false);
+  hubspot = new MemoryHubspot(false);
+}
+
 class LiveRemote implements Remote {
   hubspot = new LiveHubspotService();
   marketplace = new LiveMarketplaceService();
   emailProviderLister = new LiveEmailProviderListerService();
   tldLister = new LiveTldListerService();
 }
-
-const NoOpRemote: Remote = {
-  emailProviderLister: {
-    async downloadFreeEmailProviders() { return [] },
-  },
-  hubspot: {
-    async downloadEntities() { return [] },
-    async createAssociations() { },
-    async deleteAssociations() { },
-    async createEntities() { return [] },
-    async updateEntities() { return [] },
-  },
-  marketplace: {
-    async downloadLicensesWithDataInsights() { return [] },
-    async downloadLicensesWithoutDataInsights() { return [] },
-    async downloadTransactions() { return [] },
-  },
-  tldLister: {
-    async downloadAllTlds() { return [] },
-  },
-};
