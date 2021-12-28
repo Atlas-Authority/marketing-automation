@@ -1,11 +1,12 @@
+import mustache from 'mustache';
 import log from "../../log/logger";
 import { Deal, DealData, DealManager } from "../../model/deal";
-import { DealStage } from "../../model/hubspot/interfaces";
+import { DealStage, Pipeline } from "../../model/hubspot/interfaces";
 import { License } from "../../model/license";
 import { Transaction } from "../../model/transaction";
+import env from '../../parameters/env-config';
 import { isPresent, sorter } from "../../util/helpers";
 import { abbrEventDetails, DealRelevantEvent, EvalEvent, PurchaseEvent, RefundEvent, RenewalEvent, UpgradeEvent } from "./events";
-import { dealCreationProperties, updateDeal } from "./records";
 
 export type Action = CreateDealAction | UpdateDealAction | IgnoreDealAction;
 export type CreateDealAction = { type: 'create'; properties: DealData };
@@ -198,4 +199,37 @@ function makeUpdateAction(event: DealRelevantEvent, deal: Deal, record: License 
 
 function getLatestLicense(event: PurchaseEvent): License {
   return [...event.licenses].sort(sorter(item => item.data.maintenanceStartDate, 'DSC'))[0];
+}
+
+function dealCreationProperties(record: License | Transaction, data: Pick<DealData, 'addonLicenseId' | 'transactionId' | 'dealStage'>): DealData {
+  return {
+    ...data,
+    closeDate: (record instanceof Transaction
+      ? record.data.saleDate
+      : record.data.maintenanceStartDate),
+    deployment: record.data.hosting,
+    app: record.data.addonKey,
+    licenseTier: record.tier,
+    country: record.data.country,
+    origin: env.hubspot.deals.dealOrigin ?? null,
+    relatedProducts: env.hubspot.deals.dealRelatedProducts ?? null,
+    dealName: mustache.render(env.hubspot.deals.dealDealName, record.data),
+    pipeline: Pipeline.MPAC,
+    associatedPartner: null,
+    amount: (data.dealStage === DealStage.EVAL
+      ? null
+      : record instanceof License
+        ? 0
+        : record.data.vendorAmount),
+  };
+}
+
+function updateDeal(deal: Deal, record: License | Transaction) {
+  const data = dealCreationProperties(record, {
+    addonLicenseId: deal.data.addonLicenseId,
+    transactionId: deal.data.transactionId,
+    dealStage: deal.data.dealStage,
+  });
+  Object.assign(deal.data, data);
+  deal.data.licenseTier = Math.max(deal.data.licenseTier ?? -1, record.tier);
 }

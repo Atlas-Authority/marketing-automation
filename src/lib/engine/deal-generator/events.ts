@@ -2,7 +2,6 @@ import { License } from "../../model/license";
 import { Transaction } from "../../model/transaction";
 import { sorter } from "../../util/helpers";
 import { RelatedLicenseSet } from "../license-matching/license-grouper";
-import { isEvalOrOpenSourceLicense, isPaidLicense } from "./records";
 
 export type RefundEvent = { type: 'refund', refundedTxs: Transaction[] };
 export type EvalEvent = { type: 'eval', licenses: License[] };
@@ -184,4 +183,20 @@ export function abbrEventDetails(e: DealRelevantEvent) {
     case 'renewal': return { type: e.type, txs: [e.transaction.id] };
     case 'upgrade': return { type: e.type, txs: [e.transaction.id] };
   }
+}
+
+function isEvalOrOpenSourceLicense(record: License) {
+  return (
+    record.data.licenseType === 'EVALUATION' ||
+    record.data.licenseType === 'OPEN_SOURCE'
+  );
+}
+
+function isPaidLicense(license: License) {
+  return (
+    license.data.licenseType === 'ACADEMIC' ||
+    license.data.licenseType === 'COMMERCIAL' ||
+    license.data.licenseType === 'COMMUNITY' ||
+    license.data.licenseType === 'DEMONSTRATION'
+  );
 }

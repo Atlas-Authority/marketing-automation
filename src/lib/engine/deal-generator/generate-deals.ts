@@ -13,7 +13,6 @@ import { RelatedLicenseSet } from "../license-matching/license-grouper";
 import { ActionGenerator } from "./actions";
 import { EventGenerator } from "./events";
 import { DealDataLogger } from "./logger";
-import { getEmails } from "./records";
 
 
 export type IgnoredLicense = LicenseData & {
@@ -203,4 +202,12 @@ export class DealGenerator {
 
 function hasIgnoredApp(record: { addonKey: string }) {
   return env.engine.ignoredApps.has(record.addonKey);
+}
+
+function getEmails(item: Transaction | License) {
+  return [
+    item.data.technicalContact.email,
+    item.data.billingContact?.email,
+    item.data.partnerDetails?.billingContact.email,
+  ].filter(isPresent);
 }
