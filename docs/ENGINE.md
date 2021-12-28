@@ -83,19 +83,22 @@ This phase assumes a few things:
 2. Each transaction points to exactly one `addonLicenseId`
 3. Some transactions point to the same `addonLicenseId`
 4. Therefore, we can match up every license with 0-N transactions
-5. The engine calls this a License Context (naming things is hard)
-6. We can always map back each license to its transactions
-7. So we can work with licenses, and be able to traverse their transactions
+5. Each license keeps a reference to all its transactions (as an array)
+6. Each transaction keeps a reference to its license
+7. If a transaction doesn't have an accompanying license, we log and omit it
 
-So, using TypeScript for context, we start with this:
+Using TypeScript to explain this, we basically have:
 
-```typescript
-type LicenseContext = {
-  license: License;
-  transactions: Transaction[];
-};
+```ts
+class License {
+  public transactions!: Transaction[];
+  // ...
+}
 
-let toMatchUp: LicenseContext[];
+class Transaction {
+  public license!: License;
+  // ...
+}
 ```
 
 #### Motivation
@@ -158,12 +161,12 @@ In practice, this means that if 2 licenses are 100 days apart, but matched with 
 
 #### Match results
 
-At the end of this phase, we have a set of matched License Contexts, which the engine calls uncreatively Related License Sets.
+At the end of this phase, we have a set of matched Licenses, which the engine calls uncreatively Related License Sets.
 
-To continue the TypeScript reference from above, at the end of this phase, we have:
+To use TypeScript to demonstrate this, at the end of this phase, we have:
 
 ```typescript
-type RelatedLicenseSet = LicenseContext[];
+type RelatedLicenseSet = License[];
 
 let matchedUp: RelatedLicenseSet[];
 ```
