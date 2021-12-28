@@ -88,9 +88,9 @@ function reassembleMatchGroup(ids: [string, string[]][], records: (License | Tra
   return group;
 }
 
-function fakeContact(): ContactInfo {
+function fakeContact(email?: string): ContactInfo {
   return {
-    email: chance.email(),
+    email: email ?? chance.email(),
     name: chance.name(),
   };
 }
@@ -128,9 +128,10 @@ export function testLicense(
   maintenanceStartDate: string,
   licenseType: string,
   status: string,
+  email?: string,
 ) {
   return new License({
-    ...testRecordCommon(addonLicenseId, maintenanceStartDate),
+    ...testRecordCommon(addonLicenseId, maintenanceStartDate, email),
 
     tier: 'Unlimited Users',
     licenseType: licenseType as LicenseData['licenseType'],
@@ -147,7 +148,7 @@ export function testLicense(
   });
 }
 
-function testRecordCommon(addonLicenseId: string, maintenanceStartDate: string) {
+function testRecordCommon(addonLicenseId: string, maintenanceStartDate: string, email?: string) {
   return {
     addonLicenseId,
     licenseId: addonLicenseId,
@@ -155,7 +156,7 @@ function testRecordCommon(addonLicenseId: string, maintenanceStartDate: string) 
     addonName: chance.sentence({ words: 3, punctuation: false }),
     lastUpdated: maintenanceStartDate,
 
-    technicalContact: fakeContact(),
+    technicalContact: fakeContact(email),
     billingContact: null,
     partnerDetails: null,
 

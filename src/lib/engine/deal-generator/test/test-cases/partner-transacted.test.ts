@@ -36,3 +36,25 @@ it(`Sets partner domain on deal if record is partern-transacted even if newer on
   const deal = deals[0];
   expect(deal.data.associatedPartner).toEqual(partnerDomain);
 });
+
+it(`Sets partner domain on contact if latest record is partner-transacted`, () => {
+  const license1 = testLicense("1111111", "2021-12-26", "EVAL", "inactive", "foo@domain1.example.com");
+  const license2 = testLicense("2222222", "2021-12-27", "COMMERCIAL", "active", "foo@domain2.example.com");
+  const partnerDomain = "domain1.example.com";
+
+  const { db } = runDealGeneratorTwice({
+    group: [['1111111', []], ['2222222', []]],
+    records: [license1, license2],
+    partnerDomains: [partnerDomain],
+  });
+
+  const contacts = db.contactManager.getArray();
+  expect(contacts.length).toBe(2);
+
+  const [c1, c2] = contacts;
+  expect(c1.data.email).toEqual("foo@domain1.example.com");
+  expect(c2.data.email).toEqual("foo@domain2.example.com");
+
+  expect(c1.data.lastAssociatedPartner).toEqual("domain1.example.com");
+  expect(c2.data.lastAssociatedPartner).toEqual(null);
+});
