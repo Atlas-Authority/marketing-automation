@@ -3,6 +3,8 @@ import { Company } from "./company";
 import { Entity } from "./hubspot/entity";
 import { EntityKind } from "./hubspot/interfaces";
 import { EntityAdapter, EntityManager } from "./hubspot/manager";
+import { License } from "./license";
+import { Transaction } from "./transaction";
 
 export type ContactType = 'Partner' | 'Customer';
 
@@ -49,6 +51,8 @@ export class Contact extends Entity<ContactData, ContactComputed> {
       .find(domain =>
         partnerDomains.has(domain)));
   }
+
+  public records: (License | Transaction)[] = [];
 
 }
 

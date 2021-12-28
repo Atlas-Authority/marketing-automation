@@ -45,6 +45,10 @@ export class ContactGenerator {
       record.allContacts.push(record.techContact);
       if (record.billingContact) record.allContacts.push(record.billingContact);
       if (record.partnerContact) record.allContacts.push(record.partnerContact);
+
+      for (const contact of record.allContacts) {
+        contact.records.push(record);
+      }
     }
   }
 
