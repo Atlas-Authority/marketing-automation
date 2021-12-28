@@ -50,7 +50,7 @@ export class DealGenerator {
           ? this.db.dealManager.create(action.properties)
           : action.deal);
 
-        deal.groups = matches;
+        deal.records = records;
 
         this.associateDealContactsAndCompanies(relatedLicenseIds, deal);
 
@@ -201,25 +201,33 @@ export class DealGenerator {
   }
 
   private flagPartnerTransacted(deal: Deal) {
-    if (!deal.groups) {
-      log.error('Deal Actions', "Deal has no associated licenses:", deal.id);
+    if (deal.records.length === 0) {
+      log.error('Deal Actions', "Deal has no associated MPAC records:", deal.id);
       return;
     }
 
     /**
-     * The plan:
-     * 
-     * For deals:
-     * 
-     *   If any record in any of the deal's groups have partner contacts
-     *   then use the most recent record's partner contact's domain.
-     *   Otherwise set this to null.
-     * 
+     * If any record in any of the deal's groups have partner contacts
+     * then use the most recent record's partner contact's domain.
+     * Otherwise set this to null.
+     */
+    const lastPartner = (deal
+      .records
+      .flatMap(r => r.allContacts)
+      .reverse()
+      .find(c => c.isPartner));
+
+    deal.data.associatedPartner = lastPartner?.getPartnerDomain(this.db.partnerDomains) ?? null;
+
+
+
+    /**
      * For contacts:
      * 
      *   If the contact's most recent record has a partner,
      *   set that partner's domain as last associated partner.
      *   Otherwise set it to blank, ignoring previous records.
+     * 
      *   (Probably has to happen in another spot in the code.)
      * 
      */

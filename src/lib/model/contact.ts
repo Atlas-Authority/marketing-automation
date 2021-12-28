@@ -43,6 +43,13 @@ export class Contact extends Entity<ContactData, ContactComputed> {
   public get isPartner() { return this.data.contactType === 'Partner'; }
   public get isCustomer() { return this.data.contactType === 'Customer'; }
 
+  public getPartnerDomain(partnerDomains: Set<string>) {
+    return (this.allEmails
+      .map(domainFor)
+      .find(domain =>
+        partnerDomains.has(domain)));
+  }
+
 }
 
 const ContactAdapter: EntityAdapter<ContactData, ContactComputed> = {
@@ -151,4 +158,8 @@ export class ContactManager extends EntityManager<ContactData, ContactComputed, 
 
   public getByEmail = this.makeIndex(c => c.allEmails, ['email']);
 
+}
+
+export function domainFor(email: string): string {
+  return email.split('@')[1];
 }

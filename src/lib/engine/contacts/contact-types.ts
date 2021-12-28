@@ -1,4 +1,4 @@
-import { Contact } from "../../model/contact";
+import { Contact, domainFor } from "../../model/contact";
 import { Database } from "../../model/database";
 import { License } from "../../model/license";
 import { Transaction } from "../../model/transaction";
@@ -81,8 +81,4 @@ function maybeAddDomain(set: Set<string>, email: string | undefined) {
 
 function usesDomains(contact: Contact, domains: Set<string>) {
   return contact.allEmails.some(email => domains.has(domainFor(email)));
-}
-
-function domainFor(email: string): string {
-  return email.split('@')[1];
 }
