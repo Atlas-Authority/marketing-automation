@@ -1,4 +1,5 @@
 import assert from "assert";
+import { License } from "./license";
 import { AddonLicenseId, ContactInfo, getContactInfo, getPartnerInfo, maybeGetContactInfo, PartnerInfo } from "./marketplace/common";
 import { RawTransaction } from "./marketplace/raw";
 
@@ -38,6 +39,8 @@ export class Transaction {
   /** Unique ID for this Transaction. */
   public id: string;
   public tier: number;
+
+  public license!: License;
 
   static fromRaw(rawTransaction: RawTransaction) {
     return new Transaction({

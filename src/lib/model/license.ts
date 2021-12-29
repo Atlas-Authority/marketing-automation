@@ -1,6 +1,7 @@
 import * as assert from 'assert';
 import { AddonLicenseId, ContactInfo, getContactInfo, getPartnerInfo, maybeGetContactInfo, PartnerInfo } from "./marketplace/common";
 import { RawLicense } from "./marketplace/raw";
+import { Transaction } from './transaction';
 
 type AttributionData = {
   channel: string;
@@ -61,6 +62,8 @@ export class License {
   public id: string;
   public tier: number;
   public active: boolean;
+
+  public transactions: Transaction[] = [];
 
   static fromRaw(rawLicense: RawLicense) {
     let newEvalData: NewEvalData | null = null;

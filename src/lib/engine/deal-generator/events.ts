@@ -2,7 +2,7 @@ import { License } from "../../model/license";
 import { Transaction } from "../../model/transaction";
 import { sorter } from "../../util/helpers";
 import { RelatedLicenseSet } from "../license-matching/license-grouper";
-import { getLicense, isEvalOrOpenSourceLicense, isPaidLicense } from "./records";
+import { isEvalOrOpenSourceLicense, isPaidLicense } from "./records";
 
 export type RefundEvent = { type: 'refund', refundedTxs: Transaction[] };
 export type EvalEvent = { type: 'eval', licenses: License[] };
@@ -35,8 +35,7 @@ export class EventGenerator {
       else {
         switch (record.data.saleType) {
           case 'New': {
-            const license = getLicense(record.data.addonLicenseId, records);
-            this.events.push({ type: 'purchase', licenses: [license], transaction: record });
+            this.events.push({ type: 'purchase', licenses: [record.license], transaction: record });
             break;
           }
           case 'Renewal':
@@ -88,14 +87,14 @@ export class EventGenerator {
     }
   }
 
-  public getSortedRecords(groups: RelatedLicenseSet) {
-    return groups.flatMap(group => {
-      const transactions = this.applyRefunds(group.transactions);
+  public getSortedRecords(group: RelatedLicenseSet) {
+    return group.flatMap(license => {
+      const transactions = this.applyRefunds(license.transactions);
       const records: (License | Transaction)[] = [...transactions];
 
       // Include the License unless it's based on a 'New' Transaction
       if (!transactions.some(t => t.data.saleType === 'New')) {
-        records.push(group.license);
+        records.push(license);
       }
 
       return records;
