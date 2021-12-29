@@ -8,7 +8,7 @@ import { cli } from "../lib/parameters/cli-args";
 import env, { envConfig } from "../lib/parameters/env-config";
 import { AttachableError, KnownError } from "../lib/util/errors";
 import run from "../lib/util/runner";
-import { ioFromCliArgs } from './run-once';
+import { ioFromCliArgs } from './cli-args';
 
 main();
 async function main() {
