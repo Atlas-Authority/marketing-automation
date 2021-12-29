@@ -1,4 +1,4 @@
-import { runDealGeneratorTwice, testLicense } from "../utils";
+import { runDealGenerator, runDealGeneratorTwice, testLicense } from "../utils";
 
 
 it(`Sets partner domain on deal if record is partern-transacted`, () => {
@@ -42,7 +42,7 @@ it(`Sets partner domain on contact if latest record is partner-transacted`, () =
   const license2 = testLicense("2222222", "2021-12-27", "COMMERCIAL", "active", "foo@domain2.example.com");
   const partnerDomain = "domain1.example.com";
 
-  const { db } = runDealGeneratorTwice({
+  const { db } = runDealGenerator({
     group: [['1111111', []], ['2222222', []]],
     records: [license1, license2],
     partnerDomains: [partnerDomain],
