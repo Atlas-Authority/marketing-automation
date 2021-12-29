@@ -1,16 +1,13 @@
-import log from '../../log/logger.js';
-import { Table } from '../../log/table.js';
-import { License } from '../../model/license.js';
-import { Transaction } from '../../model/transaction.js';
-import { sorter } from "../../util/helpers.js";
-import { RelatedLicenseSet } from '../license-matching/license-grouper.js';
-import { getLicense, isEvalOrOpenSourceLicense, isPaidLicense, printRecordDetails } from "./records.js";
+import { License } from "../../model/license";
+import { Transaction } from "../../model/transaction";
+import { sorter } from "../../util/helpers";
+import { RelatedLicenseSet } from "../license-matching/license-grouper";
 
-export type RefundEvent = { type: 'refund', groups: RelatedLicenseSet, refundedTxs: Transaction[] };
-export type EvalEvent = { type: 'eval', groups: RelatedLicenseSet, licenses: License[] };
-export type PurchaseEvent = { type: 'purchase', groups: RelatedLicenseSet, licenses: License[], transaction?: Transaction };
-export type RenewalEvent = { type: 'renewal', groups: RelatedLicenseSet, transaction: Transaction };
-export type UpgradeEvent = { type: 'upgrade', groups: RelatedLicenseSet, transaction: Transaction };
+export type RefundEvent = { type: 'refund', refundedTxs: Transaction[] };
+export type EvalEvent = { type: 'eval', licenses: License[] };
+export type PurchaseEvent = { type: 'purchase', licenses: License[], transaction?: Transaction };
+export type RenewalEvent = { type: 'renewal', transaction: Transaction };
+export type UpgradeEvent = { type: 'upgrade', transaction: Transaction };
 
 export type DealRelevantEvent = (
   RefundEvent |
@@ -22,42 +19,35 @@ export type DealRelevantEvent = (
 
 export class EventGenerator {
 
-  events: DealRelevantEvent[] = [];
+  private events: DealRelevantEvent[] = [];
 
-  interpretAsEvents(groups: RelatedLicenseSet) {
-    const records = this.getRecords(groups);
-    this.sortRecords(records);
-
+  public interpretAsEvents(records: (License | Transaction)[]) {
     for (const record of records) {
       if (record instanceof License) {
         if (isEvalOrOpenSourceLicense(record)) {
-          this.events.push({ type: 'eval', groups, licenses: [record] });
+          this.events.push({ type: 'eval', licenses: [record] });
         }
         else if (isPaidLicense(record)) {
-          this.events.push({ type: 'purchase', groups, licenses: [record] });
+          this.events.push({ type: 'purchase', licenses: [record] });
         }
       }
       else {
         switch (record.data.saleType) {
           case 'New': {
-            const license = getLicense(record.data.addonLicenseId, groups);
-            this.events.push({ type: 'purchase', groups, licenses: [license], transaction: record });
+            this.events.push({ type: 'purchase', licenses: [record.license], transaction: record });
             break;
           }
           case 'Renewal':
-            this.events.push({ type: 'renewal', groups, transaction: record });
+            this.events.push({ type: 'renewal', transaction: record });
             break;
           case 'Upgrade':
-            this.events.push({ type: 'upgrade', groups, transaction: record });
+            this.events.push({ type: 'upgrade', transaction: record });
             break;
         }
       }
     }
 
     this.normalizeEvalAndPurchaseEvents();
-
-    printRecordDetails(records);
-    printEventDetails(this.events);
 
     return this.events;
   }
@@ -96,22 +86,18 @@ export class EventGenerator {
     }
   }
 
-  private getRecords(groups: RelatedLicenseSet) {
-    return groups.flatMap(group => {
-      const transactions = this.applyRefunds(group.transactions, groups);
+  public getSortedRecords(group: RelatedLicenseSet) {
+    return group.flatMap(license => {
+      const transactions = this.applyRefunds(license.transactions);
       const records: (License | Transaction)[] = [...transactions];
 
       // Include the License unless it's based on a 'New' Transaction
       if (!transactions.some(t => t.data.saleType === 'New')) {
-        records.push(group.license);
+        records.push(license);
       }
 
       return records;
-    });
-  }
-
-  private sortRecords(records: (License | Transaction)[]) {
-    records.sort((a, b) => {
+    }).sort((a, b) => {
       // First sort by date
       const date1 = a.data.maintenanceStartDate;
       const date2 = b.data.maintenanceStartDate;
@@ -128,7 +114,7 @@ export class EventGenerator {
     });
   }
 
-  private applyRefunds(transactions: Transaction[], groups: RelatedLicenseSet) {
+  private applyRefunds(transactions: Transaction[]) {
     const refundedTxs: Transaction[] = [];
 
     // Handle refunds fully, either by applying or removing them
@@ -151,6 +137,8 @@ export class EventGenerator {
 
         if (fullyRefundedTx) {
           refundedTxs.push(fullyRefundedTx);
+
+          fullyRefundedTx.refunded = true;
 
           // Remove it from the list
           transactions = transactions.filter(tx =>
@@ -176,7 +164,6 @@ export class EventGenerator {
         if (transactions.length === 0) {
           this.events.push({
             type: 'refund',
-            groups,
             refundedTxs,
           });
         }
@@ -188,35 +175,28 @@ export class EventGenerator {
 
 }
 
-function printEventDetails(events: DealRelevantEvent[]) {
-  const rows = events.map(e => {
-    switch (e.type) {
-      case 'eval': return { type: e.type, lics: e.licenses.map(l => l.id) };
-      case 'purchase': return { type: e.type, lics: e.licenses.map(l => l.id), txs: [e.transaction?.id] };
-      case 'refund': return { type: e.type, txs: e.refundedTxs.map(tx => tx.id) };
-      case 'renewal': return { type: e.type, txs: [e.transaction.id] };
-      case 'upgrade': return { type: e.type, txs: [e.transaction.id] };
-    }
-  });
-
-  Table.print({
-    title: 'Events',
-    log: str => log.detailed('Deal Actions', str),
-    rows: rows,
-    cols: [
-      [{ title: 'Type' }, row => row.type],
-      [{ title: 'Licenses' }, row => row.lics?.join(', ') ?? ''],
-      [{ title: 'Transactions' }, row => row.txs?.join(', ') ?? ''],
-    ],
-  });
-}
-
 export function abbrEventDetails(e: DealRelevantEvent) {
   switch (e.type) {
-    case 'eval': return { type: e.type, ids: e.licenses.map(l => l.id) };
-    case 'purchase': return { type: e.type, ids: e.licenses.map(l => l.id), tx: e.transaction?.id };
-    case 'refund': return { type: e.type, ids: e.refundedTxs.map(tx => tx.id) };
-    case 'renewal': return { type: e.type, id: e.transaction.id };
-    case 'upgrade': return { type: e.type, id: e.transaction.id };
+    case 'eval': return { type: e.type, lics: e.licenses.map(l => l.id) };
+    case 'purchase': return { type: e.type, lics: e.licenses.map(l => l.id), txs: [e.transaction?.id] };
+    case 'refund': return { type: e.type, txs: e.refundedTxs.map(tx => tx.id) };
+    case 'renewal': return { type: e.type, txs: [e.transaction.id] };
+    case 'upgrade': return { type: e.type, txs: [e.transaction.id] };
   }
+}
+
+function isEvalOrOpenSourceLicense(record: License) {
+  return (
+    record.data.licenseType === 'EVALUATION' ||
+    record.data.licenseType === 'OPEN_SOURCE'
+  );
+}
+
+function isPaidLicense(license: License) {
+  return (
+    license.data.licenseType === 'ACADEMIC' ||
+    license.data.licenseType === 'COMMERCIAL' ||
+    license.data.licenseType === 'COMMUNITY' ||
+    license.data.licenseType === 'DEMONSTRATION'
+  );
 }

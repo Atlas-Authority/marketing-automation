@@ -1,18 +1,19 @@
-import * as assert from 'assert';
-import { saveForInspection } from '../../cache/inspection.js';
-import log from '../../log/logger.js';
-import { Table } from '../../log/table.js';
-import { Database } from '../../model/database.js';
-import { Deal } from '../../model/deal.js';
-import { License, LicenseData } from '../../model/license.js';
-import { Transaction } from '../../model/transaction.js';
-import env from '../../parameters/env.js';
-import { formatMoney } from '../../util/formatters.js';
-import { isPresent, sorter } from '../../util/helpers.js';
-import { RelatedLicenseSet } from '../license-matching/license-grouper.js';
-import { abbrActionDetails, ActionGenerator, CreateDealAction, UpdateDealAction } from './actions.js';
-import { EventGenerator } from './events.js';
-import { getEmails } from './records.js';
+import assert from "assert";
+import { saveForInspection } from "../../cache/inspection";
+import log from "../../log/logger";
+import { Table } from "../../log/table";
+import { Database } from "../../model/database";
+import { Deal } from "../../model/deal";
+import { License, LicenseData } from "../../model/license";
+import { Transaction } from "../../model/transaction";
+import env from "../../parameters/env-config";
+import { formatMoney } from "../../util/formatters";
+import { isPresent, sorter } from "../../util/helpers";
+import { RelatedLicenseSet } from "../license-matching/license-grouper";
+import { ActionGenerator } from "./actions";
+import { EventGenerator } from "./events";
+import { DealDataLogger } from "./logger";
+
 
 export type IgnoredLicense = LicenseData & {
   reason: string;
@@ -24,21 +25,37 @@ export class DealGenerator {
 
   private actionGenerator: ActionGenerator;
 
-  private dealCreateActions: CreateDealAction[] = [];
-  private dealUpdateActions: UpdateDealAction[] = [];
-
   private ignoredLicenseSets: (IgnoredLicense)[][] = [];
   private ignoredAmounts = new Map<string, number>();
 
   private partnerTransactions = new Set<Transaction>();
 
-  constructor(private db: Database) {
+  public constructor(private db: Database) {
     this.actionGenerator = new ActionGenerator(db.dealManager);
   }
 
-  run(matches: RelatedLicenseSet[]) {
+  public run(matches: RelatedLicenseSet[]) {
+    const logger = new DealDataLogger();
+
     for (const relatedLicenseIds of matches) {
-      this.generateActionsForMatchedGroup(relatedLicenseIds);
+      const { records, events, actions } = this.generateActionsForMatchedGroup(relatedLicenseIds);
+
+      logger.logTestID(relatedLicenseIds);
+      logger.logRecords(records);
+      logger.logEvents(events);
+      logger.logActions(actions);
+
+      for (const action of actions) {
+        const deal = (action.type === 'create'
+          ? this.db.dealManager.create(action.properties)
+          : action.deal);
+
+        deal.records = records;
+
+        this.associateDealContactsAndCompanies(relatedLicenseIds, deal);
+
+        this.flagPartnerTransacted(deal);
+      }
     }
 
     saveForInspection('ignored', this.ignoredLicenseSets);
@@ -50,14 +67,7 @@ export class DealGenerator {
     this.printIgnoredTransactionsTable();
     this.printPartnerTransactionsTable();
 
-    for (const { groups, properties } of this.dealCreateActions) {
-      const deal = this.db.dealManager.create(properties);
-      this.associateDealContactsAndCompanies(groups, deal);
-    }
-
-    for (const { deal, groups } of this.dealUpdateActions) {
-      this.associateDealContactsAndCompanies(groups, deal);
-    }
+    logger.close();
   }
 
   private printIgnoredTransactionsTable() {
@@ -91,7 +101,7 @@ export class DealGenerator {
         t.data.addonLicenseId,
         t.data.saleDate,
         formatMoney(t.data.vendorAmount),
-        [...new Set(getEmails(t))].join(', '),
+        [...new Set(t.allContacts.map(c => c.data.email))].join(', '),
       ]);
     }
 
@@ -101,26 +111,22 @@ export class DealGenerator {
     }
   }
 
-  private generateActionsForMatchedGroup(groups: RelatedLicenseSet) {
-    assert.ok(groups.length > 0);
-    if (this.ignoring(groups)) return;
+  public generateActionsForMatchedGroup(group: RelatedLicenseSet) {
+    assert.ok(group.length > 0);
+    if (this.ignoring(group)) return { records: [], actions: [], events: [] };
 
-    const events = new EventGenerator().interpretAsEvents(groups);
+    const eventGenerator = new EventGenerator();
+
+    const records = eventGenerator.getSortedRecords(group);
+    const events = eventGenerator.interpretAsEvents(records);
     const actions = this.actionGenerator.generateFrom(events);
-    log.detailed('Deal Actions', 'Generated deal actions', actions.map(action => abbrActionDetails(action)));
 
-    for (const action of actions) {
-      switch (action.type) {
-        case 'create': this.dealCreateActions.push(action); break;
-        case 'update': this.dealUpdateActions.push(action); break;
-        case 'noop': break;
-      }
-    }
+    return { records, events, actions };
   }
 
-  private associateDealContactsAndCompanies(groups: RelatedLicenseSet, deal: Deal) {
-    const records = groups.flatMap(group => [group.license, ...group.transactions]);
-    const emails = [...new Set(records.flatMap(getEmails))];
+  private associateDealContactsAndCompanies(group: RelatedLicenseSet, deal: Deal) {
+    const records = group.flatMap(license => [license, ...license.transactions]);
+    const emails = [...new Set(records.flatMap(r => r.allContacts.map(c => c.data.email)))];
     const contacts = (emails
       .map(email => this.db.contactManager.getByEmail(email))
       .filter(isPresent));
@@ -142,9 +148,9 @@ export class DealGenerator {
   }
 
   /** Ignore if every license's tech contact domain is partner or mass-provider */
-  private ignoring(groups: RelatedLicenseSet) {
-    const licenses = groups.map(g => g.license);
-    const transactions = groups.flatMap(g => g.transactions);
+  private ignoring(group: RelatedLicenseSet) {
+    const licenses = group;
+    const transactions = group.flatMap(license => license.transactions);
     const records = [...licenses, ...transactions];
     const domains = new Set(records.map(license => license.data.technicalContact.email.toLowerCase().split('@')[1]));
 
@@ -192,6 +198,26 @@ export class DealGenerator {
       details,
       ...license.data,
     })));
+  }
+
+  public flagPartnerTransacted(deal: Deal) {
+    if (deal.records.length === 0) {
+      log.error('Deal Actions', "Deal has no associated MPAC records:", deal.id);
+      return;
+    }
+
+    /**
+     * If any record in any of the deal's groups have partner contacts
+     * then use the most recent record's partner contact's domain.
+     * Otherwise set this to null.
+     */
+    const lastPartner = (deal
+      .records
+      .flatMap(r => r.allContacts)
+      .reverse()
+      .find(c => c.isPartner));
+
+    deal.data.associatedPartner = lastPartner?.getPartnerDomain(this.db.partnerDomains) ?? null;
   }
 
 }

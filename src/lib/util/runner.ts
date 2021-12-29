@@ -1,5 +1,5 @@
-import log from '../log/logger.js';
-import env from '../parameters/env.js';
+import log from "../log/logger";
+import env from "../parameters/env-config";
 
 export default async function run({ work, failed }: {
   work: () => Promise<void>,

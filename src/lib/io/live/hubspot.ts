@@ -1,17 +1,20 @@
 import * as hubspot from '@hubspot/api-client';
 import assert from 'assert';
-import { Association, EntityKind, ExistingEntity, FullEntity, NewEntity, RelativeAssociation } from '../../model/hubspot/interfaces.js';
-import env from '../../parameters/env.js';
-import { SimpleError } from '../../util/errors.js';
-import { batchesOf } from '../../util/helpers.js';
-import cache from '../cache.js';
-import { HubspotService, Progress } from '../interfaces.js';
+import log from '../../log/logger';
+import { Association, EntityKind, ExistingEntity, FullEntity, NewEntity, RelativeAssociation } from '../../model/hubspot/interfaces';
+import env from '../../parameters/env-config';
+import { KnownError } from '../../util/errors';
+import { batchesOf } from '../../util/helpers';
+import cache from '../cache';
+import { HubspotService, Progress } from '../interfaces';
 
 export default class LiveHubspotService implements HubspotService {
 
-  client = new hubspot.Client({ apiKey: env.hubspot.apiKey });
+  private client = new hubspot.Client(env.hubspot.accessToken
+    ? { accessToken: env.hubspot.accessToken }
+    : { apiKey: env.hubspot.apiKey });
 
-  async downloadEntities(_progess: Progress, kind: EntityKind, apiProperties: string[], inputAssociations: string[]): Promise<FullEntity[]> {
+  public async downloadEntities(_progess: Progress, kind: EntityKind, apiProperties: string[], inputAssociations: string[]): Promise<FullEntity[]> {
     let associations = ((inputAssociations.length > 0)
       ? inputAssociations
       : undefined);
@@ -34,7 +37,7 @@ export default class LiveHubspotService implements HubspotService {
       return cache(`${kind}.json`, normalizedEntities);
     }
     catch (e: any) {
-      const body = e.response.body;
+      const body = e.response?.body;
       if (
         (
           typeof body === 'string' && (
@@ -46,7 +49,7 @@ export default class LiveHubspotService implements HubspotService {
           body.message === 'internal error'
         )
       ) {
-        throw new SimpleError(`Hubspot v3 API for "${kind}" had internal error.`);
+        throw new KnownError(`Hubspot v3 API for "${kind}" had internal error.`);
       }
       else {
         throw new Error(`Failed downloading ${kind}s: ${JSON.stringify(body)}`);
@@ -54,14 +57,14 @@ export default class LiveHubspotService implements HubspotService {
     }
   }
 
-  async createEntities(kind: EntityKind, entities: NewEntity[]): Promise<ExistingEntity[]> {
+  public async createEntities(kind: EntityKind, entities: NewEntity[]): Promise<ExistingEntity[]> {
     return await this.batchDo(kind, entities, async entities => {
       const response = await this.apiFor(kind).batchApi.create({ inputs: entities });
       return response.body.results;
     });
   }
 
-  async updateEntities(kind: EntityKind, entities: ExistingEntity[]): Promise<ExistingEntity[]> {
+  public async updateEntities(kind: EntityKind, entities: ExistingEntity[]): Promise<ExistingEntity[]> {
     return await this.batchDo(kind, entities, async entities => {
       const response = await this.apiFor(kind).batchApi.update({ inputs: entities });
       return response.body.results;
@@ -85,15 +88,18 @@ export default class LiveHubspotService implements HubspotService {
     return resultGroups.flat(1);
   }
 
-  async createAssociations(fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void> {
+  public async createAssociations(fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void> {
     for (const inputBatch of batchesOf(inputs, 100)) {
-      await this.client.crm.associations.batchApi.create(fromKind, toKind, {
+      const response = await this.client.crm.associations.batchApi.create(fromKind, toKind, {
         inputs: inputBatch.map(input => mapAssociationInput(fromKind, input))
       });
+      for (const e of response.body.errors ?? []) {
+        log.error('Live Hubspot', e.message);
+      }
     }
   }
 
-  async deleteAssociations(fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void> {
+  public async deleteAssociations(fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void> {
     for (const inputBatch of batchesOf(inputs, 100)) {
       await this.client.crm.associations.batchApi.archive(fromKind, toKind, {
         inputs: inputBatch.map(input => mapAssociationInput(fromKind, input))
@@ -115,6 +121,6 @@ function mapAssociationInput(fromKind: EntityKind, input: Association) {
   return {
     from: { id: input.fromId },
     to: { id: input.toId },
-    type: `${fromKind}_${input.toType}`,
+    type: `${fromKind}_to_${input.toType}`,
   };
 }

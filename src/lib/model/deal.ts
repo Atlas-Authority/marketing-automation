@@ -1,13 +1,13 @@
-import env from "../parameters/env.js";
-import { AttachableError } from "../util/errors.js";
-import { isPresent } from "../util/helpers.js";
-import { Company } from "./company.js";
-import { Contact } from "./contact.js";
-import { Entity } from "./hubspot/entity.js";
-import { DealStage, EntityKind, Pipeline } from "./hubspot/interfaces.js";
-import { EntityAdapter, EntityManager } from "./hubspot/manager.js";
-import { License } from "./license.js";
-import { Transaction } from "./transaction.js";
+import env from "../parameters/env-config";
+import { AttachableError } from "../util/errors";
+import { isPresent } from "../util/helpers";
+import { Company } from "./company";
+import { Contact } from "./contact";
+import { Entity } from "./hubspot/entity";
+import { DealStage, EntityKind, Pipeline } from "./hubspot/interfaces";
+import { EntityAdapter, EntityManager } from "./hubspot/manager";
+import { License } from "./license";
+import { Transaction, uniqueTransactionId } from "./transaction";
 
 export type DealData = {
   relatedProducts: string | null;
@@ -23,6 +23,7 @@ export type DealData = {
   pipeline: Pipeline;
   dealStage: DealStage;
   amount: number | null;
+  associatedPartner: string | null;
 };
 
 type DealComputed = {
@@ -31,23 +32,28 @@ type DealComputed = {
 
 export class Deal extends Entity<DealData, DealComputed> {
 
-  contacts = this.makeDynamicAssociation<Contact>('contact');
-  companies = this.makeDynamicAssociation<Company>('company');
+  records: (License | Transaction)[] = [];
 
-  mpacId() {
+  public contacts = this.makeDynamicAssociation<Contact>('contact');
+  public companies = this.makeDynamicAssociation<Company>('company');
+
+  public mpacId() {
     if (this.data.transactionId && this.data.addonLicenseId) {
-      return `${this.data.transactionId}[${this.data.addonLicenseId}]`;
+      return uniqueTransactionId({
+        transactionId: this.data.transactionId,
+        addonLicenseId: this.data.addonLicenseId,
+      });
     }
     else {
       return this.data.addonLicenseId;
     }
   }
 
-  get isWon() { return this.data.dealStage === DealStage.CLOSED_WON }
-  get isLost() { return this.data.dealStage === DealStage.CLOSED_LOST }
+  public get isWon() { return this.data.dealStage === DealStage.CLOSED_WON }
+  public get isLost() { return this.data.dealStage === DealStage.CLOSED_LOST }
 
-  isEval() { return this.data.dealStage === DealStage.EVAL; }
-  isClosed() { return this.isWon || this.isLost; }
+  public isEval() { return this.data.dealStage === DealStage.EVAL; }
+  public isClosed() { return this.isWon || this.isLost; }
 
   public link() {
     const hsAccountId = env.hubspot.accountId;
@@ -137,6 +143,11 @@ const DealAdapter: EntityAdapter<DealData, DealComputed> = {
       down: amount => !amount ? null : +amount,
       up: amount => amount?.toString() ?? '',
     },
+    associatedPartner: {
+      property: env.hubspot.attrs.deal.associatedPartner,
+      down: partner => partner,
+      up: partner => partner ?? '',
+    },
   },
 
   computed: {
@@ -171,16 +182,16 @@ const DealAdapter: EntityAdapter<DealData, DealComputed> = {
 
 export class DealManager extends EntityManager<DealData, DealComputed, Deal> {
 
-  override Entity = Deal;
-  override kind: EntityKind = 'deal';
-  override entityAdapter = DealAdapter;
+  protected override Entity = Deal;
+  protected override kind: EntityKind = 'deal';
+  protected override entityAdapter = DealAdapter;
 
   /** Either `License.addonLicenseId` or `Transaction.transactionId[Transacton.addonLicenseId]` */
   public getByMpacId = this.makeIndex(d => [d.mpacId()].filter(isPresent), ['transactionId', 'addonLicenseId']);
 
-  duplicatesToDelete = new Map<Deal, Set<Deal>>();
+  public duplicatesToDelete = new Map<Deal, Set<Deal>>();
 
-  getDealsForRecords(records: (License | Transaction)[]) {
+  public getDealsForRecords(records: (License | Transaction)[]) {
     return new Set(records
       .map(record => this.getByMpacId(record.id))
       .filter(isPresent));

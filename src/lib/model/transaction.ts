@@ -1,6 +1,8 @@
-import * as assert from 'assert';
-import { AddonLicenseId, ContactInfo, getContactInfo, getPartnerInfo, maybeGetContactInfo, PartnerInfo } from "./marketplace/common.js";
-import { RawTransaction } from "./marketplace/raw.js";
+import assert from "assert";
+import { License } from "./license";
+import { AddonLicenseId, ContactInfo, getContactInfo, getPartnerInfo, maybeGetContactInfo, PartnerInfo } from "./marketplace/common";
+import { RawTransaction } from "./marketplace/raw";
+import { MpacRecord } from "./marketplace/record";
 
 export interface TransactionData {
   addonLicenseId: AddonLicenseId,
@@ -33,15 +35,17 @@ export interface TransactionData {
   vendorAmount: number,
 }
 
-export class Transaction {
+export class Transaction extends MpacRecord<TransactionData> {
 
   /** Unique ID for this Transaction. */
-  public id: string;
-  public data: TransactionData;
-  public tier: number;
+  declare id;
+  declare tier;
 
-  constructor(rawTransaction: RawTransaction) {
-    this.data = {
+  public license!: License;
+  public refunded = false;
+
+  static fromRaw(rawTransaction: RawTransaction) {
+    return new Transaction({
       transactionId: rawTransaction.transactionId,
 
       addonLicenseId: rawTransaction.addonLicenseId,
@@ -69,9 +73,12 @@ export class Transaction {
       billingPeriod: rawTransaction.purchaseDetails.billingPeriod,
       purchasePrice: rawTransaction.purchaseDetails.purchasePrice,
       vendorAmount: rawTransaction.purchaseDetails.vendorAmount,
-    };
+    });
+  }
 
-    this.id = `${this.data.transactionId}[${this.data.addonLicenseId}]`;
+  public constructor(data: TransactionData) {
+    super(data);
+    this.id = uniqueTransactionId(this.data);
     this.tier = this.parseTier();
   }
 
@@ -91,4 +98,8 @@ export class Transaction {
     assert.fail(`Unknown transaction tier: ${tier}`);
   }
 
+}
+
+export function uniqueTransactionId(data: { transactionId: string, addonLicenseId: string }) {
+  return `${data.transactionId}[${data.addonLicenseId}]`
 }

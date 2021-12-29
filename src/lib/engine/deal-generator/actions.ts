@@ -1,19 +1,24 @@
-import log from '../../log/logger.js';
-import { Deal, DealData, DealManager } from '../../model/deal.js';
-import { DealStage } from '../../model/hubspot/interfaces.js';
-import { License } from '../../model/license.js';
-import { Transaction } from '../../model/transaction.js';
-import { isPresent, sorter } from '../../util/helpers.js';
-import { RelatedLicenseSet } from '../license-matching/license-grouper.js';
-import { abbrEventDetails, DealRelevantEvent, EvalEvent, PurchaseEvent, RefundEvent, RenewalEvent, UpgradeEvent } from "./events.js";
-import { dealCreationProperties, updateDeal } from './records.js';
+import mustache from 'mustache';
+import log from "../../log/logger";
+import { Deal, DealData, DealManager } from "../../model/deal";
+import { DealStage, Pipeline } from "../../model/hubspot/interfaces";
+import { License } from "../../model/license";
+import { Transaction } from "../../model/transaction";
+import env from '../../parameters/env-config';
+import { isPresent, sorter } from "../../util/helpers";
+import { abbrEventDetails, DealRelevantEvent, EvalEvent, PurchaseEvent, RefundEvent, RenewalEvent, UpgradeEvent } from "./events";
+
+export type Action = CreateDealAction | UpdateDealAction | IgnoreDealAction;
+export type CreateDealAction = { type: 'create'; properties: DealData };
+export type UpdateDealAction = { type: 'update'; deal: Deal; properties: Partial<DealData> };
+export type IgnoreDealAction = { type: 'noop'; deal: Deal };
 
 export class ActionGenerator {
 
   #handledDeals = new Map<Deal, DealRelevantEvent>();
-  constructor(private dealManager: DealManager) { }
+  public constructor(private dealManager: DealManager) { }
 
-  generateFrom(events: DealRelevantEvent[]) {
+  public generateFrom(events: DealRelevantEvent[]) {
     return events.flatMap(event => this.actionsFor(event));
   }
 
@@ -59,7 +64,8 @@ export class ActionGenerator {
 
     if (deal) {
       const license = event.transaction || getLatestLicense(event);
-      return makeUpdateAction(event, deal, license, DealStage.CLOSED_WON);
+      const dealStage = deal.isEval() ? DealStage.CLOSED_WON : deal.data.dealStage;
+      return makeUpdateAction(event, deal, license, dealStage);
     }
     else if (event.transaction) {
       return makeCreateAction(event, event.transaction, {
@@ -169,38 +175,9 @@ export class ActionGenerator {
 
 }
 
-export type CreateDealAction = {
-  type: 'create';
-  groups: RelatedLicenseSet;
-  properties: DealData;
-};
-
-export type UpdateDealAction = {
-  type: 'update';
-  groups: RelatedLicenseSet;
-  deal: Deal;
-  properties: Partial<DealData>;
-};
-
-export type NoDealAction = {
-  type: 'noop';
-  deal: Deal;
-};
-
-export type Action = CreateDealAction | UpdateDealAction | NoDealAction;
-
-export function abbrActionDetails(action: Action) {
-  switch (action.type) {
-    case 'create': return ['create', action.properties];
-    case 'update': return ['update', action.deal.id, action.properties];
-    case 'noop': return ['noop', action.deal.id];
-  }
-}
-
 function makeCreateAction(event: DealRelevantEvent, record: License | Transaction, data: Pick<DealData, 'addonLicenseId' | 'transactionId' | 'dealStage'>): Action {
   return {
     type: 'create',
-    groups: event.groups,
     properties: dealCreationProperties(record, data),
   };
 }
@@ -210,13 +187,11 @@ function makeUpdateAction(event: DealRelevantEvent, deal: Deal, record: License 
   if (record) updateDeal(deal, record);
 
   if (!deal.hasPropertyChanges()) {
-    log.detailed('Deal Actions', 'No properties to update for deal', deal.id);
     return { type: 'noop', deal };
   }
 
   return {
     type: 'update',
-    groups: event.groups,
     deal,
     properties: deal.getPropertyChanges(),
   };
@@ -224,4 +199,37 @@ function makeUpdateAction(event: DealRelevantEvent, deal: Deal, record: License 
 
 function getLatestLicense(event: PurchaseEvent): License {
   return [...event.licenses].sort(sorter(item => item.data.maintenanceStartDate, 'DSC'))[0];
+}
+
+function dealCreationProperties(record: License | Transaction, data: Pick<DealData, 'addonLicenseId' | 'transactionId' | 'dealStage'>): DealData {
+  return {
+    ...data,
+    closeDate: (record instanceof Transaction
+      ? record.data.saleDate
+      : record.data.maintenanceStartDate),
+    deployment: record.data.hosting,
+    app: record.data.addonKey,
+    licenseTier: record.tier,
+    country: record.data.country,
+    origin: env.hubspot.deals.dealOrigin ?? null,
+    relatedProducts: env.hubspot.deals.dealRelatedProducts ?? null,
+    dealName: mustache.render(env.hubspot.deals.dealDealName, record.data),
+    pipeline: Pipeline.MPAC,
+    associatedPartner: null,
+    amount: (data.dealStage === DealStage.EVAL
+      ? null
+      : record instanceof License
+        ? 0
+        : record.data.vendorAmount),
+  };
+}
+
+function updateDeal(deal: Deal, record: License | Transaction) {
+  const data = dealCreationProperties(record, {
+    addonLicenseId: deal.data.addonLicenseId,
+    transactionId: deal.data.transactionId,
+    dealStage: deal.data.dealStage,
+  });
+  Object.assign(deal.data, data);
+  deal.data.licenseTier = Math.max(deal.data.licenseTier ?? -1, record.tier);
 }

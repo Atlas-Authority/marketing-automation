@@ -1,6 +1,8 @@
 import * as assert from 'assert';
-import { AddonLicenseId, ContactInfo, getContactInfo, getPartnerInfo, maybeGetContactInfo, PartnerInfo } from "./marketplace/common.js";
-import { RawLicense } from "./marketplace/raw.js";
+import { AddonLicenseId, ContactInfo, getContactInfo, getPartnerInfo, maybeGetContactInfo, PartnerInfo } from "./marketplace/common";
+import { RawLicense } from "./marketplace/raw";
+import { MpacRecord } from './marketplace/record.js';
+import { Transaction } from './transaction';
 
 type AttributionData = {
   channel: string;
@@ -55,15 +57,16 @@ export interface LicenseData {
   newEvalData: NewEvalData | null,
 }
 
-export class License {
+export class License extends MpacRecord<LicenseData> {
 
   /** Unique ID for this License. */
-  public id: string;
-  public data: LicenseData;
-  public tier: number;
+  declare id;
+  declare tier;
+
+  public transactions: Transaction[] = [];
   public active: boolean;
 
-  constructor(rawLicense: RawLicense) {
+  static fromRaw(rawLicense: RawLicense) {
     let newEvalData: NewEvalData | null = null;
     if (rawLicense.evaluationLicense) {
       newEvalData = {
@@ -88,7 +91,7 @@ export class License {
       } as ParentProductInfo;
     }
 
-    this.data = {
+    return new License({
       addonLicenseId: rawLicense.addonLicenseId,
       licenseId: rawLicense.licenseId,
       addonKey: rawLicense.addonKey,
@@ -114,8 +117,11 @@ export class License {
       attribution: rawLicense.attribution ?? null,
       parentInfo,
       newEvalData,
-    };
+    });
+  }
 
+  public constructor(data: LicenseData) {
+    super(data);
     this.id = this.data.addonLicenseId;
     this.tier = Math.max(this.parseTier(), this.tierFromEvalOpportunity());
     this.active = this.data.status === 'active';

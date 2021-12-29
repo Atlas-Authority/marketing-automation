@@ -2,26 +2,21 @@
   "compilerOptions": {
     "checkJs": true,
     "allowJs": true,
-    "module": "ESNext",
+    "module": "CommonJS",
     "target": "ESNext",
     "sourceMap": true,
     "moduleResolution": "Node",
     "lib": [
       "ES2020"
     ],
-    "strictFunctionTypes": true,
-    "strictBindCallApply": true,
-    "strictNullChecks": true,
-    "strictPropertyInitialization": true,
     "strict": true,
     "outDir": "./out",
     "noImplicitReturns": true,
-    "noImplicitThis": true,
     "noImplicitAny": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": false,
     "skipLibCheck": true,
-    "allowSyntheticDefaultImports": true
+    "esModuleInterop": true
   },
   "include": [
     "src/**/*.js",

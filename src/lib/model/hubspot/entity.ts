@@ -1,5 +1,4 @@
-import * as assert from 'assert';
-import { EntityKind } from './interfaces.js';
+import { EntityKind } from "./interfaces";
 
 export interface Indexer<D> {
   removeIndexesFor<K extends keyof D>(key: K, val: D[K] | undefined): void;
@@ -11,7 +10,7 @@ export abstract class Entity<
   C extends Record<string, any>>
 {
 
-  id?: string;
+  public id?: string;
 
   /** The most recently saved props, or all unsaved props */
   private _data: D;
@@ -23,9 +22,10 @@ export abstract class Entity<
   /** A copy of assocs, which all updates act on, whether an existing or new entity */
   private newAssocs = new Set<Entity<any, any>>();
 
-  readonly data: D;
+  public readonly data: D;
 
-  constructor(
+  /** Don't call directly; use manager.create() */
+  public constructor(
     id: string | null,
     public kind: EntityKind,
     data: D,
@@ -47,20 +47,20 @@ export abstract class Entity<
     });
   }
 
-  guaranteedId() {
+  public guaranteedId() {
     if (!this.id) throw new Error('Trying to access null deal id!');
     return this.id;
   }
 
   // Properties
 
-  get<K extends keyof D>(key: K) {
+  private get<K extends keyof D>(key: K) {
     if (this.id === undefined) return this._data[key];
     if (key in this.newData) return this.newData[key];
     return this._data[key];
   }
 
-  set<K extends keyof D>(key: K, val: D[K]) {
+  private set<K extends keyof D>(key: K, val: D[K]) {
     if (this.id === undefined) {
       this.indexer.removeIndexesFor(key, this._data[key]);
       this._data[key] = val;
@@ -79,16 +79,16 @@ export abstract class Entity<
     this.indexer.addIndexesFor(key, this.newData[key], this);
   }
 
-  hasPropertyChanges() {
+  public hasPropertyChanges() {
     return this.id === undefined || Object.keys(this.newData).length > 0;
   }
 
-  getPropertyChanges() {
+  public getPropertyChanges() {
     if (this.id === undefined) return this._data;
     return this.newData;
   }
 
-  applyPropertyChanges() {
+  public applyPropertyChanges() {
     Object.assign(this._data, this.newData);
     this.newData = {};
   }
@@ -106,7 +106,7 @@ export abstract class Entity<
   }
 
   /** Don't use directly; use deal.contacts.add(c) etc. */
-  addAssociation(entity: Entity<any, any>, meta: { firstSide: boolean, initial: boolean }) {
+  public addAssociation(entity: Entity<any, any>, meta: { firstSide: boolean, initial: boolean }) {
     if (meta.initial) this.assocs.add(entity);
     this.newAssocs.add(entity);
 
@@ -135,14 +135,14 @@ export abstract class Entity<
     }
   }
 
-  hasAssociationChanges() {
+  public hasAssociationChanges() {
     return (
       [...this.assocs].some(e => !this.newAssocs.has(e)) ||
       [...this.newAssocs].some(e => !this.assocs.has(e))
     );
   }
 
-  getAssociationChanges() {
+  public getAssociationChanges() {
     const toAdd = [...this.newAssocs].filter(e => !this.assocs.has(e));
     const toDel = [...this.assocs].filter(e => !this.newAssocs.has(e));
     return [
@@ -151,7 +151,7 @@ export abstract class Entity<
     ] as { op: 'add' | 'del', other: Entity<any, any> }[];
   }
 
-  applyAssociationChanges() {
+  public applyAssociationChanges() {
     this.assocs = new Set(this.newAssocs);
   }
 

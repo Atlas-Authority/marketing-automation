@@ -1,24 +1,26 @@
+import got from 'got';
 import { DateTime, Duration, Interval } from 'luxon';
-import fetch from 'node-fetch';
-import { RawLicense, RawTransaction } from "../../model/marketplace/raw";
-import env from '../../parameters/env.js';
-import { AttachableError } from '../../util/errors.js';
-import cache from '../cache.js';
-import { MarketplaceService, Progress } from '../interfaces.js';
+import { RawLicense, RawTransaction } from '../../model/marketplace/raw';
+import env from '../../parameters/env-config';
+import { AttachableError, KnownError } from '../../util/errors';
+import cache from '../cache';
+import { MarketplaceService, Progress } from '../interfaces';
+
 
 export class LiveMarketplaceService implements MarketplaceService {
 
-  async downloadTransactions(): Promise<RawTransaction[]> {
-    return cache('transactions.json',
-      await this.downloadMarketplaceData('/sales/transactions/export'));
+  public async downloadTransactions(): Promise<RawTransaction[]> {
+    const transactions = await this.downloadMarketplaceData('/sales/transactions/export');
+    if ((transactions as any).code === 401) throw new KnownError("MPAC_API_KEY is an invalid API key.");
+    return cache('transactions.json', transactions as RawTransaction[]);
   }
 
-  async downloadLicensesWithoutDataInsights(): Promise<RawLicense[]> {
+  public async downloadLicensesWithoutDataInsights(): Promise<RawLicense[]> {
     return cache('licenses-without.json',
       await this.downloadMarketplaceData('/licenses/export?endDate=2018-07-01'));
   }
 
-  async downloadLicensesWithDataInsights(progress: Progress): Promise<RawLicense[]> {
+  public async downloadLicensesWithDataInsights(progress: Progress): Promise<RawLicense[]> {
     const dates = dataInsightDateRanges();
     progress.setCount(dates.length);
     const promises = dates.map(async ({ startDate, endDate }) => {
@@ -31,15 +33,15 @@ export class LiveMarketplaceService implements MarketplaceService {
   }
 
   private async downloadMarketplaceData<T>(subpath: string): Promise<T[]> {
-    const res = await fetch(`https://marketplace.atlassian.com/rest/2/vendors/${env.mpac.sellerId}/reporting${subpath}`, {
+    const res = await got.get(`https://marketplace.atlassian.com/rest/2/vendors/${env.mpac.sellerId}/reporting${subpath}`, {
       headers: {
-        'Authorization': 'Basic ' + Buffer.from(env.mpac.user + ':' + env.mpac.pass).toString('base64'),
+        'Authorization': 'Basic ' + Buffer.from(env.mpac.user + ':' + env.mpac.apiKey).toString('base64'),
       },
     });
 
     let text;
     try {
-      text = await res.text();
+      text = res.body;
       return JSON.parse(text);
     }
     catch (e) {

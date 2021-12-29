@@ -1,9 +1,9 @@
-import log from "../log/logger.js";
-import { Table } from "../log/table.js";
-import { Database } from "../model/database.js";
-import { Deal } from "../model/deal.js";
-import { formatMoney, formatNumber } from "../util/formatters.js";
-import { isPresent } from "../util/helpers.js";
+import log from "../log/logger";
+import { Table } from "../log/table";
+import { Database } from "../model/database";
+import { Deal } from "../model/deal";
+import { formatMoney, formatNumber } from "../util/formatters";
+import { isPresent } from "../util/helpers";
 
 export function printSummary(db: Database) {
 

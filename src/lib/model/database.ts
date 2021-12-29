@@ -1,46 +1,51 @@
-import { IO } from "../io/io.js";
-import { makeEmailValidationRegex } from "../io/live/domains.js";
-import { MultiDownloadLogger } from "../log/download-logger.js";
-import log from "../log/logger.js";
-import { Table } from "../log/table.js";
-import { Tallier } from "../log/tallier.js";
-import { formatMoney, formatNumber } from "../util/formatters.js";
-import { CompanyManager } from "./company.js";
-import { ContactManager } from "./contact.js";
-import { DealManager } from "./deal.js";
-import { EmailProviderLister } from "./email-providers/index.js";
-import { Entity } from "./hubspot/entity.js";
-import { EntityKind } from "./hubspot/interfaces.js";
-import { License } from "./license.js";
-import { validateMarketplaceData } from "./marketplace/validation.js";
-import { Transaction } from "./transaction.js";
+import { IO } from "../io/io";
+import { makeEmailValidationRegex } from "../io/live/domains";
+import { MultiDownloadLogger } from "../log/download-logger";
+import log from "../log/logger";
+import { Table } from "../log/table";
+import { Tallier } from "../log/tallier";
+import { Config } from "../parameters/env-config";
+import { formatMoney, formatNumber } from "../util/formatters";
+import { CompanyManager } from "./company";
+import { ContactManager } from "./contact";
+import { DealManager } from "./deal";
+import { EmailProviderLister } from "./email-providers";
+import { Entity } from "./hubspot/entity";
+import { EntityKind } from "./hubspot/interfaces";
+import { License } from "./license";
+import { validateMarketplaceData } from "./marketplace/validation";
+import { Transaction } from "./transaction";
 
 export class Database {
 
-  dealManager: DealManager;
-  contactManager: ContactManager;
-  companyManager: CompanyManager;
+  public dealManager: DealManager;
+  public contactManager: ContactManager;
+  public companyManager: CompanyManager;
 
-  licenses: License[] = [];
-  transactions: Transaction[] = [];
+  public licenses: License[] = [];
+  public transactions: Transaction[] = [];
 
   /** Domains that provide spam or free email accounts for masses. */
-  providerDomains = new Set<string>();
-  partnerDomains = new Set<string>();
-  customerDomains = new Set<string>();
+  public providerDomains = new Set<string>();
+  public partnerDomains = new Set<string>();
+  public customerDomains = new Set<string>();
 
-  emailProviderLister: EmailProviderLister;
+  private emailProviderLister: EmailProviderLister;
 
-  tallier = new Tallier();
+  public tallier = new Tallier();
 
-  constructor(private io: IO) {
-    this.dealManager = new DealManager(io.in.hubspot, io.out.hubspot, this);
-    this.contactManager = new ContactManager(io.in.hubspot, io.out.hubspot, this);
-    this.companyManager = new CompanyManager(io.in.hubspot, io.out.hubspot, this);
+  public constructor(private io: IO, config: Config) {
+    this.dealManager = new DealManager(io.in.hubspot, io.out.hubspot);
+    this.contactManager = new ContactManager(io.in.hubspot, io.out.hubspot);
+    this.companyManager = new CompanyManager(io.in.hubspot, io.out.hubspot);
     this.emailProviderLister = new EmailProviderLister(io.in.emailProviderLister);
+
+    for (const domain of config.partnerDomains) {
+      this.partnerDomains.add(domain);
+    }
   }
 
-  async downloadAllData() {
+  public async downloadAllData() {
     log.info('Downloader', 'Starting downloads with API');
 
     const logbox = new MultiDownloadLogger();
@@ -78,9 +83,9 @@ export class Database {
 
     logbox.done();
 
-    this.dealManager.linkAssociations();
-    this.companyManager.linkAssociations();
-    this.contactManager.linkAssociations();
+    this.dealManager.linkAssociations(this);
+    this.companyManager.linkAssociations(this);
+    this.contactManager.linkAssociations(this);
 
     log.info('Downloader', 'Done');
 
@@ -93,8 +98,8 @@ export class Database {
       transactions,
       emailRe);
 
-    this.licenses = results.licenses.map(raw => new License(raw));
-    this.transactions = results.transactions.map(raw => new Transaction(raw));
+    this.licenses = results.licenses.map(raw => License.fromRaw(raw));
+    this.transactions = results.transactions.map(raw => Transaction.fromRaw(raw));
 
     const transactionTotal = (this.transactions
       .map(t => t.data.vendorAmount)
@@ -105,7 +110,7 @@ export class Database {
     this.tallier.first('Transaction total', transactionTotal);
   }
 
-  printDownloadSummary(transactionTotal: number) {
+  private printDownloadSummary(transactionTotal: number) {
     const deals = this.dealManager.getArray();
     const dealSum = (deals
       .map(d => d.data.amount ?? 0)
@@ -128,7 +133,7 @@ export class Database {
 
   }
 
-  async syncUpAllEntities() {
+  public async syncUpAllEntities() {
     await this.dealManager.syncUpAllEntities();
     await this.contactManager.syncUpAllEntities();
     await this.companyManager.syncUpAllEntities();
@@ -138,7 +143,7 @@ export class Database {
     await this.companyManager.syncUpAllAssociations();
   }
 
-  getEntity(kind: EntityKind, id: string): Entity<any, any> {
+  public getEntity(kind: EntityKind, id: string): Entity<any, any> {
     const found = this.getManager(kind).get(id);
     // There's only two ways to set associations:
     // 1. They were already set in HubSpot when we downloaded them, or

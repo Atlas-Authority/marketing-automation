@@ -1,25 +1,33 @@
-import DataDir from "../../cache/datadir.js";
-import log from "../../log/logger.js";
-import { Association, EntityKind, ExistingEntity, FullEntity, NewEntity, RelativeAssociation } from "../../model/hubspot/interfaces.js";
-import { HubspotService, Progress } from "../interfaces.js";
+import DataDir from "../../cache/datadir";
+import log from "../../log/logger";
+import { Association, EntityKind, ExistingEntity, FullEntity, NewEntity, RelativeAssociation } from "../../model/hubspot/interfaces";
+import { HubspotService, Progress } from "../interfaces";
 
 export class MemoryHubspot implements HubspotService {
 
-  ids = new Map<string, number>();
+  private ids = new Map<string, number>();
 
-  readonly deals = DataDir.in.file<FullEntity[]>(`deal.json`);
-  readonly companies = DataDir.in.file<FullEntity[]>(`company.json`);
-  readonly contacts = DataDir.in.file<FullEntity[]>(`contact.json`);
+  private readonly deals: FullEntity[] = [];
+  private readonly companies: FullEntity[] = [];
+  private readonly contacts: FullEntity[] = [];
+
+  constructor(useDiskCache: boolean) {
+    if (useDiskCache) {
+      this.deals = DataDir.in.file<FullEntity[]>(`deal.json`).readJson();
+      this.companies = DataDir.in.file<FullEntity[]>(`company.json`).readJson();
+      this.contacts = DataDir.in.file<FullEntity[]>(`contact.json`).readJson();
+    }
+  }
 
   // Downloader
 
-  async downloadEntities(_progress: Progress, kind: EntityKind, apiProperties: string[], inputAssociations: string[]): Promise<readonly FullEntity[]> {
+  public async downloadEntities(_progress: Progress, kind: EntityKind, apiProperties: string[], inputAssociations: string[]): Promise<readonly FullEntity[]> {
     return this.arrayFor(kind);
   }
 
   // Uploader
 
-  async createEntities(kind: EntityKind, inputs: NewEntity[]): Promise<ExistingEntity[]> {
+  public async createEntities(kind: EntityKind, inputs: NewEntity[]): Promise<ExistingEntity[]> {
     const objects = inputs.map((o) => ({
       properties: o.properties,
       id: this.newUniqueId(kind),
@@ -39,7 +47,7 @@ export class MemoryHubspot implements HubspotService {
     return `fake.${kind}.${id}`;
   }
 
-  async updateEntities(kind: EntityKind, inputs: ExistingEntity[]): Promise<ExistingEntity[]> {
+  public async updateEntities(kind: EntityKind, inputs: ExistingEntity[]): Promise<ExistingEntity[]> {
     for (const input of inputs) {
       const entity = this.getEntity(kind, input.id);
       Object.assign(entity.properties, input.properties);
@@ -49,7 +57,7 @@ export class MemoryHubspot implements HubspotService {
     return inputs;
   }
 
-  async createAssociations(fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void> {
+  public async createAssociations(fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void> {
     for (const input of inputs) {
       const entity = this.getEntity(fromKind, input.fromId);
       const assoc: RelativeAssociation = `${toKind}:${input.toId}`;
@@ -61,7 +69,7 @@ export class MemoryHubspot implements HubspotService {
     this.fakeApiConsoleLog(`Fake Associating ${fromKind}s to ${toKind}s:`, inputs);
   }
 
-  async deleteAssociations(fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void> {
+  public async deleteAssociations(fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void> {
     for (const input of inputs) {
       const entity = this.getEntity(fromKind, input.fromId);
       const assoc: RelativeAssociation = `${toKind}:${input.toId}`;
@@ -91,9 +99,9 @@ export class MemoryHubspot implements HubspotService {
 
   private arrayFor(kind: EntityKind) {
     switch (kind) {
-      case 'company': return this.companies.readJson();
-      case 'contact': return this.contacts.readJson();
-      case 'deal': return this.deals.readJson();
+      case 'company': return this.companies;
+      case 'contact': return this.contacts;
+      case 'deal': return this.deals;
     }
   }
 

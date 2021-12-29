@@ -1,14 +1,14 @@
-import { Database } from '../../model/database.js';
-import { License } from '../../model/license.js';
-import { SimilarityScorer } from './similarity-scorer.js';
+import { Database } from "../../model/database";
+import { License } from "../../model/license";
+import { SimilarityScorer } from "./similarity-scorer";
 
 export class LicenseMatcher {
 
-  similarityScorer = new SimilarityScorer();
+  private similarityScorer = new SimilarityScorer();
 
-  constructor(private db: Database) { }
+  public constructor(private db: Database) { }
 
-  score(license1: License, license2: License): null | { item1: string, item2: string, score: number, reasons: string[] } {
+  public score(license1: License, license2: License): null | { item1: string, item2: string, score: number, reasons: string[] } {
     const item1 = license1.data.addonLicenseId;
     const item2 = license2.data.addonLicenseId;
 

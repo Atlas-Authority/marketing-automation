@@ -1,7 +1,7 @@
-import { Contact } from "./contact.js";
-import { Entity } from "./hubspot/entity.js";
-import { EntityKind } from "./hubspot/interfaces.js";
-import { EntityAdapter, EntityManager } from "./hubspot/manager.js";
+import { Contact } from "./contact";
+import { Entity } from "./hubspot/entity";
+import { EntityKind } from "./hubspot/interfaces";
+import { EntityAdapter, EntityManager } from "./hubspot/manager";
 
 type CompanyData = {
   name: string;
@@ -10,7 +10,7 @@ type CompanyData = {
 
 export class Company extends Entity<CompanyData, {}> {
 
-  contacts = this.makeDynamicAssociation<Contact>('contact');
+  public contacts = this.makeDynamicAssociation<Contact>('contact');
 
 }
 
@@ -39,8 +39,8 @@ const CompanyAdapter: EntityAdapter<CompanyData, {}> = {
 
 export class CompanyManager extends EntityManager<CompanyData, {}, Company> {
 
-  override Entity = Company;
-  override kind: EntityKind = 'company';
-  override entityAdapter = CompanyAdapter;
+  protected override Entity = Company;
+  protected override kind: EntityKind = 'company';
+  protected override entityAdapter = CompanyAdapter;
 
 }

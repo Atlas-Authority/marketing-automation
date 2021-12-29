@@ -1,5 +1,4 @@
-import { ContactType } from "../../model/contact.js";
-import { GeneratedContact, mergeContactInfo } from "./generate-contacts.js";
+import { GeneratedContact, mergeContactInfo } from "./generate-contacts";
 
 describe('updating latest contact properties', () => {
 
@@ -210,6 +209,7 @@ function fakeContact(props: Partial<GeneratedContact>): GeneratedContact {
     lastMpacEvent: null,
     licenseTier: null,
     relatedProducts: new Set(),
+    lastAssociatedPartner: null,
     ...props
   };
 }

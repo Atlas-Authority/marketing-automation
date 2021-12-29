@@ -1,10 +1,12 @@
-import { batchesOf } from "../util/helpers.js";
+import { batchesOf } from "../util/helpers";
 
 class ArgParser {
 
+  public static readonly cli = new ArgParser(process.argv.slice(2));
+
   #opts: { [opt: string]: string };
 
-  constructor(argv: string[]) {
+  private constructor(argv: string[]) {
     const args = argv.flatMap(s => s.split('='));
     this.#opts = Object.fromEntries(batchesOf(args, 2));
   }
@@ -35,4 +37,4 @@ class ArgParser {
 
 }
 
-export const cli = new ArgParser(process.argv.slice(2));
+export const { cli } = ArgParser;

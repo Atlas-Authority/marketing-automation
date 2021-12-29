@@ -1,21 +1,28 @@
-import Engine from "../lib/engine/engine.js";
-import { IO } from "../lib/io/io.js";
-import log from "../lib/log/logger.js";
-import { Database } from "../lib/model/database.js";
-import { cli } from "../lib/parameters/cli.js";
+import 'source-map-support/register';
+import Engine from "../lib/engine/engine";
+import { CachedMemoryRemote, IO } from "../lib/io/io";
+import log from "../lib/log/logger";
+import { Database } from "../lib/model/database";
+import { cli } from "../lib/parameters/cli-args";
+import { envConfig } from '../lib/parameters/env-config';
 
-cli.failIfExtraOpts();
-log.level = log.Levels.Info;
+main();
+async function main() {
 
-const io = new IO({ in: 'local', out: 'local' });
-const engine = new Engine();
+  cli.failIfExtraOpts();
+  log.level = log.Levels.Info;
 
-// First
-await engine.run(new Database(io));
+  const io = new IO(new CachedMemoryRemote());
+  const engine = new Engine();
 
-// Second
-log.level = log.Levels.Verbose;
-await engine.run(new Database(io));
+  // First
+  await engine.run(new Database(io, envConfig));
 
-// Third
-await engine.run(new Database(io));
+  // Second
+  log.level = log.Levels.Verbose;
+  await engine.run(new Database(io, envConfig));
+
+  // Third
+  await engine.run(new Database(io, envConfig));
+
+}

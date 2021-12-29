@@ -1,0 +1,19 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
+// https://github.com/microsoft/vscode-dev-containers/tree/v0.205.2/containers/javascript-node
+{
+	"name": "Marketing Automation Engine",
+	"build": {
+		"dockerfile": "Dockerfile",
+		"args": {
+			"VARIANT": "16-bullseye"
+		}
+	},
+	"extensions": [
+		"mikestead.dotenv",
+		"yzhang.markdown-all-in-one",
+		"mechatroner.rainbow-csv"
+	],
+	// "forwardPorts": [],
+	"postCreateCommand": "npm i",
+	"remoteUser": "node",
+}

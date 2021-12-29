@@ -1,9 +1,9 @@
-import * as assert from 'assert';
-import { HubspotService, Progress } from '../../io/interfaces.js';
-import { AttachableError } from '../../util/errors.js';
-import { isPresent } from '../../util/helpers.js';
-import { Entity, Indexer } from "./entity.js";
-import { EntityKind, HubspotProperties, RelativeAssociation } from './interfaces.js';
+import assert from 'assert';
+import { HubspotService, Progress } from '../../io/interfaces';
+import { AttachableError } from '../../util/errors';
+import { isPresent } from '../../util/helpers';
+import { Entity, Indexer } from './entity';
+import { EntityKind, HubspotProperties, RelativeAssociation } from './interfaces';
 
 export interface EntityDatabase {
   getEntity(kind: EntityKind, id: string): Entity<any, any>;
@@ -35,10 +35,9 @@ export abstract class EntityManager<
   E extends Entity<D, C>>
 {
 
-  constructor(
+  public constructor(
     private downloader: HubspotService,
     private uploader: HubspotService,
-    private db: EntityDatabase
   ) { }
 
   public createdCount = 0;
@@ -95,14 +94,14 @@ export abstract class EntityManager<
     }
   }
 
-  public linkAssociations() {
+  public linkAssociations(db: EntityDatabase) {
     for (const [meId, rawAssocs] of this.prelinkedAssociations) {
       for (const rawAssoc of rawAssocs) {
         const me = this.get(meId);
         if (!me) throw new Error(`Couldn't find kind=${this.kind} id=${meId}`);
 
         const { toKind, youId } = this.getAssocInfo(rawAssoc);
-        const you = this.db.getEntity(toKind, youId);
+        const you = db.getEntity(toKind, youId);
         if (!you) throw new Error(`Couldn't find kind=${toKind} id=${youId}`);
 
         me.addAssociation(you, { firstSide: true, initial: true });
@@ -287,12 +286,12 @@ export abstract class EntityManager<
     return index.get.bind(index);
   }
 
-  removeIndexesFor<K extends keyof D>(key: K, val: D[K] | undefined) {
+  public removeIndexesFor<K extends keyof D>(key: K, val: D[K] | undefined) {
     if (!val) return;
     this.indexIndex.get(key)?.removeIndex(val);
   }
 
-  addIndexesFor<K extends keyof D>(key: K, val: D[K] | undefined, entity: E) {
+  public addIndexesFor<K extends keyof D>(key: K, val: D[K] | undefined, entity: E) {
     if (!val) return;
     this.indexIndex.get(key)?.addIndex(val, entity);
   }
@@ -302,21 +301,21 @@ export abstract class EntityManager<
 class Index<E> {
 
   private map = new Map<string, E>();
-  constructor(private keysFor: (e: E) => string[]) { }
+  public constructor(private keysFor: (e: E) => string[]) { }
 
-  clear() {
+  public clear() {
     this.map.clear();
   }
 
-  addIndex(key: string, entity: E) {
+  public addIndex(key: string, entity: E) {
     this.map.set(key, entity);
   }
 
-  removeIndex(key: string) {
+  public removeIndex(key: string) {
     this.map.delete(key);
   }
 
-  addIndexesFor(entities: Iterable<E>) {
+  public addIndexesFor(entities: Iterable<E>) {
     for (const e of entities) {
       for (const key of this.keysFor(e)) {
         this.addIndex(key, e);
@@ -324,7 +323,7 @@ class Index<E> {
     }
   }
 
-  removeIndexesFor(entities: Iterable<E>) {
+  public removeIndexesFor(entities: Iterable<E>) {
     for (const e of entities) {
       for (const key of this.keysFor(e)) {
         this.removeIndex(key);
@@ -332,7 +331,7 @@ class Index<E> {
     }
   }
 
-  get(key: string) {
+  public get(key: string) {
     return this.map.get(key);
   }
 

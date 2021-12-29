@@ -1,4 +1,4 @@
-import { SimilarityScorer } from "./similarity-scorer.js";
+import { SimilarityScorer } from "./similarity-scorer";
 
 describe('similarity scorer', () => {
 

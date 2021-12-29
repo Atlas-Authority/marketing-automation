@@ -1,12 +1,18 @@
-import DataDir from "../../cache/datadir.js";
-import { EmailProviderListerService } from "../interfaces.js";
+import DataDir from "../../cache/datadir";
+import { EmailProviderListerService } from "../interfaces";
 
 export class MemoryEmailProviderListerService implements EmailProviderListerService {
 
-  readonly domains = DataDir.in.file<readonly string[]>('domains.json');
+  private readonly domains: readonly string[] = [];
 
-  async downloadFreeEmailProviders(): Promise<readonly string[]> {
-    return this.domains.readJson();
+  constructor(useDiskCache: boolean) {
+    if (useDiskCache) {
+      this.domains = DataDir.in.file<readonly string[]>('domains.json').readJson();
+    }
+  }
+
+  public async downloadFreeEmailProviders(): Promise<readonly string[]> {
+    return this.domains;
   }
 
 }

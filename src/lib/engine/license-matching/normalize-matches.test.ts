@@ -1,4 +1,4 @@
-import { normalizeMatches } from "./license-grouper.js";
+import { normalizeMatches } from "./license-grouper";
 
 describe('normalizer', () => {
 

@@ -1,11 +1,11 @@
 import chalk from "chalk";
-import log from "./logger.js";
+import log from "./logger";
 
 export class EngineLogger {
 
-  count = 0;
+  private count = 0;
 
-  step(description: string) {
+  public step(description: string) {
     log.info('Marketing Automation', chalk.bold.blueBright(`Step ${++this.count}: ${description}`));
   }
 

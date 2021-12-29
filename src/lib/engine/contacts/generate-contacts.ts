@@ -1,10 +1,11 @@
-import capitalize from 'capitalize';
-import { Contact, ContactData, ContactType } from '../../model/contact.js';
-import { Database } from '../../model/database.js';
-import { License } from '../../model/license.js';
-import { ContactInfo, PartnerBillingInfo } from '../../model/marketplace/common.js';
-import { Transaction } from '../../model/transaction.js';
-import { sorter } from '../../util/helpers.js';
+import capitalize from "capitalize";
+import { Contact, ContactData, ContactType } from '../../model/contact';
+import { Database } from '../../model/database';
+import { License } from '../../model/license';
+import { ContactInfo, PartnerBillingInfo } from '../../model/marketplace/common';
+import { Transaction } from '../../model/transaction';
+import env from "../../parameters/env-config";
+import { sorter } from '../../util/helpers';
 
 export type GeneratedContact = ContactData & { lastUpdated: string };
 
@@ -12,23 +13,21 @@ export class ContactGenerator {
 
   private toMerge = new Map<Contact, GeneratedContact[]>();
 
-  constructor(private db: Database) { }
+  public constructor(private db: Database) { }
 
-  run() {
+  public run() {
     this.generateContacts();
     this.mergeGeneratedContacts();
+    this.associateContacts();
+    this.sortContactRecords();
+    this.flagPartnerTransactedContacts();
   }
 
   private generateContacts() {
-    for (const license of this.db.licenses) {
-      this.generateContact(license, license.data.technicalContact);
-      this.generateContact(license, license.data.billingContact);
-      this.generateContact(license, license.data.partnerDetails?.billingContact ?? null);
-    }
-    for (const transaction of this.db.transactions) {
-      this.generateContact(transaction, transaction.data.technicalContact);
-      this.generateContact(transaction, transaction.data.billingContact);
-      this.generateContact(transaction, transaction.data.partnerDetails?.billingContact ?? null);
+    for (const record of [...this.db.licenses, ...this.db.transactions]) {
+      this.generateContact(record, record.data.technicalContact);
+      this.generateContact(record, record.data.billingContact);
+      this.generateContact(record, record.data.partnerDetails?.billingContact ?? null);
     }
   }
 
@@ -37,6 +36,51 @@ export class ContactGenerator {
       contacts.sort(sorter(c => c.lastUpdated, 'DSC'));
       mergeContactInfo(contact.data, contacts);
     }
+  }
+
+  private associateContacts() {
+    for (const record of [...this.db.licenses, ...this.db.transactions]) {
+      record.techContact = this.findContact(record.data.technicalContact.email)!;
+      record.billingContact = this.findContact(record.data.billingContact?.email);
+      record.partnerContact = this.findContact(record.data.partnerDetails?.billingContact.email);
+
+      record.allContacts.push(record.techContact);
+      if (record.billingContact) record.allContacts.push(record.billingContact);
+      if (record.partnerContact) record.allContacts.push(record.partnerContact);
+
+      for (const contact of record.allContacts) {
+        contact.records.push(record);
+      }
+    }
+  }
+
+  private sortContactRecords() {
+    for (const contact of this.db.contactManager.getAll()) {
+      contact.records.sort(sorter(r => r.data.maintenanceStartDate, 'DSC'));
+    }
+  }
+
+  private flagPartnerTransactedContacts() {
+    /**
+     * If the contact's most recent record has a partner,
+     * set that partner's domain as last associated partner.
+     * Otherwise set it to blank, ignoring previous records.
+     */
+
+    for (const contact of this.db.contactManager.getAll()) {
+      contact.data.lastAssociatedPartner = null;
+
+      const lastRecord = contact.records[0];
+      if (lastRecord) {
+        const partnerDomain = lastRecord.getPartnerDomain(this.db.partnerDomains);
+        contact.data.lastAssociatedPartner = partnerDomain ?? null;
+      }
+    }
+  }
+
+  private findContact(email: string | undefined): Contact | null {
+    if (!email) return null;
+    return this.db.contactManager.getByEmail(email)!;
   }
 
   private generateContact(item: License | Transaction, info: ContactInfo | PartnerBillingInfo | null) {
@@ -77,15 +121,17 @@ export class ContactGenerator {
       region: item.data.region,
       relatedProducts: new Set(),
       deployment: item.data.hosting,
-      products: new Set([item.data.addonKey]),
+      products: new Set([item.data.addonKey].filter(notIgnored)),
       licenseTier: null,
       lastMpacEvent: '',
       lastUpdated: (item instanceof License ? item.data.lastUpdated : item.data.saleDate),
+      lastAssociatedPartner: null,
     };
   }
 
 }
 
+/** Don't use directly; only exported for tests; use ContactGenerator instead. */
 export function mergeContactInfo(contact: ContactData, contacts: GeneratedContact[]) {
   const currentContactProps = {
     ...contact,
@@ -137,4 +183,8 @@ export function mergeContactInfo(contact: ContactData, contacts: GeneratedContac
       contact.products.add(product);
     }
   }
+}
+
+function notIgnored(addonKey: string) {
+  return !env.engine.ignoredApps.has(addonKey);
 }

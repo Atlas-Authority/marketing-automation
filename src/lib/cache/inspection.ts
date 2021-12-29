@@ -1,11 +1,11 @@
-import csvStringify from 'csv-stringify/lib/es5/sync.js';
-import flatten from 'flat';
-import log from '../log/logger.js';
-import env from '../parameters/env.js';
-import DataDir from './datadir.js';
+import csvStringify from "csv-stringify/lib/es5/sync.js";
+import flatten from "flat";
+import log from "../log/logger";
+import { isProduction, isTest } from "../parameters/env-config";
+import DataDir from "./datadir";
 
 function saveArrayToCsv(filename: string, array: any[]) {
-  if (env.isProduction || env.isTest) return;
+  if (isProduction || isTest) return;
 
   if (array[0] instanceof Array) {
     array = array.flatMap(innerArray => innerArray.concat([{}]));
@@ -19,7 +19,7 @@ function saveArrayToCsv(filename: string, array: any[]) {
 }
 
 function saveToJson(filename: string, object: unknown) {
-  if (env.isProduction || env.isTest) return;
+  if (isProduction || isTest) return;
 
   DataDir.out.file(filename).writeJson(object);
   log.info('Dev', 'Saved data to:', filename);

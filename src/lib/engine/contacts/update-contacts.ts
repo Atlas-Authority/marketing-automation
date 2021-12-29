@@ -1,20 +1,19 @@
-import { Database } from '../../model/database.js';
-import env from '../../parameters/env.js';
-import { SimpleError } from '../../util/errors.js';
-import { RelatedLicenseSet } from '../license-matching/license-grouper.js';
-import { flagPartnersViaCoworkers } from './contact-types.js';
-
+import { Database } from "../../model/database";
+import env from "../../parameters/env-config";
+import { KnownError } from "../../util/errors";
+import { RelatedLicenseSet } from "../license-matching/license-grouper";
+import { flagPartnersViaCoworkers } from "./contact-types";
 
 export function updateContactsBasedOnMatchResults(db: Database, allMatches: RelatedLicenseSet[]) {
-  for (const group of allMatches) {
-    const contacts = new Set(group.map(m => db.contactManager.getByEmail(m.license.data.technicalContact.email)!));
+  for (const license of allMatches) {
+    const contacts = new Set(license.map(license => db.contactManager.getByEmail(license.data.technicalContact.email)!));
 
     flagPartnersViaCoworkers([...contacts]);
 
     for (const contact of contacts) {
       const items = [
-        ...group.map(g => g.license),
-        ...group.flatMap(g => g.transactions)
+        ...license,
+        ...license.flatMap(l => l.transactions)
       ];
 
       for (const tier of items.map(item => item.tier)) {
@@ -29,14 +28,16 @@ export function updateContactsBasedOnMatchResults(db: Database, allMatches: Rela
         }
       }
 
-      const addonKey = group[0].license.data.addonKey;
+      const addonKey = license[0].data.addonKey;
       const product = env.mpac.platforms[addonKey];
       if (!product) {
-        throw new SimpleError(`Add "${addonKey}" to ADDONKEY_PLATFORMS`);
+        throw new KnownError(`Add "${addonKey}" to ADDONKEY_PLATFORMS`);
       }
-      contact.data.relatedProducts.add(product);
+      if (!env.engine.ignoredApps.has(addonKey)) {
+        contact.data.relatedProducts.add(product);
+      }
 
-      const hosting = group[0].license.data.hosting;
+      const hosting = license[0].data.hosting;
       if (!contact.data.deployment) {
         contact.data.deployment = hosting;
       }

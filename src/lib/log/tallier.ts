@@ -1,14 +1,14 @@
-import { formatMoney } from "../util/formatters.js";
-import log from "./logger.js";
-import { Table } from "./table.js";
+import { formatMoney } from "../util/formatters";
+import log from "./logger";
+import { Table } from "./table";
 
 export class Tallier {
 
   private tally: [string, number, number][] = [];
-  first(reason: string, n: number) { this.tally.push([reason, n, 1]); }
-  less(reason: string, n: number) { this.tally.push([reason, n, -1]); }
+  public first(reason: string, n: number) { this.tally.push([reason, n, 1]); }
+  public less(reason: string, n: number) { this.tally.push([reason, n, -1]); }
 
-  printTable() {
+  public printTable() {
     const remainder = (this.tally
       .map(([reason, amount, multiplier]) => amount * multiplier)
       .reduce((a, b) => a + b));

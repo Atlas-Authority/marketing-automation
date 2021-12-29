@@ -1,6 +1,5 @@
-import chalk from 'chalk';
-import util from 'util';
-import { cli } from '../parameters/cli.js';
+import chalk from "chalk";
+import util from "util";
 
 enum LogLevel {
   Error,
@@ -12,14 +11,14 @@ enum LogLevel {
 
 class Logger {
 
-  public level = logLevelFromCliString(cli.get('--loglevel')) ?? LogLevel.Verbose;
+  public level = LogLevel.Verbose;
   public readonly Levels = LogLevel;
 
-  error(prefix: string, ...args: any[]) { this.print(LogLevel.Error, prefix, ...args); }
-  warn(prefix: string, ...args: any[]) { this.print(LogLevel.Warn, prefix, ...args); }
-  info(prefix: string, ...args: any[]) { this.print(LogLevel.Info, prefix, ...args); }
-  verbose(prefix: string, ...args: any[]) { this.print(LogLevel.Verbose, prefix, ...args); }
-  detailed(prefix: string, ...args: any[]) { this.print(LogLevel.Detailed, prefix, ...args); }
+  public error(prefix: string, ...args: any[]) { this.print(LogLevel.Error, prefix, ...args); }
+  public warn(prefix: string, ...args: any[]) { this.print(LogLevel.Warn, prefix, ...args); }
+  public info(prefix: string, ...args: any[]) { this.print(LogLevel.Info, prefix, ...args); }
+  public verbose(prefix: string, ...args: any[]) { this.print(LogLevel.Verbose, prefix, ...args); }
+  public detailed(prefix: string, ...args: any[]) { this.print(LogLevel.Detailed, prefix, ...args); }
 
   private print(level: LogLevel, prefix: string, ...args: any[]) {
     if (level > this.level) return;
@@ -52,6 +51,19 @@ class Logger {
     }
   }
 
+  public setLevelFrom(levelString: string | undefined) {
+    const mapping = new Map([
+      ['error', LogLevel.Error],
+      ['warn', LogLevel.Warn],
+      ['info', LogLevel.Info],
+      ['verbose', LogLevel.Verbose],
+      ['detailed', LogLevel.Detailed],
+      [undefined, LogLevel.Verbose],
+    ]);
+    const level = mapping.get(levelString?.trim().toLowerCase());
+    if (level) this.level = level;
+  }
+
 }
 
 const levelPrefixes = {
@@ -70,17 +82,6 @@ function formatted(data: unknown, prefixLength: number) {
     maxArrayLength: null,
     maxStringLength: null,
   });
-}
-
-function logLevelFromCliString(level: string | undefined) {
-  switch (level?.trim().toLowerCase()) {
-    case 'error': return LogLevel.Error;
-    case 'warn': return LogLevel.Warn;
-    case 'info': return LogLevel.Info;
-    case 'verbose': return LogLevel.Verbose;
-    case 'detailed': return LogLevel.Detailed;
-    default: return null;
-  }
 }
 
 const log = new Logger();
