@@ -1,13 +1,17 @@
 import 'source-map-support/register';
-import { IO } from "../lib/io/io";
+import { IO, LiveRemote, MemoryRemote } from "../lib/io/io";
 import log from "../lib/log/logger";
 import { Database } from "../lib/model/database";
+import { envConfig } from '../lib/parameters/env-config';
 
 main();
 async function main() {
 
   log.level = log.Levels.Verbose;
-  const db = new Database(new IO({ in: 'remote', out: 'local' }));
+  const io = new IO();
+  io.in = new LiveRemote();
+  io.out = new MemoryRemote();
+  const db = new Database(io, envConfig);
   await db.downloadAllData();
 
 }

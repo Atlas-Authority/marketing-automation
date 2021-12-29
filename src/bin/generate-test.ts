@@ -4,10 +4,11 @@ import { DealGenerator } from '../lib/engine/deal-generator/generate-deals';
 import { redactedLicense, redactedTransaction } from '../lib/engine/deal-generator/redact';
 import { abbrActionDetails, abbrEventDetails } from '../lib/engine/deal-generator/test/utils';
 import { RelatedLicenseSet } from '../lib/engine/license-matching/license-grouper';
-import { IO } from "../lib/io/io";
+import { CachedMemoryRemote, IO } from "../lib/io/io";
 import { Database } from "../lib/model/database";
 import { License } from '../lib/model/license';
 import { Transaction } from '../lib/model/transaction';
+import { emptyConfig, envConfig } from '../lib/parameters/env-config';
 
 function TEMPLATE({ runDealGenerator, GROUP, RECORDS, EVENTS, ACTIONS }: any) {
   it(`describe test`, () => {
@@ -27,7 +28,7 @@ async function main(template: string, testId: string) {
 
   const group = await getRedactedMatchGroup(ids);
 
-  const db = new Database(new IO());
+  const db = new Database(new IO(), emptyConfig);
 
   db.licenses.length = 0;
   db.licenses.push(...group);
@@ -51,7 +52,7 @@ function format(o: any, breakLength = 50) {
 }
 
 async function getRedactedMatchGroup(ids: [string, string[]][]) {
-  const db = new Database(new IO({ in: 'local', out: 'local' }));
+  const db = new Database(new IO(new CachedMemoryRemote()), envConfig);
   await db.downloadAllData();
 
   const group: RelatedLicenseSet = [];

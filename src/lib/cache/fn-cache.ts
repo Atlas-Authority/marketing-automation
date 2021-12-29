@@ -1,13 +1,16 @@
 import chalk from "chalk";
 import log from "../log/logger";
-import { cli } from "../parameters/cli";
-import env from "../parameters/env";
+import { isProduction, isTest } from "../parameters/env-config";
 import DataDir from "./datadir";
 
-const cachedFns = cli.get('--cached-fns')?.split(',') || [];
+let cachedFns: string[] = [];
+
+export function useCachedFunctions(names: string[] | undefined) {
+  cachedFns = names ?? [];
+};
 
 export function fnOrCache<T>(filename: string, fn: () => T): T {
-  const skipCacheFully = (env.isProduction || env.isTest);
+  const skipCacheFully = (isProduction || isTest);
 
   const file = DataDir.cache.file<T>(filename);
 

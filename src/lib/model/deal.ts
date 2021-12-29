@@ -1,4 +1,4 @@
-import env from "../parameters/env";
+import env from "../parameters/env-config";
 import { AttachableError } from "../util/errors";
 import { isPresent } from "../util/helpers";
 import { Company } from "./company";
@@ -23,6 +23,7 @@ export type DealData = {
   pipeline: Pipeline;
   dealStage: DealStage;
   amount: number | null;
+  associatedPartner: string | null;
 };
 
 type DealComputed = {
@@ -30,6 +31,8 @@ type DealComputed = {
 };
 
 export class Deal extends Entity<DealData, DealComputed> {
+
+  records: (License | Transaction)[] = [];
 
   public contacts = this.makeDynamicAssociation<Contact>('contact');
   public companies = this.makeDynamicAssociation<Company>('company');
@@ -139,6 +142,11 @@ const DealAdapter: EntityAdapter<DealData, DealComputed> = {
       property: 'amount',
       down: amount => !amount ? null : +amount,
       up: amount => amount?.toString() ?? '',
+    },
+    associatedPartner: {
+      property: env.hubspot.attrs.deal.associatedPartner,
+      down: partner => partner,
+      up: partner => partner ?? '',
     },
   },
 

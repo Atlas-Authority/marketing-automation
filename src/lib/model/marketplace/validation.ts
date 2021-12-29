@@ -1,7 +1,7 @@
 import assert from "assert";
 import util from "util";
 import log from '../../log/logger';
-import env from '../../parameters/env';
+import env from '../../parameters/env-config';
 import { AttachableError } from '../../util/errors';
 import { isPresent } from '../../util/helpers';
 import { RawLicense, RawTransaction } from './raw';

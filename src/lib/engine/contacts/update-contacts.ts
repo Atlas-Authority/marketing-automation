@@ -1,5 +1,5 @@
 import { Database } from "../../model/database";
-import env from "../../parameters/env";
+import env from "../../parameters/env-config";
 import { KnownError } from "../../util/errors";
 import { RelatedLicenseSet } from "../license-matching/license-grouper";
 import { flagPartnersViaCoworkers } from "./contact-types";

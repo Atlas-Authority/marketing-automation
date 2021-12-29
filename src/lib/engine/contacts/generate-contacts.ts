@@ -4,7 +4,7 @@ import { Database } from '../../model/database';
 import { License } from '../../model/license';
 import { ContactInfo, PartnerBillingInfo } from '../../model/marketplace/common';
 import { Transaction } from '../../model/transaction';
-import env from "../../parameters/env";
+import env from "../../parameters/env-config";
 import { sorter } from '../../util/helpers';
 
 export type GeneratedContact = ContactData & { lastUpdated: string };
@@ -18,18 +18,16 @@ export class ContactGenerator {
   public run() {
     this.generateContacts();
     this.mergeGeneratedContacts();
+    this.associateContacts();
+    this.sortContactRecords();
+    this.flagPartnerTransactedContacts();
   }
 
   private generateContacts() {
-    for (const license of this.db.licenses) {
-      this.generateContact(license, license.data.technicalContact);
-      this.generateContact(license, license.data.billingContact);
-      this.generateContact(license, license.data.partnerDetails?.billingContact ?? null);
-    }
-    for (const transaction of this.db.transactions) {
-      this.generateContact(transaction, transaction.data.technicalContact);
-      this.generateContact(transaction, transaction.data.billingContact);
-      this.generateContact(transaction, transaction.data.partnerDetails?.billingContact ?? null);
+    for (const record of [...this.db.licenses, ...this.db.transactions]) {
+      this.generateContact(record, record.data.technicalContact);
+      this.generateContact(record, record.data.billingContact);
+      this.generateContact(record, record.data.partnerDetails?.billingContact ?? null);
     }
   }
 
@@ -38,6 +36,51 @@ export class ContactGenerator {
       contacts.sort(sorter(c => c.lastUpdated, 'DSC'));
       mergeContactInfo(contact.data, contacts);
     }
+  }
+
+  private associateContacts() {
+    for (const record of [...this.db.licenses, ...this.db.transactions]) {
+      record.techContact = this.findContact(record.data.technicalContact.email)!;
+      record.billingContact = this.findContact(record.data.billingContact?.email);
+      record.partnerContact = this.findContact(record.data.partnerDetails?.billingContact.email);
+
+      record.allContacts.push(record.techContact);
+      if (record.billingContact) record.allContacts.push(record.billingContact);
+      if (record.partnerContact) record.allContacts.push(record.partnerContact);
+
+      for (const contact of record.allContacts) {
+        contact.records.push(record);
+      }
+    }
+  }
+
+  private sortContactRecords() {
+    for (const contact of this.db.contactManager.getAll()) {
+      contact.records.sort(sorter(r => r.data.maintenanceStartDate, 'DSC'));
+    }
+  }
+
+  private flagPartnerTransactedContacts() {
+    /**
+     * If the contact's most recent record has a partner,
+     * set that partner's domain as last associated partner.
+     * Otherwise set it to blank, ignoring previous records.
+     */
+
+    for (const contact of this.db.contactManager.getAll()) {
+      contact.data.lastAssociatedPartner = null;
+
+      const lastRecord = contact.records[0];
+      if (lastRecord) {
+        const partnerDomain = lastRecord.getPartnerDomain(this.db.partnerDomains);
+        contact.data.lastAssociatedPartner = partnerDomain ?? null;
+      }
+    }
+  }
+
+  private findContact(email: string | undefined): Contact | null {
+    if (!email) return null;
+    return this.db.contactManager.getByEmail(email)!;
   }
 
   private generateContact(item: License | Transaction, info: ContactInfo | PartnerBillingInfo | null) {
@@ -82,6 +125,7 @@ export class ContactGenerator {
       licenseTier: null,
       lastMpacEvent: '',
       lastUpdated: (item instanceof License ? item.data.lastUpdated : item.data.saleDate),
+      lastAssociatedPartner: null,
     };
   }
 

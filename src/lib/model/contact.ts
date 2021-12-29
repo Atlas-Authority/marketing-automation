@@ -1,8 +1,10 @@
-import env from "../parameters/env";
+import env from "../parameters/env-config";
 import { Company } from "./company";
 import { Entity } from "./hubspot/entity";
 import { EntityKind } from "./hubspot/interfaces";
 import { EntityAdapter, EntityManager } from "./hubspot/manager";
+import { License } from "./license";
+import { Transaction } from "./transaction";
 
 export type ContactType = 'Partner' | 'Customer';
 
@@ -25,6 +27,8 @@ export type ContactData = {
   relatedProducts: Set<string>;
   licenseTier: number | null;
   lastMpacEvent: string | null;
+
+  lastAssociatedPartner: string | null;
 };
 
 type ContactComputed = {
@@ -40,6 +44,16 @@ export class Contact extends Entity<ContactData, ContactComputed> {
   public get allEmails() { return [this.data.email, ...this.computed.otherEmails]; }
   public get isPartner() { return this.data.contactType === 'Partner'; }
   public get isCustomer() { return this.data.contactType === 'Customer'; }
+
+  public getPartnerDomain(partnerDomains: Set<string>) {
+    return (this.allEmails
+      .map(domainFor)
+      .find(domain =>
+        partnerDomains.has(domain)));
+  }
+
+  /** Sorted newest first */
+  public records: (License | Transaction)[] = [];
 
 }
 
@@ -124,6 +138,11 @@ const ContactAdapter: EntityAdapter<ContactData, ContactComputed> = {
       down: last_mpac_event => last_mpac_event,
       up: lastMpacEvent => lastMpacEvent ?? '',
     },
+    lastAssociatedPartner: {
+      property: env.hubspot.attrs.contact.lastAssociatedPartner,
+      down: partner => partner,
+      up: partner => partner ?? '',
+    },
   },
 
   computed: {
@@ -144,4 +163,8 @@ export class ContactManager extends EntityManager<ContactData, ContactComputed, 
 
   public getByEmail = this.makeIndex(c => c.allEmails, ['email']);
 
+}
+
+export function domainFor(email: string): string {
+  return email.split('@')[1];
 }

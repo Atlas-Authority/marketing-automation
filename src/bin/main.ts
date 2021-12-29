@@ -1,17 +1,22 @@
 import 'source-map-support/register';
+import { useCachedFunctions } from '../lib/cache/fn-cache';
 import Engine from "../lib/engine/engine";
-import { IO } from "../lib/io/io";
 import Slack from "../lib/io/slack";
+import log from '../lib/log/logger';
 import { Database } from "../lib/model/database";
-import { cli } from "../lib/parameters/cli";
-import env from "../lib/parameters/env";
+import { cli } from "../lib/parameters/cli-args";
+import env, { envConfig } from "../lib/parameters/env-config";
 import { AttachableError, KnownError } from "../lib/util/errors";
 import run from "../lib/util/runner";
+import { ioFromCliArgs } from './run-once';
 
 main();
 async function main() {
 
-  const io = IO.fromCli();
+  log.setLevelFrom(cli.get('--loglevel'));
+  useCachedFunctions(cli.get('--cached-fns')?.split(','));
+
+  const io = ioFromCliArgs();
   cli.failIfExtraOpts();
 
   const slack = new Slack();
@@ -21,7 +26,7 @@ async function main() {
   await run({
 
     async work() {
-      const db = new Database(io);
+      const db = new Database(io, envConfig);
       await new Engine().run(db);
     },
 

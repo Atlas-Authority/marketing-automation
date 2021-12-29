@@ -6,14 +6,13 @@ import { Database } from "../../model/database";
 import { Deal } from "../../model/deal";
 import { License, LicenseData } from "../../model/license";
 import { Transaction } from "../../model/transaction";
-import env from "../../parameters/env";
+import env from "../../parameters/env-config";
 import { formatMoney } from "../../util/formatters";
 import { isPresent, sorter } from "../../util/helpers";
 import { RelatedLicenseSet } from "../license-matching/license-grouper";
 import { ActionGenerator } from "./actions";
 import { EventGenerator } from "./events";
 import { DealDataLogger } from "./logger";
-import { getEmails } from "./records";
 
 
 export type IgnoredLicense = LicenseData & {
@@ -51,7 +50,11 @@ export class DealGenerator {
           ? this.db.dealManager.create(action.properties)
           : action.deal);
 
+        deal.records = records;
+
         this.associateDealContactsAndCompanies(relatedLicenseIds, deal);
+
+        this.flagPartnerTransacted(deal);
       }
     }
 
@@ -98,7 +101,7 @@ export class DealGenerator {
         t.data.addonLicenseId,
         t.data.saleDate,
         formatMoney(t.data.vendorAmount),
-        [...new Set(getEmails(t))].join(', '),
+        [...new Set(t.allContacts.map(c => c.data.email))].join(', '),
       ]);
     }
 
@@ -123,7 +126,7 @@ export class DealGenerator {
 
   private associateDealContactsAndCompanies(group: RelatedLicenseSet, deal: Deal) {
     const records = group.flatMap(license => [license, ...license.transactions]);
-    const emails = [...new Set(records.flatMap(getEmails))];
+    const emails = [...new Set(records.flatMap(r => r.allContacts.map(c => c.data.email)))];
     const contacts = (emails
       .map(email => this.db.contactManager.getByEmail(email))
       .filter(isPresent));
@@ -195,6 +198,26 @@ export class DealGenerator {
       details,
       ...license.data,
     })));
+  }
+
+  public flagPartnerTransacted(deal: Deal) {
+    if (deal.records.length === 0) {
+      log.error('Deal Actions', "Deal has no associated MPAC records:", deal.id);
+      return;
+    }
+
+    /**
+     * If any record in any of the deal's groups have partner contacts
+     * then use the most recent record's partner contact's domain.
+     * Otherwise set this to null.
+     */
+    const lastPartner = (deal
+      .records
+      .flatMap(r => r.allContacts)
+      .reverse()
+      .find(c => c.isPartner));
+
+    deal.data.associatedPartner = lastPartner?.getPartnerDomain(this.db.partnerDomains) ?? null;
   }
 
 }

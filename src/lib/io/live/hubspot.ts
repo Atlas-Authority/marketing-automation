@@ -2,7 +2,7 @@ import * as hubspot from '@hubspot/api-client';
 import assert from 'assert';
 import log from '../../log/logger';
 import { Association, EntityKind, ExistingEntity, FullEntity, NewEntity, RelativeAssociation } from '../../model/hubspot/interfaces';
-import env from '../../parameters/env';
+import env from '../../parameters/env-config';
 import { KnownError } from '../../util/errors';
 import { batchesOf } from '../../util/helpers';
 import cache from '../cache';

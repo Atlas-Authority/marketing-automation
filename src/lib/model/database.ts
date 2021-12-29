@@ -4,6 +4,7 @@ import { MultiDownloadLogger } from "../log/download-logger";
 import log from "../log/logger";
 import { Table } from "../log/table";
 import { Tallier } from "../log/tallier";
+import { Config } from "../parameters/env-config";
 import { formatMoney, formatNumber } from "../util/formatters";
 import { CompanyManager } from "./company";
 import { ContactManager } from "./contact";
@@ -33,11 +34,15 @@ export class Database {
 
   public tallier = new Tallier();
 
-  public constructor(private io: IO) {
+  public constructor(private io: IO, config: Config) {
     this.dealManager = new DealManager(io.in.hubspot, io.out.hubspot);
     this.contactManager = new ContactManager(io.in.hubspot, io.out.hubspot);
     this.companyManager = new CompanyManager(io.in.hubspot, io.out.hubspot);
     this.emailProviderLister = new EmailProviderLister(io.in.emailProviderLister);
+
+    for (const domain of config.partnerDomains) {
+      this.partnerDomains.add(domain);
+    }
   }
 
   public async downloadAllData() {

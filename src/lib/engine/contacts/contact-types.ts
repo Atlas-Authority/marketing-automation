@@ -1,14 +1,12 @@
-import { Contact } from "../../model/contact";
+import { Contact, domainFor } from "../../model/contact";
 import { Database } from "../../model/database";
 import { License } from "../../model/license";
 import { Transaction } from "../../model/transaction";
-import env from "../../parameters/env";
 
 export function identifyAndFlagContactTypes(db: Database) {
   // Identifying contact types
   identifyContactTypesFromRecordDomains(db, db.licenses);
   identifyContactTypesFromRecordDomains(db, db.transactions);
-  addPartnerDomainsFromEnv(db);
   removeProviderDomainsFromPartnerDomains(db);
   separatePartnerDomainsFromCustomerDomains(db);
 
@@ -22,12 +20,6 @@ function identifyContactTypesFromRecordDomains(db: Database, records: (Transacti
     maybeAddDomain(db.partnerDomains, record.data.partnerDetails?.billingContact.email);
     maybeAddDomain(db.customerDomains, record.data.billingContact?.email);
     maybeAddDomain(db.customerDomains, record.data.technicalContact.email);
-  }
-}
-
-function addPartnerDomainsFromEnv(db: Database) {
-  for (const domain of env.engine.partnerDomains) {
-    db.partnerDomains.add(domain);
   }
 }
 
@@ -81,8 +73,4 @@ function maybeAddDomain(set: Set<string>, email: string | undefined) {
 
 function usesDomains(contact: Contact, domains: Set<string>) {
   return contact.allEmails.some(email => domains.has(domainFor(email)));
-}
-
-function domainFor(email: string): string {
-  return email.split('@')[1];
 }

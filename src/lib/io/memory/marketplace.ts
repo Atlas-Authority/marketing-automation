@@ -4,20 +4,28 @@ import { MarketplaceService } from "../interfaces";
 
 export class MemoryMarketplace implements MarketplaceService {
 
-  private readonly licensesWith = DataDir.in.file<readonly RawLicense[]>('licenses-with.json');
-  private readonly licensesWithout = DataDir.in.file<readonly RawLicense[]>('licenses-without.json');
-  private readonly transactions = DataDir.in.file<readonly RawTransaction[]>('transactions.json');
+  private readonly licensesWith: readonly RawLicense[] = [];
+  private readonly licensesWithout: readonly RawLicense[] = [];
+  private readonly transactions: readonly RawTransaction[] = [];
+
+  constructor(useDiskCache: boolean) {
+    if (useDiskCache) {
+      this.licensesWith = DataDir.in.file<readonly RawLicense[]>('licenses-with.json').readJson();
+      this.licensesWithout = DataDir.in.file<readonly RawLicense[]>('licenses-without.json').readJson();
+      this.transactions = DataDir.in.file<readonly RawTransaction[]>('transactions.json').readJson();
+    }
+  }
 
   public async downloadTransactions(): Promise<readonly RawTransaction[]> {
-    return this.transactions.readJson();
+    return this.transactions;
   }
 
   public async downloadLicensesWithoutDataInsights(): Promise<readonly RawLicense[]> {
-    return this.licensesWithout.readJson();
+    return this.licensesWithout;
   }
 
   public async downloadLicensesWithDataInsights(): Promise<readonly RawLicense[]> {
-    return this.licensesWith.readJson();
+    return this.licensesWith;
   }
 
 }

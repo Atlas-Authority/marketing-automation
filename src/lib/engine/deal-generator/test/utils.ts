@@ -6,6 +6,8 @@ import { DealStage } from '../../../model/hubspot/interfaces';
 import { License, LicenseData } from "../../../model/license";
 import { ContactInfo } from '../../../model/marketplace/common';
 import { Transaction, TransactionData } from "../../../model/transaction";
+import { emptyConfig } from '../../../parameters/env-config';
+import { ContactGenerator } from '../../contacts/generate-contacts';
 import { RelatedLicenseSet } from '../../license-matching/license-grouper';
 import { Action } from "../actions";
 import { DealRelevantEvent } from '../events';
@@ -17,6 +19,7 @@ export type TestInput = {
   deals?: DealData[];
   records: (License | Transaction)[];
   group: [string, string[]][];
+  partnerDomains?: string[],
 };
 
 export function runDealGeneratorTwice(input: TestInput) {
@@ -26,10 +29,15 @@ export function runDealGeneratorTwice(input: TestInput) {
 
 export function runDealGenerator(input: TestInput) {
   const io = new IO();
-  const db = new Database(io);
+  const db = new Database(io, {
+    ...emptyConfig,
+    partnerDomains: input.partnerDomains ?? [],
+  });
   const group = reassembleMatchGroup(input.group, input.records);
   db.licenses = group;
   db.transactions = group.flatMap(g => g.transactions);
+
+  new ContactGenerator(db).run();
 
   for (const [i, dealData] of (input.deals ?? []).entries()) {
     const deal = db.dealManager.create(dealData);
@@ -38,7 +46,12 @@ export function runDealGenerator(input: TestInput) {
   }
 
   const dealGenerator = new DealGenerator(db);
-  const { events, actions } = dealGenerator.generateActionsForMatchedGroup(group);
+  const { records, events, actions } = dealGenerator.generateActionsForMatchedGroup(group);
+
+  for (const deal of db.dealManager.getAll()) {
+    deal.records = records;
+    dealGenerator.flagPartnerTransacted(deal);
+  }
 
   const createdDeals: DealData[] = [];
   for (const [i, action] of actions.entries()) {
@@ -51,6 +64,7 @@ export function runDealGenerator(input: TestInput) {
     events: events.map(abbrEventDetails),
     actions: actions.map(abbrActionDetails),
     createdDeals,
+    db,
   };
 }
 
@@ -74,9 +88,9 @@ function reassembleMatchGroup(ids: [string, string[]][], records: (License | Tra
   return group;
 }
 
-function fakeContact(): ContactInfo {
+function fakeContact(email?: string): ContactInfo {
   return {
-    email: chance.email(),
+    email: email ?? chance.email(),
     name: chance.name(),
   };
 }
@@ -114,9 +128,10 @@ export function testLicense(
   maintenanceStartDate: string,
   licenseType: string,
   status: string,
+  email?: string,
 ) {
   return new License({
-    ...testRecordCommon(addonLicenseId, maintenanceStartDate),
+    ...testRecordCommon(addonLicenseId, maintenanceStartDate, email),
 
     tier: 'Unlimited Users',
     licenseType: licenseType as LicenseData['licenseType'],
@@ -133,7 +148,7 @@ export function testLicense(
   });
 }
 
-function testRecordCommon(addonLicenseId: string, maintenanceStartDate: string) {
+function testRecordCommon(addonLicenseId: string, maintenanceStartDate: string, email?: string) {
   return {
     addonLicenseId,
     licenseId: addonLicenseId,
@@ -141,7 +156,7 @@ function testRecordCommon(addonLicenseId: string, maintenanceStartDate: string) 
     addonName: chance.sentence({ words: 3, punctuation: false }),
     lastUpdated: maintenanceStartDate,
 
-    technicalContact: fakeContact(),
+    technicalContact: fakeContact(email),
     billingContact: null,
     partnerDetails: null,
 

@@ -3,10 +3,16 @@ import { EmailProviderListerService } from "../interfaces";
 
 export class MemoryEmailProviderListerService implements EmailProviderListerService {
 
-  private readonly domains = DataDir.in.file<readonly string[]>('domains.json');
+  private readonly domains: readonly string[] = [];
+
+  constructor(useDiskCache: boolean) {
+    if (useDiskCache) {
+      this.domains = DataDir.in.file<readonly string[]>('domains.json').readJson();
+    }
+  }
 
   public async downloadFreeEmailProviders(): Promise<readonly string[]> {
-    return this.domains.readJson();
+    return this.domains;
   }
 
 }

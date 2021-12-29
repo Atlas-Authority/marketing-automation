@@ -2,6 +2,7 @@ import assert from "assert";
 import { License } from "./license";
 import { AddonLicenseId, ContactInfo, getContactInfo, getPartnerInfo, maybeGetContactInfo, PartnerInfo } from "./marketplace/common";
 import { RawTransaction } from "./marketplace/raw";
+import { MpacRecord } from "./marketplace/record";
 
 export interface TransactionData {
   addonLicenseId: AddonLicenseId,
@@ -34,13 +35,14 @@ export interface TransactionData {
   vendorAmount: number,
 }
 
-export class Transaction {
+export class Transaction extends MpacRecord<TransactionData> {
 
   /** Unique ID for this Transaction. */
-  public id: string;
-  public tier: number;
+  declare id;
+  declare tier;
 
   public license!: License;
+  public refunded = false;
 
   static fromRaw(rawTransaction: RawTransaction) {
     return new Transaction({
@@ -74,7 +76,8 @@ export class Transaction {
     });
   }
 
-  public constructor(public data: TransactionData) {
+  public constructor(data: TransactionData) {
+    super(data);
     this.id = uniqueTransactionId(this.data);
     this.tier = this.parseTier();
   }

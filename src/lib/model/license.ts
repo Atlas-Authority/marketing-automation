@@ -1,6 +1,7 @@
 import * as assert from 'assert';
 import { AddonLicenseId, ContactInfo, getContactInfo, getPartnerInfo, maybeGetContactInfo, PartnerInfo } from "./marketplace/common";
 import { RawLicense } from "./marketplace/raw";
+import { MpacRecord } from './marketplace/record.js';
 import { Transaction } from './transaction';
 
 type AttributionData = {
@@ -56,14 +57,14 @@ export interface LicenseData {
   newEvalData: NewEvalData | null,
 }
 
-export class License {
+export class License extends MpacRecord<LicenseData> {
 
   /** Unique ID for this License. */
-  public id: string;
-  public tier: number;
-  public active: boolean;
+  declare id;
+  declare tier;
 
   public transactions: Transaction[] = [];
+  public active: boolean;
 
   static fromRaw(rawLicense: RawLicense) {
     let newEvalData: NewEvalData | null = null;
@@ -119,7 +120,8 @@ export class License {
     });
   }
 
-  public constructor(public data: LicenseData) {
+  public constructor(data: LicenseData) {
+    super(data);
     this.id = this.data.addonLicenseId;
     this.tier = Math.max(this.parseTier(), this.tierFromEvalOpportunity());
     this.active = this.data.status === 'active';

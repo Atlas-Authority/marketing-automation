@@ -1,4 +1,3 @@
-import { cli } from "../parameters/cli";
 import { Remote } from "./interfaces";
 import { LiveTldListerService } from "./live/domains";
 import { LiveEmailProviderListerService } from "./live/email-providers";
@@ -11,69 +10,35 @@ import { MemoryMarketplace } from "./memory/marketplace";
 
 export class IO {
 
-  public static fromCli() {
-    return new IO({
-      in: cli.getChoiceOrFail('--in', ['local', 'remote']),
-      out: cli.getChoiceOrFail('--out', ['local', 'remote']),
-    });
-  }
+  public in: Remote = new MemoryRemote();
+  public out: Remote = this.in;
 
-  public in: Remote = NoOpRemote;
-  public out: Remote = NoOpRemote;
-
-  public constructor(opts?: { in: 'local' | 'remote', out: 'local' | 'remote' }) {
-    if (opts) {
-      if (opts.in === opts.out) {
-        // Important that it's the same instance!
-        this.in = this.out = remoteFor(opts.in);
-      }
-      else {
-        this.in = remoteFor(opts.in);
-        this.out = remoteFor(opts.out);
-      }
+  /** You can pass one as a convenience; otherwise set them after construction. */
+  public constructor(both?: Remote) {
+    if (both) {
+      this.in = this.out = both;
     }
   }
 
 }
 
-function remoteFor(opt: 'local' | 'remote'): Remote {
-  switch (opt) {
-    case 'local': return new MemoryRemote();
-    case 'remote': return new LiveRemote();
-  }
+export class CachedMemoryRemote implements Remote {
+  marketplace = new MemoryMarketplace(true);
+  tldLister = new MemoryTldListerService(true);
+  emailProviderLister = new MemoryEmailProviderListerService(true);
+  hubspot = new MemoryHubspot(true);
 }
 
-class MemoryRemote implements Remote {
-  marketplace = new MemoryMarketplace();
-  tldLister = new MemoryTldListerService();
-  emailProviderLister = new MemoryEmailProviderListerService();
-  hubspot = new MemoryHubspot();
+export class MemoryRemote implements Remote {
+  marketplace = new MemoryMarketplace(false);
+  tldLister = new MemoryTldListerService(false);
+  emailProviderLister = new MemoryEmailProviderListerService(false);
+  hubspot = new MemoryHubspot(false);
 }
 
-class LiveRemote implements Remote {
+export class LiveRemote implements Remote {
   hubspot = new LiveHubspotService();
   marketplace = new LiveMarketplaceService();
   emailProviderLister = new LiveEmailProviderListerService();
   tldLister = new LiveTldListerService();
 }
-
-const NoOpRemote: Remote = {
-  emailProviderLister: {
-    async downloadFreeEmailProviders() { return [] },
-  },
-  hubspot: {
-    async downloadEntities() { return [] },
-    async createAssociations() { },
-    async deleteAssociations() { },
-    async createEntities() { return [] },
-    async updateEntities() { return [] },
-  },
-  marketplace: {
-    async downloadLicensesWithDataInsights() { return [] },
-    async downloadLicensesWithoutDataInsights() { return [] },
-    async downloadTransactions() { return [] },
-  },
-  tldLister: {
-    async downloadAllTlds() { return [] },
-  },
-};
