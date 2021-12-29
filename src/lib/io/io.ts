@@ -13,43 +13,30 @@ export class IO {
   public in: Remote = new MemoryRemote();
   public out: Remote = this.in;
 
-  public constructor(opts?: { in: 'local' | 'remote', out: 'local' | 'remote' }) {
-    if (opts) {
-      if (opts.in === opts.out) {
-        // Important that it's the same instance!
-        this.in = this.out = remoteFor(opts.in);
-      }
-      else {
-        this.in = remoteFor(opts.in);
-        this.out = remoteFor(opts.out);
-      }
+  /** You can pass one as a convenience; otherwise set them after construction. */
+  public constructor(both?: Remote) {
+    if (both) {
+      this.in = this.out = both;
     }
   }
 
 }
 
-function remoteFor(opt: 'local' | 'remote'): Remote {
-  switch (opt) {
-    case 'local': return new CachedMemoryRemote();
-    case 'remote': return new LiveRemote();
-  }
-}
-
-class CachedMemoryRemote implements Remote {
+export class CachedMemoryRemote implements Remote {
   marketplace = new MemoryMarketplace(true);
   tldLister = new MemoryTldListerService(true);
   emailProviderLister = new MemoryEmailProviderListerService(true);
   hubspot = new MemoryHubspot(true);
 }
 
-class MemoryRemote implements Remote {
+export class MemoryRemote implements Remote {
   marketplace = new MemoryMarketplace(false);
   tldLister = new MemoryTldListerService(false);
   emailProviderLister = new MemoryEmailProviderListerService(false);
   hubspot = new MemoryHubspot(false);
 }
 
-class LiveRemote implements Remote {
+export class LiveRemote implements Remote {
   hubspot = new LiveHubspotService();
   marketplace = new LiveMarketplaceService();
   emailProviderLister = new LiveEmailProviderListerService();

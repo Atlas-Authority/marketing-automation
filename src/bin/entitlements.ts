@@ -1,6 +1,6 @@
 import 'source-map-support/register';
 import { Progress } from '../lib/io/interfaces';
-import { IO } from "../lib/io/io";
+import { CachedMemoryRemote, IO } from "../lib/io/io";
 import { RawLicense, RawTransaction } from '../lib/model/marketplace/raw';
 
 main();
@@ -11,7 +11,7 @@ async function main() {
     tick() { },
   };
 
-  const io = new IO({ in: 'local', out: 'local' });
+  const io = new IO(new CachedMemoryRemote());
 
   const licensesWith = await io.in.marketplace.downloadLicensesWithDataInsights(noOpProgress);
   const licensesWithout = await io.in.marketplace.downloadLicensesWithoutDataInsights(noOpProgress);

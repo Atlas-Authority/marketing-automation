@@ -4,7 +4,7 @@ import { DealGenerator } from '../lib/engine/deal-generator/generate-deals';
 import { redactedLicense, redactedTransaction } from '../lib/engine/deal-generator/redact';
 import { abbrActionDetails, abbrEventDetails } from '../lib/engine/deal-generator/test/utils';
 import { RelatedLicenseSet } from '../lib/engine/license-matching/license-grouper';
-import { IO } from "../lib/io/io";
+import { CachedMemoryRemote, IO } from "../lib/io/io";
 import { Database } from "../lib/model/database";
 import { License } from '../lib/model/license';
 import { Transaction } from '../lib/model/transaction';
@@ -52,7 +52,7 @@ function format(o: any, breakLength = 50) {
 }
 
 async function getRedactedMatchGroup(ids: [string, string[]][]) {
-  const db = new Database(new IO({ in: 'local', out: 'local' }), envConfig);
+  const db = new Database(new IO(new CachedMemoryRemote()), envConfig);
   await db.downloadAllData();
 
   const group: RelatedLicenseSet = [];
