@@ -105,7 +105,6 @@ export class ActionGenerator {
     }
 
     return ([...deals]
-      .filter(deal => deal.data.dealStage !== DealStage.CLOSED_LOST)
       .map(deal => makeUpdateAction(deal, null, DealStage.CLOSED_LOST, { amount: 0 }))
       .filter(isPresent)
     );
