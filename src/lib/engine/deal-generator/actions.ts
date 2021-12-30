@@ -182,14 +182,13 @@ function makeCreateAction(record: License | Transaction, data: Pick<DealData, 'a
   };
 }
 
-function makeUpdateAction(deal: Deal, record: License | Transaction | null, dealstage?: DealStage, data?: Partial<DealData>): Action {
+function makeUpdateAction(deal: Deal, record: License | Transaction | null, dealstage?: DealStage, certainData?: Partial<DealData>): Action {
   if (dealstage !== undefined) deal.data.dealStage = dealstage;
   if (record) {
     const dataToEnsure = {
       addonLicenseId: deal.data.addonLicenseId,
       transactionId: deal.data.transactionId,
       dealStage: deal.data.dealStage,
-      ...data,
     };
     if (record instanceof Transaction) {
       dataToEnsure.transactionId = record.data.transactionId;
@@ -197,6 +196,10 @@ function makeUpdateAction(deal: Deal, record: License | Transaction | null, deal
     }
     Object.assign(deal.data, dealCreationProperties(record, dataToEnsure));
     deal.data.licenseTier = Math.max(deal.data.licenseTier ?? -1, record.tier);
+  }
+
+  if (certainData) {
+    Object.assign(deal.data, certainData);
   }
 
   if (!deal.hasPropertyChanges()) {
