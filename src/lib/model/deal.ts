@@ -28,6 +28,7 @@ export type DealData = {
 
 type DealComputed = {
   readonly hasActivity: boolean;
+  readonly createdDate: string;
 };
 
 export class Deal extends Entity<DealData, DealComputed> {
@@ -176,6 +177,11 @@ const DealAdapter: EntityAdapter<DealData, DealComputed> = {
         'hs_sales_email_last_replied',
       ]
     },
+    createdDate: {
+      default: '',
+      down: data => data['createdate']!,
+      properties: ['createdate'],
+    }
   },
 
 };
