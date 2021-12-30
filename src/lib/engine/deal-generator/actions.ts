@@ -184,7 +184,15 @@ function makeCreateAction(record: License | Transaction, data: Pick<DealData, 'a
 
 function makeUpdateAction(deal: Deal, record: License | Transaction | null, dealstage?: DealStage): Action {
   if (dealstage !== undefined) deal.data.dealStage = dealstage;
-  if (record) updateDeal(deal, record);
+  if (record) {
+    const data = dealCreationProperties(record, {
+      addonLicenseId: deal.data.addonLicenseId,
+      transactionId: deal.data.transactionId,
+      dealStage: deal.data.dealStage,
+    });
+    Object.assign(deal.data, data);
+    deal.data.licenseTier = Math.max(deal.data.licenseTier ?? -1, record.tier);
+  }
 
   if (!deal.hasPropertyChanges()) {
     return { type: 'noop', deal };
@@ -222,14 +230,4 @@ function dealCreationProperties(record: License | Transaction, data: Pick<DealDa
         ? 0
         : record.data.vendorAmount),
   };
-}
-
-function updateDeal(deal: Deal, record: License | Transaction) {
-  const data = dealCreationProperties(record, {
-    addonLicenseId: deal.data.addonLicenseId,
-    transactionId: deal.data.transactionId,
-    dealStage: deal.data.dealStage,
-  });
-  Object.assign(deal.data, data);
-  deal.data.licenseTier = Math.max(deal.data.licenseTier ?? -1, record.tier);
 }
