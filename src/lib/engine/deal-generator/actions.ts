@@ -106,7 +106,7 @@ export class ActionGenerator {
 
     return ([...deals]
       .filter(deal => deal.data.dealStage !== DealStage.CLOSED_LOST)
-      .map(deal => makeUpdateAction(deal, null, DealStage.CLOSED_LOST))
+      .map(deal => makeUpdateAction(deal, null, DealStage.CLOSED_LOST, { amount: 0 }))
       .filter(isPresent)
     );
   }
@@ -182,13 +182,14 @@ function makeCreateAction(record: License | Transaction, data: Pick<DealData, 'a
   };
 }
 
-function makeUpdateAction(deal: Deal, record: License | Transaction | null, dealstage?: DealStage): Action {
+function makeUpdateAction(deal: Deal, record: License | Transaction | null, dealstage?: DealStage, data?: Partial<DealData>): Action {
   if (dealstage !== undefined) deal.data.dealStage = dealstage;
   if (record) {
     const dataToEnsure = {
       addonLicenseId: deal.data.addonLicenseId,
       transactionId: deal.data.transactionId,
       dealStage: deal.data.dealStage,
+      ...data,
     };
     if (record instanceof Transaction) {
       dataToEnsure.transactionId = record.data.transactionId;
