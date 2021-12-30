@@ -185,12 +185,16 @@ function makeCreateAction(record: License | Transaction, data: Pick<DealData, 'a
 function makeUpdateAction(deal: Deal, record: License | Transaction | null, dealstage?: DealStage): Action {
   if (dealstage !== undefined) deal.data.dealStage = dealstage;
   if (record) {
-    const data = dealCreationProperties(record, {
+    const dataToEnsure = {
       addonLicenseId: deal.data.addonLicenseId,
       transactionId: deal.data.transactionId,
       dealStage: deal.data.dealStage,
-    });
-    Object.assign(deal.data, data);
+    };
+    if (record instanceof Transaction) {
+      dataToEnsure.transactionId = record.data.transactionId;
+      dataToEnsure.addonLicenseId = record.data.addonLicenseId;
+    }
+    Object.assign(deal.data, dealCreationProperties(record, dataToEnsure));
     deal.data.licenseTier = Math.max(deal.data.licenseTier ?? -1, record.tier);
   }
 
