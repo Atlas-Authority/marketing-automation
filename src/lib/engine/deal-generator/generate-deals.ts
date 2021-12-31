@@ -151,14 +151,14 @@ export class DealGenerator {
   private ignoring(group: RelatedLicenseSet) {
     const licenses = group;
     const transactions = group.flatMap(license => license.transactions);
-    const records = [...licenses, ...transactions];
-    const domains = new Set(records.map(license => license.data.technicalContact.email.toLowerCase().split('@')[1]));
 
-    if (records.every(r => hasIgnoredApp(r.data))) {
-      this.ignoreLicenses("Archived app", records[0].data.addonKey, licenses, transactions);
+    if (env.engine.ignoredApps.has(licenses[0].data.addonKey)) {
+      this.ignoreLicenses("Archived app", licenses[0].data.addonKey, licenses, transactions);
       return true;
     }
 
+    const records = [...licenses, ...transactions];
+    const domains = new Set(records.map(license => license.data.technicalContact.email.toLowerCase().split('@')[1]));
     const partnerDomains = [...domains].filter(domain => this.db.partnerDomains.has(domain));
     const providerDomains = [...domains].filter(domain => this.db.providerDomains.has(domain));
 
@@ -220,8 +220,4 @@ export class DealGenerator {
     deal.data.associatedPartner = lastPartner?.getPartnerDomain(this.db.partnerDomains) ?? null;
   }
 
-}
-
-function hasIgnoredApp(record: { addonKey: string }) {
-  return env.engine.ignoredApps.has(record.addonKey);
 }
