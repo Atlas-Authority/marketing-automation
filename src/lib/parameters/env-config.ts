@@ -28,6 +28,13 @@ export function serviceCredsFromENV() {
   }
 }
 
+export function slackConfigFromENV() {
+  return {
+    apiToken: optional('SLACK_API_TOKEN'),
+    errorChannelId: optional('SLACK_ERROR_CHANNEL_ID'),
+  };
+}
+
 const env = {
   mpac: {
     platforms: Object.fromEntries<string>(
@@ -75,11 +82,6 @@ const env = {
         associatedPartner: optional('HUBSPOT_DEAL_ASSOCIATED_PARTNER'),
       },
     },
-  },
-
-  slack: {
-    apiToken: optional('SLACK_API_TOKEN'),
-    errorChannelId: optional('SLACK_ERROR_CHANNEL_ID'),
   },
 
   loop: {
