@@ -1,13 +1,15 @@
 import got from 'got';
 import { DateTime, Duration, Interval } from 'luxon';
 import { RawLicense, RawTransaction } from '../../model/marketplace/raw';
-import env from '../../parameters/env-config';
+import { MpacCreds } from '../../parameters/interfaces';
 import { AttachableError, KnownError } from '../../util/errors';
 import cache from '../cache';
 import { MarketplaceService, Progress } from '../interfaces';
 
 
 export class LiveMarketplaceService implements MarketplaceService {
+
+  constructor(private creds: MpacCreds) { }
 
   public async downloadTransactions(): Promise<RawTransaction[]> {
     const transactions = await this.downloadMarketplaceData('/sales/transactions/export');
@@ -33,9 +35,9 @@ export class LiveMarketplaceService implements MarketplaceService {
   }
 
   private async downloadMarketplaceData<T>(subpath: string): Promise<T[]> {
-    const res = await got.get(`https://marketplace.atlassian.com/rest/2/vendors/${env.mpac.sellerId}/reporting${subpath}`, {
+    const res = await got.get(`https://marketplace.atlassian.com/rest/2/vendors/${this.creds.sellerId}/reporting${subpath}`, {
       headers: {
-        'Authorization': 'Basic ' + Buffer.from(env.mpac.user + ':' + env.mpac.apiKey).toString('base64'),
+        'Authorization': 'Basic ' + Buffer.from(this.creds.user + ':' + this.creds.apiKey).toString('base64'),
       },
     });
 

@@ -2,7 +2,7 @@ import * as hubspot from '@hubspot/api-client';
 import assert from 'assert';
 import log from '../../log/logger';
 import { Association, EntityKind, ExistingEntity, FullEntity, NewEntity, RelativeAssociation } from '../../model/hubspot/interfaces';
-import env from '../../parameters/env-config';
+import { HubspotCreds } from '../../parameters/interfaces';
 import { KnownError } from '../../util/errors';
 import { batchesOf } from '../../util/helpers';
 import cache from '../cache';
@@ -10,9 +10,11 @@ import { HubspotService, Progress } from '../interfaces';
 
 export default class LiveHubspotService implements HubspotService {
 
-  private client = new hubspot.Client(env.hubspot.accessToken
-    ? { accessToken: env.hubspot.accessToken }
-    : { apiKey: env.hubspot.apiKey });
+  private client: hubspot.Client;
+
+  constructor(creds: HubspotCreds) {
+    this.client = new hubspot.Client(creds);
+  }
 
   public async downloadEntities(_progess: Progress, kind: EntityKind, apiProperties: string[], inputAssociations: string[]): Promise<FullEntity[]> {
     let associations = ((inputAssociations.length > 0)

@@ -1,5 +1,6 @@
 import assert from "assert";
 import dotenv from "dotenv";
+import { HubspotCreds, MpacCreds } from "./interfaces";
 
 dotenv.config();
 
@@ -10,11 +11,25 @@ export interface Config {
   partnerDomains: string[];
 }
 
+export function serviceCredsFromENV() {
+  return {
+
+    mpacCreds: {
+      user: required('MPAC_USER'),
+      apiKey: required('MPAC_API_KEY'),
+      sellerId: required('MPAC_SELLER_ID'),
+    } as MpacCreds,
+
+    hubspotCreds: requireOneOf([
+      { accessToken: 'HUBSPOT_ACCESS_TOKEN' },
+      { apiKey: 'HUBSPOT_API_KEY' },
+    ]) as HubspotCreds,
+
+  }
+}
+
 const env = {
   mpac: {
-    user: required('MPAC_USER'),
-    apiKey: required('MPAC_API_KEY'),
-    sellerId: required('MPAC_SELLER_ID'),
     platforms: Object.fromEntries<string>(
       required('ADDONKEY_PLATFORMS')
         .split(',')
@@ -23,10 +38,6 @@ const env = {
   },
 
   hubspot: {
-    ...requireOneOf([
-      { accessToken: 'HUBSPOT_ACCESS_TOKEN' },
-      { apiKey: 'HUBSPOT_API_KEY' },
-    ]),
     accountId: optional('HUBSPOT_ACCOUNT_ID'),
     pipeline: {
       mpac: required('HUBSPOT_PIPELINE_MPAC'),
