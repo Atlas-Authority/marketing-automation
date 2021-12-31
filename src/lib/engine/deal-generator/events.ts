@@ -161,12 +161,10 @@ export class EventGenerator {
           }
         }
 
-        if (transactions.length === 0) {
-          this.events.push({
-            type: 'refund',
-            refundedTxs,
-          });
-        }
+        this.events.push({
+          type: 'refund',
+          refundedTxs,
+        });
       }
     }
 

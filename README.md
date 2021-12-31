@@ -96,6 +96,9 @@ After running the engine, to test logic *after* the Scoring Engine runs, pass `-
 
 - Renamed `npm start` to `npm run once` (Use Docker image for continuous background processing)
 - Renamed ENV variables `MPAC_PASS` to `MPAC_API_KEY`
+- Added optional "Associated Partner" keys on Deals and Contacts.
+- Fixed bug where refunds sometimes weren't being processed by MAE.
+- Deals now always use transaction ID when available.
 
 ### 0.1.0 (2021-11-25)
 

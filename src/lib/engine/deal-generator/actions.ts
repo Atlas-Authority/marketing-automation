@@ -38,7 +38,7 @@ export class ActionGenerator {
 
     const latestLicense = event.licenses[event.licenses.length - 1];
     if (!deal) {
-      return makeCreateAction(event, latestLicense, {
+      return makeCreateAction(latestLicense, {
         dealStage: event.licenses.some(l => l.active)
           ? DealStage.EVAL
           : DealStage.CLOSED_LOST,
@@ -50,10 +50,10 @@ export class ActionGenerator {
       const dealStage = (event.licenses.some(l => l.active)
         ? DealStage.EVAL
         : DealStage.CLOSED_LOST);
-      return makeUpdateAction(event, deal, latestLicense, dealStage);
+      return makeUpdateAction(deal, latestLicense, dealStage);
     }
     else {
-      return makeUpdateAction(event, deal, latestLicense);
+      return makeUpdateAction(deal, latestLicense);
     }
   }
 
@@ -63,12 +63,12 @@ export class ActionGenerator {
     if (deal) this.recordSeen(deal, event);
 
     if (deal) {
-      const license = event.transaction || getLatestLicense(event);
+      const record = event.transaction || getLatestLicense(event);
       const dealStage = deal.isEval() ? DealStage.CLOSED_WON : deal.data.dealStage;
-      return makeUpdateAction(event, deal, license, dealStage);
+      return makeUpdateAction(deal, record, dealStage);
     }
     else if (event.transaction) {
-      return makeCreateAction(event, event.transaction, {
+      return makeCreateAction(event.transaction, {
         dealStage: DealStage.CLOSED_WON,
         addonLicenseId: event.transaction.data.addonLicenseId,
         transactionId: event.transaction.data.transactionId,
@@ -76,7 +76,7 @@ export class ActionGenerator {
     }
     else {
       const license = getLatestLicense(event);
-      return makeCreateAction(event, license, {
+      return makeCreateAction(license, {
         dealStage: DealStage.CLOSED_WON,
         addonLicenseId: license.data.addonLicenseId,
         transactionId: null,
@@ -89,9 +89,9 @@ export class ActionGenerator {
     if (deal) this.recordSeen(deal, event);
 
     if (deal) {
-      return makeUpdateAction(event, deal, event.transaction);
+      return makeUpdateAction(deal, event.transaction);
     }
-    return makeCreateAction(event, event.transaction, {
+    return makeCreateAction(event.transaction, {
       dealStage: DealStage.CLOSED_WON,
       addonLicenseId: event.transaction.data.addonLicenseId,
       transactionId: event.transaction.data.transactionId,
@@ -105,8 +105,7 @@ export class ActionGenerator {
     }
 
     return ([...deals]
-      .filter(deal => deal.data.dealStage !== DealStage.CLOSED_LOST)
-      .map(deal => makeUpdateAction(event, deal, null, DealStage.CLOSED_LOST))
+      .map(deal => makeUpdateAction(deal, null, DealStage.CLOSED_LOST, { amount: 0 }))
       .filter(isPresent)
     );
   }
@@ -175,16 +174,32 @@ export class ActionGenerator {
 
 }
 
-function makeCreateAction(event: DealRelevantEvent, record: License | Transaction, data: Pick<DealData, 'addonLicenseId' | 'transactionId' | 'dealStage'>): Action {
+function makeCreateAction(record: License | Transaction, data: Pick<DealData, 'addonLicenseId' | 'transactionId' | 'dealStage'>): Action {
   return {
     type: 'create',
     properties: dealCreationProperties(record, data),
   };
 }
 
-function makeUpdateAction(event: DealRelevantEvent, deal: Deal, record: License | Transaction | null, dealstage?: DealStage): Action {
+function makeUpdateAction(deal: Deal, record: License | Transaction | null, dealstage?: DealStage, certainData?: Partial<DealData>): Action {
   if (dealstage !== undefined) deal.data.dealStage = dealstage;
-  if (record) updateDeal(deal, record);
+  if (record) {
+    const dataToEnsure = {
+      addonLicenseId: deal.data.addonLicenseId,
+      transactionId: deal.data.transactionId,
+      dealStage: deal.data.dealStage,
+    };
+    if (record instanceof Transaction) {
+      dataToEnsure.transactionId = record.data.transactionId;
+      dataToEnsure.addonLicenseId = record.data.addonLicenseId;
+    }
+    Object.assign(deal.data, dealCreationProperties(record, dataToEnsure));
+    deal.data.licenseTier = Math.max(deal.data.licenseTier ?? -1, record.tier);
+  }
+
+  if (certainData) {
+    Object.assign(deal.data, certainData);
+  }
 
   if (!deal.hasPropertyChanges()) {
     return { type: 'noop', deal };
@@ -222,14 +237,4 @@ function dealCreationProperties(record: License | Transaction, data: Pick<DealDa
         ? 0
         : record.data.vendorAmount),
   };
-}
-
-function updateDeal(deal: Deal, record: License | Transaction) {
-  const data = dealCreationProperties(record, {
-    addonLicenseId: deal.data.addonLicenseId,
-    transactionId: deal.data.transactionId,
-    dealStage: deal.data.dealStage,
-  });
-  Object.assign(deal.data, data);
-  deal.data.licenseTier = Math.max(deal.data.licenseTier ?? -1, record.tier);
 }
