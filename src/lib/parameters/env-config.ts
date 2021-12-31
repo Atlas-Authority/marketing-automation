@@ -124,7 +124,6 @@ function requireOneOf<T>(opts: T[]): T {
   })));
 
   const firstValid = all.find(opt => opt.value);
-  if (isTest) return opts[0];
   assert.ok(firstValid, `One of ENV keys ${all.map(o => o.envKey).join(' or ')} are required`);
 
   const { localKey, value } = firstValid;
