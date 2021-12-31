@@ -35,6 +35,14 @@ export function slackConfigFromENV() {
   };
 }
 
+export function runLoopConfigFromENV() {
+  return {
+    runInterval: required('RUN_INTERVAL'),
+    retryInterval: required('RETRY_INTERVAL'),
+    retryTimes: +required('RETRY_TIMES'),
+  };
+}
+
 const env = {
   mpac: {
     platforms: Object.fromEntries<string>(
@@ -82,12 +90,6 @@ const env = {
         associatedPartner: optional('HUBSPOT_DEAL_ASSOCIATED_PARTNER'),
       },
     },
-  },
-
-  loop: {
-    runInterval: required('RUN_INTERVAL'),
-    retryInterval: required('RETRY_INTERVAL'),
-    retryTimes: +required('RETRY_TIMES'),
   },
 
   engine: {
