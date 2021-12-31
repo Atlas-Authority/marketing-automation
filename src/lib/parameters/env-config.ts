@@ -71,12 +71,15 @@ const env = {
     errorChannelId: optional('SLACK_ERROR_CHANNEL_ID'),
   },
 
-  engine: {
+  loop: {
     runInterval: required('RUN_INTERVAL'),
     retryInterval: required('RETRY_INTERVAL'),
     retryTimes: +required('RETRY_TIMES'),
+  },
+
+  engine: {
     partnerDomains: optional('PARTNER_DOMAINS')?.split(/\s*,\s*/g),
-    ignoredApps: new Set(optional('IGNORED_APPS')?.split(',') ?? []),
+    archivedApps: new Set(optional('IGNORED_APPS')?.split(',') ?? []),
     ignoredEmails: new Set((optional('IGNORED_EMAILS')?.split(',') ?? []).map(e => e.toLowerCase())),
   },
 };

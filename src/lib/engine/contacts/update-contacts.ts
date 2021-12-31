@@ -33,7 +33,7 @@ export function updateContactsBasedOnMatchResults(db: Database, allMatches: Rela
       if (!product) {
         throw new KnownError(`Add "${addonKey}" to ADDONKEY_PLATFORMS`);
       }
-      if (!env.engine.ignoredApps.has(addonKey)) {
+      if (!env.engine.archivedApps.has(addonKey)) {
         contact.data.relatedProducts.add(product);
       }
 

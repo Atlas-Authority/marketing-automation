@@ -5,10 +5,10 @@ export default async function run({ work, failed }: {
   work: () => Promise<void>,
   failed: (errors: Error[]) => Promise<void>,
 }) {
-  log.info('Runner', 'Starting with options:', env.engine);
-  const normalInterval = env.engine.runInterval;
-  const errorInterval = env.engine.retryInterval;
-  const errorTries = env.engine.retryTimes;
+  log.info('Runner', 'Starting with options:', env.loop);
+  const normalInterval = env.loop.runInterval;
+  const errorInterval = env.loop.retryInterval;
+  const errorTries = env.loop.retryTimes;
 
   log.info('Runner', 'Running loop');
   const errors: Error[] = [];

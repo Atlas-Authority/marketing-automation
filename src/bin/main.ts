@@ -31,7 +31,7 @@ async function main() {
     },
 
     async failed(errors) {
-      await slack.postToSlack(`Failed ${env.engine.retryTimes} times. Below are the specific errors, in order. Trying again in ${env.engine.runInterval}.`);
+      await slack.postToSlack(`Failed ${env.loop.retryTimes} times. Below are the specific errors, in order. Trying again in ${env.loop.runInterval}.`);
       for (const error of errors) {
         if (error instanceof KnownError) {
           await slack.postErrorToSlack(error.message);

@@ -152,7 +152,7 @@ export class DealGenerator {
     const licenses = group;
     const transactions = group.flatMap(license => license.transactions);
 
-    if (env.engine.ignoredApps.has(licenses[0].data.addonKey)) {
+    if (env.engine.archivedApps.has(licenses[0].data.addonKey)) {
       this.ignoreLicenses("Archived app", licenses[0].data.addonKey, licenses, transactions);
       return true;
     }

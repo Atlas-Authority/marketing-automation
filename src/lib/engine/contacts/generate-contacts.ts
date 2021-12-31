@@ -186,5 +186,5 @@ export function mergeContactInfo(contact: ContactData, contacts: GeneratedContac
 }
 
 function notIgnored(addonKey: string) {
-  return !env.engine.ignoredApps.has(addonKey);
+  return !env.engine.archivedApps.has(addonKey);
 }
