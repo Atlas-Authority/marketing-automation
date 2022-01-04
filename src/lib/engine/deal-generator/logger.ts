@@ -84,11 +84,13 @@ export class DealDataLogger {
           type: e.type,
           lics: e.licenses.map(l => l.id),
           txs: [],
+          meta: e.meta,
         };
         case 'purchase': return {
           type: e.type,
           lics: e.licenses.map(l => l.id),
           txs: [e.transaction?.id],
+          meta: e.meta,
         };
         case 'refund': return {
           type: e.type,
@@ -99,11 +101,13 @@ export class DealDataLogger {
           type: e.type,
           lics: [],
           txs: [e.transaction.id],
+          meta: e.meta,
         };
         case 'upgrade': return {
           type: e.type,
           lics: [],
           txs: [e.transaction.id],
+          meta: e.meta,
         };
       }
     });
@@ -116,6 +120,7 @@ export class DealDataLogger {
         [{ title: 'Type' }, row => row.type],
         [{ title: 'Licenses' }, row => row.lics?.join(', ') ?? ''],
         [{ title: 'Transactions' }, row => row.txs?.join(', ') ?? ''],
+        [{ title: 'Partner-only' }, row => row.meta ?? ''],
       ],
     });
   }

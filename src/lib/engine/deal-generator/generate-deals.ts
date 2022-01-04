@@ -4,9 +4,7 @@ import log from "../../log/logger";
 import { Table } from "../../log/table";
 import { Database } from "../../model/database";
 import { Deal } from "../../model/deal";
-import { License, LicenseData } from "../../model/license";
-import { Transaction } from "../../model/transaction";
-import env from "../../parameters/env-config";
+import { LicenseData } from "../../model/license";
 import { formatMoney } from "../../util/formatters";
 import { isPresent, sorter } from "../../util/helpers";
 import { RelatedLicenseSet } from "../license-matching/license-grouper";
@@ -27,8 +25,6 @@ export class DealGenerator {
 
   private ignoredLicenseSets: (IgnoredLicense)[][] = [];
   private ignoredAmounts = new Map<string, number>();
-
-  private partnerTransactions = new Set<Transaction>();
 
   public constructor(private db: Database) {
     this.actionGenerator = new ActionGenerator(db.dealManager);
@@ -65,7 +61,6 @@ export class DealGenerator {
     }
 
     this.printIgnoredTransactionsTable();
-    this.printPartnerTransactionsTable();
 
     logger.close();
   }
@@ -85,37 +80,10 @@ export class DealGenerator {
     }
   }
 
-  private printPartnerTransactionsTable() {
-    const table = new Table([
-      { title: 'Transaction' },
-      { title: 'SEN' },
-      { title: 'AddonLicId' },
-      { title: 'Sale Date' },
-      { title: 'Amount', align: 'right' },
-      { title: 'Emails used' },
-    ]);
-    for (const t of this.partnerTransactions) {
-      table.rows.push([
-        t.data.transactionId,
-        t.data.licenseId,
-        t.data.addonLicenseId,
-        t.data.saleDate,
-        formatMoney(t.data.vendorAmount),
-        [...new Set(t.allContacts.map(c => c.data.email))].join(', '),
-      ]);
-    }
-
-    log.warn('Deal Actions', 'Partner amounts');
-    for (const row of table.eachRow()) {
-      log.warn('Deal Actions', '  ' + row);
-    }
-  }
-
   public generateActionsForMatchedGroup(group: RelatedLicenseSet) {
     assert.ok(group.length > 0);
-    if (this.ignoring(group)) return { records: [], actions: [], events: [] };
 
-    const eventGenerator = new EventGenerator();
+    const eventGenerator = new EventGenerator(this.db);
 
     const records = eventGenerator.getSortedRecords(group);
     const events = eventGenerator.interpretAsEvents(records);
@@ -145,59 +113,6 @@ export class DealGenerator {
     for (const company of companies) {
       deal.companies.add(company);
     }
-  }
-
-  /** Ignore if every license's tech contact domain is partner or mass-provider */
-  private ignoring(group: RelatedLicenseSet) {
-    const licenses = group;
-    const transactions = group.flatMap(license => license.transactions);
-
-    if (env.engine.archivedApps.has(licenses[0].data.addonKey)) {
-      this.ignoreLicenses("Archived app", licenses[0].data.addonKey, licenses, transactions);
-      return true;
-    }
-
-    const records = [...licenses, ...transactions];
-    const domains = new Set(records.map(license => license.data.technicalContact.email.toLowerCase().split('@')[1]));
-    const partnerDomains = [...domains].filter(domain => this.db.partnerDomains.has(domain));
-    const providerDomains = [...domains].filter(domain => this.db.providerDomains.has(domain));
-
-    if (domains.size == partnerDomains.length + providerDomains.length) {
-      let reason;
-      if (partnerDomains.length > 0) {
-        reason = 'Partner Domains';
-        for (const tx of transactions) {
-          this.partnerTransactions.add(tx);
-        }
-      }
-      else if (providerDomains.length > 0) {
-        reason = 'Mass-Provider Domains';
-      }
-      else {
-        reason = 'Unknown domain issue';
-      }
-
-      this.ignoreLicenses(reason, [...domains].join(','), licenses, transactions);
-      return true;
-    }
-
-    return false;
-  }
-
-  private ignoreLicenses(reason: string, details: string, licenses: License[], transactions: Transaction[]) {
-    const ignoringAmount = (transactions
-      .map(t => t.data.vendorAmount)
-      .reduce((a, b) => a + b, 0));
-
-    this.ignoredAmounts.set(reason,
-      (this.ignoredAmounts.get(reason) ?? 0) +
-      ignoringAmount);
-
-    this.ignoredLicenseSets.push(licenses.map(license => ({
-      reason,
-      details,
-      ...license.data,
-    })));
   }
 
   public flagPartnerTransacted(deal: Deal) {

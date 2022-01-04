@@ -1,13 +1,17 @@
+import { Database } from "../../model/database";
 import { License } from "../../model/license";
 import { Transaction } from "../../model/transaction";
+import env from "../../parameters/env-config";
 import { sorter } from "../../util/helpers";
 import { RelatedLicenseSet } from "../license-matching/license-grouper";
 
+type EventMeta = 'partner-only' | 'mass-provider-only' | 'partner-and-mass-provider-only' | 'archived-app' | null;
+
 export type RefundEvent = { type: 'refund', refundedTxs: Transaction[] };
-export type EvalEvent = { type: 'eval', licenses: License[] };
-export type PurchaseEvent = { type: 'purchase', licenses: License[], transaction?: Transaction };
-export type RenewalEvent = { type: 'renewal', transaction: Transaction };
-export type UpgradeEvent = { type: 'upgrade', transaction: Transaction };
+export type EvalEvent = { type: 'eval', meta: EventMeta, licenses: License[] };
+export type PurchaseEvent = { type: 'purchase', meta: EventMeta, licenses: License[], transaction?: Transaction };
+export type RenewalEvent = { type: 'renewal', meta: EventMeta, transaction: Transaction };
+export type UpgradeEvent = { type: 'upgrade', meta: EventMeta, transaction: Transaction };
 
 export type DealRelevantEvent = (
   RefundEvent |
@@ -19,29 +23,33 @@ export type DealRelevantEvent = (
 
 export class EventGenerator {
 
+  constructor(private db: Database) { }
+
   private events: DealRelevantEvent[] = [];
 
   public interpretAsEvents(records: (License | Transaction)[]) {
+    const meta = this.getEventMeta(records);
+
     for (const record of records) {
       if (record instanceof License) {
         if (isEvalOrOpenSourceLicense(record)) {
-          this.events.push({ type: 'eval', licenses: [record] });
+          this.events.push({ type: 'eval', meta, licenses: [record] });
         }
         else if (isPaidLicense(record)) {
-          this.events.push({ type: 'purchase', licenses: [record] });
+          this.events.push({ type: 'purchase', meta, licenses: [record] });
         }
       }
       else {
         switch (record.data.saleType) {
           case 'New': {
-            this.events.push({ type: 'purchase', licenses: [record.license], transaction: record });
+            this.events.push({ type: 'purchase', meta, licenses: [record.license], transaction: record });
             break;
           }
           case 'Renewal':
-            this.events.push({ type: 'renewal', transaction: record });
+            this.events.push({ type: 'renewal', meta, transaction: record });
             break;
           case 'Upgrade':
-            this.events.push({ type: 'upgrade', transaction: record });
+            this.events.push({ type: 'upgrade', meta, transaction: record });
             break;
         }
       }
@@ -50,6 +58,29 @@ export class EventGenerator {
     this.normalizeEvalAndPurchaseEvents();
 
     return this.events;
+  }
+
+  private getEventMeta(records: (License | Transaction)[]): EventMeta {
+    if (env.engine.archivedApps.has(records[0].data.addonKey)) {
+      return 'archived-app';
+    }
+
+    const domains = new Set(records.map(license => license.data.technicalContact.email.toLowerCase().split('@')[1]));
+    const partnerDomains = [...domains].filter(domain => this.db.partnerDomains.has(domain));
+    const providerDomains = [...domains].filter(domain => this.db.providerDomains.has(domain));
+
+    if (domains.size == partnerDomains.length + providerDomains.length) {
+      if (partnerDomains.length > 0 && providerDomains.length > 0) {
+        return 'partner-and-mass-provider-only';
+      }
+      else if (partnerDomains.length > 0) {
+        return 'partner-only';
+      }
+      else if (providerDomains.length > 0) {
+        return 'mass-provider-only';
+      }
+    }
+    return null;
   }
 
   /**
