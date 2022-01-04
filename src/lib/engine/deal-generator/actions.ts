@@ -6,12 +6,14 @@ import { License } from "../../model/license";
 import { Transaction } from "../../model/transaction";
 import env from '../../parameters/env-config';
 import { isPresent, sorter } from "../../util/helpers";
-import { abbrEventDetails, DealRelevantEvent, EvalEvent, PurchaseEvent, RefundEvent, RenewalEvent, UpgradeEvent } from "./events";
+import { abbrEventDetails, DealRelevantEvent, EvalEvent, EventMeta, PurchaseEvent, RefundEvent, RenewalEvent, UpgradeEvent } from "./events";
+
+type DealNoOpReason = Exclude<EventMeta, null> | 'properties-up-to-date';
 
 export type Action = CreateDealAction | UpdateDealAction | IgnoreDealAction;
 export type CreateDealAction = { type: 'create'; properties: DealData };
 export type UpdateDealAction = { type: 'update'; deal: Deal; properties: Partial<DealData> };
-export type IgnoreDealAction = { type: 'noop'; deal: Deal };
+export type IgnoreDealAction = { type: 'noop'; deal: Deal | null, reason: DealNoOpReason };
 
 export class ActionGenerator {
 
@@ -35,6 +37,9 @@ export class ActionGenerator {
   private actionForEval(event: EvalEvent): Action {
     const deal = this.singleDeal(this.dealManager.getDealsForRecords(event.licenses));
     if (deal) this.recordSeen(deal, event);
+
+    const metaAction = maybeMakeMetaAction(event, deal);
+    if (metaAction) return metaAction;
 
     const latestLicense = event.licenses[event.licenses.length - 1];
     if (!deal) {
@@ -62,6 +67,9 @@ export class ActionGenerator {
     const deal = this.singleDeal(this.dealManager.getDealsForRecords(recordsToSearch));
     if (deal) this.recordSeen(deal, event);
 
+    const metaAction = maybeMakeMetaAction(event, deal);
+    if (metaAction) return metaAction;
+
     if (deal) {
       const record = event.transaction || getLatestLicense(event);
       const dealStage = deal.isEval() ? DealStage.CLOSED_WON : deal.data.dealStage;
@@ -87,6 +95,9 @@ export class ActionGenerator {
   private actionForRenewal(event: RenewalEvent | UpgradeEvent): Action {
     const deal = this.singleDeal(this.dealManager.getDealsForRecords([event.transaction]));
     if (deal) this.recordSeen(deal, event);
+
+    const metaAction = maybeMakeMetaAction(event, deal);
+    if (metaAction) return metaAction;
 
     if (deal) {
       return makeUpdateAction(deal, event.transaction);
@@ -202,7 +213,7 @@ function makeUpdateAction(deal: Deal, record: License | Transaction | null, deal
   }
 
   if (!deal.hasPropertyChanges()) {
-    return { type: 'noop', deal };
+    return { type: 'noop', deal, reason: 'properties-up-to-date' };
   }
 
   return {
@@ -237,4 +248,16 @@ function dealCreationProperties(record: License | Transaction, data: Pick<DealDa
         ? 0
         : record.data.vendorAmount),
   };
+}
+
+function maybeMakeMetaAction(event: Exclude<DealRelevantEvent, RefundEvent>, deal: Deal | null): Action | null {
+  if (event.meta) {
+    if (deal) {
+      return makeUpdateAction(deal, null, DealStage.CLOSED_LOST, {
+        amount: 0,
+      });
+    }
+    return { type: 'noop', deal: null, reason: event.meta };
+  }
+  return null;
 }

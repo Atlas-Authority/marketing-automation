@@ -5,7 +5,7 @@ import env from "../../parameters/env-config";
 import { sorter } from "../../util/helpers";
 import { RelatedLicenseSet } from "../license-matching/license-grouper";
 
-type EventMeta = 'partner-only' | 'mass-provider-only' | 'partner-and-mass-provider-only' | 'archived-app' | null;
+export type EventMeta = 'partner-only' | 'mass-provider-only' | 'partner-and-mass-provider-only' | 'archived-app' | null;
 
 export type RefundEvent = { type: 'refund', refundedTxs: Transaction[] };
 export type EvalEvent = { type: 'eval', meta: EventMeta, licenses: License[] };

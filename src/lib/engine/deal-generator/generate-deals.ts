@@ -46,11 +46,11 @@ export class DealGenerator {
           ? this.db.dealManager.create(action.properties)
           : action.deal);
 
-        deal.records = records;
-
-        this.associateDealContactsAndCompanies(relatedLicenseIds, deal);
-
-        this.flagPartnerTransacted(deal);
+        if (deal) {
+          deal.records = records;
+          this.associateDealContactsAndCompanies(relatedLicenseIds, deal);
+          this.flagPartnerTransacted(deal);
+        }
       }
     }
 

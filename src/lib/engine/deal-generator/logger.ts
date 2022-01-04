@@ -3,7 +3,7 @@ import { Table } from "../../log/table.js";
 import { DealData } from "../../model/deal.js";
 import { DealStage } from '../../model/hubspot/interfaces.js';
 import { License } from "../../model/license.js";
-import { Transaction, uniqueTransactionId } from "../../model/transaction.js";
+import { Transaction } from "../../model/transaction.js";
 import { formatMoney } from "../../util/formatters.js";
 import { RelatedLicenseSet } from "../license-matching/license-grouper.js";
 import { Action } from "./actions.js";
@@ -33,11 +33,15 @@ export class DealDataLogger {
           break;
         }
         case 'noop': {
-          const dealId = action.deal.id;
-          const { amount, dealStage } = action.deal.data;
-          const recordId = action.deal.mpacId();
-          const stage = DealStage[dealStage];
-          this.log.writeLine(`  Nothing: ${dealId}, via ${recordId}, stage=${stage}, amount=${amount}`);
+          let details = `  Nothing: [${action.reason}]`;
+          if (action.deal) {
+            const dealId = action.deal.id;
+            const { amount, dealStage } = action.deal.data;
+            const recordId = action.deal.mpacId();
+            const stage = DealStage[dealStage];
+            details += ` deal=${dealId}, record=${recordId}, stage=${stage}, amount=${amount}`;
+          }
+          this.log.writeLine(details);
           break;
         }
       }
