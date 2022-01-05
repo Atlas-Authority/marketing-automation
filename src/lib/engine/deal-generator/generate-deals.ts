@@ -1,5 +1,4 @@
 import assert from "assert";
-import { saveForInspection } from "../../cache/inspection";
 import log from "../../log/logger";
 import { Table } from "../../log/table";
 import { Database } from "../../model/database";
@@ -23,11 +22,10 @@ export class DealGenerator {
 
   private actionGenerator: ActionGenerator;
 
-  private ignoredLicenseSets: (IgnoredLicense)[][] = [];
   private ignoredAmounts = new Map<string, number>();
 
   public constructor(private db: Database) {
-    this.actionGenerator = new ActionGenerator(db.dealManager);
+    this.actionGenerator = new ActionGenerator(db.dealManager, this.ignore.bind(this));
   }
 
   public run(matches: RelatedLicenseSet[]) {
@@ -53,8 +51,6 @@ export class DealGenerator {
         }
       }
     }
-
-    saveForInspection('ignored', this.ignoredLicenseSets);
 
     for (const [reason, amount] of this.ignoredAmounts) {
       this.db.tallier.less('Ignored: ' + reason, amount);
@@ -133,6 +129,11 @@ export class DealGenerator {
       .find(c => c.isPartner));
 
     deal.data.associatedPartner = lastPartner?.getPartnerDomain(this.db.partnerDomains) ?? null;
+  }
+
+  private ignore(reason: string, amount: number) {
+    const oldAmount = this.ignoredAmounts.get(reason) ?? 0;
+    this.ignoredAmounts.set(reason, oldAmount + amount);
   }
 
 }

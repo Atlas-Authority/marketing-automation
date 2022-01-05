@@ -18,7 +18,10 @@ export type IgnoreDealAction = { type: 'noop'; deal: Deal | null, reason: DealNo
 export class ActionGenerator {
 
   #handledDeals = new Map<Deal, DealRelevantEvent>();
-  public constructor(private dealManager: DealManager) { }
+  public constructor(
+    private dealManager: DealManager,
+    private ignore: (reason: string, amount: number) => void,
+  ) { }
 
   public generateFrom(events: DealRelevantEvent[]) {
     return events.flatMap(event => this.actionsFor(event));
@@ -38,7 +41,7 @@ export class ActionGenerator {
     const deal = this.singleDeal(this.dealManager.getDealsForRecords(event.licenses));
     if (deal) this.recordSeen(deal, event);
 
-    const metaAction = maybeMakeMetaAction(event, deal);
+    const metaAction = this.maybeMakeMetaAction(event, deal, 0);
     if (metaAction) return metaAction;
 
     const latestLicense = event.licenses[event.licenses.length - 1];
@@ -67,7 +70,7 @@ export class ActionGenerator {
     const deal = this.singleDeal(this.dealManager.getDealsForRecords(recordsToSearch));
     if (deal) this.recordSeen(deal, event);
 
-    const metaAction = maybeMakeMetaAction(event, deal);
+    const metaAction = this.maybeMakeMetaAction(event, deal, event.transaction?.data.vendorAmount ?? 0);
     if (metaAction) return metaAction;
 
     if (deal) {
@@ -96,7 +99,7 @@ export class ActionGenerator {
     const deal = this.singleDeal(this.dealManager.getDealsForRecords([event.transaction]));
     if (deal) this.recordSeen(deal, event);
 
-    const metaAction = maybeMakeMetaAction(event, deal);
+    const metaAction = this.maybeMakeMetaAction(event, deal, event.transaction.data.vendorAmount);
     if (metaAction) return metaAction;
 
     if (deal) {
@@ -183,6 +186,17 @@ export class ActionGenerator {
     return dealToUse;
   }
 
+  maybeMakeMetaAction(event: Exclude<DealRelevantEvent, RefundEvent>, deal: Deal | null, amount: number): Action | null {
+    switch (event.meta) {
+      case 'archived-app':
+      case 'mass-provider-only':
+        this.ignore(event.meta, amount);
+        return { type: 'noop', deal, reason: event.meta };
+      default:
+        return null;
+    }
+  }
+
 }
 
 function makeCreateAction(record: License | Transaction, data: Pick<DealData, 'addonLicenseId' | 'transactionId' | 'dealStage'>): Action {
@@ -248,16 +262,4 @@ function dealCreationProperties(record: License | Transaction, data: Pick<DealDa
         ? 0
         : record.data.vendorAmount),
   };
-}
-
-function maybeMakeMetaAction(event: Exclude<DealRelevantEvent, RefundEvent>, deal: Deal | null): Action | null {
-  if (event.meta) {
-    if (deal) {
-      return makeUpdateAction(deal, null, DealStage.CLOSED_LOST, {
-        amount: 0,
-      });
-    }
-    return { type: 'noop', deal: null, reason: event.meta };
-  }
-  return null;
 }

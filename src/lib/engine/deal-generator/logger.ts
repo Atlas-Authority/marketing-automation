@@ -124,7 +124,7 @@ export class DealDataLogger {
         [{ title: 'Type' }, row => row.type],
         [{ title: 'Licenses' }, row => row.lics?.join(', ') ?? ''],
         [{ title: 'Transactions' }, row => row.txs?.join(', ') ?? ''],
-        [{ title: 'Partner-only' }, row => row.meta ?? ''],
+        [{ title: 'Metadata' }, row => row.meta ?? ''],
       ],
     });
   }
