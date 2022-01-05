@@ -1,6 +1,5 @@
 import mustache from 'mustache';
 import log from "../../log/logger";
-import { domainFor } from '../../model/contact';
 import { Deal, DealData, DealManager } from "../../model/deal";
 import { DealStage, Pipeline } from "../../model/hubspot/interfaces";
 import { License } from "../../model/license";
@@ -254,15 +253,11 @@ function dealCreationProperties(records: (License | Transaction)[], record: Lice
    * then use the most recent record's partner contact's domain.
    * Otherwise set this to null.
    */
-  const lastPartnerEmail = ([...records]
+  const associatedPartner = ([...records]
     .reverse()
-    .find(r => r.partnerContact)
-    ?.partnerContact
-    ?.data.email);
-
-  const associatedPartner = (lastPartnerEmail
-    ? domainFor(lastPartnerEmail)
-    : null);
+    .map(record => record.partnerDomain)
+    .find(domain => domain)
+    ?? null);
 
   return {
     ...data,
