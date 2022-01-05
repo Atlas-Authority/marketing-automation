@@ -190,7 +190,13 @@ export class ActionGenerator {
     switch (event.meta) {
       case 'archived-app':
       case 'mass-provider-only':
-        this.ignore(event.meta, amount);
+        const reason = (event.meta === 'archived-app'
+          ? 'Archived-app transaction'
+          : 'Mass-provider transaction'
+        );
+        if (!deal) {
+          this.ignore(reason, amount);
+        }
         return { type: 'noop', deal, reason: event.meta };
       default:
         return null;

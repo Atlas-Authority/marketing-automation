@@ -24,6 +24,9 @@ export function printSummary(db: Database) {
       .reduce((a, b) => a + b));
 
     log.warn('Deal Generator', 'Total of duplicates:', formatMoney(dupTotal));
+    log.warn('Deal Generator', 'Total duplicates:', db.dealManager.duplicatesToDelete.size);
+
+    db.tallier.less('Over-accounted: Duplicate deals', -dupTotal);
   }
 
   const deals = db.dealManager.getArray();
