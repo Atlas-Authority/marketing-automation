@@ -45,9 +45,7 @@ export class DealGenerator {
           : action.deal);
 
         if (deal) {
-          deal.records = records;
           this.associateDealContactsAndCompanies(relatedLicenseIds, deal);
-          this.flagPartnerTransacted(deal);
         }
       }
     }
@@ -83,7 +81,7 @@ export class DealGenerator {
 
     const records = eventGenerator.getSortedRecords(group);
     const events = eventGenerator.interpretAsEvents(records);
-    const actions = this.actionGenerator.generateFrom(events);
+    const actions = this.actionGenerator.generateFrom(records, events);
 
     return { records, events, actions };
   }
@@ -109,26 +107,6 @@ export class DealGenerator {
     for (const company of companies) {
       deal.companies.add(company);
     }
-  }
-
-  public flagPartnerTransacted(deal: Deal) {
-    if (deal.records.length === 0) {
-      log.error('Deal Actions', "Deal has no associated MPAC records:", deal.id);
-      return;
-    }
-
-    /**
-     * If any record in any of the deal's groups have partner contacts
-     * then use the most recent record's partner contact's domain.
-     * Otherwise set this to null.
-     */
-    const lastPartner = (deal
-      .records
-      .flatMap(r => r.allContacts)
-      .reverse()
-      .find(c => c.isPartner));
-
-    deal.data.associatedPartner = lastPartner?.getPartnerDomain(this.db.partnerDomains) ?? null;
   }
 
   private ignore(reason: string, amount: number) {

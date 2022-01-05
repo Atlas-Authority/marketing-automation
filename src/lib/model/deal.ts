@@ -33,8 +33,6 @@ type DealComputed = {
 
 export class Deal extends Entity<DealData, DealComputed> {
 
-  records: (License | Transaction)[] = [];
-
   public contacts = this.makeDynamicAssociation<Contact>('contact');
   public companies = this.makeDynamicAssociation<Company>('company');
 

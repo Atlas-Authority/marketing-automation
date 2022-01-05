@@ -48,11 +48,6 @@ export function runDealGenerator(input: TestInput) {
   const dealGenerator = new DealGenerator(db);
   const { records, events, actions } = dealGenerator.generateActionsForMatchedGroup(group);
 
-  for (const deal of db.dealManager.getAll()) {
-    deal.records = records;
-    dealGenerator.flagPartnerTransacted(deal);
-  }
-
   const createdDeals: DealData[] = [];
   for (const [i, action] of actions.entries()) {
     if (action.type === 'create') {
