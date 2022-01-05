@@ -2,7 +2,6 @@ import { domainFor } from "../../model/contact";
 import { Database } from "../../model/database";
 import { License } from "../../model/license";
 import { Transaction } from "../../model/transaction";
-import env from "../../parameters/env-config";
 import { KnownError } from "../../util/errors";
 import { isPresent } from "../../util/helpers";
 import { RelatedLicenseSet } from "../license-matching/license-grouper";
@@ -33,11 +32,11 @@ export function updateContactsBasedOnMatchResults(db: Database, allMatches: Rela
       }
 
       const addonKey = license[0].data.addonKey;
-      const product = env.mpac.platforms[addonKey];
+      const product = db.appToPlatform[addonKey];
       if (!product) {
         throw new KnownError(`Add "${addonKey}" to ADDONKEY_PLATFORMS`);
       }
-      if (!env.engine.archivedApps.has(addonKey)) {
+      if (!db.archivedApps.has(addonKey)) {
         contact.data.relatedProducts.add(product);
       }
 

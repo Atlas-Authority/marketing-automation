@@ -8,6 +8,7 @@ import { ContactInfo } from '../../../model/marketplace/common';
 import { Transaction, TransactionData } from "../../../model/transaction";
 import { emptyConfig } from '../../../parameters/env-config';
 import { ContactGenerator } from '../../contacts/generate-contacts';
+import { updateContactsBasedOnMatchResults } from '../../contacts/update-contacts';
 import { RelatedLicenseSet } from '../../license-matching/license-grouper';
 import { Action } from "../actions";
 import { DealRelevantEvent } from '../events';
@@ -32,12 +33,17 @@ export function runDealGenerator(input: TestInput) {
   const db = new Database(io, {
     ...emptyConfig,
     partnerDomains: input.partnerDomains ?? [],
-  });
+  }, false);
   const group = reassembleMatchGroup(input.group, input.records);
   db.licenses = group;
   db.transactions = group.flatMap(g => g.transactions);
 
+  for (const license of group) {
+    db.appToPlatform[license.data.addonKey] = 'Confluence';
+  }
+
   new ContactGenerator(db).run();
+  updateContactsBasedOnMatchResults(db, [group]);
 
   for (const [i, dealData] of (input.deals ?? []).entries()) {
     const deal = db.dealManager.create(dealData);
