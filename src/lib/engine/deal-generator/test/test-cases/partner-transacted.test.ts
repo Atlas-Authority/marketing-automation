@@ -1,7 +1,7 @@
 import { runDealGenerator, runDealGeneratorTwice, testLicense } from "../utils";
 
 
-it(`Sets partner domain on deal if record is partern-transacted`, () => {
+it(`Sets partner domain on deal if record is partner-transacted`, () => {
   const license1 = testLicense("1111111", "2021-12-26", "EVAL", "inactive");
   const license2 = testLicense("2222222", "2021-12-27", "COMMERCIAL", "active");
   const partnerDomain = license2.data.technicalContact.email.split('@')[1];
@@ -19,7 +19,7 @@ it(`Sets partner domain on deal if record is partern-transacted`, () => {
   expect(deal.data.associatedPartner).toEqual(partnerDomain);
 });
 
-it(`Sets partner domain on deal if record is partern-transacted even if newer one is not`, () => {
+it(`Sets partner domain on deal if record is partner-transacted even if newer one is not`, () => {
   const license1 = testLicense("1111111", "2021-12-26", "EVAL", "inactive");
   const license2 = testLicense("2222222", "2021-12-27", "COMMERCIAL", "active");
   const partnerDomain = license1.data.technicalContact.email.split('@')[1];
