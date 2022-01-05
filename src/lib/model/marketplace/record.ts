@@ -10,6 +10,8 @@ export abstract class MpacRecord<T> {
   public partnerContact: Contact | null = null;
   public allContacts: Contact[] = [];
 
+  public partnerDomain: string | null = null;
+
   public constructor(public data: T) { }
 
   public getPartnerDomain(partnerDomains: Set<string>) {
