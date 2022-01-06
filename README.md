@@ -99,6 +99,8 @@ After running the engine, to test logic *after* the Scoring Engine runs, pass `-
 - Added optional "Associated Partner" keys on Deals and Contacts.
 - Fixed bug where refunds sometimes weren't being processed by MAE.
 - Deals now always use transaction ID when available.
+- Refunded deals now have their amounts set to zero.
+- Purchased inactive licenses are set to closed-won if not refunded.
 
 ### 0.1.0 (2021-11-25)
 
