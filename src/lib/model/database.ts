@@ -184,7 +184,7 @@ export class Database {
     verifyIdIsUnique(this.licenses, l => l.data.appEntitlementId);
     verifyIdIsUnique(this.licenses, l => l.data.appEntitlementNumber);
 
-    // All license IDs should point to the same transactions
+    // All license IDs should point to the same transactions as each other
     for (const l of this.licenses) {
       const id1 = l.data.appEntitlementId;
       const id2 = l.data.appEntitlementNumber;
@@ -200,6 +200,24 @@ export class Database {
 
       verifySameSet(set1 || null, set2 || null);
       verifySameSet(set2 || null, set3 || null);
+    }
+
+    // All license IDs on each transaction should point to the same license
+    // (I'm 99% certain this is the logical inverse of the above,
+    //  but adding this quick assertion just in case I'm wrong.
+    //  Like, what if an ID is missing on License but not Transaction?
+    //  It's a bit confusing right now, and this test is cheap.)
+    for (const t of this.transactions) {
+      const id1 = t.data.appEntitlementId;
+      const id2 = t.data.appEntitlementNumber;
+      const id3 = t.data.addonLicenseId;
+
+      const license1 = id1 && this.licenses.find(l => id1 === l.data.appEntitlementId);
+      const license2 = id2 && this.licenses.find(l => id2 === l.data.appEntitlementNumber);
+      const license3 = id3 && this.licenses.find(l => id3 === l.data.addonLicenseId);
+
+      verifyEqual(license1 || null, license2 || null);
+      verifyEqual(license2 || null, license3 || null);
     }
 
     log.info('Database', 'Validating MPAC ID uniqueness: Done')
@@ -230,5 +248,13 @@ function verifySameSet(set1: Set<Transaction> | null, set2: Set<Transaction> | n
   const same = set1.size === set2.size && [...set1].every(t => set2.has(t));
   if (!same) {
     log.error('Database', `License IDs do not point to same transactions`);
+  }
+}
+
+function verifyEqual(license1: License | null, license2: License | null) {
+  if (!license1 || !license2) return;
+
+  if (license1 !== license2) {
+    log.error('Database', `License IDs do not point to same License from Transaction`);
   }
 }
