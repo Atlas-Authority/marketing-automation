@@ -45,13 +45,6 @@ export class Contact extends Entity<ContactData, ContactComputed> {
   public get isPartner() { return this.data.contactType === 'Partner'; }
   public get isCustomer() { return this.data.contactType === 'Customer'; }
 
-  public getPartnerDomain(partnerDomains: Set<string>) {
-    return (this.allEmails
-      .map(domainFor)
-      .find(domain =>
-        partnerDomains.has(domain)));
-  }
-
   /** Sorted newest first */
   public records: (License | Transaction)[] = [];
 
