@@ -83,6 +83,8 @@ const env = {
         origin: optional('HUBSPOT_DEAL_ORIGIN_ATTR'),
         country: optional('HUBSPOT_DEAL_COUNTRY_ATTR'),
         deployment: optional('HUBSPOT_DEAL_DEPLOYMENT_ATTR'),
+        appEntitlementId: required('HUBSPOT_DEAL_APPENTITLEMENTID_ATTR'),
+        appEntitlementNumber: required('HUBSPOT_DEAL_APPENTITLEMENTNUMBER_ATTR'),
         addonLicenseId: required('HUBSPOT_DEAL_ADDONLICENESID_ATTR'),
         transactionId: required('HUBSPOT_DEAL_TRANSACTIONID_ATTR'),
         licenseTier: optional('HUBSPOT_DEAL_LICENSE_TIER_ATTR'),

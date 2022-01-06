@@ -275,6 +275,8 @@ function dealCreationProperties(records: (License | Transaction)[], record: Lice
     dealName: mustache.render(env.hubspot.deals.dealDealName, record.data),
     pipeline: Pipeline.MPAC,
     associatedPartner,
+    appEntitlementId: record.data.appEntitlementId,
+    appEntitlementNumber: record.data.appEntitlementNumber,
     amount: (data.dealStage === DealStage.EVAL
       ? null
       : record instanceof License

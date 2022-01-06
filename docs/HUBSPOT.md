@@ -18,14 +18,16 @@ Add any of these fields in HubSpot, and assign their internal IDs to an ENV var:
 
 ### Deals
 
-| Field              | Type        | Allowed Values             | ENV var                              | Required |
-| ------------------ | ----------- | -------------------------- | ------------------------------------ | -------- |
-| License Tier       | Number      | *                          | `HUBSPOT_DEAL_LICENSE_TIER_ATTR`     | ❌        |
-| Related Products   | 1-Select    | `DEAL_RELATED_PRODUCTS`    | `HUBSPOT_DEAL_RELATED_PRODUCTS_ATTR` | ❌        |
-| Origin             | 1-Select    | `DEAL_ORIGIN`              | `HUBSPOT_DEAL_ORIGIN_ATTR`           | ❌        |
-| Deployment         | 1-Select    | "hosting" of MPAC records  | `HUBSPOT_DEAL_DEPLOYMENT_ATTR`       | ❌        |
-| App                | 1-Select    | "addonKey" of MPAC records | `HUBSPOT_DEAL_APP_ATTR`              | ❌        |
-| Country            | 1-line Text | "country" of MPAC records  | `HUBSPOT_DEAL_COUNTRY_ATTR`          | ❌        |
-| AddonLicenseId     | 1-line Text | (for engine use)           | `HUBSPOT_DEAL_ADDONLICENESID_ATTR`   | ✔️        |
-| TransactionId      | 1-line Text | (for engine use)           | `HUBSPOT_DEAL_TRANSACTIONID_ATTR`    | ✔️        |
-| Associated Partner | 1-line Text | Valid domains              | `HUBSPOT_DEAL_ASSOCIATED_PARTNER`    | ❌        |
+| Field                | Type        | Allowed Values             | ENV var                                  | Required |
+| -------------------- | ----------- | -------------------------- | ---------------------------------------- | -------- |
+| License Tier         | Number      | *                          | `HUBSPOT_DEAL_LICENSE_TIER_ATTR`         | ❌        |
+| Related Products     | 1-Select    | `DEAL_RELATED_PRODUCTS`    | `HUBSPOT_DEAL_RELATED_PRODUCTS_ATTR`     | ❌        |
+| Origin               | 1-Select    | `DEAL_ORIGIN`              | `HUBSPOT_DEAL_ORIGIN_ATTR`               | ❌        |
+| Deployment           | 1-Select    | "hosting" of MPAC records  | `HUBSPOT_DEAL_DEPLOYMENT_ATTR`           | ❌        |
+| App                  | 1-Select    | "addonKey" of MPAC records | `HUBSPOT_DEAL_APP_ATTR`                  | ❌        |
+| Country              | 1-line Text | "country" of MPAC records  | `HUBSPOT_DEAL_COUNTRY_ATTR`              | ❌        |
+| Associated Partner   | 1-line Text | Valid domains              | `HUBSPOT_DEAL_ASSOCIATED_PARTNER`        | ❌        |
+| AddonLicenseId       | 1-line Text | (for engine use)           | `HUBSPOT_DEAL_ADDONLICENESID_ATTR`       | ✔️        |
+| TransactionId        | 1-line Text | (for engine use)           | `HUBSPOT_DEAL_TRANSACTIONID_ATTR`        | ✔️        |
+| AppEntitlementId     | 1-line Text | (for engine use)           | `HUBSPOT_DEAL_APPENTITLEMENTID_ATTR`     | ✔️        |
+| AppEntitlementNumber | 1-line Text | (for engine use)           | `HUBSPOT_DEAL_APPENTITLEMENTNUMBER_ATTR` | ✔️        |
