@@ -60,7 +60,7 @@ export function updateContactsBasedOnMatchResults(db: Database, allMatches: Rela
    */
   for (const contact of db.contactManager.getAll()) {
     const lastRecord = contact.records[0];
-    contact.data.lastAssociatedPartner = lastRecord?.partnerDomain;
+    contact.data.lastAssociatedPartner = lastRecord?.partnerDomain ?? null;
   }
 }
 

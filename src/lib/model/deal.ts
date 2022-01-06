@@ -144,7 +144,7 @@ const DealAdapter: EntityAdapter<DealData, DealComputed> = {
     },
     associatedPartner: {
       property: env.hubspot.attrs.deal.associatedPartner,
-      down: partner => partner,
+      down: partner => partner || null,
       up: partner => partner ?? '',
     },
   },

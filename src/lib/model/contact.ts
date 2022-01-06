@@ -133,7 +133,7 @@ const ContactAdapter: EntityAdapter<ContactData, ContactComputed> = {
     },
     lastAssociatedPartner: {
       property: env.hubspot.attrs.contact.lastAssociatedPartner,
-      down: partner => partner,
+      down: partner => partner || null,
       up: partner => partner ?? '',
     },
   },
