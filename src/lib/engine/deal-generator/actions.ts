@@ -75,7 +75,9 @@ export class ActionGenerator {
 
     if (deal) {
       const record = event.transaction || getLatestLicense(event);
-      const dealStage = deal.isEval() ? DealStage.CLOSED_WON : deal.data.dealStage;
+      const dealStage = (event.transaction?.refunded
+        ? DealStage.CLOSED_LOST
+        : DealStage.CLOSED_WON);
       return makeUpdateAction(records, deal, record, dealStage);
     }
     else if (event.transaction) {
