@@ -6,6 +6,7 @@ import { Table } from "../log/table";
 import { Tallier } from "../log/tallier";
 import env, { Config } from "../parameters/env-config";
 import { formatMoney, formatNumber } from "../util/formatters";
+import { isPresent } from "../util/helpers";
 import { CompanyManager } from "./company";
 import { ContactManager } from "./contact";
 import { DealManager } from "./deal";
@@ -113,6 +114,8 @@ export class Database {
     this.licenses = results.licenses.map(raw => License.fromRaw(raw));
     this.transactions = results.transactions.map(raw => Transaction.fromRaw(raw));
 
+    this.validateIdUniqueness();
+
     const transactionTotal = (this.transactions
       .map(t => t.data.vendorAmount)
       .reduce((a, b) => a + b));
@@ -173,4 +176,59 @@ export class Database {
     }
   }
 
+  private validateIdUniqueness() {
+    log.info('Database', 'Validating MPAC ID uniqueness: Starting...')
+
+    // All three should be unique on licenses
+    verifyIdIsUnique(this.licenses, l => l.data.addonLicenseId);
+    verifyIdIsUnique(this.licenses, l => l.data.appEntitlementId);
+    verifyIdIsUnique(this.licenses, l => l.data.appEntitlementNumber);
+
+    // All license IDs should point to the same transactions
+    for (const l of this.licenses) {
+      const id1 = l.data.appEntitlementId;
+      const id2 = l.data.appEntitlementNumber;
+      const id3 = l.data.addonLicenseId;
+
+      const array1 = id1 && this.transactions.filter(t => id1 === t.data.appEntitlementId);
+      const array2 = id2 && this.transactions.filter(t => id2 === t.data.appEntitlementNumber);
+      const array3 = id3 && this.transactions.filter(t => id3 === t.data.addonLicenseId);
+
+      const set1 = array1 && uniqueSetFor(array1);
+      const set2 = array2 && uniqueSetFor(array2);
+      const set3 = array3 && uniqueSetFor(array3);
+
+      verifySameSet(set1 || null, set2 || null);
+      verifySameSet(set2 || null, set3 || null);
+    }
+
+    log.info('Database', 'Validating MPAC ID uniqueness: Done')
+  }
+
+}
+
+function verifyIdIsUnique(licenses: License[], getter: (r: License) => string | null) {
+  const ids = licenses.map(getter).filter(isPresent);
+  const idSet = new Set(ids);
+  if (ids.length !== idSet.size) {
+    const idName = getter.toString().replace(/(\w+) => \1\.data\./, '');
+    log.error('Database', 'License IDs not unique:', idName);
+  }
+}
+
+function uniqueSetFor(transactions: Transaction[]) {
+  const set = new Set(transactions);
+  if (set.size !== transactions.length) {
+    log.error('Database', `Transactions aren't unique: got ${set.size} out of ${transactions.length}`);
+  }
+  return set;
+}
+
+function verifySameSet(set1: Set<Transaction> | null, set2: Set<Transaction> | null) {
+  if (!set1 || !set2) return;
+
+  const same = set1.size === set2.size && [...set1].every(t => set2.has(t));
+  if (!same) {
+    log.error('Database', `License IDs do not point to same transactions`);
+  }
 }
