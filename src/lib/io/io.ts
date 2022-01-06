@@ -1,4 +1,5 @@
-import { Remote } from "./interfaces";
+import { HubspotCreds, MpacCreds } from "../parameters/interfaces";
+import { HubspotService, MarketplaceService, Remote } from "./interfaces";
 import { LiveTldListerService } from "./live/domains";
 import { LiveEmailProviderListerService } from "./live/email-providers";
 import LiveHubspotService from "./live/hubspot";
@@ -37,8 +38,16 @@ export class MemoryRemote implements Remote {
 }
 
 export class LiveRemote implements Remote {
-  hubspot = new LiveHubspotService();
-  marketplace = new LiveMarketplaceService();
+  hubspot: HubspotService;
+  marketplace: MarketplaceService;
   emailProviderLister = new LiveEmailProviderListerService();
   tldLister = new LiveTldListerService();
+
+  constructor(config: {
+    hubspotCreds: HubspotCreds,
+    mpacCreds: MpacCreds,
+  }) {
+    this.hubspot = new LiveHubspotService(config.hubspotCreds);
+    this.marketplace = new LiveMarketplaceService(config.mpacCreds);
+  }
 }

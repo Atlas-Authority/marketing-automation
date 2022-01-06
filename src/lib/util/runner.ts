@@ -1,14 +1,19 @@
 import log from "../log/logger";
-import env from "../parameters/env-config";
 
-export default async function run({ work, failed }: {
+interface LoopConfig {
+  runInterval: string,
+  retryInterval: string,
+  retryTimes: number,
+};
+
+export default async function run(loopConfig: LoopConfig, { work, failed }: {
   work: () => Promise<void>,
   failed: (errors: Error[]) => Promise<void>,
 }) {
-  log.info('Runner', 'Starting with options:', env.engine);
-  const normalInterval = env.engine.runInterval;
-  const errorInterval = env.engine.retryInterval;
-  const errorTries = env.engine.retryTimes;
+  log.info('Runner', 'Starting with options:', loopConfig);
+  const normalInterval = loopConfig.runInterval;
+  const errorInterval = loopConfig.retryInterval;
+  const errorTries = loopConfig.retryTimes;
 
   log.info('Runner', 'Running loop');
   const errors: Error[] = [];

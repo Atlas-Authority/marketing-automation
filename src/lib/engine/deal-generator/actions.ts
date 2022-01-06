@@ -6,39 +6,47 @@ import { License } from "../../model/license";
 import { Transaction } from "../../model/transaction";
 import env from '../../parameters/env-config';
 import { isPresent, sorter } from "../../util/helpers";
-import { abbrEventDetails, DealRelevantEvent, EvalEvent, PurchaseEvent, RefundEvent, RenewalEvent, UpgradeEvent } from "./events";
+import { abbrEventDetails, DealRelevantEvent, EvalEvent, EventMeta, PurchaseEvent, RefundEvent, RenewalEvent, UpgradeEvent } from "./events";
+
+type DealNoOpReason = Exclude<EventMeta, null> | 'properties-up-to-date';
 
 export type Action = CreateDealAction | UpdateDealAction | IgnoreDealAction;
 export type CreateDealAction = { type: 'create'; properties: DealData };
 export type UpdateDealAction = { type: 'update'; deal: Deal; properties: Partial<DealData> };
-export type IgnoreDealAction = { type: 'noop'; deal: Deal };
+export type IgnoreDealAction = { type: 'noop'; deal: Deal | null, reason: DealNoOpReason };
 
 export class ActionGenerator {
 
   #handledDeals = new Map<Deal, DealRelevantEvent>();
-  public constructor(private dealManager: DealManager) { }
+  public constructor(
+    private dealManager: DealManager,
+    private ignore: (reason: string, amount: number) => void,
+  ) { }
 
-  public generateFrom(events: DealRelevantEvent[]) {
-    return events.flatMap(event => this.actionsFor(event));
+  public generateFrom(records: (License | Transaction)[], events: DealRelevantEvent[]) {
+    return events.flatMap(event => this.actionsFor(records, event));
   }
 
-  private actionsFor(event: DealRelevantEvent): Action[] {
+  private actionsFor(records: (License | Transaction)[], event: DealRelevantEvent): Action[] {
     switch (event.type) {
-      case 'eval': return [this.actionForEval(event)];
-      case 'purchase': return [this.actionForPurchase(event)];
-      case 'renewal': return [this.actionForRenewal(event)];
-      case 'upgrade': return [this.actionForRenewal(event)];
-      case 'refund': return this.actionsForRefund(event);
+      case 'eval': return [this.actionForEval(records, event)];
+      case 'purchase': return [this.actionForPurchase(records, event)];
+      case 'renewal': return [this.actionForRenewal(records, event)];
+      case 'upgrade': return [this.actionForRenewal(records, event)];
+      case 'refund': return this.actionsForRefund(records, event);
     }
   }
 
-  private actionForEval(event: EvalEvent): Action {
+  private actionForEval(records: (License | Transaction)[], event: EvalEvent): Action {
     const deal = this.singleDeal(this.dealManager.getDealsForRecords(event.licenses));
     if (deal) this.recordSeen(deal, event);
 
+    const metaAction = this.maybeMakeMetaAction(event, deal, 0);
+    if (metaAction) return metaAction;
+
     const latestLicense = event.licenses[event.licenses.length - 1];
     if (!deal) {
-      return makeCreateAction(latestLicense, {
+      return makeCreateAction(records, latestLicense, {
         dealStage: event.licenses.some(l => l.active)
           ? DealStage.EVAL
           : DealStage.CLOSED_LOST,
@@ -50,25 +58,28 @@ export class ActionGenerator {
       const dealStage = (event.licenses.some(l => l.active)
         ? DealStage.EVAL
         : DealStage.CLOSED_LOST);
-      return makeUpdateAction(deal, latestLicense, dealStage);
+      return makeUpdateAction(records, deal, latestLicense, dealStage);
     }
     else {
-      return makeUpdateAction(deal, latestLicense);
+      return makeUpdateAction(records, deal, latestLicense);
     }
   }
 
-  private actionForPurchase(event: PurchaseEvent): Action {
+  private actionForPurchase(records: (License | Transaction)[], event: PurchaseEvent): Action {
     const recordsToSearch = [event.transaction, ...event.licenses].filter(isPresent);
     const deal = this.singleDeal(this.dealManager.getDealsForRecords(recordsToSearch));
     if (deal) this.recordSeen(deal, event);
 
+    const metaAction = this.maybeMakeMetaAction(event, deal, event.transaction?.data.vendorAmount ?? 0);
+    if (metaAction) return metaAction;
+
     if (deal) {
       const record = event.transaction || getLatestLicense(event);
       const dealStage = deal.isEval() ? DealStage.CLOSED_WON : deal.data.dealStage;
-      return makeUpdateAction(deal, record, dealStage);
+      return makeUpdateAction(records, deal, record, dealStage);
     }
     else if (event.transaction) {
-      return makeCreateAction(event.transaction, {
+      return makeCreateAction(records, event.transaction, {
         dealStage: DealStage.CLOSED_WON,
         addonLicenseId: event.transaction.data.addonLicenseId,
         transactionId: event.transaction.data.transactionId,
@@ -76,7 +87,7 @@ export class ActionGenerator {
     }
     else {
       const license = getLatestLicense(event);
-      return makeCreateAction(license, {
+      return makeCreateAction(records, license, {
         dealStage: DealStage.CLOSED_WON,
         addonLicenseId: license.data.addonLicenseId,
         transactionId: null,
@@ -84,28 +95,31 @@ export class ActionGenerator {
     }
   }
 
-  private actionForRenewal(event: RenewalEvent | UpgradeEvent): Action {
+  private actionForRenewal(records: (License | Transaction)[], event: RenewalEvent | UpgradeEvent): Action {
     const deal = this.singleDeal(this.dealManager.getDealsForRecords([event.transaction]));
     if (deal) this.recordSeen(deal, event);
 
+    const metaAction = this.maybeMakeMetaAction(event, deal, event.transaction.data.vendorAmount);
+    if (metaAction) return metaAction;
+
     if (deal) {
-      return makeUpdateAction(deal, event.transaction);
+      return makeUpdateAction(records, deal, event.transaction);
     }
-    return makeCreateAction(event.transaction, {
+    return makeCreateAction(records, event.transaction, {
       dealStage: DealStage.CLOSED_WON,
       addonLicenseId: event.transaction.data.addonLicenseId,
       transactionId: event.transaction.data.transactionId,
     });
   }
 
-  private actionsForRefund(event: RefundEvent): Action[] {
+  private actionsForRefund(records: (License | Transaction)[], event: RefundEvent): Action[] {
     const deals = this.dealManager.getDealsForRecords(event.refundedTxs);
     for (const deal of deals) {
       this.recordSeen(deal, event);
     }
 
     return ([...deals]
-      .map(deal => makeUpdateAction(deal, null, DealStage.CLOSED_LOST, { amount: 0 }))
+      .map(deal => makeUpdateAction(records, deal, null, DealStage.CLOSED_LOST, { amount: 0 }))
       .filter(isPresent)
     );
   }
@@ -172,16 +186,33 @@ export class ActionGenerator {
     return dealToUse;
   }
 
+  maybeMakeMetaAction(event: Exclude<DealRelevantEvent, RefundEvent>, deal: Deal | null, amount: number): Action | null {
+    switch (event.meta) {
+      case 'archived-app':
+      case 'mass-provider-only':
+        const reason = (event.meta === 'archived-app'
+          ? 'Archived-app transaction'
+          : 'Mass-provider transaction'
+        );
+        if (!deal) {
+          this.ignore(reason, amount);
+        }
+        return { type: 'noop', deal, reason: event.meta };
+      default:
+        return null;
+    }
+  }
+
 }
 
-function makeCreateAction(record: License | Transaction, data: Pick<DealData, 'addonLicenseId' | 'transactionId' | 'dealStage'>): Action {
+function makeCreateAction(records: (License | Transaction)[], record: License | Transaction, data: Pick<DealData, 'addonLicenseId' | 'transactionId' | 'dealStage'>): Action {
   return {
     type: 'create',
-    properties: dealCreationProperties(record, data),
+    properties: dealCreationProperties(records, record, data),
   };
 }
 
-function makeUpdateAction(deal: Deal, record: License | Transaction | null, dealstage?: DealStage, certainData?: Partial<DealData>): Action {
+function makeUpdateAction(records: (License | Transaction)[], deal: Deal, record: License | Transaction | null, dealstage?: DealStage, certainData?: Partial<DealData>): Action {
   if (dealstage !== undefined) deal.data.dealStage = dealstage;
   if (record) {
     const dataToEnsure = {
@@ -193,7 +224,7 @@ function makeUpdateAction(deal: Deal, record: License | Transaction | null, deal
       dataToEnsure.transactionId = record.data.transactionId;
       dataToEnsure.addonLicenseId = record.data.addonLicenseId;
     }
-    Object.assign(deal.data, dealCreationProperties(record, dataToEnsure));
+    Object.assign(deal.data, dealCreationProperties(records, record, dataToEnsure));
     deal.data.licenseTier = Math.max(deal.data.licenseTier ?? -1, record.tier);
   }
 
@@ -202,7 +233,7 @@ function makeUpdateAction(deal: Deal, record: License | Transaction | null, deal
   }
 
   if (!deal.hasPropertyChanges()) {
-    return { type: 'noop', deal };
+    return { type: 'noop', deal, reason: 'properties-up-to-date' };
   }
 
   return {
@@ -216,7 +247,18 @@ function getLatestLicense(event: PurchaseEvent): License {
   return [...event.licenses].sort(sorter(item => item.data.maintenanceStartDate, 'DSC'))[0];
 }
 
-function dealCreationProperties(record: License | Transaction, data: Pick<DealData, 'addonLicenseId' | 'transactionId' | 'dealStage'>): DealData {
+function dealCreationProperties(records: (License | Transaction)[], record: License | Transaction, data: Pick<DealData, 'addonLicenseId' | 'transactionId' | 'dealStage'>): DealData {
+  /**
+   * If any record in any of the deal's groups have partner contacts
+   * then use the most recent record's partner contact's domain.
+   * Otherwise set this to null.
+   */
+  const associatedPartner = ([...records]
+    .reverse()
+    .map(record => record.partnerDomain)
+    .find(domain => domain)
+    ?? null);
+
   return {
     ...data,
     closeDate: (record instanceof Transaction
@@ -230,7 +272,7 @@ function dealCreationProperties(record: License | Transaction, data: Pick<DealDa
     relatedProducts: env.hubspot.deals.dealRelatedProducts ?? null,
     dealName: mustache.render(env.hubspot.deals.dealDealName, record.data),
     pipeline: Pipeline.MPAC,
-    associatedPartner: null,
+    associatedPartner,
     amount: (data.dealStage === DealStage.EVAL
       ? null
       : record instanceof License

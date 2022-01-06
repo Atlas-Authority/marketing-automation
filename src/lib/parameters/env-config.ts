@@ -1,5 +1,6 @@
 import assert from "assert";
 import dotenv from "dotenv";
+import { HubspotCreds, MpacCreds } from "./interfaces";
 
 dotenv.config();
 
@@ -10,11 +11,40 @@ export interface Config {
   partnerDomains: string[];
 }
 
+export function serviceCredsFromENV() {
+  return {
+
+    mpacCreds: {
+      user: required('MPAC_USER'),
+      apiKey: required('MPAC_API_KEY'),
+      sellerId: required('MPAC_SELLER_ID'),
+    } as MpacCreds,
+
+    hubspotCreds: requireOneOf([
+      { accessToken: 'HUBSPOT_ACCESS_TOKEN' },
+      { apiKey: 'HUBSPOT_API_KEY' },
+    ]) as HubspotCreds,
+
+  }
+}
+
+export function slackConfigFromENV() {
+  return {
+    apiToken: optional('SLACK_API_TOKEN'),
+    errorChannelId: optional('SLACK_ERROR_CHANNEL_ID'),
+  };
+}
+
+export function runLoopConfigFromENV() {
+  return {
+    runInterval: required('RUN_INTERVAL'),
+    retryInterval: required('RETRY_INTERVAL'),
+    retryTimes: +required('RETRY_TIMES'),
+  };
+}
+
 const env = {
   mpac: {
-    user: required('MPAC_USER'),
-    apiKey: required('MPAC_API_KEY'),
-    sellerId: required('MPAC_SELLER_ID'),
     platforms: Object.fromEntries<string>(
       required('ADDONKEY_PLATFORMS')
         .split(',')
@@ -23,10 +53,6 @@ const env = {
   },
 
   hubspot: {
-    ...requireOneOf([
-      { accessToken: 'HUBSPOT_ACCESS_TOKEN' },
-      { apiKey: 'HUBSPOT_API_KEY' },
-    ]),
     accountId: optional('HUBSPOT_ACCOUNT_ID'),
     pipeline: {
       mpac: required('HUBSPOT_PIPELINE_MPAC'),
@@ -66,17 +92,9 @@ const env = {
     },
   },
 
-  slack: {
-    apiToken: optional('SLACK_API_TOKEN'),
-    errorChannelId: optional('SLACK_ERROR_CHANNEL_ID'),
-  },
-
   engine: {
-    runInterval: required('RUN_INTERVAL'),
-    retryInterval: required('RETRY_INTERVAL'),
-    retryTimes: +required('RETRY_TIMES'),
     partnerDomains: optional('PARTNER_DOMAINS')?.split(/\s*,\s*/g),
-    ignoredApps: new Set(optional('IGNORED_APPS')?.split(',') ?? []),
+    archivedApps: new Set(optional('IGNORED_APPS')?.split(',') ?? []),
     ignoredEmails: new Set((optional('IGNORED_EMAILS')?.split(',') ?? []).map(e => e.toLowerCase())),
   },
 };
@@ -110,7 +128,6 @@ function requireOneOf<T>(opts: T[]): T {
   })));
 
   const firstValid = all.find(opt => opt.value);
-  if (isTest) return opts[0];
   assert.ok(firstValid, `One of ENV keys ${all.map(o => o.envKey).join(' or ')} are required`);
 
   const { localKey, value } = firstValid;

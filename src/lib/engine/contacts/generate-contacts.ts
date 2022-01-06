@@ -20,7 +20,6 @@ export class ContactGenerator {
     this.mergeGeneratedContacts();
     this.associateContacts();
     this.sortContactRecords();
-    this.flagPartnerTransactedContacts();
   }
 
   private generateContacts() {
@@ -57,24 +56,6 @@ export class ContactGenerator {
   private sortContactRecords() {
     for (const contact of this.db.contactManager.getAll()) {
       contact.records.sort(sorter(r => r.data.maintenanceStartDate, 'DSC'));
-    }
-  }
-
-  private flagPartnerTransactedContacts() {
-    /**
-     * If the contact's most recent record has a partner,
-     * set that partner's domain as last associated partner.
-     * Otherwise set it to blank, ignoring previous records.
-     */
-
-    for (const contact of this.db.contactManager.getAll()) {
-      contact.data.lastAssociatedPartner = null;
-
-      const lastRecord = contact.records[0];
-      if (lastRecord) {
-        const partnerDomain = lastRecord.getPartnerDomain(this.db.partnerDomains);
-        contact.data.lastAssociatedPartner = partnerDomain ?? null;
-      }
     }
   }
 
@@ -186,5 +167,5 @@ export function mergeContactInfo(contact: ContactData, contacts: GeneratedContac
 }
 
 function notIgnored(addonKey: string) {
-  return !env.engine.ignoredApps.has(addonKey);
+  return !env.engine.archivedApps.has(addonKey);
 }

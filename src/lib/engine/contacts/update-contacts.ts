@@ -1,6 +1,9 @@
+import { domainFor } from "../../model/contact";
 import { Database } from "../../model/database";
-import env from "../../parameters/env-config";
+import { License } from "../../model/license";
+import { Transaction } from "../../model/transaction";
 import { KnownError } from "../../util/errors";
+import { isPresent } from "../../util/helpers";
 import { RelatedLicenseSet } from "../license-matching/license-grouper";
 import { flagPartnersViaCoworkers } from "./contact-types";
 
@@ -29,11 +32,11 @@ export function updateContactsBasedOnMatchResults(db: Database, allMatches: Rela
       }
 
       const addonKey = license[0].data.addonKey;
-      const product = env.mpac.platforms[addonKey];
+      const product = db.appToPlatform[addonKey];
       if (!product) {
         throw new KnownError(`Add "${addonKey}" to ADDONKEY_PLATFORMS`);
       }
-      if (!env.engine.ignoredApps.has(addonKey)) {
+      if (!db.archivedApps.has(addonKey)) {
         contact.data.relatedProducts.add(product);
       }
 
@@ -45,5 +48,34 @@ export function updateContactsBasedOnMatchResults(db: Database, allMatches: Rela
         contact.data.deployment = 'Multiple';
       }
     }
+  }
+
+  setPartnerDomainFor(db.partnerDomains, db.licenses);
+  setPartnerDomainFor(db.partnerDomains, db.transactions);
+
+  /**
+   * If the contact's most recent record has a partner,
+   * set that partner's domain as last associated partner.
+   * Otherwise set it to blank, ignoring previous records.
+   */
+  for (const contact of db.contactManager.getAll()) {
+    const lastRecord = contact.records[0];
+    contact.data.lastAssociatedPartner = lastRecord?.partnerDomain;
+  }
+}
+
+function setPartnerDomainFor(partnerDomains: Set<string>, records: (License | Transaction)[]) {
+  for (const record of records) {
+    const contactsToCheck = [
+      record.partnerContact,
+      record.billingContact,
+      record.techContact
+    ].filter(isPresent);
+
+    record.partnerDomain = (contactsToCheck
+      .flatMap(c => c.allEmails)
+      .map(domainFor)
+      .find(domain => partnerDomains.has(domain))
+      ?? null);
   }
 }

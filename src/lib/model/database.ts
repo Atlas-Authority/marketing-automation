@@ -4,7 +4,7 @@ import { MultiDownloadLogger } from "../log/download-logger";
 import log from "../log/logger";
 import { Table } from "../log/table";
 import { Tallier } from "../log/tallier";
-import { Config } from "../parameters/env-config";
+import env, { Config } from "../parameters/env-config";
 import { formatMoney, formatNumber } from "../util/formatters";
 import { CompanyManager } from "./company";
 import { ContactManager } from "./contact";
@@ -34,7 +34,10 @@ export class Database {
 
   public tallier = new Tallier();
 
-  public constructor(private io: IO, config: Config) {
+  public appToPlatform: { [addonKey: string]: string } = Object.create(null);
+  public archivedApps = new Set<string>();
+
+  public constructor(private io: IO, config: Config, populateFromEnv = true) {
     this.dealManager = new DealManager(io.in.hubspot, io.out.hubspot);
     this.contactManager = new ContactManager(io.in.hubspot, io.out.hubspot);
     this.companyManager = new CompanyManager(io.in.hubspot, io.out.hubspot);
@@ -43,6 +46,15 @@ export class Database {
     for (const domain of config.partnerDomains) {
       this.partnerDomains.add(domain);
     }
+
+    if (populateFromEnv) {
+      this.populateFromEnv();
+    }
+  }
+
+  populateFromEnv() {
+    this.appToPlatform = env.mpac.platforms;
+    this.archivedApps = env.engine.archivedApps;
   }
 
   public async downloadAllData() {

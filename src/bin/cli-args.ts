@@ -1,6 +1,7 @@
 import { Remote } from "../lib/io/interfaces";
 import { CachedMemoryRemote, IO, LiveRemote } from "../lib/io/io";
 import { cli } from "../lib/parameters/cli-args";
+import { serviceCredsFromENV } from "../lib/parameters/env-config";
 
 export function ioFromCliArgs() {
   const io = new IO();
@@ -23,7 +24,7 @@ export function ioFromCliArgs() {
   function remoteFor(opt: 'local' | 'remote'): Remote {
     switch (opt) {
       case 'local': return new CachedMemoryRemote();
-      case 'remote': return new LiveRemote();
+      case 'remote': return new LiveRemote(serviceCredsFromENV());
     }
   }
 }

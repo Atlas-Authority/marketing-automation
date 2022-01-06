@@ -36,7 +36,7 @@ it(`Does not create deal from purchase when one already exists`, () => {
   ]);
   expect(actions).toEqual([
     {
-      Nothing: ['2454822', 'CLOSED_WON', 0]
+      Nothing: ['properties-up-to-date', ['2454822', 'CLOSED_WON', 0]]
     }
   ]);
 });
@@ -103,8 +103,8 @@ it(`Does nothing when upgrades and renewals already have deals`, () => {
     ['renewal', 'AT-131949332[2479625]']
   ]);
   expect(actions).toEqual([
-    { Nothing: ["2479625", "CLOSED_WON", 0,] },
-    { Nothing: ["AT-97165138[2479625]", "CLOSED_WON", 411,] },
-    { Nothing: ["AT-131949332[2479625]", "CLOSED_WON", 274,] },
+    { Nothing: ['properties-up-to-date', ["2479625", "CLOSED_WON", 0,]] },
+    { Nothing: ['properties-up-to-date', ["AT-97165138[2479625]", "CLOSED_WON", 411,]] },
+    { Nothing: ['properties-up-to-date', ["AT-131949332[2479625]", "CLOSED_WON", 274,]] },
   ]);
 });
