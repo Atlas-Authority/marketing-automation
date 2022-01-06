@@ -39,6 +39,7 @@ export function printSummary(db: Database) {
   table.rows.push(['$ Total Deals', formatMoney(sumDeals(deals))]);
   table.rows.push(['$ Total Deals Won', formatMoney(sumDeals(deals.filter(d => d.isWon)))]);
   table.rows.push(['$ Total Deals Lost', formatMoney(sumDeals(deals.filter(d => d.isLost)))]);
+  table.rows.push(['$ Total Deals Eval', formatMoney(sumDeals(deals.filter(d => d.isEval())))]);
 
   table.rows.push(['Deals Created', formatNumber(db.dealManager.createdCount)]);
   table.rows.push(['Deals Updated', formatNumber(db.dealManager.updatedCount)]);
