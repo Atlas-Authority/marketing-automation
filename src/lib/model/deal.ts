@@ -24,6 +24,9 @@ export type DealData = {
   dealStage: DealStage;
   amount: number | null;
   associatedPartner: string | null;
+
+  appEntitlementId: string | null;
+  appEntitlementNumber: string | null;
 };
 
 type DealComputed = {
@@ -36,15 +39,19 @@ export class Deal extends Entity<DealData, DealComputed> {
   public contacts = this.makeDynamicAssociation<Contact>('contact');
   public companies = this.makeDynamicAssociation<Company>('company');
 
-  public mpacId() {
-    if (this.data.transactionId && this.data.addonLicenseId) {
+  public mpacId() { return this.deriveId(this.data.addonLicenseId); }
+  public entitlementId() { return this.deriveId(this.data.appEntitlementId); }
+  public entitlementNumber() { return this.deriveId(this.data.appEntitlementNumber); }
+
+  public deriveId(id: string | null) {
+    if (this.data.transactionId && id) {
       return uniqueTransactionId({
         transactionId: this.data.transactionId,
-        addonLicenseId: this.data.addonLicenseId,
+        addonLicenseId: id,
       });
     }
     else {
-      return this.data.addonLicenseId;
+      return id;
     }
   }
 
@@ -147,6 +154,16 @@ const DealAdapter: EntityAdapter<DealData, DealComputed> = {
       down: partner => partner || null,
       up: partner => partner ?? '',
     },
+    appEntitlementId: {
+      property: env.hubspot.attrs.deal.appEntitlementId,
+      down: id => id || null,
+      up: id => id ?? '',
+    },
+    appEntitlementNumber: {
+      property: env.hubspot.attrs.deal.appEntitlementNumber,
+      down: id => id || null,
+      up: id => id ?? '',
+    },
   },
 
   computed: {
@@ -192,12 +209,18 @@ export class DealManager extends EntityManager<DealData, DealComputed, Deal> {
 
   /** Either `License.addonLicenseId` or `Transaction.transactionId[Transacton.addonLicenseId]` */
   public getByMpacId = this.makeIndex(d => [d.mpacId()].filter(isPresent), ['transactionId', 'addonLicenseId']);
+  public getByEntitlementId = this.makeIndex(d => [d.entitlementId()].filter(isPresent), ['transactionId', 'appEntitlementId']);
+  public getByEntitlementNumber = this.makeIndex(d => [d.entitlementNumber()].filter(isPresent), ['transactionId', 'appEntitlementNumber']);
 
   public duplicatesToDelete = new Map<Deal, Set<Deal>>();
 
   public getDealsForRecords(records: (License | Transaction)[]) {
     return new Set(records
-      .map(record => this.getByMpacId(record.id))
+      .flatMap(record => [
+        this.getByEntitlementNumber(record.id),
+        this.getByEntitlementId(record.id),
+        this.getByMpacId(record.id),
+      ])
       .filter(isPresent));
   }
 

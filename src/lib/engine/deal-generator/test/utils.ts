@@ -152,6 +152,9 @@ export function testLicense(
 function testRecordCommon(addonLicenseId: string, maintenanceStartDate: string, email?: string) {
   return {
     addonLicenseId,
+    appEntitlementId: addonLicenseId,
+    appEntitlementNumber: addonLicenseId,
+
     licenseId: addonLicenseId,
     addonKey: chance.word({ capitalize: false, syllables: 3 }),
     addonName: chance.sentence({ words: 3, punctuation: false }),

@@ -30,6 +30,9 @@ type NewEvalData = {
 
 export interface LicenseData {
   addonLicenseId: AddonLicenseId,
+  appEntitlementId: string | null,
+  appEntitlementNumber: string | null,
+
   licenseId: string,
   addonKey: string,
   addonName: string,
@@ -93,6 +96,9 @@ export class License extends MpacRecord<LicenseData> {
 
     return new License({
       addonLicenseId: rawLicense.addonLicenseId,
+      appEntitlementId: rawLicense.appEntitlementId ?? null,
+      appEntitlementNumber: rawLicense.appEntitlementNumber ?? null,
+
       licenseId: rawLicense.licenseId,
       addonKey: rawLicense.addonKey,
       addonName: rawLicense.addonName,

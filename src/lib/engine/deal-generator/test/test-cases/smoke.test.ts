@@ -25,6 +25,8 @@ it(`Sets deal properties correctly`, () => {
         maintenanceEndDate: '2013-12-27',
         status: 'inactive',
         evaluationOpportunitySize: 'NA',
+        appEntitlementId: 'abc',
+        appEntitlementNumber: '123',
         attribution: null,
         parentInfo: null,
         newEvalData: null

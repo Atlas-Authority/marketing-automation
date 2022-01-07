@@ -8,6 +8,9 @@ import { Transaction } from '../../model/transaction';
 export function redactedLicense(t: License): License {
   return new License({
     addonLicenseId: t.data.addonLicenseId,
+    appEntitlementId: t.data.addonLicenseId,
+    appEntitlementNumber: t.data.addonLicenseId,
+
     licenseId: t.data.licenseId,
     addonKey: Redact.addonKey(t.data.addonKey),
     addonName: Redact.addonName(t.data.addonName),
@@ -39,6 +42,9 @@ export function redactedLicense(t: License): License {
 export function redactedTransaction(t: Transaction): Transaction {
   return new Transaction({
     addonLicenseId: t.data.addonLicenseId,
+    appEntitlementId: t.data.addonLicenseId,
+    appEntitlementNumber: t.data.addonLicenseId,
+
     licenseId: t.data.licenseId,
     addonKey: Redact.addonKey(t.data.addonKey),
     addonName: Redact.addonName(t.data.addonName),
