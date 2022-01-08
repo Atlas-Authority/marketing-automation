@@ -1,5 +1,4 @@
 import 'source-map-support/register';
-import { useCachedFunctions } from '../lib/cache/fn-cache';
 import Engine from "../lib/engine/engine";
 import Slack from "../lib/io/slack";
 import log from '../lib/log/logger';
@@ -14,7 +13,6 @@ main();
 async function main() {
 
   log.setLevelFrom(cli.get('--loglevel'));
-  useCachedFunctions(cli.get('--cached-fns')?.split(','));
 
   const io = ioFromCliArgs();
   cli.failIfExtraOpts();

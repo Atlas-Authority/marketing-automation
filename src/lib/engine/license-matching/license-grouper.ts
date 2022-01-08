@@ -1,5 +1,4 @@
 import assert from 'assert';
-import { fnOrCache } from '../../cache/fn-cache';
 import { saveForInspection } from '../../cache/inspection';
 import log from '../../log/logger';
 import { Table } from '../../log/table';
@@ -23,15 +22,8 @@ export function matchIntoLikelyGroups(db: Database): RelatedLicenseSet[] {
 
   const threshold = 130;
 
-  const { maybeMatches, unaccounted: unaccountedArray } = fnOrCache('scorer.json', () => {
-    const scorer = new LicenseMatcher(db.providerDomains);
-    const { maybeMatches, unaccounted } = scoreLicenseMatches(threshold, productGroupings, scorer);
-    return {
-      maybeMatches,
-      unaccounted: [...unaccounted],
-    };
-  });
-  const unaccounted = new Set(unaccountedArray);
+  const scorer = new LicenseMatcher(db.providerDomains);
+  const { maybeMatches, unaccounted } = scoreLicenseMatches(threshold, productGroupings, scorer);
 
   for (const license of db.licenses) {
     if (license.data.newEvalData) {

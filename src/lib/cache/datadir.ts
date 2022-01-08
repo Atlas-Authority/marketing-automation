@@ -10,7 +10,6 @@ export default class DataDir {
 
   public static readonly in = new DataDir("in");
   public static readonly out = new DataDir("out");
-  public static readonly cache = new DataDir("cache");
 
   #base: URL;
   #files = new Map<string, DataFile<any>>();
