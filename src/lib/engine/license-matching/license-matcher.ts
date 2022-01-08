@@ -2,6 +2,8 @@ import { Database } from "../../model/database";
 import { License } from "../../model/license";
 import { SimilarityScorer } from "./similarity-scorer";
 
+const NINETY_DAYS_AS_MS = 1000 * 60 * 60 * 24 * 90;
+
 export class LicenseMatcher {
 
   private similarityScorer = new SimilarityScorer();
@@ -9,16 +11,14 @@ export class LicenseMatcher {
   public constructor(private db: Database) { }
 
   public score(license1: License, license2: License): null | { item1: string, item2: string, score: number, reasons: string[] } {
-    // Skip if over 90 days apart
-    const dateGap = dateDiff(
-      license1.data.maintenanceStartDate, license1.data.maintenanceEndDate,
-      license2.data.maintenanceStartDate, license2.data.maintenanceEndDate
-    );
-
     const item1 = license1.data.addonLicenseId;
     const item2 = license2.data.addonLicenseId;
 
-    if (dateGap > 90) {
+    // Skip if over 90 days apart
+    if (
+      license2.momentStarted - license1.momentEnded > NINETY_DAYS_AS_MS ||
+      license1.momentStarted - license2.momentEnded > NINETY_DAYS_AS_MS
+    ) {
       return {
         item1,
         item2,
@@ -135,22 +135,4 @@ export class LicenseMatcher {
     return null;
   }
 
-}
-
-const DATEDIFF_CACHE = new Map<string, number>();
-
-function dateDiff(a1: string, a2: string, b1: string, b2: string) {
-  if (!DATEDIFF_CACHE.has(a1)) DATEDIFF_CACHE.set(a1, new Date(a1).getTime());
-  if (!DATEDIFF_CACHE.has(a2)) DATEDIFF_CACHE.set(a2, new Date(a2).getTime());
-  if (!DATEDIFF_CACHE.has(b1)) DATEDIFF_CACHE.set(b1, new Date(b1).getTime());
-  if (!DATEDIFF_CACHE.has(b2)) DATEDIFF_CACHE.set(b2, new Date(b2).getTime());
-
-  const d_a1 = DATEDIFF_CACHE.get(a1) as number;
-  const d_a2 = DATEDIFF_CACHE.get(a2) as number;
-  const d_b1 = DATEDIFF_CACHE.get(b1) as number;
-  const d_b2 = DATEDIFF_CACHE.get(b2) as number;
-
-  if (d_a1 > d_b2) return (d_a1 - d_b2) / 1000 / 60 / 60 / 24;
-  if (d_b1 > d_a2) return (d_b1 - d_a2) / 1000 / 60 / 60 / 24;
-  return 0;
 }
