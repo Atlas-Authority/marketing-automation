@@ -10,24 +10,18 @@ export type RelatedLicenseSet = License[];
 
 export class LicenseGrouper {
 
-  private productMapping = new Map<string, {
-    addonKey: string,
-    hosting: string,
-    group: License[],
-  }>();
-
-  private groups = new Map<License, Set<License>>();
+  private matchGroups = new Map<License, Set<License>>();
 
   constructor(private db: Database) { }
 
   run(): RelatedLicenseSet[] {
     log.info('Scoring Engine', 'Grouping licenses/transactions by hosting and addonKey');
-    this.groupLicensesByProduct();
+    const productGroups = this.groupLicensesByProduct();
 
     const threshold = 130;
     const scorer = new LicenseMatcher(threshold, this.db.providerDomains);
-    this.matchLicenses(scorer);
-    const matches = new Set(this.groups.values())
+    this.matchLicenses(scorer, productGroups);
+    const matches = new Set(this.matchGroups.values())
 
     saveForInspection('matched-groups-all',
       Array.from(matches)
@@ -58,24 +52,29 @@ export class LicenseGrouper {
     return matchGroups;
   }
 
-  groupLicensesByProduct() {
+  private groupLicensesByProduct() {
+    const productMapping = new Map<string, License[]>();
+
     for (const license of this.db.licensesByAddonLicenseId.values()) {
       const addonKey = license.data.addonKey;
       const hosting = license.data.hosting;
-      const key = `${addonKey} - ${hosting}`;
+      const key = `${addonKey}, ${hosting}`;
 
-      let list = this.productMapping.get(key);
-      if (!list) this.productMapping.set(key, list = { addonKey, hosting, group: [] });
-      list.group.push(license);
+      let list = productMapping.get(key);
+      if (!list) productMapping.set(key, list = []);
+      list.push(license);
     }
+
+    return productMapping;
+
   }
 
-  matchLicenses(scorer: LicenseMatcher) {
+  private matchLicenses(scorer: LicenseMatcher, productGroups: Map<string, License[]>) {
     log.info('Scoring Engine', 'Scoring licenses within [addonKey + hosting] groups');
     const startTime = process.hrtime.bigint();
 
-    for (const { addonKey, hosting, group } of this.productMapping.values()) {
-      log.info('Scoring Engine', `  Scoring [${addonKey}, ${hosting}]`);
+    for (const [name, group] of productGroups) {
+      log.info('Scoring Engine', `  Scoring [${name}]`);
 
       for (let i1 = 0; i1 < group.length; i1++) {
         for (let i2 = i1 + 1; i2 < group.length; i2++) {
@@ -97,18 +96,18 @@ export class LicenseGrouper {
   }
 
   private joinMatches(license1: License, license2: License) {
-    const group1 = this.groups.get(license1)!;
-    const group2 = this.groups.get(license2)!;
+    const group1 = this.matchGroups.get(license1)!;
+    const group2 = this.matchGroups.get(license2)!;
     const combinedGroup = new Set([...group1, ...group2]);
-    for (const l of combinedGroup) {
-      this.groups.set(l, combinedGroup);
+    for (const license of combinedGroup) {
+      this.matchGroups.set(license, combinedGroup);
     }
   }
 
   private initMatch(license: License) {
-    if (this.groups.has(license)) return;
+    if (this.matchGroups.has(license)) return;
 
-    this.groups.set(license, new Set([license]));
+    this.matchGroups.set(license, new Set([license]));
 
     if (license.evaluatedTo) {
       this.initMatch(license.evaluatedTo);
