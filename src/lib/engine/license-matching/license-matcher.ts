@@ -9,23 +9,14 @@ export class LicenseMatcher {
   public constructor(private db: Database) { }
 
   public score(license1: License, license2: License): null | { item1: string, item2: string, score: number, reasons: string[] } {
-    const item1 = license1.data.addonLicenseId;
-    const item2 = license2.data.addonLicenseId;
-
-    const techEmail1 = license1.data.technicalContact.email;
-    const techEmail2 = license2.data.technicalContact.email;
-
-    const billingEmail1 = license1.data.billingContact?.email;
-    const billingEmail2 = license2.data.billingContact?.email;
-
-    const contact1 = this.db.contactManager.getByEmail(techEmail1);
-    const contact2 = this.db.contactManager.getByEmail(techEmail2);
-
     // Skip if over 90 days apart
     const dateGap = dateDiff(
       license1.data.maintenanceStartDate, license1.data.maintenanceEndDate,
       license2.data.maintenanceStartDate, license2.data.maintenanceEndDate
     );
+
+    const item1 = license1.data.addonLicenseId;
+    const item2 = license2.data.addonLicenseId;
 
     if (dateGap > 90) {
       return {
@@ -35,6 +26,15 @@ export class LicenseMatcher {
         score: -1000,
       };
     }
+
+    const techEmail1 = license1.data.technicalContact.email;
+    const techEmail2 = license2.data.technicalContact.email;
+
+    const billingEmail1 = license1.data.billingContact?.email;
+    const billingEmail2 = license2.data.billingContact?.email;
+
+    const contact1 = this.db.contactManager.getByEmail(techEmail1);
+    const contact2 = this.db.contactManager.getByEmail(techEmail2);
 
     // If same exact email, definitely a match
     if (
