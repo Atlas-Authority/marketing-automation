@@ -7,15 +7,14 @@ export class LicenseMatcher {
 
   private similarityScorer = new SimilarityScorer();
 
-  public constructor(private providerDomains: Set<string>) { }
+  public constructor(private providerDomains: ReadonlySet<string>) { }
 
-  public isSimilarEnough(threshold: number, license1: License, license2: License, reasons: string[]): boolean {
+  public isSimilarEnough(threshold: number, license1: License, license2: License): boolean {
     // Skip if over 90 days apart
     if (
       license2.momentStarted - license1.momentEnded > NINETY_DAYS_AS_MS ||
       license1.momentStarted - license2.momentEnded > NINETY_DAYS_AS_MS
     ) {
-      reasons.push('too far apart');
       return false;
     }
 
@@ -36,7 +35,6 @@ export class LicenseMatcher {
         billingContact1 &&
         billingContact1 === billingContact2)
     ) {
-      reasons.push('same contact');
       return true;
     }
 
@@ -49,7 +47,6 @@ export class LicenseMatcher {
     ));
     if (addressScore) {
       score += addressScore;
-      reasons.push(`addressScore = ${addressScore}`);
     }
     if (null !== (earlyResult = basicallyDone(threshold, score, 80 + 30 + 30 + 30 + 30))) return earlyResult;
 
@@ -59,7 +56,6 @@ export class LicenseMatcher {
     ));
     if (companyScore) {
       score += companyScore;
-      reasons.push(`companyScore = ${companyScore}`);
     }
     if (null !== (earlyResult = basicallyDone(threshold, score, 30 + 30 + 30 + 30))) return earlyResult;
 
@@ -72,7 +68,6 @@ export class LicenseMatcher {
         domain2.toLowerCase(),
       ));
       score += domainScore;
-      reasons.push(`domainScore = ${domainScore}`);
     }
     if (null !== (earlyResult = basicallyDone(threshold, score, 30 + 30 + 30))) return earlyResult;
 
@@ -82,7 +77,6 @@ export class LicenseMatcher {
     ));
     if (emailAddressScore) {
       score += emailAddressScore;
-      reasons.push(`emailAddressScore = ${emailAddressScore}`);
     }
     if (null !== (earlyResult = basicallyDone(threshold, score, 30 + 30))) return earlyResult;
 
@@ -92,7 +86,6 @@ export class LicenseMatcher {
     ));
     if (techContactNameScore) {
       score += techContactNameScore;
-      reasons.push(`techContactNameScore = ${techContactNameScore}`);
     }
     if (null !== (earlyResult = basicallyDone(threshold, score, 30))) return earlyResult;
 
@@ -102,7 +95,6 @@ export class LicenseMatcher {
     ));
     if (techContactPhoneScore) {
       score += techContactPhoneScore;
-      reasons.push(`techContactPhoneScore = ${techContactPhoneScore}`);
     }
 
     return score >= threshold;

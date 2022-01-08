@@ -40,7 +40,6 @@ export function matchIntoLikelyGroups(db: Database): RelatedLicenseSet[] {
       maybeMatches.push({
         item1: license1,
         item2: license2,
-        reasons: ['New eval data'],
       });
       unaccounted.delete(license1);
       unaccounted.delete(license2);
@@ -172,7 +171,7 @@ function groupMappingByProduct(mapping: Map<AddonLicenseId, License>) {
 function scoreLicenseMatches(threshold: number, productGroupings: Iterable<{ addonKey: string; hosting: string; group: License[] }>, scorer: LicenseMatcher) {
   log.info('Scoring Engine', 'Preparing license-matching jobs within [addonKey + hosting] groups');
 
-  const maybeMatches: { item1: string, item2: string, reasons: string[] }[] = [];
+  const maybeMatches: { item1: string, item2: string }[] = [];
 
   const unaccounted: Set<string> = new Set();
 
@@ -187,13 +186,12 @@ function scoreLicenseMatches(threshold: number, productGroupings: Iterable<{ add
         const license1 = group[i1];
         const license2 = group[i2];
 
-        const reasons: string[] = [];
-        const matched = scorer.isSimilarEnough(threshold, license1, license2, reasons);
+        const matched = scorer.isSimilarEnough(threshold, license1, license2);
 
         if (matched) {
           const item1 = license1.data.addonLicenseId;
           const item2 = license2.data.addonLicenseId;
-          maybeMatches.push({ reasons, item1, item2 });
+          maybeMatches.push({ item1, item2 });
         }
         else {
           unaccounted.add(license1.data.addonLicenseId);
