@@ -116,19 +116,7 @@ export class Database {
     this.licenses = results.licenses.map(raw => License.fromRaw(raw));
     this.transactions = results.transactions.map(raw => Transaction.fromRaw(raw));
 
-    for (const license of this.licenses) {
-      if (license.data.addonLicenseId) {
-        this.licensesByAddonLicenseId.set(license.data.addonLicenseId, license);
-      }
-    }
-
-    for (const license of this.licenses) {
-      if (license.data.newEvalData) {
-        const evalLicense = this.licensesByAddonLicenseId.get(license.data.newEvalData.evaluationLicense);
-        license.evaluatedFrom = evalLicense;
-        evalLicense!.evaluatedTo = license;
-      }
-    }
+    this.buildMpacMappings();
 
     this.validateIdUniqueness();
 
@@ -139,6 +127,68 @@ export class Database {
     this.printDownloadSummary(transactionTotal);
 
     this.tallier.first('Transaction total', transactionTotal);
+  }
+
+  private buildMpacMappings() {
+    // Build addonLicenseId mapping
+    for (const license of this.licenses) {
+      if (license.data.addonLicenseId) {
+        this.licensesByAddonLicenseId.set(license.data.addonLicenseId, license);
+      }
+    }
+
+    // Connect via license's `evaluationLicense` if present
+    for (const license of this.licenses) {
+      if (license.data.newEvalData) {
+        const evalLicense = this.licensesByAddonLicenseId.get(license.data.newEvalData.evaluationLicense);
+        license.evaluatedFrom = evalLicense;
+        evalLicense!.evaluatedTo = license;
+      }
+    }
+
+    // Connect Licenses and Transactions
+    const maybeRefunded: Transaction[] = [];
+    const refunds: Transaction[] = [];
+
+    for (const transaction of this.transactions) {
+      const license = this.licensesByAddonLicenseId.get(transaction.data.addonLicenseId);
+      if (!license) {
+        if (transaction.data.saleType === 'Refund') {
+          refunds.push(transaction);
+        }
+        else {
+          maybeRefunded.push(transaction);
+        }
+      }
+      else {
+        transaction.license = license;
+        license.transactions.push(transaction);
+      }
+    }
+
+    // Warn when some transactions without matching licenses don't seem to be refunds
+    const refundAmount = refunds.map(t => t.data.vendorAmount).reduce((a, b) => a + b, 0);
+    const refundedAmount = maybeRefunded.map(t => t.data.vendorAmount).reduce((a, b) => a + b, 0);
+
+    if (-refundAmount !== refundedAmount) {
+      log.warn('Scoring Engine', "The following transactions have no accompanying licenses:");
+      {
+        const table = new Table([{ title: 'Refunds' }, { title: 'License', align: 'right' }]);
+        for (const tx of refunds) { table.rows.push([tx.data.transactionId, tx.data.addonLicenseId]); }
+        for (const row of table.eachRow()) {
+          log.warn('Scoring Engine', '  ' + row);
+        }
+      }
+      {
+        const table = new Table([{ title: 'Maybe Refunded' }, { title: 'License', align: 'right' }]);
+        for (const tx of maybeRefunded) { table.rows.push([tx.data.transactionId, tx.data.addonLicenseId]); }
+        for (const row of table.eachRow()) {
+          log.warn('Scoring Engine', '  ' + row);
+        }
+      }
+
+      this.tallier.less('Ignored: Transactions without licenses', refundAmount + refundedAmount);
+    }
   }
 
   private printDownloadSummary(transactionTotal: number) {
