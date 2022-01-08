@@ -40,7 +40,6 @@ export function matchIntoLikelyGroups(db: Database): RelatedLicenseSet[] {
       maybeMatches.push({
         item1: license1,
         item2: license2,
-        score: 1000,
         reasons: ['New eval data'],
       });
       unaccounted.delete(license1);
@@ -48,25 +47,8 @@ export function matchIntoLikelyGroups(db: Database): RelatedLicenseSet[] {
     }
   }
 
-  saveForInspection('match-scores-all', maybeMatches
-    .sort(sorter(m => m.score, 'DSC'))
-    .map(m => [
-      { score: m.score, reasons: m.reasons.join(', '), ...shorterLicenseInfo(itemsByAddonLicenseId.get(m.item1)!) },
-      { score: m.score, reasons: m.reasons.join(', '), ...shorterLicenseInfo(itemsByAddonLicenseId.get(m.item2)!) },
-    ])
-  );
-
-  saveForInspection('match-scores-only-uncertain', maybeMatches
-    .filter(m => m.score < 1000)
-    .sort(sorter(m => m.score, 'DSC'))
-    .map(m => [
-      { score: m.score, reasons: m.reasons.join(', '), ...shorterLicenseInfo(itemsByAddonLicenseId.get(m.item1)!) },
-      { score: m.score, reasons: m.reasons.join(', '), ...shorterLicenseInfo(itemsByAddonLicenseId.get(m.item2)!) },
-    ])
-  );
-
   log.info('Scoring Engine', 'Normalize license matches into groups over threshold');
-  const normalizedMatches: { [addonLicenseId: string]: Set<string> } = normalizeMatches(maybeMatches, threshold);
+  const normalizedMatches: { [addonLicenseId: string]: Set<string> } = normalizeMatches(maybeMatches);
 
   // Re-add non-matches as single-item sets
   for (const { item1, item2 } of maybeMatches) {
@@ -190,7 +172,7 @@ function groupMappingByProduct(mapping: Map<AddonLicenseId, License>) {
 function scoreLicenseMatches(threshold: number, productGroupings: Iterable<{ addonKey: string; hosting: string; group: License[] }>, scorer: LicenseMatcher) {
   log.info('Scoring Engine', 'Preparing license-matching jobs within [addonKey + hosting] groups');
 
-  const maybeMatches: { score: number, item1: string, item2: string, reasons: string[] }[] = [];
+  const maybeMatches: { item1: string, item2: string, reasons: string[] }[] = [];
 
   const unaccounted: Set<string> = new Set();
 
@@ -206,18 +188,12 @@ function scoreLicenseMatches(threshold: number, productGroupings: Iterable<{ add
         const license2 = group[i2];
 
         const reasons: string[] = [];
-        const result = scorer.score(threshold, license1, license2, reasons);
+        const matched = scorer.isSimilarEnough(threshold, license1, license2, reasons);
 
-        if (result) {
+        if (matched) {
           const item1 = license1.data.addonLicenseId;
           const item2 = license2.data.addonLicenseId;
-          if (result.score === -1000) {
-            unaccounted.add(license1.data.addonLicenseId);
-            unaccounted.add(license2.data.addonLicenseId);
-          }
-          else {
-            maybeMatches.push({ reasons, item1, item2, ...result });
-          }
+          maybeMatches.push({ reasons, item1, item2 });
         }
         else {
           unaccounted.add(license1.data.addonLicenseId);
@@ -265,12 +241,10 @@ export function shorterLicenseInfo(license: License) {
   };
 }
 
-export function normalizeMatches(maybeMatches: { score: number, item1: string, item2: string }[], threshold: number) {
+export function normalizeMatches(maybeMatches: { item1: string, item2: string }[]) {
   const normalizedMatches: { [id: string]: Set<string> } = {};
 
-  for (const { item1, item2, score } of maybeMatches) {
-    if (score < threshold) continue;
-
+  for (const { item1, item2 } of maybeMatches) {
     const set1 = normalizedMatches[item1];
     const set2 = normalizedMatches[item2];
 
