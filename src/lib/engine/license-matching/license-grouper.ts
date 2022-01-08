@@ -205,7 +205,8 @@ function scoreLicenseMatches(threshold: number, productGroupings: Iterable<{ add
         const license1 = group[i1];
         const license2 = group[i2];
 
-        const result = scorer.score(threshold, license1, license2);
+        const reasons: string[] = [];
+        const result = scorer.score(threshold, license1, license2, reasons);
 
         if (result) {
           if (result.score === -1000) {
@@ -213,7 +214,7 @@ function scoreLicenseMatches(threshold: number, productGroupings: Iterable<{ add
             unaccounted.add(result.item2);
           }
           else {
-            maybeMatches.push(result);
+            maybeMatches.push({ reasons, ...result });
           }
         }
         else {
