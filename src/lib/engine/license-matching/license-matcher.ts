@@ -35,25 +35,19 @@ export class LicenseMatcher {
     // If same exact email, definitely a match
     if (
       (techContact1 === techContact2) ||
-      (billingContact1 && billingContact1 === billingContact2)
+      (
+        techContact1 === billingContact2 ||
+        techContact2 === billingContact1
+      ) ||
+      (
+        billingContact1 &&
+        billingContact1 === billingContact2)
     ) {
       return {
         item1,
         item2,
         score: 1000,
         reasons: ['same contact'],
-      };
-    }
-
-    if (
-      techContact1 === billingContact2 ||
-      techContact2 === billingContact1
-    ) {
-      return {
-        item1,
-        item2,
-        score: 1000,
-        reasons: ['same other-contact'],
       };
     }
 
