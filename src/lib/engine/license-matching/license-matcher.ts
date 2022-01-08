@@ -1,4 +1,3 @@
-import { Database } from "../../model/database";
 import { License } from "../../model/license";
 import { SimilarityScorer } from "./similarity-scorer";
 
@@ -8,7 +7,7 @@ export class LicenseMatcher {
 
   private similarityScorer = new SimilarityScorer();
 
-  public constructor(private db: Database) { }
+  public constructor() { }
 
   public score(license1: License, license2: License): null | { item1: string, item2: string, score: number, reasons: string[] } {
     const item1 = license1.data.addonLicenseId;
@@ -27,20 +26,16 @@ export class LicenseMatcher {
       };
     }
 
-    const techEmail1 = license1.data.technicalContact.email;
-    const techEmail2 = license2.data.technicalContact.email;
+    const techContact1 = license1.techContact;
+    const techContact2 = license2.techContact;
 
-    const billingEmail1 = license1.data.billingContact?.email;
-    const billingEmail2 = license2.data.billingContact?.email;
-
-    const contact1 = this.db.contactManager.getByEmail(techEmail1);
-    const contact2 = this.db.contactManager.getByEmail(techEmail2);
+    const billingContact1 = license1.billingContact;
+    const billingContact2 = license2.billingContact;
 
     // If same exact email, definitely a match
     if (
-      (contact1 === contact2) ||
-      (techEmail1 === techEmail2) ||
-      (billingEmail1 && billingEmail1 === billingEmail2)
+      (techContact1 === techContact2) ||
+      (billingContact1 && billingContact1 === billingContact2)
     ) {
       return {
         item1,
@@ -51,8 +46,8 @@ export class LicenseMatcher {
     }
 
     if (
-      techEmail1 === billingEmail2 ||
-      techEmail2 === billingEmail1
+      techContact1 === billingContact2 ||
+      techContact2 === billingContact1
     ) {
       return {
         item1,
@@ -66,10 +61,10 @@ export class LicenseMatcher {
 
     const reasons: string[] = [];
 
-    const [emailAddress1, domain1] = techEmail1.split('@');
-    const [emailAddress2, domain2] = techEmail2.split('@');
+    const [emailAddress1, domain1] = techContact1.data.email.split('@');
+    const [emailAddress2, domain2] = techContact2.data.email.split('@');
 
-    if (!this.db.providerDomains.has(domain1)) {
+    if (techContact1.isCustomer) {
       const domainScore = Math.round(30 * this.similarityScorer.score(0.80,
         domain1.toLowerCase(),
         domain2.toLowerCase(),

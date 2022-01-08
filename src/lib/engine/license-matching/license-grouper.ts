@@ -22,7 +22,7 @@ export function matchIntoLikelyGroups(db: Database): RelatedLicenseSet[] {
   const productGroupings: Iterable<{ addonKey: string; hosting: string; group: License[] }> = groupMappingByProduct(itemsByAddonLicenseId);
 
   const { maybeMatches, unaccounted: unaccountedArray } = fnOrCache('scorer.json', () => {
-    const scorer = new LicenseMatcher(db);
+    const scorer = new LicenseMatcher();
     const { maybeMatches, unaccounted } = scoreLicenseMatches(productGroupings, scorer);
     return {
       maybeMatches,
