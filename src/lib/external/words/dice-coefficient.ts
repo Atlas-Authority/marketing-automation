@@ -1,4 +1,4 @@
-// We have to embed this so we can import dice-coefficient (which uses this) via CJS
+// Modified versions of Mr. Wormer's libraries dice-coefficient and n-grams
 
 /**
  * (The MIT License)
@@ -25,58 +25,41 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-export var bigram = nGram(2)
-export var trigram = nGram(3)
+export function diceCoefficient(value: string, alternative: string): number {
+  const left = bigram(value);
+  const right = bigram(alternative);
 
-/**
- * Factory returning a function that converts a value string to n-grams.
- *
- * @param {number} n
- */
-export function nGram(n) {
-  if (
-    typeof n !== 'number' ||
-    Number.isNaN(n) ||
-    n < 1 ||
-    n === Number.POSITIVE_INFINITY
-  ) {
-    throw new Error('`' + n + '` is not a valid argument for `n-gram`')
+  let index = -1;
+  let intersections = 0;
+
+  let leftPair: string;
+  let rightPair: string;
+  let offset: number;
+
+  while (++index < left.length) {
+    leftPair = left[index];
+    offset = -1;
+
+    while (++offset < right.length) {
+      rightPair = right[offset];
+
+      if (leftPair === rightPair) {
+        intersections++;
+
+        // Make sure this pair never matches again.
+        right[offset] = '';
+        break;
+      }
+    }
   }
 
-  return grams
+  return (2 * intersections) / (left.length + right.length);
+}
 
-  /**
-   * Create n-grams from a given value.
-   *
-   * @template {string|string[]} T
-   * @param {T} [value]
-   * @returns {T[]}
-   */
-  function grams(value) {
-    /** @type {T[]} */
-    var nGrams = []
-    /** @type {number} */
-    var index
-    /** @type {string|string[]} */
-    var source
-
-    if (value === null || value === undefined) {
-      return nGrams
-    }
-
-    // @ts-ignore
-    source = value.slice ? value : String(value)
-    index = source.length - n + 1
-
-    if (index < 1) {
-      return nGrams
-    }
-
-    while (index--) {
-      // @ts-ignore
-      nGrams[index] = source.slice(index, index + n)
-    }
-
-    return nGrams
-  }
+function bigram(value: string) {
+  const pairs = [];
+  const n = 2;
+  let i = value.length - n + 1;
+  while (i--) pairs[i] = value.slice(i, i + n);
+  return pairs;
 }
