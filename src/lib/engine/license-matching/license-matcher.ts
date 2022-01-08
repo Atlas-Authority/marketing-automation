@@ -10,9 +10,6 @@ export class LicenseMatcher {
   public constructor(private providerDomains: Set<string>) { }
 
   public score(threshold: number, license1: License, license2: License, reasons: string[]): null | { score: number } {
-    const item1 = license1.data.addonLicenseId;
-    const item2 = license2.data.addonLicenseId;
-
     // Skip if over 90 days apart
     if (
       license2.momentStarted - license1.momentEnded > NINETY_DAYS_AS_MS ||
