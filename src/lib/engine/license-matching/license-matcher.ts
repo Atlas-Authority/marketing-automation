@@ -7,9 +7,9 @@ export class LicenseMatcher {
 
   private similarityScorer = new SimilarityScorer();
 
-  public constructor(private providerDomains: ReadonlySet<string>) { }
+  public constructor(private threshold: number, private providerDomains: ReadonlySet<string>) { }
 
-  public isSimilarEnough(threshold: number, license1: License, license2: License): boolean {
+  public isSimilarEnough(license1: License, license2: License): boolean {
     // Skip if over 90 days apart
     if (
       license2.momentStarted - license1.momentEnded > NINETY_DAYS_AS_MS ||
@@ -49,8 +49,8 @@ export class LicenseMatcher {
     if (addressScore) {
       score += addressScore;
     }
-    if (score >= threshold) return true;
-    if (score + opportunity < threshold) return false;
+    if (score >= this.threshold) return true;
+    if (score + opportunity < this.threshold) return false;
 
     opportunity -= 80;
     const companyScore = Math.round(80 * this.similarityScorer.score(0.90,
@@ -60,8 +60,8 @@ export class LicenseMatcher {
     if (companyScore) {
       score += companyScore;
     }
-    if (score >= threshold) return true;
-    if (score + opportunity < threshold) return false;
+    if (score >= this.threshold) return true;
+    if (score + opportunity < this.threshold) return false;
 
     const [emailAddress1, domain1] = techContact1.data.email.split('@');
     const [emailAddress2, domain2] = techContact2.data.email.split('@');
@@ -74,8 +74,8 @@ export class LicenseMatcher {
       ));
       score += domainScore;
     }
-    if (score >= threshold) return true;
-    if (score + opportunity < threshold) return false;
+    if (score >= this.threshold) return true;
+    if (score + opportunity < this.threshold) return false;
 
     opportunity -= 30;
     const emailAddressScore = Math.round(30 * this.similarityScorer.score(0.80,
@@ -85,8 +85,8 @@ export class LicenseMatcher {
     if (emailAddressScore) {
       score += emailAddressScore;
     }
-    if (score >= threshold) return true;
-    if (score + opportunity < threshold) return false;
+    if (score >= this.threshold) return true;
+    if (score + opportunity < this.threshold) return false;
 
     opportunity -= 30;
     const techContactNameScore = Math.round(30 * this.similarityScorer.score(0.70,
@@ -96,8 +96,8 @@ export class LicenseMatcher {
     if (techContactNameScore) {
       score += techContactNameScore;
     }
-    if (score >= threshold) return true;
-    if (score + opportunity < threshold) return false;
+    if (score >= this.threshold) return true;
+    if (score + opportunity < this.threshold) return false;
 
     opportunity -= 30;
     const techContactPhoneScore = Math.round(30 * this.similarityScorer.score(0.90,
@@ -108,7 +108,7 @@ export class LicenseMatcher {
       score += techContactPhoneScore;
     }
 
-    return score >= threshold;
+    return score >= this.threshold;
   }
 
 }

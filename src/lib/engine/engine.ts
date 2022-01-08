@@ -4,7 +4,7 @@ import { identifyAndFlagContactTypes } from "./contacts/contact-types";
 import { ContactGenerator } from "./contacts/generate-contacts";
 import { updateContactsBasedOnMatchResults } from "./contacts/update-contacts";
 import { DealGenerator } from "./deal-generator/generate-deals";
-import { matchIntoLikelyGroups } from "./license-matching/license-grouper";
+import { LicenseGrouper } from "./license-matching/license-grouper";
 import { printSummary } from "./summary";
 
 export default class Engine {
@@ -22,7 +22,7 @@ export default class Engine {
     new ContactGenerator(db).run();
 
     log.step('Running Scoring Engine');
-    const allMatches = matchIntoLikelyGroups(db);
+    const allMatches = new LicenseGrouper(db).run();
 
     log.step('Updating Contacts based on Match Results');
     updateContactsBasedOnMatchResults(db, allMatches);
