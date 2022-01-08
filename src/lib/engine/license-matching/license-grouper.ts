@@ -24,7 +24,7 @@ export function matchIntoLikelyGroups(db: Database): RelatedLicenseSet[] {
   const threshold = 130;
 
   const { maybeMatches, unaccounted: unaccountedArray } = fnOrCache('scorer.json', () => {
-    const scorer = new LicenseMatcher();
+    const scorer = new LicenseMatcher(db.providerDomains);
     const { maybeMatches, unaccounted } = scoreLicenseMatches(threshold, productGroupings, scorer);
     return {
       maybeMatches,

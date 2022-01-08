@@ -7,7 +7,7 @@ export class LicenseMatcher {
 
   private similarityScorer = new SimilarityScorer();
 
-  public constructor() { }
+  public constructor(private providerDomains: Set<string>) { }
 
   public score(threshold: number, license1: License, license2: License, reasons: string[]): null | { score: number } {
     const item1 = license1.data.addonLicenseId;
@@ -73,7 +73,7 @@ export class LicenseMatcher {
     const [emailAddress1, domain1] = techContact1.data.email.split('@');
     const [emailAddress2, domain2] = techContact2.data.email.split('@');
 
-    if (techContact1.isCustomer) {
+    if (!this.providerDomains.has(domain1)) {
       const domainScore = Math.round(30 * this.similarityScorer.score(0.80,
         domain1.toLowerCase(),
         domain2.toLowerCase(),
