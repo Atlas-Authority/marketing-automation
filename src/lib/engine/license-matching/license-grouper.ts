@@ -209,12 +209,14 @@ function scoreLicenseMatches(threshold: number, productGroupings: Iterable<{ add
         const result = scorer.score(threshold, license1, license2, reasons);
 
         if (result) {
+          const item1 = license1.data.addonLicenseId;
+          const item2 = license2.data.addonLicenseId;
           if (result.score === -1000) {
-            unaccounted.add(result.item1);
-            unaccounted.add(result.item2);
+            unaccounted.add(license1.data.addonLicenseId);
+            unaccounted.add(license2.data.addonLicenseId);
           }
           else {
-            maybeMatches.push({ reasons, ...result });
+            maybeMatches.push({ reasons, item1, item2, ...result });
           }
         }
         else {
