@@ -21,9 +21,11 @@ export function matchIntoLikelyGroups(db: Database): RelatedLicenseSet[] {
   log.info('Scoring Engine', 'Grouping licenses/transactions by hosting and addonKey');
   const productGroupings: Iterable<{ addonKey: string; hosting: string; group: License[] }> = groupMappingByProduct(itemsByAddonLicenseId);
 
+  const threshold = 130;
+
   const { maybeMatches, unaccounted: unaccountedArray } = fnOrCache('scorer.json', () => {
     const scorer = new LicenseMatcher();
-    const { maybeMatches, unaccounted } = scoreLicenseMatches(productGroupings, scorer);
+    const { maybeMatches, unaccounted } = scoreLicenseMatches(threshold, productGroupings, scorer);
     return {
       maybeMatches,
       unaccounted: [...unaccounted],
@@ -64,7 +66,7 @@ export function matchIntoLikelyGroups(db: Database): RelatedLicenseSet[] {
   );
 
   log.info('Scoring Engine', 'Normalize license matches into groups over threshold');
-  const normalizedMatches: { [addonLicenseId: string]: Set<string> } = normalizeMatches(maybeMatches, 130);
+  const normalizedMatches: { [addonLicenseId: string]: Set<string> } = normalizeMatches(maybeMatches, threshold);
 
   // Re-add non-matches as single-item sets
   for (const { item1, item2 } of maybeMatches) {
@@ -185,7 +187,7 @@ function groupMappingByProduct(mapping: Map<AddonLicenseId, License>) {
 }
 
 /** Score how likely each license is connected to another license. */
-function scoreLicenseMatches(productGroupings: Iterable<{ addonKey: string; hosting: string; group: License[] }>, scorer: LicenseMatcher) {
+function scoreLicenseMatches(threshold: number, productGroupings: Iterable<{ addonKey: string; hosting: string; group: License[] }>, scorer: LicenseMatcher) {
   log.info('Scoring Engine', 'Preparing license-matching jobs within [addonKey + hosting] groups');
 
   const maybeMatches: { score: number, item1: string, item2: string, reasons: string[] }[] = [];
@@ -203,7 +205,7 @@ function scoreLicenseMatches(productGroupings: Iterable<{ addonKey: string; host
         const license1 = group[i1];
         const license2 = group[i2];
 
-        const result = scorer.score(license1, license2);
+        const result = scorer.score(threshold, license1, license2);
 
         if (result) {
           if (result.score === -1000) {

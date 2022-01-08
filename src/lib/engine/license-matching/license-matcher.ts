@@ -9,7 +9,7 @@ export class LicenseMatcher {
 
   public constructor() { }
 
-  public score(license1: License, license2: License): null | { item1: string, item2: string, score: number, reasons: string[] } {
+  public score(threshold: number, license1: License, license2: License): null | { item1: string, item2: string, score: number, reasons: string[] } {
     const item1 = license1.data.addonLicenseId;
     const item2 = license2.data.addonLicenseId;
 
@@ -52,8 +52,28 @@ export class LicenseMatcher {
     }
 
     let score = 0;
-
+    let earlyResult;
     const reasons: string[] = [];
+
+    const addressScore = Math.round(80 * this.similarityScorer.score(0.90,
+      license1.data.technicalContact.address1?.toLowerCase(),
+      license2.data.technicalContact.address1?.toLowerCase(),
+    ));
+    if (addressScore) {
+      score += addressScore;
+      reasons.push(`addressScore = ${addressScore}`);
+    }
+    if (false !== (earlyResult = basicallyDone(item1, item2, reasons, threshold, score, 80 + 30 + 30 + 30 + 30))) return earlyResult;
+
+    const companyScore = Math.round(80 * this.similarityScorer.score(0.90,
+      license1.data.company?.toLowerCase(),
+      license2.data.company?.toLowerCase(),
+    ));
+    if (companyScore) {
+      score += companyScore;
+      reasons.push(`companyScore = ${companyScore}`);
+    }
+    if (false !== (earlyResult = basicallyDone(item1, item2, reasons, threshold, score, 30 + 30 + 30 + 30))) return earlyResult;
 
     const [emailAddress1, domain1] = techContact1.data.email.split('@');
     const [emailAddress2, domain2] = techContact2.data.email.split('@');
@@ -66,6 +86,7 @@ export class LicenseMatcher {
       score += domainScore;
       reasons.push(`domainScore = ${domainScore}`);
     }
+    if (false !== (earlyResult = basicallyDone(item1, item2, reasons, threshold, score, 30 + 30 + 30))) return earlyResult;
 
     const emailAddressScore = Math.round(30 * this.similarityScorer.score(0.80,
       emailAddress1.toLowerCase(),
@@ -75,24 +96,7 @@ export class LicenseMatcher {
       score += emailAddressScore;
       reasons.push(`emailAddressScore = ${emailAddressScore}`);
     }
-
-    const addressScore = Math.round(80 * this.similarityScorer.score(0.90,
-      license1.data.technicalContact.address1?.toLowerCase(),
-      license2.data.technicalContact.address1?.toLowerCase(),
-    ));
-    if (addressScore) {
-      score += addressScore;
-      reasons.push(`addressScore = ${addressScore}`);
-    }
-
-    const companyScore = Math.round(80 * this.similarityScorer.score(0.90,
-      license1.data.company?.toLowerCase(),
-      license2.data.company?.toLowerCase(),
-    ));
-    if (companyScore) {
-      score += companyScore;
-      reasons.push(`companyScore = ${companyScore}`);
-    }
+    if (false !== (earlyResult = basicallyDone(item1, item2, reasons, threshold, score, 30 + 30))) return earlyResult;
 
     const techContactNameScore = Math.round(30 * this.similarityScorer.score(0.70,
       license1.data.technicalContact.name?.toLowerCase(),
@@ -102,6 +106,7 @@ export class LicenseMatcher {
       score += techContactNameScore;
       reasons.push(`techContactNameScore = ${techContactNameScore}`);
     }
+    if (false !== (earlyResult = basicallyDone(item1, item2, reasons, threshold, score, 30))) return earlyResult;
 
     const techContactPhoneScore = Math.round(30 * this.similarityScorer.score(0.90,
       license1.data.technicalContact.phone?.toLowerCase(),
@@ -111,6 +116,7 @@ export class LicenseMatcher {
       score += techContactPhoneScore;
       reasons.push(`techContactPhoneScore = ${techContactPhoneScore}`);
     }
+    if (false !== (earlyResult = basicallyDone(item1, item2, reasons, threshold, score, 0))) return earlyResult;
 
     if (score > 0) {
       return {
@@ -124,4 +130,12 @@ export class LicenseMatcher {
     return null;
   }
 
+}
+
+function basicallyDone(item1: string, item2: string, reasons: string[], threshold: number, score: number, opportunities: number): false | null | { item1: string, item2: string, reasons: string[], score: number } {
+  if (score >= threshold) return { item1, item2, reasons, score: 999 };
+  if (score + opportunities < threshold) return (score === 0
+    ? null
+    : { item1, item2, reasons, score });
+  return false;
 }
