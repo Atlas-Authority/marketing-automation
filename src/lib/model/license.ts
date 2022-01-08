@@ -129,6 +129,9 @@ export class License extends MpacRecord<LicenseData> {
   momentStarted: number;
   momentEnded: number;
 
+  evaluatedFrom: License | undefined = undefined;
+  evaluatedTo: License | undefined = undefined;
+
   public constructor(data: LicenseData) {
     super(data);
     this.id = this.data.addonLicenseId;

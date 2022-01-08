@@ -23,45 +23,18 @@ export function matchIntoLikelyGroups(db: Database): RelatedLicenseSet[] {
   const threshold = 130;
 
   const scorer = new LicenseMatcher(db.providerDomains);
-  const { maybeMatches, unaccounted } = scoreLicenseMatches(threshold, productGroupings, scorer);
-
-  for (const license of db.licenses) {
-    if (license.data.newEvalData) {
-      const license1 = license.id;
-      const license2 = license.data.newEvalData.evaluationLicense;
-      maybeMatches.push({
-        item1: license1,
-        item2: license2,
-      });
-      unaccounted.delete(license1);
-      unaccounted.delete(license2);
-    }
-  }
-
-  log.info('Scoring Engine', 'Normalize license matches into groups over threshold');
-  const normalizedMatches: { [addonLicenseId: string]: Set<string> } = normalizeMatches(maybeMatches);
-
-  // Re-add non-matches as single-item sets
-  for (const { item1, item2 } of maybeMatches) {
-    if (!normalizedMatches[item1]) normalizedMatches[item1] = new Set([item1]);
-    if (!normalizedMatches[item2]) normalizedMatches[item2] = new Set([item2]);
-  }
-
-  for (const item of unaccounted) {
-    assert.ok(!normalizedMatches[item]);
-    normalizedMatches[item] = new Set([item]);
-  }
+  const normalizedMatches = scoreLicenseMatches(threshold, productGroupings, scorer);
 
   saveForInspection('matched-groups-all',
-    Array.from(new Set(Object.values(normalizedMatches)))
+    Array.from(normalizedMatches)
       .map(group => Array.from(group)
-        .map(id => shorterLicenseInfo(itemsByAddonLicenseId.get(id)!))
+        .map(l => shorterLicenseInfo(l))
         .sort(sorter(l => l.start))));
 
   saveForInspection('matched-groups-to-check',
-    Array.from(new Set(Object.values(normalizedMatches)))
+    Array.from(normalizedMatches)
       .map(group => Array.from(group)
-        .map(id => shorterLicenseInfo(itemsByAddonLicenseId.get(id)!))
+        .map(l => shorterLicenseInfo(l))
         .sort(sorter(l => l.start)))
       .filter(group => (
         group.length > 1 &&
@@ -74,9 +47,8 @@ export function matchIntoLikelyGroups(db: Database): RelatedLicenseSet[] {
 
   log.info('Scoring Engine', 'Done');
 
-  const matchGroups = Array.from(new Set(Object.values(normalizedMatches)))
+  const matchGroups = Array.from(normalizedMatches)
     .map(group => Array.from(group)
-      .map(id => itemsByAddonLicenseId.get(id)!)
       .sort(sorter(license => license.data.maintenanceStartDate)));
 
   return matchGroups;
@@ -160,12 +132,43 @@ function groupMappingByProduct(mapping: Map<AddonLicenseId, License>) {
 }
 
 /** Score how likely each license is connected to another license. */
-function scoreLicenseMatches(threshold: number, productGroupings: Iterable<{ addonKey: string; hosting: string; group: License[] }>, scorer: LicenseMatcher) {
+function scoreLicenseMatches(
+  threshold: number,
+  productGroupings: Iterable<{
+    addonKey: string;
+    hosting: string;
+    group: License[];
+  }>,
+  scorer: LicenseMatcher
+) {
   log.info('Scoring Engine', 'Preparing license-matching jobs within [addonKey + hosting] groups');
 
-  const maybeMatches: { item1: string, item2: string }[] = [];
+  const groups = new Map<License, Set<License>>();
 
-  const unaccounted: Set<string> = new Set();
+  const join = (license1: License, license2: License) => {
+    const group1 = groups.get(license1)!;
+    const group2 = groups.get(license2)!;
+    const combinedGroup = new Set([...group1, ...group2]);
+    for (const l of combinedGroup) {
+      groups.set(l, combinedGroup);
+    }
+  };
+
+  const init = (license: License) => {
+    if (groups.has(license)) return;
+
+    groups.set(license, new Set([license]));
+
+    if (license.evaluatedTo) {
+      init(license.evaluatedTo);
+      join(license.evaluatedTo, license);
+    }
+
+    if (license.evaluatedFrom) {
+      init(license.evaluatedFrom);
+      join(license.evaluatedFrom, license);
+    }
+  };
 
   log.info('Scoring Engine', 'Running license-similarity scoring');
   const startTime = process.hrtime.bigint();
@@ -178,16 +181,11 @@ function scoreLicenseMatches(threshold: number, productGroupings: Iterable<{ add
         const license1 = group[i1];
         const license2 = group[i2];
 
-        const matched = scorer.isSimilarEnough(threshold, license1, license2);
+        init(license1);
+        init(license2);
 
-        if (matched) {
-          const item1 = license1.data.addonLicenseId;
-          const item2 = license2.data.addonLicenseId;
-          maybeMatches.push({ item1, item2 });
-        }
-        else {
-          unaccounted.add(license1.data.addonLicenseId);
-          unaccounted.add(license2.data.addonLicenseId);
+        if (scorer.isSimilarEnough(threshold, license1, license2)) {
+          join(license1, license2);
         }
       }
     }
@@ -196,15 +194,7 @@ function scoreLicenseMatches(threshold: number, productGroupings: Iterable<{ add
   const endTime = process.hrtime.bigint();
   log.info('Scoring Engine', `Total time: ${timeAsMinutesSeconds(endTime - startTime)}`);
 
-  for (const m of maybeMatches) {
-    unaccounted.delete(m.item1);
-    unaccounted.delete(m.item2);
-  }
-
-  return {
-    maybeMatches,
-    unaccounted,
-  };
+  return new Set(groups.values());
 }
 
 export function shorterLicenseInfo(license: License) {
@@ -229,62 +219,6 @@ export function shorterLicenseInfo(license: License) {
     billing_email: license.data.billingContact?.email,
     partner_email: license.data.partnerDetails?.billingContact.email,
   };
-}
-
-export function normalizeMatches(maybeMatches: { item1: string, item2: string }[]) {
-  const normalizedMatches: { [id: string]: Set<string> } = {};
-
-  for (const { item1, item2 } of maybeMatches) {
-    const set1 = normalizedMatches[item1];
-    const set2 = normalizedMatches[item2];
-
-    let list: Set<string>;
-
-    if (set1 && set2) {
-      if (set1 === set2) {
-        list = set1;
-      }
-      else {
-        list = new Set([...set1, ...set2]);
-
-        for (const id of list) {
-          normalizedMatches[id] = list;
-        }
-      }
-    }
-    else if (!set1 && !set2) {
-      list = new Set();
-      normalizedMatches[item1] = list;
-      normalizedMatches[item2] = list;
-    }
-    else {
-      if (set1) {
-        list = set1;
-        normalizedMatches[item2] = list;
-      }
-      else {
-        list = set2;
-        normalizedMatches[item1] = list;
-      }
-    }
-
-    list.add(item1);
-    list.add(item2);
-  }
-
-  const final: { [id: string]: Set<string> } = Object.create(null);
-
-  for (const bag of new Set(Object.values(normalizedMatches))) {
-    for (const id of bag) {
-      // Verify
-      assert.ok(!final[id], `License ID found in two lists: ${id}`);
-
-      // Quick access
-      final[id] = bag;
-    }
-  }
-
-  return final;
 }
 
 function timeAsMinutesSeconds(ns: bigint) {

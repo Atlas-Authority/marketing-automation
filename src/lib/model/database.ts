@@ -26,6 +26,8 @@ export class Database {
   public licenses: License[] = [];
   public transactions: Transaction[] = [];
 
+  public licensesByAddonLicenseId = new Map<string, License>();
+
   /** Domains that provide spam or free email accounts for masses. */
   public providerDomains = new Set<string>();
   public partnerDomains = new Set<string>();
@@ -113,6 +115,20 @@ export class Database {
 
     this.licenses = results.licenses.map(raw => License.fromRaw(raw));
     this.transactions = results.transactions.map(raw => Transaction.fromRaw(raw));
+
+    for (const license of this.licenses) {
+      if (license.data.addonLicenseId) {
+        this.licensesByAddonLicenseId.set(license.data.addonLicenseId, license);
+      }
+    }
+
+    for (const license of this.licenses) {
+      if (license.data.newEvalData) {
+        const evalLicense = this.licensesByAddonLicenseId.get(license.data.newEvalData.evaluationLicense);
+        license.evaluatedFrom = evalLicense;
+        evalLicense!.evaluatedTo = license;
+      }
+    }
 
     this.validateIdUniqueness();
 
