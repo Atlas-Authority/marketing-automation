@@ -18,22 +18,16 @@ export class LicenseMatcher {
       return false;
     }
 
-    const techContact1 = license1.techContact;
-    const techContact2 = license2.techContact;
-
-    const billingContact1 = license1.billingContact;
-    const billingContact2 = license2.billingContact;
-
     // If same exact email, definitely a match
     if (
-      (techContact1 === techContact2) ||
+      (license1.techContact === license2.techContact) ||
       (
-        techContact1 === billingContact2 ||
-        techContact2 === billingContact1
+        license1.techContact === license2.billingContact ||
+        license2.techContact === license1.billingContact
       ) ||
       (
-        billingContact1 &&
-        billingContact1 === billingContact2)
+        license1.billingContact &&
+        license1.billingContact === license2.billingContact)
     ) {
       return true;
     }
@@ -41,74 +35,68 @@ export class LicenseMatcher {
     let score = 0;
     let opportunity = 80 + 80 + 30 + 30 + 30 + 30;
 
-    opportunity -= 80;
-    const addressScore = Math.round(80 * this.similarityScorer.score(0.90,
-      license1.data.technicalContact.address1?.toLowerCase(),
-      license2.data.technicalContact.address1?.toLowerCase(),
-    ));
-    if (addressScore) {
-      score += addressScore;
-    }
+    let s: number; // score
+    let t: number; // atLeast
+    let a: string | undefined;
+    let b: string | undefined;
+
+    s = 80;
+    t = 0.90;
+    a = license1.data.technicalContact.address1?.toLowerCase();
+    b = license2.data.technicalContact.address1?.toLowerCase();
+    score += Math.round(s * this.similarityScorer.score(t, a, b));
     if (score >= this.threshold) return true;
-    if (score + opportunity < this.threshold) return false;
+    if (score + (opportunity -= s) < this.threshold) return false;
 
-    opportunity -= 80;
-    const companyScore = Math.round(80 * this.similarityScorer.score(0.90,
-      license1.data.company?.toLowerCase(),
-      license2.data.company?.toLowerCase(),
-    ));
-    if (companyScore) {
-      score += companyScore;
-    }
+    s = 80;
+    t = 0.90;
+    a = license1.data.company?.toLowerCase();
+    b = license2.data.company?.toLowerCase();
+    score += Math.round(s * this.similarityScorer.score(t, a, b));
     if (score >= this.threshold) return true;
-    if (score + opportunity < this.threshold) return false;
+    if (score + (opportunity -= s) < this.threshold) return false;
 
-    const [emailAddress1, domain1] = techContact1.data.email.split('@');
-    const [emailAddress2, domain2] = techContact2.data.email.split('@');
+    const [emailAddress1, domain1] = license1.techContact.data.email.split('@');
+    const [emailAddress2, domain2] = license2.techContact.data.email.split('@');
 
-    opportunity -= 30;
-    if (!this.providerDomains.has(domain1)) {
-      const domainScore = Math.round(30 * this.similarityScorer.score(0.80,
-        domain1.toLowerCase(),
-        domain2.toLowerCase(),
-      ));
-      score += domainScore;
+    s = 30;
+    t = 0.80;
+    if (this.providerDomains.has(domain1)) {
+      opportunity -= s;
     }
+    else {
+      a = domain1.toLowerCase();
+      b = domain2.toLowerCase();
+      score += Math.round(s * this.similarityScorer.score(t, a, b));
+      if (score >= this.threshold) return true;
+      if (score + (opportunity -= s) < this.threshold) return false;
+    }
+
+    s = 30;
+    t = 0.80;
+    a = emailAddress1.toLowerCase();
+    b = emailAddress2.toLowerCase();
+    score += Math.round(s * this.similarityScorer.score(t, a, b));
     if (score >= this.threshold) return true;
-    if (score + opportunity < this.threshold) return false;
+    if (score + (opportunity -= s) < this.threshold) return false;
 
-    opportunity -= 30;
-    const emailAddressScore = Math.round(30 * this.similarityScorer.score(0.80,
-      emailAddress1.toLowerCase(),
-      emailAddress2.toLowerCase(),
-    ));
-    if (emailAddressScore) {
-      score += emailAddressScore;
-    }
+    s = 30;
+    t = 0.70;
+    a = license1.data.technicalContact.name?.toLowerCase();
+    b = license2.data.technicalContact.name?.toLowerCase();
+    score += Math.round(s * this.similarityScorer.score(t, a, b));
     if (score >= this.threshold) return true;
-    if (score + opportunity < this.threshold) return false;
+    if (score + (opportunity -= s) < this.threshold) return false;
 
-    opportunity -= 30;
-    const techContactNameScore = Math.round(30 * this.similarityScorer.score(0.70,
-      license1.data.technicalContact.name?.toLowerCase(),
-      license2.data.technicalContact.name?.toLowerCase(),
-    ));
-    if (techContactNameScore) {
-      score += techContactNameScore;
-    }
+    s = 30;
+    t = 0.90;
+    a = license1.data.technicalContact.phone?.toLowerCase();
+    b = license2.data.technicalContact.phone?.toLowerCase();
+    score += Math.round(s * this.similarityScorer.score(t, a, b));
     if (score >= this.threshold) return true;
-    if (score + opportunity < this.threshold) return false;
+    if (score + (opportunity -= s) < this.threshold) return false;
 
-    opportunity -= 30;
-    const techContactPhoneScore = Math.round(30 * this.similarityScorer.score(0.90,
-      license1.data.technicalContact.phone?.toLowerCase(),
-      license2.data.technicalContact.phone?.toLowerCase(),
-    ));
-    if (techContactPhoneScore) {
-      score += techContactPhoneScore;
-    }
-
-    return score >= this.threshold;
+    return false;
   }
 
 }

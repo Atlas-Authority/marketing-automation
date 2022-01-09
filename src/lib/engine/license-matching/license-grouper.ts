@@ -45,11 +45,9 @@ export class LicenseGrouper {
 
     log.info('Scoring Engine', 'Done');
 
-    const matchGroups = Array.from(matches)
+    return Array.from(matches)
       .map(group => Array.from(group)
         .sort(sorter(license => license.data.maintenanceStartDate)));
-
-    return matchGroups;
   }
 
   private groupLicensesByProduct() {
@@ -66,7 +64,6 @@ export class LicenseGrouper {
     }
 
     return productMapping;
-
   }
 
   private matchLicenses(scorer: LicenseMatcher, productGroups: Map<string, License[]>) {
