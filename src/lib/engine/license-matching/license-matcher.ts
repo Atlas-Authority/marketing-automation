@@ -61,16 +61,11 @@ export class LicenseMatcher {
 
     s = 30;
     t = 0.80;
-    if (this.providerDomains.has(domain1)) {
-      opportunity -= s;
-    }
-    else {
-      a = domain1.toLowerCase();
-      b = domain2.toLowerCase();
-      score += Math.round(s * this.similarityScorer.score(t, a, b));
-      if (score >= this.threshold) return true;
-      if (score + (opportunity -= s) < this.threshold) return false;
-    }
+    a = this.providerDomains.has(domain1) ? '' : domain1.toLowerCase();
+    b = this.providerDomains.has(domain2) ? '' : domain2.toLowerCase();
+    score += Math.round(s * this.similarityScorer.score(t, a, b));
+    if (score >= this.threshold) return true;
+    if (score + (opportunity -= s) < this.threshold) return false;
 
     s = 30;
     t = 0.80;
