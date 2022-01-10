@@ -49,7 +49,10 @@ export class LicenseGrouper {
 
   private groupLicensesByProduct() {
     log.info('Scoring Engine', 'Grouping licenses/transactions by hosting and addonKey');
-    const productMapping = new Map<string, ScorableLicense[]>();
+    const productMapping = new Map<string, {
+      license: License,
+      scorable: ScorableLicense,
+    }[]>();
 
     for (const license of this.db.licensesByAddonLicenseId.values()) {
       const addonKey = license.data.addonKey;
@@ -63,20 +66,21 @@ export class LicenseGrouper {
 
       list.push({
         license,
+        scorable: {
+          momentStarted: new Date(license.data.maintenanceStartDate).getTime(),
+          momentEnded: new Date(license.data.maintenanceEndDate).getTime(),
 
-        momentStarted: new Date(license.data.maintenanceStartDate).getTime(),
-        momentEnded: new Date(license.data.maintenanceEndDate).getTime(),
+          techContact: license.techContact,
+          billingContact: license.billingContact,
 
-        techContact: license.techContact,
-        billingContact: license.billingContact,
+          company: license.data.company.toLowerCase(),
+          companyDomain: this.db.providerDomains.has(techContactDomain) ? '' : techContactDomain,
 
-        company: license.data.company.toLowerCase(),
-        companyDomain: this.db.providerDomains.has(techContactDomain) ? '' : techContactDomain,
-
-        techContactEmailPart,
-        techContactAddress: license.data.technicalContact.address1?.toLowerCase(),
-        techContactName: license.data.technicalContact.name?.toLowerCase(),
-        techContactPhone: license.data.technicalContact.phone?.toLowerCase(),
+          techContactEmailPart,
+          techContactAddress: license.data.technicalContact.address1?.toLowerCase(),
+          techContactName: license.data.technicalContact.name?.toLowerCase(),
+          techContactPhone: license.data.technicalContact.phone?.toLowerCase(),
+        },
       });
     }
 
@@ -100,7 +104,7 @@ export class LicenseGrouper {
           this.initMatch(license1.license);
           this.initMatch(license2.license);
 
-          if (scorer.isSimilarEnough(license1, license2)) {
+          if (scorer.isSimilarEnough(license1.scorable, license2.scorable)) {
             this.joinMatches(license1.license, license2.license);
           }
         }

@@ -1,12 +1,9 @@
 import { Contact } from "../../model/contact";
-import { License } from "../../model/license";
 import { SimilarityScorer } from "./similarity-scorer";
 
 const NINETY_DAYS_AS_MS = 1000 * 60 * 60 * 24 * 90;
 
 export interface ScorableLicense {
-  license: License;
-
   momentStarted: number;
   momentEnded: number;
 
