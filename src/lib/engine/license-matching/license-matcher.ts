@@ -55,7 +55,7 @@ export class LicenseMatcher {
 
     let score = 0;
     let opportunity = 80 + 80 + 30 + 30 + 30 + 30;
-    let bail;
+    let bail: boolean | void;
 
     let p: number; // possible score
     let s: number; // actual score
@@ -113,10 +113,11 @@ export class LicenseMatcher {
     return score >= this.threshold;
   }
 
-  bail(score: number, opportunity: number): any {
-    if (this.scoreLog) return false;
-    if (score >= this.threshold) return true;
-    if (score + opportunity < this.threshold) return false;
+  bail(score: number, opportunity: number): boolean | void {
+    if (!this.scoreLog) {
+      if (score >= this.threshold) return true;
+      if (score + opportunity < this.threshold) return false;
+    }
   }
 
 }
