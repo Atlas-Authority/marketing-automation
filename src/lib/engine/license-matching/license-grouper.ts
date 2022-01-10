@@ -136,11 +136,6 @@ export class LicenseGrouper {
       this.initMatch(license.evaluatedTo);
       this.joinMatches(license.evaluatedTo, license);
     }
-
-    if (license.evaluatedFrom) {
-      this.initMatch(license.evaluatedFrom);
-      this.joinMatches(license.evaluatedFrom, license);
-    }
   }
 
 }
