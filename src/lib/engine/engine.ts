@@ -9,7 +9,7 @@ import { printSummary } from "./summary";
 
 export default class Engine {
 
-  public async run(db: Database) {
+  public async run(db: Database, shouldLogExtras = false) {
     const log = new EngineLogger();
 
     log.step('Starting to download data');
@@ -22,7 +22,7 @@ export default class Engine {
     new ContactGenerator(db).run();
 
     log.step('Running Scoring Engine');
-    const allMatches = new LicenseGrouper(db).run();
+    const allMatches = new LicenseGrouper(db, shouldLogExtras).run();
 
     log.step('Updating Contacts based on Match Results');
     updateContactsBasedOnMatchResults(db, allMatches);

@@ -16,6 +16,6 @@ async function main() {
 
   const db = new Database(io, envConfig);
 
-  await new Engine().run(db);
+  await new Engine().run(db, log.level >= log.Levels.Verbose);
 
 }

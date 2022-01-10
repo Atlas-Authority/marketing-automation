@@ -1,4 +1,5 @@
 import DataDir from '../../cache/datadir';
+import { saveForInspection } from '../../cache/inspection';
 import { License } from '../../model/license';
 import { shorterLicenseInfo } from './license-grouper';
 
@@ -42,6 +43,21 @@ export class LicenseMatchLogger {
 
   logScore(score: number, reason: string) {
     this.scores.push([score, reason]);
+  }
+
+  logMatchResults(matches: License[][]) {
+    const shortMatches = matches.map(group => group.map(l => shorterLicenseInfo(l)));
+    saveForInspection('matched-groups-all', shortMatches);
+    saveForInspection('matched-groups-to-check',
+      shortMatches.filter(group => (
+        group.length > 1 &&
+        (
+          !group.every(item => item.tech_email === group[0].tech_email) ||
+          !group.every(item => item.company === group[0].company) ||
+          !group.every(item => item.tech_address === group[0].tech_address)
+        )
+      ))
+    );
   }
 
   close() {

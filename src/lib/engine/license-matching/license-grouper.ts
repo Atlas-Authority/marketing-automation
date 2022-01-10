@@ -1,4 +1,3 @@
-import { saveForInspection } from '../../cache/inspection';
 import log from '../../log/logger';
 import { Database } from '../../model/database';
 import { License } from '../../model/license';
@@ -12,48 +11,32 @@ export type RelatedLicenseSet = License[];
 export class LicenseGrouper {
 
   private matchGroups = new Map<License, Set<License>>();
+  scoreLogger?: LicenseMatchLogger;
 
-  constructor(private db: Database, private shouldLogExtras = false) { }
+  constructor(private db: Database, shouldLogExtras: boolean) {
+    if (shouldLogExtras) {
+      this.scoreLogger = new LicenseMatchLogger();
+    }
+  }
 
   run(): RelatedLicenseSet[] {
     const threshold = 130;
 
-    let scoreLogger: LicenseMatchLogger | undefined;
-    if (this.shouldLogExtras) {
-      scoreLogger = new LicenseMatchLogger();
-    }
+    const scorer = new LicenseMatcher(threshold, this.scoreLogger);
+    this.matchLicenses(scorer);
 
-    const scorer = new LicenseMatcher(threshold, scoreLogger);
-    this.matchLicenses(scorer, scoreLogger);
-    scoreLogger?.close();
-
-    const matches = new Set(this.matchGroups.values())
-
-    saveForInspection('matched-groups-all',
-      Array.from(matches)
+    const matches = (
+      Array.from(new Set(this.matchGroups.values()))
         .map(group => Array.from(group)
-          .map(l => shorterLicenseInfo(l))
-          .sort(sorter(l => l.start))));
+          .sort(sorter(license => license.data.maintenanceStartDate)))
+    );
 
-    saveForInspection('matched-groups-to-check',
-      Array.from(matches)
-        .map(group => Array.from(group)
-          .map(l => shorterLicenseInfo(l))
-          .sort(sorter(l => l.start)))
-        .filter(group => (
-          group.length > 1 &&
-          (
-            !group.every(item => item.tech_email === group[0].tech_email) ||
-            !group.every(item => item.company === group[0].company) ||
-            !group.every(item => item.tech_address === group[0].tech_address)
-          )
-        )));
+    this.scoreLogger?.logMatchResults(matches);
+    this.scoreLogger?.close();
 
     log.info('Scoring Engine', 'Done');
 
-    return Array.from(matches)
-      .map(group => Array.from(group)
-        .sort(sorter(license => license.data.maintenanceStartDate)));
+    return matches;
   }
 
   private groupLicensesByProduct() {
@@ -99,7 +82,7 @@ export class LicenseGrouper {
     return productMapping;
   }
 
-  private matchLicenses(scorer: LicenseMatcher, scoreLogger?: LicenseMatchLogger) {
+  private matchLicenses(scorer: LicenseMatcher) {
     log.info('Scoring Engine', 'Scoring licenses within [addonKey + hosting] groups');
     const startTime = process.hrtime.bigint();
 
@@ -116,9 +99,9 @@ export class LicenseGrouper {
           this.initMatch(license1.license);
           this.initMatch(license2.license);
 
-          scoreLogger?.beginGroup(license1.license, license2.license);
+          this.scoreLogger?.beginGroup(license1.license, license2.license);
           const didMatch = scorer.isSimilarEnough(license1.scorable, license2.scorable);
-          scoreLogger?.endGroup();
+          this.scoreLogger?.endGroup();
 
           if (didMatch) {
             this.joinMatches(license1.license, license2.license);
