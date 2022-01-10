@@ -1,15 +1,34 @@
+import { Contact } from "../../model/contact";
 import { License } from "../../model/license";
 import { SimilarityScorer } from "./similarity-scorer";
 
 const NINETY_DAYS_AS_MS = 1000 * 60 * 60 * 24 * 90;
 
+export interface ScorableLicense {
+  license: License;
+
+  momentStarted: number;
+  momentEnded: number;
+
+  techContact: Contact;
+  billingContact: Contact | null;
+
+  company: string | undefined;
+  companyDomain: string;
+
+  techContactEmailPart: string;
+  techContactAddress: string | undefined;
+  techContactPhone: string | undefined;
+  techContactName: string | undefined;
+}
+
 export class LicenseMatcher {
 
   private similarityScorer = new SimilarityScorer();
 
-  public constructor(private threshold: number, private providerDomains: ReadonlySet<string>) { }
+  public constructor(private threshold: number) { }
 
-  public isSimilarEnough(license1: License, license2: License): boolean {
+  public isSimilarEnough(license1: ScorableLicense, license2: ScorableLicense): boolean {
     // Skip if over 90 days apart
     if (
       license2.momentStarted - license1.momentEnded > NINETY_DAYS_AS_MS ||
@@ -43,46 +62,43 @@ export class LicenseMatcher {
 
     s = 80;
     t = 0.90;
-    a = license1.data.technicalContact.address1?.toLowerCase();
-    b = license2.data.technicalContact.address1?.toLowerCase();
+    a = license1.techContactAddress;
+    b = license2.techContactAddress;
     score += Math.round(s * this.similarityScorer.score(t, a, b));
     if (undefined !== (bail = this.bail(score, opportunity -= s))) return bail;
 
     s = 80;
     t = 0.90;
-    a = license1.data.company?.toLowerCase();
-    b = license2.data.company?.toLowerCase();
-    score += Math.round(s * this.similarityScorer.score(t, a, b));
-    if (undefined !== (bail = this.bail(score, opportunity -= s))) return bail;
-
-    const [emailAddress1, domain1] = license1.techContact.data.email.split('@');
-    const [emailAddress2, domain2] = license2.techContact.data.email.split('@');
-
-    s = 30;
-    t = 0.80;
-    a = this.providerDomains.has(domain1) ? '' : domain1.toLowerCase();
-    b = this.providerDomains.has(domain2) ? '' : domain2.toLowerCase();
+    a = license1.company;
+    b = license2.company;
     score += Math.round(s * this.similarityScorer.score(t, a, b));
     if (undefined !== (bail = this.bail(score, opportunity -= s))) return bail;
 
     s = 30;
     t = 0.80;
-    a = emailAddress1.toLowerCase();
-    b = emailAddress2.toLowerCase();
+    a = license1.companyDomain;
+    b = license2.companyDomain;
+    score += Math.round(s * this.similarityScorer.score(t, a, b));
+    if (undefined !== (bail = this.bail(score, opportunity -= s))) return bail;
+
+    s = 30;
+    t = 0.80;
+    a = license1.techContactEmailPart;
+    b = license2.techContactEmailPart;
     score += Math.round(s * this.similarityScorer.score(t, a, b));
     if (undefined !== (bail = this.bail(score, opportunity -= s))) return bail;
 
     s = 30;
     t = 0.70;
-    a = license1.data.technicalContact.name?.toLowerCase();
-    b = license2.data.technicalContact.name?.toLowerCase();
+    a = license1.techContactName;
+    b = license2.techContactName;
     score += Math.round(s * this.similarityScorer.score(t, a, b));
     if (undefined !== (bail = this.bail(score, opportunity -= s))) return bail;
 
     s = 30;
     t = 0.90;
-    a = license1.data.technicalContact.phone?.toLowerCase();
-    b = license2.data.technicalContact.phone?.toLowerCase();
+    a = license1.techContactPhone;
+    b = license2.techContactPhone;
     score += Math.round(s * this.similarityScorer.score(t, a, b));
     if (undefined !== (bail = this.bail(score, opportunity -= s))) return bail;
 

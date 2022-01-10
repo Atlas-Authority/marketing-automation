@@ -3,7 +3,7 @@ import log from '../../log/logger';
 import { Database } from '../../model/database';
 import { License } from '../../model/license';
 import { sorter } from '../../util/helpers';
-import { LicenseMatcher } from './license-matcher';
+import { LicenseMatcher, ScorableLicense } from './license-matcher';
 
 /** Related via the matching engine. */
 export type RelatedLicenseSet = License[];
@@ -16,11 +16,9 @@ export class LicenseGrouper {
 
   run(): RelatedLicenseSet[] {
     log.info('Scoring Engine', 'Grouping licenses/transactions by hosting and addonKey');
-    const productGroups = this.groupLicensesByProduct();
-
     const threshold = 130;
-    const scorer = new LicenseMatcher(threshold, this.db.providerDomains);
-    this.matchLicenses(scorer, productGroups);
+    const scorer = new LicenseMatcher(threshold);
+    this.matchLicenses(scorer);
     const matches = new Set(this.matchGroups.values())
 
     saveForInspection('matched-groups-all',
@@ -51,7 +49,7 @@ export class LicenseGrouper {
   }
 
   private groupLicensesByProduct() {
-    const productMapping = new Map<string, License[]>();
+    const productMapping = new Map<string, ScorableLicense[]>();
 
     for (const license of this.db.licensesByAddonLicenseId.values()) {
       const addonKey = license.data.addonKey;
@@ -60,15 +58,36 @@ export class LicenseGrouper {
 
       let list = productMapping.get(key);
       if (!list) productMapping.set(key, list = []);
-      list.push(license);
+
+      const [techContactEmailPart, techContactDomain] = license.techContact.data.email.split('@');
+
+      list.push({
+        license,
+
+        momentStarted: new Date(license.data.maintenanceStartDate).getTime(),
+        momentEnded: new Date(license.data.maintenanceEndDate).getTime(),
+
+        techContact: license.techContact,
+        billingContact: license.billingContact,
+
+        company: license.data.company.toLowerCase(),
+        companyDomain: this.db.providerDomains.has(techContactDomain) ? '' : techContactDomain,
+
+        techContactEmailPart,
+        techContactAddress: license.data.technicalContact.address1?.toLowerCase(),
+        techContactName: license.data.technicalContact.name?.toLowerCase(),
+        techContactPhone: license.data.technicalContact.phone?.toLowerCase(),
+      });
     }
 
     return productMapping;
   }
 
-  private matchLicenses(scorer: LicenseMatcher, productGroups: Map<string, License[]>) {
+  private matchLicenses(scorer: LicenseMatcher) {
     log.info('Scoring Engine', 'Scoring licenses within [addonKey + hosting] groups');
     const startTime = process.hrtime.bigint();
+
+    const productGroups = this.groupLicensesByProduct();
 
     for (const [name, group] of productGroups) {
       log.info('Scoring Engine', `  Scoring [${name}]`);
@@ -78,11 +97,11 @@ export class LicenseGrouper {
           const license1 = group[i1];
           const license2 = group[i2];
 
-          this.initMatch(license1);
-          this.initMatch(license2);
+          this.initMatch(license1.license);
+          this.initMatch(license2.license);
 
           if (scorer.isSimilarEnough(license1, license2)) {
-            this.joinMatches(license1, license2);
+            this.joinMatches(license1.license, license2.license);
           }
         }
       }
