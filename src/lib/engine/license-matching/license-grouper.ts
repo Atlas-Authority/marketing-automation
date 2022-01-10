@@ -4,6 +4,7 @@ import { Database } from '../../model/database';
 import { License } from '../../model/license';
 import { sorter } from '../../util/helpers';
 import { LicenseMatcher, ScorableLicense } from './license-matcher';
+import { LicenseMatchLogger } from './score-logger';
 
 /** Related via the matching engine. */
 export type RelatedLicenseSet = License[];
@@ -12,12 +13,20 @@ export class LicenseGrouper {
 
   private matchGroups = new Map<License, Set<License>>();
 
-  constructor(private db: Database) { }
+  constructor(private db: Database, private shouldLogExtras = false) { }
 
   run(): RelatedLicenseSet[] {
     const threshold = 130;
-    const scorer = new LicenseMatcher(threshold);
-    this.matchLicenses(scorer);
+
+    let scoreLogger: LicenseMatchLogger | undefined;
+    if (this.shouldLogExtras) {
+      scoreLogger = new LicenseMatchLogger();
+    }
+
+    const scorer = new LicenseMatcher(threshold, scoreLogger);
+    this.matchLicenses(scorer, scoreLogger);
+    scoreLogger?.close();
+
     const matches = new Set(this.matchGroups.values())
 
     saveForInspection('matched-groups-all',
@@ -90,7 +99,7 @@ export class LicenseGrouper {
     return productMapping;
   }
 
-  private matchLicenses(scorer: LicenseMatcher) {
+  private matchLicenses(scorer: LicenseMatcher, scoreLogger?: LicenseMatchLogger) {
     log.info('Scoring Engine', 'Scoring licenses within [addonKey + hosting] groups');
     const startTime = process.hrtime.bigint();
 
@@ -107,7 +116,11 @@ export class LicenseGrouper {
           this.initMatch(license1.license);
           this.initMatch(license2.license);
 
-          if (scorer.isSimilarEnough(license1.scorable, license2.scorable)) {
+          scoreLogger?.beginGroup(license1.license, license2.license);
+          const didMatch = scorer.isSimilarEnough(license1.scorable, license2.scorable);
+          scoreLogger?.endGroup();
+
+          if (didMatch) {
             this.joinMatches(license1.license, license2.license);
           }
         }

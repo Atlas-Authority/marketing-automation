@@ -87,18 +87,18 @@ export interface LogWriteStream {
 
 export class FileLogWriteStream {
 
-  stream: fs.WriteStream;
+  fd: number;
 
   constructor(url: URL) {
-    this.stream = fs.createWriteStream(url);
+    this.fd = fs.openSync(url, 'w');
   }
 
   close() {
-    this.stream.end();
+    fs.close(this.fd, () => { });
   }
 
   writeLine(text: string) {
-    this.stream.write(text + '\n');
+    fs.writeSync(this.fd, text + '\n');
   }
 
 }

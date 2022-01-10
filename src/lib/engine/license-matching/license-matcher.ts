@@ -20,7 +20,7 @@ export interface ScorableLicense {
 }
 
 interface ScoreLog {
-  log(l1: ScorableLicense, l2: ScorableLicense, score: number, reason: string): void;
+  logScore(score: number, reason: string): void;
 }
 
 export class LicenseMatcher {
@@ -39,17 +39,18 @@ export class LicenseMatcher {
       return false;
     }
 
-    // If same exact email, definitely a match
-    if (
-      (l1.techContact === l2.techContact) ||
-      (
-        l1.techContact === l2.billingContact ||
-        l2.techContact === l1.billingContact
-      ) ||
-      (
-        l1.billingContact &&
-        l1.billingContact === l2.billingContact)
-    ) {
+    if (l1.techContact === l2.techContact) {
+      this.scoreLog?.logScore(1000, 'Same tech contacts');
+      return true;
+    }
+
+    if (l1.billingContact && l1.billingContact === l2.billingContact) {
+      this.scoreLog?.logScore(1000, 'Same billing contacts');
+      return true;
+    }
+
+    if (l1.techContact === l2.billingContact || l2.techContact === l1.billingContact) {
+      this.scoreLog?.logScore(1000, 'Same tech/billing contacts');
       return true;
     }
 
@@ -68,7 +69,7 @@ export class LicenseMatcher {
     a = l1.techContactAddress;
     b = l2.techContactAddress;
     score += (s = Math.round(p * scoreSimilarity(t, a, b)));
-    this.scoreLog?.log(l1, l2, s, 'Tech Contact Address');
+    this.scoreLog?.logScore(s, 'Tech Contact Address');
     if (undefined !== (bail = this.bail(score, opportunity -= p))) return bail;
 
     p = 80;
@@ -76,7 +77,7 @@ export class LicenseMatcher {
     a = l1.company;
     b = l2.company;
     score += (s = Math.round(p * scoreSimilarity(t, a, b)));
-    this.scoreLog?.log(l1, l2, s, 'Company Name');
+    this.scoreLog?.logScore(s, 'Company Name');
     if (undefined !== (bail = this.bail(score, opportunity -= p))) return bail;
 
     p = 30;
@@ -84,7 +85,7 @@ export class LicenseMatcher {
     a = l1.companyDomain;
     b = l2.companyDomain;
     score += (s = Math.round(p * scoreSimilarity(t, a, b)));
-    this.scoreLog?.log(l1, l2, s, 'Company Domain');
+    this.scoreLog?.logScore(s, 'Company Domain');
     if (undefined !== (bail = this.bail(score, opportunity -= p))) return bail;
 
     p = 30;
@@ -92,7 +93,7 @@ export class LicenseMatcher {
     a = l1.techContactEmailPart;
     b = l2.techContactEmailPart;
     score += (s = Math.round(p * scoreSimilarity(t, a, b)));
-    this.scoreLog?.log(l1, l2, s, 'Tech Email Address (first part)');
+    this.scoreLog?.logScore(s, 'Tech Email Address (first part)');
     if (undefined !== (bail = this.bail(score, opportunity -= p))) return bail;
 
     p = 30;
@@ -100,7 +101,7 @@ export class LicenseMatcher {
     a = l1.techContactName;
     b = l2.techContactName;
     score += (s = Math.round(p * scoreSimilarity(t, a, b)));
-    this.scoreLog?.log(l1, l2, s, 'Tech Contact Name');
+    this.scoreLog?.logScore(s, 'Tech Contact Name');
     if (undefined !== (bail = this.bail(score, opportunity -= p))) return bail;
 
     p = 30;
@@ -108,7 +109,7 @@ export class LicenseMatcher {
     a = l1.techContactPhone;
     b = l2.techContactPhone;
     score += (s = Math.round(p * scoreSimilarity(t, a, b)));
-    this.scoreLog?.log(l1, l2, s, 'Tech Contact Phone');
+    this.scoreLog?.logScore(s, 'Tech Contact Phone');
 
     return score >= this.threshold;
   }
