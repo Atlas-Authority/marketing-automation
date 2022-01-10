@@ -34,6 +34,7 @@ export class LicenseMatcher {
 
     let score = 0;
     let opportunity = 80 + 80 + 30 + 30 + 30 + 30;
+    let bail;
 
     let s: number; // score
     let t: number; // atLeast
@@ -45,16 +46,14 @@ export class LicenseMatcher {
     a = license1.data.technicalContact.address1?.toLowerCase();
     b = license2.data.technicalContact.address1?.toLowerCase();
     score += Math.round(s * this.similarityScorer.score(t, a, b));
-    if (score >= this.threshold) return true;
-    if (score + (opportunity -= s) < this.threshold) return false;
+    if (undefined !== (bail = this.bail(score, opportunity -= s))) return bail;
 
     s = 80;
     t = 0.90;
     a = license1.data.company?.toLowerCase();
     b = license2.data.company?.toLowerCase();
     score += Math.round(s * this.similarityScorer.score(t, a, b));
-    if (score >= this.threshold) return true;
-    if (score + (opportunity -= s) < this.threshold) return false;
+    if (undefined !== (bail = this.bail(score, opportunity -= s))) return bail;
 
     const [emailAddress1, domain1] = license1.techContact.data.email.split('@');
     const [emailAddress2, domain2] = license2.techContact.data.email.split('@');
@@ -64,34 +63,35 @@ export class LicenseMatcher {
     a = this.providerDomains.has(domain1) ? '' : domain1.toLowerCase();
     b = this.providerDomains.has(domain2) ? '' : domain2.toLowerCase();
     score += Math.round(s * this.similarityScorer.score(t, a, b));
-    if (score >= this.threshold) return true;
-    if (score + (opportunity -= s) < this.threshold) return false;
+    if (undefined !== (bail = this.bail(score, opportunity -= s))) return bail;
 
     s = 30;
     t = 0.80;
     a = emailAddress1.toLowerCase();
     b = emailAddress2.toLowerCase();
     score += Math.round(s * this.similarityScorer.score(t, a, b));
-    if (score >= this.threshold) return true;
-    if (score + (opportunity -= s) < this.threshold) return false;
+    if (undefined !== (bail = this.bail(score, opportunity -= s))) return bail;
 
     s = 30;
     t = 0.70;
     a = license1.data.technicalContact.name?.toLowerCase();
     b = license2.data.technicalContact.name?.toLowerCase();
     score += Math.round(s * this.similarityScorer.score(t, a, b));
-    if (score >= this.threshold) return true;
-    if (score + (opportunity -= s) < this.threshold) return false;
+    if (undefined !== (bail = this.bail(score, opportunity -= s))) return bail;
 
     s = 30;
     t = 0.90;
     a = license1.data.technicalContact.phone?.toLowerCase();
     b = license2.data.technicalContact.phone?.toLowerCase();
     score += Math.round(s * this.similarityScorer.score(t, a, b));
-    if (score >= this.threshold) return true;
-    if (score + (opportunity -= s) < this.threshold) return false;
+    if (undefined !== (bail = this.bail(score, opportunity -= s))) return bail;
 
     return false;
+  }
+
+  bail(score: number, opportunity: number): any {
+    if (score >= this.threshold) return true;
+    if (score + opportunity < this.threshold) return false;
   }
 
 }
