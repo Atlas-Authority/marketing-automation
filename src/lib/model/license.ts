@@ -126,9 +126,6 @@ export class License extends MpacRecord<LicenseData> {
     });
   }
 
-  momentStarted: number;
-  momentEnded: number;
-
   evaluatedFrom: License | undefined = undefined;
   evaluatedTo: License | undefined = undefined;
 
@@ -137,9 +134,6 @@ export class License extends MpacRecord<LicenseData> {
     this.id = this.data.addonLicenseId;
     this.tier = Math.max(this.parseTier(), this.tierFromEvalOpportunity());
     this.active = this.data.status === 'active';
-
-    this.momentStarted = new Date(this.data.maintenanceStartDate).getTime();
-    this.momentEnded = new Date(this.data.maintenanceEndDate).getTime();
   }
 
   private parseTier() {

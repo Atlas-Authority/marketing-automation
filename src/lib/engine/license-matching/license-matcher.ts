@@ -1,5 +1,5 @@
 import { Contact } from "../../model/contact";
-import { SimilarityScorer } from "./similarity-scorer";
+import { scoreSimilarity } from "./similarity-scorer";
 
 const NINETY_DAYS_AS_MS = 1000 * 60 * 60 * 24 * 90;
 
@@ -10,44 +10,45 @@ export interface ScorableLicense {
   techContact: Contact;
   billingContact: Contact | null;
 
-  company: string | undefined;
+  company: string;
   companyDomain: string;
 
   techContactEmailPart: string;
-  techContactAddress: string | undefined;
-  techContactPhone: string | undefined;
-  techContactName: string | undefined;
+  techContactAddress: string;
+  techContactPhone: string;
+  techContactName: string;
 }
 
 interface ScoreLog {
-  log(license1: ScorableLicense, license2: ScorableLicense, score: number, reason: string): void;
+  log(l1: ScorableLicense, l2: ScorableLicense, score: number, reason: string): void;
 }
 
 export class LicenseMatcher {
 
-  private similarityScorer = new SimilarityScorer();
-
   public constructor(private threshold: number, private scoreLog?: ScoreLog) { }
 
-  public isSimilarEnough(license1: ScorableLicense, license2: ScorableLicense): boolean {
+  public isSimilarEnough(
+    l1: ScorableLicense,
+    l2: ScorableLicense,
+  ): boolean {
     // Skip if over 90 days apart
     if (
-      license2.momentStarted - license1.momentEnded > NINETY_DAYS_AS_MS ||
-      license1.momentStarted - license2.momentEnded > NINETY_DAYS_AS_MS
+      l2.momentStarted - l1.momentEnded > NINETY_DAYS_AS_MS ||
+      l1.momentStarted - l2.momentEnded > NINETY_DAYS_AS_MS
     ) {
       return false;
     }
 
     // If same exact email, definitely a match
     if (
-      (license1.techContact === license2.techContact) ||
+      (l1.techContact === l2.techContact) ||
       (
-        license1.techContact === license2.billingContact ||
-        license2.techContact === license1.billingContact
+        l1.techContact === l2.billingContact ||
+        l2.techContact === l1.billingContact
       ) ||
       (
-        license1.billingContact &&
-        license1.billingContact === license2.billingContact)
+        l1.billingContact &&
+        l1.billingContact === l2.billingContact)
     ) {
       return true;
     }
@@ -56,63 +57,64 @@ export class LicenseMatcher {
     let opportunity = 80 + 80 + 30 + 30 + 30 + 30;
     let bail;
 
-    let s: number; // score
+    let p: number; // possible score
+    let s: number; // actual score
     let t: number; // atLeast
     let a: string | undefined;
     let b: string | undefined;
 
-    s = 80;
+    p = 80;
     t = 0.90;
-    a = license1.techContactAddress;
-    b = license2.techContactAddress;
-    score += this.score(license1, license2, 'Tech Contact Address', t, a, b, s);
-    if (undefined !== (bail = this.bail(score, opportunity -= s))) return bail;
+    a = l1.techContactAddress;
+    b = l2.techContactAddress;
+    score += (s = Math.round(p * scoreSimilarity(t, a, b)));
+    this.scoreLog?.log(l1, l2, s, 'Tech Contact Address');
+    if (undefined !== (bail = this.bail(score, opportunity -= p))) return bail;
 
-    s = 80;
+    p = 80;
     t = 0.90;
-    a = license1.company;
-    b = license2.company;
-    score += this.score(license1, license2, 'Company Name', t, a, b, s);
-    if (undefined !== (bail = this.bail(score, opportunity -= s))) return bail;
+    a = l1.company;
+    b = l2.company;
+    score += (s = Math.round(p * scoreSimilarity(t, a, b)));
+    this.scoreLog?.log(l1, l2, s, 'Company Name');
+    if (undefined !== (bail = this.bail(score, opportunity -= p))) return bail;
 
-    s = 30;
+    p = 30;
     t = 0.80;
-    a = license1.companyDomain;
-    b = license2.companyDomain;
-    score += this.score(license1, license2, 'Company Domain', t, a, b, s);
-    if (undefined !== (bail = this.bail(score, opportunity -= s))) return bail;
+    a = l1.companyDomain;
+    b = l2.companyDomain;
+    score += (s = Math.round(p * scoreSimilarity(t, a, b)));
+    this.scoreLog?.log(l1, l2, s, 'Company Domain');
+    if (undefined !== (bail = this.bail(score, opportunity -= p))) return bail;
 
-    s = 30;
+    p = 30;
     t = 0.80;
-    a = license1.techContactEmailPart;
-    b = license2.techContactEmailPart;
-    score += this.score(license1, license2, 'Tech Email Address (first part)', t, a, b, s);
-    if (undefined !== (bail = this.bail(score, opportunity -= s))) return bail;
+    a = l1.techContactEmailPart;
+    b = l2.techContactEmailPart;
+    score += (s = Math.round(p * scoreSimilarity(t, a, b)));
+    this.scoreLog?.log(l1, l2, s, 'Tech Email Address (first part)');
+    if (undefined !== (bail = this.bail(score, opportunity -= p))) return bail;
 
-    s = 30;
+    p = 30;
     t = 0.70;
-    a = license1.techContactName;
-    b = license2.techContactName;
-    score += this.score(license1, license2, 'Tech Contact Name', t, a, b, s);
-    if (undefined !== (bail = this.bail(score, opportunity -= s))) return bail;
+    a = l1.techContactName;
+    b = l2.techContactName;
+    score += (s = Math.round(p * scoreSimilarity(t, a, b)));
+    this.scoreLog?.log(l1, l2, s, 'Tech Contact Name');
+    if (undefined !== (bail = this.bail(score, opportunity -= p))) return bail;
 
-    s = 30;
+    p = 30;
     t = 0.90;
-    a = license1.techContactPhone;
-    b = license2.techContactPhone;
-    score += this.score(license1, license2, 'Tech Contact Phone', t, a, b, s);
-    if (undefined !== (bail = this.bail(score, opportunity -= s))) return bail;
+    a = l1.techContactPhone;
+    b = l2.techContactPhone;
+    score += (s = Math.round(p * scoreSimilarity(t, a, b)));
+    this.scoreLog?.log(l1, l2, s, 'Tech Contact Phone');
 
-    return false;
-  }
-
-  score(l1: ScorableLicense, l2: ScorableLicense, reason: string, t: number, a: string | undefined, b: string | undefined, s: number) {
-    const score = Math.round(s * this.similarityScorer.score(t, a, b));
-    this.scoreLog?.log(l1, l2, score, reason);
-    return score;
+    return score >= this.threshold;
   }
 
   bail(score: number, opportunity: number): any {
+    if (this.scoreLog) return false;
     if (score >= this.threshold) return true;
     if (score + opportunity < this.threshold) return false;
   }

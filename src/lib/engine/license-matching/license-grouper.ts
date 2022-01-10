@@ -64,6 +64,9 @@ export class LicenseGrouper {
 
       const [techContactEmailPart, techContactDomain] = license.techContact.data.email.split('@');
 
+      const NON_EMPTY_FIELD = /[A-Za-z0-9]/;
+      const normalizeString = (s: string | undefined) => s && NON_EMPTY_FIELD.test(s) ? s : '';
+
       list.push({
         license,
         scorable: {
@@ -73,13 +76,13 @@ export class LicenseGrouper {
           techContact: license.techContact,
           billingContact: license.billingContact,
 
-          company: license.data.company.toLowerCase(),
-          companyDomain: this.db.providerDomains.has(techContactDomain) ? '' : techContactDomain,
+          company: normalizeString(license.data.company)?.toLowerCase(),
+          companyDomain: this.db.providerDomains.has(techContactDomain) ? '' : normalizeString(techContactDomain),
 
           techContactEmailPart,
-          techContactAddress: license.data.technicalContact.address1?.toLowerCase(),
-          techContactName: license.data.technicalContact.name?.toLowerCase(),
-          techContactPhone: license.data.technicalContact.phone?.toLowerCase(),
+          techContactAddress: normalizeString(license.data.technicalContact.address1)?.toLowerCase(),
+          techContactName: normalizeString(license.data.technicalContact.name)?.toLowerCase(),
+          techContactPhone: normalizeString(license.data.technicalContact.phone)?.toLowerCase(),
         },
       });
     }
