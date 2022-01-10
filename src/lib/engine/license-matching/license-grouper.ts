@@ -15,7 +15,6 @@ export class LicenseGrouper {
   constructor(private db: Database) { }
 
   run(): RelatedLicenseSet[] {
-    log.info('Scoring Engine', 'Grouping licenses/transactions by hosting and addonKey');
     const threshold = 130;
     const scorer = new LicenseMatcher(threshold);
     this.matchLicenses(scorer);
@@ -49,6 +48,7 @@ export class LicenseGrouper {
   }
 
   private groupLicensesByProduct() {
+    log.info('Scoring Engine', 'Grouping licenses/transactions by hosting and addonKey');
     const productMapping = new Map<string, ScorableLicense[]>();
 
     for (const license of this.db.licensesByAddonLicenseId.values()) {

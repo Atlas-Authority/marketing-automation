@@ -22,11 +22,15 @@ export interface ScorableLicense {
   techContactName: string | undefined;
 }
 
+interface ScoreLog {
+  log(license1: ScorableLicense, license2: ScorableLicense, score: number, reason: string): void;
+}
+
 export class LicenseMatcher {
 
   private similarityScorer = new SimilarityScorer();
 
-  public constructor(private threshold: number) { }
+  public constructor(private threshold: number, private scoreLog?: ScoreLog) { }
 
   public isSimilarEnough(license1: ScorableLicense, license2: ScorableLicense): boolean {
     // Skip if over 90 days apart
@@ -64,45 +68,51 @@ export class LicenseMatcher {
     t = 0.90;
     a = license1.techContactAddress;
     b = license2.techContactAddress;
-    score += Math.round(s * this.similarityScorer.score(t, a, b));
+    score += this.score(license1, license2, 'Tech Contact Address', t, a, b, s);
     if (undefined !== (bail = this.bail(score, opportunity -= s))) return bail;
 
     s = 80;
     t = 0.90;
     a = license1.company;
     b = license2.company;
-    score += Math.round(s * this.similarityScorer.score(t, a, b));
+    score += this.score(license1, license2, 'Company Name', t, a, b, s);
     if (undefined !== (bail = this.bail(score, opportunity -= s))) return bail;
 
     s = 30;
     t = 0.80;
     a = license1.companyDomain;
     b = license2.companyDomain;
-    score += Math.round(s * this.similarityScorer.score(t, a, b));
+    score += this.score(license1, license2, 'Company Domain', t, a, b, s);
     if (undefined !== (bail = this.bail(score, opportunity -= s))) return bail;
 
     s = 30;
     t = 0.80;
     a = license1.techContactEmailPart;
     b = license2.techContactEmailPart;
-    score += Math.round(s * this.similarityScorer.score(t, a, b));
+    score += this.score(license1, license2, 'Tech Email Address (first part)', t, a, b, s);
     if (undefined !== (bail = this.bail(score, opportunity -= s))) return bail;
 
     s = 30;
     t = 0.70;
     a = license1.techContactName;
     b = license2.techContactName;
-    score += Math.round(s * this.similarityScorer.score(t, a, b));
+    score += this.score(license1, license2, 'Tech Contact Name', t, a, b, s);
     if (undefined !== (bail = this.bail(score, opportunity -= s))) return bail;
 
     s = 30;
     t = 0.90;
     a = license1.techContactPhone;
     b = license2.techContactPhone;
-    score += Math.round(s * this.similarityScorer.score(t, a, b));
+    score += this.score(license1, license2, 'Tech Contact Phone', t, a, b, s);
     if (undefined !== (bail = this.bail(score, opportunity -= s))) return bail;
 
     return false;
+  }
+
+  score(l1: ScorableLicense, l2: ScorableLicense, reason: string, t: number, a: string | undefined, b: string | undefined, s: number) {
+    const score = Math.round(s * this.similarityScorer.score(t, a, b));
+    this.scoreLog?.log(l1, l2, score, reason);
+    return score;
   }
 
   bail(score: number, opportunity: number): any {
