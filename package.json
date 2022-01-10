@@ -11,7 +11,6 @@
     "multiple": "node out/bin/verify-multiple-runs.js",
     "download": "node out/bin/download.js",
     "entitlements": "node out/bin/entitlements.js",
-    "explain": "node out/bin/check-licenses.js",
     "test": "jest",
     "test-watch": "jest --watch"
   },
