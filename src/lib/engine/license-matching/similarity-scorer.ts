@@ -37,41 +37,27 @@ export function scoreSimilarity(atLeast: number, a: string, b: string) {
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-function diceCoefficient(value: string, alternative: string): number {
-  const left = bigram(value);
-  const right = bigram(alternative);
-
+function diceCoefficient(a: string, b: string): number {
   let index = -1;
   let intersections = 0;
-
-  let leftPair: string;
-  let rightPair: string;
   let offset: number;
+  const seen: boolean[] = [];
 
-  while (++index < left.length) {
-    leftPair = left[index];
+  const al = a.length - 1;
+  const bl = b.length - 1;
+
+  while (++index < al) {
     offset = -1;
-
-    while (++offset < right.length) {
-      rightPair = right[offset];
-
-      if (leftPair === rightPair) {
+    while (++offset < bl) {
+      if (a[index] === b[offset] && a[index + 1] == b[offset + 1] && !seen[offset]) {
         intersections++;
 
         // Make sure this pair never matches again.
-        right[offset] = '';
+        seen[offset] = true;
         break;
       }
     }
   }
 
-  return (2 * intersections) / (left.length + right.length);
-}
-
-function bigram(value: string) {
-  const pairs = [];
-  const n = 2;
-  let i = value.length - n + 1;
-  while (i--) pairs[i] = value.slice(i, i + n);
-  return pairs;
+  return (2 * intersections) / (al + bl);
 }
