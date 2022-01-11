@@ -1,7 +1,7 @@
-import { Remote } from "../lib/io/interfaces";
-import { CachedMemoryRemote, IO, LiveRemote } from "../lib/io/io";
-import { cli } from "../lib/parameters/cli-args";
-import { serviceCredsFromENV } from "../lib/parameters/env-config";
+import { Remote } from "../io/interfaces";
+import { CachedMemoryRemote, IO, LiveRemote } from "../io/io";
+import { cli } from "./cli-args";
+import { serviceCredsFromENV } from "./env-config";
 
 export function ioFromCliArgs() {
   const io = new IO();

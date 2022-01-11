@@ -4,8 +4,8 @@ import Engine from "../lib/engine/engine";
 import log from '../lib/log/logger';
 import { Database } from "../lib/model/database";
 import { cli } from "../lib/parameters/cli-args";
+import { ioFromCliArgs } from '../lib/parameters/cli-io';
 import { envConfig } from '../lib/parameters/env-config';
-import { ioFromCliArgs } from './cli-args';
 
 main();
 async function main() {
