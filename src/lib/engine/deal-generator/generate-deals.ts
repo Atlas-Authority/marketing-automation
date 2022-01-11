@@ -28,16 +28,17 @@ export class DealGenerator {
     this.actionGenerator = new ActionGenerator(db.dealManager, this.ignore.bind(this));
   }
 
-  public run(matches: RelatedLicenseSet[]) {
-    const logger = new DealDataLogger();
+  public run(matches: RelatedLicenseSet[], shouldLog = false) {
+    let logger: DealDataLogger | undefined;
+    if (shouldLog) logger = new DealDataLogger();
 
     for (const relatedLicenseIds of matches) {
       const { records, events, actions } = this.generateActionsForMatchedGroup(relatedLicenseIds);
 
-      logger.logTestID(relatedLicenseIds);
-      logger.logRecords(records);
-      logger.logEvents(events);
-      logger.logActions(actions);
+      logger?.logTestID(relatedLicenseIds);
+      logger?.logRecords(records);
+      logger?.logEvents(events);
+      logger?.logActions(actions);
 
       for (const action of actions) {
         const deal = (action.type === 'create'
@@ -56,7 +57,7 @@ export class DealGenerator {
 
     this.printIgnoredTransactionsTable();
 
-    logger.close();
+    logger?.close();
   }
 
   private printIgnoredTransactionsTable() {

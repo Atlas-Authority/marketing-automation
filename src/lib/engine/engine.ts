@@ -22,13 +22,13 @@ export default class Engine {
     new ContactGenerator(db).run();
 
     log.step('Running Scoring Engine');
-    const allMatches = new LicenseGrouper(db, shouldLogExtras).run();
+    const allMatches = new LicenseGrouper(db).run(shouldLogExtras);
 
     log.step('Updating Contacts based on Match Results');
     updateContactsBasedOnMatchResults(db, allMatches);
 
     log.step('Generating deals');
-    new DealGenerator(db).run(allMatches);
+    new DealGenerator(db).run(allMatches, shouldLogExtras);
 
     log.step('Up-syncing to Hubspot');
     await db.syncUpAllEntities();

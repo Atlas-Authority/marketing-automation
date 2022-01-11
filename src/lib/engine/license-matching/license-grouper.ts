@@ -11,19 +11,17 @@ export type RelatedLicenseSet = License[];
 export class LicenseGrouper {
 
   private matchGroups = new Map<License, Set<License>>();
-  scoreLogger?: LicenseMatchLogger;
 
-  constructor(private db: Database, shouldLogExtras: boolean) {
-    if (shouldLogExtras) {
-      this.scoreLogger = new LicenseMatchLogger();
-    }
-  }
+  constructor(private db: Database) { }
 
-  run(): RelatedLicenseSet[] {
+  run(shouldLogExtras = false): RelatedLicenseSet[] {
+    let scoreLogger: LicenseMatchLogger | undefined;
+    if (shouldLogExtras) scoreLogger = new LicenseMatchLogger();
+
     const threshold = 130;
 
-    const scorer = new LicenseMatcher(threshold, this.scoreLogger);
-    this.matchLicenses(scorer);
+    const scorer = new LicenseMatcher(threshold, scoreLogger);
+    this.matchLicenses(scorer, scoreLogger);
 
     const matches = (
       Array.from(new Set(this.matchGroups.values()))
@@ -31,8 +29,8 @@ export class LicenseGrouper {
           .sort(sorter(license => license.data.maintenanceStartDate)))
     );
 
-    this.scoreLogger?.logMatchResults(matches);
-    this.scoreLogger?.close();
+    scoreLogger?.logMatchResults(matches);
+    scoreLogger?.close();
 
     log.info('Scoring Engine', 'Done');
 
@@ -82,7 +80,7 @@ export class LicenseGrouper {
     return productMapping;
   }
 
-  private matchLicenses(scorer: LicenseMatcher) {
+  private matchLicenses(scorer: LicenseMatcher, scoreLogger?: LicenseMatchLogger) {
     log.info('Scoring Engine', 'Scoring licenses within [addonKey + hosting] groups');
     const startTime = process.hrtime.bigint();
 
@@ -99,9 +97,9 @@ export class LicenseGrouper {
           this.initMatch(license1.license);
           this.initMatch(license2.license);
 
-          this.scoreLogger?.beginGroup(license1.license, license2.license);
+          scoreLogger?.beginGroup(license1.license, license2.license);
           const didMatch = scorer.isSimilarEnough(license1.scorable, license2.scorable);
-          this.scoreLogger?.endGroup();
+          scoreLogger?.endGroup();
 
           if (didMatch) {
             this.joinMatches(license1.license, license2.license);
