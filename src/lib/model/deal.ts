@@ -12,7 +12,7 @@ import { Transaction, uniqueTransactionId } from "./transaction";
 export type DealData = {
   relatedProducts: string | null;
   app: string | null;
-  addonLicenseId: string;
+  addonLicenseId: string | null;
   transactionId: string | null;
   closeDate: string;
   country: string | null;
@@ -44,15 +44,9 @@ export class Deal extends Entity<DealData, DealComputed> {
   public entitlementNumber() { return this.deriveId(this.data.appEntitlementNumber); }
 
   public deriveId(id: string | null) {
-    if (this.data.transactionId && id) {
-      return uniqueTransactionId({
-        transactionId: this.data.transactionId,
-        addonLicenseId: id,
-      });
-    }
-    else {
-      return id;
-    }
+    if (!id) return null;
+    if (!this.data.transactionId) return id;
+    return uniqueTransactionId(this.data.transactionId, id);
   }
 
   public get isWon() { return this.data.dealStage === DealStage.CLOSED_WON }

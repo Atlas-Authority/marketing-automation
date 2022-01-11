@@ -74,7 +74,7 @@ export class DealDataLogger {
       rows: records,
       cols: [
         [{ title: 'Hosting' }, record => record.data.hosting],
-        [{ title: 'AddonLicenseId' }, record => record.data.addonLicenseId],
+        [{ title: 'LicenseId' }, record => record.id],
         [{ title: 'Date' }, record => record.data.maintenanceStartDate],
         [{ title: 'LicenseType' }, record => record.data.licenseType],
         [{ title: 'SaleType' }, ifTx(record => record.data.saleType)],

@@ -216,14 +216,14 @@ export class Database {
       log.warn('Scoring Engine', "The following transactions have no accompanying licenses:");
       {
         const table = new Table([{ title: 'Refunds' }, { title: 'License', align: 'right' }]);
-        for (const tx of refunds) { table.rows.push([tx.data.transactionId, tx.data.addonLicenseId]); }
+        for (const tx of refunds) { table.rows.push([tx.data.transactionId, tx.data.addonLicenseId ?? tx.data.appEntitlementId ?? tx.data.appEntitlementNumber!]); }
         for (const row of table.eachRow()) {
           log.warn('Scoring Engine', '  ' + row);
         }
       }
       {
         const table = new Table([{ title: 'Maybe Refunded' }, { title: 'License', align: 'right' }]);
-        for (const tx of maybeRefunded) { table.rows.push([tx.data.transactionId, tx.data.addonLicenseId]); }
+        for (const tx of maybeRefunded) { table.rows.push([tx.data.transactionId, tx.data.addonLicenseId ?? tx.data.appEntitlementId ?? tx.data.appEntitlementNumber!]); }
         for (const row of table.eachRow()) {
           log.warn('Scoring Engine', '  ' + row);
         }
