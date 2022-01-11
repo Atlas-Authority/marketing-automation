@@ -44,7 +44,7 @@ export class LicenseGrouper {
       scorable: ScorableLicense,
     }[]>();
 
-    for (const license of this.db.licensesByAddonLicenseId.values()) {
+    for (const license of this.db.licenses) {
       const addonKey = license.data.addonKey;
       const hosting = license.data.hosting;
       const key = `${addonKey}, ${hosting}`;
