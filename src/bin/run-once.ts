@@ -16,6 +16,6 @@ async function main() {
 
   const db = new Database(io, envConfig);
 
-  await new Engine().run(db, log.level >= log.Levels.Verbose);
+  await new Engine().run(db, cli.get('--savelogs') === 'true');
 
 }
