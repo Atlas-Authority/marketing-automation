@@ -30,7 +30,6 @@ export default class DataDir {
 class DataFile<T> {
 
   #url: URL;
-  #text?: string;
   #json?: T;
 
   /** Don't use this, use DataDir static fields instead. */
@@ -38,36 +37,21 @@ class DataFile<T> {
     this.#url = new URL(filename, base);
   }
 
-  public exists() {
-    return fs.existsSync(this.#url);
-  }
-
   public readJson(): T {
     if (this.#json === undefined) {
-      this.#json = JSON.parse(this.readText()) as T;
+      if (!fs.existsSync(this.#url)) {
+        log.error('Dev', `Data file doesn't exist yet; run engine to create`, this.#url);
+        process.exit(1);
+      }
+      const text = fs.readFileSync(this.#url, 'utf8');
+      this.#json = JSON.parse(text) as T;
     }
     return this.#json;
   }
 
-  public readText() {
-    if (this.#text == undefined) {
-      if (!this.exists()) {
-        log.error('Dev', `Data file doesn't exist yet; run engine to create`, this.#url);
-        process.exit(1);
-      }
-      this.#text = fs.readFileSync(this.#url, 'utf8');
-    }
-    return this.#text;
-  }
-
   public writeJson(json: T) {
     this.#json = json;
-    this.writeText(JSON.stringify(json, null, 2));
-  }
-
-  public writeText(text: string) {
-    this.#text = text;
-    fs.writeFileSync(this.#url, this.#text);
+    fs.writeFileSync(this.#url, JSON.stringify(json, null, 2));
   }
 
   public writeStream(): LogWriteStream {
