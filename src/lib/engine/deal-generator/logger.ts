@@ -40,7 +40,7 @@ export class DealDataLogger {
           if (action.deal) {
             const dealId = action.deal.id;
             const { amount, dealStage } = action.deal.data;
-            const recordId = action.deal.mpacId();
+            const recordId = action.deal.getMpacIds().join(',');
             const stage = DealStage[dealStage];
             details += ` deal=${dealId}, record=${recordId}, stage=${stage}, amount=${amount}`;
           }

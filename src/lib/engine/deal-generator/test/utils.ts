@@ -198,7 +198,7 @@ export function abbrActionDetails(action: Action) {
     };
     case 'noop': return {
       "Nothing": [action.reason, action.deal && [
-        action.deal.mpacId(),
+        action.deal.getMpacIds().join(','),
         DealStage[action.deal.data.dealStage],
         action.deal.data.amount,
       ]]

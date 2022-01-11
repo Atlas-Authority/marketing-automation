@@ -77,7 +77,6 @@ function uniqLicenses(licenses: RawLicense[]) {
 }
 
 function validateLicense(license: RawLicense) {
-  validateField(license, license => license.addonLicenseId);
   validateField(license, license => license.licenseId);
   validateField(license, license => license.addonKey);
   validateField(license, license => license.addonName);

@@ -39,9 +39,13 @@ export class Deal extends Entity<DealData, DealComputed> {
   public contacts = this.makeDynamicAssociation<Contact>('contact');
   public companies = this.makeDynamicAssociation<Company>('company');
 
-  public mpacId() { return this.deriveId(this.data.addonLicenseId); }
-  public entitlementId() { return this.deriveId(this.data.appEntitlementId); }
-  public entitlementNumber() { return this.deriveId(this.data.appEntitlementNumber); }
+  public getMpacIds() {
+    return [
+      this.deriveId(this.data.addonLicenseId),
+      this.deriveId(this.data.appEntitlementId),
+      this.deriveId(this.data.appEntitlementNumber),
+    ].filter(isPresent);
+  }
 
   public deriveId(id: string | null) {
     if (!id) return null;
@@ -201,21 +205,48 @@ export class DealManager extends EntityManager<DealData, DealComputed, Deal> {
   protected override kind: EntityKind = 'deal';
   protected override entityAdapter = DealAdapter;
 
-  /** Either `License.addonLicenseId` or `Transaction.transactionId[Transacton.addonLicenseId]` */
-  public getByMpacId = this.makeIndex(d => [d.mpacId()].filter(isPresent), ['transactionId', 'addonLicenseId']);
-  public getByEntitlementId = this.makeIndex(d => [d.entitlementId()].filter(isPresent), ['transactionId', 'appEntitlementId']);
-  public getByEntitlementNumber = this.makeIndex(d => [d.entitlementNumber()].filter(isPresent), ['transactionId', 'appEntitlementNumber']);
+  /** Either `License.{each id}` or `Transaction.transactionId[Transacton.{each id}]` */
+  public getByMpacId = this.makeIndex(d => d.getMpacIds(), [
+    'transactionId',
+    'addonLicenseId',
+    'appEntitlementId',
+    'appEntitlementNumber',
+  ]);
 
   public duplicatesToDelete = new Map<Deal, Set<Deal>>();
 
   public getDealsForRecords(records: (License | Transaction)[]) {
-    return new Set(records
-      .flatMap(record => [
-        this.getByEntitlementNumber(record.id),
-        this.getByEntitlementId(record.id),
-        this.getByMpacId(record.id),
-      ])
-      .filter(isPresent));
+    const set = new Set<Deal>();
+    const maybeAdd = (deal: Deal | undefined) => {
+      if (deal) set.add(deal);
+    };
+
+    for (const record of records) {
+      if (record instanceof Transaction) {
+        const txId = record.data.transactionId;
+
+        if (record.data.addonLicenseId)
+          maybeAdd(this.getByMpacId(uniqueTransactionId(txId, record.data.addonLicenseId)));
+
+        if (record.data.appEntitlementId)
+          maybeAdd(this.getByMpacId(uniqueTransactionId(txId, record.data.appEntitlementId)));
+
+        if (record.data.appEntitlementNumber)
+          maybeAdd(this.getByMpacId(uniqueTransactionId(txId, record.data.appEntitlementNumber)));
+      }
+      else {
+        if (record.data.addonLicenseId)
+          maybeAdd(this.getByMpacId(record.data.addonLicenseId));
+
+        if (record.data.appEntitlementId)
+          maybeAdd(this.getByMpacId(record.data.appEntitlementId));
+
+        if (record.data.appEntitlementNumber)
+          maybeAdd(this.getByMpacId(record.data.appEntitlementNumber));
+      }
+
+    }
+    return set;
   }
 
 }
