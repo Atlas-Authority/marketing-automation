@@ -32,7 +32,7 @@ async function main() {
 
     async work() {
       const db = new Database(io, envConfig);
-      await new Engine().run(db);
+      await new Engine().run(db, null);
     },
 
     async failed(errors) {

@@ -25,7 +25,7 @@ async function main() {
     ].join(',')))
   );
 
-  const file = new CsvStream(DataDir.out.file('attributions.csv').writeStream());
+  const file = new CsvStream(new DataDir('out').file('attributions.csv').writeStream());
   for (const a of attributions) {
     file.writeRow({
       channel: a.channel,

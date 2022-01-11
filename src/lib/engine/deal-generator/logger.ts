@@ -11,7 +11,10 @@ import { DealRelevantEvent } from "./events.js";
 
 export class DealDataLogger {
 
-  private readonly log = DataDir.out.file('deal-generator.txt').writeStream();
+  private readonly log;
+  constructor(logDir: DataDir) {
+    this.log = logDir.file('deal-generator.txt').writeStream();
+  }
 
   close() {
     this.log.close();

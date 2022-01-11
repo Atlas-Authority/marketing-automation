@@ -5,7 +5,10 @@ import { shorterLicenseInfo } from './license-grouper';
 
 export class LicenseMatchLogger {
 
-  #file = new CsvStream(DataDir.out.file('license-scoring.csv').writeStream());
+  #file;
+  constructor(private logDir: DataDir) {
+    this.#file = new CsvStream(logDir.file('license-scoring.csv').writeStream());
+  }
 
   l1!: License;
   l2!: License;
@@ -38,8 +41,8 @@ export class LicenseMatchLogger {
   logMatchResults(matches: License[][]) {
     const groups = matches.map(group => group.map(shorterLicenseInfo));
 
-    const allMatchGroupsLog = new CsvStream(DataDir.out.file('matched-groups-all.csv').writeStream());
-    const checkMatchGroupsLog = new CsvStream(DataDir.out.file('matched-groups-to-check.csv').writeStream());
+    const allMatchGroupsLog = new CsvStream(this.logDir.file('matched-groups-all.csv').writeStream());
+    const checkMatchGroupsLog = new CsvStream(this.logDir.file('matched-groups-to-check.csv').writeStream());
 
     for (const match of groups) {
       for (const shortLicense of match) {

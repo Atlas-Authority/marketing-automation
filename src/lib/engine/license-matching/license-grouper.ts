@@ -1,3 +1,4 @@
+import DataDir from '../../cache/datadir';
 import log from '../../log/logger';
 import { Database } from '../../model/database';
 import { License } from '../../model/license';
@@ -14,9 +15,8 @@ export class LicenseGrouper {
 
   constructor(private db: Database) { }
 
-  run(shouldLogExtras = false): RelatedLicenseSet[] {
-    let scoreLogger: LicenseMatchLogger | undefined;
-    if (shouldLogExtras) scoreLogger = new LicenseMatchLogger();
+  run(logDir: DataDir | null): RelatedLicenseSet[] {
+    const scoreLogger = (logDir) ? new LicenseMatchLogger(logDir) : undefined;
 
     const threshold = 130;
 

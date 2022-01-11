@@ -1,3 +1,4 @@
+import DataDir from "../cache/datadir";
 import { EngineLogger } from "../log/engine-logger";
 import { Database } from "../model/database";
 import { identifyAndFlagContactTypes } from "./contacts/contact-types";
@@ -9,7 +10,7 @@ import { printSummary } from "./summary";
 
 export default class Engine {
 
-  public async run(db: Database, shouldLogExtras = false) {
+  public async run(db: Database, logDir: DataDir | null) {
     const log = new EngineLogger();
 
     log.step('Starting to download data');
@@ -22,13 +23,13 @@ export default class Engine {
     new ContactGenerator(db).run();
 
     log.step('Running Scoring Engine');
-    const allMatches = new LicenseGrouper(db).run(shouldLogExtras);
+    const allMatches = new LicenseGrouper(db).run(logDir);
 
     log.step('Updating Contacts based on Match Results');
     updateContactsBasedOnMatchResults(db, allMatches);
 
     log.step('Generating deals');
-    new DealGenerator(db).run(allMatches, shouldLogExtras);
+    new DealGenerator(db).run(allMatches, logDir);
 
     log.step('Up-syncing to Hubspot');
     await db.syncUpAllEntities();

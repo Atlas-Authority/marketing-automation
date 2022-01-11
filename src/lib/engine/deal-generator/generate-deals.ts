@@ -1,4 +1,5 @@
 import assert from "assert";
+import DataDir from "../../cache/datadir";
 import log from "../../log/logger";
 import { Table } from "../../log/table";
 import { Database } from "../../model/database";
@@ -28,9 +29,8 @@ export class DealGenerator {
     this.actionGenerator = new ActionGenerator(db.dealManager, this.ignore.bind(this));
   }
 
-  public run(matches: RelatedLicenseSet[], shouldLog = false) {
-    let logger: DealDataLogger | undefined;
-    if (shouldLog) logger = new DealDataLogger();
+  public run(matches: RelatedLicenseSet[], logDir: DataDir | null) {
+    const logger = (logDir) ? new DealDataLogger(logDir) : undefined;
 
     for (const relatedLicenseIds of matches) {
       const { records, events, actions } = this.generateActionsForMatchedGroup(relatedLicenseIds);

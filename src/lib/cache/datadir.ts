@@ -9,12 +9,11 @@ if (!fs.existsSync(rootDataDir)) fs.mkdirSync(rootDataDir);
 export default class DataDir {
 
   public static readonly in = new DataDir("in");
-  public static readonly out = new DataDir("out");
 
   #base: URL;
   #files = new Map<string, DataFile<any>>();
 
-  private constructor(place: string) {
+  constructor(place: string) {
     this.#base = new URL(`${place}/`, rootDataDir);
     if (!fs.existsSync(this.#base)) fs.mkdirSync(this.#base);
   }
