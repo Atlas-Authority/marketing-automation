@@ -286,14 +286,13 @@ export abstract class EntityManager<
     return index.get.bind(index);
   }
 
-  public removeIndexesFor<K extends keyof D>(key: K, val: D[K] | undefined) {
-    if (!val) return;
-    this.indexIndex.get(key)?.removeIndex(val);
+  public removeIndexesFor<K extends keyof D>(depKey: K, entity: E) {
+    this.indexIndex.get(depKey)?.removeIndexesFor([entity]);
   }
 
-  public addIndexesFor<K extends keyof D>(key: K, val: D[K] | undefined, entity: E) {
+  public addIndexesFor<K extends keyof D>(depKey: K, val: D[K] | undefined, entity: E) {
     if (!val) return;
-    this.indexIndex.get(key)?.addIndex(val, entity);
+    this.indexIndex.get(depKey)?.addIndexesFor([entity]);
   }
 
 }

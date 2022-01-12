@@ -47,7 +47,7 @@ export class Deal extends Entity<DealData, DealComputed> {
     ].filter(isPresent);
   }
 
-  public deriveId(id: string | null) {
+  private deriveId(id: string | null) {
     if (!id) return null;
     if (!this.data.transactionId) return id;
     return uniqueTransactionId(this.data.transactionId, id);
@@ -216,37 +216,28 @@ export class DealManager extends EntityManager<DealData, DealComputed, Deal> {
   public duplicatesToDelete = new Map<Deal, Set<Deal>>();
 
   public getDealsForRecords(records: (License | Transaction)[]) {
-    const set = new Set<Deal>();
-    const maybeAdd = (deal: Deal | undefined) => {
-      if (deal) set.add(deal);
-    };
+    const ids = new Set<string | null>();
 
     for (const record of records) {
       if (record instanceof Transaction) {
         const txId = record.data.transactionId;
-
-        if (record.data.addonLicenseId)
-          maybeAdd(this.getByMpacId(uniqueTransactionId(txId, record.data.addonLicenseId)));
-
-        if (record.data.appEntitlementId)
-          maybeAdd(this.getByMpacId(uniqueTransactionId(txId, record.data.appEntitlementId)));
-
-        if (record.data.appEntitlementNumber)
-          maybeAdd(this.getByMpacId(uniqueTransactionId(txId, record.data.appEntitlementNumber)));
+        ids.add(record.data.addonLicenseId && uniqueTransactionId(txId, record.data.addonLicenseId));
+        ids.add(record.data.appEntitlementId && uniqueTransactionId(txId, record.data.appEntitlementId));
+        ids.add(record.data.appEntitlementNumber && uniqueTransactionId(txId, record.data.appEntitlementNumber));
       }
       else {
-        if (record.data.addonLicenseId)
-          maybeAdd(this.getByMpacId(record.data.addonLicenseId));
-
-        if (record.data.appEntitlementId)
-          maybeAdd(this.getByMpacId(record.data.appEntitlementId));
-
-        if (record.data.appEntitlementNumber)
-          maybeAdd(this.getByMpacId(record.data.appEntitlementNumber));
+        ids.add(record.data.addonLicenseId);
+        ids.add(record.data.appEntitlementId);
+        ids.add(record.data.appEntitlementNumber);
       }
-
     }
-    return set;
+    ids.delete(null);
+
+    const deals = ([...ids]
+      .map(id => this.getByMpacId(id!))
+      .filter(isPresent));
+
+    return new Set(deals);
   }
 
 }

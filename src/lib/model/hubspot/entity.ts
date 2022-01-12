@@ -1,7 +1,7 @@
 import { EntityKind } from "./interfaces";
 
 export interface Indexer<D> {
-  removeIndexesFor<K extends keyof D>(key: K, val: D[K] | undefined): void;
+  removeIndexesFor<K extends keyof D>(key: K, entity: Entity<D, any>): void;
   addIndexesFor<K extends keyof D>(key: K, val: D[K] | undefined, entity: Entity<D, any>): void;
 }
 
@@ -61,22 +61,23 @@ export abstract class Entity<
   }
 
   private set<K extends keyof D>(key: K, val: D[K]) {
-    if (this.id === undefined) {
-      this.indexer.removeIndexesFor(key, this._data[key]);
-      this._data[key] = val;
-      this.indexer.addIndexesFor(key, this._data[key], this);
-      return;
-    }
+    this.indexer.removeIndexesFor(key, this);
 
-    this.indexer.removeIndexesFor(key, this.newData[key]);
-    const oldVal = this._data[key];
-    if (oldVal === val) {
-      delete this.newData[key];
+    if (this.id === undefined) {
+      this._data[key] = val;
+      this.indexer.addIndexesFor(key, val, this);
     }
     else {
-      this.newData[key] = val;
+      const oldVal = this._data[key];
+      if (oldVal === val) {
+        delete this.newData[key];
+      }
+      else {
+        this.newData[key] = val;
+      }
     }
-    this.indexer.addIndexesFor(key, this.newData[key], this);
+
+    this.indexer.addIndexesFor(key, val, this);
   }
 
   public hasPropertyChanges() {
