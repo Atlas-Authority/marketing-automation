@@ -94,7 +94,6 @@ function validateLicense(license: RawLicense) {
 
 function validateTransaction(transaction: RawTransaction) {
   validateField(transaction, transaction => transaction.transactionId);
-  validateField(transaction, transaction => transaction.addonLicenseId);
   validateField(transaction, transaction => transaction.licenseId);
   validateField(transaction, transaction => transaction.addonKey);
   validateField(transaction, transaction => transaction.addonName);
