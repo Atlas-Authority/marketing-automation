@@ -49,7 +49,7 @@ function diceCoefficient(a: string, b: string): number {
   while (++index < al) {
     offset = -1;
     while (++offset < bl) {
-      if (a[index] === b[offset] && a[index + 1] == b[offset + 1] && !seen[offset]) {
+      if (a[index] === b[offset] && a[index + 1] === b[offset + 1] && !seen[offset]) {
         intersections++;
 
         // Make sure this pair never matches again.
