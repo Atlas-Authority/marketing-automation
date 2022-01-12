@@ -15,7 +15,8 @@
 6. To create tests with deals:
    1. Copy an existing test into a new one
    2. Copy its deals from its output to its input
-   3. Run it and see what changes
-   4. Put the new expected results into the test
-   5. Make sure it makes sense
-   6. Repeat until expected output is no-op
+   3. Redact any sensitive info (should be almost none)
+   4. Run it and see what changes
+   5. Put the new expected results into the test
+   6. Make sure it makes sense
+   7. Repeat until expected output is no-op

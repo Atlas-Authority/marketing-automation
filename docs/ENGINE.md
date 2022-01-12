@@ -119,7 +119,15 @@ For a deeper understanding of this phase, run the engine with out=local, and ins
 
 First, we group licenses by app and hosting, since each Deal must be for one product on one Atlassian platform.
 
-In each group, we score every license with every other license. This phase can take a few minutes overall, so it's a good time to grab a cup of coffee.
+In each group, we score every license with every other license.
+
+We score by pairs, creating sets when combined, so that:
+
+* If A and B match, then a set [A, B] is created
+* If B and C match, then set [A, B] is updated to [A, B, C]
+* If D never matches anything, it'll be in [D] all by itself.
+
+In practice, this means that if 2 licenses are 100 days apart, but matched with one in common 50 days between each, they'll all be matched up together.
 
 Sometimes we're certain about a match or non-match:
 
@@ -135,29 +143,7 @@ In all other case, match scoring is based on a threshold. Certain factors add to
 - Similar tech contact name has a low score
 - Similar tech contact phone has a low score
 
-At this point, we have a bunch of scores. The engine then matches groups up by related scores, given a probability threshold.
-
-Given the following table:
-
-| L1  | L2  | Score |
-| --- | --- | ----- |
-| `a` | `b` | 50    |
-| `a` | `c` | 50    |
-| `b` | `c` | 30    |
-| `d` | `a` | 20    |
-| `d` | `b` | 20    |
-| `d` | `c` | 20    |
-
-If we use threshold=40, we'll have these groups:
-
-- `[a, b, c]`
-- `[d]`
-
-As expected, `d` will be in a group by itself, since it wasn't related enough to anything else.
-
-But even though `b` and `c` didn't seem directly related, they were connected through `a`, which they're both related to based on the threshold.
-
-In practice, this means that if 2 licenses are 100 days apart, but matched with one in common 50 days between each, they'll all be matched up together.
+You can log the scoring results by passing `--savelogs=somedir` which streams it to `data/somedir/license-scoring.csv`.
 
 #### Match results
 

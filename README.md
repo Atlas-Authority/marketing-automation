@@ -45,12 +45,11 @@ See [docs/HUBSPOT.md](./docs/HUBSPOT.md).
     --out  local | remote
         Whether to cache output to disk and log, or upload live data
 
-    --cached-fns  scorer.json
-        (Optional) Reuse cached results of given function
-
     --loglevel    error | warn | info | verbose | detailed
         (Optional) What the engine should log to console.log()
 
+    --savelogs somedir
+        (Optional) Log helpful debug files under `data/somedir/`
 
 ## Developer NPM commands
 
@@ -59,7 +58,7 @@ See [docs/HUBSPOT.md](./docs/HUBSPOT.md).
 $ npm run once -- [options]
 
 # Example of dry-run, using local data and cached scorer data, with medium verbosity
-$ npm run once -- --in=local --out=local --cached-fns=scorer.json --loglevel=info
+$ npm run once -- --in=local --out=local --savelogs=out --loglevel=info
 
 # Download live data and cache to disk
 $ npm run download
@@ -87,7 +86,7 @@ Running the engine live (steps above) will cache data locally in git-ignored `da
 
 Instead of uploading to Hubspot, you can use `--out=local` and `--loglevel=verbose` (the default) to print data to console that would have been uploaded, or `--loglevel=info` to just show array counts.
 
-After running the engine, to test logic *after* the Scoring Engine runs, pass `--cached-fns=scorer.json` to reuse the most recently results of the Scoring Engine.
+To save logs about what the scoring engine is doing during a dry-run, pass a subdirectory of "data" to `--savelogs` (see above).
 
 
 ## Changelog
@@ -101,6 +100,10 @@ After running the engine, to test logic *after* the Scoring Engine runs, pass `-
 - Deals now always use transaction ID when available.
 - Refunded deals now have their amounts set to zero.
 - Purchased inactive licenses are set to closed-won if not refunded.
+- Added `--savelogs=somedir` as the way to manually log debug files.
+- Updated `npm run multiple` to save logs to `data/run{1..3}/`.
+- Sped up license scorer down to 12% original run time in some cases.
+- Removed `--cached-fns` option and cached-fns data file usage.
 
 ### 0.1.0 (2021-11-25)
 
