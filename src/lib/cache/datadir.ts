@@ -1,7 +1,6 @@
 import fs from "fs";
 import { pathToFileURL, URL } from "url";
 import log from "../log/logger";
-import { isProduction, isTest } from "../parameters/env-config";
 
 const rootDataDir = new URL(`../../data/`, pathToFileURL(__dirname));
 if (!fs.existsSync(rootDataDir)) fs.mkdirSync(rootDataDir);
@@ -55,10 +54,7 @@ class DataFile<T> {
   }
 
   public writeStream(): LogWriteStream {
-    if (isTest || isProduction)
-      return noopWriteStream;
-    else
-      return new FileLogWriteStream(this.#url);
+    return new FileLogWriteStream(this.#url);
   }
 
 }
@@ -85,8 +81,3 @@ export class FileLogWriteStream {
   }
 
 }
-
-const noopWriteStream: LogWriteStream = {
-  writeLine() { },
-  close() { },
-};
