@@ -1,29 +1,20 @@
-import { batchesOf } from "../util/helpers";
+type Opts<T extends string> = { [K in T]: string | undefined };
 
-class ArgParser {
+export function getCliArgs<T extends string>(...params: T[]): Opts<T> {
+  const args = Object.fromEntries(process.argv.slice(2)
+    .map(s => s.split('='))
+    .map(([k, v]) => [k.replace(/^--/, ''), v || 'true']));
 
-  public static readonly cli = new ArgParser(process.argv.slice(2));
-
-  #opts: { [opt: string]: string };
-
-  private constructor(argv: string[]) {
-    const args = argv.flatMap(s => s.split('='));
-    this.#opts = Object.fromEntries(batchesOf(args, 2));
+  const opts = {} as Opts<T>;
+  for (const param of params) {
+    opts[param] = args[param];
+    delete args[param];
   }
 
-  get(option: string): string | undefined {
-    const value = this.#opts[option];
-    delete this.#opts[option];
-    return value;
+  if (Object.keys(args).length > 0) {
+    console.log(`Error: Unknown arguments passed:`, args);
+    process.exit(1);
   }
 
-  failIfExtraOpts() {
-    if (Object.keys(this.#opts).length > 0) {
-      console.log(`Error: Unknown options passed:`, this.#opts);
-      process.exit(1);
-    }
-  }
-
+  return opts;
 }
-
-export const { cli } = ArgParser;

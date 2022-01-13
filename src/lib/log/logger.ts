@@ -50,17 +50,14 @@ class Logger {
   }
 
   public setLevelFrom(levelString: string | undefined) {
-    const mapping = new Map([
-      ['error', LogLevel.Error],
-      ['warn', LogLevel.Warn],
-      ['info', LogLevel.Info],
-      ['verbose', LogLevel.Verbose],
-      [undefined, LogLevel.Verbose],
-    ]);
-    const level = mapping.get(levelString?.trim().toLowerCase());
-    if (level) this.level = level;
+    if (!levelString) return;
+    switch (levelString.trim().toLowerCase()) {
+      case 'error': this.level = LogLevel.Error; break;
+      case 'warn': this.level = LogLevel.Warn; break;
+      case 'info': this.level = LogLevel.Info; break;
+      case 'verbose': this.level = LogLevel.Verbose; break;
+    }
   }
-
 }
 
 const levelPrefixes = {

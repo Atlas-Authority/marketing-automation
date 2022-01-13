@@ -4,7 +4,7 @@ import { IO, LiveRemote } from '../lib/io/io';
 import Slack from "../lib/io/slack";
 import log from '../lib/log/logger';
 import { Database } from "../lib/model/database";
-import { cli } from "../lib/parameters/cli-args";
+import { getCliArgs } from '../lib/parameters/cli-args';
 import { envConfig, runLoopConfigFromENV, serviceCredsFromENV, slackConfigFromENV } from "../lib/parameters/env-config";
 import { AttachableError, KnownError } from "../lib/util/errors";
 import run from "../lib/util/runner";
@@ -12,10 +12,10 @@ import run from "../lib/util/runner";
 main();
 async function main() {
 
-  log.setLevelFrom(cli.get('--loglevel'));
+  const { loglevel } = getCliArgs('loglevel');
+  log.setLevelFrom(loglevel);
 
   const io = new IO(new LiveRemote(serviceCredsFromENV()));
-  cli.failIfExtraOpts();
 
   let slack: Slack | undefined;
   const slackConfig = slackConfigFromENV();
