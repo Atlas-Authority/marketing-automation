@@ -1,10 +1,10 @@
 import 'source-map-support/register';
 import DataDir from '../lib/cache/datadir';
 import Engine from "../lib/engine/engine";
+import { CachedMemoryRemote, IO } from '../lib/io/io';
 import log from '../lib/log/logger';
 import { Database } from "../lib/model/database";
 import { cli } from "../lib/parameters/cli-args";
-import { ioFromCliArgs } from '../lib/parameters/cli-io';
 import { envConfig } from '../lib/parameters/env-config';
 
 main();
@@ -15,7 +15,7 @@ async function main() {
 
   const dataDir = logDir ? new DataDir(logDir) : null;
 
-  const io = ioFromCliArgs();
+  const io = new IO(new CachedMemoryRemote());
   cli.failIfExtraOpts();
 
   const db = new Database(io, envConfig);

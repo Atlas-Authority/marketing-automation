@@ -1,11 +1,11 @@
 import 'source-map-support/register';
 import Engine from "../lib/engine/engine";
+import { IO, LiveRemote } from '../lib/io/io';
 import Slack from "../lib/io/slack";
 import log from '../lib/log/logger';
 import { Database } from "../lib/model/database";
 import { cli } from "../lib/parameters/cli-args";
-import { ioFromCliArgs } from '../lib/parameters/cli-io';
-import { envConfig, runLoopConfigFromENV, slackConfigFromENV } from "../lib/parameters/env-config";
+import { envConfig, runLoopConfigFromENV, serviceCredsFromENV, slackConfigFromENV } from "../lib/parameters/env-config";
 import { AttachableError, KnownError } from "../lib/util/errors";
 import run from "../lib/util/runner";
 
@@ -14,7 +14,7 @@ async function main() {
 
   log.setLevelFrom(cli.get('--loglevel'));
 
-  const io = ioFromCliArgs();
+  const io = new IO(new LiveRemote(serviceCredsFromENV()));
   cli.failIfExtraOpts();
 
   let slack: Slack | undefined;

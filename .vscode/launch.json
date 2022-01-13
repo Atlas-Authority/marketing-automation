@@ -12,8 +12,6 @@
       ],
       "program": "${workspaceFolder}/src/bin/run-once.ts",
       "args": [
-        "--in=local",
-        "--out=local",
         "--loglevel=info",
       ],
       "type": "pwa-node"

@@ -17,17 +17,6 @@ class ArgParser {
     return value;
   }
 
-  getChoiceOrFail<T extends string>(option: string, choices: T[]): T {
-    const value = this.get(option) as T;
-    if (!value || !choices.includes(value)) {
-      console.log(`Error: ${option} must be ${choices
-        .map(c => `'${c}'`)
-        .join(' or ')}`);
-      process.exit(1);
-    }
-    return value;
-  }
-
   failIfExtraOpts() {
     if (Object.keys(this.#opts).length > 0) {
       console.log(`Error: Unknown options passed:`, this.#opts);
