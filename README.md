@@ -44,7 +44,7 @@ See [docs/HUBSPOT.md](./docs/HUBSPOT.md).
 
 ## CLI Options
 
-    --loglevel    error | warn | info | verbose | detailed
+    --loglevel    error | warn | info | verbose
         (Optional) What the engine should log to console.log()
 
     --savelogs somedir
