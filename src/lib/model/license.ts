@@ -126,9 +126,12 @@ export class License extends MpacRecord<LicenseData> {
     });
   }
 
+  evaluatedFrom: License | undefined = undefined;
+  evaluatedTo: License | undefined = undefined;
+
   public constructor(data: LicenseData) {
     super(data);
-    this.id = this.data.addonLicenseId;
+    this.id = this.data.addonLicenseId ?? this.data.appEntitlementId ?? this.data.appEntitlementNumber!;
     this.tier = Math.max(this.parseTier(), this.tierFromEvalOpportunity());
     this.active = this.data.status === 'active';
   }

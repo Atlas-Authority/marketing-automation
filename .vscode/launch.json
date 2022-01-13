@@ -5,21 +5,6 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Run cached-download/scorer",
-      "request": "launch",
-      "skipFiles": [
-        "<node_internals>/**"
-      ],
-      "program": "${workspaceFolder}/src/bin/run-once.ts",
-      "args": [
-        "--in=local",
-        "--out=local",
-        "--cached-fns=scorer.json",
-        "--loglevel=info",
-      ],
-      "type": "pwa-node"
-    },
-    {
       "name": "Run cached-download",
       "request": "launch",
       "skipFiles": [

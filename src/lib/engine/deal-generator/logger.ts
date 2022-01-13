@@ -1,4 +1,4 @@
-import DataDir from "../../cache/datadir.js";
+import { LogWriteStream } from "../../cache/datadir.js";
 import { Table } from "../../log/table.js";
 import { DealData } from "../../model/deal.js";
 import { DealStage } from '../../model/hubspot/interfaces.js';
@@ -11,11 +11,7 @@ import { DealRelevantEvent } from "./events.js";
 
 export class DealDataLogger {
 
-  private readonly log = DataDir.out.file('deal-generator.txt').writeStream();
-
-  close() {
-    this.log.close();
-  }
+  constructor(private log: LogWriteStream) { }
 
   logActions(actions: Action[]) {
     this.log.writeLine('Actions');
@@ -37,7 +33,7 @@ export class DealDataLogger {
           if (action.deal) {
             const dealId = action.deal.id;
             const { amount, dealStage } = action.deal.data;
-            const recordId = action.deal.mpacId();
+            const recordId = action.deal.getMpacIds().join(',');
             const stage = DealStage[dealStage];
             details += ` deal=${dealId}, record=${recordId}, stage=${stage}, amount=${amount}`;
           }
@@ -71,7 +67,7 @@ export class DealDataLogger {
       rows: records,
       cols: [
         [{ title: 'Hosting' }, record => record.data.hosting],
-        [{ title: 'AddonLicenseId' }, record => record.data.addonLicenseId],
+        [{ title: 'LicenseId' }, record => record.id],
         [{ title: 'Date' }, record => record.data.maintenanceStartDate],
         [{ title: 'LicenseType' }, record => record.data.licenseType],
         [{ title: 'SaleType' }, ifTx(record => record.data.saleType)],

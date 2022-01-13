@@ -46,13 +46,10 @@ export class ActionGenerator {
 
     const latestLicense = event.licenses[event.licenses.length - 1];
     if (!deal) {
-      return makeCreateAction(records, latestLicense, {
-        dealStage: event.licenses.some(l => l.active)
-          ? DealStage.EVAL
-          : DealStage.CLOSED_LOST,
-        addonLicenseId: latestLicense.data.addonLicenseId,
-        transactionId: null,
-      });
+      const dealStage = (event.licenses.some(l => l.active)
+        ? DealStage.EVAL
+        : DealStage.CLOSED_LOST);
+      return makeCreateAction(records, latestLicense, dealStage);
     }
     else if (deal.isEval()) {
       const dealStage = (event.licenses.some(l => l.active)
@@ -81,19 +78,11 @@ export class ActionGenerator {
       return makeUpdateAction(records, deal, record, dealStage);
     }
     else if (event.transaction) {
-      return makeCreateAction(records, event.transaction, {
-        dealStage: DealStage.CLOSED_WON,
-        addonLicenseId: event.transaction.data.addonLicenseId,
-        transactionId: event.transaction.data.transactionId,
-      });
+      return makeCreateAction(records, event.transaction, DealStage.CLOSED_WON);
     }
     else {
       const license = getLatestLicense(event);
-      return makeCreateAction(records, license, {
-        dealStage: DealStage.CLOSED_WON,
-        addonLicenseId: license.data.addonLicenseId,
-        transactionId: null,
-      });
+      return makeCreateAction(records, license, DealStage.CLOSED_WON);
     }
   }
 
@@ -107,11 +96,7 @@ export class ActionGenerator {
     if (deal) {
       return makeUpdateAction(records, deal, event.transaction);
     }
-    return makeCreateAction(records, event.transaction, {
-      dealStage: DealStage.CLOSED_WON,
-      addonLicenseId: event.transaction.data.addonLicenseId,
-      transactionId: event.transaction.data.transactionId,
-    });
+    return makeCreateAction(records, event.transaction, DealStage.CLOSED_WON);
   }
 
   private actionsForRefund(records: (License | Transaction)[], event: RefundEvent): Action[] {
@@ -207,26 +192,17 @@ export class ActionGenerator {
 
 }
 
-function makeCreateAction(records: (License | Transaction)[], record: License | Transaction, data: Pick<DealData, 'addonLicenseId' | 'transactionId' | 'dealStage'>): Action {
+function makeCreateAction(records: (License | Transaction)[], record: License | Transaction, dealStage: DealStage): Action {
   return {
     type: 'create',
-    properties: dealCreationProperties(records, record, data),
+    properties: dealCreationProperties(records, record, dealStage),
   };
 }
 
-function makeUpdateAction(records: (License | Transaction)[], deal: Deal, record: License | Transaction | null, dealstage?: DealStage, certainData?: Partial<DealData>): Action {
-  if (dealstage !== undefined) deal.data.dealStage = dealstage;
+function makeUpdateAction(records: (License | Transaction)[], deal: Deal, record: License | Transaction | null, dealStage?: DealStage, certainData?: Partial<DealData>): Action {
+  if (dealStage !== undefined) deal.data.dealStage = dealStage;
   if (record) {
-    const dataToEnsure = {
-      addonLicenseId: deal.data.addonLicenseId,
-      transactionId: deal.data.transactionId,
-      dealStage: deal.data.dealStage,
-    };
-    if (record instanceof Transaction) {
-      dataToEnsure.transactionId = record.data.transactionId;
-      dataToEnsure.addonLicenseId = record.data.addonLicenseId;
-    }
-    Object.assign(deal.data, dealCreationProperties(records, record, dataToEnsure));
+    Object.assign(deal.data, dealCreationProperties(records, record, dealStage ?? deal.data.dealStage));
     deal.data.licenseTier = Math.max(deal.data.licenseTier ?? -1, record.tier);
   }
 
@@ -249,7 +225,7 @@ function getLatestLicense(event: PurchaseEvent): License {
   return [...event.licenses].sort(sorter(item => item.data.maintenanceStartDate, 'DSC'))[0];
 }
 
-function dealCreationProperties(records: (License | Transaction)[], record: License | Transaction, data: Pick<DealData, 'addonLicenseId' | 'transactionId' | 'dealStage'>): DealData {
+function dealCreationProperties(records: (License | Transaction)[], record: License | Transaction, dealStage: DealStage): DealData {
   /**
    * If any record in any of the deal's groups have partner contacts
    * then use the most recent record's partner contact's domain.
@@ -262,7 +238,6 @@ function dealCreationProperties(records: (License | Transaction)[], record: Lice
     ?? null);
 
   return {
-    ...data,
     closeDate: (record instanceof Transaction
       ? record.data.saleDate
       : record.data.maintenanceStartDate),
@@ -275,9 +250,12 @@ function dealCreationProperties(records: (License | Transaction)[], record: Lice
     dealName: mustache.render(env.hubspot.deals.dealDealName, record.data),
     pipeline: Pipeline.MPAC,
     associatedPartner,
+    addonLicenseId: record.data.addonLicenseId,
+    transactionId: (record instanceof Transaction ? record.data.transactionId : null),
     appEntitlementId: record.data.appEntitlementId,
     appEntitlementNumber: record.data.appEntitlementNumber,
-    amount: (data.dealStage === DealStage.EVAL
+    dealStage,
+    amount: (dealStage === DealStage.EVAL
       ? null
       : record instanceof License
         ? 0

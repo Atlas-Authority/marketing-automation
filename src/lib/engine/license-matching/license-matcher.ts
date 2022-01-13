@@ -1,156 +1,124 @@
-import { Database } from "../../model/database";
-import { License } from "../../model/license";
-import { SimilarityScorer } from "./similarity-scorer";
+import { Contact } from "../../model/contact";
+import { scoreSimilarity } from "./similarity-scorer";
+
+const NINETY_DAYS_AS_MS = 1000 * 60 * 60 * 24 * 90;
+
+export interface ScorableLicense {
+  momentStarted: number;
+  momentEnded: number;
+
+  techContact: Contact;
+  billingContact: Contact | null;
+
+  company: string;
+  companyDomain: string;
+
+  techContactEmailPart: string;
+  techContactAddress: string;
+  techContactPhone: string;
+  techContactName: string;
+}
+
+interface ScoreLog {
+  logScore(score: number, reason: string): void;
+}
 
 export class LicenseMatcher {
 
-  private similarityScorer = new SimilarityScorer();
+  public constructor(private threshold: number, private scoreLog?: ScoreLog) { }
 
-  public constructor(private db: Database) { }
-
-  public score(license1: License, license2: License): null | { item1: string, item2: string, score: number, reasons: string[] } {
-    const item1 = license1.data.addonLicenseId;
-    const item2 = license2.data.addonLicenseId;
-
-    const techEmail1 = license1.data.technicalContact.email;
-    const techEmail2 = license2.data.technicalContact.email;
-
-    const billingEmail1 = license1.data.billingContact?.email;
-    const billingEmail2 = license2.data.billingContact?.email;
-
-    const contact1 = this.db.contactManager.getByEmail(techEmail1);
-    const contact2 = this.db.contactManager.getByEmail(techEmail2);
-
+  public isSimilarEnough(
+    l1: ScorableLicense,
+    l2: ScorableLicense,
+  ): boolean {
     // Skip if over 90 days apart
-    const dateGap = dateDiff(
-      license1.data.maintenanceStartDate, license1.data.maintenanceEndDate,
-      license2.data.maintenanceStartDate, license2.data.maintenanceEndDate
-    );
-
-    if (dateGap > 90) {
-      return {
-        item1,
-        item2,
-        reasons: ['too far apart'],
-        score: -1000,
-      };
+    if (
+      l2.momentStarted - l1.momentEnded > NINETY_DAYS_AS_MS ||
+      l1.momentStarted - l2.momentEnded > NINETY_DAYS_AS_MS
+    ) {
+      return false;
     }
 
-    // If same exact email, definitely a match
-    if (
-      (contact1 === contact2) ||
-      (techEmail1 === techEmail2) ||
-      (billingEmail1 && billingEmail1 === billingEmail2)
-    ) {
-      return {
-        item1,
-        item2,
-        score: 1000,
-        reasons: ['same contact'],
-      };
+    if (l1.techContact === l2.techContact) {
+      this.scoreLog?.logScore(1000, 'Same tech contacts');
+      return true;
     }
 
-    if (
-      techEmail1 === billingEmail2 ||
-      techEmail2 === billingEmail1
-    ) {
-      return {
-        item1,
-        item2,
-        score: 1000,
-        reasons: ['same other-contact'],
-      };
+    if (l1.billingContact && l1.billingContact === l2.billingContact) {
+      this.scoreLog?.logScore(1000, 'Same billing contacts');
+      return true;
+    }
+
+    if (l1.techContact === l2.billingContact || l2.techContact === l1.billingContact) {
+      this.scoreLog?.logScore(1000, 'Same tech/billing contacts');
+      return true;
     }
 
     let score = 0;
+    let opportunity = 80 + 80 + 30 + 30 + 30 + 30;
+    let bail: boolean | void;
 
-    const reasons: string[] = [];
+    let p: number; // possible score
+    let s: number; // actual score
+    let t: number; // atLeast
+    let a: string | undefined;
+    let b: string | undefined;
 
-    const [emailAddress1, domain1] = techEmail1.split('@');
-    const [emailAddress2, domain2] = techEmail2.split('@');
+    p = 80;
+    t = 0.90;
+    a = l1.techContactAddress;
+    b = l2.techContactAddress;
+    score += (s = Math.round(p * scoreSimilarity(t, a, b)));
+    this.scoreLog?.logScore(s, 'Tech Contact Address');
+    if (undefined !== (bail = this.bail(score, opportunity -= p))) return bail;
 
-    if (!this.db.providerDomains.has(domain1)) {
-      const domainScore = Math.round(30 * this.similarityScorer.score(0.80,
-        domain1.toLowerCase(),
-        domain2.toLowerCase(),
-      ));
-      score += domainScore;
-      reasons.push(`domainScore = ${domainScore}`);
-    }
+    p = 80;
+    t = 0.90;
+    a = l1.company;
+    b = l2.company;
+    score += (s = Math.round(p * scoreSimilarity(t, a, b)));
+    this.scoreLog?.logScore(s, 'Company Name');
+    if (undefined !== (bail = this.bail(score, opportunity -= p))) return bail;
 
-    const emailAddressScore = Math.round(30 * this.similarityScorer.score(0.80,
-      emailAddress1.toLowerCase(),
-      emailAddress2.toLowerCase(),
-    ));
-    if (emailAddressScore) {
-      score += emailAddressScore;
-      reasons.push(`emailAddressScore = ${emailAddressScore}`);
-    }
+    p = 30;
+    t = 0.80;
+    a = l1.companyDomain;
+    b = l2.companyDomain;
+    score += (s = Math.round(p * scoreSimilarity(t, a, b)));
+    this.scoreLog?.logScore(s, 'Company Domain');
+    if (undefined !== (bail = this.bail(score, opportunity -= p))) return bail;
 
-    const addressScore = Math.round(80 * this.similarityScorer.score(0.90,
-      license1.data.technicalContact.address1?.toLowerCase(),
-      license2.data.technicalContact.address1?.toLowerCase(),
-    ));
-    if (addressScore) {
-      score += addressScore;
-      reasons.push(`addressScore = ${addressScore}`);
-    }
+    p = 30;
+    t = 0.80;
+    a = l1.techContactEmailPart;
+    b = l2.techContactEmailPart;
+    score += (s = Math.round(p * scoreSimilarity(t, a, b)));
+    this.scoreLog?.logScore(s, 'Tech Email Address (first part)');
+    if (undefined !== (bail = this.bail(score, opportunity -= p))) return bail;
 
-    const companyScore = Math.round(80 * this.similarityScorer.score(0.90,
-      license1.data.company?.toLowerCase(),
-      license2.data.company?.toLowerCase(),
-    ));
-    if (companyScore) {
-      score += companyScore;
-      reasons.push(`companyScore = ${companyScore}`);
-    }
+    p = 30;
+    t = 0.70;
+    a = l1.techContactName;
+    b = l2.techContactName;
+    score += (s = Math.round(p * scoreSimilarity(t, a, b)));
+    this.scoreLog?.logScore(s, 'Tech Contact Name');
+    if (undefined !== (bail = this.bail(score, opportunity -= p))) return bail;
 
-    const techContactNameScore = Math.round(30 * this.similarityScorer.score(0.70,
-      license1.data.technicalContact.name?.toLowerCase(),
-      license2.data.technicalContact.name?.toLowerCase(),
-    ));
-    if (techContactNameScore) {
-      score += techContactNameScore;
-      reasons.push(`techContactNameScore = ${techContactNameScore}`);
-    }
+    p = 30;
+    t = 0.90;
+    a = l1.techContactPhone;
+    b = l2.techContactPhone;
+    score += (s = Math.round(p * scoreSimilarity(t, a, b)));
+    this.scoreLog?.logScore(s, 'Tech Contact Phone');
 
-    const techContactPhoneScore = Math.round(30 * this.similarityScorer.score(0.90,
-      license1.data.technicalContact.phone?.toLowerCase(),
-      license2.data.technicalContact.phone?.toLowerCase(),
-    ));
-    if (techContactPhoneScore) {
-      score += techContactPhoneScore;
-      reasons.push(`techContactPhoneScore = ${techContactPhoneScore}`);
-    }
-
-    if (score > 0) {
-      return {
-        item1,
-        item2,
-        score,
-        reasons,
-      };
-    }
-
-    return null;
+    return score >= this.threshold;
   }
 
-}
+  bail(score: number, opportunity: number): boolean | void {
+    if (!this.scoreLog) {
+      if (score >= this.threshold) return true;
+      if (score + opportunity < this.threshold) return false;
+    }
+  }
 
-const DATEDIFF_CACHE = new Map<string, number>();
-
-function dateDiff(a1: string, a2: string, b1: string, b2: string) {
-  if (!DATEDIFF_CACHE.has(a1)) DATEDIFF_CACHE.set(a1, new Date(a1).getTime());
-  if (!DATEDIFF_CACHE.has(a2)) DATEDIFF_CACHE.set(a2, new Date(a2).getTime());
-  if (!DATEDIFF_CACHE.has(b1)) DATEDIFF_CACHE.set(b1, new Date(b1).getTime());
-  if (!DATEDIFF_CACHE.has(b2)) DATEDIFF_CACHE.set(b2, new Date(b2).getTime());
-
-  const d_a1 = DATEDIFF_CACHE.get(a1) as number;
-  const d_a2 = DATEDIFF_CACHE.get(a2) as number;
-  const d_b1 = DATEDIFF_CACHE.get(b1) as number;
-  const d_b2 = DATEDIFF_CACHE.get(b2) as number;
-
-  if (d_a1 > d_b2) return (d_a1 - d_b2) / 1000 / 60 / 60 / 24;
-  if (d_b1 > d_a2) return (d_b1 - d_a2) / 1000 / 60 / 60 / 24;
-  return 0;
 }

@@ -84,7 +84,11 @@ export class Transaction extends MpacRecord<TransactionData> {
 
   public constructor(data: TransactionData) {
     super(data);
-    this.id = uniqueTransactionId(this.data);
+    this.id = uniqueTransactionId(this.data.transactionId,
+      this.data.addonLicenseId ??
+      this.data.appEntitlementId ??
+      this.data.appEntitlementNumber!
+    );
     this.tier = this.parseTier();
   }
 
@@ -106,6 +110,6 @@ export class Transaction extends MpacRecord<TransactionData> {
 
 }
 
-export function uniqueTransactionId(data: { transactionId: string, addonLicenseId: string }) {
-  return `${data.transactionId}[${data.addonLicenseId}]`
+export function uniqueTransactionId(transactionId: string, licenseId: string) {
+  return `${transactionId}[${licenseId}]`
 }

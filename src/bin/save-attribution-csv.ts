@@ -1,5 +1,6 @@
 import 'source-map-support/register';
-import { saveForInspection } from "../lib/cache/inspection";
+import { CsvStream } from '../lib/cache/csv-stream';
+import DataDir from '../lib/cache/datadir';
 import { CachedMemoryRemote, IO } from "../lib/io/io";
 import log from "../lib/log/logger";
 import { Database } from "../lib/model/database";
@@ -17,22 +18,25 @@ async function main() {
     .licenses
     .map(l => l.data.attribution)
     .filter(isPresent)
-  );
-
-  saveForInspection('attributions', attributions
     .sort(sorter(a => [
       Object.keys(a).length,
       a.channel,
       a.referrerDomain,
     ].join(',')))
-    .map(a => ({
-      channel: a.channel,
-      referrerDomain: a.referrerDomain,
-      campaignName: a.campaignName,
-      campaignSource: a.campaignSource,
-      campaignMedium: a.campaignMedium,
-      campaignContent: a.campaignContent,
-    }))
   );
+
+  new DataDir('out').file('attributions.csv').writeStream(stream => {
+    const file = new CsvStream(stream);
+    for (const a of attributions) {
+      file.writeRow({
+        channel: a.channel,
+        referrerDomain: a.referrerDomain,
+        campaignName: a.campaignName,
+        campaignSource: a.campaignSource,
+        campaignMedium: a.campaignMedium,
+        campaignContent: a.campaignContent,
+      });
+    }
+  });
 
 }

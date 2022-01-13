@@ -1,7 +1,6 @@
 import 'source-map-support/register';
 import util from 'util';
 import { DealGenerator } from '../lib/engine/deal-generator/generate-deals';
-import { redactedLicense, redactedTransaction } from '../lib/engine/deal-generator/redact';
 import { abbrActionDetails, abbrEventDetails } from '../lib/engine/deal-generator/test/utils';
 import { RelatedLicenseSet } from '../lib/engine/license-matching/license-grouper';
 import { CachedMemoryRemote, IO } from "../lib/io/io";
@@ -57,10 +56,10 @@ async function getRedactedMatchGroup(ids: [string, string[]][]) {
 
   const group: RelatedLicenseSet = [];
   for (const [lid, txids] of ids) {
-    const license = redactedLicense(db.licenses.find(l => l.id === lid)!);
+    const license = db.licenses.find(l => l.id === lid)!;
     group.push(license);
     for (const tid of txids) {
-      const transaction = redactedTransaction(db.transactions.find(t => t.id === tid)!);
+      const transaction = db.transactions.find(t => t.id === tid)!;
       license.transactions.push(transaction);
       transaction.license = license;
     }

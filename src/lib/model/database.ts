@@ -114,7 +114,9 @@ export class Database {
     this.licenses = results.licenses.map(raw => License.fromRaw(raw));
     this.transactions = results.transactions.map(raw => Transaction.fromRaw(raw));
 
-    this.validateIdUniqueness();
+    log.info('Database', 'Connecting MPAC records: Starting...');
+    this.buildMpacMappings();
+    log.info('Database', 'Connecting MPAC records: Done');
 
     const transactionTotal = (this.transactions
       .map(t => t.data.vendorAmount)
@@ -123,6 +125,112 @@ export class Database {
     this.printDownloadSummary(transactionTotal);
 
     this.tallier.first('Transaction total', transactionTotal);
+  }
+
+  private buildMpacMappings() {
+    // All three should be unique on licenses
+    verifyIdIsUnique(this.licenses, l => l.data.addonLicenseId);
+    verifyIdIsUnique(this.licenses, l => l.data.appEntitlementId);
+    verifyIdIsUnique(this.licenses, l => l.data.appEntitlementNumber);
+
+    const licensesByAddonLicenseId = new Map<string, License>();
+
+    // Map all licenses first
+    for (const license of this.licenses) {
+
+      // All license IDs (when present) should point to the same transactions as each other
+      const id1 = license.data.appEntitlementId;
+      const id2 = license.data.appEntitlementNumber;
+      const id3 = license.data.addonLicenseId;
+
+      const array1 = !id1 ? null : this.transactions.filter(t => id1 === t.data.appEntitlementId);
+      const array2 = !id2 ? null : this.transactions.filter(t => id2 === t.data.appEntitlementNumber);
+      const array3 = !id3 ? null : this.transactions.filter(t => id3 === t.data.addonLicenseId);
+
+      const set1 = array1 && uniqueTransactionSetFrom(array1);
+      const set2 = array2 && uniqueTransactionSetFrom(array2);
+      const set3 = array3 && uniqueTransactionSetFrom(array3);
+
+      verifySameTransactionSet(set1 || null, set2 || null);
+      verifySameTransactionSet(set2 || null, set3 || null);
+
+      // Store transactions on license, and vice versa
+      license.transactions = (array1 ?? array2 ?? array3)!;
+      for (const t of license.transactions) {
+        t.license = license;
+      }
+
+      // Map licenses by their 3 IDs
+      if (license.data.addonLicenseId) {
+        if (license.data.addonLicenseId) licensesByAddonLicenseId.set(license.data.addonLicenseId, license);
+      }
+    }
+
+    // Connect via license's `evaluationLicense` if present
+    for (const license of this.licenses) {
+      if (license.data.newEvalData) {
+        const evalLicense = licensesByAddonLicenseId.get(license.data.newEvalData.evaluationLicense);
+        license.evaluatedFrom = evalLicense;
+        evalLicense!.evaluatedTo = license;
+      }
+    }
+
+    // Connect Licenses and Transactions
+    const maybeRefunded: Transaction[] = [];
+    const refunds: Transaction[] = [];
+
+    for (const transaction of this.transactions) {
+
+      // All license IDs on each transaction should point to the same license
+      // (I'm 99% certain this is the logical inverse of the above,
+      //  but adding this quick assertion just in case I'm wrong.
+      //  Like, what if an ID is missing on License but not Transaction?
+      //  It's a bit confusing right now, and this test is cheap.)
+      const id1 = transaction.data.appEntitlementId;
+      const id2 = transaction.data.appEntitlementNumber;
+      const id3 = transaction.data.addonLicenseId;
+
+      const license1 = id1 && this.licenses.find(l => id1 === l.data.appEntitlementId);
+      const license2 = id2 && this.licenses.find(l => id2 === l.data.appEntitlementNumber);
+      const license3 = id3 && this.licenses.find(l => id3 === l.data.addonLicenseId);
+
+      verifyEqualLicenses(license1 || null, license2 || null);
+      verifyEqualLicenses(license2 || null, license3 || null);
+
+      // Check for transactions with missing licenses
+      if (!transaction.license) {
+        if (transaction.data.saleType === 'Refund') {
+          refunds.push(transaction);
+        }
+        else {
+          maybeRefunded.push(transaction);
+        }
+      }
+    }
+
+    // Warn when some transactions without matching licenses don't seem to be refunds
+    const refundAmount = refunds.map(t => t.data.vendorAmount).reduce((a, b) => a + b, 0);
+    const refundedAmount = maybeRefunded.map(t => t.data.vendorAmount).reduce((a, b) => a + b, 0);
+
+    if (-refundAmount !== refundedAmount) {
+      log.warn('Scoring Engine', "The following transactions have no accompanying licenses:");
+      {
+        const table = new Table([{ title: 'Refunds' }, { title: 'License', align: 'right' }]);
+        for (const tx of refunds) { table.rows.push([tx.data.transactionId, tx.data.addonLicenseId ?? tx.data.appEntitlementId ?? tx.data.appEntitlementNumber!]); }
+        for (const row of table.eachRow()) {
+          log.warn('Scoring Engine', '  ' + row);
+        }
+      }
+      {
+        const table = new Table([{ title: 'Maybe Refunded' }, { title: 'License', align: 'right' }]);
+        for (const tx of maybeRefunded) { table.rows.push([tx.data.transactionId, tx.data.addonLicenseId ?? tx.data.appEntitlementId ?? tx.data.appEntitlementNumber!]); }
+        for (const row of table.eachRow()) {
+          log.warn('Scoring Engine', '  ' + row);
+        }
+      }
+
+      this.tallier.less('Ignored: Transactions without licenses', refundAmount + refundedAmount);
+    }
   }
 
   private printDownloadSummary(transactionTotal: number) {
@@ -176,53 +284,6 @@ export class Database {
     }
   }
 
-  private validateIdUniqueness() {
-    log.info('Database', 'Validating MPAC ID uniqueness: Starting...')
-
-    // All three should be unique on licenses
-    verifyIdIsUnique(this.licenses, l => l.data.addonLicenseId);
-    verifyIdIsUnique(this.licenses, l => l.data.appEntitlementId);
-    verifyIdIsUnique(this.licenses, l => l.data.appEntitlementNumber);
-
-    // All license IDs should point to the same transactions as each other
-    for (const l of this.licenses) {
-      const id1 = l.data.appEntitlementId;
-      const id2 = l.data.appEntitlementNumber;
-      const id3 = l.data.addonLicenseId;
-
-      const array1 = id1 && this.transactions.filter(t => id1 === t.data.appEntitlementId);
-      const array2 = id2 && this.transactions.filter(t => id2 === t.data.appEntitlementNumber);
-      const array3 = id3 && this.transactions.filter(t => id3 === t.data.addonLicenseId);
-
-      const set1 = array1 && uniqueSetFor(array1);
-      const set2 = array2 && uniqueSetFor(array2);
-      const set3 = array3 && uniqueSetFor(array3);
-
-      verifySameSet(set1 || null, set2 || null);
-      verifySameSet(set2 || null, set3 || null);
-    }
-
-    // All license IDs on each transaction should point to the same license
-    // (I'm 99% certain this is the logical inverse of the above,
-    //  but adding this quick assertion just in case I'm wrong.
-    //  Like, what if an ID is missing on License but not Transaction?
-    //  It's a bit confusing right now, and this test is cheap.)
-    for (const t of this.transactions) {
-      const id1 = t.data.appEntitlementId;
-      const id2 = t.data.appEntitlementNumber;
-      const id3 = t.data.addonLicenseId;
-
-      const license1 = id1 && this.licenses.find(l => id1 === l.data.appEntitlementId);
-      const license2 = id2 && this.licenses.find(l => id2 === l.data.appEntitlementNumber);
-      const license3 = id3 && this.licenses.find(l => id3 === l.data.addonLicenseId);
-
-      verifyEqual(license1 || null, license2 || null);
-      verifyEqual(license2 || null, license3 || null);
-    }
-
-    log.info('Database', 'Validating MPAC ID uniqueness: Done')
-  }
-
 }
 
 function verifyIdIsUnique(licenses: License[], getter: (r: License) => string | null) {
@@ -234,7 +295,7 @@ function verifyIdIsUnique(licenses: License[], getter: (r: License) => string | 
   }
 }
 
-function uniqueSetFor(transactions: Transaction[]) {
+function uniqueTransactionSetFrom(transactions: Transaction[]) {
   const set = new Set(transactions);
   if (set.size !== transactions.length) {
     log.error('Database', `Transactions aren't unique: got ${set.size} out of ${transactions.length}`);
@@ -242,7 +303,7 @@ function uniqueSetFor(transactions: Transaction[]) {
   return set;
 }
 
-function verifySameSet(set1: Set<Transaction> | null, set2: Set<Transaction> | null) {
+function verifySameTransactionSet(set1: Set<Transaction> | null, set2: Set<Transaction> | null) {
   if (!set1 || !set2) return;
 
   const same = set1.size === set2.size && [...set1].every(t => set2.has(t));
@@ -251,7 +312,7 @@ function verifySameSet(set1: Set<Transaction> | null, set2: Set<Transaction> | n
   }
 }
 
-function verifyEqual(license1: License | null, license2: License | null) {
+function verifyEqualLicenses(license1: License | null, license2: License | null) {
   if (!license1 || !license2) return;
 
   if (license1 !== license2) {

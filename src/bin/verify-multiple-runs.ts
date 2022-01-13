@@ -1,4 +1,5 @@
 import 'source-map-support/register';
+import DataDir from '../lib/cache/datadir';
 import Engine from "../lib/engine/engine";
 import { CachedMemoryRemote, IO } from "../lib/io/io";
 import log from "../lib/log/logger";
@@ -16,13 +17,13 @@ async function main() {
   const engine = new Engine();
 
   // First
-  await engine.run(new Database(io, envConfig));
+  await engine.run(new Database(io, envConfig), new DataDir('run1'));
 
   // Second
   log.level = log.Levels.Verbose;
-  await engine.run(new Database(io, envConfig));
+  await engine.run(new Database(io, envConfig), new DataDir('run2'));
 
   // Third
-  await engine.run(new Database(io, envConfig));
+  await engine.run(new Database(io, envConfig), new DataDir('run3'));
 
 }
