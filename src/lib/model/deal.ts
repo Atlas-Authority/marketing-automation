@@ -154,11 +154,13 @@ const DealAdapter: EntityAdapter<DealData, DealComputed> = {
     },
     appEntitlementId: {
       property: env.hubspot.attrs.deal.appEntitlementId,
+      identifier: true,
       down: id => id || null,
       up: id => id ?? '',
     },
     appEntitlementNumber: {
       property: env.hubspot.attrs.deal.appEntitlementNumber,
+      identifier: true,
       down: id => id || null,
       up: id => id ?? '',
     },
