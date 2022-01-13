@@ -5,7 +5,7 @@ import { RawTransaction } from "./marketplace/raw";
 import { MpacRecord } from "./marketplace/record";
 
 export interface TransactionData {
-  addonLicenseId: AddonLicenseId,
+  addonLicenseId: AddonLicenseId | null,
   appEntitlementId: string | null,
   appEntitlementNumber: string | null,
 
@@ -51,7 +51,7 @@ export class Transaction extends MpacRecord<TransactionData> {
     return new Transaction({
       transactionId: rawTransaction.transactionId,
 
-      addonLicenseId: rawTransaction.addonLicenseId,
+      addonLicenseId: rawTransaction.addonLicenseId ?? null,
       appEntitlementId: rawTransaction.appEntitlementId ?? null,
       appEntitlementNumber: rawTransaction.appEntitlementNumber ?? null,
 

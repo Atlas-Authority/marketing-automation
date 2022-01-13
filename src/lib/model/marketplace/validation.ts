@@ -122,7 +122,8 @@ function validateField<T>(o: T, accessor: (o: T) => any) {
 
 function filterLicensesWithTechEmail(license: RawLicense) {
   if (!license.contactDetails.technicalContact?.email) {
-    log.warn('Downloader', 'License does not have a tech contact email; will be skipped', license.addonLicenseId);
+    const id = license.addonLicenseId ?? license.appEntitlementId ?? license.appEntitlementNumber!;
+    log.warn('Downloader', 'License does not have a tech contact email; will be skipped', id);
     return false;
   }
   return true;

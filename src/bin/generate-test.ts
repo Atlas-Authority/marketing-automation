@@ -80,7 +80,7 @@ main(template, testId);
 function abbrRecordDetails(record: License | Transaction) {
   if (record instanceof Transaction) {
     return `testTransaction(${[
-      record.data.addonLicenseId,
+      record.id,
       record.data.saleDate,
       record.data.licenseType,
       record.data.saleType,
@@ -92,7 +92,7 @@ function abbrRecordDetails(record: License | Transaction) {
   }
   else {
     return `testLicense(${[
-      record.data.addonLicenseId,
+      record.id,
       record.data.maintenanceStartDate,
       record.data.licenseType,
       record.data.status,

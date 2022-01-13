@@ -93,7 +93,7 @@ const DealAdapter: EntityAdapter<DealData, DealComputed> = {
     addonLicenseId: {
       property: env.hubspot.attrs.deal.addonLicenseId,
       identifier: true,
-      down: addonLicenseId => addonLicenseId!,
+      down: addonLicenseId => addonLicenseId,
       up: addonLicenseId => addonLicenseId || '',
     },
     transactionId: {
