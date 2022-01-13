@@ -3,29 +3,26 @@ import util from "util";
 import log from '../../log/logger';
 import env from '../../parameters/env-config';
 import { AttachableError } from '../../util/errors';
-import { isPresent } from '../../util/helpers';
-import { RawLicense, RawTransaction } from './raw';
+import { isPresent } from "../../util/helpers";
+import { License, LicenseData } from "../license";
+import { Transaction } from "../transaction";
 
 export function validateMarketplaceData(
-  licensesWithDataInsights: readonly RawLicense[],
-  licensesWithoutDataInsights: readonly RawLicense[],
-  transactions: readonly RawTransaction[],
+  licenses: readonly License[],
+  transactions: readonly Transaction[],
   emailRe: RegExp,
 ) {
-  const licenses = uniqLicenses([
-    ...licensesWithDataInsights.filter(filterLicensesWithTechEmail),
-    ...licensesWithoutDataInsights.filter(filterLicensesWithTechEmail),
-  ]);
+  licenses = uniqLicenses(licenses.filter(hasTechEmail));
 
   licenses.forEach(validateLicense);
   transactions.forEach(validateTransaction);
 
   const emailChecker = (kind: 'License' | 'Transaction') =>
-    (item: RawLicense | RawTransaction) => {
-      const allEmails = getEmails(item);
+    (record: License | Transaction) => {
+      const allEmails = getEmails(record);
       const allGood = allEmails.every(e => emailRe.test(e));
       if (!allGood && !allEmails.every(e => env.engine.ignoredEmails.has(e.toLowerCase()))) {
-        log.warn('Downloader', `${kind} has invalid email(s); will be skipped:`, item);
+        log.warn('Downloader', `${kind} has invalid email(s); will be skipped:`, record);
       }
       return allGood;
     };
@@ -36,15 +33,15 @@ export function validateMarketplaceData(
   };
 }
 
-function uniqLicenses(licenses: RawLicense[]) {
-  const groups: { [addonLicenseId: string]: RawLicense[] } = {};
+function uniqLicenses(licenses: readonly License[]) {
+  const groups: { [addonLicenseId: string]: License[] } = {};
 
   for (const license of licenses) {
-    if (!groups[license.addonLicenseId]) {
-      groups[license.addonLicenseId] = [license];
+    if (!groups[license.id]) {
+      groups[license.id] = [license];
     }
-    else if (!groups[license.addonLicenseId].some(other => util.isDeepStrictEqual(license, other))) {
-      groups[license.addonLicenseId].push(license);
+    else if (!groups[license.id].some(other => util.isDeepStrictEqual(license, other))) {
+      groups[license.id].push(license);
     }
   }
 
@@ -53,29 +50,32 @@ function uniqLicenses(licenses: RawLicense[]) {
   for (const dups of edgeCases) {
     assert.ok(dups
       .map(dup => ({
-        addonKey: dup.addonKey,
-        addonName: dup.addonName,
-        contactDetails: dup.contactDetails,
-        hosting: dup.hosting,
-        lastUpdated: dup.lastUpdated,
-        licenseId: dup.licenseId,
-        licenseType: dup.licenseType,
-        maintenanceEndDate: dup.maintenanceEndDate,
-        maintenanceStartDate: dup.maintenanceStartDate,
-        status: dup.status,
-        tier: dup.tier,
-        addonLicenseId: dup.addonLicenseId,
-        appEntitlementId: dup.appEntitlementId,
-        appEntitlementNumber: dup.appEntitlementNumber,
-        partnerDetails: dup.partnerDetails,
-      }) as Partial<RawLicense>)
+        addonKey: dup.data.addonKey,
+        addonName: dup.data.addonName,
+        company: dup.data.company,
+        country: dup.data.country,
+        region: dup.data.region,
+        technicalContact: dup.data.technicalContact,
+        hosting: dup.data.hosting,
+        lastUpdated: dup.data.lastUpdated,
+        licenseId: dup.data.licenseId,
+        licenseType: dup.data.licenseType,
+        maintenanceEndDate: dup.data.maintenanceEndDate,
+        maintenanceStartDate: dup.data.maintenanceStartDate,
+        status: dup.data.status,
+        tier: dup.data.tier,
+        addonLicenseId: dup.data.addonLicenseId,
+        appEntitlementId: dup.data.appEntitlementId,
+        appEntitlementNumber: dup.data.appEntitlementNumber,
+        partnerDetails: dup.data.partnerDetails,
+      }) as Partial<LicenseData>)
       .every((dup, i, array) => util.isDeepStrictEqual(dup, array[0])),
       util.inspect(dups, { colors: true, depth: null })
     );
 
     // Keep the first one with attributions
-    dups.sort((a, b) => a.evaluationOpportunitySize ? -1 : 1);
-    assert.ok(dups[0].evaluationOpportunitySize);
+    dups.sort((a, b) => a.data.evaluationOpportunitySize ? -1 : 1);
+    assert.ok(dups[0].data.evaluationOpportunitySize);
     dups.length = 1;
   }
 
@@ -85,76 +85,66 @@ function uniqLicenses(licenses: RawLicense[]) {
   return fixed.map(ls => ls[0]);
 }
 
-function validateLicense(license: RawLicense) {
-  validateField(license, license => license.licenseId);
-  validateField(license, license => license.addonKey);
-  validateField(license, license => license.addonName);
-  validateField(license, license => license.lastUpdated);
-  validateField(license, license => license.contactDetails);
-  validateField(license, license => license.contactDetails.technicalContact);
-  validateField(license, license => license.contactDetails.technicalContact.email);
-  validateField(license, license => license.tier);
-  validateField(license, license => license.licenseType);
-  validateField(license, license => license.hosting);
-  validateField(license, license => license.maintenanceStartDate);
-  validateField(license, license => license.maintenanceEndDate);
-  validateField(license, license => license.status);
+function validateLicense(license: License) {
+  validateField(license, license => license.data.licenseId);
+  validateField(license, license => license.data.addonKey);
+  validateField(license, license => license.data.addonName);
+  validateField(license, license => license.data.lastUpdated);
+  // validateField(license, license => license.data.company);
+  validateField(license, license => license.data.country);
+  validateField(license, license => license.data.region);
+  validateField(license, license => license.data.technicalContact);
+  validateField(license, license => license.data.technicalContact.email);
+  validateField(license, license => license.data.tier);
+  validateField(license, license => license.data.licenseType);
+  validateField(license, license => license.data.hosting);
+  validateField(license, license => license.data.maintenanceStartDate);
+  validateField(license, license => license.data.maintenanceEndDate);
+  validateField(license, license => license.data.status);
 }
 
-function validateTransaction(transaction: RawTransaction) {
-  validateField(transaction, transaction => transaction.transactionId);
-  validateField(transaction, transaction => transaction.licenseId);
-  validateField(transaction, transaction => transaction.addonKey);
-  validateField(transaction, transaction => transaction.addonName);
-  validateField(transaction, transaction => transaction.lastUpdated);
-  validateField(transaction, transaction => transaction.customerDetails);
-  validateField(transaction, transaction => transaction.customerDetails.technicalContact);
-  validateField(transaction, transaction => transaction.customerDetails.technicalContact.email);
-  validateField(transaction, transaction => transaction.purchaseDetails);
-  validateField(transaction, transaction => transaction.purchaseDetails.saleDate);
-  validateField(transaction, transaction => transaction.purchaseDetails.tier);
-  validateField(transaction, transaction => transaction.purchaseDetails.licenseType);
-  validateField(transaction, transaction => transaction.purchaseDetails.hosting);
-  validateField(transaction, transaction => transaction.purchaseDetails.billingPeriod);
-  validateField(transaction, transaction => transaction.purchaseDetails.purchasePrice);
-  validateField(transaction, transaction => transaction.purchaseDetails.vendorAmount);
-  validateField(transaction, transaction => transaction.purchaseDetails.saleType);
-  validateField(transaction, transaction => transaction.purchaseDetails.maintenanceStartDate);
-  validateField(transaction, transaction => transaction.purchaseDetails.maintenanceEndDate);
+function validateTransaction(transaction: Transaction) {
+  validateField(transaction, transaction => transaction.data.transactionId);
+  validateField(transaction, transaction => transaction.data.licenseId);
+  validateField(transaction, transaction => transaction.data.addonKey);
+  validateField(transaction, transaction => transaction.data.addonName);
+  validateField(transaction, transaction => transaction.data.lastUpdated);
+  validateField(transaction, transaction => transaction.data.company);
+  validateField(transaction, transaction => transaction.data.country);
+  validateField(transaction, transaction => transaction.data.region);
+  validateField(transaction, transaction => transaction.data.technicalContact);
+  validateField(transaction, transaction => transaction.data.technicalContact.email);
+  validateField(transaction, transaction => transaction.data.saleDate);
+  validateField(transaction, transaction => transaction.data.tier);
+  validateField(transaction, transaction => transaction.data.licenseType);
+  validateField(transaction, transaction => transaction.data.hosting);
+  validateField(transaction, transaction => transaction.data.billingPeriod);
+  validateField(transaction, transaction => transaction.data.purchasePrice);
+  validateField(transaction, transaction => transaction.data.vendorAmount);
+  validateField(transaction, transaction => transaction.data.saleType);
+  validateField(transaction, transaction => transaction.data.maintenanceStartDate);
+  validateField(transaction, transaction => transaction.data.maintenanceEndDate);
 }
 
 function validateField<T>(o: T, accessor: (o: T) => any) {
   const val = accessor(o);
   const path = accessor.toString().replace(/^(\w+) => /, '');
-  if (!val) throw new AttachableError(`Missing field: ${path}`, JSON.stringify(o, null, 2));
+  if (!val) throw new AttachableError(`Missing field: ${path} (found ${JSON.stringify(val)})`, JSON.stringify(o, null, 2));
 }
 
-function filterLicensesWithTechEmail(license: RawLicense) {
-  if (!license.contactDetails.technicalContact?.email) {
-    const id = license.addonLicenseId ?? license.appEntitlementId ?? license.appEntitlementNumber!;
+function hasTechEmail(license: License) {
+  if (!license.data.technicalContact?.email) {
+    const id = license.id;
     log.warn('Downloader', 'License does not have a tech contact email; will be skipped', id);
     return false;
   }
   return true;
 }
 
-function isRawTransaction(item: RawTransaction | RawLicense): item is RawTransaction {
-  return 'transactionId' in item;
-}
-
-function getEmails(item: RawTransaction | RawLicense) {
-  if (!isRawTransaction(item)) {
-    return [
-      item.contactDetails.technicalContact.email,
-      item.contactDetails.billingContact?.email,
-      item.partnerDetails?.billingContact.email,
-    ].filter(isPresent);
-  }
-  else {
-    return [
-      item.customerDetails.technicalContact.email,
-      item.customerDetails.billingContact?.email,
-      item.partnerDetails?.billingContact.email,
-    ].filter(isPresent);
-  }
+function getEmails(record: License | Transaction) {
+  return [
+    record.data.technicalContact.email,
+    record.data.billingContact?.email,
+    record.data.partnerDetails?.billingContact.email,
+  ].filter(isPresent);
 }

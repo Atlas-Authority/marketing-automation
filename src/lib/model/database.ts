@@ -105,14 +105,19 @@ export class Database {
     this.providerDomains = this.emailProviderLister.set;
 
     const emailRe = makeEmailValidationRegex(tlds);
+
+    const licenses = [
+      ...licensesWithDataInsights,
+      ...licensesWithoutDataInsights,
+    ].map(raw => License.fromRaw(raw));
+
     const results = validateMarketplaceData(
-      licensesWithDataInsights,
-      licensesWithoutDataInsights,
-      transactions,
+      licenses,
+      transactions.map(raw => Transaction.fromRaw(raw)),
       emailRe);
 
-    this.licenses = results.licenses.map(raw => License.fromRaw(raw));
-    this.transactions = results.transactions.map(raw => Transaction.fromRaw(raw));
+    this.licenses = results.licenses;
+    this.transactions = results.transactions;
 
     log.info('Database', 'Connecting MPAC records: Starting...');
     this.buildMpacMappings();
