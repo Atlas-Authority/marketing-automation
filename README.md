@@ -44,9 +44,9 @@ $ npm run watch
 For general development:
 
 ```sh
-$ npm run download --help  # Download MPAC & HubSpot data
-$ npm run once     --help  # Dry-run engine once on cached inputs
-$ npm run 3x       --help  # Dry-run engine 3x, piping output to input
+$ npm run download -- --help  # Download MPAC & HubSpot data
+$ npm run once     -- --help  # Dry-run engine once on cached inputs
+$ npm run 3x       -- --help  # Dry-run engine 3x, piping output to input
 ```
 
 * Data must be downloaded before local dry-runs.
