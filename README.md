@@ -68,11 +68,11 @@ $ npm run build # either build once
 $ npm run watch # or watch and build
 $ npm test
 
-# Run engine multiple times,
+# Run engine 3 times,
 #   starting with cached data,
 #   and pumping output of each run
 #     into input of next run
-$ npm run multiple
+$ npm run 3x
 
 # Explain what the engine does given certain SENs or transactions
 # (Requires the engine to have been run on latest data locally)
@@ -101,7 +101,9 @@ To save logs about what the scoring engine is doing during a dry-run, pass a sub
 - Refunded deals now have their amounts set to zero.
 - Purchased inactive licenses are set to closed-won if not refunded.
 - Added `--savelogs=somedir` as the way to manually log debug files.
-- Updated `npm run multiple` to save logs to `data/run{1..3}/`.
+- Renamed `npm run multiple` to `npm run 3x`.
+- Updated `npm run 3x` to save logs to `data/run{1..3}/`.
+- Added (optional) `--skiplogs=true` option to `npm run 3x`.
 - Sped up license scorer down to 12% original run time in some cases.
 - Removed `--cached-fns` option and cached-fns data file usage.
 
