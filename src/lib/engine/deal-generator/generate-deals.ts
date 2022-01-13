@@ -30,34 +30,44 @@ export class DealGenerator {
   }
 
   public run(matches: RelatedLicenseSet[], logDir: DataDir | null) {
-    const logger = (logDir) ? new DealDataLogger(logDir) : undefined;
+    this.withLogger(logDir, logger => {
+      for (const relatedLicenseIds of matches) {
+        const { records, events, actions } = this.generateActionsForMatchedGroup(relatedLicenseIds);
 
-    for (const relatedLicenseIds of matches) {
-      const { records, events, actions } = this.generateActionsForMatchedGroup(relatedLicenseIds);
+        logger?.logTestID(relatedLicenseIds);
+        logger?.logRecords(records);
+        logger?.logEvents(events);
+        logger?.logActions(actions);
 
-      logger?.logTestID(relatedLicenseIds);
-      logger?.logRecords(records);
-      logger?.logEvents(events);
-      logger?.logActions(actions);
+        for (const action of actions) {
+          const deal = (action.type === 'create'
+            ? this.db.dealManager.create(action.properties)
+            : action.deal);
 
-      for (const action of actions) {
-        const deal = (action.type === 'create'
-          ? this.db.dealManager.create(action.properties)
-          : action.deal);
-
-        if (deal) {
-          this.associateDealContactsAndCompanies(relatedLicenseIds, deal);
+          if (deal) {
+            this.associateDealContactsAndCompanies(relatedLicenseIds, deal);
+          }
         }
       }
+
+      for (const [reason, amount] of this.ignoredAmounts) {
+        this.db.tallier.less('Ignored: ' + reason, amount);
+      }
+
+      this.printIgnoredTransactionsTable();
+    });
+  }
+
+  private withLogger(logDir: DataDir | null, fn: (logger: DealDataLogger | null) => void) {
+    if (logDir) {
+      logDir.file('deal-generator.txt').writeStream(stream => {
+        const logger = new DealDataLogger(stream);
+        fn(logger);
+      });
     }
-
-    for (const [reason, amount] of this.ignoredAmounts) {
-      this.db.tallier.less('Ignored: ' + reason, amount);
+    else {
+      fn(null);
     }
-
-    this.printIgnoredTransactionsTable();
-
-    logger?.close();
   }
 
   private printIgnoredTransactionsTable() {

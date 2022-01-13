@@ -19,8 +19,4 @@ export class CsvStream {
     this.stream.writeLine(','.repeat(this.keyCount - 1));
   }
 
-  close() {
-    this.stream.close();
-  }
-
 }

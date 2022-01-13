@@ -16,25 +16,34 @@ export class LicenseGrouper {
   constructor(private db: Database) { }
 
   run(logDir: DataDir | null): RelatedLicenseSet[] {
-    const scoreLogger = (logDir) ? new LicenseMatchLogger(logDir) : undefined;
+    return this.withLog(logDir, scoreLogger => {
+      const threshold = 130;
+      const scorer = new LicenseMatcher(threshold, scoreLogger);
+      this.matchLicenses(scorer, scoreLogger);
 
-    const threshold = 130;
-
-    const scorer = new LicenseMatcher(threshold, scoreLogger);
-    this.matchLicenses(scorer, scoreLogger);
-
-    const matches = (
-      Array.from(new Set(this.matchGroups.values()))
+      const matches = (Array.from(new Set(this.matchGroups.values()))
         .map(group => Array.from(group)
-          .sort(sorter(license => license.data.maintenanceStartDate)))
-    );
+          .sort(sorter(license => license.data.maintenanceStartDate))));
 
-    scoreLogger?.logMatchResults(matches);
-    scoreLogger?.close();
+      scoreLogger?.logMatchResults(matches);
 
-    log.info('Scoring Engine', 'Done');
+      log.info('Scoring Engine', 'Done');
 
-    return matches;
+      return matches;
+    });
+  }
+
+  private withLog<T>(logDir: DataDir | null, fn: (logger: LicenseMatchLogger | undefined) => T) {
+    if (logDir) {
+      return logDir.file('license-scoring.csv').writeStream(stream => {
+        const scoreLogger = new LicenseMatchLogger(logDir, stream);
+        const result = fn(scoreLogger);
+        return result;
+      });
+    }
+    else {
+      return fn(undefined);
+    }
   }
 
   private groupLicensesByProduct() {

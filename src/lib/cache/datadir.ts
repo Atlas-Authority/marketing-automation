@@ -53,31 +53,19 @@ class DataFile<T> {
     fs.writeFileSync(this.#url, JSON.stringify(json, null, 2));
   }
 
-  public writeStream(): LogWriteStream {
-    return new FileLogWriteStream(this.#url);
+  public writeStream<T>(fn: (stream: LogWriteStream) => T) {
+    const fd = fs.openSync(this.#url, 'w');
+    const result = fn({
+      writeLine: (text) => {
+        fs.writeSync(fd, text + '\n');
+      },
+    });
+    fs.close(fd, () => { });
+    return result;
   }
 
 }
 
 export interface LogWriteStream {
-  close(): void;
   writeLine(text: string): void;
-}
-
-export class FileLogWriteStream {
-
-  fd: number;
-
-  constructor(url: URL) {
-    this.fd = fs.openSync(url, 'w');
-  }
-
-  close() {
-    fs.close(this.fd, () => { });
-  }
-
-  writeLine(text: string) {
-    fs.writeSync(this.fd, text + '\n');
-  }
-
 }

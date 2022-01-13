@@ -1,13 +1,13 @@
 import { CsvStream } from '../../cache/csv-stream';
-import DataDir from '../../cache/datadir';
+import DataDir, { LogWriteStream } from '../../cache/datadir';
 import { License } from '../../model/license';
 import { shorterLicenseInfo } from './license-grouper';
 
 export class LicenseMatchLogger {
 
-  #file;
-  constructor(private logDir: DataDir) {
-    this.#file = new CsvStream(logDir.file('license-scoring.csv').writeStream());
+  #scoreStream;
+  constructor(private logDir: DataDir, stream: LogWriteStream) {
+    this.#scoreStream = new CsvStream(stream);
   }
 
   l1!: License;
@@ -27,9 +27,9 @@ export class LicenseMatchLogger {
     const score = this.score;
     if (score > 0) {
       const reason = this.scores.filter(([s, r]) => s).map(([s, r]) => `${r}=${s}`).join(',');
-      this.#file.writeRow({ score, reason, ...shorterLicenseInfo(this.l1) });
-      this.#file.writeRow({ score, reason, ...shorterLicenseInfo(this.l2) });
-      this.#file.writeBlankRow();
+      this.#scoreStream.writeRow({ score, reason, ...shorterLicenseInfo(this.l1) });
+      this.#scoreStream.writeRow({ score, reason, ...shorterLicenseInfo(this.l2) });
+      this.#scoreStream.writeBlankRow();
     }
   }
 
@@ -41,33 +41,30 @@ export class LicenseMatchLogger {
   logMatchResults(matches: License[][]) {
     const groups = matches.map(group => group.map(shorterLicenseInfo));
 
-    const allMatchGroupsLog = new CsvStream(this.logDir.file('matched-groups-all.csv').writeStream());
-    const checkMatchGroupsLog = new CsvStream(this.logDir.file('matched-groups-to-check.csv').writeStream());
+    this.logDir.file('matched-groups-all.csv').writeStream(allStream => {
+      const allMatchGroupsLog = new CsvStream(allStream);
 
-    for (const match of groups) {
-      for (const shortLicense of match) {
-        allMatchGroupsLog.writeRow(shortLicense);
-      }
-      allMatchGroupsLog.writeBlankRow();
+      this.logDir.file('matched-groups-to-check.csv').writeStream(checkStream => {
+        const checkMatchGroupsLog = new CsvStream(checkStream);
 
-      if (match.length > 1 && (
-        !match.every(item => item.tech_email === match[0].tech_email) ||
-        !match.every(item => item.company === match[0].company) ||
-        !match.every(item => item.tech_address === match[0].tech_address)
-      )) {
-        for (const shortLicense of match) {
-          checkMatchGroupsLog.writeRow(shortLicense);
+        for (const match of groups) {
+          for (const shortLicense of match) {
+            allMatchGroupsLog.writeRow(shortLicense);
+          }
+          allMatchGroupsLog.writeBlankRow();
+
+          if (match.length > 1 && (
+            !match.every(item => item.tech_email === match[0].tech_email) ||
+            !match.every(item => item.company === match[0].company) ||
+            !match.every(item => item.tech_address === match[0].tech_address)
+          )) {
+            for (const shortLicense of match) {
+              checkMatchGroupsLog.writeRow(shortLicense);
+            }
+            checkMatchGroupsLog.writeBlankRow();
+          }
         }
-        checkMatchGroupsLog.writeBlankRow();
-      }
-    }
-
-    allMatchGroupsLog.close();
-    checkMatchGroupsLog.close();
+      });
+    });
   }
-
-  close() {
-    this.#file.close();
-  }
-
 }

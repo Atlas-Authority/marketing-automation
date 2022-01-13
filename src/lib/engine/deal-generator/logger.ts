@@ -1,4 +1,4 @@
-import DataDir from "../../cache/datadir.js";
+import { LogWriteStream } from "../../cache/datadir.js";
 import { Table } from "../../log/table.js";
 import { DealData } from "../../model/deal.js";
 import { DealStage } from '../../model/hubspot/interfaces.js';
@@ -11,14 +11,7 @@ import { DealRelevantEvent } from "./events.js";
 
 export class DealDataLogger {
 
-  private readonly log;
-  constructor(logDir: DataDir) {
-    this.log = logDir.file('deal-generator.txt').writeStream();
-  }
-
-  close() {
-    this.log.close();
-  }
+  constructor(private log: LogWriteStream) { }
 
   logActions(actions: Action[]) {
     this.log.writeLine('Actions');
