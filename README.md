@@ -24,6 +24,7 @@ Implemented in Node.js (TypeScript) and can build a Docker image.
 
 See [docs/HUBSPOT.md](./docs/HUBSPOT.md).
 
+
 ## Dev Setup
 
 1. Install Node.js 16+ and NPM 7+
@@ -34,58 +35,36 @@ See [docs/HUBSPOT.md](./docs/HUBSPOT.md).
 
 ## Running in Development
 
-    $ npm run once
+Compile TypeScript in background:
+
+```sh
+$ npm run watch
+```
+
+For general development:
+
+```sh
+$ npm run download --help  # Download MPAC & HubSpot data
+$ npm run once     --help  # Dry-run engine once on cached inputs
+$ npm run 3x       --help  # Dry-run engine 3x, piping output to input
+```
+
+* Data must be downloaded before local dry-runs.
+* Pass `--loglevel=verbose` or `--savelogs=out` to examine engine logic.
+
+Running tests:
+
+```sh
+$ npm run test                # Run once
+$ npm run test -- --watchAll  # Run during dev
+```
 
 
 ## Running in Production
 
-    $ node out/bin/main.js
-
-
-## CLI Options
-
-    --loglevel    error | warn | info | verbose
-        (Optional) What the engine should log to console.log()
-
-    --savelogs somedir
-        (Optional) Log helpful debug files under `data/somedir/`
-
-## Developer NPM commands
-
 ```sh
-# Run engine once
-$ npm run once -- [options]
-
-# Example of dry-run, using local data, with medium verbosity, and saving engine logs to './data/out'
-$ npm run once -- --savelogs=out --loglevel=info
-
-# Download live data and cache to disk
-$ npm run download
-
-# Run unit tests
-$ npm run build # either build once
-$ npm run watch # or watch and build
-$ npm test
-
-# Run engine 3 times,
-#   starting with cached data,
-#   and pumping output of each run
-#     into input of next run
-$ npm run 3x
-
-# Explain what the engine does given certain SENs or transactions
-# (Requires the engine to have been run on latest data locally)
-$ npm run explain -- [--verbose] <SEN12345ABCDE>... | <transactions.json>
+$ node out/bin/main.js  # This always uses live inputs/outputs
 ```
-
-
-## Running during Development
-
-First you must download MPAC data via `npm run download`. This will cache data locally in git-ignored `data` directory.
-
-During development, output is not uploaded to HubSpot. It is printed to console if `--loglevel=verbose`.
-
-To save logs about what the scoring engine is doing during a dry-run, pass a subdirectory of "data" to `--savelogs` (see above).
 
 
 ## Changelog
@@ -109,6 +88,7 @@ To save logs about what the scoring engine is doing during a dry-run, pass a sub
   - `npm run once` always uses local IO (for local development)
   - `node out/bin/main.js` always uses remote IO (for production)
   - To use remote during local dev, change it in the code (at your own risk)
+- Added `--help` option to developer commands.
 
 ### 0.1.0 (2021-11-25)
 

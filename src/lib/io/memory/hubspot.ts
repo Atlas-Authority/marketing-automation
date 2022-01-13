@@ -83,7 +83,6 @@ export class MemoryHubspot implements HubspotService {
   }
 
   private fakeApiConsoleLog(action: string, data: unknown[]) {
-    log.info('Fake Uploader', action, data.length);
     if (data.length > 0) {
       log.verbose('Fake Uploader', action, data);
     }
