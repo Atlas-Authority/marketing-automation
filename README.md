@@ -32,18 +32,17 @@ See [docs/HUBSPOT.md](./docs/HUBSPOT.md).
 4. `npm run build` to compile TypeScript into JavaScript at `out/`
 
 
-## Running
+## Running in Development
 
-    $ npm run once -- --in=remote --out=remote
+    $ npm run once
+
+
+## Running in Production
+
+    $ node out/bin/main.js
 
 
 ## CLI Options
-
-    --in   local | remote
-        Whether to use disk-cached values, or download live data
-
-    --out  local | remote
-        Whether to cache output to disk and log, or upload live data
 
     --loglevel    error | warn | info | verbose | detailed
         (Optional) What the engine should log to console.log()
@@ -57,8 +56,8 @@ See [docs/HUBSPOT.md](./docs/HUBSPOT.md).
 # Run engine once
 $ npm run once -- [options]
 
-# Example of dry-run, using local data and cached scorer data, with medium verbosity
-$ npm run once -- --in=local --out=local --savelogs=out --loglevel=info
+# Example of dry-run, using local data, with medium verbosity, and saving engine logs to './data/out'
+$ npm run once -- --savelogs=out --loglevel=info
 
 # Download live data and cache to disk
 $ npm run download
@@ -82,9 +81,9 @@ $ npm run explain -- [--verbose] <SEN12345ABCDE>... | <transactions.json>
 
 ## Running during Development
 
-Running the engine live (steps above) will cache data locally in git-ignored `data` directory. After it's cached, you can use `--in=local` for faster development and to avoid API calls.
+First you must download MPAC data via `npm run download`. This will cache data locally in git-ignored `data` directory.
 
-Instead of uploading to Hubspot, you can use `--out=local` and `--loglevel=verbose` (the default) to print data to console that would have been uploaded, or `--loglevel=info` to just show array counts.
+During development, output is not uploaded to HubSpot. It is printed to console if `--loglevel=verbose`.
 
 To save logs about what the scoring engine is doing during a dry-run, pass a subdirectory of "data" to `--savelogs` (see above).
 
@@ -106,6 +105,10 @@ To save logs about what the scoring engine is doing during a dry-run, pass a sub
 - Added (optional) `--skiplogs=true` option to `npm run 3x`.
 - Sped up license scorer down to 12% original run time in some cases.
 - Removed `--cached-fns` option and cached-fns data file usage.
+- Removed `--in` and `--out`
+  - `npm run once` always uses local IO (for local development)
+  - `node out/bin/main.js` always uses remote IO (for production)
+  - To use remote during local dev, change it in the code (at your own risk)
 
 ### 0.1.0 (2021-11-25)
 
