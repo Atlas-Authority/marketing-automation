@@ -52,14 +52,23 @@ function uniqLicenses(licenses: RawLicense[]) {
   const edgeCases = Object.values(groups).filter(ls => ls.length > 1);
   for (const dups of edgeCases) {
     assert.ok(dups
-      .map(({
-        attribution, evaluationOpportunitySize,
-        parentProductBillingCycle, parentProductName,
-        installedOnSandbox, parentProductEdition,
-        evaluationLicense, evaluationSaleDate,
-        evaluationStartDate, evaluationEndDate,
-        daysToConvertEval,
-        ...dup }) => dup)
+      .map(dup => ({
+        addonKey: dup.addonKey,
+        addonName: dup.addonName,
+        contactDetails: dup.contactDetails,
+        hosting: dup.hosting,
+        lastUpdated: dup.lastUpdated,
+        licenseId: dup.licenseId,
+        licenseType: dup.licenseType,
+        maintenanceEndDate: dup.maintenanceEndDate,
+        maintenanceStartDate: dup.maintenanceStartDate,
+        status: dup.status,
+        tier: dup.tier,
+        addonLicenseId: dup.addonLicenseId,
+        appEntitlementId: dup.appEntitlementId,
+        appEntitlementNumber: dup.appEntitlementNumber,
+        partnerDetails: dup.partnerDetails,
+      }) as Partial<RawLicense>)
       .every((dup, i, array) => util.isDeepStrictEqual(dup, array[0])),
       util.inspect(dups, { colors: true, depth: null })
     );
