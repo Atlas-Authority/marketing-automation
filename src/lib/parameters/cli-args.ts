@@ -15,7 +15,7 @@ const help: Help = {
   },
 
   skiplogs: {
-    values: 'true',
+    values: '',
     description: '(Optional) Do not write engine log files',
   },
 
@@ -24,12 +24,12 @@ const help: Help = {
 export function getCliArgs<T extends string>(...params: T[]): Opts<T> {
   const args = Object.fromEntries(process.argv.slice(2)
     .map(s => s.split('='))
-    .map(([k, v]) => [k.replace(/^--/, ''), v || 'true']));
+    .map(([k, v]) => [k.replace(/^--?/, ''), v || 'true']));
+
+  if (args['help'] || args['h']) showHelp(params);
 
   const opts = {} as Opts<T>;
   for (const param of params) {
-    if (param === 'help') showHelp(params);
-
     opts[param] = args[param];
     delete args[param];
   }
