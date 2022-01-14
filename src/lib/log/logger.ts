@@ -6,7 +6,6 @@ enum LogLevel {
   Warn,
   Info,
   Verbose,
-  Detailed,
 }
 
 class Logger {
@@ -18,7 +17,6 @@ class Logger {
   public warn(prefix: string, ...args: any[]) { this.print(LogLevel.Warn, prefix, ...args); }
   public info(prefix: string, ...args: any[]) { this.print(LogLevel.Info, prefix, ...args); }
   public verbose(prefix: string, ...args: any[]) { this.print(LogLevel.Verbose, prefix, ...args); }
-  public detailed(prefix: string, ...args: any[]) { this.print(LogLevel.Detailed, prefix, ...args); }
 
   private print(level: LogLevel, prefix: string, ...args: any[]) {
     if (level > this.level) return;
@@ -52,18 +50,14 @@ class Logger {
   }
 
   public setLevelFrom(levelString: string | undefined) {
-    const mapping = new Map([
-      ['error', LogLevel.Error],
-      ['warn', LogLevel.Warn],
-      ['info', LogLevel.Info],
-      ['verbose', LogLevel.Verbose],
-      ['detailed', LogLevel.Detailed],
-      [undefined, LogLevel.Verbose],
-    ]);
-    const level = mapping.get(levelString?.trim().toLowerCase());
-    if (level) this.level = level;
+    if (!levelString) return;
+    switch (levelString.trim().toLowerCase()) {
+      case 'error': this.level = LogLevel.Error; break;
+      case 'warn': this.level = LogLevel.Warn; break;
+      case 'info': this.level = LogLevel.Info; break;
+      case 'verbose': this.level = LogLevel.Verbose; break;
+    }
   }
-
 }
 
 const levelPrefixes = {
@@ -71,7 +65,6 @@ const levelPrefixes = {
   [LogLevel.Warn]: chalk.dim.redBright('WARN'),
   [LogLevel.Info]: chalk.green('info'),
   [LogLevel.Verbose]: chalk.green('more'),
-  [LogLevel.Detailed]: chalk.blue('....'),
 };
 
 function formatted(data: unknown, prefixLength: number) {

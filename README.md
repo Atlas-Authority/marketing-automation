@@ -24,6 +24,7 @@ Implemented in Node.js (TypeScript) and can build a Docker image.
 
 See [docs/HUBSPOT.md](./docs/HUBSPOT.md).
 
+
 ## Dev Setup
 
 1. Install Node.js 16+ and NPM 7+
@@ -32,61 +33,38 @@ See [docs/HUBSPOT.md](./docs/HUBSPOT.md).
 4. `npm run build` to compile TypeScript into JavaScript at `out/`
 
 
-## Running
+## Running in Development
 
-    $ npm run once -- --in=remote --out=remote
-
-
-## CLI Options
-
-    --in   local | remote
-        Whether to use disk-cached values, or download live data
-
-    --out  local | remote
-        Whether to cache output to disk and log, or upload live data
-
-    --loglevel    error | warn | info | verbose | detailed
-        (Optional) What the engine should log to console.log()
-
-    --savelogs somedir
-        (Optional) Log helpful debug files under `data/somedir/`
-
-## Developer NPM commands
+Compile TypeScript in background:
 
 ```sh
-# Run engine once
-$ npm run once -- [options]
+$ npm run watch
+```
 
-# Example of dry-run, using local data and cached scorer data, with medium verbosity
-$ npm run once -- --in=local --out=local --savelogs=out --loglevel=info
+For general development:
 
-# Download live data and cache to disk
-$ npm run download
+```sh
+$ npm run download -- --help  # Download MPAC & HubSpot data
+$ npm run once     -- --help  # Dry-run engine once on cached inputs
+$ npm run 3x       -- --help  # Dry-run engine 3x, piping output to input
+```
 
-# Run unit tests
-$ npm run build # either build once
-$ npm run watch # or watch and build
-$ npm test
+* Data must be downloaded before local dry-runs.
+* Pass `--loglevel=verbose` or `--savelogs=out` to examine engine logic.
 
-# Run engine 3 times,
-#   starting with cached data,
-#   and pumping output of each run
-#     into input of next run
-$ npm run 3x
+Running tests:
 
-# Explain what the engine does given certain SENs or transactions
-# (Requires the engine to have been run on latest data locally)
-$ npm run explain -- [--verbose] <SEN12345ABCDE>... | <transactions.json>
+```sh
+$ npm run test                # Run once
+$ npm run test -- --watchAll  # Run during dev
 ```
 
 
-## Running during Development
+## Running in Production
 
-Running the engine live (steps above) will cache data locally in git-ignored `data` directory. After it's cached, you can use `--in=local` for faster development and to avoid API calls.
-
-Instead of uploading to Hubspot, you can use `--out=local` and `--loglevel=verbose` (the default) to print data to console that would have been uploaded, or `--loglevel=info` to just show array counts.
-
-To save logs about what the scoring engine is doing during a dry-run, pass a subdirectory of "data" to `--savelogs` (see above).
+```sh
+$ node out/bin/main.js  # This always uses live inputs/outputs
+```
 
 
 ## Changelog
@@ -106,6 +84,11 @@ To save logs about what the scoring engine is doing during a dry-run, pass a sub
 - Added (optional) `--skiplogs=true` option to `npm run 3x`.
 - Sped up license scorer down to 12% original run time in some cases.
 - Removed `--cached-fns` option and cached-fns data file usage.
+- Removed `--in` and `--out`
+  - `npm run once` always uses local IO (for local development)
+  - `node out/bin/main.js` always uses remote IO (for production)
+  - To use remote during local dev, change it in the code (at your own risk)
+- Added `--help` option to developer commands.
 
 ### 0.1.0 (2021-11-25)
 

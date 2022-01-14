@@ -1,40 +1,61 @@
-import { batchesOf } from "../util/helpers";
+type Opts<T extends string> = { [K in T]: string | undefined };
 
-class ArgParser {
+type Help = { [key: string]: { values: string, description: string } };
 
-  public static readonly cli = new ArgParser(process.argv.slice(2));
+const help: Help = {
 
-  #opts: { [opt: string]: string };
+  loglevel: {
+    values: 'error | warn | info | verbose',
+    description: '(Optional) What the engine should log to console.log()',
+  },
 
-  private constructor(argv: string[]) {
-    const args = argv.flatMap(s => s.split('='));
-    this.#opts = Object.fromEntries(batchesOf(args, 2));
+  savelogs: {
+    values: 'somedir',
+    description: '(Optional) Log helpful debug files under `data/somedir/`',
+  },
+
+  skiplogs: {
+    values: 'true',
+    description: '(Optional) Do not write engine log files',
+  },
+
+};
+
+export function getCliArgs<T extends string>(...params: T[]): Opts<T> {
+  const args = Object.fromEntries(process.argv.slice(2)
+    .map(s => s.split('='))
+    .map(([k, v]) => [k.replace(/^--/, ''), v || 'true']));
+
+  const opts = {} as Opts<T>;
+  for (const param of params) {
+    if (param === 'help') showHelp(params);
+
+    opts[param] = args[param];
+    delete args[param];
   }
 
-  get(option: string): string | undefined {
-    const value = this.#opts[option];
-    delete this.#opts[option];
-    return value;
+  if (Object.keys(args).length > 0) {
+    console.log(`Error: Unknown arguments passed:`);
+    console.log(Object.entries(args)
+      .map(([k, v]) => `  ${k}: ${JSON.stringify(v)}`)
+      .join('\n'))
+    showHelp(params);
   }
 
-  getChoiceOrFail<T extends string>(option: string, choices: T[]): T {
-    const value = this.get(option) as T;
-    if (!value || !choices.includes(value)) {
-      console.log(`Error: ${option} must be ${choices
-        .map(c => `'${c}'`)
-        .join(' or ')}`);
-      process.exit(1);
-    }
-    return value;
-  }
-
-  failIfExtraOpts() {
-    if (Object.keys(this.#opts).length > 0) {
-      console.log(`Error: Unknown options passed:`, this.#opts);
-      process.exit(1);
-    }
-  }
-
+  return opts;
 }
 
-export const { cli } = ArgParser;
+function showHelp(params: string[]) {
+  console.log();
+  console.log(`Allowed options:`);
+  console.log();
+  for (const param of params) {
+    const details = help[param];
+    if (details) {
+      console.log(`    --${param}    ${details.values}`);
+      console.log(`        ${details.description}`);
+      console.log();
+    }
+  }
+  process.exit(1);
+}
