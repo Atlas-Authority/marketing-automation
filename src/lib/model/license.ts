@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import { AddonLicenseId, ContactInfo, getContactInfo, getPartnerInfo, maybeGetContactInfo, PartnerInfo } from "./marketplace/common";
+import { ContactInfo, getContactInfo, getPartnerInfo, maybeGetContactInfo, PartnerInfo } from "./marketplace/common";
 import { RawLicense } from "./marketplace/raw";
 import { MpacRecord } from './marketplace/record.js';
 import { Transaction } from './transaction';
@@ -29,7 +29,7 @@ type NewEvalData = {
 };
 
 export interface LicenseData {
-  addonLicenseId: AddonLicenseId,
+  addonLicenseId: string | null,
   appEntitlementId: string | null,
   appEntitlementNumber: string | null,
 
@@ -95,7 +95,7 @@ export class License extends MpacRecord<LicenseData> {
     }
 
     return new License({
-      addonLicenseId: rawLicense.addonLicenseId,
+      addonLicenseId: rawLicense.addonLicenseId ?? null,
       appEntitlementId: rawLicense.appEntitlementId ?? null,
       appEntitlementNumber: rawLicense.appEntitlementNumber ?? null,
 
@@ -131,7 +131,11 @@ export class License extends MpacRecord<LicenseData> {
 
   public constructor(data: LicenseData) {
     super(data);
-    this.id = this.data.addonLicenseId ?? this.data.appEntitlementId ?? this.data.appEntitlementNumber!;
+    this.id = (
+      this.data.addonLicenseId ??
+      this.data.appEntitlementId ??
+      this.data.appEntitlementNumber!
+    );
     this.tier = Math.max(this.parseTier(), this.tierFromEvalOpportunity());
     this.active = this.data.status === 'active';
   }

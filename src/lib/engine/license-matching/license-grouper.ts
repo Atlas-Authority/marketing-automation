@@ -146,7 +146,7 @@ export class LicenseGrouper {
 
 export function shorterLicenseInfo(license: License) {
   return {
-    addonLicenseId: license.data.addonLicenseId,
+    id: license.id,
 
     company: license.data.company,
 

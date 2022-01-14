@@ -1,11 +1,11 @@
 import assert from "assert";
 import { License } from "./license";
-import { AddonLicenseId, ContactInfo, getContactInfo, getPartnerInfo, maybeGetContactInfo, PartnerInfo } from "./marketplace/common";
+import { ContactInfo, getContactInfo, getPartnerInfo, maybeGetContactInfo, PartnerInfo } from "./marketplace/common";
 import { RawTransaction } from "./marketplace/raw";
 import { MpacRecord } from "./marketplace/record";
 
 export interface TransactionData {
-  addonLicenseId: AddonLicenseId,
+  addonLicenseId: string | null,
   appEntitlementId: string | null,
   appEntitlementNumber: string | null,
 
@@ -51,7 +51,7 @@ export class Transaction extends MpacRecord<TransactionData> {
     return new Transaction({
       transactionId: rawTransaction.transactionId,
 
-      addonLicenseId: rawTransaction.addonLicenseId,
+      addonLicenseId: rawTransaction.addonLicenseId ?? null,
       appEntitlementId: rawTransaction.appEntitlementId ?? null,
       appEntitlementNumber: rawTransaction.appEntitlementNumber ?? null,
 

@@ -10,6 +10,9 @@ import { envConfig } from '../lib/parameters/env-config';
 main();
 async function main() {
 
+  const skiplogs = cli.get('--skiplogs');
+  const logdir = (dir: string) => skiplogs ? null : new DataDir(dir);
+
   cli.failIfExtraOpts();
   log.level = log.Levels.Info;
 
@@ -17,13 +20,13 @@ async function main() {
   const engine = new Engine();
 
   // First
-  await engine.run(new Database(io, envConfig), new DataDir('run1'));
+  await engine.run(new Database(io, envConfig), logdir('run1'));
 
   // Second
   log.level = log.Levels.Verbose;
-  await engine.run(new Database(io, envConfig), new DataDir('run2'));
+  await engine.run(new Database(io, envConfig), logdir('run2'));
 
   // Third
-  await engine.run(new Database(io, envConfig), new DataDir('run3'));
+  await engine.run(new Database(io, envConfig), logdir('run3'));
 
 }

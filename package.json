@@ -8,7 +8,7 @@
     "watch": "tsc --watch",
     "once": "node out/bin/run-once.js",
     "generate-test": "node out/bin/generate-test.js",
-    "multiple": "node out/bin/verify-multiple-runs.js",
+    "3x": "node out/bin/run-3x.js",
     "download": "node out/bin/download.js",
     "entitlements": "node out/bin/entitlements.js",
     "test": "jest",

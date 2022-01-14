@@ -5,7 +5,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Run cached-download",
+      "name": "Dry-run",
       "request": "launch",
       "skipFiles": [
         "<node_internals>/**"
@@ -19,21 +19,15 @@
       "type": "pwa-node"
     },
     {
-      "name": "Run cached-download multiple times",
+      "name": "Dry-run 3x",
       "request": "launch",
       "skipFiles": [
         "<node_internals>/**"
       ],
-      "program": "${workspaceFolder}/src/bin/verify-multiple-runs.ts",
-      "type": "pwa-node"
-    },
-    {
-      "name": "Downloader",
-      "program": "${workspaceFolder}/src/bin/download.ts",
-      "request": "launch",
-      "skipFiles": [
-        "<node_internals>/**"
+      "args": [
+        "--skiplogs=true"
       ],
+      "program": "${workspaceFolder}/src/bin/run-3x.ts",
       "type": "pwa-node"
     },
     {

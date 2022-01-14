@@ -185,7 +185,7 @@ export function abbrActionDetails(action: Action) {
     case 'create': return {
       "Create": {
         dealStage: DealStage[action.properties.dealStage],
-        addonLicenseId: action.properties.addonLicenseId,
+        addonLicenseId: action.properties.addonLicenseId ?? action.properties.appEntitlementId ?? action.properties.appEntitlementNumber!,
         transactionId: action.properties.transactionId,
         closeDate: action.properties.closeDate,
         amount: action.properties.amount,

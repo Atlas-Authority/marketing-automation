@@ -1,7 +1,5 @@
 import { RawLicenseContact, RawPartnerDetails, RawTransactionContact } from "./raw";
 
-export type AddonLicenseId = string | null;
-
 export type ContactInfo = {
   email: string,
   name?: string,

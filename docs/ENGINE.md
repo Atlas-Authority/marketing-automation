@@ -79,9 +79,9 @@ After this, the engine has a combination of all existing and new Contacts, ready
 
 This phase assumes a few things:
 
-1. Each `addonLicenseId` uniquely points to exactly one License
-2. Each transaction points to exactly one `addonLicenseId`
-3. Some transactions point to the same `addonLicenseId`
+1. Each license is a unique object within MPAC data
+2. Each transaction points to exactly one license
+3. Some transactions point to the same license
 4. Therefore, we can match up every license with 0-N transactions
 5. Each license keeps a reference to all its transactions (as an array)
 6. Each transaction keeps a reference to its license

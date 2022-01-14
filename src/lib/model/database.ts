@@ -105,14 +105,19 @@ export class Database {
     this.providerDomains = this.emailProviderLister.set;
 
     const emailRe = makeEmailValidationRegex(tlds);
+
+    const licenses = [
+      ...licensesWithDataInsights,
+      ...licensesWithoutDataInsights,
+    ].map(raw => License.fromRaw(raw));
+
     const results = validateMarketplaceData(
-      licensesWithDataInsights,
-      licensesWithoutDataInsights,
-      transactions,
+      licenses,
+      transactions.map(raw => Transaction.fromRaw(raw)),
       emailRe);
 
-    this.licenses = results.licenses.map(raw => License.fromRaw(raw));
-    this.transactions = results.transactions.map(raw => Transaction.fromRaw(raw));
+    this.licenses = results.licenses;
+    this.transactions = results.transactions;
 
     log.info('Database', 'Connecting MPAC records: Starting...');
     this.buildMpacMappings();
@@ -216,14 +221,14 @@ export class Database {
       log.warn('Scoring Engine', "The following transactions have no accompanying licenses:");
       {
         const table = new Table([{ title: 'Refunds' }, { title: 'License', align: 'right' }]);
-        for (const tx of refunds) { table.rows.push([tx.data.transactionId, tx.data.addonLicenseId ?? tx.data.appEntitlementId ?? tx.data.appEntitlementNumber!]); }
+        for (const tx of refunds) { table.rows.push([tx.data.transactionId, tx.id]); }
         for (const row of table.eachRow()) {
           log.warn('Scoring Engine', '  ' + row);
         }
       }
       {
         const table = new Table([{ title: 'Maybe Refunded' }, { title: 'License', align: 'right' }]);
-        for (const tx of maybeRefunded) { table.rows.push([tx.data.transactionId, tx.data.addonLicenseId ?? tx.data.appEntitlementId ?? tx.data.appEntitlementNumber!]); }
+        for (const tx of maybeRefunded) { table.rows.push([tx.data.transactionId, tx.id]); }
         for (const row of table.eachRow()) {
           log.warn('Scoring Engine', '  ' + row);
         }

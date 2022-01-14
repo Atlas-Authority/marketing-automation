@@ -93,14 +93,14 @@ const DealAdapter: EntityAdapter<DealData, DealComputed> = {
     addonLicenseId: {
       property: env.hubspot.attrs.deal.addonLicenseId,
       identifier: true,
-      down: addonLicenseId => addonLicenseId!,
-      up: addonLicenseId => addonLicenseId || '',
+      down: id => id || null,
+      up: id => id || '',
     },
     transactionId: {
       property: env.hubspot.attrs.deal.transactionId,
       identifier: true,
-      down: transactionId => transactionId,
-      up: transactionId => transactionId || '',
+      down: id => id || null,
+      up: id => id || '',
     },
     closeDate: {
       property: 'closedate',
@@ -154,11 +154,13 @@ const DealAdapter: EntityAdapter<DealData, DealComputed> = {
     },
     appEntitlementId: {
       property: env.hubspot.attrs.deal.appEntitlementId,
+      identifier: true,
       down: id => id || null,
       up: id => id ?? '',
     },
     appEntitlementNumber: {
       property: env.hubspot.attrs.deal.appEntitlementNumber,
+      identifier: true,
       down: id => id || null,
       up: id => id ?? '',
     },
