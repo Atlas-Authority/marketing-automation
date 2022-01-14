@@ -25,15 +25,17 @@ Implemented in Node.js (TypeScript) and can build a Docker image.
 See [docs/HUBSPOT.md](./docs/HUBSPOT.md).
 
 
-## Dev Setup
-
-1. Install Node.js 16+ and NPM 7+
-2. Copy [`.sample.env`](./.sample.env) to `.env` and set values.
-3. `npm install` to install dependencies
-4. `npm run build` to compile TypeScript into JavaScript at `out/`
-
-
 ## Running in Development
+
+Install Node.js 16+ and NPM 7+
+
+Copy [`.sample.env`](./.sample.env) to `.env` and set values.
+
+Install dependencies:
+
+```sh
+$ npm install
+```
 
 Compile TypeScript in background:
 
