@@ -1,8 +1,4 @@
-type Opts<T extends string> = { [K in T]: string | undefined };
-
-type Help = { [key: string]: { values: string, description: string } };
-
-const help: Help = {
+const Options = {
 
   loglevel: {
     values: 'error | warn | info | verbose',
@@ -16,15 +12,15 @@ const help: Help = {
 
 };
 
-export function getCliArgs<T extends string>(...params: T[]): Opts<T> {
+export function getCliArgs<T extends keyof typeof Options>(...allowedOptions: T[]) {
   const args = Object.fromEntries(process.argv.slice(2)
     .map(s => s.split('='))
     .map(([k, v]) => [k.replace(/^--?/, ''), v || 'true']));
 
-  if (args['help'] || args['h']) showHelp(params);
+  if (args['help'] || args['h']) showHelp(allowedOptions);
 
-  const opts = {} as Opts<T>;
-  for (const param of params) {
+  const opts = {} as { [K in T]: string };
+  for (const param of allowedOptions) {
     opts[param] = args[param];
     delete args[param];
   }
@@ -34,18 +30,18 @@ export function getCliArgs<T extends string>(...params: T[]): Opts<T> {
     console.log(Object.entries(args)
       .map(([k, v]) => `  ${k}: ${JSON.stringify(v)}`)
       .join('\n'))
-    showHelp(params);
+    showHelp(allowedOptions);
   }
 
   return opts;
 }
 
-function showHelp(params: string[]) {
+function showHelp(allowedOptions: (keyof typeof Options)[]) {
   console.log();
   console.log(`Allowed options:`);
   console.log();
-  for (const param of params) {
-    const details = help[param];
+  for (const param of allowedOptions) {
+    const details = Options[param];
     if (details) {
       console.log(`    --${param}    ${details.values}`);
       console.log(`        ${details.description}`);
