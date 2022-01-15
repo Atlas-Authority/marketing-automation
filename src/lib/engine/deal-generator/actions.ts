@@ -154,7 +154,6 @@ export class ActionGenerator {
         ids.add(record.data.appEntitlementNumber);
       }
     }
-    ids.delete(null);
 
     const deals = new Set<Deal>();
     for (const id of ids) {
