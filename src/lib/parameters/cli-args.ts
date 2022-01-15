@@ -15,9 +15,9 @@ const Options = {
 export function getCliArgs<T extends keyof typeof Options>(...allowedOptions: T[]) {
   const args = Object.fromEntries(process.argv.slice(2)
     .map(s => s.split('='))
-    .map(([k, v]) => [k.replace(/^--?/, ''), v || 'true']));
+    .map(([k, v]) => [k.replace(/^--/, ''), v || 'true']));
 
-  if (args['help'] || args['h']) showHelp(allowedOptions);
+  if (args['help']) showHelp(allowedOptions);
 
   const opts = {} as { [K in T]: string };
   for (const param of allowedOptions) {
