@@ -46,13 +46,13 @@ $ npm run watch
 For general development:
 
 ```sh
-$ npm run download -- --help  # Download MPAC & HubSpot data
-$ npm run once     -- --help  # Dry-run engine once on cached inputs
-$ npm run 3x       -- --help  # Dry-run engine 3x, piping output to input
+$ npm run download -- help  # Download MPAC & HubSpot data
+$ npm run once     -- help  # Dry-run engine once on cached inputs
+$ npm run 3x       -- help  # Dry-run engine 3x, piping output to input
 ```
 
 * Data must be downloaded before local dry-runs.
-* Pass `--loglevel=verbose` or `--savelogs=out` to examine engine logic.
+* Pass `loglevel=verbose` or `savelogs=out` to examine engine logic.
 
 Running tests:
 
@@ -80,16 +80,17 @@ $ node out/bin/main.js  # This always uses live inputs/outputs
 - Deals now always use transaction ID when available.
 - Refunded deals now have their amounts set to zero.
 - Purchased inactive licenses are set to closed-won if not refunded.
-- Added `--savelogs=somedir` as the way to manually log debug files.
+- Removed `--cached-fns` option and cached-fns data file usage.
+- Removed `--in` and `--out`
+- Removed `--` prefix from CLI arguments.
+- Added `savelogs=somedir` as the way to manually log debug files.
 - Renamed `npm run multiple` to `npm run 3x`.
 - Updated `npm run 3x` to save logs to `data/run{1..3}/`.
 - Sped up license scorer down to 12% original run time in some cases.
-- Removed `--cached-fns` option and cached-fns data file usage.
-- Removed `--in` and `--out`
   - `npm run once` always uses local IO (for local development)
   - `node out/bin/main.js` always uses remote IO (for production)
   - To use remote during local dev, change it in the code (at your own risk)
-- Added `--help` option to developer commands.
+- Added `help` option to developer commands.
 
 ### 0.1.0 (2021-11-25)
 

@@ -1,12 +1,12 @@
 const Options = {
 
   loglevel: {
-    values: 'error | warn | info | verbose',
+    values: '<error> | <warn> | <info> | <verbose>',
     description: '(Optional) What the engine should log to console.log()',
   },
 
   savelogs: {
-    values: 'somedir',
+    values: '<somedir>',
     description: '(Optional) Log helpful debug files under `data/somedir/`',
   },
 
@@ -14,12 +14,11 @@ const Options = {
 
 export function getCliArgs<T extends keyof typeof Options>(...allowedOptions: T[]) {
   const args = Object.fromEntries(process.argv.slice(2)
-    .map(s => s.split('='))
-    .map(([k, v]) => [k.replace(/^--/, ''), v || 'true']));
+    .map(s => s.split('=')));
 
-  if (args['help']) showHelp(allowedOptions);
+  if ('help' in args) showHelp(allowedOptions);
 
-  const opts = {} as { [K in T]: string };
+  const opts = {} as { [K in T]: string | undefined };
   for (const param of allowedOptions) {
     opts[param] = args[param];
     delete args[param];
@@ -43,8 +42,8 @@ function showHelp(allowedOptions: (keyof typeof Options)[]) {
   for (const param of allowedOptions) {
     const details = Options[param];
     if (details) {
-      console.log(`    --${param}    ${details.values}`);
-      console.log(`        ${details.description}`);
+      console.log(`    ${param}=${details.values}`);
+      console.log(`      ${details.description}`);
       console.log();
     }
   }
