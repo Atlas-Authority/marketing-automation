@@ -62,7 +62,7 @@ export class Deal extends Entity<DealData, DealComputed> {
     const hsAccountId = env.hubspot.accountId;
     return (hsAccountId
       ? `https://app.hubspot.com/contacts/${hsAccountId}/deal/${this.id}/`
-      : `deal-id=${this.id}`);
+      : `Deal=${this.id} (see link by setting HUBSPOT_ACCOUNT_ID)`);
   }
 
 }
@@ -206,7 +206,7 @@ export class DealManager extends EntityManager<DealData, DealComputed, Deal> {
   protected override kind: EntityKind = 'deal';
   protected override entityAdapter = DealAdapter;
 
-  public duplicatesToDelete = new Map<Deal, Set<Deal>>();
+  public duplicates = new Map<Deal, Deal[]>();
 
 }
 

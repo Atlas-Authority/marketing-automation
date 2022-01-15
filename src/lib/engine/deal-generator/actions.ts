@@ -180,7 +180,7 @@ export class ActionGenerator {
 
       const importantDeals = [...foundDeals].filter(d => d.computed.hasActivity);
 
-      let toDelete = [];
+      let toDelete: Deal[] = [];
 
       if (importantDeals.length === 0) {
         // Just pick one, it'll be updated soon; delete the rest
@@ -203,12 +203,12 @@ export class ActionGenerator {
         }
       }
 
-      this.dealManager.removeLocally(toDelete);
-      for (const deal of toDelete) {
-        let dupOf = this.dealManager.duplicatesToDelete.get(deal);
-        if (!dupOf) this.dealManager.duplicatesToDelete.set(deal, dupOf = new Set());
-        dupOf.add(dealToUse);
+      if (this.dealManager.duplicates.has(dealToUse)) {
+        throw new Error(`Primary duplicate is accounted for twice: ${dealToUse.id}`);
       }
+
+      this.dealManager.removeLocally(toDelete);
+      this.dealManager.duplicates.set(dealToUse, toDelete);
     }
 
     return dealToUse;

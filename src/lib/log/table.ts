@@ -1,4 +1,4 @@
-type Row = string[];
+type Row = (string | string[])[];
 
 type ColSpec = {
   align?: 'left' | 'right';
@@ -11,7 +11,7 @@ export class Table {
     log: (s: string) => void,
     title: string,
     rows: Iterable<T>,
-    cols: [ColSpec, (t: T) => string][],
+    cols: [ColSpec, (t: T) => string | string[]][],
   }) {
     opts.log(opts.title);
     const table = new Table(opts.cols.map(([spec,]) => spec));
@@ -44,12 +44,24 @@ export class Table {
       right: (s, i) => s.padStart(cols[i], ' '),
     };
 
-    return this.rows.map(row => (
-      row.map((cell, colIndex) => {
+    return this.rows.map(row => {
+      const joiner = '   ';
+      const rowString = row.map((cell, colIndex) => {
         const alignment = this.colSpecs[colIndex].align ?? 'left';
-        return padders[alignment](cell, colIndex);
-      }).join('   ')
-    ));
+
+        let cellString = cell;
+        if (Array.isArray(cellString)) {
+          const padding = '  ' + (cols
+            .slice(0, colIndex)
+            .map(n => ' '.repeat(n) + joiner));
+          cellString = cellString.join('\n' + padding);
+        }
+
+        return padders[alignment](cellString, colIndex);
+      }).join(joiner);
+
+      return rowString;
+    });
   }
 
 }
