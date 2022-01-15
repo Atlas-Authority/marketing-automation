@@ -1,7 +1,7 @@
 const Options = {
 
   loglevel: {
-    values: '<error> | <warn> | <info> | <verbose>',
+    values: '<error | warn | info | verbose>',
     description: '(Optional) What the engine should log to console.log()',
   },
 

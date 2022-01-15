@@ -12,7 +12,7 @@
       ],
       "program": "${workspaceFolder}/src/bin/run-once.ts",
       "args": [
-        "--loglevel=info",
+        "loglevel=info",
       ],
       "type": "pwa-node"
     },
