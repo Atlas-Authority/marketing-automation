@@ -22,9 +22,6 @@
       "skipFiles": [
         "<node_internals>/**"
       ],
-      "args": [
-        "--skiplogs=true"
-      ],
       "program": "${workspaceFolder}/src/bin/run-3x.ts",
       "type": "pwa-node"
     },

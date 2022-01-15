@@ -14,11 +14,6 @@ const help: Help = {
     description: '(Optional) Log helpful debug files under `data/somedir/`',
   },
 
-  skiplogs: {
-    values: '',
-    description: '(Optional) Do not write engine log files',
-  },
-
 };
 
 export function getCliArgs<T extends string>(...params: T[]): Opts<T> {
