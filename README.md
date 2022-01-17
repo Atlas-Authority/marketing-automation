@@ -100,6 +100,8 @@ Engine changes:
 - Refunded deals now have their amounts set to zero.
 - Purchased inactive licenses are set to closed-won if not refunded.
 - Sped up license scorer down to 12% original run time in some cases.
+- Fixed bug where duplicate deals were not correctly identified.
+- Fixed bug that sometimes didn't print some duplicate deals.
 
 ### 0.1.0 (2021-11-25)
 
