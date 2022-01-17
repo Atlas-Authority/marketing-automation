@@ -77,10 +77,8 @@ CLI changes:
 
 - Renamed `npm start` to `npm run once`.
 - Renamed `npm run multiple` to `npm run 3x`.
-
 - Added `help` option.
 - Added `savelogs=somedir` option.
-
 - Removed `--cached-fns` option.
 - Removed `--in` and `--out`.
   - `npm run once` always uses local IO (for local development)
