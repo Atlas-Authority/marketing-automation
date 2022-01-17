@@ -7,24 +7,24 @@ import { isPresent } from "../util/helpers";
 
 export function printSummary(db: Database) {
 
-  if (db.dealManager.duplicatesToDelete.size > 0) {
-    log.warn('Deal Generator',
-      'Found duplicate deals; delete them manually',
-      [...db.dealManager.duplicatesToDelete].map(([dup, dupOf]) => ({
-        "Primary": dupOf.size > 1
-          ? [...dupOf].map(d => d.link())
-          : dupOf.size === 0
-            ? 'Unknown???'
-            : [...dupOf][0].link(),
-        "Duplicate": dup.link(),
-      })));
+  if (db.dealManager.duplicates.size > 0) {
+    Table.print({
+      title: 'Duplicate Deals',
+      log: s => log.warn('Dups', s),
+      cols: [
+        [{ title: 'Primary' }, s => s[0].link()],
+        [{ title: 'Duplicate(s)' }, s => s[1].map(d => d.link())],
+      ],
+      rows: db.dealManager.duplicates,
+    });
 
-    const dupTotal = ([...db.dealManager.duplicatesToDelete]
-      .map(([dup, dupOf]) => dup.data.amount ?? 0)
+    const dupTotal = ([...db.dealManager.duplicates]
+      .flatMap(([primary, dups]) => dups)
+      .map((dup) => dup.data.amount ?? 0)
       .reduce((a, b) => a + b));
 
     log.warn('Deal Generator', 'Total of duplicates:', formatMoney(dupTotal));
-    log.warn('Deal Generator', 'Total duplicates:', db.dealManager.duplicatesToDelete.size);
+    log.warn('Deal Generator', 'Total duplicates:', db.dealManager.duplicates.size);
 
     db.tallier.less('Over-accounted: Duplicate deals', -dupTotal);
   }

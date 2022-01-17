@@ -6,8 +6,7 @@ import { Contact } from "./contact";
 import { Entity } from "./hubspot/entity";
 import { DealStage, EntityKind, Pipeline } from "./hubspot/interfaces";
 import { EntityAdapter, EntityManager } from "./hubspot/manager";
-import { License } from "./license";
-import { Transaction, uniqueTransactionId } from "./transaction";
+import { uniqueTransactionId } from "./transaction";
 
 export type DealData = {
   relatedProducts: string | null;
@@ -63,7 +62,7 @@ export class Deal extends Entity<DealData, DealComputed> {
     const hsAccountId = env.hubspot.accountId;
     return (hsAccountId
       ? `https://app.hubspot.com/contacts/${hsAccountId}/deal/${this.id}/`
-      : `deal-id=${this.id}`);
+      : `Deal=${this.id} (see link by setting HUBSPOT_ACCOUNT_ID)`);
   }
 
 }
@@ -207,40 +206,7 @@ export class DealManager extends EntityManager<DealData, DealComputed, Deal> {
   protected override kind: EntityKind = 'deal';
   protected override entityAdapter = DealAdapter;
 
-  /** Either `License.{each id}` or `Transaction.transactionId[Transacton.{each id}]` */
-  public getByMpacId = this.makeIndex(d => d.getMpacIds(), [
-    'transactionId',
-    'addonLicenseId',
-    'appEntitlementId',
-    'appEntitlementNumber',
-  ]);
-
-  public duplicatesToDelete = new Map<Deal, Set<Deal>>();
-
-  public getDealsForRecords(records: (License | Transaction)[]) {
-    const ids = new Set<string | null>();
-
-    for (const record of records) {
-      if (record instanceof Transaction) {
-        const txId = record.data.transactionId;
-        ids.add(record.data.addonLicenseId && uniqueTransactionId(txId, record.data.addonLicenseId));
-        ids.add(record.data.appEntitlementId && uniqueTransactionId(txId, record.data.appEntitlementId));
-        ids.add(record.data.appEntitlementNumber && uniqueTransactionId(txId, record.data.appEntitlementNumber));
-      }
-      else {
-        ids.add(record.data.addonLicenseId);
-        ids.add(record.data.appEntitlementId);
-        ids.add(record.data.appEntitlementNumber);
-      }
-    }
-    ids.delete(null);
-
-    const deals = ([...ids]
-      .map(id => this.getByMpacId(id!))
-      .filter(isPresent));
-
-    return new Set(deals);
-  }
+  public duplicates = new Map<Deal, Deal[]>();
 
 }
 

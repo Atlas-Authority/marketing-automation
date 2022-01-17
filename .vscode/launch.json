@@ -12,7 +12,7 @@
       ],
       "program": "${workspaceFolder}/src/bin/run-once.ts",
       "args": [
-        "--loglevel=info",
+        "loglevel=info",
       ],
       "type": "pwa-node"
     },
@@ -21,9 +21,6 @@
       "request": "launch",
       "skipFiles": [
         "<node_internals>/**"
-      ],
-      "args": [
-        "--skiplogs=true"
       ],
       "program": "${workspaceFolder}/src/bin/run-3x.ts",
       "type": "pwa-node"

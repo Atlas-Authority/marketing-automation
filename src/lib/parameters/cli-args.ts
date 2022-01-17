@@ -1,35 +1,25 @@
-type Opts<T extends string> = { [K in T]: string | undefined };
-
-type Help = { [key: string]: { values: string, description: string } };
-
-const help: Help = {
+const Options = {
 
   loglevel: {
-    values: 'error | warn | info | verbose',
+    values: '<error | warn | info | verbose>',
     description: '(Optional) What the engine should log to console.log()',
   },
 
   savelogs: {
-    values: 'somedir',
+    values: '<somedir>',
     description: '(Optional) Log helpful debug files under `data/somedir/`',
-  },
-
-  skiplogs: {
-    values: 'true',
-    description: '(Optional) Do not write engine log files',
   },
 
 };
 
-export function getCliArgs<T extends string>(...params: T[]): Opts<T> {
+export function getCliArgs<T extends keyof typeof Options>(...allowedOptions: T[]) {
   const args = Object.fromEntries(process.argv.slice(2)
-    .map(s => s.split('='))
-    .map(([k, v]) => [k.replace(/^--/, ''), v || 'true']));
+    .map(s => s.split('=')));
 
-  const opts = {} as Opts<T>;
-  for (const param of params) {
-    if (param === 'help') showHelp(params);
+  if ('help' in args) showHelp(allowedOptions);
 
+  const opts = {} as { [K in T]: string | undefined };
+  for (const param of allowedOptions) {
     opts[param] = args[param];
     delete args[param];
   }
@@ -39,21 +29,21 @@ export function getCliArgs<T extends string>(...params: T[]): Opts<T> {
     console.log(Object.entries(args)
       .map(([k, v]) => `  ${k}: ${JSON.stringify(v)}`)
       .join('\n'))
-    showHelp(params);
+    showHelp(allowedOptions);
   }
 
   return opts;
 }
 
-function showHelp(params: string[]) {
+function showHelp(allowedOptions: (keyof typeof Options)[]) {
   console.log();
   console.log(`Allowed options:`);
   console.log();
-  for (const param of params) {
-    const details = help[param];
+  for (const param of allowedOptions) {
+    const details = Options[param];
     if (details) {
-      console.log(`    --${param}    ${details.values}`);
-      console.log(`        ${details.description}`);
+      console.log(`    ${param}=${details.values}`);
+      console.log(`      ${details.description}`);
       console.log();
     }
   }

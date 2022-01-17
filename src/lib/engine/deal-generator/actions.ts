@@ -3,7 +3,7 @@ import log from "../../log/logger";
 import { Deal, DealData, DealManager } from "../../model/deal";
 import { DealStage, Pipeline } from "../../model/hubspot/interfaces";
 import { License } from "../../model/license";
-import { Transaction } from "../../model/transaction";
+import { Transaction, uniqueTransactionId } from "../../model/transaction";
 import env from '../../parameters/env-config';
 import { isPresent, sorter } from "../../util/helpers";
 import { abbrEventDetails, DealRelevantEvent, EvalEvent, EventMeta, PurchaseEvent, RefundEvent, RenewalEvent, UpgradeEvent } from "./events";
@@ -17,11 +17,21 @@ export type IgnoreDealAction = { type: 'noop'; deal: Deal | null, reason: DealNo
 
 export class ActionGenerator {
 
+  #mpacIndex = new Map<string, Set<Deal>>();
   #handledDeals = new Map<Deal, DealRelevantEvent>();
+
   public constructor(
     private dealManager: DealManager,
     private ignore: (reason: string, amount: number) => void,
-  ) { }
+  ) {
+    for (const deal of this.dealManager.getAll()) {
+      for (const id of deal.getMpacIds()) {
+        let set = this.#mpacIndex.get(id);
+        if (!set) this.#mpacIndex.set(id, set = new Set());
+        set.add(deal);
+      }
+    }
+  }
 
   public generateFrom(records: (License | Transaction)[], events: DealRelevantEvent[]) {
     return events.flatMap(event => this.actionsFor(records, event));
@@ -38,7 +48,7 @@ export class ActionGenerator {
   }
 
   private actionForEval(records: (License | Transaction)[], event: EvalEvent): Action {
-    const deal = this.singleDeal(this.dealManager.getDealsForRecords(event.licenses));
+    const deal = this.singleDeal(this.getDealsForRecords(event.licenses));
     if (deal) this.recordSeen(deal, event);
 
     const metaAction = this.maybeMakeMetaAction(event, deal, 0);
@@ -64,7 +74,7 @@ export class ActionGenerator {
 
   private actionForPurchase(records: (License | Transaction)[], event: PurchaseEvent): Action {
     const recordsToSearch = [event.transaction, ...event.licenses].filter(isPresent);
-    const deal = this.singleDeal(this.dealManager.getDealsForRecords(recordsToSearch));
+    const deal = this.singleDeal(this.getDealsForRecords(recordsToSearch));
     if (deal) this.recordSeen(deal, event);
 
     const metaAction = this.maybeMakeMetaAction(event, deal, event.transaction?.data.vendorAmount ?? 0);
@@ -87,7 +97,7 @@ export class ActionGenerator {
   }
 
   private actionForRenewal(records: (License | Transaction)[], event: RenewalEvent | UpgradeEvent): Action {
-    const deal = this.singleDeal(this.dealManager.getDealsForRecords([event.transaction]));
+    const deal = this.singleDeal(this.getDealsForRecords([event.transaction]));
     if (deal) this.recordSeen(deal, event);
 
     const metaAction = this.maybeMakeMetaAction(event, deal, event.transaction.data.vendorAmount);
@@ -100,7 +110,7 @@ export class ActionGenerator {
   }
 
   private actionsForRefund(records: (License | Transaction)[], event: RefundEvent): Action[] {
-    const deals = this.dealManager.getDealsForRecords(event.refundedTxs);
+    const deals = this.getDealsForRecords(event.refundedTxs);
     for (const deal of deals) {
       this.recordSeen(deal, event);
     }
@@ -128,6 +138,37 @@ export class ActionGenerator {
     }
   }
 
+  private getDealsForRecords(records: (License | Transaction)[]) {
+    const ids = new Set<string | null>();
+
+    for (const record of records) {
+      if (record instanceof Transaction) {
+        const txId = record.data.transactionId;
+        ids.add(record.data.addonLicenseId && uniqueTransactionId(txId, record.data.addonLicenseId));
+        ids.add(record.data.appEntitlementId && uniqueTransactionId(txId, record.data.appEntitlementId));
+        ids.add(record.data.appEntitlementNumber && uniqueTransactionId(txId, record.data.appEntitlementNumber));
+      }
+      else {
+        ids.add(record.data.addonLicenseId);
+        ids.add(record.data.appEntitlementId);
+        ids.add(record.data.appEntitlementNumber);
+      }
+    }
+
+    const deals = new Set<Deal>();
+    for (const id of ids) {
+      if (id) {
+        const set = this.#mpacIndex.get(id);
+        if (set) {
+          for (const deal of set) {
+            deals.add(deal);
+          }
+        }
+      }
+    }
+    return deals;
+  }
+
   private singleDeal(foundDeals: Set<Deal>) {
     let dealToUse = null;
 
@@ -139,7 +180,7 @@ export class ActionGenerator {
 
       const importantDeals = [...foundDeals].filter(d => d.computed.hasActivity);
 
-      let toDelete = [];
+      let toDelete: Deal[] = [];
 
       if (importantDeals.length === 0) {
         // Just pick one, it'll be updated soon; delete the rest
@@ -162,12 +203,12 @@ export class ActionGenerator {
         }
       }
 
-      this.dealManager.removeLocally(toDelete);
-      for (const deal of toDelete) {
-        let dupOf = this.dealManager.duplicatesToDelete.get(deal);
-        if (!dupOf) this.dealManager.duplicatesToDelete.set(deal, dupOf = new Set());
-        dupOf.add(dealToUse);
+      if (this.dealManager.duplicates.has(dealToUse)) {
+        throw new Error(`Primary duplicate is accounted for twice: ${dealToUse.id}`);
       }
+
+      this.dealManager.removeLocally(toDelete);
+      this.dealManager.duplicates.set(dealToUse, toDelete);
     }
 
     return dealToUse;

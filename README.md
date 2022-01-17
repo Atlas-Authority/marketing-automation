@@ -46,13 +46,13 @@ $ npm run watch
 For general development:
 
 ```sh
-$ npm run download -- --help  # Download MPAC & HubSpot data
-$ npm run once     -- --help  # Dry-run engine once on cached inputs
-$ npm run 3x       -- --help  # Dry-run engine 3x, piping output to input
+$ npm run download -- help  # Download MPAC & HubSpot data
+$ npm run once     -- help  # Dry-run engine once on cached inputs
+$ npm run 3x       -- help  # Dry-run engine 3x, piping output to input
 ```
 
 * Data must be downloaded before local dry-runs.
-* Pass `--loglevel=verbose` or `--savelogs=out` to examine engine logic.
+* Pass `loglevel=verbose` or `savelogs=out` to examine engine logic.
 
 Running tests:
 
@@ -73,24 +73,35 @@ $ node out/bin/main.js  # This always uses live inputs/outputs
 
 ### Unreleased
 
-- Renamed `npm start` to `npm run once` (Use Docker image for continuous background processing)
+CLI changes:
+
+- Renamed `npm start` to `npm run once`.
+- Renamed `npm run multiple` to `npm run 3x`.
+
+- Added `help` option.
+- Added `savelogs=somedir` option.
+
+- Removed `--cached-fns` option.
+- Removed `--in` and `--out`.
+  - `npm run once` always uses local IO (for local development)
+  - Docker image always uses remote IO (for production)
+- Removed `--` prefix from CLI arguments
+
+ENV changes:
+
 - Renamed ENV variables `MPAC_PASS` to `MPAC_API_KEY`
+- Added new HubSpot keys (see [HUBSPOT.md](./docs/HUBSPOT.md))
+
+Engine changes:
+
 - Added optional "Associated Partner" keys on Deals and Contacts.
 - Fixed bug where refunds sometimes weren't being processed by MAE.
 - Deals now always use transaction ID when available.
 - Refunded deals now have their amounts set to zero.
 - Purchased inactive licenses are set to closed-won if not refunded.
-- Added `--savelogs=somedir` as the way to manually log debug files.
-- Renamed `npm run multiple` to `npm run 3x`.
-- Updated `npm run 3x` to save logs to `data/run{1..3}/`.
-- Added (optional) `--skiplogs=true` option to `npm run 3x`.
 - Sped up license scorer down to 12% original run time in some cases.
-- Removed `--cached-fns` option and cached-fns data file usage.
-- Removed `--in` and `--out`
-  - `npm run once` always uses local IO (for local development)
-  - `node out/bin/main.js` always uses remote IO (for production)
-  - To use remote during local dev, change it in the code (at your own risk)
-- Added `--help` option to developer commands.
+- Fixed bug where duplicate deals were not correctly identified.
+- Fixed bug that sometimes didn't print some duplicate deals.
 
 ### 0.1.0 (2021-11-25)
 
