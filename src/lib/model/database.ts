@@ -15,7 +15,7 @@ import { Entity } from "./hubspot/entity";
 import { EntityKind } from "./hubspot/interfaces";
 import { License } from "./license";
 import { validateMarketplaceData } from "./marketplace/validation";
-import { Transaction } from "./transaction";
+import { Transaction, TransactionData } from "./transaction";
 
 export class Database {
 
@@ -181,8 +181,8 @@ export class Database {
     }
 
     // Connect Licenses and Transactions
-    const maybeRefunded: Transaction[] = [];
-    const refunds: Transaction[] = [];
+    const maybeRefunded = new Set<Transaction>();
+    const refunds = new Set<Transaction>();
 
     for (const transaction of this.transactions) {
 
@@ -205,54 +205,62 @@ export class Database {
       // Check for transactions with missing licenses
       if (!transaction.license) {
         if (transaction.data.saleType === 'Refund') {
-          refunds.push(transaction);
+          refunds.add(transaction);
         }
         else {
-          maybeRefunded.push(transaction);
+          maybeRefunded.add(transaction);
         }
       }
     }
 
     // Warn when some transactions without matching licenses don't seem to be refunds
-    const refundAmount = refunds.map(t => t.data.vendorAmount).reduce((a, b) => a + b, 0);
-    const refundedAmount = maybeRefunded.map(t => t.data.vendorAmount).reduce((a, b) => a + b, 0);
+    const refundAmount = [...refunds].map(t => t.data.vendorAmount).reduce((a, b) => a + b, 0);
+    const refundedAmount = [...maybeRefunded].map(t => t.data.vendorAmount).reduce((a, b) => a + b, 0);
 
     if (-refundAmount !== refundedAmount) {
       log.warn('Scoring Engine', "The following transactions have no accompanying licenses:");
 
-      const matched = new Set<Transaction>();
+      const sameById = (tx1: Transaction, tx2: Transaction, id: keyof TransactionData) => (
+        tx1.data[id] && tx1.data[id] === tx2.data[id]
+      );
+
       for (const refund of refunds) {
-        const maybeMatch = maybeRefunded.find(maybeRefunded =>
-          maybeRefunded.data.vendorAmount
-          === -refund.data.vendorAmount
+        const maybeMatch = [...maybeRefunded].find(maybeRefunded =>
+          (
+            sameById(refund, maybeRefunded, 'addonLicenseId') ||
+            sameById(refund, maybeRefunded, 'appEntitlementId') ||
+            sameById(refund, maybeRefunded, 'appEntitlementNumber')
+          ) && maybeRefunded.data.vendorAmount === -refund.data.vendorAmount
         );
         if (maybeMatch) {
-          matched.add(refund);
-          matched.add(maybeMatch);
+          refunds.delete(refund);
+          maybeRefunded.delete(maybeMatch);
         }
       }
 
-      Table.print({
-        title: 'Refunds',
-        log: s => log.warn('Scoring Engine', '  ' + s),
-        cols: [
-          [{ title: 'Transaction[License]', align: 'right' }, tx => tx.id],
-          [{ title: 'Amount', align: 'right' }, tx => formatMoney(tx.data.vendorAmount)],
-          [{ title: 'Matched?', align: 'right' }, tx => matched.has(tx) ? '✅' : '❌'],
-        ],
-        rows: refunds,
-      });
+      if (refunds.size > 0) {
+        Table.print({
+          title: 'Refunds',
+          log: s => log.warn('Scoring Engine', '  ' + s),
+          cols: [
+            [{ title: 'Transaction[License]', align: 'right' }, tx => tx.id],
+            [{ title: 'Amount', align: 'right' }, tx => formatMoney(tx.data.vendorAmount)],
+          ],
+          rows: refunds,
+        });
+      }
 
-      Table.print({
-        title: 'Maybe Refunded',
-        log: s => log.warn('Scoring Engine', '  ' + s),
-        cols: [
-          [{ title: 'Transaction[License]', align: 'right' }, tx => tx.id],
-          [{ title: 'Amount', align: 'right' }, tx => formatMoney(tx.data.vendorAmount)],
-          [{ title: 'Matched?', align: 'right' }, tx => matched.has(tx) ? '✅' : '❌'],
-        ],
-        rows: maybeRefunded,
-      });
+      if (maybeRefunded.size > 0) {
+        Table.print({
+          title: 'Non-Refunds',
+          log: s => log.warn('Scoring Engine', '  ' + s),
+          cols: [
+            [{ title: 'Transaction[License]', align: 'right' }, tx => tx.id],
+            [{ title: 'Amount', align: 'right' }, tx => formatMoney(tx.data.vendorAmount)],
+          ],
+          rows: maybeRefunded,
+        });
+      }
 
       this.tallier.less('Ignored: Transactions without licenses', refundAmount + refundedAmount);
     }
