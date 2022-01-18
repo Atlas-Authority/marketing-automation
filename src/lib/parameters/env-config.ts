@@ -90,7 +90,7 @@ const env = {
         licenseTier: optional('HUBSPOT_DEAL_LICENSE_TIER_ATTR'),
         relatedProducts: optional('HUBSPOT_DEAL_RELATED_PRODUCTS_ATTR'),
         associatedPartner: optional('HUBSPOT_DEAL_ASSOCIATED_PARTNER'),
-        duplicateOf: optional('HUBSPOT_DEAL_DUPLICATE_OF_ATTR'),
+        duplicateOf: optional('HUBSPOT_DEAL_DUPLICATEOF_ATTR'),
       },
     },
   },
