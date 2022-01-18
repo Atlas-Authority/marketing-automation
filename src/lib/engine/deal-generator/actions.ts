@@ -294,6 +294,7 @@ function dealCreationProperties(records: (License | Transaction)[], record: Lice
     addonLicenseId: record.data.addonLicenseId,
     transactionId: (record instanceof Transaction ? record.data.transactionId : null),
     appEntitlementId: record.data.appEntitlementId,
+    duplicateOf: null,
     appEntitlementNumber: record.data.appEntitlementNumber,
     dealStage,
     amount: (dealStage === DealStage.EVAL
