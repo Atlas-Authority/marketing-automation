@@ -209,6 +209,10 @@ export class ActionGenerator {
 
       this.dealManager.removeLocally(toDelete);
       this.dealManager.duplicates.set(dealToUse, toDelete);
+
+      for (const dup of toDelete) {
+        dup.data.duplicateOf = dealToUse.id ?? null;
+      }
     }
 
     return dealToUse;
