@@ -77,7 +77,9 @@ const DealAdapter: EntityAdapter<DealData, DealComputed> = {
   ],
 
   shouldReject(data) {
-    return (data['pipeline'] !== env.hubspot.pipeline.mpac);
+    if (data['pipeline'] !== env.hubspot.pipeline.mpac) return true;
+    if (env.hubspot.attrs.deal.duplicateOf && data[env.hubspot.attrs.deal.duplicateOf]) return true;
+    return false;
   },
 
   data: {
