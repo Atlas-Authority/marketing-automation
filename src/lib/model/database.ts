@@ -219,20 +219,40 @@ export class Database {
 
     if (-refundAmount !== refundedAmount) {
       log.warn('Scoring Engine', "The following transactions have no accompanying licenses:");
-      {
-        const table = new Table([{ title: 'Refunds' }, { title: 'License', align: 'right' }]);
-        for (const tx of refunds) { table.rows.push([tx.data.transactionId, tx.id]); }
-        for (const row of table.eachRow()) {
-          log.warn('Scoring Engine', '  ' + row);
+
+      const matched = new Set<Transaction>();
+      for (const refund of refunds) {
+        const maybeMatch = maybeRefunded.find(maybeRefunded =>
+          maybeRefunded.data.vendorAmount
+          === -refund.data.vendorAmount
+        );
+        if (maybeMatch) {
+          matched.add(refund);
+          matched.add(maybeMatch);
         }
       }
-      {
-        const table = new Table([{ title: 'Maybe Refunded' }, { title: 'License', align: 'right' }]);
-        for (const tx of maybeRefunded) { table.rows.push([tx.data.transactionId, tx.id]); }
-        for (const row of table.eachRow()) {
-          log.warn('Scoring Engine', '  ' + row);
-        }
-      }
+
+      Table.print({
+        title: 'Refunds',
+        log: s => log.warn('Scoring Engine', '  ' + s),
+        cols: [
+          [{ title: 'Transaction[License]', align: 'right' }, tx => tx.id],
+          [{ title: 'Amount', align: 'right' }, tx => formatMoney(tx.data.vendorAmount)],
+          [{ title: 'Matched?', align: 'right' }, tx => matched.has(tx) ? '✅' : '❌'],
+        ],
+        rows: refunds,
+      });
+
+      Table.print({
+        title: 'Maybe Refunded',
+        log: s => log.warn('Scoring Engine', '  ' + s),
+        cols: [
+          [{ title: 'Transaction[License]', align: 'right' }, tx => tx.id],
+          [{ title: 'Amount', align: 'right' }, tx => formatMoney(tx.data.vendorAmount)],
+          [{ title: 'Matched?', align: 'right' }, tx => matched.has(tx) ? '✅' : '❌'],
+        ],
+        rows: maybeRefunded,
+      });
 
       this.tallier.less('Ignored: Transactions without licenses', refundAmount + refundedAmount);
     }
