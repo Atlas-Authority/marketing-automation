@@ -26,6 +26,8 @@ export type DealData = {
 
   appEntitlementId: string | null;
   appEntitlementNumber: string | null;
+
+  duplicateOf: string | null;
 };
 
 type DealComputed = {
@@ -160,6 +162,11 @@ const DealAdapter: EntityAdapter<DealData, DealComputed> = {
     appEntitlementNumber: {
       property: env.hubspot.attrs.deal.appEntitlementNumber,
       identifier: true,
+      down: id => id || null,
+      up: id => id ?? '',
+    },
+    duplicateOf: {
+      property: env.hubspot.attrs.deal.duplicateOf,
       down: id => id || null,
       up: id => id ?? '',
     },

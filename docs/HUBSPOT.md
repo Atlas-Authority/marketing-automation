@@ -27,6 +27,7 @@ Add any of these fields in HubSpot, and assign their internal IDs to an ENV var:
 | App                  | 1-Select    | "addonKey" of MPAC records | `HUBSPOT_DEAL_APP_ATTR`                  | ❌        |
 | Country              | 1-line Text | "country" of MPAC records  | `HUBSPOT_DEAL_COUNTRY_ATTR`              | ❌        |
 | Associated Partner   | 1-line Text | Valid domains              | `HUBSPOT_DEAL_ASSOCIATED_PARTNER`        | ❌        |
+| Duplicate Of         | 1-line Text | ID of primary Deal         | `HUBSPOT_DEAL_DUPLICATE_OF_ATTR`         | ❌        |
 | AddonLicenseId       | 1-line Text | (for engine use)           | `HUBSPOT_DEAL_ADDONLICENESID_ATTR`       | ✔️        |
 | TransactionId        | 1-line Text | (for engine use)           | `HUBSPOT_DEAL_TRANSACTIONID_ATTR`        | ✔️        |
 | AppEntitlementId     | 1-line Text | (for engine use)           | `HUBSPOT_DEAL_APPENTITLEMENTID_ATTR`     | ✔️        |
