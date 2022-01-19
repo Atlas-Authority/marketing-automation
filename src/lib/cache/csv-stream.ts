@@ -6,11 +6,15 @@ export class CsvStream {
 
   constructor(private stream: LogWriteStream) { }
 
+  writeHeader(keys: string[]) {
+    if (this.keyCount) throw new Error('Writing CSV header more than once');
+    this.stream.writeLine(keys.join(','));
+    this.keyCount = keys.length;
+  }
+
   writeRow(o: object) {
     if (!this.keyCount) {
-      const keys = Object.keys(o);
-      this.stream.writeLine(keys.join(','));
-      this.keyCount = keys.length;
+      this.writeHeader(Object.keys(o));
     }
     this.stream.writeLine(Object.values(o).map(o => JSON.stringify(o)).join(','));
   }
