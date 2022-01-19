@@ -9,18 +9,13 @@ if (!fs.existsSync(rootDataDir)) fs.mkdirSync(rootDataDir);
 export default class DataDir {
 
   #base: URL;
-  #files = new Map<string, DataFile<any>>();
-
   constructor(place: string) {
     this.#base = new URL(`${place}/`, rootDataDir);
     if (!fs.existsSync(this.#base)) fs.mkdirSync(this.#base);
   }
 
   public file<T extends readonly any[]>(filename: string): DataFile<T> {
-    let cache = this.#files.get(filename);
-    if (!cache) this.#files.set(filename, cache =
-      new DataFile<T>(this.#base, filename));
-    return cache;
+    return new DataFile<T>(this.#base, filename);
   }
 
 }
@@ -28,8 +23,6 @@ export default class DataDir {
 class DataFile<T extends readonly any[]> {
 
   #url: URL;
-
-  /** Don't use this, use DataDir.file(name) instead. */
   public constructor(base: URL, filename: string) {
     this.#url = new URL(filename, base);
   }
