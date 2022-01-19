@@ -73,6 +73,10 @@ $ node out/bin/main.js  # This always uses live inputs/outputs
 
 ### Unreleased
 
+- n/a
+
+### 0.2.0 (2022-01-19)
+
 CLI changes:
 
 - Renamed `npm start` to `npm run once`.
