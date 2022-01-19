@@ -125,16 +125,6 @@ export abstract class EntityManager<
     return e;
   }
 
-  public removeLocally(entities: Iterable<E>) {
-    for (const index of this.indexes) {
-      index.removeIndexesFor(entities);
-    }
-    for (const e of entities) {
-      const idx = this.entities.indexOf(e);
-      this.entities.splice(idx, 1);
-    }
-  }
-
   public getAll(): Iterable<E> {
     return this.entities;
   }

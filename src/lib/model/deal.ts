@@ -26,6 +26,8 @@ export type DealData = {
 
   appEntitlementId: string | null;
   appEntitlementNumber: string | null;
+
+  duplicateOf: string | null;
 };
 
 type DealComputed = {
@@ -75,7 +77,9 @@ const DealAdapter: EntityAdapter<DealData, DealComputed> = {
   ],
 
   shouldReject(data) {
-    return (data['pipeline'] !== env.hubspot.pipeline.mpac);
+    if (data['pipeline'] !== env.hubspot.pipeline.mpac) return true;
+    if (env.hubspot.attrs.deal.duplicateOf && data[env.hubspot.attrs.deal.duplicateOf]) return true;
+    return false;
   },
 
   data: {
@@ -160,6 +164,11 @@ const DealAdapter: EntityAdapter<DealData, DealComputed> = {
     appEntitlementNumber: {
       property: env.hubspot.attrs.deal.appEntitlementNumber,
       identifier: true,
+      down: id => id || null,
+      up: id => id ?? '',
+    },
+    duplicateOf: {
+      property: env.hubspot.attrs.deal.duplicateOf,
       down: id => id || null,
       up: id => id ?? '',
     },
