@@ -1,6 +1,7 @@
 import fs from "fs";
 import { pathToFileURL, URL } from "url";
 import log from "../log/logger";
+import { CsvStream } from "./csv-stream";
 
 const rootDataDir = new URL(`../../data/`, pathToFileURL(__dirname));
 if (!fs.existsSync(rootDataDir)) fs.mkdirSync(rootDataDir);
@@ -55,6 +56,13 @@ class DataFile<T extends readonly any[]> {
     });
     fs.closeSync(fd);
     return result;
+  }
+
+  public writeCsvStream<FT>(fn: (stream: CsvStream) => FT): FT {
+    return this.writeStream(stream => {
+      const csvStream = new CsvStream(stream);
+      return fn(csvStream);
+    });
   }
 
 }

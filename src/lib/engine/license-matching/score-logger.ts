@@ -1,13 +1,13 @@
 import { CsvStream } from '../../cache/csv-stream';
-import DataDir, { LogWriteStream } from '../../cache/datadir';
+import DataDir from '../../cache/datadir';
 import { License } from '../../model/license';
 import { shorterLicenseInfo } from './license-grouper';
 
 export class LicenseMatchLogger {
 
   #scoreStream;
-  constructor(private logDir: DataDir, stream: LogWriteStream) {
-    this.#scoreStream = new CsvStream(stream);
+  constructor(private logDir: DataDir, stream: CsvStream) {
+    this.#scoreStream = stream;
   }
 
   l1!: License;
@@ -41,12 +41,8 @@ export class LicenseMatchLogger {
   logMatchResults(matches: License[][]) {
     const groups = matches.map(group => group.map(shorterLicenseInfo));
 
-    this.logDir.file('matched-groups-all.csv').writeStream(allStream => {
-      const allMatchGroupsLog = new CsvStream(allStream);
-
-      this.logDir.file('matched-groups-to-check.csv').writeStream(checkStream => {
-        const checkMatchGroupsLog = new CsvStream(checkStream);
-
+    this.logDir.file('matched-groups-all.csv').writeCsvStream(allMatchGroupsLog => {
+      this.logDir.file('matched-groups-to-check.csv').writeCsvStream(checkMatchGroupsLog => {
         for (const match of groups) {
           for (const shortLicense of match) {
             allMatchGroupsLog.writeRow(shortLicense);

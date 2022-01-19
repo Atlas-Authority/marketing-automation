@@ -35,7 +35,7 @@ export class LicenseGrouper {
 
   private withLog<T>(logDir: DataDir | null, fn: (logger: LicenseMatchLogger | undefined) => T) {
     if (logDir) {
-      return logDir.file('license-scoring.csv').writeStream(stream => {
+      return logDir.file('license-scoring.csv').writeCsvStream(stream => {
         const scoreLogger = new LicenseMatchLogger(logDir, stream);
         const result = fn(scoreLogger);
         return result;

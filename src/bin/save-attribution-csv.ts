@@ -1,5 +1,4 @@
 import 'source-map-support/register';
-import { CsvStream } from '../lib/cache/csv-stream';
 import DataDir from '../lib/cache/datadir';
 import { CachedMemoryRemote, IO } from "../lib/io/io";
 import log from "../lib/log/logger";
@@ -25,8 +24,7 @@ async function main() {
     ].join(',')))
   );
 
-  new DataDir('out').file('attributions.csv').writeStream(stream => {
-    const file = new CsvStream(stream);
+  new DataDir('out').file('attributions.csv').writeCsvStream(file => {
     for (const a of attributions) {
       file.writeRow({
         channel: a.channel,
