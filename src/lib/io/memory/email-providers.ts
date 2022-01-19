@@ -5,9 +5,9 @@ export class MemoryEmailProviderListerService implements EmailProviderListerServ
 
   private readonly domains: readonly string[] = [];
 
-  constructor(useDiskCache: boolean) {
-    if (useDiskCache) {
-      this.domains = DataDir.in.file<readonly string[]>('domains.json').readJson();
+  constructor(dataDir: DataDir | null) {
+    if (dataDir) {
+      this.domains = dataDir.file<readonly string[]>('domains.json').readJson();
     }
   }
 

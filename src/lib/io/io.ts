@@ -1,3 +1,4 @@
+import DataDir from "../cache/datadir";
 import { HubspotCreds, MpacCreds } from "../parameters/interfaces";
 import { HubspotService, MarketplaceService, Remote } from "./interfaces";
 import { LiveTldListerService } from "./live/domains";
@@ -24,30 +25,34 @@ export class IO {
 }
 
 export class CachedMemoryRemote implements Remote {
-  marketplace = new MemoryMarketplace(true);
-  tldLister = new MemoryTldListerService(true);
-  emailProviderLister = new MemoryEmailProviderListerService(true);
-  hubspot = new MemoryHubspot(true);
+  dataDir = new DataDir("in");
+  marketplace = new MemoryMarketplace(this.dataDir);
+  tldLister = new MemoryTldListerService(this.dataDir);
+  emailProviderLister = new MemoryEmailProviderListerService(this.dataDir);
+  hubspot = new MemoryHubspot(this.dataDir);
 }
 
 export class MemoryRemote implements Remote {
-  marketplace = new MemoryMarketplace(false);
-  tldLister = new MemoryTldListerService(false);
-  emailProviderLister = new MemoryEmailProviderListerService(false);
-  hubspot = new MemoryHubspot(false);
+  marketplace = new MemoryMarketplace(null);
+  tldLister = new MemoryTldListerService(null);
+  emailProviderLister = new MemoryEmailProviderListerService(null);
+  hubspot = new MemoryHubspot(null);
 }
 
 export class LiveRemote implements Remote {
+
+  dataDir = new DataDir("in");
+
   hubspot: HubspotService;
   marketplace: MarketplaceService;
-  emailProviderLister = new LiveEmailProviderListerService();
-  tldLister = new LiveTldListerService();
+  emailProviderLister = new LiveEmailProviderListerService(this.dataDir);
+  tldLister = new LiveTldListerService(this.dataDir);
 
   constructor(config: {
     hubspotCreds: HubspotCreds,
     mpacCreds: MpacCreds,
   }) {
-    this.hubspot = new LiveHubspotService(config.hubspotCreds);
-    this.marketplace = new LiveMarketplaceService(config.mpacCreds);
+    this.hubspot = new LiveHubspotService(this.dataDir, config.hubspotCreds);
+    this.marketplace = new LiveMarketplaceService(this.dataDir, config.mpacCreds);
   }
 }

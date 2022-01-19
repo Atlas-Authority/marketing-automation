@@ -1,25 +1,27 @@
 import got from 'got';
 import { DateTime, Duration, Interval } from 'luxon';
+import DataDir from '../../cache/datadir';
 import { RawLicense, RawTransaction } from '../../model/marketplace/raw';
 import { MpacCreds } from '../../parameters/interfaces';
 import { AttachableError, KnownError } from '../../util/errors';
-import cache from '../cache';
 import { MarketplaceService, Progress } from '../interfaces';
 
 
 export class LiveMarketplaceService implements MarketplaceService {
 
-  constructor(private creds: MpacCreds) { }
+  constructor(private dataDir: DataDir, private creds: MpacCreds) { }
 
   public async downloadTransactions(): Promise<RawTransaction[]> {
     const transactions = await this.downloadMarketplaceData('/sales/transactions/export');
     if ((transactions as any).code === 401) throw new KnownError("MPAC_API_KEY is an invalid API key.");
-    return cache('transactions.json', transactions as RawTransaction[]);
+    this.dataDir.file('transactions.json').writeJson(transactions);
+    return transactions as RawTransaction[];
   }
 
   public async downloadLicensesWithoutDataInsights(): Promise<RawLicense[]> {
-    return cache('licenses-without.json',
-      await this.downloadMarketplaceData('/licenses/export?endDate=2018-07-01'));
+    const licenses = await this.downloadMarketplaceData('/licenses/export?endDate=2018-07-01');
+    this.dataDir.file('licenses-without.json').writeJson(licenses);
+    return licenses as RawLicense[];
   }
 
   public async downloadLicensesWithDataInsights(progress: Progress): Promise<RawLicense[]> {
@@ -30,8 +32,9 @@ export class LiveMarketplaceService implements MarketplaceService {
       progress.tick(`${startDate}-${endDate}`);
       return json;
     });
-    return cache('licenses-with.json',
-      (await Promise.all(promises)).flat());
+    const licenses = (await Promise.all(promises)).flat();
+    this.dataDir.file('licenses-with.json').writeJson(licenses);
+    return licenses;
   }
 
   private async downloadMarketplaceData<T>(subpath: string): Promise<T[]> {

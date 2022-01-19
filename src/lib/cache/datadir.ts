@@ -7,8 +7,6 @@ if (!fs.existsSync(rootDataDir)) fs.mkdirSync(rootDataDir);
 
 export default class DataDir {
 
-  public static readonly in = new DataDir("in");
-
   #base: URL;
   #files = new Map<string, DataFile<any>>();
 
@@ -31,7 +29,7 @@ class DataFile<T> {
   #url: URL;
   #json?: T;
 
-  /** Don't use this, use DataDir static fields instead. */
+  /** Don't use this, use DataDir.file(name) instead. */
   public constructor(base: URL, filename: string) {
     this.#url = new URL(filename, base);
   }

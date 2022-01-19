@@ -1,18 +1,18 @@
 import * as hubspot from '@hubspot/api-client';
 import assert from 'assert';
+import DataDir from '../../cache/datadir';
 import log from '../../log/logger';
 import { Association, EntityKind, ExistingEntity, FullEntity, NewEntity, RelativeAssociation } from '../../model/hubspot/interfaces';
 import { HubspotCreds } from '../../parameters/interfaces';
 import { KnownError } from '../../util/errors';
 import { batchesOf } from '../../util/helpers';
-import cache from '../cache';
 import { HubspotService, Progress } from '../interfaces';
 
 export default class LiveHubspotService implements HubspotService {
 
   private client: hubspot.Client;
 
-  constructor(creds: HubspotCreds) {
+  constructor(private dataDir: DataDir, creds: HubspotCreds) {
     this.client = new hubspot.Client(creds);
   }
 
@@ -36,7 +36,8 @@ export default class LiveHubspotService implements HubspotService {
             })
           )),
       }));
-      return cache(`${kind}.json`, normalizedEntities);
+      this.dataDir.file(`${kind}.json`).writeJson(normalizedEntities);
+      return normalizedEntities;
     }
     catch (e: any) {
       const body = e.response?.body;

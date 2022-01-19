@@ -5,9 +5,9 @@ export class MemoryTldListerService implements TldListerService {
 
   private readonly tlds: readonly string[] = [];
 
-  constructor(useDiskCache: boolean) {
-    if (useDiskCache) {
-      this.tlds = DataDir.in.file<readonly string[]>('tlds.json').readJson();
+  constructor(dataDir: DataDir | null) {
+    if (dataDir) {
+      this.tlds = dataDir.file<readonly string[]>('tlds.json').readJson();
     }
   }
 

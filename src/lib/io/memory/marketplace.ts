@@ -8,11 +8,11 @@ export class MemoryMarketplace implements MarketplaceService {
   private readonly licensesWithout: readonly RawLicense[] = [];
   private readonly transactions: readonly RawTransaction[] = [];
 
-  constructor(useDiskCache: boolean) {
-    if (useDiskCache) {
-      this.licensesWith = DataDir.in.file<readonly RawLicense[]>('licenses-with.json').readJson();
-      this.licensesWithout = DataDir.in.file<readonly RawLicense[]>('licenses-without.json').readJson();
-      this.transactions = DataDir.in.file<readonly RawTransaction[]>('transactions.json').readJson();
+  constructor(dataDir: DataDir | null) {
+    if (dataDir) {
+      this.licensesWith = dataDir.file<readonly RawLicense[]>('licenses-with.json').readJson();
+      this.licensesWithout = dataDir.file<readonly RawLicense[]>('licenses-without.json').readJson();
+      this.transactions = dataDir.file<readonly RawTransaction[]>('transactions.json').readJson();
     }
   }
 

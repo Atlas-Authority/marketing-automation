@@ -11,11 +11,11 @@ export class MemoryHubspot implements HubspotService {
   private readonly companies: FullEntity[] = [];
   private readonly contacts: FullEntity[] = [];
 
-  constructor(useDiskCache: boolean) {
-    if (useDiskCache) {
-      this.deals = DataDir.in.file<FullEntity[]>(`deal.json`).readJson();
-      this.companies = DataDir.in.file<FullEntity[]>(`company.json`).readJson();
-      this.contacts = DataDir.in.file<FullEntity[]>(`contact.json`).readJson();
+  constructor(dataDir: DataDir | null) {
+    if (dataDir) {
+      this.deals = dataDir.file<FullEntity[]>(`deal.json`).readJson();
+      this.companies = dataDir.file<FullEntity[]>(`company.json`).readJson();
+      this.contacts = dataDir.file<FullEntity[]>(`contact.json`).readJson();
     }
   }
 
