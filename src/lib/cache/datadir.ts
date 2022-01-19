@@ -27,7 +27,6 @@ export default class DataDir {
 class DataFile<T> {
 
   #url: URL;
-  #json?: T;
 
   /** Don't use this, use DataDir.file(name) instead. */
   public constructor(base: URL, filename: string) {
@@ -35,19 +34,15 @@ class DataFile<T> {
   }
 
   public readJson(): T {
-    if (this.#json === undefined) {
-      if (!fs.existsSync(this.#url)) {
-        log.error('Dev', `Data file doesn't exist yet; run engine to create`, this.#url);
-        process.exit(1);
-      }
-      const text = fs.readFileSync(this.#url, 'utf8');
-      this.#json = JSON.parse(text) as T;
+    if (!fs.existsSync(this.#url)) {
+      log.error('Dev', `Data file doesn't exist yet; run engine to create`, this.#url);
+      process.exit(1);
     }
-    return this.#json;
+    const text = fs.readFileSync(this.#url, 'utf8');
+    return JSON.parse(text) as T;
   }
 
   public writeJson(json: T) {
-    this.#json = json;
     fs.writeFileSync(this.#url, JSON.stringify(json, null, 2));
   }
 
