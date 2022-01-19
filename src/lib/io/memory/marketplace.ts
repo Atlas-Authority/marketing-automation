@@ -10,9 +10,9 @@ export class MemoryMarketplace implements MarketplaceService {
 
   constructor(dataDir: DataDir | null) {
     if (dataDir) {
-      this.licensesWith = dataDir.file<readonly RawLicense[]>('licenses-with.json').readJson();
-      this.licensesWithout = dataDir.file<readonly RawLicense[]>('licenses-without.json').readJson();
-      this.transactions = dataDir.file<readonly RawTransaction[]>('transactions.json').readJson();
+      this.licensesWith = dataDir.file<readonly RawLicense[]>('licenses-with.json').readArray();
+      this.licensesWithout = dataDir.file<readonly RawLicense[]>('licenses-without.json').readArray();
+      this.transactions = dataDir.file<readonly RawTransaction[]>('transactions.json').readArray();
     }
   }
 

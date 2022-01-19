@@ -14,13 +14,13 @@ export class LiveMarketplaceService implements MarketplaceService {
   public async downloadTransactions(): Promise<RawTransaction[]> {
     const transactions = await this.downloadMarketplaceData('/sales/transactions/export');
     if ((transactions as any).code === 401) throw new KnownError("MPAC_API_KEY is an invalid API key.");
-    this.dataDir.file('transactions.json').writeJson(transactions);
+    this.dataDir.file('transactions.json').writeArray(transactions);
     return transactions as RawTransaction[];
   }
 
   public async downloadLicensesWithoutDataInsights(): Promise<RawLicense[]> {
     const licenses = await this.downloadMarketplaceData('/licenses/export?endDate=2018-07-01');
-    this.dataDir.file('licenses-without.json').writeJson(licenses);
+    this.dataDir.file('licenses-without.json').writeArray(licenses);
     return licenses as RawLicense[];
   }
 
@@ -33,7 +33,7 @@ export class LiveMarketplaceService implements MarketplaceService {
       return json;
     });
     const licenses = (await Promise.all(promises)).flat();
-    this.dataDir.file('licenses-with.json').writeJson(licenses);
+    this.dataDir.file('licenses-with.json').writeArray(licenses);
     return licenses;
   }
 

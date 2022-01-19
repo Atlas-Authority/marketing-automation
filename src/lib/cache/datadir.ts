@@ -15,7 +15,7 @@ export default class DataDir {
     if (!fs.existsSync(this.#base)) fs.mkdirSync(this.#base);
   }
 
-  public file<T>(filename: string): DataFile<T> {
+  public file<T extends readonly any[]>(filename: string): DataFile<T> {
     let cache = this.#files.get(filename);
     if (!cache) this.#files.set(filename, cache =
       new DataFile<T>(this.#base, filename));
@@ -24,7 +24,7 @@ export default class DataDir {
 
 }
 
-class DataFile<T> {
+class DataFile<T extends readonly any[]> {
 
   #url: URL;
 
@@ -33,7 +33,7 @@ class DataFile<T> {
     this.#url = new URL(filename, base);
   }
 
-  public readJson(): T {
+  public readArray(): T {
     if (!fs.existsSync(this.#url)) {
       log.error('Dev', `Data file doesn't exist yet; run engine to create`, this.#url);
       process.exit(1);
@@ -42,7 +42,7 @@ class DataFile<T> {
     return JSON.parse(text) as T;
   }
 
-  public writeJson(json: T) {
+  public writeArray(json: T) {
     fs.writeFileSync(this.#url, JSON.stringify(json, null, 2));
   }
 
@@ -53,7 +53,7 @@ class DataFile<T> {
         fs.writeSync(fd, text + '\n');
       },
     });
-    fs.close(fd, () => { });
+    fs.closeSync(fd);
     return result;
   }
 
