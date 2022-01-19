@@ -12,11 +12,15 @@ export class CsvStream {
     this.keyCount = keys.length;
   }
 
-  writeRow(o: object) {
+  writeObjectRow(o: object) {
     if (!this.keyCount) {
       this.writeHeader(Object.keys(o));
     }
-    this.stream.writeLine(Object.values(o).map(o => JSON.stringify(o)).join(','));
+    this.writeValueRow(Object.values(o));
+  }
+
+  writeValueRow(values: any[]) {
+    this.stream.writeLine(JSON.stringify(values).slice(1, -1));
   }
 
   writeBlankRow() {

@@ -26,7 +26,7 @@ async function main() {
 
   new DataDir('out').file('attributions.csv').writeCsvStream(file => {
     for (const a of attributions) {
-      file.writeRow({
+      file.writeObjectRow({
         channel: a.channel,
         referrerDomain: a.referrerDomain,
         campaignName: a.campaignName,

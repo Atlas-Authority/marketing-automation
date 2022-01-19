@@ -36,7 +36,7 @@ export default class LiveHubspotService implements HubspotService {
             })
           )),
       }));
-      this.dataDir.file(`${kind}.json`).writeArray(normalizedEntities);
+      this.dataDir.file(`${kind}.csv`).writeArray(normalizedEntities);
       return normalizedEntities;
     }
     catch (e: any) {

@@ -7,7 +7,7 @@ export class MemoryTldListerService implements TldListerService {
 
   constructor(dataDir: DataDir | null) {
     if (dataDir) {
-      this.tlds = dataDir.file<readonly string[]>('tlds.json').readArray();
+      this.tlds = dataDir.file<readonly { tld: string }[]>('tlds.csv').readArray().map(({ tld }) => tld);
     }
   }
 

@@ -7,7 +7,7 @@ export class MemoryEmailProviderListerService implements EmailProviderListerServ
 
   constructor(dataDir: DataDir | null) {
     if (dataDir) {
-      this.domains = dataDir.file<readonly string[]>('domains.json').readArray();
+      this.domains = dataDir.file<readonly { domain: string }[]>('domains.csv').readArray().map(({ domain }) => domain);
     }
   }
 

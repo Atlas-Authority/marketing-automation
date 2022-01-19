@@ -2,6 +2,8 @@ import fs from "fs";
 import { pathToFileURL, URL } from "url";
 import log from "../log/logger";
 import { CsvStream } from "./csv-stream";
+import { flatten, unflatten } from 'flat';
+import LineReader from 'n-readlines';
 
 const rootDataDir = new URL(`../../data/`, pathToFileURL(__dirname));
 if (!fs.existsSync(rootDataDir)) fs.mkdirSync(rootDataDir);
@@ -32,12 +34,61 @@ class DataFile<T extends readonly any[]> {
       log.error('Dev', `Data file doesn't exist yet; run engine to create`, this.#url);
       process.exit(1);
     }
-    const text = fs.readFileSync(this.#url, 'utf8');
-    return JSON.parse(text) as T;
+
+    let keys: string[] | undefined;
+    const array: any[] = [];
+
+    const reader = new LineReader(this.#url);
+    let lineBuffer;
+    while (lineBuffer = reader.next()) {
+      const line = lineBuffer.toString('utf-8');
+
+      if (!keys) {
+        keys = line.split(',');
+        continue;
+      }
+
+      const vals = JSON.parse(`[${line}]`);
+      const entries = keys.map((key, i) => [key, vals[i]]);
+      const normalized = entries.filter(([k, v]) => v !== null && v !== undefined);
+      const object = Object.fromEntries(normalized);
+      const restored = unflatten(object);
+      array.push(restored);
+    }
+
+    return array as unknown as T;
   }
 
-  public writeArray(json: T) {
-    fs.writeFileSync(this.#url, JSON.stringify(json, null, 2));
+  public writeArray(array: T) {
+    const keySet = new Set<string>();
+    for (const item of array) {
+      for (const key of Object.keys(flatten(item))) {
+        keySet.add(key);
+      }
+    }
+
+    this.writeCsvStream(csv => {
+      const keys = [...keySet];
+      csv.writeHeader(keys);
+
+      for (const item of array) {
+        const flattened = flatten(item) as any;
+        const orderedValues: any[] = [];
+        for (const key of keys) {
+          orderedValues.push(flattened[key]);
+        }
+        while (orderedValues.length > 1) {
+          const lastVal = orderedValues[orderedValues.length - 1];
+          if (lastVal === undefined || lastVal === null) {
+            orderedValues.pop();
+          }
+          else {
+            break;
+          }
+        }
+        csv.writeValueRow(orderedValues);
+      }
+    });
   }
 
   public writeStream<T>(fn: (stream: LogWriteStream) => T) {

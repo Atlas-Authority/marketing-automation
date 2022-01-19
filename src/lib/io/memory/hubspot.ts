@@ -13,9 +13,9 @@ export class MemoryHubspot implements HubspotService {
 
   constructor(dataDir: DataDir | null) {
     if (dataDir) {
-      this.deals = dataDir.file<FullEntity[]>(`deal.json`).readArray();
-      this.companies = dataDir.file<FullEntity[]>(`company.json`).readArray();
-      this.contacts = dataDir.file<FullEntity[]>(`contact.json`).readArray();
+      this.deals = dataDir.file<FullEntity[]>(`deal.csv`).readArray();
+      this.companies = dataDir.file<FullEntity[]>(`company.csv`).readArray();
+      this.contacts = dataDir.file<FullEntity[]>(`contact.csv`).readArray();
     }
   }
 

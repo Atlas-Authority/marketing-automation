@@ -27,8 +27,8 @@ export class LicenseMatchLogger {
     const score = this.score;
     if (score > 0) {
       const reason = this.scores.filter(([s, r]) => s).map(([s, r]) => `${r}=${s}`).join(',');
-      this.#scoreStream.writeRow({ score, reason, ...shorterLicenseInfo(this.l1) });
-      this.#scoreStream.writeRow({ score, reason, ...shorterLicenseInfo(this.l2) });
+      this.#scoreStream.writeObjectRow({ score, reason, ...shorterLicenseInfo(this.l1) });
+      this.#scoreStream.writeObjectRow({ score, reason, ...shorterLicenseInfo(this.l2) });
       this.#scoreStream.writeBlankRow();
     }
   }
@@ -45,7 +45,7 @@ export class LicenseMatchLogger {
       this.logDir.file('matched-groups-to-check.csv').writeCsvStream(checkMatchGroupsLog => {
         for (const match of groups) {
           for (const shortLicense of match) {
-            allMatchGroupsLog.writeRow(shortLicense);
+            allMatchGroupsLog.writeObjectRow(shortLicense);
           }
           allMatchGroupsLog.writeBlankRow();
 
@@ -55,7 +55,7 @@ export class LicenseMatchLogger {
             !match.every(item => item.tech_address === match[0].tech_address)
           )) {
             for (const shortLicense of match) {
-              checkMatchGroupsLog.writeRow(shortLicense);
+              checkMatchGroupsLog.writeObjectRow(shortLicense);
             }
             checkMatchGroupsLog.writeBlankRow();
           }
