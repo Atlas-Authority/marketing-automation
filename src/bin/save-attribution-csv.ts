@@ -1,5 +1,5 @@
 import 'source-map-support/register';
-import DataDir from '../lib/cache/datadir';
+import DataDir from '../lib/data/datadir';
 import { CachedMemoryRemote, IO } from "../lib/io/io";
 import log from "../lib/log/logger";
 import { Database } from "../lib/model/database";

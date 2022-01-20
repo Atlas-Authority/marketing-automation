@@ -1,5 +1,5 @@
 import assert from "assert";
-import DataDir from "../../cache/datadir";
+import DataDir from "../../data/datadir";
 import log from "../../log/logger";
 import { Table } from "../../log/table";
 import { Database } from "../../model/database";

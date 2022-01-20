@@ -1,4 +1,4 @@
-import DataDir from "../cache/datadir";
+import DataDir from "../data/datadir";
 import { HubspotCreds, MpacCreds } from "../parameters/interfaces";
 import { HubspotService, MarketplaceService, Remote } from "./interfaces";
 import { LiveTldListerService } from "./live/domains";

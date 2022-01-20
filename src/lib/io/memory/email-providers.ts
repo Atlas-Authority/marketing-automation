@@ -1,4 +1,4 @@
-import DataDir from "../../cache/datadir";
+import DataDir from "../../data/datadir";
 import { EmailProviderListerService } from "../interfaces";
 
 export class MemoryEmailProviderListerService implements EmailProviderListerService {

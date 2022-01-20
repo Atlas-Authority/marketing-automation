@@ -1,5 +1,5 @@
-import { CsvStream } from '../../cache/csv-stream';
-import DataDir from '../../cache/datadir';
+import { CsvStream } from '../../data/csv-stream';
+import DataDir from '../../data/datadir';
 import { License } from '../../model/license';
 import { shorterLicenseInfo } from './license-grouper';
 

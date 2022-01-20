@@ -1,4 +1,4 @@
-import DataDir from '../../cache/datadir';
+import DataDir from '../../data/datadir';
 import log from '../../log/logger';
 import { Database } from '../../model/database';
 import { License } from '../../model/license';

@@ -1,5 +1,5 @@
 import got from 'got';
-import DataDir from '../../cache/datadir';
+import DataDir from '../../data/datadir';
 import { TldListerService } from '../interfaces';
 
 export function makeEmailValidationRegex(tlds: readonly string[]) {
