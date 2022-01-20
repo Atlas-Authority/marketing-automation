@@ -4,15 +4,13 @@ import { IO, LiveRemote } from '../lib/io/io';
 import log from '../lib/log/logger';
 import { SlackNotifier } from '../lib/log/slack-notifier';
 import { Database } from "../lib/model/database";
-import { getCliArgs } from '../lib/parameters/cli-args';
-import { envConfig, runLoopConfigFromENV, serviceCredsFromENV } from "../lib/parameters/env-config";
+import { envConfig, logLevelFromENV, runLoopConfigFromENV, serviceCredsFromENV } from "../lib/parameters/env-config";
 import run from "../lib/util/runner";
 
 main();
 async function main() {
 
-  const { loglevel } = getCliArgs('loglevel');
-  log.setLevelFrom(loglevel);
+  log.setLevelFrom(logLevelFromENV());
 
   const io = new IO(new LiveRemote(serviceCredsFromENV()));
 

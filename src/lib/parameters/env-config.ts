@@ -10,6 +10,10 @@ export interface Config {
   partnerDomains: string[];
 }
 
+export function logLevelFromENV() {
+  return optional('LOG_LEVEL');
+}
+
 export function serviceCredsFromENV() {
   return {
 
