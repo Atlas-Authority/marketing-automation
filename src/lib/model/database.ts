@@ -66,6 +66,9 @@ export class Database {
       licensesWithoutDataInsights,
       transactions,
       freeDomains,
+      rawDeals,
+      rawCompanies,
+      rawContacts,
     ] = await Promise.all([
       logbox.wrap('Tlds', (progress) =>
         this.io.in.tldLister.downloadAllTlds(progress)),
@@ -94,9 +97,9 @@ export class Database {
 
     logbox.done();
 
-    this.dealManager.linkAssociations(this);
-    this.companyManager.linkAssociations(this);
-    this.contactManager.linkAssociations(this);
+    this.dealManager.importEntities(rawDeals, this);
+    this.companyManager.importEntities(rawCompanies, this);
+    this.contactManager.importEntities(rawContacts, this);
 
     log.info('Downloader', 'Done');
 

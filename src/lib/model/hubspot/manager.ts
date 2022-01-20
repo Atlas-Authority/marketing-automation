@@ -3,7 +3,7 @@ import { HubspotService, Progress } from '../../io/interfaces';
 import { AttachableError } from '../../util/errors';
 import { isPresent } from '../../util/helpers';
 import { Entity, Indexer } from './entity';
-import { EntityKind, HubspotProperties, RelativeAssociation } from './interfaces';
+import { EntityKind, FullEntity, HubspotProperties, RelativeAssociation } from './interfaces';
 
 export interface EntityDatabase {
   getEntity(kind: EntityKind, id: string): Entity<any, any>;
@@ -54,8 +54,6 @@ export abstract class EntityManager<
   private indexIndex = new Map<keyof D, Index<E>>();
   public get = this.makeIndex(e => [e.id].filter(isPresent), []);
 
-  private prelinkedAssociations = new Map<string, Set<RelativeAssociation>>();
-
   public async downloadAllEntities(progress: Progress) {
     const downAssociations = (this.entityAdapter.associations
       .filter(([kind, dir]) => dir.includes('down'))
@@ -66,7 +64,11 @@ export abstract class EntityManager<
       ...typedEntries(this.entityAdapter.computed).flatMap(([k, v]) => v.properties),
     ];
 
-    const rawEntities = await this.downloader.downloadEntities(progress, this.kind, apiProperties, downAssociations);
+    return await this.downloader.downloadEntities(progress, this.kind, apiProperties, downAssociations);
+  }
+
+  public importEntities(rawEntities: readonly FullEntity[], db: EntityDatabase) {
+    const prelinkedAssociations = new Map<string, Set<RelativeAssociation>>();
 
     for (const rawEntity of rawEntities) {
       if (this.entityAdapter.shouldReject?.(rawEntity.properties)) continue;
@@ -79,8 +81,8 @@ export abstract class EntityManager<
       const computed = mapObject(this.entityAdapter.computed, spec => spec.down(rawEntity.properties)) as C;
 
       for (const item of rawEntity.associations) {
-        let set = this.prelinkedAssociations.get(rawEntity.id);
-        if (!set) this.prelinkedAssociations.set(rawEntity.id, set = new Set());
+        let set = prelinkedAssociations.get(rawEntity.id);
+        if (!set) prelinkedAssociations.set(rawEntity.id, set = new Set());
         set.add(item);
       }
 
@@ -92,10 +94,8 @@ export abstract class EntityManager<
       index.clear();
       index.addIndexesFor(this.entities);
     }
-  }
 
-  public linkAssociations(db: EntityDatabase) {
-    for (const [meId, rawAssocs] of this.prelinkedAssociations) {
+    for (const [meId, rawAssocs] of prelinkedAssociations) {
       for (const rawAssoc of rawAssocs) {
         const me = this.get(meId);
         if (!me) throw new Error(`Couldn't find kind=${this.kind} id=${meId}`);
@@ -107,7 +107,6 @@ export abstract class EntityManager<
         me.addAssociation(you, { firstSide: true, initial: true });
       }
     }
-    this.prelinkedAssociations.clear();
   }
 
   private getAssocInfo(a: RelativeAssociation) {
