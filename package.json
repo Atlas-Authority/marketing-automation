@@ -30,6 +30,7 @@
     "luxon": "^1.25.0",
     "mustache": "^4.2.0",
     "n-readlines": "^1.0.1",
+    "promise-all-properties": "^3.0.4",
     "source-map-support": "^0.5.21"
   },
   "devDependencies": {

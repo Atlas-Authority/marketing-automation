@@ -1,3 +1,4 @@
+import promiseAllProperties from 'promise-all-properties';
 import { IO } from "../io/io";
 import { makeEmailValidationRegex } from "../io/live/domains";
 import { MultiDownloadLogger } from "../log/download-logger";
@@ -60,7 +61,7 @@ export class Database {
 
     const logbox = new MultiDownloadLogger();
 
-    const [
+    const {
       tlds,
       licensesWithDataInsights,
       licensesWithoutDataInsights,
@@ -69,31 +70,31 @@ export class Database {
       rawDeals,
       rawCompanies,
       rawContacts,
-    ] = await Promise.all([
-      logbox.wrap('Tlds', (progress) =>
+    } = await promiseAllProperties({
+      tlds: logbox.wrap('Tlds', (progress) =>
         this.io.in.tldLister.downloadAllTlds(progress)),
 
-      logbox.wrap('Licenses With Data Insights', (progress) =>
+      licensesWithDataInsights: logbox.wrap('Licenses With Data Insights', (progress) =>
         this.io.in.marketplace.downloadLicensesWithDataInsights(progress)),
 
-      logbox.wrap('Licenses Without Data Insights', (progress) =>
+      licensesWithoutDataInsights: logbox.wrap('Licenses Without Data Insights', (progress) =>
         this.io.in.marketplace.downloadLicensesWithoutDataInsights(progress)),
 
-      logbox.wrap('Transactions', (progress) =>
+      transactions: logbox.wrap('Transactions', (progress) =>
         this.io.in.marketplace.downloadTransactions(progress)),
 
-      logbox.wrap('Free Email Providers', (progress) =>
+      freeDomains: logbox.wrap('Free Email Providers', (progress) =>
         this.io.in.emailProviderLister.downloadFreeEmailProviders(progress)),
 
-      logbox.wrap('Deals', (progress) =>
+      rawDeals: logbox.wrap('Deals', (progress) =>
         this.dealManager.downloadAllEntities(progress)),
 
-      logbox.wrap('Companies', (progress) =>
+      rawCompanies: logbox.wrap('Companies', (progress) =>
         this.companyManager.downloadAllEntities(progress)),
 
-      logbox.wrap('Contacts', (progress) =>
+      rawContacts: logbox.wrap('Contacts', (progress) =>
         this.contactManager.downloadAllEntities(progress)),
-    ]);
+    });
 
     logbox.done();
 
