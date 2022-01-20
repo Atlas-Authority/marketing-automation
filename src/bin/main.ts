@@ -1,12 +1,11 @@
 import 'source-map-support/register';
 import Engine from "../lib/engine/engine";
 import { IO, LiveRemote } from '../lib/io/io';
-import Slack from "../lib/io/slack";
 import log from '../lib/log/logger';
+import { SlackNotifier } from '../lib/log/slack-notifier';
 import { Database } from "../lib/model/database";
 import { getCliArgs } from '../lib/parameters/cli-args';
-import { envConfig, runLoopConfigFromENV, serviceCredsFromENV, slackConfigFromENV } from "../lib/parameters/env-config";
-import { AttachableError, KnownError } from "../lib/util/errors";
+import { envConfig, runLoopConfigFromENV, serviceCredsFromENV } from "../lib/parameters/env-config";
 import run from "../lib/util/runner";
 
 main();
@@ -17,18 +16,10 @@ async function main() {
 
   const io = new IO(new LiveRemote(serviceCredsFromENV()));
 
-  let slack: Slack | undefined;
-  const slackConfig = slackConfigFromENV();
-  if (slackConfig.apiToken) {
-    const { apiToken, errorChannelId } = slackConfig;
-    slack = new Slack(apiToken, errorChannelId);
-  }
+  const notifier = SlackNotifier.fromENV();
+  notifier?.notifyStarting();
 
-  await slack?.postToSlack(`Starting Marketing Engine`);
-
-  const loopConfig = runLoopConfigFromENV();
-
-  await run(loopConfig, {
+  await run(runLoopConfigFromENV(), {
 
     async work() {
       const db = new Database(io, envConfig);
@@ -36,22 +27,7 @@ async function main() {
     },
 
     async failed(errors) {
-      await slack?.postToSlack(`Failed ${loopConfig.retryTimes} times. Below are the specific errors, in order. Trying again in ${loopConfig.runInterval}.`);
-      for (const error of errors) {
-        if (error instanceof KnownError) {
-          await slack?.postErrorToSlack(error.message);
-        }
-        else if (error instanceof AttachableError) {
-          await slack?.postErrorToSlack(`\`\`\`\n${error.stack}\n\`\`\``);
-          await slack?.postAttachmentToSlack({
-            title: 'Error attachment for ^',
-            content: error.attachment,
-          });
-        }
-        else {
-          await slack?.postErrorToSlack(`\`\`\`\n${error.stack}\n\`\`\``);
-        }
-      }
+      notifier?.notifyErrors(errors);
     },
 
   });
