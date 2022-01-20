@@ -10,7 +10,7 @@ import { isPresent } from "../util/helpers";
 import { CompanyManager } from "./company";
 import { ContactManager } from "./contact";
 import { DealManager } from "./deal";
-import { EmailProviderLister } from "./email-providers";
+import { deriveMultiProviderDomainsSet } from "./email-providers";
 import { Entity } from "./hubspot/entity";
 import { EntityKind } from "./hubspot/interfaces";
 import { License } from "./license";
@@ -31,8 +31,6 @@ export class Database {
   public partnerDomains = new Set<string>();
   public customerDomains = new Set<string>();
 
-  private emailProviderLister: EmailProviderLister;
-
   public tallier = new Tallier();
 
   public appToPlatform: { [addonKey: string]: string } = Object.create(null);
@@ -42,7 +40,6 @@ export class Database {
     this.dealManager = new DealManager(io.in.hubspot, io.out.hubspot);
     this.contactManager = new ContactManager(io.in.hubspot, io.out.hubspot);
     this.companyManager = new CompanyManager(io.in.hubspot, io.out.hubspot);
-    this.emailProviderLister = new EmailProviderLister(io.in.emailProviderLister);
 
     for (const domain of config.partnerDomains) {
       this.partnerDomains.add(domain);
@@ -68,6 +65,7 @@ export class Database {
       licensesWithDataInsights,
       licensesWithoutDataInsights,
       transactions,
+      freeDomains,
     ] = await Promise.all([
       logbox.wrap('Tlds', (progress) =>
         this.io.in.tldLister.downloadAllTlds(progress)),
@@ -82,7 +80,7 @@ export class Database {
         this.io.in.marketplace.downloadTransactions(progress)),
 
       logbox.wrap('Free Email Providers', (progress) =>
-        this.emailProviderLister.deriveMultiProviderDomainsSet(progress)),
+        this.io.in.emailProviderLister.downloadFreeEmailProviders(progress)),
 
       logbox.wrap('Deals', (progress) =>
         this.dealManager.downloadAllEntities(progress)),
@@ -102,7 +100,7 @@ export class Database {
 
     log.info('Downloader', 'Done');
 
-    this.providerDomains = this.emailProviderLister.set;
+    this.providerDomains = deriveMultiProviderDomainsSet(freeDomains);
 
     const emailRe = makeEmailValidationRegex(tlds);
 
