@@ -67,7 +67,7 @@ export abstract class EntityManager<
     return await this.downloader.downloadEntities(progress, this.kind, apiProperties, downAssociations);
   }
 
-  public importEntities(rawEntities: readonly FullEntity[], db: EntityDatabase) {
+  public importEntities(rawEntities: readonly FullEntity[]) {
     const prelinkedAssociations = new Map<string, Set<RelativeAssociation>>();
 
     for (const rawEntity of rawEntities) {
@@ -95,6 +95,10 @@ export abstract class EntityManager<
       index.addIndexesFor(this.entities);
     }
 
+    return prelinkedAssociations;
+  }
+
+  public linkEntities(prelinkedAssociations: Map<string, Set<RelativeAssociation>>, db: EntityDatabase) {
     for (const [meId, rawAssocs] of prelinkedAssociations) {
       for (const rawAssoc of rawAssocs) {
         const me = this.get(meId);

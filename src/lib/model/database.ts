@@ -134,10 +134,13 @@ export class Database {
       return found;
     };
 
+    const dealPrelinks = this.dealManager.importEntities(rawDeals);
+    const companyPrelinks = this.companyManager.importEntities(rawCompanies);
+    const contactPrelinks = this.contactManager.importEntities(rawContacts);
 
-    this.dealManager.importEntities(rawDeals, { getEntity });
-    this.companyManager.importEntities(rawCompanies, { getEntity });
-    this.contactManager.importEntities(rawContacts, { getEntity });
+    this.dealManager.linkEntities(dealPrelinks, { getEntity });
+    this.companyManager.linkEntities(companyPrelinks, { getEntity });
+    this.contactManager.linkEntities(contactPrelinks, { getEntity });
 
     log.info('Downloader', 'Done');
 
