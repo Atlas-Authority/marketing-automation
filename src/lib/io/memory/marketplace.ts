@@ -1,4 +1,4 @@
-import DataDir from "../../data/datadir";
+import DataDir from "../../data/dir";
 import { RawLicense, RawTransaction } from "../../model/marketplace/raw";
 import { MarketplaceService } from "../interfaces";
 

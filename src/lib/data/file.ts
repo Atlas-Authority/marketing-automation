@@ -1,28 +1,11 @@
+import { flatten, unflatten } from 'flat';
 import fs from "fs";
-import { pathToFileURL, URL } from "url";
+import LineReader from 'n-readlines';
+import { URL } from "url";
 import log from "../log/logger";
 import { CsvStream } from "./csv-stream";
-import { flatten, unflatten } from 'flat';
-import LineReader from 'n-readlines';
 
-const rootDataDir = new URL(`../../data/`, pathToFileURL(__dirname));
-if (!fs.existsSync(rootDataDir)) fs.mkdirSync(rootDataDir);
-
-export default class DataDir {
-
-  #base: URL;
-  constructor(place: string) {
-    this.#base = new URL(`${place}/`, rootDataDir);
-    if (!fs.existsSync(this.#base)) fs.mkdirSync(this.#base);
-  }
-
-  public file<T extends readonly any[]>(filename: string): DataFile<T> {
-    return new DataFile<T>(this.#base, filename);
-  }
-
-}
-
-class DataFile<T extends readonly any[]> {
+export class DataFile<T extends readonly any[]> {
 
   #url: URL;
   public constructor(base: URL, filename: string) {

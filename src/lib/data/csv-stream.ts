@@ -1,4 +1,4 @@
-import { LogWriteStream } from "./datadir";
+import { LogWriteStream } from "./file";
 
 export class CsvStream {
 

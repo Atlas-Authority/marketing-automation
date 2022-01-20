@@ -1,4 +1,4 @@
-import DataDir from "../../data/datadir";
+import DataDir from "../../data/dir";
 import log from "../../log/logger";
 import { Association, EntityKind, ExistingEntity, FullEntity, NewEntity, RelativeAssociation } from "../../model/hubspot/interfaces";
 import { HubspotService, Progress } from "../interfaces";

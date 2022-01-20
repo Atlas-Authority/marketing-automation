@@ -1,4 +1,4 @@
-import DataDir from "../data/datadir";
+import DataDir from "../data/dir";
 import { EngineLogger } from "../log/engine-logger";
 import { Database } from "../model/database";
 import { identifyAndFlagContactTypes } from "./contacts/contact-types";

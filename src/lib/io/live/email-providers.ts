@@ -1,5 +1,5 @@
 import got from 'got';
-import DataDir from '../../data/datadir';
+import DataDir from '../../data/dir';
 import { EmailProviderListerService } from '../interfaces';
 
 export class LiveEmailProviderListerService implements EmailProviderListerService {

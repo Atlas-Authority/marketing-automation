@@ -1,6 +1,6 @@
 import got from 'got';
 import { DateTime, Duration, Interval } from 'luxon';
-import DataDir from '../../data/datadir';
+import DataDir from '../../data/dir';
 import { RawLicense, RawTransaction } from '../../model/marketplace/raw';
 import { MpacCreds } from '../../parameters/interfaces';
 import { AttachableError, KnownError } from '../../util/errors';

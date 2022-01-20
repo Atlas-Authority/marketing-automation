@@ -1,4 +1,4 @@
-import { LogWriteStream } from "../../data/datadir.js";
+import { LogWriteStream } from "../../data/file.js";
 import { Table } from "../../log/table.js";
 import { DealData } from "../../model/deal.js";
 import { DealStage } from '../../model/hubspot/interfaces.js';

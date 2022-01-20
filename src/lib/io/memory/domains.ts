@@ -1,4 +1,4 @@
-import DataDir from "../../data/datadir";
+import DataDir from "../../data/dir";
 import { TldListerService } from "../interfaces";
 
 export class MemoryTldListerService implements TldListerService {
