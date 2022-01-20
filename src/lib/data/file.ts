@@ -1,4 +1,3 @@
-import { flatten, unflatten } from 'flat';
 import fs from "fs";
 import LineReader from 'n-readlines';
 import { URL } from "url";
@@ -18,59 +17,20 @@ export class DataFile<T extends readonly any[]> {
       process.exit(1);
     }
 
-    let keys: string[] | undefined;
-    const array: any[] = [];
-
     const reader = new LineReader(this.#url);
-    let lineBuffer;
-    while (lineBuffer = reader.next()) {
-      const line = lineBuffer.toString('utf-8');
-
-      if (!keys) {
-        keys = line.split(',');
-        continue;
-      }
-
-      const vals = JSON.parse(`[${line}]`);
-      const entries = keys.map((key, i) => [key, vals[i]]);
-      const normalized = entries.filter(([k, v]) => v !== null && v !== undefined);
-      const object = Object.fromEntries(normalized);
-      const restored = unflatten(object);
-      array.push(restored);
-    }
-
-    return array as unknown as T;
+    const stream: LogReadStream = {
+      readLine: () => {
+        const buf = reader.next();
+        if (!buf) return undefined;
+        return buf.toString('utf8');
+      },
+    };
+    return CsvStream.readFileFromFile(stream) as T;
   }
 
   public writeArray(array: T) {
-    const keySet = new Set<string>();
-    for (const item of array) {
-      for (const key of Object.keys(flatten(item))) {
-        keySet.add(key);
-      }
-    }
-
     this.writeCsvStream(csv => {
-      const keys = [...keySet];
-      csv.writeHeader(keys);
-
-      for (const item of array) {
-        const flattened = flatten(item) as any;
-        const orderedValues: any[] = [];
-        for (const key of keys) {
-          orderedValues.push(flattened[key]);
-        }
-        while (orderedValues.length > 1) {
-          const lastVal = orderedValues[orderedValues.length - 1];
-          if (lastVal === undefined || lastVal === null) {
-            orderedValues.pop();
-          }
-          else {
-            break;
-          }
-        }
-        csv.writeValueRow(orderedValues);
-      }
+      csv.writeArrayToFile(array);
     });
   }
 
@@ -96,4 +56,8 @@ export class DataFile<T extends readonly any[]> {
 
 export interface LogWriteStream {
   writeLine(text: string): void;
+}
+
+export interface LogReadStream {
+  readLine(): string | undefined;
 }

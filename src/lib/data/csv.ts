@@ -1,4 +1,5 @@
-import { LogWriteStream } from "./file";
+import { flatten, unflatten } from 'flat';
+import { LogReadStream, LogWriteStream } from "./file";
 
 export class CsvStream {
 
@@ -25,6 +26,58 @@ export class CsvStream {
 
   writeBlankRow() {
     this.stream.writeLine(','.repeat(this.keyCount - 1));
+  }
+
+  static readFileFromFile(stream: LogReadStream): unknown {
+    let keys: string[] | undefined;
+    const array: any[] = [];
+
+    let line: string | undefined;
+    while (undefined !== (line = stream.readLine())) {
+      if (!keys) {
+        keys = line.split(',');
+        continue;
+      }
+
+      const vals = JSON.parse(`[${line}]`);
+      const entries = keys.map((key, i) => [key, vals[i]]);
+      const normalized = entries.filter(([k, v]) => v !== null && v !== undefined);
+      const object = Object.fromEntries(normalized);
+      const restored = unflatten(object);
+      array.push(restored);
+    }
+
+    return array;
+  }
+
+  writeArrayToFile(array: readonly any[]) {
+    const keySet = new Set<string>();
+    for (const item of array) {
+      for (const key of Object.keys(flatten(item))) {
+        keySet.add(key);
+      }
+    }
+
+    const keys = [...keySet];
+    this.writeHeader(keys);
+
+    for (const item of array) {
+      const flattened = flatten(item) as any;
+      const orderedValues: any[] = [];
+      for (const key of keys) {
+        orderedValues.push(flattened[key]);
+      }
+      while (orderedValues.length > 1) {
+        const lastVal = orderedValues[orderedValues.length - 1];
+        if (lastVal === undefined || lastVal === null) {
+          orderedValues.pop();
+        }
+        else {
+          break;
+        }
+      }
+      this.writeValueRow(orderedValues);
+    }
   }
 
 }
