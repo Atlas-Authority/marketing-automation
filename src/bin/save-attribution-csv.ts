@@ -24,17 +24,13 @@ async function main() {
     ].join(',')))
   );
 
-  new DataDir('out').file('attributions.csv').writeCsvStream(file => {
-    for (const a of attributions) {
-      file.writeObjectRow({
-        channel: a.channel,
-        referrerDomain: a.referrerDomain,
-        campaignName: a.campaignName,
-        campaignSource: a.campaignSource,
-        campaignMedium: a.campaignMedium,
-        campaignContent: a.campaignContent,
-      });
-    }
-  });
+  new DataDir('inspect').file('attributions.csv').writeArray(attributions.map(a => ({
+    channel: a.channel,
+    referrerDomain: a.referrerDomain,
+    campaignName: a.campaignName,
+    campaignSource: a.campaignSource,
+    campaignMedium: a.campaignMedium,
+    campaignContent: a.campaignContent,
+  })));
 
 }
