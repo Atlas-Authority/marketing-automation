@@ -1,5 +1,4 @@
 import 'source-map-support/register';
-import DataDir from '../lib/data/dir';
 import Engine from "../lib/engine/engine";
 import { CachedMemoryRemote, IO } from "../lib/io/io";
 import log from "../lib/log/logger";
@@ -12,11 +11,13 @@ async function main() {
 
   let i = 0;
   const { savelogs } = getCliArgs('savelogs');
-  const nextDataDir = () => savelogs ? new DataDir(`${savelogs}-${++i}`) : null;
 
   log.level = log.Levels.Info;
 
-  const io = new IO(new CachedMemoryRemote());
+  const remote = new CachedMemoryRemote();
+  const nextDataDir = () => savelogs ? remote.dataDir.subdir(`${savelogs}-${++i}`) : null;
+
+  const io = new IO(remote);
   const engine = new Engine();
 
   // First

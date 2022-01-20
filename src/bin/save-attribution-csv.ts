@@ -24,7 +24,7 @@ async function main() {
     ].join(',')))
   );
 
-  new DataDir('inspect').file('attributions.csv').writeArray(attributions.map(a => ({
+  DataDir.root.subdir('inspect').file('attributions.csv').writeArray(attributions.map(a => ({
     channel: a.channel,
     referrerDomain: a.referrerDomain,
     campaignName: a.campaignName,

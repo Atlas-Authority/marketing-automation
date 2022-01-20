@@ -25,7 +25,7 @@ export class IO {
 }
 
 export class CachedMemoryRemote implements Remote {
-  dataDir = new DataDir("in");
+  dataDir = DataDir.root.subdir("in");
   marketplace = new MemoryMarketplace(this.dataDir);
   tldLister = new MemoryTldListerService(this.dataDir);
   emailProviderLister = new MemoryEmailProviderListerService(this.dataDir);
@@ -41,7 +41,7 @@ export class MemoryRemote implements Remote {
 
 export class LiveRemote implements Remote {
 
-  dataDir = new DataDir("in");
+  dataDir = DataDir.root.subdir("in");
 
   hubspot: HubspotService;
   marketplace: MarketplaceService;

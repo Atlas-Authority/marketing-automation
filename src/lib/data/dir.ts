@@ -2,14 +2,13 @@ import fs from "fs";
 import { pathToFileURL, URL } from "url";
 import { DataFile } from "./file";
 
-const rootDataDir = new URL(`../../data/`, pathToFileURL(__dirname));
-if (!fs.existsSync(rootDataDir)) fs.mkdirSync(rootDataDir);
-
 export default class DataDir {
 
+  static root = new DataDir('data', new URL(`../../`, pathToFileURL(__dirname)));
+
   #base: URL;
-  constructor(place: string) {
-    this.#base = new URL(`${place}/`, rootDataDir);
+  private constructor(place: string, base?: URL) {
+    this.#base = new URL(`${place}/`, base);
     if (!fs.existsSync(this.#base)) fs.mkdirSync(this.#base);
   }
 
@@ -17,4 +16,9 @@ export default class DataDir {
     return new DataFile<T>(this.#base, filename);
   }
 
+  public subdir(place: string): DataDir {
+    return new DataDir(place, this.#base);
+  }
+
 }
+
