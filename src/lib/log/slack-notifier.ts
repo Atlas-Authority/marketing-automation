@@ -1,4 +1,5 @@
-import Slack from "../io/slack";
+import * as slack from '@slack/web-api';
+import log from '../log/logger';
 import { runLoopConfigFromENV, slackConfigFromENV } from "../parameters/env-config";
 import { AttachableError, KnownError } from "../util/errors";
 
@@ -8,34 +9,64 @@ export class SlackNotifier {
     const slackConfig = slackConfigFromENV();
     if (!slackConfig.apiToken) return null;
 
-    const slack = new Slack(slackConfig.apiToken, slackConfig.errorChannelId);
-    return new SlackNotifier(slack);
+    const client = new slack.WebClient(slackConfig.apiToken);
+    return new SlackNotifier(client, slackConfig.errorChannelId);
   }
 
-  constructor(private slack: Slack) { }
+  private constructor(
+    private client: slack.WebClient,
+    private errorChannelId: string | undefined,
+  ) { }
 
-  notifyStarting() {
-    this.slack.postToSlack(`Starting Marketing Engine`);
+  public async notifyStarting() {
+    this.postToSlack(`Starting Marketing Engine`);
   }
 
-  async notifyErrors(errors: any[]) {
+  public async notifyErrors(errors: any[]) {
     const loopConfig = runLoopConfigFromENV();
 
-    await this.slack.postToSlack(`Failed ${loopConfig.retryTimes} times. Below are the specific errors, in order. Trying again in ${loopConfig.runInterval}.`);
+    await this.postToSlack(`Failed ${loopConfig.retryTimes} times. Below are the specific errors, in order. Trying again in ${loopConfig.runInterval}.`);
     for (const error of errors) {
       if (error instanceof KnownError) {
-        await this.slack.postErrorToSlack(error.message);
+        await this.postToSlack(error.message);
       }
       else if (error instanceof AttachableError) {
-        await this.slack.postErrorToSlack(`\`\`\`\n${error.stack}\n\`\`\``);
-        await this.slack.postAttachmentToSlack({
+        await this.postErrorToSlack(error);
+        await this.postAttachmentToSlack({
           title: 'Error attachment for ^',
           content: error.attachment,
         });
       }
       else {
-        await this.slack.postErrorToSlack(`\`\`\`\n${error.stack}\n\`\`\``);
+        await this.postErrorToSlack(error);
       }
+    }
+  }
+
+  private async postErrorToSlack(error: Error) {
+    await this.postToSlack(`\`\`\`\n${error.stack}\n\`\`\``);
+  }
+
+  private async postAttachmentToSlack({ title, content }: { title: string, content: string }) {
+    log.info('Slack', title, content);
+
+    if (this.errorChannelId) {
+      await this.client.files.upload({
+        channels: this.errorChannelId,
+        title: title,
+        content: content,
+      })
+    }
+  }
+
+  private async postToSlack(text: string) {
+    log.info('Slack', text);
+
+    if (this.errorChannelId) {
+      await this.client.chat.postMessage({
+        channel: this.errorChannelId,
+        text: text,
+      });
     }
   }
 
