@@ -3,7 +3,7 @@ import fs from "fs";
 import LineReader from 'n-readlines';
 import { URL } from "url";
 import log from "../log/logger";
-import { CsvStream } from "./csv-stream";
+import { CsvStream } from "./csv";
 
 export class DataFile<T extends readonly any[]> {
 
