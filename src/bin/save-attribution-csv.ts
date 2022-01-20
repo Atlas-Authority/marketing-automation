@@ -11,7 +11,8 @@ async function main() {
 
   log.level = log.Levels.Verbose;
   const db = new Database(new IO(new CachedMemoryRemote()), envConfig);
-  await db.downloadAllData();
+  const data = await db.downloadData();
+  db.importData(data);
 
   const attributions = (db
     .licenses

@@ -8,7 +8,8 @@ main();
 async function main() {
 
   const db = new Database(new IO(new CachedMemoryRemote()), envConfig);
-  await db.downloadAllData();
+  const data = await db.downloadData();
+  db.importData(data);
   printSummary(db);
 
 }

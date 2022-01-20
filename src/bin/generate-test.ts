@@ -52,7 +52,8 @@ function format(o: any, breakLength = 50) {
 
 async function getRedactedMatchGroup(ids: [string, string[]][]) {
   const db = new Database(new IO(new CachedMemoryRemote()), envConfig);
-  await db.downloadAllData();
+  const data = await db.downloadData();
+  db.importData(data);
 
   const group: RelatedLicenseSet = [];
   for (const [lid, txids] of ids) {

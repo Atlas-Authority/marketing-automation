@@ -14,7 +14,8 @@ export default class Engine {
     const log = new EngineLogger();
 
     log.step('Starting to download data');
-    await db.downloadAllData();
+    const data = await db.downloadData();
+    db.importData(data);
 
     log.step('Identifying and Flagging Contact Types');
     identifyAndFlagContactTypes(db);

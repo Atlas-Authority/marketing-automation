@@ -12,6 +12,7 @@ async function main() {
   io.in = new LiveRemote(serviceCredsFromENV());
   io.out = new MemoryRemote();
   const db = new Database(io, envConfig);
-  await db.downloadAllData();
+  const data = await db.downloadData();
+  db.importData(data);
 
 }

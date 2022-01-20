@@ -13,10 +13,22 @@ import { ContactManager } from "./contact";
 import { DealManager } from "./deal";
 import { deriveMultiProviderDomainsSet } from "./email-providers";
 import { Entity } from "./hubspot/entity";
-import { EntityKind } from "./hubspot/interfaces";
+import { EntityKind, FullEntity } from "./hubspot/interfaces";
 import { License } from "./license";
+import { RawLicense, RawTransaction } from './marketplace/raw';
 import { validateMarketplaceData } from "./marketplace/validation";
 import { Transaction, TransactionData } from "./transaction";
+
+interface InputData {
+  tlds: readonly string[];
+  licensesWithDataInsights: readonly RawLicense[];
+  licensesWithoutDataInsights: readonly RawLicense[];
+  transactions: readonly RawTransaction[];
+  freeDomains: readonly string[];
+  rawDeals: readonly FullEntity[];
+  rawCompanies: readonly FullEntity[];
+  rawContacts: readonly FullEntity[];
+}
 
 export class Database {
 
@@ -56,21 +68,12 @@ export class Database {
     this.archivedApps = env.engine.archivedApps;
   }
 
-  public async downloadAllData() {
+  public async downloadData(): Promise<InputData> {
     log.info('Downloader', 'Starting downloads with API');
 
     const logbox = new MultiDownloadLogger();
 
-    const {
-      tlds,
-      licensesWithDataInsights,
-      licensesWithoutDataInsights,
-      transactions,
-      freeDomains,
-      rawDeals,
-      rawCompanies,
-      rawContacts,
-    } = await promiseAllProperties({
+    const data = await promiseAllProperties({
       tlds: logbox.wrap('Tlds', (progress) =>
         this.io.in.tldLister.downloadAllTlds(progress)),
 
@@ -98,6 +101,20 @@ export class Database {
 
     logbox.done();
 
+    return data;
+  }
+
+  importData(data: InputData) {
+    const {
+      tlds,
+      licensesWithDataInsights,
+      licensesWithoutDataInsights,
+      transactions,
+      freeDomains,
+      rawDeals,
+      rawCompanies,
+      rawContacts,
+    } = data;
 
     const getManager = (kind: EntityKind) => {
       switch (kind) {
