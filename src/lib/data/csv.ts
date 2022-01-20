@@ -1,5 +1,5 @@
 import { flatten, unflatten } from 'flat';
-import { LogReadStream, LogWriteStream } from "./file";
+import { LogWriteStream } from "./file";
 
 export class CsvStream {
 
@@ -28,12 +28,11 @@ export class CsvStream {
     this.stream.writeLine(','.repeat(this.keyCount - 1));
   }
 
-  static readFileFromFile(stream: LogReadStream): unknown {
+  static readFileFromFile(lines: Iterable<string>): unknown {
     let keys: string[] | undefined;
     const array: any[] = [];
 
-    let line: string | undefined;
-    while (undefined !== (line = stream.readLine())) {
+    for (const line of lines) {
       if (!keys) {
         keys = line.split(',');
         continue;

@@ -17,15 +17,21 @@ export class DataFile<T extends readonly any[]> {
       process.exit(1);
     }
 
+    return CsvStream.readFileFromFile(this.readLines()) as T;
+  }
+
+  public readLines(): Iterator<string> & Iterable<string> {
     const reader = new LineReader(this.#url);
-    const stream: LogReadStream = {
-      readLine: () => {
+    return {
+      [Symbol.iterator]() {
+        return this;
+      },
+      next(): { done: boolean, value: string } {
         const buf = reader.next();
-        if (!buf) return undefined;
-        return buf.toString('utf8');
+        if (!buf) return { done: true, value: '' };
+        return { done: false, value: buf.toString('utf8') }
       },
     };
-    return CsvStream.readFileFromFile(stream) as T;
   }
 
   public writeArray(array: T) {
@@ -56,8 +62,4 @@ export class DataFile<T extends readonly any[]> {
 
 export interface LogWriteStream {
   writeLine(text: string): void;
-}
-
-export interface LogReadStream {
-  readLine(): string | undefined;
 }
