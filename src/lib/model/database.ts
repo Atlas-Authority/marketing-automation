@@ -97,9 +97,29 @@ export class Database {
 
     logbox.done();
 
-    this.dealManager.importEntities(rawDeals, this);
-    this.companyManager.importEntities(rawCompanies, this);
-    this.contactManager.importEntities(rawContacts, this);
+
+    const getManager = (kind: EntityKind) => {
+      switch (kind) {
+        case 'deal': return this.dealManager;
+        case 'company': return this.companyManager;
+        case 'contact': return this.contactManager;
+      }
+    };
+
+    const getEntity = (kind: EntityKind, id: string): Entity<any, any> => {
+      const found = getManager(kind).get(id);
+      // There's only two ways to set associations:
+      // 1. They were already set in HubSpot when we downloaded them, or
+      // 2. We set them in code with an object already having a valid id.
+      // In either case, an invalid id would fail before this method.
+      if (!found) throw new Error(`Expected to find ${kind} with id ${id}`);
+      return found;
+    };
+
+
+    this.dealManager.importEntities(rawDeals, { getEntity });
+    this.companyManager.importEntities(rawCompanies, { getEntity });
+    this.contactManager.importEntities(rawContacts, { getEntity });
 
     log.info('Downloader', 'Done');
 
@@ -298,24 +318,6 @@ export class Database {
     await this.dealManager.syncUpAllAssociations();
     await this.contactManager.syncUpAllAssociations();
     await this.companyManager.syncUpAllAssociations();
-  }
-
-  public getEntity(kind: EntityKind, id: string): Entity<any, any> {
-    const found = this.getManager(kind).get(id);
-    // There's only two ways to set associations:
-    // 1. They were already set in HubSpot when we downloaded them, or
-    // 2. We set them in code with an object already having a valid id.
-    // In either case, an invalid id would fail before this method.
-    if (!found) throw new Error(`Expected to find ${kind} with id ${id}`);
-    return found;
-  }
-
-  private getManager(kind: EntityKind) {
-    switch (kind) {
-      case 'deal': return this.dealManager;
-      case 'company': return this.companyManager;
-      case 'contact': return this.contactManager;
-    }
   }
 
 }
