@@ -69,7 +69,9 @@ export class Deal extends Entity<DealData, DealComputed> {
 
 }
 
-const DealAdapter: EntityAdapter<DealData, DealComputed> = {
+export const DealAdapter: EntityAdapter<DealData, DealComputed> = {
+
+  kind: 'deal',
 
   associations: [
     ['company', 'down/up'],
@@ -212,7 +214,6 @@ const DealAdapter: EntityAdapter<DealData, DealComputed> = {
 export class DealManager extends EntityManager<DealData, DealComputed, Deal> {
 
   protected override Entity = Deal;
-  protected override kind: EntityKind = 'deal';
   protected override entityAdapter = DealAdapter;
 
   public duplicates = new Map<Deal, Deal[]>();

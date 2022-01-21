@@ -1,6 +1,5 @@
 import { Data, HubspotService } from '../io/interfaces';
 import { makeEmailValidationRegex } from "../io/live/domains";
-import { MemoryHubspot } from '../io/memory/hubspot';
 import log from "../log/logger";
 import { Table } from "../log/table";
 import { Tallier } from "../log/tallier";
@@ -37,9 +36,9 @@ export class Database {
   public archivedApps = new Set<string>();
 
   public constructor(outHubspot: HubspotService, config: Config, populateFromEnv = true) {
-    this.dealManager = new DealManager(new MemoryHubspot(null), outHubspot);
-    this.contactManager = new ContactManager(new MemoryHubspot(null), outHubspot);
-    this.companyManager = new CompanyManager(new MemoryHubspot(null), outHubspot);
+    this.dealManager = new DealManager(outHubspot);
+    this.contactManager = new ContactManager(outHubspot);
+    this.companyManager = new CompanyManager(outHubspot);
 
     for (const domain of config.partnerDomains) {
       this.partnerDomains.add(domain);

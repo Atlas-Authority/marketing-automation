@@ -1,17 +1,13 @@
 import promiseAllProperties from 'promise-all-properties';
 import { Data, Remote } from '../io/interfaces';
-import { MemoryHubspot } from '../io/memory/hubspot';
 import { MultiDownloadLogger } from "../log/download-logger";
 import log from "../log/logger";
-import { CompanyManager } from '../model/company';
-import { ContactManager } from '../model/contact';
-import { DealManager } from '../model/deal';
+import { CompanyAdapter } from '../model/company';
+import { ContactAdapter } from '../model/contact';
+import { DealAdapter } from '../model/deal';
+import { downloadHubspotEntities } from '../model/hubspot/manager';
 
 export async function downloadData(remote: Remote): Promise<Data> {
-  const dealManager = new DealManager(remote.hubspot, new MemoryHubspot(null));
-  const contactManager = new ContactManager(remote.hubspot, new MemoryHubspot(null));
-  const companyManager = new CompanyManager(remote.hubspot, new MemoryHubspot(null));
-
   log.info('Downloader', 'Starting downloads with API');
   const logbox = new MultiDownloadLogger();
 
@@ -32,13 +28,13 @@ export async function downloadData(remote: Remote): Promise<Data> {
       remote.emailProviderLister.downloadFreeEmailProviders(progress)),
 
     rawDeals: logbox.wrap('Deals', (progress) =>
-      dealManager.downloadAllEntities(progress)),
+      downloadHubspotEntities(remote.hubspot, DealAdapter, progress)),
 
     rawCompanies: logbox.wrap('Companies', (progress) =>
-      companyManager.downloadAllEntities(progress)),
+      downloadHubspotEntities(remote.hubspot, CompanyAdapter, progress)),
 
     rawContacts: logbox.wrap('Contacts', (progress) =>
-      contactManager.downloadAllEntities(progress)),
+      downloadHubspotEntities(remote.hubspot, ContactAdapter, progress)),
   });
 
   logbox.done();

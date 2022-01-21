@@ -14,7 +14,9 @@ export class Company extends Entity<CompanyData, {}> {
 
 }
 
-const CompanyAdapter: EntityAdapter<CompanyData, {}> = {
+export const CompanyAdapter: EntityAdapter<CompanyData, {}> = {
+
+  kind: 'company',
 
   associations: [
     ['contact', 'down']
@@ -40,7 +42,6 @@ const CompanyAdapter: EntityAdapter<CompanyData, {}> = {
 export class CompanyManager extends EntityManager<CompanyData, {}, Company> {
 
   protected override Entity = Company;
-  protected override kind: EntityKind = 'company';
   protected override entityAdapter = CompanyAdapter;
 
 }

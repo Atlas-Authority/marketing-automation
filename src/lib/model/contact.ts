@@ -50,7 +50,9 @@ export class Contact extends Entity<ContactData, ContactComputed> {
 
 }
 
-const ContactAdapter: EntityAdapter<ContactData, ContactComputed> = {
+export const ContactAdapter: EntityAdapter<ContactData, ContactComputed> = {
+
+  kind: 'contact',
 
   associations: [
     ['company', 'down/up'],
@@ -151,7 +153,6 @@ const ContactAdapter: EntityAdapter<ContactData, ContactComputed> = {
 export class ContactManager extends EntityManager<ContactData, ContactComputed, Contact> {
 
   protected override Entity = Contact;
-  protected override kind: EntityKind = 'contact';
   protected override entityAdapter = ContactAdapter;
 
   public getByEmail = this.makeIndex(c => c.allEmails, ['email']);

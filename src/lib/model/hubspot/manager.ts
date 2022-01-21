@@ -9,7 +9,23 @@ export interface EntityDatabase {
   getEntity(kind: EntityKind, id: string): Entity<any, any>;
 }
 
+export async function downloadHubspotEntities<D, C>(downloader: HubspotService, entityAdapter: EntityAdapter<D, C>, progress: Progress) {
+  const downAssociations = (entityAdapter.associations
+    .filter(([kind, dir]) => dir.includes('down'))
+    .map(([kind, dir]) => kind));
+
+  const apiProperties = [
+    ...typedEntries(entityAdapter.data).map(([k, v]) => v.property).filter(isPresent),
+    ...typedEntries(entityAdapter.computed).flatMap(([k, v]) => v.properties),
+  ];
+
+  return await downloader.downloadEntities(progress, entityAdapter.kind, apiProperties, downAssociations);
+}
+
 export interface EntityAdapter<D, C> {
+
+  kind: EntityKind;
+
   associations: [EntityKind, 'down' | 'down/up'][];
 
   shouldReject?: (data: HubspotProperties) => boolean;
@@ -36,7 +52,6 @@ export abstract class EntityManager<
 {
 
   public constructor(
-    private downloader: HubspotService,
     private uploader: HubspotService,
   ) { }
 
@@ -46,26 +61,13 @@ export abstract class EntityManager<
   public disassociatedCount = 0;
 
   protected abstract Entity: new (id: string | null, kind: EntityKind, data: D, computed: C, indexer: Indexer<D>) => E;
-  protected abstract kind: EntityKind;
   protected abstract entityAdapter: EntityAdapter<D, C>;
+  protected get kind(): EntityKind { return this.entityAdapter.kind; }
 
   private entities: E[] = [];
   private indexes: Index<E>[] = [];
   private indexIndex = new Map<keyof D, Index<E>>();
   public get = this.makeIndex(e => [e.id].filter(isPresent), []);
-
-  public async downloadAllEntities(progress: Progress) {
-    const downAssociations = (this.entityAdapter.associations
-      .filter(([kind, dir]) => dir.includes('down'))
-      .map(([kind, dir]) => kind));
-
-    const apiProperties = [
-      ...typedEntries(this.entityAdapter.data).map(([k, v]) => v.property).filter(isPresent),
-      ...typedEntries(this.entityAdapter.computed).flatMap(([k, v]) => v.properties),
-    ];
-
-    return await this.downloader.downloadEntities(progress, this.kind, apiProperties, downAssociations);
-  }
 
   public importEntities(rawEntities: readonly FullEntity[]) {
     const prelinkedAssociations = new Map<string, Set<RelativeAssociation>>();
