@@ -1,6 +1,7 @@
 import 'source-map-support/register';
 import DataDir from '../lib/data/dir';
-import { CachedMemoryRemote, IO } from "../lib/io/io";
+import { downloadData } from '../lib/engine/downloader';
+import { CachedMemoryRemote } from "../lib/io/io";
 import log from "../lib/log/logger";
 import { Database } from "../lib/model/database";
 import { envConfig } from '../lib/parameters/env-config';
@@ -10,8 +11,8 @@ main();
 async function main() {
 
   log.level = log.Levels.Verbose;
-  const db = new Database(new IO(new CachedMemoryRemote()), envConfig);
-  const data = await db.downloadData();
+  const db = new Database(new CachedMemoryRemote(), envConfig);
+  const data = await downloadData(new CachedMemoryRemote());
   db.importData(data);
 
   const attributions = (db

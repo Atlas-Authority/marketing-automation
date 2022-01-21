@@ -1,5 +1,5 @@
 import Chance from 'chance';
-import { IO } from '../../../io/io';
+import { MemoryRemote } from '../../../io/io';
 import { Database } from '../../../model/database';
 import { DealData } from "../../../model/deal";
 import { DealStage } from '../../../model/hubspot/interfaces';
@@ -29,8 +29,7 @@ export function runDealGeneratorTwice(input: TestInput) {
 }
 
 export function runDealGenerator(input: TestInput) {
-  const io = new IO();
-  const db = new Database(io, {
+  const db = new Database(new MemoryRemote(), {
     ...emptyConfig,
     partnerDomains: input.partnerDomains ?? [],
   }, false);

@@ -1,7 +1,6 @@
-import promiseAllProperties from 'promise-all-properties';
-import { IO } from "../io/io";
+import { Data, Remote } from '../io/interfaces';
 import { makeEmailValidationRegex } from "../io/live/domains";
-import { MultiDownloadLogger } from "../log/download-logger";
+import { MemoryHubspot } from '../io/memory/hubspot';
 import log from "../log/logger";
 import { Table } from "../log/table";
 import { Tallier } from "../log/tallier";
@@ -13,22 +12,10 @@ import { ContactManager } from "./contact";
 import { DealManager } from "./deal";
 import { deriveMultiProviderDomainsSet } from "./email-providers";
 import { Entity } from "./hubspot/entity";
-import { EntityKind, FullEntity } from "./hubspot/interfaces";
+import { EntityKind } from "./hubspot/interfaces";
 import { License } from "./license";
-import { RawLicense, RawTransaction } from './marketplace/raw';
 import { validateMarketplaceData } from "./marketplace/validation";
 import { Transaction, TransactionData } from "./transaction";
-
-interface InputData {
-  tlds: readonly string[];
-  licensesWithDataInsights: readonly RawLicense[];
-  licensesWithoutDataInsights: readonly RawLicense[];
-  transactions: readonly RawTransaction[];
-  freeDomains: readonly string[];
-  rawDeals: readonly FullEntity[];
-  rawCompanies: readonly FullEntity[];
-  rawContacts: readonly FullEntity[];
-}
 
 export class Database {
 
@@ -49,10 +36,10 @@ export class Database {
   public appToPlatform: { [addonKey: string]: string } = Object.create(null);
   public archivedApps = new Set<string>();
 
-  public constructor(private io: IO, config: Config, populateFromEnv = true) {
-    this.dealManager = new DealManager(io.in.hubspot, io.out.hubspot);
-    this.contactManager = new ContactManager(io.in.hubspot, io.out.hubspot);
-    this.companyManager = new CompanyManager(io.in.hubspot, io.out.hubspot);
+  public constructor(out: Remote, config: Config, populateFromEnv = true) {
+    this.dealManager = new DealManager(new MemoryHubspot(null), out.hubspot);
+    this.contactManager = new ContactManager(new MemoryHubspot(null), out.hubspot);
+    this.companyManager = new CompanyManager(new MemoryHubspot(null), out.hubspot);
 
     for (const domain of config.partnerDomains) {
       this.partnerDomains.add(domain);
@@ -68,43 +55,7 @@ export class Database {
     this.archivedApps = env.engine.archivedApps;
   }
 
-  public async downloadData(): Promise<InputData> {
-    log.info('Downloader', 'Starting downloads with API');
-
-    const logbox = new MultiDownloadLogger();
-
-    const data = await promiseAllProperties({
-      tlds: logbox.wrap('Tlds', (progress) =>
-        this.io.in.tldLister.downloadAllTlds(progress)),
-
-      licensesWithDataInsights: logbox.wrap('Licenses With Data Insights', (progress) =>
-        this.io.in.marketplace.downloadLicensesWithDataInsights(progress)),
-
-      licensesWithoutDataInsights: logbox.wrap('Licenses Without Data Insights', (progress) =>
-        this.io.in.marketplace.downloadLicensesWithoutDataInsights(progress)),
-
-      transactions: logbox.wrap('Transactions', (progress) =>
-        this.io.in.marketplace.downloadTransactions(progress)),
-
-      freeDomains: logbox.wrap('Free Email Providers', (progress) =>
-        this.io.in.emailProviderLister.downloadFreeEmailProviders(progress)),
-
-      rawDeals: logbox.wrap('Deals', (progress) =>
-        this.dealManager.downloadAllEntities(progress)),
-
-      rawCompanies: logbox.wrap('Companies', (progress) =>
-        this.companyManager.downloadAllEntities(progress)),
-
-      rawContacts: logbox.wrap('Contacts', (progress) =>
-        this.contactManager.downloadAllEntities(progress)),
-    });
-
-    logbox.done();
-
-    return data;
-  }
-
-  importData(data: InputData) {
+  importData(data: Data) {
     const {
       tlds,
       licensesWithDataInsights,
@@ -141,8 +92,6 @@ export class Database {
     this.dealManager.linkEntities(dealPrelinks, { getEntity });
     this.companyManager.linkEntities(companyPrelinks, { getEntity });
     this.contactManager.linkEntities(contactPrelinks, { getEntity });
-
-    log.info('Downloader', 'Done');
 
     this.providerDomains = deriveMultiProviderDomainsSet(freeDomains);
 

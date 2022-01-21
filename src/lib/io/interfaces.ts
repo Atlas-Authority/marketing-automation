@@ -36,3 +36,14 @@ export interface Remote {
   tldLister: TldListerService;
   marketplace: MarketplaceService;
 }
+
+export interface Data {
+  tlds: readonly string[];
+  licensesWithDataInsights: readonly RawLicense[];
+  licensesWithoutDataInsights: readonly RawLicense[];
+  transactions: readonly RawTransaction[];
+  freeDomains: readonly string[];
+  rawDeals: readonly FullEntity[];
+  rawCompanies: readonly FullEntity[];
+  rawContacts: readonly FullEntity[];
+}

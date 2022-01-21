@@ -1,21 +1,15 @@
 import 'source-map-support/register';
-import { Progress } from '../lib/io/interfaces';
-import { CachedMemoryRemote, IO } from "../lib/io/io";
+import { CachedMemoryRemote } from "../lib/io/io";
 import { RawLicense, RawTransaction } from '../lib/model/marketplace/raw';
 
 main();
 async function main() {
 
-  const noOpProgress: Progress = {
-    setCount() { },
-    tick() { },
-  };
+  const io = new CachedMemoryRemote();
 
-  const io = new IO(new CachedMemoryRemote());
-
-  const licensesWith = await io.in.marketplace.downloadLicensesWithDataInsights(noOpProgress);
-  const licensesWithout = await io.in.marketplace.downloadLicensesWithoutDataInsights(noOpProgress);
-  const transactions = await io.in.marketplace.downloadTransactions(noOpProgress);
+  const licensesWith = await io.marketplace.downloadLicensesWithDataInsights();
+  const licensesWithout = await io.marketplace.downloadLicensesWithoutDataInsights();
+  const transactions = await io.marketplace.downloadTransactions();
 
   function checkMapping(k1: K, k2: K) {
     const map = new Map<string, string>();

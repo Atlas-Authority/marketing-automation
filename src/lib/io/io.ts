@@ -10,20 +10,6 @@ import { MemoryEmailProviderListerService } from "./memory/email-providers";
 import { MemoryHubspot } from "./memory/hubspot";
 import { MemoryMarketplace } from "./memory/marketplace";
 
-export class IO {
-
-  public in: Remote = new MemoryRemote();
-  public out: Remote = this.in;
-
-  /** You can pass one as a convenience; otherwise set them after construction. */
-  public constructor(both?: Remote) {
-    if (both) {
-      this.in = this.out = both;
-    }
-  }
-
-}
-
 export class CachedMemoryRemote implements Remote {
   dataDir = DataDir.root.subdir("in");
   marketplace = new MemoryMarketplace(this.dataDir);

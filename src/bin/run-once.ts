@@ -1,6 +1,6 @@
 import 'source-map-support/register';
 import Engine from "../lib/engine/engine";
-import { CachedMemoryRemote, IO } from '../lib/io/io';
+import { CachedMemoryRemote } from '../lib/io/io';
 import log from '../lib/log/logger';
 import { Database } from "../lib/model/database";
 import { getCliArgs } from '../lib/parameters/cli-args';
@@ -15,8 +15,7 @@ async function main() {
   const remote = new CachedMemoryRemote();
   const dataDir = savelogs ? remote.dataDir.subdir(savelogs) : null;
 
-  const io = new IO(remote);
-  const db = new Database(io, envConfig);
+  const db = new Database(remote, envConfig);
 
-  await new Engine().run(db, dataDir);
+  await new Engine().run(remote, db, dataDir);
 }
