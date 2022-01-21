@@ -1,9 +1,9 @@
 import DataDir from "../../data/dir";
 import log from "../../log/logger";
 import { Association, EntityKind, ExistingEntity, FullEntity, NewEntity, RelativeAssociation } from "../../model/hubspot/interfaces";
-import { HubspotService, Progress } from "../interfaces";
+import { HubspotUploader } from "../interfaces";
 
-export class MemoryHubspot implements HubspotService {
+export class MemoryHubspot implements HubspotUploader {
 
   private ids = new Map<string, number>();
 
@@ -18,14 +18,6 @@ export class MemoryHubspot implements HubspotService {
       this.contacts = dataDir.file<FullEntity[]>(`contact.csv`).readArray();
     }
   }
-
-  // Downloader
-
-  public async downloadEntities(_progress: Progress, kind: EntityKind, apiProperties: string[], inputAssociations: string[]): Promise<readonly FullEntity[]> {
-    return this.arrayFor(kind);
-  }
-
-  // Uploader
 
   public async createEntities(kind: EntityKind, inputs: NewEntity[]): Promise<ExistingEntity[]> {
     const objects = inputs.map((o) => ({
@@ -93,8 +85,6 @@ export class MemoryHubspot implements HubspotService {
     if (!entity) throw new Error(`Entity kind=${kind} id=${id} doesn't exist in test environment`);
     return entity;
   }
-
-  // Both
 
   private arrayFor(kind: EntityKind) {
     switch (kind) {

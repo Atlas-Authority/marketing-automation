@@ -1,37 +1,41 @@
 import DataDir from "../data/dir";
+import { FullEntity } from "../model/hubspot/interfaces";
+import { RawLicense, RawTransaction } from "../model/marketplace/raw";
 import { HubspotCreds, MpacCreds } from "../parameters/interfaces";
-import { HubspotService, MarketplaceService, Remote } from "./interfaces";
+import { Data } from "./interfaces";
 import { LiveTldListerService } from "./live/domains";
 import { LiveEmailProviderListerService } from "./live/email-providers";
 import LiveHubspotService from "./live/hubspot";
 import { LiveMarketplaceService } from "./live/marketplace";
-import { MemoryTldListerService } from "./memory/domains";
-import { MemoryEmailProviderListerService } from "./memory/email-providers";
-import { MemoryHubspot } from "./memory/hubspot";
-import { MemoryMarketplace } from "./memory/marketplace";
 
-export class CachedMemoryRemote implements Remote {
-  dataDir = DataDir.root.subdir("in");
-  marketplace = new MemoryMarketplace(this.dataDir);
-  tldLister = new MemoryTldListerService(this.dataDir);
-  emailProviderLister = new MemoryEmailProviderListerService(this.dataDir);
-  hubspot = new MemoryHubspot(this.dataDir);
+export function loadDataFromDisk(dataDir: DataDir): Data {
+  return {
+    licensesWithDataInsights: dataDir.file<readonly RawLicense[]>('licenses-with.csv').readArray(),
+    licensesWithoutDataInsights: dataDir.file<readonly RawLicense[]>('licenses-without.csv').readArray(),
+    transactions: dataDir.file<readonly RawTransaction[]>('transactions.csv').readArray(),
+    tlds: dataDir.file<readonly { tld: string }[]>('tlds.csv').readArray().map(({ tld }) => tld),
+    freeDomains: dataDir.file<readonly { domain: string }[]>('domains.csv').readArray().map(({ domain }) => domain),
+    rawDeals: dataDir.file<FullEntity[]>(`deal.csv`).readArray(),
+    rawCompanies: dataDir.file<FullEntity[]>(`company.csv`).readArray(),
+    rawContacts: dataDir.file<FullEntity[]>(`contact.csv`).readArray(),
+  }
 }
 
-export class LiveRemote implements Remote {
+export class LiveRemote {
 
-  dataDir = DataDir.root.subdir("in");
+  hubspot;
+  marketplace;
+  emailProviderLister;
+  tldLister;
 
-  hubspot: HubspotService;
-  marketplace: MarketplaceService;
-  emailProviderLister = new LiveEmailProviderListerService(this.dataDir);
-  tldLister = new LiveTldListerService(this.dataDir);
-
-  constructor(config: {
+  constructor(private dataDir: DataDir, config: {
     hubspotCreds: HubspotCreds,
     mpacCreds: MpacCreds,
   }) {
     this.hubspot = new LiveHubspotService(this.dataDir, config.hubspotCreds);
     this.marketplace = new LiveMarketplaceService(this.dataDir, config.mpacCreds);
+    this.emailProviderLister = new LiveEmailProviderListerService(this.dataDir);
+    this.tldLister = new LiveTldListerService(this.dataDir);
   }
+
 }

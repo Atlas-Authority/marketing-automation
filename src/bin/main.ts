@@ -1,4 +1,6 @@
 import 'source-map-support/register';
+import DataDir from '../lib/data/dir';
+import { downloadData } from '../lib/engine/downloader';
 import Engine from "../lib/engine/engine";
 import { LiveRemote } from '../lib/io/io';
 import log from '../lib/log/logger';
@@ -12,7 +14,9 @@ async function main() {
 
   log.setLevelFrom(logLevelFromENV());
 
-  const remote = new LiveRemote(serviceCredsFromENV());
+  const dataDir = DataDir.root.subdir("in");
+
+  const remote = new LiveRemote(dataDir, serviceCredsFromENV());
 
   const notifier = SlackNotifier.fromENV();
   notifier?.notifyStarting();
@@ -20,8 +24,9 @@ async function main() {
   await run(runLoopConfigFromENV(), {
 
     async work() {
+      const data = await downloadData(remote);
       const db = new Database(remote.hubspot, envConfig);
-      await new Engine().run(remote, db, null);
+      await new Engine().run(data, db, null);
     },
 
     async failed(errors) {

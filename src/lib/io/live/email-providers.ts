@@ -1,8 +1,7 @@
 import got from 'got';
 import DataDir from '../../data/dir';
-import { EmailProviderListerService } from '../interfaces';
 
-export class LiveEmailProviderListerService implements EmailProviderListerService {
+export class LiveEmailProviderListerService {
 
   constructor(private dataDir: DataDir) { }
 

@@ -1,15 +1,16 @@
 import 'source-map-support/register';
-import { CachedMemoryRemote } from "../lib/io/io";
+import DataDir from '../lib/data/dir';
+import { loadDataFromDisk } from "../lib/io/io";
 import { RawLicense, RawTransaction } from '../lib/model/marketplace/raw';
 
 main();
 async function main() {
 
-  const io = new CachedMemoryRemote();
+  const data = loadDataFromDisk(DataDir.root.subdir('in'));
 
-  const licensesWith = await io.marketplace.downloadLicensesWithDataInsights();
-  const licensesWithout = await io.marketplace.downloadLicensesWithoutDataInsights();
-  const transactions = await io.marketplace.downloadTransactions();
+  const licensesWith = data.licensesWithDataInsights;
+  const licensesWithout = data.licensesWithoutDataInsights;
+  const transactions = data.transactions;
 
   function checkMapping(k1: K, k2: K) {
     const map = new Map<string, string>();

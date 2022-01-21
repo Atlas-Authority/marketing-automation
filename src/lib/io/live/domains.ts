@@ -1,12 +1,11 @@
 import got from 'got';
 import DataDir from '../../data/dir';
-import { TldListerService } from '../interfaces';
 
 export function makeEmailValidationRegex(tlds: readonly string[]) {
   return new RegExp(`.+@.+\\.(${tlds.join('|')})`);
 }
 
-export class LiveTldListerService implements TldListerService {
+export class LiveTldListerService {
 
   constructor(private dataDir: DataDir) { }
 

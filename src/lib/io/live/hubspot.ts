@@ -6,9 +6,9 @@ import { Association, EntityKind, ExistingEntity, FullEntity, NewEntity, Relativ
 import { HubspotCreds } from '../../parameters/interfaces';
 import { KnownError } from '../../util/errors';
 import { batchesOf } from '../../util/helpers';
-import { HubspotService, Progress } from '../interfaces';
+import { Progress } from '../interfaces';
 
-export default class LiveHubspotService implements HubspotService {
+export default class LiveHubspotService {
 
   private client: hubspot.Client;
 

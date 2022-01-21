@@ -1,4 +1,4 @@
-import { Data, HubspotService } from '../io/interfaces';
+import { Data, HubspotUploader } from '../io/interfaces';
 import { makeEmailValidationRegex } from "../io/live/domains";
 import log from "../log/logger";
 import { Table } from "../log/table";
@@ -35,7 +35,7 @@ export class Database {
   public appToPlatform: { [addonKey: string]: string } = Object.create(null);
   public archivedApps = new Set<string>();
 
-  public constructor(outHubspot: HubspotService, config: Config, populateFromEnv = true) {
+  public constructor(outHubspot: HubspotUploader, config: Config, populateFromEnv = true) {
     this.dealManager = new DealManager(outHubspot);
     this.contactManager = new ContactManager(outHubspot);
     this.companyManager = new CompanyManager(outHubspot);

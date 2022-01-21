@@ -4,10 +4,10 @@ import DataDir from '../../data/dir';
 import { RawLicense, RawTransaction } from '../../model/marketplace/raw';
 import { MpacCreds } from '../../parameters/interfaces';
 import { AttachableError, KnownError } from '../../util/errors';
-import { MarketplaceService, Progress } from '../interfaces';
+import { Progress } from '../interfaces';
 
 
-export class LiveMarketplaceService implements MarketplaceService {
+export class LiveMarketplaceService {
 
   constructor(private dataDir: DataDir, private creds: MpacCreds) { }
 

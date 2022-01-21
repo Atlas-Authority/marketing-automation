@@ -1,7 +1,6 @@
 import 'source-map-support/register';
 import DataDir from '../lib/data/dir';
-import { downloadData } from '../lib/engine/downloader';
-import { CachedMemoryRemote } from "../lib/io/io";
+import { loadDataFromDisk } from "../lib/io/io";
 import { MemoryHubspot } from '../lib/io/memory/hubspot';
 import log from "../lib/log/logger";
 import { Database } from "../lib/model/database";
@@ -13,7 +12,7 @@ async function main() {
 
   log.level = log.Levels.Verbose;
   const db = new Database(new MemoryHubspot(null), envConfig);
-  const data = await downloadData(new CachedMemoryRemote());
+  const data = loadDataFromDisk(DataDir.root.subdir('in'));
   db.importData(data);
 
   const attributions = (db

@@ -1,6 +1,8 @@
 import 'source-map-support/register';
+import DataDir from '../lib/data/dir';
 import Engine from "../lib/engine/engine";
-import { CachedMemoryRemote } from "../lib/io/io";
+import { loadDataFromDisk } from "../lib/io/io";
+import { MemoryHubspot } from '../lib/io/memory/hubspot';
 import log from "../lib/log/logger";
 import { Database } from "../lib/model/database";
 import { getCliArgs } from '../lib/parameters/cli-args';
@@ -14,19 +16,22 @@ async function main() {
 
   log.level = log.Levels.Info;
 
-  const remote = new CachedMemoryRemote();
-  const nextDataDir = () => savelogs ? remote.dataDir.subdir(`${savelogs}-${++i}`) : null;
+  const dataDir = DataDir.root.subdir('in');
+
+  const nextDataDir = () => savelogs ? dataDir.subdir(`${savelogs}-${++i}`) : null;
 
   const engine = new Engine();
 
+  const data = loadDataFromDisk(dataDir);
+
   // First
-  await engine.run(remote, new Database(remote.hubspot, envConfig), nextDataDir());
+  await engine.run(data, new Database(new MemoryHubspot(null), envConfig), nextDataDir());
 
   // Second
   log.level = log.Levels.Verbose;
-  await engine.run(remote, new Database(remote.hubspot, envConfig), nextDataDir());
+  await engine.run(data, new Database(new MemoryHubspot(null), envConfig), nextDataDir());
 
   // Third
-  await engine.run(remote, new Database(remote.hubspot, envConfig), nextDataDir());
+  await engine.run(data, new Database(new MemoryHubspot(null), envConfig), nextDataDir());
 
 }
