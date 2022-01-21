@@ -4,7 +4,8 @@ import { DealGenerator } from '../lib/engine/deal-generator/generate-deals';
 import { abbrActionDetails, abbrEventDetails } from '../lib/engine/deal-generator/test/utils';
 import { downloadData } from '../lib/engine/downloader';
 import { RelatedLicenseSet } from '../lib/engine/license-matching/license-grouper';
-import { CachedMemoryRemote, MemoryRemote } from "../lib/io/io";
+import { CachedMemoryRemote } from "../lib/io/io";
+import { MemoryHubspot } from '../lib/io/memory/hubspot';
 import { Database } from "../lib/model/database";
 import { License } from '../lib/model/license';
 import { Transaction } from '../lib/model/transaction';
@@ -28,7 +29,7 @@ async function main(template: string, testId: string) {
 
   const group = await getRedactedMatchGroup(ids);
 
-  const db = new Database(new MemoryRemote(), emptyConfig);
+  const db = new Database(new MemoryHubspot(null), emptyConfig);
 
   db.licenses.length = 0;
   db.licenses.push(...group);
@@ -52,7 +53,7 @@ function format(o: any, breakLength = 50) {
 }
 
 async function getRedactedMatchGroup(ids: [string, string[]][]) {
-  const db = new Database(new CachedMemoryRemote(), envConfig);
+  const db = new Database(new MemoryHubspot(null), envConfig);
   const data = await downloadData(new CachedMemoryRemote());
   db.importData(data);
 

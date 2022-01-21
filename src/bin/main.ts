@@ -12,7 +12,7 @@ async function main() {
 
   log.setLevelFrom(logLevelFromENV());
 
-  const out = new LiveRemote(serviceCredsFromENV());
+  const remote = new LiveRemote(serviceCredsFromENV());
 
   const notifier = SlackNotifier.fromENV();
   notifier?.notifyStarting();
@@ -20,8 +20,8 @@ async function main() {
   await run(runLoopConfigFromENV(), {
 
     async work() {
-      const db = new Database(out, envConfig);
-      await new Engine().run(new LiveRemote(serviceCredsFromENV()), db, null);
+      const db = new Database(remote.hubspot, envConfig);
+      await new Engine().run(remote, db, null);
     },
 
     async failed(errors) {

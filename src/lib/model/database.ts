@@ -1,4 +1,4 @@
-import { Data, Remote } from '../io/interfaces';
+import { Data, HubspotService } from '../io/interfaces';
 import { makeEmailValidationRegex } from "../io/live/domains";
 import { MemoryHubspot } from '../io/memory/hubspot';
 import log from "../log/logger";
@@ -36,10 +36,10 @@ export class Database {
   public appToPlatform: { [addonKey: string]: string } = Object.create(null);
   public archivedApps = new Set<string>();
 
-  public constructor(out: Remote, config: Config, populateFromEnv = true) {
-    this.dealManager = new DealManager(new MemoryHubspot(null), out.hubspot);
-    this.contactManager = new ContactManager(new MemoryHubspot(null), out.hubspot);
-    this.companyManager = new CompanyManager(new MemoryHubspot(null), out.hubspot);
+  public constructor(outHubspot: HubspotService, config: Config, populateFromEnv = true) {
+    this.dealManager = new DealManager(new MemoryHubspot(null), outHubspot);
+    this.contactManager = new ContactManager(new MemoryHubspot(null), outHubspot);
+    this.companyManager = new CompanyManager(new MemoryHubspot(null), outHubspot);
 
     for (const domain of config.partnerDomains) {
       this.partnerDomains.add(domain);

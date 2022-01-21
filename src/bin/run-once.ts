@@ -1,6 +1,8 @@
 import 'source-map-support/register';
+import DataDir from '../lib/data/dir';
 import Engine from "../lib/engine/engine";
 import { CachedMemoryRemote } from '../lib/io/io';
+import { MemoryHubspot } from '../lib/io/memory/hubspot';
 import log from '../lib/log/logger';
 import { Database } from "../lib/model/database";
 import { getCliArgs } from '../lib/parameters/cli-args';
@@ -12,10 +14,9 @@ async function main() {
 
   log.setLevelFrom(loglevel);
 
-  const remote = new CachedMemoryRemote();
-  const dataDir = savelogs ? remote.dataDir.subdir(savelogs) : null;
+  const logDir = savelogs ? DataDir.root.subdir("in").subdir(savelogs) : null;
 
-  const db = new Database(remote, envConfig);
+  const db = new Database(new MemoryHubspot(null), envConfig);
 
-  await new Engine().run(remote, db, dataDir);
+  await new Engine().run(new CachedMemoryRemote(), db, logDir);
 }

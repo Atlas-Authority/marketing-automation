@@ -20,13 +20,13 @@ async function main() {
   const engine = new Engine();
 
   // First
-  await engine.run(remote, new Database(remote, envConfig), nextDataDir());
+  await engine.run(remote, new Database(remote.hubspot, envConfig), nextDataDir());
 
   // Second
   log.level = log.Levels.Verbose;
-  await engine.run(remote, new Database(remote, envConfig), nextDataDir());
+  await engine.run(remote, new Database(remote.hubspot, envConfig), nextDataDir());
 
   // Third
-  await engine.run(remote, new Database(remote, envConfig), nextDataDir());
+  await engine.run(remote, new Database(remote.hubspot, envConfig), nextDataDir());
 
 }
