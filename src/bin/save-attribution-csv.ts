@@ -1,6 +1,6 @@
 import 'source-map-support/register';
 import DataDir from '../lib/data/dir';
-import { loadDataFromDisk } from "../lib/io/io";
+import { loadDataFromDisk } from "../lib/io/downloader";
 import { MemoryHubspot } from '../lib/io/memory/hubspot';
 import log from "../lib/log/logger";
 import { Database } from "../lib/model/database";

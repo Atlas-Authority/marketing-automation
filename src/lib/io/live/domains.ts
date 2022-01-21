@@ -5,7 +5,7 @@ export function makeEmailValidationRegex(tlds: readonly string[]) {
   return new RegExp(`.+@.+\\.(${tlds.join('|')})`);
 }
 
-export class LiveTldListerService {
+export class TldListAPI {
 
   constructor(private dataDir: DataDir) { }
 

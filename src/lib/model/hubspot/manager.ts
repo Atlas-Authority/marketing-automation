@@ -1,6 +1,6 @@
 import assert from 'assert';
 import { HubspotUploader, Progress } from '../../io/interfaces';
-import LiveHubspotService from '../../io/live/hubspot';
+import HubspotAPI from '../../io/live/hubspot';
 import { AttachableError } from '../../util/errors';
 import { isPresent } from '../../util/helpers';
 import { Entity, Indexer } from './entity';
@@ -10,7 +10,7 @@ export interface EntityDatabase {
   getEntity(kind: EntityKind, id: string): Entity<any, any>;
 }
 
-export async function downloadHubspotEntities<D, C>(downloader: LiveHubspotService, entityAdapter: EntityAdapter<D, C>, progress: Progress) {
+export async function downloadHubspotEntities<D, C>(downloader: HubspotAPI, entityAdapter: EntityAdapter<D, C>, progress: Progress) {
   const downAssociations = (entityAdapter.associations
     .filter(([kind, dir]) => dir.includes('down'))
     .map(([kind, dir]) => kind));

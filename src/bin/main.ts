@@ -1,8 +1,8 @@
 import 'source-map-support/register';
 import DataDir from '../lib/data/dir';
-import { downloadData } from '../lib/engine/downloader';
 import Engine from "../lib/engine/engine";
-import { LiveRemote } from '../lib/io/io';
+import { Downloader } from '../lib/io/downloader';
+import HubspotAPI from '../lib/io/live/hubspot';
 import log from '../lib/log/logger';
 import { SlackNotifier } from '../lib/log/slack-notifier';
 import { Database } from "../lib/model/database";
@@ -16,7 +16,9 @@ async function main() {
 
   const dataDir = DataDir.root.subdir("in");
 
-  const remote = new LiveRemote(dataDir, serviceCredsFromENV());
+  const creds = serviceCredsFromENV();
+  const downloader = new Downloader(dataDir, creds);
+  const uploader = new HubspotAPI(dataDir, creds.hubspotCreds);
 
   const notifier = SlackNotifier.fromENV();
   notifier?.notifyStarting();
@@ -24,8 +26,8 @@ async function main() {
   await run(runLoopConfigFromENV(), {
 
     async work() {
-      const data = await downloadData(remote);
-      const db = new Database(remote.hubspot, envConfig);
+      const data = await downloader.downloadData();
+      const db = new Database(uploader, envConfig);
       await new Engine().run(data, db, null);
     },
 

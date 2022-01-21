@@ -1,6 +1,6 @@
 import 'source-map-support/register';
 import DataDir from '../lib/data/dir';
-import { loadDataFromDisk } from "../lib/io/io";
+import { loadDataFromDisk } from "../lib/io/downloader";
 import { RawLicense, RawTransaction } from '../lib/model/marketplace/raw';
 
 main();

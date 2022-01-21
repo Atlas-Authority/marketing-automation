@@ -8,7 +8,7 @@ import { KnownError } from '../../util/errors';
 import { batchesOf } from '../../util/helpers';
 import { Progress } from '../interfaces';
 
-export default class LiveHubspotService {
+export default class HubspotAPI {
 
   private client: hubspot.Client;
 

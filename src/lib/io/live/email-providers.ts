@@ -1,7 +1,7 @@
 import got from 'got';
 import DataDir from '../../data/dir';
 
-export class LiveEmailProviderListerService {
+export class EmailProviderAPI {
 
   constructor(private dataDir: DataDir) { }
 

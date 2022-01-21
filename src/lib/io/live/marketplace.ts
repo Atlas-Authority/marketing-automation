@@ -7,7 +7,7 @@ import { AttachableError, KnownError } from '../../util/errors';
 import { Progress } from '../interfaces';
 
 
-export class LiveMarketplaceService {
+export class MarketplaceAPI {
 
   constructor(private dataDir: DataDir, private creds: MpacCreds) { }
 

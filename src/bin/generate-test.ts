@@ -4,7 +4,7 @@ import DataDir from '../lib/data/dir';
 import { DealGenerator } from '../lib/engine/deal-generator/generate-deals';
 import { abbrActionDetails, abbrEventDetails } from '../lib/engine/deal-generator/test/utils';
 import { RelatedLicenseSet } from '../lib/engine/license-matching/license-grouper';
-import { loadDataFromDisk } from "../lib/io/io";
+import { loadDataFromDisk } from "../lib/io/downloader";
 import { MemoryHubspot } from '../lib/io/memory/hubspot';
 import { Database } from "../lib/model/database";
 import { License } from '../lib/model/license';
