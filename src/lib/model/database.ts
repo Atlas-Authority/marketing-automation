@@ -10,8 +10,9 @@ import { ContactManager } from "./contact";
 import { DealManager } from "./deal";
 import { deriveMultiProviderDomainsSet } from "./email-providers";
 import { License } from "./license";
+import { getEmailsForRecord } from "./marketplace/common";
 import { buildAndVerifyStructures } from "./marketplace/structure";
-import { validateMarketplaceData } from "./marketplace/validation";
+import * as validation from "./marketplace/validation";
 import { Transaction } from "./transaction";
 
 export class Database {
@@ -64,17 +65,36 @@ export class Database {
     this.providerDomains = deriveMultiProviderDomainsSet(data.freeDomains);
 
     const emailRe = new RegExp(`.+@.+\\.(${data.tlds.join('|')})`);
+    const emailChecker = (kind: 'License' | 'Transaction') =>
+      (record: License | Transaction) => {
+        const allEmails = getEmailsForRecord(record);
+        const allGood = allEmails.every(e => emailRe.test(e));
+        if (!allGood && !allEmails.every(e => env.engine.ignoredEmails.has(e.toLowerCase()))) {
+          log.warn('Downloader', `${kind} has invalid email(s); will be skipped:`, record);
+        }
+        return allGood;
+      };
 
     log.info('Database', 'Validating MPAC records: Starting...');
-    const validatedMpacData = validateMarketplaceData({
-      licenses: [
-        ...data.licensesWithDataInsights,
-        ...data.licensesWithoutDataInsights,
-      ].map(raw => License.fromRaw(raw)),
-      transactions: data.transactions.map(raw => Transaction.fromRaw(raw)),
-      emailRe,
-    });
-    const structured = buildAndVerifyStructures(validatedMpacData.licenses, validatedMpacData.transactions);
+
+    const combinedLicenses = [
+      ...data.licensesWithDataInsights,
+      ...data.licensesWithoutDataInsights,
+    ];
+
+    let licenses = combinedLicenses.map(raw => License.fromRaw(raw));
+    let transactions = data.transactions.map(raw => Transaction.fromRaw(raw));
+
+    licenses = licenses.filter(validation.hasTechEmail);
+    licenses = validation.removeApiBorderDuplicates(licenses);
+
+    licenses.forEach(validation.assertRequiredLicenseFields);
+    transactions.forEach(validation.assertRequiredTransactionFields);
+
+    licenses = licenses.filter(emailChecker('License'));
+    transactions = transactions.filter(emailChecker('Transaction'));
+
+    const structured = buildAndVerifyStructures(licenses, transactions);
     this.licenses = structured.licenses;
     this.transactions = structured.transactions;
 

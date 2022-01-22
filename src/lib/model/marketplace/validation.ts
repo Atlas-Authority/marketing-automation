@@ -1,39 +1,11 @@
 import assert from "assert";
 import util from "util";
 import log from '../../log/logger';
-import env from '../../parameters/env-config';
 import { AttachableError } from '../../util/errors';
-import { isPresent } from "../../util/helpers";
 import { License, LicenseData } from "../license";
 import { Transaction } from "../transaction";
 
-export function validateMarketplaceData({ licenses, transactions, emailRe }: {
-  licenses: readonly License[],
-  transactions: readonly Transaction[],
-  emailRe: RegExp,
-}) {
-  licenses = uniqLicenses(licenses.filter(hasTechEmail));
-
-  licenses.forEach(validateLicense);
-  transactions.forEach(validateTransaction);
-
-  const emailChecker = (kind: 'License' | 'Transaction') =>
-    (record: License | Transaction) => {
-      const allEmails = getEmails(record);
-      const allGood = allEmails.every(e => emailRe.test(e));
-      if (!allGood && !allEmails.every(e => env.engine.ignoredEmails.has(e.toLowerCase()))) {
-        log.warn('Downloader', `${kind} has invalid email(s); will be skipped:`, record);
-      }
-      return allGood;
-    };
-
-  return {
-    licenses: licenses.filter(emailChecker('License')),
-    transactions: transactions.filter(emailChecker('Transaction')),
-  };
-}
-
-function uniqLicenses(licenses: readonly License[]) {
+export function removeApiBorderDuplicates(licenses: readonly License[]) {
   const groups: { [addonLicenseId: string]: License[] } = {};
 
   for (const license of licenses) {
@@ -85,7 +57,7 @@ function uniqLicenses(licenses: readonly License[]) {
   return fixed.map(ls => ls[0]);
 }
 
-function validateLicense(license: License) {
+export function assertRequiredLicenseFields(license: License) {
   validateField(license, license => license.data.licenseId);
   validateField(license, license => license.data.addonKey);
   validateField(license, license => license.data.addonName);
@@ -103,7 +75,7 @@ function validateLicense(license: License) {
   validateField(license, license => license.data.status);
 }
 
-function validateTransaction(transaction: Transaction) {
+export function assertRequiredTransactionFields(transaction: Transaction) {
   validateField(transaction, transaction => transaction.data.transactionId);
   validateField(transaction, transaction => transaction.data.licenseId);
   validateField(transaction, transaction => transaction.data.addonKey);
@@ -132,19 +104,11 @@ function validateField<T>(o: T, accessor: (o: T) => any) {
   if (!val) throw new AttachableError(`Missing field: ${path} (found ${JSON.stringify(val)})`, JSON.stringify(o, null, 2));
 }
 
-function hasTechEmail(license: License) {
+export function hasTechEmail(license: License) {
   if (!license.data.technicalContact?.email) {
     const id = license.id;
     log.warn('Downloader', 'License does not have a tech contact email; will be skipped', id);
     return false;
   }
   return true;
-}
-
-function getEmails(record: License | Transaction) {
-  return [
-    record.data.technicalContact.email,
-    record.data.billingContact?.email,
-    record.data.partnerDetails?.billingContact.email,
-  ].filter(isPresent);
 }

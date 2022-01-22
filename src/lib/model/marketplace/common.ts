@@ -1,3 +1,6 @@
+import { isPresent } from "../../util/helpers";
+import { License } from "../license";
+import { Transaction } from "../transaction";
 import { RawLicenseContact, RawPartnerDetails, RawTransactionContact } from "./raw";
 
 export type ContactInfo = {
@@ -58,4 +61,12 @@ function normalizeContactField(field: string | undefined) {
   const normalized = field.replace(/\r/g, '').trim();
   if (normalized === '') return undefined;
   return normalized;
+}
+
+export function getEmailsForRecord(record: License | Transaction) {
+  return [
+    record.data.technicalContact.email,
+    record.data.billingContact?.email,
+    record.data.partnerDetails?.billingContact.email,
+  ].filter(isPresent);
 }
