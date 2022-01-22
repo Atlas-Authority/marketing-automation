@@ -10,35 +10,30 @@ import { getCliArgs } from '../lib/parameters/cli-args';
 import { engineConfigFromENV, runLoopConfigFromENV } from "../lib/parameters/env-config";
 import run from "../lib/util/runner";
 
-main();
-async function main() {
+const { loglevel } = getCliArgs('loglevel');
+log.setLevelFrom(loglevel);
 
-  const { loglevel } = getCliArgs('loglevel');
-  log.setLevelFrom(loglevel);
+const dataDir = DataDir.root.subdir("in");
+const dataSet = new DataSet(dataDir);
 
-  const dataDir = DataDir.root.subdir("in");
-  const dataSet = new DataSet(dataDir);
+const runLoopConfig = runLoopConfigFromENV();
+const notifier = SlackNotifier.fromENV();
+notifier?.notifyStarting();
 
-  const runLoopConfig = runLoopConfigFromENV();
-  const notifier = SlackNotifier.fromENV();
-  notifier?.notifyStarting();
+run(runLoopConfig, {
 
-  await run(runLoopConfig, {
+  async work() {
+    const hubspot = HubspotService.live();
+    await downloadAllData(dataSet, hubspot);
+    const data = new DataSet(dataDir).load();
+    const engine = new Engine(hubspot, engineConfigFromENV());
+    engine.run(data, null);
+    log.info('Upsyncing changes to HubSpot');
+    await hubspot.upsyncChanges();
+  },
 
-    async work() {
-      const hubspot = HubspotService.live();
-      await downloadAllData(dataSet, hubspot);
-      const data = new DataSet(dataDir).load();
-      const engine = new Engine(hubspot, engineConfigFromENV());
-      await engine.run(data, null);
-      log.info('Upsyncing changes to HubSpot');
-      await hubspot.upsyncChanges();
-    },
+  async failed(errors) {
+    notifier?.notifyErrors(runLoopConfig, errors);
+  },
 
-    async failed(errors) {
-      notifier?.notifyErrors(runLoopConfig, errors);
-    },
-
-  });
-
-}
+});

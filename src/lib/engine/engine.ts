@@ -72,7 +72,7 @@ export class Engine {
     };
   }
 
-  public async run(data: Data, logDir: DataDir | null) {
+  public run(data: Data, logDir: DataDir | null) {
     this.logStep('Importing given data set into engine');
     this.importData(data);
 

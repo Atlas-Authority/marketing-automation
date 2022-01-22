@@ -23,11 +23,11 @@ function TEMPLATE({ runDealGenerator, GROUP, RECORDS, EVENTS, ACTIONS }: any) {
   });
 }
 
-async function main(template: string, testId: string) {
+function main(template: string, testId: string) {
   const json = Buffer.from(testId, 'base64').toString('utf8');
   const ids: [string, string[]][] = JSON.parse(json);
 
-  const group = await getRedactedMatchGroup(ids);
+  const group = getRedactedMatchGroup(ids);
 
   const engine = new Engine(HubspotService.memory(), null);
 
@@ -52,7 +52,7 @@ function format(o: any, breakLength = 50) {
   return util.inspect(o, { depth: null, breakLength });
 }
 
-async function getRedactedMatchGroup(ids: [string, string[]][]) {
+function getRedactedMatchGroup(ids: [string, string[]][]) {
   const engine = new Engine(HubspotService.memory(), engineConfigFromENV());
   const data = new DataSet(DataDir.root.subdir('in')).load();
   engine.importData(data);

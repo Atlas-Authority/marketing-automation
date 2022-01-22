@@ -6,12 +6,7 @@ import { printSummary } from "../lib/engine/summary";
 import { HubspotService } from '../lib/hubspot/service';
 import { engineConfigFromENV } from '../lib/parameters/env-config';
 
-main();
-async function main() {
-
-  const engine = new Engine(HubspotService.memory(), engineConfigFromENV());
-  const data = new DataSet(DataDir.root.subdir('in')).load();
-  engine.importData(data);
-  printSummary(engine);
-
-}
+const engine = new Engine(HubspotService.memory(), engineConfigFromENV());
+const data = new DataSet(DataDir.root.subdir('in')).load();
+engine.importData(data);
+printSummary(engine);

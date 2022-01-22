@@ -4,7 +4,7 @@ import { DataSet } from '../lib/data/set';
 import { RawLicense, RawTransaction } from '../lib/marketplace/raw';
 
 main();
-async function main() {
+function main() {
 
   const data = new DataSet(DataDir.root.subdir('in')).load();
 
