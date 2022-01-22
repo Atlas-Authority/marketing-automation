@@ -76,7 +76,7 @@ export class LicenseGrouper {
           billingContact: license.billingContact,
 
           company: normalizeString(license.data.company)?.toLowerCase(),
-          companyDomain: this.engine.providerDomains.has(techContactDomain) ? '' : normalizeString(techContactDomain),
+          companyDomain: this.engine.freeEmailDomains.has(techContactDomain) ? '' : normalizeString(techContactDomain),
 
           techContactEmailPart,
           techContactAddress: normalizeString(license.data.technicalContact.address1)?.toLowerCase(),

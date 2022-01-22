@@ -7,7 +7,7 @@ export function identifyAndFlagContactTypes(engine: Engine) {
   // Identifying contact types
   identifyContactTypesFromRecordDomains(engine, engine.licenses);
   identifyContactTypesFromRecordDomains(engine, engine.transactions);
-  removeProviderDomainsFromPartnerDomains(engine);
+  removeFreeEmailDomainsFromPartnerDomains(engine);
   separatePartnerDomainsFromCustomerDomains(engine);
 
   // Flagging contacts and companies
@@ -23,8 +23,8 @@ function identifyContactTypesFromRecordDomains(engine: Engine, records: (Transac
   }
 }
 
-function removeProviderDomainsFromPartnerDomains(engine: Engine) {
-  for (const domain of engine.providerDomains) {
+function removeFreeEmailDomainsFromPartnerDomains(engine: Engine) {
+  for (const domain of engine.freeEmailDomains) {
     engine.partnerDomains.delete(domain);
     engine.customerDomains.add(domain);
   }

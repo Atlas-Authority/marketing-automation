@@ -66,16 +66,16 @@ export class EventGenerator {
 
     const domains = new Set(records.map(license => license.data.technicalContact.email.toLowerCase().split('@')[1]));
     const partnerDomains = [...domains].filter(domain => this.engine.partnerDomains.has(domain));
-    const providerDomains = [...domains].filter(domain => this.engine.providerDomains.has(domain));
+    const freeEmailDomains = [...domains].filter(domain => this.engine.freeEmailDomains.has(domain));
 
-    if (domains.size == partnerDomains.length + providerDomains.length) {
-      if (partnerDomains.length > 0 && providerDomains.length > 0) {
+    if (domains.size == partnerDomains.length + freeEmailDomains.length) {
+      if (partnerDomains.length > 0 && freeEmailDomains.length > 0) {
         return 'partner-and-mass-provider-only';
       }
       else if (partnerDomains.length > 0) {
         return 'partner-only';
       }
-      else if (providerDomains.length > 0) {
+      else if (freeEmailDomains.length > 0) {
         return 'mass-provider-only';
       }
     }

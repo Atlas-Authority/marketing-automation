@@ -223,7 +223,7 @@ export class ActionGenerator {
       case 'mass-provider-only':
         const reason = (event.meta === 'archived-app'
           ? 'Archived-app transaction'
-          : 'Mass-provider transaction'
+          : 'Free-email-provider transaction'
         );
         if (!deal) {
           this.ignore(reason, amount);

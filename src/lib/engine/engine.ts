@@ -40,8 +40,7 @@ export class Engine {
   public licenses: License[] = [];
   public transactions: Transaction[] = [];
 
-  /** Domains that provide spam or free email accounts for masses. */
-  public providerDomains = new Set<string>();
+  public freeEmailDomains = new Set<string>();
   public partnerDomains = new Set<string>();
   public customerDomains = new Set<string>();
 
@@ -100,7 +99,7 @@ export class Engine {
     this.companyManager.linkEntities(companyPrelinks, this);
     this.contactManager.linkEntities(contactPrelinks, this);
 
-    this.providerDomains = deriveMultiProviderDomainsSet(data.freeDomains);
+    this.freeEmailDomains = deriveMultiProviderDomainsSet(data.freeDomains);
 
     const emailRe = new RegExp(`.+@.+\\.(${data.tlds.join('|')})`);
     const emailChecker = (kind: 'License' | 'Transaction') =>
