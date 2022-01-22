@@ -6,8 +6,8 @@ import { DealGenerator } from '../lib/engine/deal-generator/generate-deals';
 import { abbrActionDetails, abbrEventDetails } from '../lib/engine/deal-generator/test/utils';
 import { Engine } from "../lib/engine/engine";
 import { RelatedLicenseSet } from '../lib/engine/license-matching/license-grouper';
-import { License } from '../lib/model/license';
-import { Transaction } from '../lib/model/transaction';
+import { License } from '../lib/marketplace/model/license';
+import { Transaction } from '../lib/marketplace/model/transaction';
 import { engineConfigFromENV } from '../lib/parameters/env-config';
 
 function TEMPLATE({ runDealGenerator, GROUP, RECORDS, EVENTS, ACTIONS }: any) {

@@ -1,5 +1,5 @@
-import { License } from "../../model/license";
-import { Transaction } from "../../model/transaction";
+import { License } from "../../marketplace/model/license";
+import { Transaction } from "../../marketplace/model/transaction";
 import { sorter } from "../../util/helpers";
 import { Engine } from "../engine";
 import { RelatedLicenseSet } from "../license-matching/license-grouper";

@@ -1,4 +1,4 @@
-import { License } from "../../../../model/license";
+import { License } from "../../../../marketplace/model/license";
 import { runDealGenerator } from "../utils";
 
 it(`Sets deal properties correctly`, () => {

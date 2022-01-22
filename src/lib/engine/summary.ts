@@ -1,6 +1,6 @@
 import log from "../log/logger";
 import { Table } from "../log/table";
-import { Deal } from "../model/deal";
+import { Deal } from "../hubspot/model/deal";
 import { formatMoney, formatNumber } from "../util/formatters";
 import { isPresent } from "../util/helpers";
 import { Engine } from "./engine";

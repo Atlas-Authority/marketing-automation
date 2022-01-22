@@ -1,6 +1,6 @@
 import { CsvStream } from '../../data/csv';
 import DataDir from '../../data/dir';
-import { License } from '../../model/license';
+import { License } from '../../marketplace/model/license';
 import { shorterLicenseInfo } from './license-grouper';
 
 export class LicenseMatchLogger {

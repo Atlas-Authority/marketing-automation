@@ -1,9 +1,9 @@
 import Chance from 'chance';
 import { DealStage } from '../../../hubspot/interfaces';
+import { DealData } from "../../../hubspot/model/deal";
 import { ContactInfo } from '../../../marketplace/common';
-import { DealData } from "../../../model/deal";
-import { License, LicenseData } from "../../../model/license";
-import { Transaction, TransactionData } from "../../../model/transaction";
+import { License, LicenseData } from "../../../marketplace/model/license";
+import { Transaction, TransactionData } from "../../../marketplace/model/transaction";
 import { ContactGenerator } from '../../contacts/generate-contacts';
 import { updateContactsBasedOnMatchResults } from '../../contacts/update-contacts';
 import { Engine } from '../../engine';

@@ -2,12 +2,12 @@ import got from 'got';
 import promiseAllProperties from 'promise-all-properties';
 import { Data, DataSet } from '../data/set';
 import HubspotAPI from "../hubspot/api";
+import { CompanyAdapter } from '../hubspot/model/company';
+import { ContactAdapter } from '../hubspot/model/contact';
+import { DealAdapter } from '../hubspot/model/deal';
 import { MultiDownloadLogger } from "../log/download-logger";
 import log from "../log/logger";
 import { MarketplaceAPI } from "../marketplace/api";
-import { CompanyAdapter } from '../model/company';
-import { ContactAdapter } from '../model/contact';
-import { DealAdapter } from '../model/deal';
 import { HubspotCreds, MpacCreds } from "../parameters/interfaces";
 
 type DownloadConfig = {

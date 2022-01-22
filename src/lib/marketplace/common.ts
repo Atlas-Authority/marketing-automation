@@ -1,5 +1,5 @@
-import { License } from "../model/license";
-import { Transaction } from "../model/transaction";
+import { License } from "./model/license";
+import { Transaction } from "./model/transaction";
 import { isPresent } from "../util/helpers";
 import { RawLicenseContact, RawPartnerDetails, RawTransactionContact } from "./raw";
 

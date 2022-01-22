@@ -1,4 +1,4 @@
-import { Contact } from "../model/contact";
+import { Contact } from "../../hubspot/model/contact";
 
 export abstract class MpacRecord<T> {
 

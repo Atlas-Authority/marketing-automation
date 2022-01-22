@@ -1,10 +1,10 @@
-import { Entity } from "../hubspot/entity";
-import { EntityAdapter } from "../hubspot/interfaces";
-import { EntityManager } from "../hubspot/manager";
-import env from "../parameters/env-config";
+import { License } from "../../marketplace/model/license";
+import { Transaction } from "../../marketplace/model/transaction";
+import env from "../../parameters/env-config";
+import { Entity } from "../entity";
+import { EntityAdapter } from "../interfaces";
+import { EntityManager } from "../manager";
 import { Company } from "./company";
-import { License } from "./license";
-import { Transaction } from "./transaction";
 
 export type ContactType = 'Partner' | 'Customer';
 

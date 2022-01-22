@@ -1,6 +1,6 @@
 import DataDir from '../../data/dir';
 import log from '../../log/logger';
-import { License } from '../../model/license';
+import { License } from '../../marketplace/model/license';
 import { sorter } from '../../util/helpers';
 import { Engine } from '../engine';
 import { LicenseMatcher, ScorableLicense } from './license-matcher';
