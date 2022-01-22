@@ -50,14 +50,6 @@ export function runLoopConfigFromENV() {
 }
 
 const env = {
-  mpac: {
-    platforms: Object.fromEntries<string>(
-      required('ADDONKEY_PLATFORMS')
-        .split(',')
-        .map(kv => kv.split('=') as [string, string])
-    ),
-  },
-
   hubspot: {
     accountId: optional('HUBSPOT_ACCOUNT_ID'),
     pipeline: {
@@ -100,21 +92,19 @@ const env = {
       },
     },
   },
-
-  engine: {
-    partnerDomains: optional('PARTNER_DOMAINS')?.split(/\s*,\s*/g),
-    archivedApps: new Set(optional('IGNORED_APPS')?.split(',') ?? []),
-    ignoredEmails: new Set((optional('IGNORED_EMAILS')?.split(',') ?? []).map(e => e.toLowerCase())),
-  },
 };
 
 export default env;
 
 export const envConfig: Config = {
-  partnerDomains: new Set(env.engine.partnerDomains ?? []),
-  appToPlatform: env.mpac.platforms,
-  archivedApps: env.engine.archivedApps,
-  ignoredEmails: new Set(env.engine.ignoredEmails),
+  partnerDomains: new Set(optional('PARTNER_DOMAINS')?.split(/\s*,\s*/g) ?? []),
+  appToPlatform: Object.fromEntries<string>(
+    required('ADDONKEY_PLATFORMS')
+      .split(',')
+      .map(kv => kv.split('=') as [string, string])
+  ),
+  archivedApps: new Set(optional('IGNORED_APPS')?.split(',') ?? []),
+  ignoredEmails: new Set((optional('IGNORED_EMAILS')?.split(',') ?? []).map(e => e.toLowerCase())),
 };
 
 function required(key: string) {
