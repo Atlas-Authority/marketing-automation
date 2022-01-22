@@ -1,7 +1,11 @@
 import chalk from "chalk";
 import { MultiBar, Presets, SingleBar } from "cli-progress";
-import { Progress } from "../io/interfaces";
 import log from "./logger";
+
+export interface Progress {
+  setCount: (count: number) => void;
+  tick: (range: string) => void;
+}
 
 export class MultiDownloadLogger {
 

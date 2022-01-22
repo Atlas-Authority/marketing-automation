@@ -1,7 +1,17 @@
 import { FullEntity } from "../hubspot/interfaces";
-import { Data } from "../io/interfaces";
 import { RawLicense, RawTransaction } from "../marketplace/raw";
 import DataDir from "./dir";
+
+export interface Data {
+  tlds: readonly string[];
+  licensesWithDataInsights: readonly RawLicense[];
+  licensesWithoutDataInsights: readonly RawLicense[];
+  transactions: readonly RawTransaction[];
+  freeDomains: readonly string[];
+  rawDeals: readonly FullEntity[];
+  rawCompanies: readonly FullEntity[];
+  rawContacts: readonly FullEntity[];
+}
 
 export class DataSet {
 

@@ -1,10 +1,11 @@
 import * as hubspot from '@hubspot/api-client';
 import assert from 'assert';
-import { Association, EntityKind, ExistingEntity, FullEntity, NewEntity, RelativeAssociation } from '../hubspot/interfaces';
 import log from '../log/logger';
 import { HubspotCreds } from '../parameters/interfaces';
 import { KnownError } from '../util/errors';
-import { batchesOf } from '../util/helpers';
+import { batchesOf, isPresent } from '../util/helpers';
+import { Association, EntityAdapter, EntityKind, ExistingEntity, FullEntity, NewEntity, RelativeAssociation } from './interfaces';
+import { typedEntries } from './manager';
 
 export default class HubspotAPI {
 
@@ -14,7 +15,20 @@ export default class HubspotAPI {
     this.client = new hubspot.Client(creds);
   }
 
-  public async downloadEntities(kind: EntityKind, apiProperties: string[], inputAssociations: string[]): Promise<FullEntity[]> {
+  public async downloadHubspotEntities<D, C>(entityAdapter: EntityAdapter<D, C>) {
+    const downAssociations = (entityAdapter.associations
+      .filter(([kind, dir]) => dir.includes('down'))
+      .map(([kind, dir]) => kind));
+
+    const apiProperties = [
+      ...typedEntries(entityAdapter.data).map(([k, v]) => v.property).filter(isPresent),
+      ...typedEntries(entityAdapter.computed).flatMap(([k, v]) => v.properties),
+    ];
+
+    return await this.downloadEntities(entityAdapter.kind, apiProperties, downAssociations);
+  }
+
+  private async downloadEntities(kind: EntityKind, apiProperties: string[], inputAssociations: string[]): Promise<FullEntity[]> {
     let associations = ((inputAssociations.length > 0)
       ? inputAssociations
       : undefined);

@@ -1,17 +1,14 @@
+import got from 'got';
 import promiseAllProperties from 'promise-all-properties';
-import { DataSet } from '../data/set';
-import { downloadHubspotEntities } from '../hubspot/download';
+import { Data, DataSet } from '../data/set';
+import HubspotAPI from "../hubspot/api";
 import { MultiDownloadLogger } from "../log/download-logger";
 import log from "../log/logger";
+import { MarketplaceAPI } from "../marketplace/api";
 import { CompanyAdapter } from '../model/company';
 import { ContactAdapter } from '../model/contact';
 import { DealAdapter } from '../model/deal';
 import { HubspotCreds, MpacCreds } from "../parameters/interfaces";
-import { EmailProviderAPI } from "./free-email-services";
-import HubspotAPI from "./hubspot";
-import { Data } from "./interfaces";
-import { MarketplaceAPI } from "./marketplace";
-import { TldListAPI } from "./tlds";
 
 type DownloadConfig = {
   hubspotCreds: HubspotCreds;
@@ -19,38 +16,36 @@ type DownloadConfig = {
 };
 
 export async function downloadAllData(dataSet: DataSet, config: DownloadConfig): Promise<Data> {
-  const hubspot = new HubspotAPI(config.hubspotCreds);
-  const marketplace = new MarketplaceAPI(config.mpacCreds);
-  const emailProviderLister = new EmailProviderAPI();
-  const tldLister = new TldListAPI();
+  const hubspotAPI = new HubspotAPI(config.hubspotCreds);
+  const marketplaceAPI = new MarketplaceAPI(config.mpacCreds);
 
   log.info('Downloader', 'Starting downloads with API');
   const logbox = new MultiDownloadLogger();
 
   const data = await promiseAllProperties({
     tlds: logbox.wrap('Tlds', () =>
-      tldLister.downloadAllTlds()),
+      downloadAllTlds()),
 
     licensesWithDataInsights: logbox.wrap('Licenses With Data Insights', (progress) =>
-      marketplace.downloadLicensesWithDataInsights(progress)),
+      marketplaceAPI.downloadLicensesWithDataInsights(progress)),
 
     licensesWithoutDataInsights: logbox.wrap('Licenses Without Data Insights', () =>
-      marketplace.downloadLicensesWithoutDataInsights()),
+      marketplaceAPI.downloadLicensesWithoutDataInsights()),
 
     transactions: logbox.wrap('Transactions', () =>
-      marketplace.downloadTransactions()),
+      marketplaceAPI.downloadTransactions()),
 
     freeDomains: logbox.wrap('Free Email Providers', () =>
-      emailProviderLister.downloadFreeEmailProviders()),
+      downloadFreeEmailProviders()),
 
     rawDeals: logbox.wrap('Deals', () =>
-      downloadHubspotEntities(hubspot, DealAdapter)),
+      hubspotAPI.downloadHubspotEntities(DealAdapter)),
 
     rawCompanies: logbox.wrap('Companies', () =>
-      downloadHubspotEntities(hubspot, CompanyAdapter)),
+      hubspotAPI.downloadHubspotEntities(CompanyAdapter)),
 
     rawContacts: logbox.wrap('Contacts', () =>
-      downloadHubspotEntities(hubspot, ContactAdapter)),
+      hubspotAPI.downloadHubspotEntities(ContactAdapter)),
   });
 
   dataSet.save(data);
@@ -59,4 +54,16 @@ export async function downloadAllData(dataSet: DataSet, config: DownloadConfig):
   log.info('Downloader', 'Done');
 
   return data;
+}
+
+async function downloadAllTlds(): Promise<string[]> {
+  const res = await got.get(`https://data.iana.org/TLD/tlds-alpha-by-domain.txt`);
+  const tlds = res.body.trim().split('\n').splice(1).map(s => s.toLowerCase());
+  return tlds;
+}
+
+async function downloadFreeEmailProviders(): Promise<string[]> {
+  const res = await got.get(`https://f.hubspotusercontent40.net/hubfs/2832391/Marketing/Lead-Capture/free-domains-1.csv`);
+  const domains = res.body.split(',\n');
+  return domains;
 }

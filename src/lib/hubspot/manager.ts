@@ -1,7 +1,7 @@
 import assert from 'assert';
-import HubspotAPI from '../io/hubspot';
 import { AttachableError } from '../util/errors';
 import { isPresent } from '../util/helpers';
+import HubspotAPI from './api';
 import { Entity, Indexer } from './entity';
 import { EntityAdapter, EntityKind, FullEntity, RelativeAssociation } from './interfaces';
 

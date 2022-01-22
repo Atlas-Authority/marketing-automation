@@ -1,7 +1,7 @@
 import chalk from "chalk";
 import DataDir from "../data/dir";
-import HubspotAPI from "../io/hubspot";
-import { Data } from '../io/interfaces';
+import { Data } from "../data/set";
+import HubspotAPI from "../hubspot/api";
 import log from "../log/logger";
 import { Table } from "../log/table";
 import { Tallier } from "../log/tallier";
