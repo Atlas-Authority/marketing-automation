@@ -96,16 +96,18 @@ const env = {
 
 export default env;
 
-export const envConfig: Config = {
-  partnerDomains: new Set(optional('PARTNER_DOMAINS')?.split(/\s*,\s*/g) ?? []),
-  appToPlatform: Object.fromEntries<string>(
-    required('ADDONKEY_PLATFORMS')
-      .split(',')
-      .map(kv => kv.split('=') as [string, string])
-  ),
-  archivedApps: new Set(optional('IGNORED_APPS')?.split(',') ?? []),
-  ignoredEmails: new Set((optional('IGNORED_EMAILS')?.split(',') ?? []).map(e => e.toLowerCase())),
-};
+export function engineConfigFromENV(): Config {
+  return {
+    partnerDomains: new Set(optional('PARTNER_DOMAINS')?.split(/\s*,\s*/g) ?? []),
+    appToPlatform: Object.fromEntries<string>(
+      required('ADDONKEY_PLATFORMS')
+        .split(',')
+        .map(kv => kv.split('=') as [string, string])
+    ),
+    archivedApps: new Set(optional('IGNORED_APPS')?.split(',') ?? []),
+    ignoredEmails: new Set((optional('IGNORED_EMAILS')?.split(',') ?? []).map(e => e.toLowerCase())),
+  };
+}
 
 function required(key: string) {
   const value = process.env[key];

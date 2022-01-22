@@ -8,7 +8,7 @@ import { RelatedLicenseSet } from '../lib/engine/license-matching/license-groupe
 import { Database } from "../lib/model/database";
 import { License } from '../lib/model/license';
 import { Transaction } from '../lib/model/transaction';
-import { envConfig } from '../lib/parameters/env-config';
+import { engineConfigFromENV } from '../lib/parameters/env-config';
 
 function TEMPLATE({ runDealGenerator, GROUP, RECORDS, EVENTS, ACTIONS }: any) {
   it(`describe test`, () => {
@@ -52,7 +52,7 @@ function format(o: any, breakLength = 50) {
 }
 
 async function getRedactedMatchGroup(ids: [string, string[]][]) {
-  const db = new Database(null, envConfig);
+  const db = new Database(null, engineConfigFromENV());
   const data = new DataSet(DataDir.root.subdir('in')).load();
   db.importData(data);
 

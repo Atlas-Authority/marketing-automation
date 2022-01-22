@@ -3,14 +3,14 @@ import DataDir from '../lib/data/dir';
 import { DataSet } from '../lib/data/set';
 import log from "../lib/log/logger";
 import { Database } from "../lib/model/database";
-import { envConfig } from '../lib/parameters/env-config';
+import { engineConfigFromENV } from '../lib/parameters/env-config';
 import { isPresent, sorter } from "../lib/util/helpers";
 
 main();
 async function main() {
 
   log.level = log.Levels.Verbose;
-  const db = new Database(null, envConfig);
+  const db = new Database(null, engineConfigFromENV());
   const data = new DataSet(DataDir.root.subdir('in')).load();
   db.importData(data);
 

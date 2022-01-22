@@ -5,7 +5,7 @@ import Engine from "../lib/engine/engine";
 import log from "../lib/log/logger";
 import { Database } from "../lib/model/database";
 import { getCliArgs } from '../lib/parameters/cli-args';
-import { envConfig } from '../lib/parameters/env-config';
+import { engineConfigFromENV } from '../lib/parameters/env-config';
 
 main();
 async function main() {
@@ -19,7 +19,7 @@ async function main() {
 
   const engine = new Engine();
   const data = new DataSet(dataDir).load();
-  const db = new Database(null, envConfig);
+  const db = new Database(null, engineConfigFromENV());
 
   // First
   log.level = log.Levels.Info;

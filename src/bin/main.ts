@@ -7,7 +7,7 @@ import HubspotAPI from '../lib/io/hubspot';
 import { SlackNotifier } from '../lib/io/slack-notifier';
 import log from '../lib/log/logger';
 import { Database } from "../lib/model/database";
-import { envConfig, logLevelFromENV, runLoopConfigFromENV, serviceCredsFromENV } from "../lib/parameters/env-config";
+import { engineConfigFromENV, logLevelFromENV, runLoopConfigFromENV, serviceCredsFromENV } from "../lib/parameters/env-config";
 import run from "../lib/util/runner";
 
 main();
@@ -29,7 +29,7 @@ async function main() {
     async work() {
       await downloadAllData(dataSet, creds);
       const data = new DataSet(dataDir).load();
-      const db = new Database(uploader, envConfig);
+      const db = new Database(uploader, engineConfigFromENV());
       await new Engine().run(data, db, null);
     },
 
