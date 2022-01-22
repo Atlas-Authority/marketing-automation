@@ -1,7 +1,13 @@
 import * as slack from '@slack/web-api';
 import log from '../log/logger';
-import { runLoopConfigFromENV, slackConfigFromENV } from "../parameters/env-config";
+import { slackConfigFromENV } from "../parameters/env-config";
 import { AttachableError, KnownError } from "../util/errors";
+
+interface RunLoopConfig {
+  runInterval: string;
+  retryInterval: string;
+  retryTimes: number;
+}
 
 export class SlackNotifier {
 
@@ -22,9 +28,7 @@ export class SlackNotifier {
     this.postToSlack(`Starting Marketing Engine`);
   }
 
-  public async notifyErrors(errors: any[]) {
-    const loopConfig = runLoopConfigFromENV();
-
+  public async notifyErrors(loopConfig: RunLoopConfig, errors: any[]) {
     await this.postToSlack(`Failed ${loopConfig.retryTimes} times. Below are the specific errors, in order. Trying again in ${loopConfig.runInterval}.`);
     for (const error of errors) {
       if (error instanceof KnownError) {

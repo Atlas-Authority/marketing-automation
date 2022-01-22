@@ -21,10 +21,11 @@ async function main() {
   const creds = serviceCredsFromENV();
   const uploader = new HubspotAPI(creds.hubspotCreds);
 
+  const runLoopConfig = runLoopConfigFromENV();
   const notifier = SlackNotifier.fromENV();
   notifier?.notifyStarting();
 
-  await run(runLoopConfigFromENV(), {
+  await run(runLoopConfig, {
 
     async work() {
       await downloadAllData(dataSet, creds);
@@ -34,7 +35,7 @@ async function main() {
     },
 
     async failed(errors) {
-      notifier?.notifyErrors(errors);
+      notifier?.notifyErrors(runLoopConfig, errors);
     },
 
   });
