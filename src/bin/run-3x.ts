@@ -11,20 +11,18 @@ import { envConfig } from '../lib/parameters/env-config';
 main();
 async function main() {
 
-  let i = 0;
   const { savelogs } = getCliArgs('savelogs');
-
-  log.level = log.Levels.Info;
 
   const dataDir = DataDir.root.subdir('in');
 
+  let i = 0;
   const nextDataDir = () => savelogs ? dataDir.subdir(`${savelogs}-${++i}`) : null;
 
   const engine = new Engine();
-
   const data = loadDataFromDisk(dataDir);
 
   // First
+  log.level = log.Levels.Info;
   await engine.run(data, new Database(new MemoryHubspot(null), envConfig), nextDataDir());
 
   // Second
@@ -32,6 +30,7 @@ async function main() {
   await engine.run(data, new Database(new MemoryHubspot(null), envConfig), nextDataDir());
 
   // Third
+  log.level = log.Levels.Verbose;
   await engine.run(data, new Database(new MemoryHubspot(null), envConfig), nextDataDir());
 
 }
