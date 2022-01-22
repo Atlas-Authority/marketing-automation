@@ -4,7 +4,6 @@ import { Database } from '../../model/database';
 import { License } from '../../model/license';
 import { ContactInfo, PartnerBillingInfo } from '../../model/marketplace/common';
 import { Transaction } from '../../model/transaction';
-import env from "../../parameters/env-config";
 import { sorter } from '../../util/helpers';
 
 export type GeneratedContact = ContactData & { lastUpdated: string };
@@ -102,7 +101,7 @@ export class ContactGenerator {
       region: item.data.region,
       relatedProducts: new Set(),
       deployment: item.data.hosting,
-      products: new Set([item.data.addonKey].filter(notIgnored)),
+      products: new Set([item.data.addonKey].filter(key => notIgnored(this.db, key))),
       licenseTier: null,
       lastMpacEvent: '',
       lastUpdated: (item instanceof License ? item.data.lastUpdated : item.data.saleDate),
@@ -166,6 +165,6 @@ export function mergeContactInfo(contact: ContactData, contacts: GeneratedContac
   }
 }
 
-function notIgnored(addonKey: string) {
-  return !env.engine.archivedApps.has(addonKey);
+function notIgnored(db: Database, addonKey: string) {
+  return !db.archivedApps.has(addonKey);
 }

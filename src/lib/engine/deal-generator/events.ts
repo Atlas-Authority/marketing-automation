@@ -1,7 +1,6 @@
 import { Database } from "../../model/database";
 import { License } from "../../model/license";
 import { Transaction } from "../../model/transaction";
-import env from "../../parameters/env-config";
 import { sorter } from "../../util/helpers";
 import { RelatedLicenseSet } from "../license-matching/license-grouper";
 
@@ -61,7 +60,7 @@ export class EventGenerator {
   }
 
   private getEventMeta(records: (License | Transaction)[]): EventMeta {
-    if (env.engine.archivedApps.has(records[0].data.addonKey)) {
+    if (this.db.archivedApps.has(records[0].data.addonKey)) {
       return 'archived-app';
     }
 
