@@ -1,10 +1,10 @@
 import 'source-map-support/register';
 import util from 'util';
 import DataDir from '../lib/data/dir';
+import { DataSet } from '../lib/data/set';
 import { DealGenerator } from '../lib/engine/deal-generator/generate-deals';
 import { abbrActionDetails, abbrEventDetails } from '../lib/engine/deal-generator/test/utils';
 import { RelatedLicenseSet } from '../lib/engine/license-matching/license-grouper';
-import { loadDataFromDisk } from "../lib/io/downloader";
 import { Database } from "../lib/model/database";
 import { License } from '../lib/model/license';
 import { Transaction } from '../lib/model/transaction';
@@ -53,7 +53,7 @@ function format(o: any, breakLength = 50) {
 
 async function getRedactedMatchGroup(ids: [string, string[]][]) {
   const db = new Database(null, envConfig);
-  const data = loadDataFromDisk(DataDir.root.subdir('in'));
+  const data = new DataSet(DataDir.root.subdir('in')).load();
   db.importData(data);
 
   const group: RelatedLicenseSet = [];

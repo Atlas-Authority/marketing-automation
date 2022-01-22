@@ -1,6 +1,6 @@
 import 'source-map-support/register';
 import DataDir from '../lib/data/dir';
-import { loadDataFromDisk } from "../lib/io/downloader";
+import { DataSet } from '../lib/data/set';
 import log from "../lib/log/logger";
 import { Database } from "../lib/model/database";
 import { envConfig } from '../lib/parameters/env-config';
@@ -11,7 +11,7 @@ async function main() {
 
   log.level = log.Levels.Verbose;
   const db = new Database(null, envConfig);
-  const data = loadDataFromDisk(DataDir.root.subdir('in'));
+  const data = new DataSet(DataDir.root.subdir('in')).load();
   db.importData(data);
 
   const attributions = (db

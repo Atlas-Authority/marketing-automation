@@ -1,7 +1,8 @@
 import 'source-map-support/register';
 import DataDir from '../lib/data/dir';
+import { DataSet } from '../lib/data/set';
 import Engine from "../lib/engine/engine";
-import { Downloader, loadDataFromDisk } from '../lib/io/downloader';
+import { Downloader } from '../lib/io/downloader';
 import HubspotAPI from '../lib/io/hubspot';
 import { SlackNotifier } from '../lib/io/slack-notifier';
 import log from '../lib/log/logger';
@@ -15,9 +16,10 @@ async function main() {
   log.setLevelFrom(logLevelFromENV());
 
   const dataDir = DataDir.root.subdir("in");
+  const dataSet = new DataSet(dataDir);
 
   const creds = serviceCredsFromENV();
-  const downloader = new Downloader(dataDir, creds);
+  const downloader = new Downloader(dataSet, creds);
   const uploader = new HubspotAPI(creds.hubspotCreds);
 
   const notifier = SlackNotifier.fromENV();
@@ -27,7 +29,7 @@ async function main() {
 
     async work() {
       await downloader.downloadData();
-      const data = loadDataFromDisk(dataDir);
+      const data = new DataSet(dataDir).load();
       const db = new Database(uploader, envConfig);
       await new Engine().run(data, db, null);
     },
