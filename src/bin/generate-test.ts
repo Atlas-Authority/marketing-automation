@@ -8,7 +8,7 @@ import { RelatedLicenseSet } from '../lib/engine/license-matching/license-groupe
 import { Database } from "../lib/model/database";
 import { License } from '../lib/model/license';
 import { Transaction } from '../lib/model/transaction';
-import { emptyConfig, envConfig } from '../lib/parameters/env-config';
+import { envConfig } from '../lib/parameters/env-config';
 
 function TEMPLATE({ runDealGenerator, GROUP, RECORDS, EVENTS, ACTIONS }: any) {
   it(`describe test`, () => {
@@ -28,7 +28,7 @@ async function main(template: string, testId: string) {
 
   const group = await getRedactedMatchGroup(ids);
 
-  const db = new Database(null, emptyConfig);
+  const db = new Database(null, null);
 
   db.licenses.length = 0;
   db.licenses.push(...group);

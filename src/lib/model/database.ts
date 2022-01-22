@@ -34,23 +34,16 @@ export class Database {
   public appToPlatform: { [addonKey: string]: string } = Object.create(null);
   public archivedApps = new Set<string>();
 
-  public constructor(outHubspot: HubspotAPI | null, config: Config, populateFromEnv = true) {
+  public constructor(outHubspot: HubspotAPI | null, config: Config | null) {
     this.dealManager = new DealManager(outHubspot);
     this.contactManager = new ContactManager(outHubspot);
     this.companyManager = new CompanyManager(outHubspot);
 
-    for (const domain of config.partnerDomains) {
-      this.partnerDomains.add(domain);
+    if (config) {
+      this.appToPlatform = config.appToPlatform;
+      this.archivedApps = config.archivedApps;
+      this.partnerDomains = config.partnerDomains;
     }
-
-    if (populateFromEnv) {
-      this.populateFromEnv();
-    }
-  }
-
-  populateFromEnv() {
-    this.appToPlatform = env.mpac.platforms;
-    this.archivedApps = env.engine.archivedApps;
   }
 
   importData(data: Data) {

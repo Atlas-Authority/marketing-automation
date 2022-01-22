@@ -7,7 +7,9 @@ dotenv.config();
 const isTest = process.env.NODE_ENV === 'test';
 
 export interface Config {
-  partnerDomains: string[];
+  partnerDomains: Set<string>;
+  appToPlatform: { [addonKey: string]: string };
+  archivedApps: Set<string>;
 }
 
 export function logLevelFromENV() {
@@ -107,12 +109,11 @@ const env = {
 
 export default env;
 
-export const emptyConfig: Config = {
-  partnerDomains: [],
-};
-
 export const envConfig: Config = {
-  partnerDomains: env.engine.partnerDomains ?? [],
+  partnerDomains: new Set(env.engine.partnerDomains ?? []),
+  appToPlatform: env.mpac.platforms,
+  archivedApps: env.engine.archivedApps,
+
 };
 
 function required(key: string) {

@@ -5,7 +5,6 @@ import { DealStage } from '../../../model/hubspot/interfaces';
 import { License, LicenseData } from "../../../model/license";
 import { ContactInfo } from '../../../model/marketplace/common';
 import { Transaction, TransactionData } from "../../../model/transaction";
-import { emptyConfig } from '../../../parameters/env-config';
 import { ContactGenerator } from '../../contacts/generate-contacts';
 import { updateContactsBasedOnMatchResults } from '../../contacts/update-contacts';
 import { RelatedLicenseSet } from '../../license-matching/license-grouper';
@@ -29,9 +28,10 @@ export function runDealGeneratorTwice(input: TestInput) {
 
 export function runDealGenerator(input: TestInput) {
   const db = new Database(null, {
-    ...emptyConfig,
-    partnerDomains: input.partnerDomains ?? [],
-  }, false);
+    partnerDomains: new Set(input.partnerDomains ?? []),
+    appToPlatform: {},
+    archivedApps: new Set(),
+  });
   const group = reassembleMatchGroup(input.group, input.records);
   db.licenses = group;
   db.transactions = group.flatMap(g => g.transactions);
