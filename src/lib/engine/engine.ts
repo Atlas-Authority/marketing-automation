@@ -15,7 +15,7 @@ export default class Engine {
   private count = 0;
 
   public async run(data: Data, db: Database, logDir: DataDir | null) {
-    this.step('Starting to download data');
+    this.step('Importing data into engine');
     db.importData(data);
 
     this.step('Identifying and Flagging Contact Types');
