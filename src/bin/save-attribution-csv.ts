@@ -10,11 +10,11 @@ main();
 async function main() {
 
   log.level = log.Levels.Verbose;
-  const db = new Engine(null, engineConfigFromENV());
+  const engine = new Engine(null, engineConfigFromENV());
   const data = new DataSet(DataDir.root.subdir('in')).load();
-  db.importData(data);
+  engine.importData(data);
 
-  const attributions = (db
+  const attributions = (engine
     .licenses
     .map(l => l.data.attribution)
     .filter(isPresent)

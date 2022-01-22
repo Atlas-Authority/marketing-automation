@@ -25,8 +25,8 @@ export class DealGenerator {
 
   private ignoredAmounts = new Map<string, number>();
 
-  public constructor(private db: Engine) {
-    this.actionGenerator = new ActionGenerator(db.dealManager, this.ignore.bind(this));
+  public constructor(private engine: Engine) {
+    this.actionGenerator = new ActionGenerator(engine.dealManager, this.ignore.bind(this));
   }
 
   public run(matches: RelatedLicenseSet[], logDir: DataDir | null) {
@@ -41,7 +41,7 @@ export class DealGenerator {
 
         for (const action of actions) {
           const deal = (action.type === 'create'
-            ? this.db.dealManager.create(action.properties)
+            ? this.engine.dealManager.create(action.properties)
             : action.deal);
 
           if (deal) {
@@ -51,7 +51,7 @@ export class DealGenerator {
       }
 
       for (const [reason, amount] of this.ignoredAmounts) {
-        this.db.tallier.less('Ignored: ' + reason, amount);
+        this.engine.tallier.less('Ignored: ' + reason, amount);
       }
 
       this.printIgnoredTransactionsTable();
@@ -88,7 +88,7 @@ export class DealGenerator {
   public generateActionsForMatchedGroup(group: RelatedLicenseSet) {
     assert.ok(group.length > 0);
 
-    const eventGenerator = new EventGenerator(this.db);
+    const eventGenerator = new EventGenerator(this.engine);
 
     const records = eventGenerator.getSortedRecords(group);
     const events = eventGenerator.interpretAsEvents(records);
@@ -101,7 +101,7 @@ export class DealGenerator {
     const records = group.flatMap(license => [license, ...license.transactions]);
     const emails = [...new Set(records.flatMap(r => r.allContacts.map(c => c.data.email)))];
     const contacts = (emails
-      .map(email => this.db.contactManager.getByEmail(email))
+      .map(email => this.engine.contactManager.getByEmail(email))
       .filter(isPresent));
     contacts.sort(sorter(c => c.isCustomer ? -1 : 0));
 

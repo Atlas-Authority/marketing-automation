@@ -27,30 +27,30 @@ export function runDealGeneratorTwice(input: TestInput) {
 }
 
 export function runDealGenerator(input: TestInput) {
-  const db = new Engine(null, {
+  const engine = new Engine(null, {
     partnerDomains: new Set(input.partnerDomains ?? []),
     appToPlatform: {},
     archivedApps: new Set(),
     ignoredEmails: new Set(),
   });
   const group = reassembleMatchGroup(input.group, input.records);
-  db.licenses = group;
-  db.transactions = group.flatMap(g => g.transactions);
+  engine.licenses = group;
+  engine.transactions = group.flatMap(g => g.transactions);
 
   for (const license of group) {
-    db.appToPlatform[license.data.addonKey] = 'Confluence';
+    engine.appToPlatform[license.data.addonKey] = 'Confluence';
   }
 
-  new ContactGenerator(db).run();
-  updateContactsBasedOnMatchResults(db, [group]);
+  new ContactGenerator(engine).run();
+  updateContactsBasedOnMatchResults(engine, [group]);
 
   for (const [i, dealData] of (input.deals ?? []).entries()) {
-    const deal = db.dealManager.create(dealData);
+    const deal = engine.dealManager.create(dealData);
     deal.id = `deal-${i}`;
     deal.applyPropertyChanges();
   }
 
-  const dealGenerator = new DealGenerator(db);
+  const dealGenerator = new DealGenerator(engine);
   const { records, events, actions } = dealGenerator.generateActionsForMatchedGroup(group);
 
   const createdDeals: DealData[] = [];
@@ -64,7 +64,7 @@ export function runDealGenerator(input: TestInput) {
     events: events.map(abbrEventDetails),
     actions: actions.map(abbrActionDetails),
     createdDeals,
-    db,
+    engine,
   };
 }
 

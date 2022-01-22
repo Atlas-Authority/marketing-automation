@@ -6,13 +6,13 @@ it(`Sets partner domain on deal if record is partner-transacted`, () => {
   const license2 = testLicense("2222222", "2021-12-27", "COMMERCIAL", "active");
   const partnerDomain = license2.data.technicalContact.email.split('@')[1];
 
-  const { db } = runDealGeneratorTwice({
+  const { engine } = runDealGeneratorTwice({
     group: [['1111111', []], ['2222222', []]],
     records: [license1, license2],
     partnerDomains: [partnerDomain],
   });
 
-  const deals = db.dealManager.getArray();
+  const deals = engine.dealManager.getArray();
   expect(deals.length).toBe(1);
 
   const deal = deals[0];
@@ -24,13 +24,13 @@ it(`Sets partner domain on deal if record is partner-transacted even if newer on
   const license2 = testLicense("2222222", "2021-12-27", "COMMERCIAL", "active");
   const partnerDomain = license1.data.technicalContact.email.split('@')[1];
 
-  const { db } = runDealGeneratorTwice({
+  const { engine } = runDealGeneratorTwice({
     group: [['1111111', []], ['2222222', []]],
     records: [license1, license2],
     partnerDomains: [partnerDomain],
   });
 
-  const deals = db.dealManager.getArray();
+  const deals = engine.dealManager.getArray();
   expect(deals.length).toBe(1);
 
   const deal = deals[0];
@@ -42,13 +42,13 @@ it(`Sets partner domain on contact if latest record is partner-transacted`, () =
   const license2 = testLicense("2222222", "2021-12-27", "COMMERCIAL", "active", "foo@domain2.example.com");
   const partnerDomain = "domain1.example.com";
 
-  const { db } = runDealGenerator({
+  const { engine } = runDealGenerator({
     group: [['1111111', []], ['2222222', []]],
     records: [license1, license2],
     partnerDomains: [partnerDomain],
   });
 
-  const contacts = db.contactManager.getArray();
+  const contacts = engine.contactManager.getArray();
   expect(contacts.length).toBe(2);
 
   const [c1, c2] = contacts;

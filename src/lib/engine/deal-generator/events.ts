@@ -22,7 +22,7 @@ export type DealRelevantEvent = (
 
 export class EventGenerator {
 
-  constructor(private db: Engine) { }
+  constructor(private engine: Engine) { }
 
   private events: DealRelevantEvent[] = [];
 
@@ -60,13 +60,13 @@ export class EventGenerator {
   }
 
   private getEventMeta(records: (License | Transaction)[]): EventMeta {
-    if (this.db.archivedApps.has(records[0].data.addonKey)) {
+    if (this.engine.archivedApps.has(records[0].data.addonKey)) {
       return 'archived-app';
     }
 
     const domains = new Set(records.map(license => license.data.technicalContact.email.toLowerCase().split('@')[1]));
-    const partnerDomains = [...domains].filter(domain => this.db.partnerDomains.has(domain));
-    const providerDomains = [...domains].filter(domain => this.db.providerDomains.has(domain));
+    const partnerDomains = [...domains].filter(domain => this.engine.partnerDomains.has(domain));
+    const providerDomains = [...domains].filter(domain => this.engine.providerDomains.has(domain));
 
     if (domains.size == partnerDomains.length + providerDomains.length) {
       if (partnerDomains.length > 0 && providerDomains.length > 0) {

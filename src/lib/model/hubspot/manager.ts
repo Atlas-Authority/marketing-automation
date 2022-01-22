@@ -62,7 +62,7 @@ export abstract class EntityManager<
 
   public linkEntities(
     prelinkedAssociations: Map<string, Set<RelativeAssociation>>,
-    db: {
+    managers: {
       [K in `${EntityKind}Manager`]: EntityManager<any, any, any>;
     },
   ) {
@@ -72,7 +72,7 @@ export abstract class EntityManager<
         if (!me) throw new Error(`Couldn't find kind=${this.kind} id=${meId}`);
 
         const { toKind, youId } = this.getAssocInfo(rawAssoc);
-        const you = db[`${toKind}Manager`].get(youId);
+        const you = managers[`${toKind}Manager`].get(youId);
         if (!you) throw new Error(`Couldn't find kind=${toKind} id=${youId}`);
 
         me.addAssociation(you, { firstSide: true, initial: true });

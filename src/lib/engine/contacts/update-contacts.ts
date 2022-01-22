@@ -7,9 +7,9 @@ import { Engine } from "../engine";
 import { RelatedLicenseSet } from "../license-matching/license-grouper";
 import { flagPartnersViaCoworkers } from "./contact-types";
 
-export function updateContactsBasedOnMatchResults(db: Engine, allMatches: RelatedLicenseSet[]) {
+export function updateContactsBasedOnMatchResults(engine: Engine, allMatches: RelatedLicenseSet[]) {
   for (const license of allMatches) {
-    const contacts = new Set(license.map(license => db.contactManager.getByEmail(license.data.technicalContact.email)!));
+    const contacts = new Set(license.map(license => engine.contactManager.getByEmail(license.data.technicalContact.email)!));
 
     flagPartnersViaCoworkers([...contacts]);
 
@@ -32,11 +32,11 @@ export function updateContactsBasedOnMatchResults(db: Engine, allMatches: Relate
       }
 
       const addonKey = license[0].data.addonKey;
-      const product = db.appToPlatform[addonKey];
+      const product = engine.appToPlatform[addonKey];
       if (!product) {
         throw new KnownError(`Add "${addonKey}" to ADDONKEY_PLATFORMS`);
       }
-      if (!db.archivedApps.has(addonKey)) {
+      if (!engine.archivedApps.has(addonKey)) {
         contact.data.relatedProducts.add(product);
       }
 
@@ -50,15 +50,15 @@ export function updateContactsBasedOnMatchResults(db: Engine, allMatches: Relate
     }
   }
 
-  setPartnerDomainFor(db.partnerDomains, db.licenses);
-  setPartnerDomainFor(db.partnerDomains, db.transactions);
+  setPartnerDomainFor(engine.partnerDomains, engine.licenses);
+  setPartnerDomainFor(engine.partnerDomains, engine.transactions);
 
   /**
    * If the contact's most recent record has a partner,
    * set that partner's domain as last associated partner.
    * Otherwise set it to blank, ignoring previous records.
    */
-  for (const contact of db.contactManager.getAll()) {
+  for (const contact of engine.contactManager.getAll()) {
     const lastRecord = contact.records[0];
     contact.data.lastAssociatedPartner = lastRecord?.partnerDomain ?? null;
   }

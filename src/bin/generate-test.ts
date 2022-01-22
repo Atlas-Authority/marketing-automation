@@ -28,15 +28,15 @@ async function main(template: string, testId: string) {
 
   const group = await getRedactedMatchGroup(ids);
 
-  const db = new Engine(null, null);
+  const engine = new Engine(null, null);
 
-  db.licenses.length = 0;
-  db.licenses.push(...group);
+  engine.licenses.length = 0;
+  engine.licenses.push(...group);
 
-  db.transactions.length = 0;
-  db.transactions.push(...group.flatMap(g => g.transactions));
+  engine.transactions.length = 0;
+  engine.transactions.push(...group.flatMap(g => g.transactions));
 
-  const dealGenerator = new DealGenerator(db);
+  const dealGenerator = new DealGenerator(engine);
   const { records, events, actions } = dealGenerator.generateActionsForMatchedGroup(group);
 
   console.log(template
@@ -52,16 +52,16 @@ function format(o: any, breakLength = 50) {
 }
 
 async function getRedactedMatchGroup(ids: [string, string[]][]) {
-  const db = new Engine(null, engineConfigFromENV());
+  const engine = new Engine(null, engineConfigFromENV());
   const data = new DataSet(DataDir.root.subdir('in')).load();
-  db.importData(data);
+  engine.importData(data);
 
   const group: RelatedLicenseSet = [];
   for (const [lid, txids] of ids) {
-    const license = db.licenses.find(l => l.id === lid)!;
+    const license = engine.licenses.find(l => l.id === lid)!;
     group.push(license);
     for (const tid of txids) {
-      const transaction = db.transactions.find(t => t.id === tid)!;
+      const transaction = engine.transactions.find(t => t.id === tid)!;
       license.transactions.push(transaction);
       transaction.license = license;
     }

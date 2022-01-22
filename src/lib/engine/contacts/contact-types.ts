@@ -3,53 +3,53 @@ import { License } from "../../model/license";
 import { Transaction } from "../../model/transaction";
 import { Engine } from "../engine";
 
-export function identifyAndFlagContactTypes(db: Engine) {
+export function identifyAndFlagContactTypes(engine: Engine) {
   // Identifying contact types
-  identifyContactTypesFromRecordDomains(db, db.licenses);
-  identifyContactTypesFromRecordDomains(db, db.transactions);
-  removeProviderDomainsFromPartnerDomains(db);
-  separatePartnerDomainsFromCustomerDomains(db);
+  identifyContactTypesFromRecordDomains(engine, engine.licenses);
+  identifyContactTypesFromRecordDomains(engine, engine.transactions);
+  removeProviderDomainsFromPartnerDomains(engine);
+  separatePartnerDomainsFromCustomerDomains(engine);
 
   // Flagging contacts and companies
-  flagKnownContactTypesByDomain(db);
-  setPartnersViaCoworkers(db);
+  flagKnownContactTypesByDomain(engine);
+  setPartnersViaCoworkers(engine);
 }
 
-function identifyContactTypesFromRecordDomains(db: Engine, records: (Transaction | License)[]) {
+function identifyContactTypesFromRecordDomains(engine: Engine, records: (Transaction | License)[]) {
   for (const record of records) {
-    maybeAddDomain(db.partnerDomains, record.data.partnerDetails?.billingContact.email);
-    maybeAddDomain(db.customerDomains, record.data.billingContact?.email);
-    maybeAddDomain(db.customerDomains, record.data.technicalContact.email);
+    maybeAddDomain(engine.partnerDomains, record.data.partnerDetails?.billingContact.email);
+    maybeAddDomain(engine.customerDomains, record.data.billingContact?.email);
+    maybeAddDomain(engine.customerDomains, record.data.technicalContact.email);
   }
 }
 
-function removeProviderDomainsFromPartnerDomains(db: Engine) {
-  for (const domain of db.providerDomains) {
-    db.partnerDomains.delete(domain);
-    db.customerDomains.add(domain);
+function removeProviderDomainsFromPartnerDomains(engine: Engine) {
+  for (const domain of engine.providerDomains) {
+    engine.partnerDomains.delete(domain);
+    engine.customerDomains.add(domain);
   }
 }
 
-function separatePartnerDomainsFromCustomerDomains(db: Engine) {
+function separatePartnerDomainsFromCustomerDomains(engine: Engine) {
   // If it's a partner domain, then it's not a customer domain
-  for (const domain of db.partnerDomains) {
-    db.customerDomains.delete(domain);
+  for (const domain of engine.partnerDomains) {
+    engine.customerDomains.delete(domain);
   }
 }
 
-function flagKnownContactTypesByDomain(db: Engine) {
-  for (const contact of db.contactManager.getAll()) {
-    if (usesDomains(contact, db.partnerDomains)) {
+function flagKnownContactTypesByDomain(engine: Engine) {
+  for (const contact of engine.contactManager.getAll()) {
+    if (usesDomains(contact, engine.partnerDomains)) {
       contact.data.contactType = 'Partner';
     }
-    else if (usesDomains(contact, db.customerDomains)) {
+    else if (usesDomains(contact, engine.customerDomains)) {
       contact.data.contactType = 'Customer';
     }
   }
 }
 
-function setPartnersViaCoworkers(db: Engine) {
-  for (const contact of db.contactManager.getAll()) {
+function setPartnersViaCoworkers(engine: Engine) {
+  for (const contact of engine.contactManager.getAll()) {
     const companies = contact.companies.getAll();
     const coworkers = companies.flatMap(company => company.contacts.getAll());
     flagPartnersViaCoworkers(coworkers);

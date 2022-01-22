@@ -13,7 +13,7 @@ export class LicenseGrouper {
 
   private matchGroups = new Map<License, Set<License>>();
 
-  constructor(private db: Engine) { }
+  constructor(private engine: Engine) { }
 
   run(logDir: DataDir | null): RelatedLicenseSet[] {
     return this.withLog(logDir, scoreLogger => {
@@ -53,7 +53,7 @@ export class LicenseGrouper {
       scorable: ScorableLicense,
     }[]>();
 
-    for (const license of this.db.licenses) {
+    for (const license of this.engine.licenses) {
       const addonKey = license.data.addonKey;
       const hosting = license.data.hosting;
       const key = `${addonKey}, ${hosting}`;
@@ -76,7 +76,7 @@ export class LicenseGrouper {
           billingContact: license.billingContact,
 
           company: normalizeString(license.data.company)?.toLowerCase(),
-          companyDomain: this.db.providerDomains.has(techContactDomain) ? '' : normalizeString(techContactDomain),
+          companyDomain: this.engine.providerDomains.has(techContactDomain) ? '' : normalizeString(techContactDomain),
 
           techContactEmailPart,
           techContactAddress: normalizeString(license.data.technicalContact.address1)?.toLowerCase(),

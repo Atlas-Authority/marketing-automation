@@ -8,9 +8,9 @@ import { engineConfigFromENV } from '../lib/parameters/env-config';
 main();
 async function main() {
 
-  const db = new Engine(null, engineConfigFromENV());
+  const engine = new Engine(null, engineConfigFromENV());
   const data = new DataSet(DataDir.root.subdir('in')).load();
-  db.importData(data);
-  printSummary(db);
+  engine.importData(data);
+  printSummary(engine);
 
 }

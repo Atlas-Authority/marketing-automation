@@ -5,9 +5,9 @@ import { formatMoney, formatNumber } from "../util/formatters";
 import { isPresent } from "../util/helpers";
 import { Engine } from "./engine";
 
-export function printSummary(db: Engine) {
+export function printSummary(engine: Engine) {
 
-  if (db.dealManager.duplicates.size > 0) {
+  if (engine.dealManager.duplicates.size > 0) {
     Table.print({
       title: 'Duplicate Deals',
       log: s => log.warn('Dups', s),
@@ -15,21 +15,21 @@ export function printSummary(db: Engine) {
         [{ title: 'Primary' }, s => s[0].link()],
         [{ title: 'Duplicate(s)' }, s => s[1].map(d => d.link())],
       ],
-      rows: db.dealManager.duplicates,
+      rows: engine.dealManager.duplicates,
     });
 
-    const dupTotal = ([...db.dealManager.duplicates]
+    const dupTotal = ([...engine.dealManager.duplicates]
       .flatMap(([primary, dups]) => dups)
       .map((dup) => dup.data.amount ?? 0)
       .reduce((a, b) => a + b));
 
     log.warn('Deal Generator', 'Total of duplicates:', formatMoney(dupTotal));
-    log.warn('Deal Generator', 'Total duplicates:', db.dealManager.duplicates.size);
+    log.warn('Deal Generator', 'Total duplicates:', engine.dealManager.duplicates.size);
 
-    db.tallier.less('Over-accounted: Duplicate deals', -dupTotal);
+    engine.tallier.less('Over-accounted: Duplicate deals', -dupTotal);
   }
 
-  const deals = db.dealManager.getArray();
+  const deals = engine.dealManager.getArray();
 
   log.info('Summary', 'Results of this run:');
 
@@ -41,25 +41,25 @@ export function printSummary(db: Engine) {
   table.rows.push(['$ Total Deals Lost', formatMoney(sumDeals(deals.filter(d => d.isLost)))]);
   table.rows.push(['$ Total Deals Eval', formatMoney(sumDeals(deals.filter(d => d.isEval())))]);
 
-  table.rows.push(['Deals Created', formatNumber(db.dealManager.createdCount)]);
-  table.rows.push(['Deals Updated', formatNumber(db.dealManager.updatedCount)]);
-  table.rows.push(['Deals Associated', formatNumber(db.dealManager.associatedCount)]);
-  table.rows.push(['Deals DisAssociated', formatNumber(db.dealManager.disassociatedCount)]);
+  table.rows.push(['Deals Created', formatNumber(engine.dealManager.createdCount)]);
+  table.rows.push(['Deals Updated', formatNumber(engine.dealManager.updatedCount)]);
+  table.rows.push(['Deals Associated', formatNumber(engine.dealManager.associatedCount)]);
+  table.rows.push(['Deals DisAssociated', formatNumber(engine.dealManager.disassociatedCount)]);
 
-  table.rows.push(['Contacts Created', formatNumber(db.contactManager.createdCount)]);
-  table.rows.push(['Contacts Updated', formatNumber(db.contactManager.updatedCount)]);
-  table.rows.push(['Contacts Associated', formatNumber(db.contactManager.associatedCount)]);
-  table.rows.push(['Contacts Disassociated', formatNumber(db.contactManager.disassociatedCount)]);
+  table.rows.push(['Contacts Created', formatNumber(engine.contactManager.createdCount)]);
+  table.rows.push(['Contacts Updated', formatNumber(engine.contactManager.updatedCount)]);
+  table.rows.push(['Contacts Associated', formatNumber(engine.contactManager.associatedCount)]);
+  table.rows.push(['Contacts Disassociated', formatNumber(engine.contactManager.disassociatedCount)]);
 
-  table.rows.push(['Companies Updated', formatNumber(db.companyManager.updatedCount)]);
+  table.rows.push(['Companies Updated', formatNumber(engine.companyManager.updatedCount)]);
 
   for (const row of table.eachRow()) {
     log.info('Summary', '  ' + row);
   }
 
-  db.tallier.less('Deal sum', sumDeals(deals));
+  engine.tallier.less('Deal sum', sumDeals(deals));
 
-  db.tallier.printTable();
+  engine.tallier.printTable();
 }
 
 function sumDeals(deals: Deal[]) {
