@@ -1,6 +1,6 @@
-import { makeEmailValidationRegex } from "../io/domains";
 import HubspotAPI from "../io/hubspot";
 import { Data } from '../io/interfaces';
+import { makeEmailValidationRegex } from "../io/tlds";
 import log from "../log/logger";
 import { Table } from "../log/table";
 import { Tallier } from "../log/tallier";
