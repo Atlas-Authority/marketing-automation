@@ -31,6 +31,7 @@ export function runDealGenerator(input: TestInput) {
     partnerDomains: new Set(input.partnerDomains ?? []),
     appToPlatform: {},
     archivedApps: new Set(),
+    ignoredEmails: new Set(),
   });
   const group = reassembleMatchGroup(input.group, input.records);
   db.licenses = group;

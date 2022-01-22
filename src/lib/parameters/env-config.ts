@@ -10,6 +10,7 @@ export interface Config {
   partnerDomains: Set<string>;
   appToPlatform: { [addonKey: string]: string };
   archivedApps: Set<string>;
+  ignoredEmails: Set<string>;
 }
 
 export function logLevelFromENV() {
@@ -113,7 +114,7 @@ export const envConfig: Config = {
   partnerDomains: new Set(env.engine.partnerDomains ?? []),
   appToPlatform: env.mpac.platforms,
   archivedApps: env.engine.archivedApps,
-
+  ignoredEmails: new Set(env.engine.ignoredEmails),
 };
 
 function required(key: string) {

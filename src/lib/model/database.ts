@@ -3,7 +3,7 @@ import { Data } from '../io/interfaces';
 import log from "../log/logger";
 import { Table } from "../log/table";
 import { Tallier } from "../log/tallier";
-import env, { Config } from "../parameters/env-config";
+import { Config } from "../parameters/env-config";
 import { formatMoney, formatNumber } from "../util/formatters";
 import { CompanyManager } from "./company";
 import { ContactManager } from "./contact";
@@ -33,6 +33,7 @@ export class Database {
 
   public appToPlatform: { [addonKey: string]: string } = Object.create(null);
   public archivedApps = new Set<string>();
+  private ignoredEmails = new Set<string>();
 
   public constructor(outHubspot: HubspotAPI | null, config: Config | null) {
     this.dealManager = new DealManager(outHubspot);
@@ -43,6 +44,7 @@ export class Database {
       this.appToPlatform = config.appToPlatform;
       this.archivedApps = config.archivedApps;
       this.partnerDomains = config.partnerDomains;
+      this.ignoredEmails = config.ignoredEmails;
     }
   }
 
@@ -62,7 +64,7 @@ export class Database {
       (record: License | Transaction) => {
         const allEmails = getEmailsForRecord(record);
         const allGood = allEmails.every(e => emailRe.test(e));
-        if (!allGood && !allEmails.every(e => env.engine.ignoredEmails.has(e.toLowerCase()))) {
+        if (!allGood && !allEmails.every(e => this.ignoredEmails.has(e.toLowerCase()))) {
           log.warn('Downloader', `${kind} has invalid email(s); will be skipped:`, record);
         }
         return allGood;
