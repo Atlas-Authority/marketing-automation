@@ -1,6 +1,5 @@
 import assert from 'assert';
 import HubspotAPI from '../../io/hubspot';
-import { HubspotUploader } from '../../io/interfaces';
 import { AttachableError } from '../../util/errors';
 import { isPresent } from '../../util/helpers';
 import { Entity, Indexer } from './entity';
@@ -53,7 +52,7 @@ export abstract class EntityManager<
 {
 
   public constructor(
-    private uploader: HubspotUploader | null,
+    private uploader: HubspotAPI | null,
   ) { }
 
   public createdCount = 0;

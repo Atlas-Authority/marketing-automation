@@ -1,5 +1,6 @@
 import { makeEmailValidationRegex } from "../io/domains";
-import { Data, HubspotUploader } from '../io/interfaces';
+import HubspotAPI from "../io/hubspot";
+import { Data } from '../io/interfaces';
 import log from "../log/logger";
 import { Table } from "../log/table";
 import { Tallier } from "../log/tallier";
@@ -35,7 +36,7 @@ export class Database {
   public appToPlatform: { [addonKey: string]: string } = Object.create(null);
   public archivedApps = new Set<string>();
 
-  public constructor(outHubspot: HubspotUploader | null, config: Config, populateFromEnv = true) {
+  public constructor(outHubspot: HubspotAPI | null, config: Config, populateFromEnv = true) {
     this.dealManager = new DealManager(outHubspot);
     this.contactManager = new ContactManager(outHubspot);
     this.companyManager = new CompanyManager(outHubspot);

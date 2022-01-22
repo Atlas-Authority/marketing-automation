@@ -16,7 +16,7 @@ export class MultiDownloadLogger {
     return result;
   }
 
-  private makeLine(name: string): InternalProgress {
+  private makeLine(name: string) {
     let bar = this.multibar.create(1, 0, { name });
     if (bar) return new AnimatedProgressBar(bar);
     return new SimpleLogProgress(name);
@@ -26,10 +26,6 @@ export class MultiDownloadLogger {
     this.multibar.stop();
   }
 
-}
-
-interface InternalProgress extends Progress {
-  done(): void;
 }
 
 class AnimatedProgressBar {
