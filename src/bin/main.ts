@@ -6,13 +6,15 @@ import { Engine } from "../lib/engine/engine";
 import { SlackNotifier } from '../lib/engine/slack-notifier';
 import HubspotAPI from '../lib/hubspot/api';
 import log from '../lib/log/logger';
-import { engineConfigFromENV, logLevelFromENV, runLoopConfigFromENV, serviceCredsFromENV } from "../lib/parameters/env-config";
+import { getCliArgs } from '../lib/parameters/cli-args';
+import { engineConfigFromENV, runLoopConfigFromENV, serviceCredsFromENV } from "../lib/parameters/env-config";
 import run from "../lib/util/runner";
 
 main();
 async function main() {
 
-  log.setLevelFrom(logLevelFromENV());
+  const { loglevel } = getCliArgs('loglevel');
+  log.setLevelFrom(loglevel);
 
   const dataDir = DataDir.root.subdir("in");
   const dataSet = new DataSet(dataDir);

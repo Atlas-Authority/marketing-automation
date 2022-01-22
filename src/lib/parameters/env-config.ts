@@ -8,10 +8,6 @@ dotenv.config();
 
 const isTest = process.env.NODE_ENV === 'test';
 
-export function logLevelFromENV() {
-  return optional('LOG_LEVEL');
-}
-
 export function serviceCredsFromENV() {
   return {
 
