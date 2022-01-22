@@ -5,7 +5,6 @@ import { Association, EntityKind, ExistingEntity, FullEntity, NewEntity, Relativ
 import { HubspotCreds } from '../parameters/interfaces';
 import { KnownError } from '../util/errors';
 import { batchesOf } from '../util/helpers';
-import { Progress } from './interfaces';
 
 export default class HubspotAPI {
 
@@ -15,7 +14,7 @@ export default class HubspotAPI {
     this.client = new hubspot.Client(creds);
   }
 
-  public async downloadEntities(_progess: Progress, kind: EntityKind, apiProperties: string[], inputAssociations: string[]): Promise<FullEntity[]> {
+  public async downloadEntities(kind: EntityKind, apiProperties: string[], inputAssociations: string[]): Promise<FullEntity[]> {
     let associations = ((inputAssociations.length > 0)
       ? inputAssociations
       : undefined);

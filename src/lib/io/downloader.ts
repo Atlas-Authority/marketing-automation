@@ -50,29 +50,29 @@ export class Downloader {
     const logbox = new MultiDownloadLogger();
 
     const data = await promiseAllProperties({
-      tlds: logbox.wrap('Tlds', (progress) =>
+      tlds: logbox.wrap('Tlds', () =>
         tldLister.downloadAllTlds()),
 
       licensesWithDataInsights: logbox.wrap('Licenses With Data Insights', (progress) =>
         marketplace.downloadLicensesWithDataInsights(progress)),
 
-      licensesWithoutDataInsights: logbox.wrap('Licenses Without Data Insights', (progress) =>
+      licensesWithoutDataInsights: logbox.wrap('Licenses Without Data Insights', () =>
         marketplace.downloadLicensesWithoutDataInsights()),
 
-      transactions: logbox.wrap('Transactions', (progress) =>
+      transactions: logbox.wrap('Transactions', () =>
         marketplace.downloadTransactions()),
 
-      freeDomains: logbox.wrap('Free Email Providers', (progress) =>
+      freeDomains: logbox.wrap('Free Email Providers', () =>
         emailProviderLister.downloadFreeEmailProviders()),
 
-      rawDeals: logbox.wrap('Deals', (progress) =>
-        downloadHubspotEntities(hubspot, DealAdapter, progress)),
+      rawDeals: logbox.wrap('Deals', () =>
+        downloadHubspotEntities(hubspot, DealAdapter)),
 
-      rawCompanies: logbox.wrap('Companies', (progress) =>
-        downloadHubspotEntities(hubspot, CompanyAdapter, progress)),
+      rawCompanies: logbox.wrap('Companies', () =>
+        downloadHubspotEntities(hubspot, CompanyAdapter)),
 
-      rawContacts: logbox.wrap('Contacts', (progress) =>
-        downloadHubspotEntities(hubspot, ContactAdapter, progress)),
+      rawContacts: logbox.wrap('Contacts', () =>
+        downloadHubspotEntities(hubspot, ContactAdapter)),
     });
 
     this.dataDir.file('transactions.csv').writeArray(data.transactions);
