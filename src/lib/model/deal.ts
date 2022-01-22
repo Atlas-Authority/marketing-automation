@@ -4,8 +4,8 @@ import { isPresent } from "../util/helpers";
 import { Company } from "./company";
 import { Contact } from "./contact";
 import { Entity } from "./hubspot/entity";
-import { DealStage, EntityKind, Pipeline } from "./hubspot/interfaces";
-import { EntityAdapter, EntityManager } from "./hubspot/manager";
+import { DealStage, EntityAdapter, Pipeline } from "./hubspot/interfaces";
+import { EntityManager } from "./hubspot/manager";
 import { uniqueTransactionId } from "./transaction";
 
 export type DealData = {

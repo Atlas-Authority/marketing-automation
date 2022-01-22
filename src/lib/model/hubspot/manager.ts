@@ -3,47 +3,7 @@ import HubspotAPI from '../../io/hubspot';
 import { AttachableError } from '../../util/errors';
 import { isPresent } from '../../util/helpers';
 import { Entity, Indexer } from './entity';
-import { EntityKind, FullEntity, HubspotProperties, RelativeAssociation } from './interfaces';
-
-export type EntityDatabase = {
-  [K in `${EntityKind}Manager`]: EntityManager<any, any, any>;
-};
-
-export async function downloadHubspotEntities<D, C>(downloader: HubspotAPI, entityAdapter: EntityAdapter<D, C>) {
-  const downAssociations = (entityAdapter.associations
-    .filter(([kind, dir]) => dir.includes('down'))
-    .map(([kind, dir]) => kind));
-
-  const apiProperties = [
-    ...typedEntries(entityAdapter.data).map(([k, v]) => v.property).filter(isPresent),
-    ...typedEntries(entityAdapter.computed).flatMap(([k, v]) => v.properties),
-  ];
-
-  return await downloader.downloadEntities(entityAdapter.kind, apiProperties, downAssociations);
-}
-
-export interface EntityAdapter<D, C> {
-
-  kind: EntityKind;
-
-  associations: [EntityKind, 'down' | 'down/up'][];
-
-  shouldReject?: (data: HubspotProperties) => boolean;
-
-  data: { [K in keyof D]: {
-    property: string | undefined,
-    down: (data: string | null) => D[K],
-    up: (data: D[K]) => string,
-    identifier?: true,
-  } };
-
-  computed: { [K in keyof C]: {
-    default: C[K],
-    down: (data: HubspotProperties) => C[K],
-    properties: string[],
-  } },
-
-}
+import { EntityAdapter, EntityKind, FullEntity, RelativeAssociation } from './interfaces';
 
 export abstract class EntityManager<
   D extends Record<string, any>,
@@ -100,7 +60,12 @@ export abstract class EntityManager<
     return prelinkedAssociations;
   }
 
-  public linkEntities(prelinkedAssociations: Map<string, Set<RelativeAssociation>>, db: EntityDatabase) {
+  public linkEntities(
+    prelinkedAssociations: Map<string, Set<RelativeAssociation>>,
+    db: {
+      [K in `${EntityKind}Manager`]: EntityManager<any, any, any>;
+    },
+  ) {
     for (const [meId, rawAssocs] of prelinkedAssociations) {
       for (const rawAssoc of rawAssocs) {
         const me = this.get(meId);
@@ -340,6 +305,6 @@ function mapObject<T, K extends keyof T, O>(o: T, fn: (e: T[K]) => O): { [K in k
   return Object.fromEntries(mapped);
 }
 
-function typedEntries<T, K extends keyof T, O>(o: T) {
+export function typedEntries<T, K extends keyof T, O>(o: T) {
   return Object.entries(o) as [K, T[K]][];
 }

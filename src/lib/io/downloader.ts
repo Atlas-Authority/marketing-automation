@@ -5,7 +5,7 @@ import log from "../log/logger";
 import { CompanyAdapter } from '../model/company';
 import { ContactAdapter } from '../model/contact';
 import { DealAdapter } from '../model/deal';
-import { downloadHubspotEntities } from '../model/hubspot/manager';
+import { downloadHubspotEntities } from '../model/hubspot/download';
 import { HubspotCreds, MpacCreds } from "../parameters/interfaces";
 import { EmailProviderAPI } from "./free-email-services";
 import HubspotAPI from "./hubspot";

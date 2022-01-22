@@ -1,8 +1,8 @@
 import env from "../parameters/env-config";
 import { Company } from "./company";
 import { Entity } from "./hubspot/entity";
-import { EntityKind } from "./hubspot/interfaces";
-import { EntityAdapter, EntityManager } from "./hubspot/manager";
+import { EntityAdapter } from "./hubspot/interfaces";
+import { EntityManager } from "./hubspot/manager";
 import { License } from "./license";
 import { Transaction } from "./transaction";
 

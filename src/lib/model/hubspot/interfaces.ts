@@ -23,3 +23,26 @@ export enum DealStage {
   CLOSED_WON,
   CLOSED_LOST,
 }
+
+export interface EntityAdapter<D, C> {
+
+  kind: EntityKind;
+
+  associations: [EntityKind, 'down' | 'down/up'][];
+
+  shouldReject?: (data: HubspotProperties) => boolean;
+
+  data: { [K in keyof D]: {
+    property: string | undefined,
+    down: (data: string | null) => D[K],
+    up: (data: D[K]) => string,
+    identifier?: true,
+  } };
+
+  computed: { [K in keyof C]: {
+    default: C[K],
+    down: (data: HubspotProperties) => C[K],
+    properties: string[],
+  } },
+
+}
