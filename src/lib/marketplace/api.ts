@@ -1,10 +1,14 @@
 import got from 'got';
 import { DateTime, Duration, Interval } from 'luxon';
 import { Progress } from '../log/download-logger';
-import { MpacCreds } from '../parameters/interfaces';
 import { AttachableError, KnownError } from '../util/errors';
 import { RawLicense, RawTransaction } from './raw';
 
+export interface MpacCreds {
+  user: string,
+  apiKey: string,
+  sellerId: string,
+}
 
 export class MarketplaceAPI {
 

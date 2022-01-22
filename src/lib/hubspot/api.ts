@@ -1,11 +1,16 @@
 import * as hubspot from '@hubspot/api-client';
 import assert from 'assert';
 import log from '../log/logger';
-import { HubspotCreds } from '../parameters/interfaces';
 import { KnownError } from '../util/errors';
 import { batchesOf, isPresent } from '../util/helpers';
 import { Association, EntityAdapter, EntityKind, ExistingEntity, FullEntity, NewEntity, RelativeAssociation } from './interfaces';
 import { typedEntries } from './manager';
+
+export type HubspotCreds = {
+  accessToken: string,
+} | {
+  apiKey: string,
+};
 
 export default class HubspotAPI {
 
