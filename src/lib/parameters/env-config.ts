@@ -1,6 +1,6 @@
 import assert from "assert";
 import dotenv from "dotenv";
-import { EngineConfig } from "../model/database";
+import { EngineConfig } from "../engine/engine";
 import { HubspotCreds, MpacCreds } from "./interfaces";
 
 dotenv.config();

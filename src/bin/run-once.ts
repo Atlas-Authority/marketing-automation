@@ -1,9 +1,8 @@
 import 'source-map-support/register';
 import DataDir from '../lib/data/dir';
 import { DataSet } from '../lib/data/set';
-import Engine from "../lib/engine/engine";
+import { Engine } from "../lib/engine/engine";
 import log from '../lib/log/logger';
-import { Database } from "../lib/model/database";
 import { getCliArgs } from '../lib/parameters/cli-args';
 import { engineConfigFromENV } from '../lib/parameters/env-config';
 
@@ -16,9 +15,9 @@ async function main() {
   const dataDir = DataDir.root.subdir('in');
   const logDir = savelogs ? dataDir.subdir(savelogs) : null;
 
-  const db = new Database(null, engineConfigFromENV());
+  const engine = new Engine(null, engineConfigFromENV());
 
   const data = new DataSet(dataDir).load();
 
-  await new Engine().run(data, db, logDir);
+  await engine.run(data, logDir);
 }

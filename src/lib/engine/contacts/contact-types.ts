@@ -1,9 +1,9 @@
 import { Contact, domainFor } from "../../model/contact";
-import { Database } from "../../model/database";
 import { License } from "../../model/license";
 import { Transaction } from "../../model/transaction";
+import { Engine } from "../engine";
 
-export function identifyAndFlagContactTypes(db: Database) {
+export function identifyAndFlagContactTypes(db: Engine) {
   // Identifying contact types
   identifyContactTypesFromRecordDomains(db, db.licenses);
   identifyContactTypesFromRecordDomains(db, db.transactions);
@@ -15,7 +15,7 @@ export function identifyAndFlagContactTypes(db: Database) {
   setPartnersViaCoworkers(db);
 }
 
-function identifyContactTypesFromRecordDomains(db: Database, records: (Transaction | License)[]) {
+function identifyContactTypesFromRecordDomains(db: Engine, records: (Transaction | License)[]) {
   for (const record of records) {
     maybeAddDomain(db.partnerDomains, record.data.partnerDetails?.billingContact.email);
     maybeAddDomain(db.customerDomains, record.data.billingContact?.email);
@@ -23,21 +23,21 @@ function identifyContactTypesFromRecordDomains(db: Database, records: (Transacti
   }
 }
 
-function removeProviderDomainsFromPartnerDomains(db: Database) {
+function removeProviderDomainsFromPartnerDomains(db: Engine) {
   for (const domain of db.providerDomains) {
     db.partnerDomains.delete(domain);
     db.customerDomains.add(domain);
   }
 }
 
-function separatePartnerDomainsFromCustomerDomains(db: Database) {
+function separatePartnerDomainsFromCustomerDomains(db: Engine) {
   // If it's a partner domain, then it's not a customer domain
   for (const domain of db.partnerDomains) {
     db.customerDomains.delete(domain);
   }
 }
 
-function flagKnownContactTypesByDomain(db: Database) {
+function flagKnownContactTypesByDomain(db: Engine) {
   for (const contact of db.contactManager.getAll()) {
     if (usesDomains(contact, db.partnerDomains)) {
       contact.data.contactType = 'Partner';
@@ -48,7 +48,7 @@ function flagKnownContactTypesByDomain(db: Database) {
   }
 }
 
-function setPartnersViaCoworkers(db: Database) {
+function setPartnersViaCoworkers(db: Engine) {
   for (const contact of db.contactManager.getAll()) {
     const companies = contact.companies.getAll();
     const coworkers = companies.flatMap(company => company.contacts.getAll());

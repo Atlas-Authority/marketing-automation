@@ -2,11 +2,11 @@ import assert from "assert";
 import DataDir from "../../data/dir";
 import log from "../../log/logger";
 import { Table } from "../../log/table";
-import { Database } from "../../model/database";
 import { Deal } from "../../model/deal";
 import { LicenseData } from "../../model/license";
 import { formatMoney } from "../../util/formatters";
 import { isPresent, sorter } from "../../util/helpers";
+import { Engine } from "../engine";
 import { RelatedLicenseSet } from "../license-matching/license-grouper";
 import { ActionGenerator } from "./actions";
 import { EventGenerator } from "./events";
@@ -25,7 +25,7 @@ export class DealGenerator {
 
   private ignoredAmounts = new Map<string, number>();
 
-  public constructor(private db: Database) {
+  public constructor(private db: Engine) {
     this.actionGenerator = new ActionGenerator(db.dealManager, this.ignore.bind(this));
   }
 

@@ -1,9 +1,8 @@
 import 'source-map-support/register';
 import DataDir from '../lib/data/dir';
 import { DataSet } from '../lib/data/set';
-import Engine from "../lib/engine/engine";
+import { Engine } from "../lib/engine/engine";
 import log from "../lib/log/logger";
-import { Database } from "../lib/model/database";
 import { getCliArgs } from '../lib/parameters/cli-args';
 import { engineConfigFromENV } from '../lib/parameters/env-config';
 
@@ -17,20 +16,19 @@ async function main() {
   let i = 0;
   const nextDataDir = () => savelogs ? dataDir.subdir(`${savelogs}-${++i}`) : null;
 
-  const engine = new Engine();
   const data = new DataSet(dataDir).load();
-  const db = new Database(null, engineConfigFromENV());
+  const engine = new Engine(null, engineConfigFromENV());
 
   // First
   log.level = log.Levels.Info;
-  await engine.run(data, db, nextDataDir());
+  await engine.run(data, nextDataDir());
 
   // Second
   log.level = log.Levels.Verbose;
-  await engine.run(data, db, nextDataDir());
+  await engine.run(data, nextDataDir());
 
   // Third
   log.level = log.Levels.Verbose;
-  await engine.run(data, db, nextDataDir());
+  await engine.run(data, nextDataDir());
 
 }

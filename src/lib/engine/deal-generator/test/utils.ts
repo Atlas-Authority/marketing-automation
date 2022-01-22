@@ -1,5 +1,4 @@
 import Chance from 'chance';
-import { Database } from '../../../model/database';
 import { DealData } from "../../../model/deal";
 import { DealStage } from '../../../model/hubspot/interfaces';
 import { License, LicenseData } from "../../../model/license";
@@ -7,6 +6,7 @@ import { ContactInfo } from '../../../model/marketplace/common';
 import { Transaction, TransactionData } from "../../../model/transaction";
 import { ContactGenerator } from '../../contacts/generate-contacts';
 import { updateContactsBasedOnMatchResults } from '../../contacts/update-contacts';
+import { Engine } from '../../engine';
 import { RelatedLicenseSet } from '../../license-matching/license-grouper';
 import { Action } from "../actions";
 import { DealRelevantEvent } from '../events';
@@ -27,7 +27,7 @@ export function runDealGeneratorTwice(input: TestInput) {
 }
 
 export function runDealGenerator(input: TestInput) {
-  const db = new Database(null, {
+  const db = new Engine(null, {
     partnerDomains: new Set(input.partnerDomains ?? []),
     appToPlatform: {},
     archivedApps: new Set(),

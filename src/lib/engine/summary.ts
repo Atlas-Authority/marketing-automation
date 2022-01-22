@@ -1,11 +1,11 @@
 import log from "../log/logger";
 import { Table } from "../log/table";
-import { Database } from "../model/database";
 import { Deal } from "../model/deal";
 import { formatMoney, formatNumber } from "../util/formatters";
 import { isPresent } from "../util/helpers";
+import { Engine } from "./engine";
 
-export function printSummary(db: Database) {
+export function printSummary(db: Engine) {
 
   if (db.dealManager.duplicates.size > 0) {
     Table.print({

@@ -1,8 +1,8 @@
 import DataDir from '../../data/dir';
 import log from '../../log/logger';
-import { Database } from '../../model/database';
 import { License } from '../../model/license';
 import { sorter } from '../../util/helpers';
+import { Engine } from '../engine';
 import { LicenseMatcher, ScorableLicense } from './license-matcher';
 import { LicenseMatchLogger } from './score-logger';
 
@@ -13,7 +13,7 @@ export class LicenseGrouper {
 
   private matchGroups = new Map<License, Set<License>>();
 
-  constructor(private db: Database) { }
+  constructor(private db: Engine) { }
 
   run(logDir: DataDir | null): RelatedLicenseSet[] {
     return this.withLog(logDir, scoreLogger => {

@@ -1,10 +1,10 @@
 import capitalize from "capitalize";
 import { Contact, ContactData, ContactType } from '../../model/contact';
-import { Database } from '../../model/database';
 import { License } from '../../model/license';
 import { ContactInfo, PartnerBillingInfo } from '../../model/marketplace/common';
 import { Transaction } from '../../model/transaction';
 import { sorter } from '../../util/helpers';
+import { Engine } from '../engine';
 
 export type GeneratedContact = ContactData & { lastUpdated: string };
 
@@ -12,7 +12,7 @@ export class ContactGenerator {
 
   private toMerge = new Map<Contact, GeneratedContact[]>();
 
-  public constructor(private db: Database) { }
+  public constructor(private db: Engine) { }
 
   public run() {
     this.generateContacts();
@@ -165,6 +165,6 @@ export function mergeContactInfo(contact: ContactData, contacts: GeneratedContac
   }
 }
 
-function notIgnored(db: Database, addonKey: string) {
+function notIgnored(db: Engine, addonKey: string) {
   return !db.archivedApps.has(addonKey);
 }

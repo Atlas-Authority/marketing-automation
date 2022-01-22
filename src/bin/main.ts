@@ -1,12 +1,11 @@
 import 'source-map-support/register';
 import DataDir from '../lib/data/dir';
 import { DataSet } from '../lib/data/set';
-import Engine from "../lib/engine/engine";
+import { Engine } from "../lib/engine/engine";
 import { downloadAllData } from '../lib/io/downloader';
 import HubspotAPI from '../lib/io/hubspot';
 import { SlackNotifier } from '../lib/io/slack-notifier';
 import log from '../lib/log/logger';
-import { Database } from "../lib/model/database";
 import { engineConfigFromENV, logLevelFromENV, runLoopConfigFromENV, serviceCredsFromENV } from "../lib/parameters/env-config";
 import run from "../lib/util/runner";
 
@@ -30,8 +29,8 @@ async function main() {
     async work() {
       await downloadAllData(dataSet, creds);
       const data = new DataSet(dataDir).load();
-      const db = new Database(uploader, engineConfigFromENV());
-      await new Engine().run(data, db, null);
+      const engine = new Engine(uploader, engineConfigFromENV());
+      await engine.run(data, null);
     },
 
     async failed(errors) {

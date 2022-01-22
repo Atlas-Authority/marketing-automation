@@ -1,13 +1,13 @@
 import { domainFor } from "../../model/contact";
-import { Database } from "../../model/database";
 import { License } from "../../model/license";
 import { Transaction } from "../../model/transaction";
 import { KnownError } from "../../util/errors";
 import { isPresent } from "../../util/helpers";
+import { Engine } from "../engine";
 import { RelatedLicenseSet } from "../license-matching/license-grouper";
 import { flagPartnersViaCoworkers } from "./contact-types";
 
-export function updateContactsBasedOnMatchResults(db: Database, allMatches: RelatedLicenseSet[]) {
+export function updateContactsBasedOnMatchResults(db: Engine, allMatches: RelatedLicenseSet[]) {
   for (const license of allMatches) {
     const contacts = new Set(license.map(license => db.contactManager.getByEmail(license.data.technicalContact.email)!));
 

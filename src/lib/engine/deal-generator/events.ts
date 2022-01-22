@@ -1,7 +1,7 @@
-import { Database } from "../../model/database";
 import { License } from "../../model/license";
 import { Transaction } from "../../model/transaction";
 import { sorter } from "../../util/helpers";
+import { Engine } from "../engine";
 import { RelatedLicenseSet } from "../license-matching/license-grouper";
 
 export type EventMeta = 'partner-only' | 'mass-provider-only' | 'partner-and-mass-provider-only' | 'archived-app' | null;
@@ -22,7 +22,7 @@ export type DealRelevantEvent = (
 
 export class EventGenerator {
 
-  constructor(private db: Database) { }
+  constructor(private db: Engine) { }
 
   private events: DealRelevantEvent[] = [];
 
