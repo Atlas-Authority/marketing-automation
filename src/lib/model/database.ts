@@ -3,7 +3,6 @@ import { Data } from '../io/interfaces';
 import log from "../log/logger";
 import { Table } from "../log/table";
 import { Tallier } from "../log/tallier";
-import { Config } from "../parameters/env-config";
 import { formatMoney, formatNumber } from "../util/formatters";
 import { CompanyManager } from "./company";
 import { ContactManager } from "./contact";
@@ -14,6 +13,13 @@ import { getEmailsForRecord } from "./marketplace/common";
 import { buildAndVerifyStructures } from "./marketplace/structure";
 import * as validation from "./marketplace/validation";
 import { Transaction } from "./transaction";
+
+export interface EngineConfig {
+  partnerDomains: Set<string>;
+  appToPlatform: { [addonKey: string]: string };
+  archivedApps: Set<string>;
+  ignoredEmails: Set<string>;
+}
 
 export class Database {
 
@@ -35,7 +41,7 @@ export class Database {
   public archivedApps = new Set<string>();
   private ignoredEmails = new Set<string>();
 
-  public constructor(outHubspot: HubspotAPI | null, config: Config | null) {
+  public constructor(outHubspot: HubspotAPI | null, config: EngineConfig | null) {
     this.dealManager = new DealManager(outHubspot);
     this.contactManager = new ContactManager(outHubspot);
     this.companyManager = new CompanyManager(outHubspot);

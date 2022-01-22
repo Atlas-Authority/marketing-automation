@@ -1,17 +1,11 @@
 import assert from "assert";
 import dotenv from "dotenv";
+import { EngineConfig } from "../model/database";
 import { HubspotCreds, MpacCreds } from "./interfaces";
 
 dotenv.config();
 
 const isTest = process.env.NODE_ENV === 'test';
-
-export interface Config {
-  partnerDomains: Set<string>;
-  appToPlatform: { [addonKey: string]: string };
-  archivedApps: Set<string>;
-  ignoredEmails: Set<string>;
-}
 
 export function logLevelFromENV() {
   return optional('LOG_LEVEL');
@@ -96,7 +90,7 @@ const env = {
 
 export default env;
 
-export function engineConfigFromENV(): Config {
+export function engineConfigFromENV(): EngineConfig {
   return {
     partnerDomains: new Set(optional('PARTNER_DOMAINS')?.split(/\s*,\s*/g) ?? []),
     appToPlatform: Object.fromEntries<string>(
