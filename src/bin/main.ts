@@ -31,6 +31,8 @@ async function main() {
       const data = new DataSet(dataDir).load();
       const engine = new Engine(hubspot, engineConfigFromENV());
       await engine.run(data, null);
+      log.info('Upsyncing changes to HubSpot');
+      await hubspot.upsyncChanges();
     },
 
     async failed(errors) {

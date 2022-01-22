@@ -29,4 +29,14 @@ export class HubspotService {
     public companyManager: CompanyManager,
   ) { }
 
+  public async upsyncChanges() {
+    await this.dealManager.syncUpAllEntities();
+    await this.contactManager.syncUpAllEntities();
+    await this.companyManager.syncUpAllEntities();
+
+    await this.dealManager.syncUpAllAssociations();
+    await this.contactManager.syncUpAllAssociations();
+    await this.companyManager.syncUpAllAssociations();
+  }
+
 }

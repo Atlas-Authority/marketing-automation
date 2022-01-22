@@ -62,7 +62,7 @@ export class Engine {
   }
 
   public async run(data: Data, logDir: DataDir | null) {
-    this.logStep('Importing data into engine');
+    this.logStep('Importing given data set into engine');
     this.importData(data);
 
     this.logStep('Identifying and Flagging Contact Types');
@@ -83,10 +83,7 @@ export class Engine {
     this.logStep('Summary');
     printSummary(this);
 
-    this.logStep('Up-syncing to Hubspot');
-    await this.syncUpAllEntities();
-
-    this.logStep('Done!');
+    this.logStep('Done running engine on given data set');
   }
 
   private importData(data: Data) {
@@ -168,18 +165,8 @@ export class Engine {
 
   }
 
-  public async syncUpAllEntities() {
-    await this.hubspotService.dealManager.syncUpAllEntities();
-    await this.hubspotService.contactManager.syncUpAllEntities();
-    await this.hubspotService.companyManager.syncUpAllEntities();
-
-    await this.hubspotService.dealManager.syncUpAllAssociations();
-    await this.hubspotService.contactManager.syncUpAllAssociations();
-    await this.hubspotService.companyManager.syncUpAllAssociations();
-  }
-
   private logStep(description: string) {
-    log.info('Marketing Automation', chalk.bold.blueBright(`Step ${++this.step}: ${description}`));
+    log.info('Engine', chalk.bold.blueBright(`Step ${++this.step}: ${description}`));
   }
 
   get contactManager() { return this.hubspotService.contactManager; }
