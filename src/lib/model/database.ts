@@ -6,7 +6,6 @@ import { Table } from "../log/table";
 import { Tallier } from "../log/tallier";
 import env, { Config } from "../parameters/env-config";
 import { formatMoney, formatNumber } from "../util/formatters";
-import { isPresent } from "../util/helpers";
 import { CompanyManager } from "./company";
 import { ContactManager } from "./contact";
 import { DealManager } from "./deal";
@@ -14,7 +13,7 @@ import { deriveMultiProviderDomainsSet } from "./email-providers";
 import { Entity } from "./hubspot/entity";
 import { EntityKind } from "./hubspot/interfaces";
 import { License } from "./license";
-import { validateMarketplaceData } from "./marketplace/validation";
+import { uniqueTransactionSetFrom, validateMarketplaceData, verifyEqualLicenses, verifyIdIsUnique, verifySameTransactionSet } from "./marketplace/validation";
 import { Transaction, TransactionData } from "./transaction";
 
 export class Database {
@@ -279,38 +278,4 @@ export class Database {
     await this.companyManager.syncUpAllAssociations();
   }
 
-}
-
-function verifyIdIsUnique(licenses: License[], getter: (r: License) => string | null) {
-  const ids = licenses.map(getter).filter(isPresent);
-  const idSet = new Set(ids);
-  if (ids.length !== idSet.size) {
-    const idName = getter.toString().replace(/(\w+) => \1\.data\./, '');
-    log.error('Database', 'License IDs not unique:', idName);
-  }
-}
-
-function uniqueTransactionSetFrom(transactions: Transaction[]) {
-  const set = new Set(transactions);
-  if (set.size !== transactions.length) {
-    log.error('Database', `Transactions aren't unique: got ${set.size} out of ${transactions.length}`);
-  }
-  return set;
-}
-
-function verifySameTransactionSet(set1: Set<Transaction> | null, set2: Set<Transaction> | null) {
-  if (!set1 || !set2) return;
-
-  const same = set1.size === set2.size && [...set1].every(t => set2.has(t));
-  if (!same) {
-    log.error('Database', `License IDs do not point to same transactions`);
-  }
-}
-
-function verifyEqualLicenses(license1: License | null, license2: License | null) {
-  if (!license1 || !license2) return;
-
-  if (license1 !== license2) {
-    log.error('Database', `License IDs do not point to same License from Transaction`);
-  }
 }
