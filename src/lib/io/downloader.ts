@@ -22,9 +22,9 @@ export function loadDataFromDisk(dataDir: DataDir): Data {
     transactions: dataDir.file<readonly RawTransaction[]>('transactions.csv').readArray(),
     tlds: dataDir.file<readonly { tld: string }[]>('tlds.csv').readArray().map(({ tld }) => tld),
     freeDomains: dataDir.file<readonly { domain: string }[]>('domains.csv').readArray().map(({ domain }) => domain),
-    rawDeals: dataDir.file<FullEntity[]>(`deal.csv`).readArray(),
-    rawCompanies: dataDir.file<FullEntity[]>(`company.csv`).readArray(),
-    rawContacts: dataDir.file<FullEntity[]>(`contact.csv`).readArray(),
+    rawDeals: dataDir.file<FullEntity[]>('deals.csv').readArray(),
+    rawCompanies: dataDir.file<FullEntity[]>('companies.csv').readArray(),
+    rawContacts: dataDir.file<FullEntity[]>('contacts.csv').readArray(),
   }
 }
 
@@ -80,9 +80,9 @@ export class Downloader {
     this.dataDir.file('licenses-with.csv').writeArray(data.licensesWithDataInsights);
     this.dataDir.file('domains.csv').writeArray(data.freeDomains.map(domain => ({ domain })));
     this.dataDir.file('tlds.csv').writeArray(data.tlds.map(tld => ({ tld })));
-    this.dataDir.file('deal.csv').writeArray(data.rawDeals);
-    this.dataDir.file('company.csv').writeArray(data.rawCompanies);
-    this.dataDir.file('contact.csv').writeArray(data.rawContacts);
+    this.dataDir.file('deals.csv').writeArray(data.rawDeals);
+    this.dataDir.file('companies.csv').writeArray(data.rawCompanies);
+    this.dataDir.file('contacts.csv').writeArray(data.rawContacts);
 
     logbox.done();
     log.info('Downloader', 'Done');
