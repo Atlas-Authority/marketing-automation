@@ -1,9 +1,5 @@
 import got from 'got';
 
-export function makeEmailValidationRegex(tlds: readonly string[]) {
-  return new RegExp(`.+@.+\\.(${tlds.join('|')})`);
-}
-
 export class TldListAPI {
 
   public async downloadAllTlds(): Promise<string[]> {

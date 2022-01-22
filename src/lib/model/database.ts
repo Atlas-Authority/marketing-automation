@@ -1,6 +1,5 @@
 import HubspotAPI from "../io/hubspot";
 import { Data } from '../io/interfaces';
-import { makeEmailValidationRegex } from "../io/tlds";
 import log from "../log/logger";
 import { Table } from "../log/table";
 import { Tallier } from "../log/tallier";
@@ -64,7 +63,7 @@ export class Database {
 
     this.providerDomains = deriveMultiProviderDomainsSet(data.freeDomains);
 
-    const emailRe = makeEmailValidationRegex(data.tlds);
+    const emailRe = new RegExp(`.+@.+\\.(${data.tlds.join('|')})`);
 
     log.info('Database', 'Validating MPAC records: Starting...');
     const validatedMpacData = validateMarketplaceData({
