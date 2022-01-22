@@ -1,6 +1,5 @@
 import got from 'got';
 import { DateTime, Duration, Interval } from 'luxon';
-import DataDir from '../../data/dir';
 import { RawLicense, RawTransaction } from '../../model/marketplace/raw';
 import { MpacCreds } from '../../parameters/interfaces';
 import { AttachableError, KnownError } from '../../util/errors';
@@ -9,18 +8,16 @@ import { Progress } from '../interfaces';
 
 export class MarketplaceAPI {
 
-  constructor(private dataDir: DataDir, private creds: MpacCreds) { }
+  constructor(private creds: MpacCreds) { }
 
   public async downloadTransactions(): Promise<RawTransaction[]> {
     const transactions = await this.downloadMarketplaceData('/sales/transactions/export');
     if ((transactions as any).code === 401) throw new KnownError("MPAC_API_KEY is an invalid API key.");
-    this.dataDir.file('transactions.csv').writeArray(transactions);
     return transactions as RawTransaction[];
   }
 
   public async downloadLicensesWithoutDataInsights(): Promise<RawLicense[]> {
     const licenses = await this.downloadMarketplaceData('/licenses/export?endDate=2018-07-01');
-    this.dataDir.file('licenses-without.csv').writeArray(licenses);
     return licenses as RawLicense[];
   }
 
@@ -33,7 +30,6 @@ export class MarketplaceAPI {
       return json;
     });
     const licenses = (await Promise.all(promises)).flat();
-    this.dataDir.file('licenses-with.csv').writeArray(licenses);
     return licenses;
   }
 

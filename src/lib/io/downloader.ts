@@ -41,10 +41,10 @@ export class Downloader {
   ) { }
 
   async downloadData(): Promise<Data> {
-    const hubspot = new HubspotAPI(this.dataDir, this.config.hubspotCreds);
-    const marketplace = new MarketplaceAPI(this.dataDir, this.config.mpacCreds);
-    const emailProviderLister = new EmailProviderAPI(this.dataDir);
-    const tldLister = new TldListAPI(this.dataDir);
+    const hubspot = new HubspotAPI(this.config.hubspotCreds);
+    const marketplace = new MarketplaceAPI(this.config.mpacCreds);
+    const emailProviderLister = new EmailProviderAPI();
+    const tldLister = new TldListAPI();
 
     log.info('Downloader', 'Starting downloads with API');
     const logbox = new MultiDownloadLogger();
@@ -74,6 +74,15 @@ export class Downloader {
       rawContacts: logbox.wrap('Contacts', (progress) =>
         downloadHubspotEntities(hubspot, ContactAdapter, progress)),
     });
+
+    this.dataDir.file('transactions.csv').writeArray(data.transactions);
+    this.dataDir.file('licenses-without.csv').writeArray(data.licensesWithoutDataInsights);
+    this.dataDir.file('licenses-with.csv').writeArray(data.licensesWithDataInsights);
+    this.dataDir.file('domains.csv').writeArray(data.freeDomains.map(domain => ({ domain })));
+    this.dataDir.file('tlds.csv').writeArray(data.tlds.map(tld => ({ tld })));
+    this.dataDir.file('deal.csv').writeArray(data.rawDeals);
+    this.dataDir.file('company.csv').writeArray(data.rawCompanies);
+    this.dataDir.file('contact.csv').writeArray(data.rawContacts);
 
     logbox.done();
     log.info('Downloader', 'Done');

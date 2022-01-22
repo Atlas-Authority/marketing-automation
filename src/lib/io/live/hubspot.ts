@@ -1,6 +1,5 @@
 import * as hubspot from '@hubspot/api-client';
 import assert from 'assert';
-import DataDir from '../../data/dir';
 import log from '../../log/logger';
 import { Association, EntityKind, ExistingEntity, FullEntity, NewEntity, RelativeAssociation } from '../../model/hubspot/interfaces';
 import { HubspotCreds } from '../../parameters/interfaces';
@@ -12,7 +11,7 @@ export default class HubspotAPI {
 
   private client: hubspot.Client;
 
-  constructor(private dataDir: DataDir, creds: HubspotCreds) {
+  constructor(creds: HubspotCreds) {
     this.client = new hubspot.Client(creds);
   }
 
@@ -36,7 +35,6 @@ export default class HubspotAPI {
             })
           )),
       }));
-      this.dataDir.file(`${kind}.csv`).writeArray(normalizedEntities);
       return normalizedEntities;
     }
     catch (e: any) {
