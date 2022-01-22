@@ -1,6 +1,7 @@
+import chalk from "chalk";
 import DataDir from "../data/dir";
 import { Data } from "../io/interfaces";
-import { EngineLogger } from "../log/engine-logger";
+import log from "../log/logger";
 import { Database } from "../model/database";
 import { identifyAndFlagContactTypes } from "./contacts/contact-types";
 import { ContactGenerator } from "./contacts/generate-contacts";
@@ -11,33 +12,37 @@ import { printSummary } from "./summary";
 
 export default class Engine {
 
-  public async run(data: Data, db: Database, logDir: DataDir | null) {
-    const log = new EngineLogger();
+  private count = 0;
 
-    log.step('Starting to download data');
+  public async run(data: Data, db: Database, logDir: DataDir | null) {
+    this.step('Starting to download data');
     db.importData(data);
 
-    log.step('Identifying and Flagging Contact Types');
+    this.step('Identifying and Flagging Contact Types');
     identifyAndFlagContactTypes(db);
 
-    log.step('Generating contacts');
+    this.step('Generating contacts');
     new ContactGenerator(db).run();
 
-    log.step('Running Scoring Engine');
+    this.step('Running Scoring Engine');
     const allMatches = new LicenseGrouper(db).run(logDir);
 
-    log.step('Updating Contacts based on Match Results');
+    this.step('Updating Contacts based on Match Results');
     updateContactsBasedOnMatchResults(db, allMatches);
 
-    log.step('Generating deals');
+    this.step('Generating deals');
     new DealGenerator(db).run(allMatches, logDir);
 
-    log.step('Up-syncing to Hubspot');
+    this.step('Up-syncing to Hubspot');
     await db.syncUpAllEntities();
 
     printSummary(db);
 
-    log.step('Done!');
+    this.step('Done!');
+  }
+
+  private step(description: string) {
+    log.info('Marketing Automation', chalk.bold.blueBright(`Step ${++this.count}: ${description}`));
   }
 
 }
