@@ -10,8 +10,6 @@ import { CompanyManager } from "./company";
 import { ContactManager } from "./contact";
 import { DealManager } from "./deal";
 import { deriveMultiProviderDomainsSet } from "./email-providers";
-import { Entity } from "./hubspot/entity";
-import { EntityKind } from "./hubspot/interfaces";
 import { License } from "./license";
 import { validateMarketplaceData } from "./marketplace/validation";
 import { Transaction } from "./transaction";
@@ -55,31 +53,13 @@ export class Database {
   }
 
   importData(data: Data) {
-    const getManager = (kind: EntityKind) => {
-      switch (kind) {
-        case 'deal': return this.dealManager;
-        case 'company': return this.companyManager;
-        case 'contact': return this.contactManager;
-      }
-    };
-
-    const getEntity = (kind: EntityKind, id: string): Entity<any, any> => {
-      const found = getManager(kind).get(id);
-      // There's only two ways to set associations:
-      // 1. They were already set in HubSpot when we downloaded them, or
-      // 2. We set them in code with an object already having a valid id.
-      // In either case, an invalid id would fail before this method.
-      if (!found) throw new Error(`Expected to find ${kind} with id ${id}`);
-      return found;
-    };
-
     const dealPrelinks = this.dealManager.importEntities(data.rawDeals);
     const companyPrelinks = this.companyManager.importEntities(data.rawCompanies);
     const contactPrelinks = this.contactManager.importEntities(data.rawContacts);
 
-    this.dealManager.linkEntities(dealPrelinks, { getEntity });
-    this.companyManager.linkEntities(companyPrelinks, { getEntity });
-    this.contactManager.linkEntities(contactPrelinks, { getEntity });
+    this.dealManager.linkEntities(dealPrelinks, this);
+    this.companyManager.linkEntities(companyPrelinks, this);
+    this.contactManager.linkEntities(contactPrelinks, this);
 
     this.providerDomains = deriveMultiProviderDomainsSet(data.freeDomains);
 

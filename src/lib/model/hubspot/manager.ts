@@ -5,9 +5,9 @@ import { isPresent } from '../../util/helpers';
 import { Entity, Indexer } from './entity';
 import { EntityKind, FullEntity, HubspotProperties, RelativeAssociation } from './interfaces';
 
-export interface EntityDatabase {
-  getEntity(kind: EntityKind, id: string): Entity<any, any>;
-}
+export type EntityDatabase = {
+  [K in `${EntityKind}Manager`]: EntityManager<any, any, any>;
+};
 
 export async function downloadHubspotEntities<D, C>(downloader: HubspotAPI, entityAdapter: EntityAdapter<D, C>) {
   const downAssociations = (entityAdapter.associations
@@ -107,7 +107,7 @@ export abstract class EntityManager<
         if (!me) throw new Error(`Couldn't find kind=${this.kind} id=${meId}`);
 
         const { toKind, youId } = this.getAssocInfo(rawAssoc);
-        const you = db.getEntity(toKind, youId);
+        const you = db[`${toKind}Manager`].get(youId);
         if (!you) throw new Error(`Couldn't find kind=${toKind} id=${youId}`);
 
         me.addAssociation(you, { firstSide: true, initial: true });
