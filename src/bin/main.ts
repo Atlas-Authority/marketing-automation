@@ -18,7 +18,7 @@ async function main() {
 
   const creds = serviceCredsFromENV();
   const downloader = new Downloader(dataDir, creds);
-  const uploader = new HubspotAPI(dataDir, creds.hubspotCreds);
+  const uploader = new HubspotAPI(creds.hubspotCreds);
 
   const notifier = SlackNotifier.fromENV();
   notifier?.notifyStarting();

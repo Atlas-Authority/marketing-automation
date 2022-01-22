@@ -20,17 +20,18 @@ async function main() {
 
   const engine = new Engine();
   const data = loadDataFromDisk(dataDir);
+  const db = new Database(new MemoryHubspot(null), envConfig);
 
   // First
   log.level = log.Levels.Info;
-  await engine.run(data, new Database(new MemoryHubspot(null), envConfig), nextDataDir());
+  await engine.run(data, db, nextDataDir());
 
   // Second
   log.level = log.Levels.Verbose;
-  await engine.run(data, new Database(new MemoryHubspot(null), envConfig), nextDataDir());
+  await engine.run(data, db, nextDataDir());
 
   // Third
   log.level = log.Levels.Verbose;
-  await engine.run(data, new Database(new MemoryHubspot(null), envConfig), nextDataDir());
+  await engine.run(data, db, nextDataDir());
 
 }
