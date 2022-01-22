@@ -18,54 +18,45 @@ type DownloadConfig = {
   mpacCreds: MpacCreds;
 };
 
-export class Downloader {
+export async function downloadAllData(dataSet: DataSet, config: DownloadConfig): Promise<Data> {
+  const hubspot = new HubspotAPI(config.hubspotCreds);
+  const marketplace = new MarketplaceAPI(config.mpacCreds);
+  const emailProviderLister = new EmailProviderAPI();
+  const tldLister = new TldListAPI();
 
-  constructor(
-    private dataSet: DataSet,
-    private config: DownloadConfig,
-  ) { }
+  log.info('Downloader', 'Starting downloads with API');
+  const logbox = new MultiDownloadLogger();
 
-  async downloadData(): Promise<Data> {
-    const hubspot = new HubspotAPI(this.config.hubspotCreds);
-    const marketplace = new MarketplaceAPI(this.config.mpacCreds);
-    const emailProviderLister = new EmailProviderAPI();
-    const tldLister = new TldListAPI();
+  const data = await promiseAllProperties({
+    tlds: logbox.wrap('Tlds', () =>
+      tldLister.downloadAllTlds()),
 
-    log.info('Downloader', 'Starting downloads with API');
-    const logbox = new MultiDownloadLogger();
+    licensesWithDataInsights: logbox.wrap('Licenses With Data Insights', (progress) =>
+      marketplace.downloadLicensesWithDataInsights(progress)),
 
-    const data = await promiseAllProperties({
-      tlds: logbox.wrap('Tlds', () =>
-        tldLister.downloadAllTlds()),
+    licensesWithoutDataInsights: logbox.wrap('Licenses Without Data Insights', () =>
+      marketplace.downloadLicensesWithoutDataInsights()),
 
-      licensesWithDataInsights: logbox.wrap('Licenses With Data Insights', (progress) =>
-        marketplace.downloadLicensesWithDataInsights(progress)),
+    transactions: logbox.wrap('Transactions', () =>
+      marketplace.downloadTransactions()),
 
-      licensesWithoutDataInsights: logbox.wrap('Licenses Without Data Insights', () =>
-        marketplace.downloadLicensesWithoutDataInsights()),
+    freeDomains: logbox.wrap('Free Email Providers', () =>
+      emailProviderLister.downloadFreeEmailProviders()),
 
-      transactions: logbox.wrap('Transactions', () =>
-        marketplace.downloadTransactions()),
+    rawDeals: logbox.wrap('Deals', () =>
+      downloadHubspotEntities(hubspot, DealAdapter)),
 
-      freeDomains: logbox.wrap('Free Email Providers', () =>
-        emailProviderLister.downloadFreeEmailProviders()),
+    rawCompanies: logbox.wrap('Companies', () =>
+      downloadHubspotEntities(hubspot, CompanyAdapter)),
 
-      rawDeals: logbox.wrap('Deals', () =>
-        downloadHubspotEntities(hubspot, DealAdapter)),
+    rawContacts: logbox.wrap('Contacts', () =>
+      downloadHubspotEntities(hubspot, ContactAdapter)),
+  });
 
-      rawCompanies: logbox.wrap('Companies', () =>
-        downloadHubspotEntities(hubspot, CompanyAdapter)),
+  dataSet.save(data);
 
-      rawContacts: logbox.wrap('Contacts', () =>
-        downloadHubspotEntities(hubspot, ContactAdapter)),
-    });
+  logbox.done();
+  log.info('Downloader', 'Done');
 
-    this.dataSet.save(data);
-
-    logbox.done();
-    log.info('Downloader', 'Done');
-
-    return data;
-  }
-
+  return data;
 }

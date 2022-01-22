@@ -2,7 +2,7 @@ import 'source-map-support/register';
 import DataDir from '../lib/data/dir';
 import { DataSet } from '../lib/data/set';
 import Engine from "../lib/engine/engine";
-import { Downloader } from '../lib/io/downloader';
+import { downloadAllData } from '../lib/io/downloader';
 import HubspotAPI from '../lib/io/hubspot';
 import { SlackNotifier } from '../lib/io/slack-notifier';
 import log from '../lib/log/logger';
@@ -19,7 +19,6 @@ async function main() {
   const dataSet = new DataSet(dataDir);
 
   const creds = serviceCredsFromENV();
-  const downloader = new Downloader(dataSet, creds);
   const uploader = new HubspotAPI(creds.hubspotCreds);
 
   const notifier = SlackNotifier.fromENV();
@@ -28,7 +27,7 @@ async function main() {
   await run(runLoopConfigFromENV(), {
 
     async work() {
-      await downloader.downloadData();
+      await downloadAllData(dataSet, creds);
       const data = new DataSet(dataDir).load();
       const db = new Database(uploader, envConfig);
       await new Engine().run(data, db, null);
