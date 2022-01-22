@@ -55,17 +55,6 @@ export class Database {
   }
 
   importData(data: Data) {
-    const {
-      tlds,
-      licensesWithDataInsights,
-      licensesWithoutDataInsights,
-      transactions,
-      freeDomains,
-      rawDeals,
-      rawCompanies,
-      rawContacts,
-    } = data;
-
     const getManager = (kind: EntityKind) => {
       switch (kind) {
         case 'deal': return this.dealManager;
@@ -84,26 +73,26 @@ export class Database {
       return found;
     };
 
-    const dealPrelinks = this.dealManager.importEntities(rawDeals);
-    const companyPrelinks = this.companyManager.importEntities(rawCompanies);
-    const contactPrelinks = this.contactManager.importEntities(rawContacts);
+    const dealPrelinks = this.dealManager.importEntities(data.rawDeals);
+    const companyPrelinks = this.companyManager.importEntities(data.rawCompanies);
+    const contactPrelinks = this.contactManager.importEntities(data.rawContacts);
 
     this.dealManager.linkEntities(dealPrelinks, { getEntity });
     this.companyManager.linkEntities(companyPrelinks, { getEntity });
     this.contactManager.linkEntities(contactPrelinks, { getEntity });
 
-    this.providerDomains = deriveMultiProviderDomainsSet(freeDomains);
+    this.providerDomains = deriveMultiProviderDomainsSet(data.freeDomains);
 
-    const emailRe = makeEmailValidationRegex(tlds);
+    const emailRe = makeEmailValidationRegex(data.tlds);
 
     const licenses = [
-      ...licensesWithDataInsights,
-      ...licensesWithoutDataInsights,
+      ...data.licensesWithDataInsights,
+      ...data.licensesWithoutDataInsights,
     ].map(raw => License.fromRaw(raw));
 
     const results = validateMarketplaceData(
       licenses,
-      transactions.map(raw => Transaction.fromRaw(raw)),
+      data.transactions.map(raw => Transaction.fromRaw(raw)),
       emailRe);
 
     this.licenses = results.licenses;
