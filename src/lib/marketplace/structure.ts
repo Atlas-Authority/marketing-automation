@@ -1,9 +1,9 @@
-import log from '../../log/logger';
-import { Table } from "../../log/table";
-import { formatMoney } from "../../util/formatters";
-import { isPresent } from "../../util/helpers";
-import { License } from "../license";
-import { Transaction, TransactionData } from "../transaction";
+import log from '../log/logger';
+import { Table } from "../log/table";
+import { License } from "../model/license";
+import { Transaction, TransactionData } from "../model/transaction";
+import { formatMoney } from "../util/formatters";
+import { isPresent } from "../util/helpers";
 
 export function buildAndVerifyStructures(licenses: License[], transactions: Transaction[]) {
   // All three should be unique on licenses

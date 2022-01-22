@@ -1,9 +1,9 @@
 import assert from "assert";
 import util from "util";
-import log from '../../log/logger';
-import { AttachableError } from '../../util/errors';
-import { License, LicenseData } from "../license";
-import { Transaction } from "../transaction";
+import log from '../log/logger';
+import { License, LicenseData } from "../model/license";
+import { Transaction } from "../model/transaction";
+import { AttachableError } from '../util/errors';
 
 export function removeApiBorderDuplicates(licenses: readonly License[]) {
   const groups: { [addonLicenseId: string]: License[] } = {};

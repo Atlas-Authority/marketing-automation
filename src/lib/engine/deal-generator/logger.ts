@@ -1,7 +1,7 @@
 import { LogWriteStream } from "../../data/file.js";
+import { DealStage } from '../../hubspot/interfaces.js';
 import { Table } from "../../log/table.js";
 import { DealData } from "../../model/deal.js";
-import { DealStage } from '../../model/hubspot/interfaces.js';
 import { License } from "../../model/license.js";
 import { Transaction } from "../../model/transaction.js";
 import { formatMoney } from "../../util/formatters.js";

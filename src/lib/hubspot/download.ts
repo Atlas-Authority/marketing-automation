@@ -1,5 +1,5 @@
-import HubspotAPI from "../../io/hubspot";
-import { isPresent } from "../../util/helpers";
+import HubspotAPI from "../io/hubspot";
+import { isPresent } from "../util/helpers";
 import { EntityAdapter } from "./interfaces";
 import { typedEntries } from "./manager";
 

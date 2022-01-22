@@ -1,7 +1,7 @@
 import mustache from 'mustache';
+import { DealStage, Pipeline } from "../../hubspot/interfaces";
 import log from "../../log/logger";
 import { Deal, DealData, DealManager } from "../../model/deal";
-import { DealStage, Pipeline } from "../../model/hubspot/interfaces";
 import { License } from "../../model/license";
 import { Transaction, uniqueTransactionId } from "../../model/transaction";
 import env from '../../parameters/env-config';

@@ -1,6 +1,6 @@
-import { isPresent } from "../../util/helpers";
-import { License } from "../license";
-import { Transaction } from "../transaction";
+import { License } from "../model/license";
+import { Transaction } from "../model/transaction";
+import { isPresent } from "../util/helpers";
 import { RawLicenseContact, RawPartnerDetails, RawTransactionContact } from "./raw";
 
 export type ContactInfo = {

@@ -1,5 +1,5 @@
-import { FullEntity } from "../model/hubspot/interfaces";
-import { RawLicense, RawTransaction } from "../model/marketplace/raw";
+import { FullEntity } from "../hubspot/interfaces";
+import { RawLicense, RawTransaction } from "../marketplace/raw";
 
 export interface Progress {
   setCount: (count: number) => void;

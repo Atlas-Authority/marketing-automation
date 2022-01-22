@@ -1,6 +1,6 @@
+import { FullEntity } from "../hubspot/interfaces";
 import { Data } from "../io/interfaces";
-import { FullEntity } from "../model/hubspot/interfaces";
-import { RawLicense, RawTransaction } from "../model/marketplace/raw";
+import { RawLicense, RawTransaction } from "../marketplace/raw";
 import DataDir from "./dir";
 
 export class DataSet {

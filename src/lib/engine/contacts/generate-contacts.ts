@@ -1,7 +1,7 @@
 import capitalize from "capitalize";
+import { ContactInfo, PartnerBillingInfo } from '../../marketplace/common';
 import { Contact, ContactData, ContactType } from '../../model/contact';
 import { License } from '../../model/license';
-import { ContactInfo, PartnerBillingInfo } from '../../model/marketplace/common';
 import { Transaction } from '../../model/transaction';
 import { sorter } from '../../util/helpers';
 import { Engine } from '../engine';

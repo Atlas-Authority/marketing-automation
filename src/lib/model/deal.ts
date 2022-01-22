@@ -1,11 +1,11 @@
+import { Entity } from "../hubspot/entity";
+import { DealStage, EntityAdapter, Pipeline } from "../hubspot/interfaces";
+import { EntityManager } from "../hubspot/manager";
 import env from "../parameters/env-config";
 import { AttachableError } from "../util/errors";
 import { isPresent } from "../util/helpers";
 import { Company } from "./company";
 import { Contact } from "./contact";
-import { Entity } from "./hubspot/entity";
-import { DealStage, EntityAdapter, Pipeline } from "./hubspot/interfaces";
-import { EntityManager } from "./hubspot/manager";
 import { uniqueTransactionId } from "./transaction";
 
 export type DealData = {

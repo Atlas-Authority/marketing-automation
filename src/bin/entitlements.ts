@@ -1,7 +1,7 @@
 import 'source-map-support/register';
 import DataDir from '../lib/data/dir';
 import { DataSet } from '../lib/data/set';
-import { RawLicense, RawTransaction } from '../lib/model/marketplace/raw';
+import { RawLicense, RawTransaction } from '../lib/marketplace/raw';
 
 main();
 async function main() {
