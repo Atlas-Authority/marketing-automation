@@ -1,7 +1,7 @@
 import 'source-map-support/register';
 import DataDir from '../lib/data/dir';
 import { DataSet } from '../lib/data/set';
-import { downloadAllData } from '../lib/io/downloader';
+import { downloadAllData } from '../lib/engine/downloader';
 import { serviceCredsFromENV } from '../lib/parameters/env-config';
 
 main();
