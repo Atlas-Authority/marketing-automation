@@ -11,6 +11,7 @@ import { ContactManager } from "./contact";
 import { DealManager } from "./deal";
 import { deriveMultiProviderDomainsSet } from "./email-providers";
 import { License } from "./license";
+import { buildAndVerifyStructures } from "./marketplace/structure";
 import { validateMarketplaceData } from "./marketplace/validation";
 import { Transaction } from "./transaction";
 
@@ -66,7 +67,7 @@ export class Database {
     const emailRe = makeEmailValidationRegex(data.tlds);
 
     log.info('Database', 'Validating MPAC records: Starting...');
-    const results = validateMarketplaceData({
+    const validatedMpacData = validateMarketplaceData({
       licenses: [
         ...data.licensesWithDataInsights,
         ...data.licensesWithoutDataInsights,
@@ -74,10 +75,11 @@ export class Database {
       transactions: data.transactions.map(raw => Transaction.fromRaw(raw)),
       emailRe,
     });
-    log.info('Database', 'Validating MPAC records: Done');
+    const structured = buildAndVerifyStructures(validatedMpacData.licenses, validatedMpacData.transactions);
+    this.licenses = structured.licenses;
+    this.transactions = structured.transactions;
 
-    this.licenses = results.licenses;
-    this.transactions = results.transactions;
+    log.info('Database', 'Validating MPAC records: Done');
 
     const transactionTotal = (this.transactions
       .map(t => t.data.vendorAmount)
