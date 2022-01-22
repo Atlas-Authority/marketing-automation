@@ -1,5 +1,5 @@
+import { makeEmailValidationRegex } from "../io/domains";
 import { Data, HubspotUploader } from '../io/interfaces';
-import { makeEmailValidationRegex } from "../io/live/domains";
 import log from "../log/logger";
 import { Table } from "../log/table";
 import { Tallier } from "../log/tallier";

@@ -1,6 +1,6 @@
 import assert from 'assert';
+import HubspotAPI from '../../io/hubspot';
 import { HubspotUploader, Progress } from '../../io/interfaces';
-import HubspotAPI from '../../io/live/hubspot';
 import { AttachableError } from '../../util/errors';
 import { isPresent } from '../../util/helpers';
 import { Entity, Indexer } from './entity';

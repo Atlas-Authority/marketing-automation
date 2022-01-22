@@ -9,11 +9,11 @@ import { FullEntity } from "../model/hubspot/interfaces";
 import { downloadHubspotEntities } from '../model/hubspot/manager';
 import { RawLicense, RawTransaction } from "../model/marketplace/raw";
 import { HubspotCreds, MpacCreds } from "../parameters/interfaces";
+import { TldListAPI } from "./domains";
+import { EmailProviderAPI } from "./email-providers";
+import HubspotAPI from "./hubspot";
 import { Data } from "./interfaces";
-import { TldListAPI } from "./live/domains";
-import { EmailProviderAPI } from "./live/email-providers";
-import HubspotAPI from "./live/hubspot";
-import { MarketplaceAPI } from "./live/marketplace";
+import { MarketplaceAPI } from "./marketplace";
 
 export function loadDataFromDisk(dataDir: DataDir): Data {
   return {

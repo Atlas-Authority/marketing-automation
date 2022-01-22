@@ -1,11 +1,11 @@
 import * as hubspot from '@hubspot/api-client';
 import assert from 'assert';
-import log from '../../log/logger';
-import { Association, EntityKind, ExistingEntity, FullEntity, NewEntity, RelativeAssociation } from '../../model/hubspot/interfaces';
-import { HubspotCreds } from '../../parameters/interfaces';
-import { KnownError } from '../../util/errors';
-import { batchesOf } from '../../util/helpers';
-import { Progress } from '../interfaces';
+import log from '../log/logger';
+import { Association, EntityKind, ExistingEntity, FullEntity, NewEntity, RelativeAssociation } from '../model/hubspot/interfaces';
+import { HubspotCreds } from '../parameters/interfaces';
+import { KnownError } from '../util/errors';
+import { batchesOf } from '../util/helpers';
+import { Progress } from './interfaces';
 
 export default class HubspotAPI {
 
