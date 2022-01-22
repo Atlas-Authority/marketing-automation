@@ -4,7 +4,7 @@ import log from '../log/logger';
 import { hubspotCredsFromENV } from '../parameters/env-config';
 import { KnownError } from '../util/errors';
 import { batchesOf, isPresent } from '../util/helpers';
-import { Association, EntityAdapter, EntityKind, ExistingEntity, FullEntity, NewEntity, RelativeAssociation } from './interfaces';
+import { Association, EntityAdapter, EntityKind, ExistingEntity, NewEntity, RelativeAssociation } from './interfaces';
 import { typedEntries } from './manager';
 
 export type HubspotCreds = {
@@ -22,7 +22,7 @@ export default class HubspotAPI {
   }
 
   public async downloadHubspotEntities<D, C>(entityAdapter: EntityAdapter<D, C>) {
-    const downAssociations = (entityAdapter.associations
+    const inputAssociations = (entityAdapter.associations
       .filter(([kind, dir]) => dir.includes('down'))
       .map(([kind, dir]) => kind));
 
@@ -31,23 +31,19 @@ export default class HubspotAPI {
       ...typedEntries(entityAdapter.computed).flatMap(([k, v]) => v.properties),
     ];
 
-    return await this.downloadEntities(entityAdapter.kind, apiProperties, downAssociations);
-  }
-
-  private async downloadEntities(kind: EntityKind, apiProperties: string[], inputAssociations: string[]): Promise<FullEntity[]> {
     let associations = ((inputAssociations.length > 0)
       ? inputAssociations
       : undefined);
 
     try {
-      const entities = await this.apiFor(kind).getAll(undefined, undefined, apiProperties, associations);
+      const entities = await this.apiFor(entityAdapter.kind).getAll(undefined, undefined, apiProperties, associations);
       const normalizedEntities = entities.map(({ id, properties, associations }) => ({
         id,
         properties,
         associations: Object.entries(associations || {})
           .flatMap(([, { results }]) => (
             results.map(item => {
-              const prefix = `${kind}_to_`;
+              const prefix = `${entityAdapter.kind}_to_`;
               assert.ok(item.type.startsWith(prefix));
               const otherKind = item.type.substr(prefix.length) as EntityKind;
               return `${otherKind}:${item.id}` as RelativeAssociation;
@@ -69,10 +65,10 @@ export default class HubspotAPI {
           body.message === 'internal error'
         )
       ) {
-        throw new KnownError(`Hubspot v3 API for "${kind}" had internal error.`);
+        throw new KnownError(`Hubspot v3 API for "${entityAdapter.kind}" had internal error.`);
       }
       else {
-        throw new Error(`Failed downloading ${kind}s: ${JSON.stringify(body)}`);
+        throw new Error(`Failed downloading ${entityAdapter.kind}s: ${JSON.stringify(body)}`);
       }
     }
   }
