@@ -111,10 +111,6 @@ export abstract class EntityManager<
     }
   }
 
-  public async syncUpAllAssociations() {
-    await this.syncUpAllEntitiesAssociations();
-  }
-
   private async syncUpAllEntitiesProperties() {
     if (!this.uploader) return;
 
@@ -182,7 +178,7 @@ export abstract class EntityManager<
     this.updatedCount += toUpdate.length;
   }
 
-  private async syncUpAllEntitiesAssociations() {
+  public async syncUpAllAssociations() {
     if (!this.uploader) return;
 
     const toSync = (this.entities
