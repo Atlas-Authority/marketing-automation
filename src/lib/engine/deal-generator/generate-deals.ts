@@ -1,8 +1,8 @@
 import assert from "assert";
 import DataDir from "../../data/dir";
+import { Deal } from "../../hubspot/model/deal";
 import log from "../../log/logger";
 import { Table } from "../../log/table";
-import { Deal } from "../../hubspot/model/deal";
 import { LicenseData } from "../../marketplace/model/license";
 import { formatMoney } from "../../util/formatters";
 import { isPresent, sorter } from "../../util/helpers";
@@ -26,7 +26,11 @@ export class DealGenerator {
   private ignoredAmounts = new Map<string, number>();
 
   public constructor(private engine: Engine) {
-    this.actionGenerator = new ActionGenerator(engine.dealManager, this.ignore.bind(this));
+    this.actionGenerator = new ActionGenerator(
+      engine.dealManager,
+      engine.dealPropertyConfig,
+      this.ignore.bind(this),
+    );
   }
 
   public run(matches: RelatedLicenseSet[], logDir: DataDir | null) {

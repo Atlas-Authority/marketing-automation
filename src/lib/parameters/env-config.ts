@@ -55,11 +55,6 @@ const env = {
       closedWon: required('HUBSPOT_DEALSTAGE_CLOSED_WON'),
       closedLost: required('HUBSPOT_DEALSTAGE_CLOSED_LOST'),
     },
-    deals: {
-      dealOrigin: optional('DEAL_ORIGIN'),
-      dealRelatedProducts: optional('DEAL_RELATED_PRODUCTS'),
-      dealDealName: required('DEAL_DEALNAME'),
-    },
     attrs: {
       contact: {
         deployment: optional('HUBSPOT_CONTACT_DEPLOYMENT_ATTR'),
@@ -101,6 +96,11 @@ export function engineConfigFromENV(): EngineConfig {
     ),
     archivedApps: new Set(optional('IGNORED_APPS')?.split(',') ?? []),
     ignoredEmails: new Set((optional('IGNORED_EMAILS')?.split(',') ?? []).map(e => e.toLowerCase())),
+    dealProperties: {
+      dealOrigin: optional('DEAL_ORIGIN'),
+      dealRelatedProducts: optional('DEAL_RELATED_PRODUCTS'),
+      dealDealName: required('DEAL_DEALNAME'),
+    },
   };
 }
 

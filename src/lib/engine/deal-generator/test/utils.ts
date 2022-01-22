@@ -29,9 +29,6 @@ export function runDealGeneratorTwice(input: TestInput) {
 export function runDealGenerator(input: TestInput) {
   const engine = new Engine(null, {
     partnerDomains: new Set(input.partnerDomains ?? []),
-    appToPlatform: {},
-    archivedApps: new Set(),
-    ignoredEmails: new Set(),
   });
   const group = reassembleMatchGroup(input.group, input.records);
   engine.licenses = group;

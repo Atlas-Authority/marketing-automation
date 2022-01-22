@@ -4,8 +4,8 @@ import { Deal, DealData, DealManager } from "../../hubspot/model/deal";
 import log from "../../log/logger";
 import { License } from "../../marketplace/model/license";
 import { Transaction, uniqueTransactionId } from "../../marketplace/model/transaction";
-import env from '../../parameters/env-config';
 import { isPresent, sorter } from "../../util/helpers";
+import { DealPropertyConfig } from '../engine';
 import { abbrEventDetails, DealRelevantEvent, EvalEvent, EventMeta, PurchaseEvent, RefundEvent, RenewalEvent, UpgradeEvent } from "./events";
 
 type DealNoOpReason = Exclude<EventMeta, null> | 'properties-up-to-date';
@@ -22,6 +22,7 @@ export class ActionGenerator {
 
   public constructor(
     private dealManager: DealManager,
+    private dealPropertyConfig: DealPropertyConfig,
     private ignore: (reason: string, amount: number) => void,
   ) {
     for (const deal of this.dealManager.getAll()) {
@@ -59,16 +60,16 @@ export class ActionGenerator {
       const dealStage = (event.licenses.some(l => l.active)
         ? DealStage.EVAL
         : DealStage.CLOSED_LOST);
-      return makeCreateAction(records, latestLicense, dealStage);
+      return this.makeCreateAction(records, latestLicense, dealStage);
     }
     else if (deal.isEval()) {
       const dealStage = (event.licenses.some(l => l.active)
         ? DealStage.EVAL
         : DealStage.CLOSED_LOST);
-      return makeUpdateAction(records, deal, latestLicense, dealStage);
+      return this.makeUpdateAction(records, deal, latestLicense, dealStage);
     }
     else {
-      return makeUpdateAction(records, deal, latestLicense);
+      return this.makeUpdateAction(records, deal, latestLicense);
     }
   }
 
@@ -85,14 +86,14 @@ export class ActionGenerator {
       const dealStage = (event.transaction?.refunded
         ? DealStage.CLOSED_LOST
         : DealStage.CLOSED_WON);
-      return makeUpdateAction(records, deal, record, dealStage);
+      return this.makeUpdateAction(records, deal, record, dealStage);
     }
     else if (event.transaction) {
-      return makeCreateAction(records, event.transaction, DealStage.CLOSED_WON);
+      return this.makeCreateAction(records, event.transaction, DealStage.CLOSED_WON);
     }
     else {
       const license = getLatestLicense(event);
-      return makeCreateAction(records, license, DealStage.CLOSED_WON);
+      return this.makeCreateAction(records, license, DealStage.CLOSED_WON);
     }
   }
 
@@ -104,9 +105,9 @@ export class ActionGenerator {
     if (metaAction) return metaAction;
 
     if (deal) {
-      return makeUpdateAction(records, deal, event.transaction);
+      return this.makeUpdateAction(records, deal, event.transaction);
     }
-    return makeCreateAction(records, event.transaction, DealStage.CLOSED_WON);
+    return this.makeCreateAction(records, event.transaction, DealStage.CLOSED_WON);
   }
 
   private actionsForRefund(records: (License | Transaction)[], event: RefundEvent): Action[] {
@@ -116,7 +117,7 @@ export class ActionGenerator {
     }
 
     return ([...deals]
-      .map(deal => makeUpdateAction(records, deal, null, DealStage.CLOSED_LOST, { amount: 0 }))
+      .map(deal => this.makeUpdateAction(records, deal, null, DealStage.CLOSED_LOST, { amount: 0 }))
       .filter(isPresent)
     );
   }
@@ -234,76 +235,76 @@ export class ActionGenerator {
     }
   }
 
-}
-
-function makeCreateAction(records: (License | Transaction)[], record: License | Transaction, dealStage: DealStage): Action {
-  return {
-    type: 'create',
-    properties: dealCreationProperties(records, record, dealStage),
-  };
-}
-
-function makeUpdateAction(records: (License | Transaction)[], deal: Deal, record: License | Transaction | null, dealStage?: DealStage, certainData?: Partial<DealData>): Action {
-  if (dealStage !== undefined) deal.data.dealStage = dealStage;
-  if (record) {
-    Object.assign(deal.data, dealCreationProperties(records, record, dealStage ?? deal.data.dealStage));
-    deal.data.licenseTier = Math.max(deal.data.licenseTier ?? -1, record.tier);
+  private makeCreateAction(records: (License | Transaction)[], record: License | Transaction, dealStage: DealStage): Action {
+    return {
+      type: 'create',
+      properties: this.dealCreationProperties(records, record, dealStage),
+    };
   }
 
-  if (certainData) {
-    Object.assign(deal.data, certainData);
+  private makeUpdateAction(records: (License | Transaction)[], deal: Deal, record: License | Transaction | null, dealStage?: DealStage, certainData?: Partial<DealData>): Action {
+    if (dealStage !== undefined) deal.data.dealStage = dealStage;
+    if (record) {
+      Object.assign(deal.data, this.dealCreationProperties(records, record, dealStage ?? deal.data.dealStage));
+      deal.data.licenseTier = Math.max(deal.data.licenseTier ?? -1, record.tier);
+    }
+
+    if (certainData) {
+      Object.assign(deal.data, certainData);
+    }
+
+    if (!deal.hasPropertyChanges()) {
+      return { type: 'noop', deal, reason: 'properties-up-to-date' };
+    }
+
+    return {
+      type: 'update',
+      deal,
+      properties: deal.getPropertyChanges(),
+    };
   }
 
-  if (!deal.hasPropertyChanges()) {
-    return { type: 'noop', deal, reason: 'properties-up-to-date' };
+  private dealCreationProperties(records: (License | Transaction)[], record: License | Transaction, dealStage: DealStage): DealData {
+    /**
+     * If any record in any of the deal's groups have partner contacts
+     * then use the most recent record's partner contact's domain.
+     * Otherwise set this to null.
+     */
+    const associatedPartner = ([...records]
+      .reverse()
+      .map(record => record.partnerDomain)
+      .find(domain => domain)
+      ?? null);
+
+    return {
+      closeDate: (record instanceof Transaction
+        ? record.data.saleDate
+        : record.data.maintenanceStartDate),
+      deployment: record.data.hosting,
+      app: record.data.addonKey,
+      licenseTier: record.tier,
+      country: record.data.country,
+      origin: this.dealPropertyConfig.dealOrigin ?? null,
+      relatedProducts: this.dealPropertyConfig.dealRelatedProducts ?? null,
+      dealName: mustache.render(this.dealPropertyConfig.dealDealName, record.data),
+      pipeline: Pipeline.MPAC,
+      associatedPartner,
+      addonLicenseId: record.data.addonLicenseId,
+      transactionId: (record instanceof Transaction ? record.data.transactionId : null),
+      appEntitlementId: record.data.appEntitlementId,
+      duplicateOf: null,
+      appEntitlementNumber: record.data.appEntitlementNumber,
+      dealStage,
+      amount: (dealStage === DealStage.EVAL
+        ? null
+        : record instanceof License
+          ? 0
+          : record.data.vendorAmount),
+    };
   }
 
-  return {
-    type: 'update',
-    deal,
-    properties: deal.getPropertyChanges(),
-  };
 }
 
 function getLatestLicense(event: PurchaseEvent): License {
   return [...event.licenses].sort(sorter(item => item.data.maintenanceStartDate, 'DSC'))[0];
-}
-
-function dealCreationProperties(records: (License | Transaction)[], record: License | Transaction, dealStage: DealStage): DealData {
-  /**
-   * If any record in any of the deal's groups have partner contacts
-   * then use the most recent record's partner contact's domain.
-   * Otherwise set this to null.
-   */
-  const associatedPartner = ([...records]
-    .reverse()
-    .map(record => record.partnerDomain)
-    .find(domain => domain)
-    ?? null);
-
-  return {
-    closeDate: (record instanceof Transaction
-      ? record.data.saleDate
-      : record.data.maintenanceStartDate),
-    deployment: record.data.hosting,
-    app: record.data.addonKey,
-    licenseTier: record.tier,
-    country: record.data.country,
-    origin: env.hubspot.deals.dealOrigin ?? null,
-    relatedProducts: env.hubspot.deals.dealRelatedProducts ?? null,
-    dealName: mustache.render(env.hubspot.deals.dealDealName, record.data),
-    pipeline: Pipeline.MPAC,
-    associatedPartner,
-    addonLicenseId: record.data.addonLicenseId,
-    transactionId: (record instanceof Transaction ? record.data.transactionId : null),
-    appEntitlementId: record.data.appEntitlementId,
-    duplicateOf: null,
-    appEntitlementNumber: record.data.appEntitlementNumber,
-    dealStage,
-    amount: (dealStage === DealStage.EVAL
-      ? null
-      : record instanceof License
-        ? 0
-        : record.data.vendorAmount),
-  };
 }

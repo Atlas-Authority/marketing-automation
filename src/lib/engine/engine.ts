@@ -22,11 +22,18 @@ import { DealGenerator } from "./deal-generator/generate-deals";
 import { LicenseGrouper } from "./license-matching/license-grouper";
 import { printSummary } from "./summary";
 
+export type DealPropertyConfig = {
+  dealOrigin?: string;
+  dealRelatedProducts?: string;
+  dealDealName: string;
+};
+
 export interface EngineConfig {
-  partnerDomains: Set<string>;
-  appToPlatform: { [addonKey: string]: string };
-  archivedApps: Set<string>;
-  ignoredEmails: Set<string>;
+  partnerDomains?: Set<string>;
+  appToPlatform?: { [addonKey: string]: string };
+  archivedApps?: Set<string>;
+  ignoredEmails?: Set<string>;
+  dealProperties?: DealPropertyConfig;
 }
 
 export class Engine {
@@ -46,9 +53,10 @@ export class Engine {
 
   public tallier = new Tallier();
 
-  public appToPlatform: { [addonKey: string]: string } = Object.create(null);
-  public archivedApps = new Set<string>();
-  private ignoredEmails = new Set<string>();
+  public appToPlatform: { [addonKey: string]: string };
+  public archivedApps: Set<string>;
+  public dealPropertyConfig: DealPropertyConfig;
+  private ignoredEmails: Set<string>;
 
   public readonly dealGenerator = new DealGenerator(this);
 
@@ -57,12 +65,13 @@ export class Engine {
     this.contactManager = new ContactManager(outHubspot);
     this.companyManager = new CompanyManager(outHubspot);
 
-    if (config) {
-      this.appToPlatform = config.appToPlatform;
-      this.archivedApps = config.archivedApps;
-      this.partnerDomains = config.partnerDomains;
-      this.ignoredEmails = config.ignoredEmails;
-    }
+    this.appToPlatform = config?.appToPlatform ?? Object.create(null);
+    this.archivedApps = config?.archivedApps ?? new Set();
+    this.partnerDomains = config?.partnerDomains ?? new Set();
+    this.ignoredEmails = config?.ignoredEmails ?? new Set();
+    this.dealPropertyConfig = config?.dealProperties ?? {
+      dealDealName: 'Deal'
+    };
   }
 
   public async run(data: Data, logDir: DataDir | null) {
