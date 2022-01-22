@@ -53,7 +53,7 @@ export abstract class EntityManager<
 {
 
   public constructor(
-    private uploader: HubspotUploader,
+    private uploader: HubspotUploader | null,
   ) { }
 
   public createdCount = 0;
@@ -152,6 +152,8 @@ export abstract class EntityManager<
   }
 
   private async syncUpAllEntitiesProperties() {
+    if (!this.uploader) return;
+
     const entitiesWithChanges = this.entities.map(e => ({ e, changes: this.getChangedProperties(e) }));
     const toSync = entitiesWithChanges.filter(({ changes }) => Object.keys(changes).length > 0);
 
@@ -217,6 +219,8 @@ export abstract class EntityManager<
   }
 
   private async syncUpAllEntitiesAssociations() {
+    if (!this.uploader) return;
+
     const toSync = (this.entities
       .filter(e => e.hasAssociationChanges())
       .flatMap(e => e.getAssociationChanges()

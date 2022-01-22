@@ -2,7 +2,6 @@ import 'source-map-support/register';
 import DataDir from '../lib/data/dir';
 import Engine from "../lib/engine/engine";
 import { loadDataFromDisk } from "../lib/io/downloader";
-import { MemoryHubspot } from '../lib/io/memory/hubspot';
 import log from "../lib/log/logger";
 import { Database } from "../lib/model/database";
 import { getCliArgs } from '../lib/parameters/cli-args';
@@ -20,7 +19,7 @@ async function main() {
 
   const engine = new Engine();
   const data = loadDataFromDisk(dataDir);
-  const db = new Database(new MemoryHubspot(null), envConfig);
+  const db = new Database(null, envConfig);
 
   // First
   log.level = log.Levels.Info;

@@ -1,5 +1,4 @@
 import Chance from 'chance';
-import { MemoryHubspot } from '../../../io/memory/hubspot';
 import { Database } from '../../../model/database';
 import { DealData } from "../../../model/deal";
 import { DealStage } from '../../../model/hubspot/interfaces';
@@ -29,7 +28,7 @@ export function runDealGeneratorTwice(input: TestInput) {
 }
 
 export function runDealGenerator(input: TestInput) {
-  const db = new Database(new MemoryHubspot(null), {
+  const db = new Database(null, {
     ...emptyConfig,
     partnerDomains: input.partnerDomains ?? [],
   }, false);

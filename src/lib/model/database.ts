@@ -35,7 +35,7 @@ export class Database {
   public appToPlatform: { [addonKey: string]: string } = Object.create(null);
   public archivedApps = new Set<string>();
 
-  public constructor(outHubspot: HubspotUploader, config: Config, populateFromEnv = true) {
+  public constructor(outHubspot: HubspotUploader | null, config: Config, populateFromEnv = true) {
     this.dealManager = new DealManager(outHubspot);
     this.contactManager = new ContactManager(outHubspot);
     this.companyManager = new CompanyManager(outHubspot);
