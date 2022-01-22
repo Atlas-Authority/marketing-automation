@@ -50,6 +50,8 @@ export class Engine {
   public archivedApps = new Set<string>();
   private ignoredEmails = new Set<string>();
 
+  public readonly dealGenerator = new DealGenerator(this);
+
   public constructor(outHubspot: HubspotAPI | null, config: EngineConfig | null) {
     this.dealManager = new DealManager(outHubspot);
     this.contactManager = new ContactManager(outHubspot);
@@ -80,7 +82,7 @@ export class Engine {
     updateContactsBasedOnMatchResults(this, allMatches);
 
     this.logStep('Generating deals');
-    new DealGenerator(this).run(allMatches, logDir);
+    this.dealGenerator.run(allMatches, logDir);
 
     this.logStep('Up-syncing to Hubspot');
     await this.syncUpAllEntities();
