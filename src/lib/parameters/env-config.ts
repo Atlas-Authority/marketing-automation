@@ -5,6 +5,7 @@ import { HubspotCreds } from "../hubspot/api";
 import { HubspotContactConfig } from "../hubspot/model/contact";
 import { HubspotDealConfig } from "../hubspot/model/deal";
 import { MpacCreds } from "../marketplace/api";
+import { RunLoopConfig } from "../util/runner";
 
 dotenv.config();
 
@@ -30,7 +31,7 @@ export function slackConfigFromENV() {
   };
 }
 
-export function runLoopConfigFromENV() {
+export function runLoopConfigFromENV(): RunLoopConfig {
   return {
     runInterval: required('RUN_INTERVAL'),
     retryInterval: required('RETRY_INTERVAL'),

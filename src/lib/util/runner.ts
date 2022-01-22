@@ -1,12 +1,12 @@
 import log from "../log/logger";
 
-interface LoopConfig {
+export interface RunLoopConfig {
   runInterval: string,
   retryInterval: string,
   retryTimes: number,
 };
 
-export default async function run(loopConfig: LoopConfig, { work, failed }: {
+export default async function run(loopConfig: RunLoopConfig, { work, failed }: {
   work: () => Promise<void>,
   failed: (errors: Error[]) => Promise<void>,
 }) {

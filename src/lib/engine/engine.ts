@@ -1,9 +1,6 @@
 import chalk from "chalk";
 import DataDir from "../data/dir";
 import { Data } from "../data/set";
-import { CompanyManager } from "../hubspot/model/company";
-import { ContactManager } from "../hubspot/model/contact";
-import { DealManager } from "../hubspot/model/deal";
 import { HubspotService } from "../hubspot/service";
 import log from "../log/logger";
 import { Table } from "../log/table";
@@ -40,10 +37,6 @@ export class Engine {
 
   private step = 0;
 
-  public dealManager: DealManager;
-  public contactManager: ContactManager;
-  public companyManager: CompanyManager;
-
   public licenses: License[] = [];
   public transactions: Transaction[] = [];
 
@@ -58,11 +51,7 @@ export class Engine {
   public dealPropertyConfig: DealPropertyConfig;
   private ignoredEmails: Set<string>;
 
-  public constructor(hubspotService: HubspotService, config: EngineConfig | null) {
-    this.dealManager = hubspotService.dealManager;
-    this.contactManager = hubspotService.contactManager;
-    this.companyManager = hubspotService.companyManager;
-
+  public constructor(private hubspotService: HubspotService, config: EngineConfig | null) {
     this.appToPlatform = config?.appToPlatform ?? Object.create(null);
     this.archivedApps = config?.archivedApps ?? new Set();
     this.partnerDomains = config?.partnerDomains ?? new Set();
@@ -91,22 +80,23 @@ export class Engine {
     this.logStep('Generating deals');
     new DealGenerator(this).run(allMatches, logDir);
 
+    this.logStep('Summary');
+    printSummary(this);
+
     this.logStep('Up-syncing to Hubspot');
     await this.syncUpAllEntities();
-
-    printSummary(this);
 
     this.logStep('Done!');
   }
 
   private importData(data: Data) {
-    const dealPrelinks = this.dealManager.importEntities(data.rawDeals);
-    const companyPrelinks = this.companyManager.importEntities(data.rawCompanies);
-    const contactPrelinks = this.contactManager.importEntities(data.rawContacts);
+    const dealPrelinks = this.hubspotService.dealManager.importEntities(data.rawDeals);
+    const companyPrelinks = this.hubspotService.companyManager.importEntities(data.rawCompanies);
+    const contactPrelinks = this.hubspotService.contactManager.importEntities(data.rawContacts);
 
-    this.dealManager.linkEntities(dealPrelinks, this);
-    this.companyManager.linkEntities(companyPrelinks, this);
-    this.contactManager.linkEntities(contactPrelinks, this);
+    this.hubspotService.dealManager.linkEntities(dealPrelinks, this.hubspotService);
+    this.hubspotService.companyManager.linkEntities(companyPrelinks, this.hubspotService);
+    this.hubspotService.contactManager.linkEntities(contactPrelinks, this.hubspotService);
 
     this.freeEmailDomains = deriveMultiProviderDomainsSet(data.freeDomains);
 
@@ -156,12 +146,12 @@ export class Engine {
   }
 
   private printDownloadSummary(transactionTotal: number) {
-    const deals = this.dealManager.getArray();
+    const deals = this.hubspotService.dealManager.getArray();
     const dealSum = (deals
       .map(d => d.data.amount ?? 0)
       .reduce((a, b) => a + b, 0));
 
-    const contacts = this.contactManager.getArray();
+    const contacts = this.hubspotService.contactManager.getArray();
 
     const table = new Table([{}, { align: 'right' }]);
     table.rows.push(['# Licenses', formatNumber(this.licenses.length)]);
@@ -179,17 +169,21 @@ export class Engine {
   }
 
   public async syncUpAllEntities() {
-    await this.dealManager.syncUpAllEntities();
-    await this.contactManager.syncUpAllEntities();
-    await this.companyManager.syncUpAllEntities();
+    await this.hubspotService.dealManager.syncUpAllEntities();
+    await this.hubspotService.contactManager.syncUpAllEntities();
+    await this.hubspotService.companyManager.syncUpAllEntities();
 
-    await this.dealManager.syncUpAllAssociations();
-    await this.contactManager.syncUpAllAssociations();
-    await this.companyManager.syncUpAllAssociations();
+    await this.hubspotService.dealManager.syncUpAllAssociations();
+    await this.hubspotService.contactManager.syncUpAllAssociations();
+    await this.hubspotService.companyManager.syncUpAllAssociations();
   }
 
   private logStep(description: string) {
     log.info('Marketing Automation', chalk.bold.blueBright(`Step ${++this.step}: ${description}`));
   }
+
+  get contactManager() { return this.hubspotService.contactManager; }
+  get dealManager() { return this.hubspotService.dealManager; }
+  get companyManager() { return this.hubspotService.companyManager; }
 
 }
