@@ -1,6 +1,7 @@
 import * as hubspot from '@hubspot/api-client';
 import assert from 'assert';
 import log from '../log/logger';
+import { hubspotCredsFromENV } from '../parameters/env-config';
 import { KnownError } from '../util/errors';
 import { batchesOf, isPresent } from '../util/helpers';
 import { Association, EntityAdapter, EntityKind, ExistingEntity, FullEntity, NewEntity, RelativeAssociation } from './interfaces';
@@ -16,8 +17,8 @@ export default class HubspotAPI {
 
   private client: hubspot.Client;
 
-  constructor(creds: HubspotCreds) {
-    this.client = new hubspot.Client(creds);
+  constructor() {
+    this.client = new hubspot.Client(hubspotCredsFromENV());
   }
 
   public async downloadHubspotEntities<D, C>(entityAdapter: EntityAdapter<D, C>) {

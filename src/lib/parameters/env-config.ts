@@ -8,21 +8,19 @@ dotenv.config();
 
 const isTest = process.env.NODE_ENV === 'test';
 
-export function serviceCredsFromENV() {
+export function hubspotCredsFromENV(): HubspotCreds {
+  return requireOneOf([
+    { accessToken: 'HUBSPOT_ACCESS_TOKEN' },
+    { apiKey: 'HUBSPOT_API_KEY' },
+  ]);
+}
+
+export function mpacCredsFromENV(): MpacCreds {
   return {
-
-    mpacCreds: {
-      user: required('MPAC_USER'),
-      apiKey: required('MPAC_API_KEY'),
-      sellerId: required('MPAC_SELLER_ID'),
-    } as MpacCreds,
-
-    hubspotCreds: requireOneOf([
-      { accessToken: 'HUBSPOT_ACCESS_TOKEN' },
-      { apiKey: 'HUBSPOT_API_KEY' },
-    ]) as HubspotCreds,
-
-  }
+    user: required('MPAC_USER'),
+    apiKey: required('MPAC_API_KEY'),
+    sellerId: required('MPAC_SELLER_ID'),
+  };
 }
 
 export function slackConfigFromENV() {

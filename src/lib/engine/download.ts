@@ -1,22 +1,17 @@
 import got from 'got';
 import promiseAllProperties from 'promise-all-properties';
 import { Data, DataSet } from '../data/set';
-import HubspotAPI, { HubspotCreds } from "../hubspot/api";
+import HubspotAPI from "../hubspot/api";
 import { CompanyAdapter } from '../hubspot/model/company';
 import { ContactAdapter } from '../hubspot/model/contact';
 import { DealAdapter } from '../hubspot/model/deal';
 import { MultiDownloadLogger } from "../log/download-logger";
 import log from "../log/logger";
-import { MarketplaceAPI, MpacCreds } from "../marketplace/api";
+import { MarketplaceAPI } from "../marketplace/api";
 
-type DownloadConfig = {
-  hubspotCreds: HubspotCreds;
-  mpacCreds: MpacCreds;
-};
-
-export async function downloadAllData(dataSet: DataSet, config: DownloadConfig): Promise<Data> {
-  const hubspotAPI = new HubspotAPI(config.hubspotCreds);
-  const marketplaceAPI = new MarketplaceAPI(config.mpacCreds);
+export async function downloadAllData(dataSet: DataSet): Promise<Data> {
+  const hubspotAPI = new HubspotAPI();
+  const marketplaceAPI = new MarketplaceAPI();
 
   log.info('Downloader', 'Starting downloads with API');
   const logbox = new MultiDownloadLogger();

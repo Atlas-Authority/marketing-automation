@@ -1,6 +1,7 @@
 import got from 'got';
 import { DateTime, Duration, Interval } from 'luxon';
 import { Progress } from '../log/download-logger';
+import { mpacCredsFromENV } from '../parameters/env-config';
 import { AttachableError, KnownError } from '../util/errors';
 import { RawLicense, RawTransaction } from './raw';
 
@@ -12,7 +13,7 @@ export interface MpacCreds {
 
 export class MarketplaceAPI {
 
-  constructor(private creds: MpacCreds) { }
+  private creds = mpacCredsFromENV();
 
   public async downloadTransactions(): Promise<RawTransaction[]> {
     const transactions = await this.downloadMarketplaceData('/sales/transactions/export');
