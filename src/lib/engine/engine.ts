@@ -1,10 +1,10 @@
 import chalk from "chalk";
 import DataDir from "../data/dir";
 import { Data } from "../data/set";
-import HubspotAPI from "../hubspot/api";
 import { CompanyManager } from "../hubspot/model/company";
 import { ContactManager } from "../hubspot/model/contact";
 import { DealManager } from "../hubspot/model/deal";
+import { HubspotService } from "../hubspot/service";
 import log from "../log/logger";
 import { Table } from "../log/table";
 import { Tallier } from "../log/tallier";
@@ -58,10 +58,10 @@ export class Engine {
   public dealPropertyConfig: DealPropertyConfig;
   private ignoredEmails: Set<string>;
 
-  public constructor(outHubspot: HubspotAPI | null, config: EngineConfig | null) {
-    this.dealManager = new DealManager(outHubspot);
-    this.contactManager = new ContactManager(outHubspot);
-    this.companyManager = new CompanyManager(outHubspot);
+  public constructor(hubspotService: HubspotService, config: EngineConfig | null) {
+    this.dealManager = hubspotService.dealManager;
+    this.contactManager = hubspotService.contactManager;
+    this.companyManager = hubspotService.companyManager;
 
     this.appToPlatform = config?.appToPlatform ?? Object.create(null);
     this.archivedApps = config?.archivedApps ?? new Set();

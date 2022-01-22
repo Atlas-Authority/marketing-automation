@@ -2,14 +2,20 @@ import got from 'got';
 import promiseAllProperties from 'promise-all-properties';
 import { Data, DataSet } from '../data/set';
 import HubspotAPI from "../hubspot/api";
-import { CompanyAdapter } from '../hubspot/model/company';
-import { ContactAdapter } from '../hubspot/model/contact';
-import { DealAdapter } from '../hubspot/model/deal';
+import { CompanyManager } from '../hubspot/model/company';
+import { ContactManager } from '../hubspot/model/contact';
+import { DealManager } from '../hubspot/model/deal';
 import { MultiDownloadLogger } from "../log/download-logger";
 import log from "../log/logger";
 import { MarketplaceAPI } from "../marketplace/api";
 
-export async function downloadAllData(dataSet: DataSet): Promise<Data> {
+interface HubspotManagers {
+  dealManager: DealManager,
+  contactManager: ContactManager,
+  companyManager: CompanyManager,
+}
+
+export async function downloadAllData(dataSet: DataSet, managers: HubspotManagers): Promise<Data> {
   const hubspotAPI = new HubspotAPI();
   const marketplaceAPI = new MarketplaceAPI();
 
@@ -33,13 +39,13 @@ export async function downloadAllData(dataSet: DataSet): Promise<Data> {
       downloadFreeEmailProviders()),
 
     rawDeals: logbox.wrap('Deals', () =>
-      hubspotAPI.downloadHubspotEntities(DealAdapter)),
+      hubspotAPI.downloadHubspotEntities(managers.dealManager.entityAdapter)),
 
     rawCompanies: logbox.wrap('Companies', () =>
-      hubspotAPI.downloadHubspotEntities(CompanyAdapter)),
+      hubspotAPI.downloadHubspotEntities(managers.companyManager.entityAdapter)),
 
     rawContacts: logbox.wrap('Contacts', () =>
-      hubspotAPI.downloadHubspotEntities(ContactAdapter)),
+      hubspotAPI.downloadHubspotEntities(managers.contactManager.entityAdapter)),
   });
 
   dataSet.save(data);

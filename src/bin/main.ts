@@ -4,7 +4,7 @@ import { DataSet } from '../lib/data/set';
 import { downloadAllData } from '../lib/engine/download';
 import { Engine } from "../lib/engine/engine";
 import { SlackNotifier } from '../lib/engine/slack-notifier';
-import HubspotAPI from '../lib/hubspot/api';
+import { HubspotService } from '../lib/hubspot/service';
 import log from '../lib/log/logger';
 import { getCliArgs } from '../lib/parameters/cli-args';
 import { engineConfigFromENV, runLoopConfigFromENV } from "../lib/parameters/env-config";
@@ -19,8 +19,6 @@ async function main() {
   const dataDir = DataDir.root.subdir("in");
   const dataSet = new DataSet(dataDir);
 
-  const uploader = new HubspotAPI();
-
   const runLoopConfig = runLoopConfigFromENV();
   const notifier = SlackNotifier.fromENV();
   notifier?.notifyStarting();
@@ -28,9 +26,10 @@ async function main() {
   await run(runLoopConfig, {
 
     async work() {
-      await downloadAllData(dataSet);
+      const hubspot = HubspotService.live();
+      await downloadAllData(dataSet, hubspot);
       const data = new DataSet(dataDir).load();
-      const engine = new Engine(uploader, engineConfigFromENV());
+      const engine = new Engine(hubspot, engineConfigFromENV());
       await engine.run(data, null);
     },
 

@@ -42,6 +42,6 @@ export const CompanyAdapter: EntityAdapter<CompanyData, {}> = {
 export class CompanyManager extends EntityManager<CompanyData, {}, Company> {
 
   protected override Entity = Company;
-  protected override entityAdapter = CompanyAdapter;
+  public override entityAdapter = CompanyAdapter;
 
 }

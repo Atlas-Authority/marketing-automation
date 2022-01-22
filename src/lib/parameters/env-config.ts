@@ -2,11 +2,11 @@ import assert from "assert";
 import dotenv from "dotenv";
 import { EngineConfig } from "../engine/engine";
 import { HubspotCreds } from "../hubspot/api";
+import { HubspotContactConfig } from "../hubspot/model/contact";
+import { HubspotDealConfig } from "../hubspot/model/deal";
 import { MpacCreds } from "../marketplace/api";
 
 dotenv.config();
-
-const isTest = process.env.NODE_ENV === 'test';
 
 export function hubspotCredsFromENV(): HubspotCreds {
   return requireOneOf([
@@ -38,8 +38,8 @@ export function runLoopConfigFromENV() {
   };
 }
 
-const env = {
-  hubspot: {
+export function hubspotDealConfigFromENV(): HubspotDealConfig {
+  return {
     accountId: optional('HUBSPOT_ACCOUNT_ID'),
     pipeline: {
       mpac: required('HUBSPOT_PIPELINE_MPAC'),
@@ -50,35 +50,38 @@ const env = {
       closedLost: required('HUBSPOT_DEALSTAGE_CLOSED_LOST'),
     },
     attrs: {
-      contact: {
-        deployment: optional('HUBSPOT_CONTACT_DEPLOYMENT_ATTR'),
-        licenseTier: optional('HUBSPOT_CONTACT_LICENSE_TIER_ATTR'),
-        products: optional('HUBSPOT_CONTACT_PRODUCTS_ATTR'),
-        lastMpacEvent: optional('HUBSPOT_CONTACT_LAST_MPAC_EVENT_ATTR'),
-        contactType: optional('HUBSPOT_CONTACT_CONTACT_TYPE_ATTR'),
-        region: optional('HUBSPOT_CONTACT_REGION_ATTR'),
-        relatedProducts: optional('HUBSPOT_CONTACT_RELATED_PRODUCTS_ATTR'),
-        lastAssociatedPartner: optional('HUBSPOT_CONTACT_LAST_ASSOCIATED_PARTNER'),
-      },
-      deal: {
-        app: optional('HUBSPOT_DEAL_APP_ATTR'),
-        origin: optional('HUBSPOT_DEAL_ORIGIN_ATTR'),
-        country: optional('HUBSPOT_DEAL_COUNTRY_ATTR'),
-        deployment: optional('HUBSPOT_DEAL_DEPLOYMENT_ATTR'),
-        appEntitlementId: required('HUBSPOT_DEAL_APPENTITLEMENTID_ATTR'),
-        appEntitlementNumber: required('HUBSPOT_DEAL_APPENTITLEMENTNUMBER_ATTR'),
-        addonLicenseId: required('HUBSPOT_DEAL_ADDONLICENESID_ATTR'),
-        transactionId: required('HUBSPOT_DEAL_TRANSACTIONID_ATTR'),
-        licenseTier: optional('HUBSPOT_DEAL_LICENSE_TIER_ATTR'),
-        relatedProducts: optional('HUBSPOT_DEAL_RELATED_PRODUCTS_ATTR'),
-        associatedPartner: optional('HUBSPOT_DEAL_ASSOCIATED_PARTNER'),
-        duplicateOf: optional('HUBSPOT_DEAL_DUPLICATEOF_ATTR'),
-      },
+      app: optional('HUBSPOT_DEAL_APP_ATTR'),
+      origin: optional('HUBSPOT_DEAL_ORIGIN_ATTR'),
+      country: optional('HUBSPOT_DEAL_COUNTRY_ATTR'),
+      deployment: optional('HUBSPOT_DEAL_DEPLOYMENT_ATTR'),
+      appEntitlementId: required('HUBSPOT_DEAL_APPENTITLEMENTID_ATTR'),
+      appEntitlementNumber: required('HUBSPOT_DEAL_APPENTITLEMENTNUMBER_ATTR'),
+      addonLicenseId: required('HUBSPOT_DEAL_ADDONLICENESID_ATTR'),
+      transactionId: required('HUBSPOT_DEAL_TRANSACTIONID_ATTR'),
+      licenseTier: optional('HUBSPOT_DEAL_LICENSE_TIER_ATTR'),
+      relatedProducts: optional('HUBSPOT_DEAL_RELATED_PRODUCTS_ATTR'),
+      associatedPartner: optional('HUBSPOT_DEAL_ASSOCIATED_PARTNER'),
+      duplicateOf: optional('HUBSPOT_DEAL_DUPLICATEOF_ATTR'),
     },
-  },
-};
+  };
+}
 
-export default env;
+export const hubspotAccountIdFromEnv = optional('HUBSPOT_ACCOUNT_ID');
+
+export function hubspotContactConfigFromENV(): HubspotContactConfig {
+  return {
+    attrs: {
+      deployment: optional('HUBSPOT_CONTACT_DEPLOYMENT_ATTR'),
+      licenseTier: optional('HUBSPOT_CONTACT_LICENSE_TIER_ATTR'),
+      products: optional('HUBSPOT_CONTACT_PRODUCTS_ATTR'),
+      lastMpacEvent: optional('HUBSPOT_CONTACT_LAST_MPAC_EVENT_ATTR'),
+      contactType: optional('HUBSPOT_CONTACT_CONTACT_TYPE_ATTR'),
+      region: optional('HUBSPOT_CONTACT_REGION_ATTR'),
+      relatedProducts: optional('HUBSPOT_CONTACT_RELATED_PRODUCTS_ATTR'),
+      lastAssociatedPartner: optional('HUBSPOT_CONTACT_LAST_ASSOCIATED_PARTNER'),
+    },
+  };
+}
 
 export function engineConfigFromENV(): EngineConfig {
   return {
@@ -100,7 +103,6 @@ export function engineConfigFromENV(): EngineConfig {
 
 function required(key: string) {
   const value = process.env[key];
-  if (isTest) return value ?? '';
   assert.ok(value, `ENV key ${key} is required`);
   return value;
 }

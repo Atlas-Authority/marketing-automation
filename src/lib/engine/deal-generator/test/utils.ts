@@ -1,6 +1,7 @@
 import Chance from 'chance';
 import { DealStage } from '../../../hubspot/interfaces';
 import { DealData } from "../../../hubspot/model/deal";
+import { HubspotService } from '../../../hubspot/service';
 import { License, LicenseData } from "../../../marketplace/model/license";
 import { ContactInfo } from '../../../marketplace/model/record';
 import { Transaction, TransactionData } from "../../../marketplace/model/transaction";
@@ -27,7 +28,7 @@ export function runDealGeneratorTwice(input: TestInput) {
 }
 
 export function runDealGenerator(input: TestInput) {
-  const engine = new Engine(null, {
+  const engine = new Engine(HubspotService.memory(), {
     partnerDomains: new Set(input.partnerDomains ?? []),
   });
   const group = reassembleMatchGroup(input.group, input.records);
