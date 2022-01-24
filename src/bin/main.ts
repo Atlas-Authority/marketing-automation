@@ -34,8 +34,7 @@ run(runLoopConfig, {
     engine.run(data, null);
 
     log.info('Main', 'Upsyncing changes to HubSpot');
-    const api = new HubspotAPI();
-    await hubspot.upsyncChangesLive(api);
+    await hubspot.upsyncChanges(new HubspotAPI());
   },
 
   async failed(errors) {

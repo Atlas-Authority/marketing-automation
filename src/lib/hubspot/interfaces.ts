@@ -2,6 +2,12 @@ export type NewEntity = { properties: Record<string, string> };
 export type ExistingEntity = NewEntity & { id: string };
 export type FullEntity = ExistingEntity & { associations: RelativeAssociation[] };
 
+export type ResultEntity = {
+  id: string | null,
+  properties: Record<string, string>,
+  associations: RelativeAssociation[],
+};
+
 export type RelativeAssociation = `${EntityKind}:${string}`;
 
 export type HubspotProperties = Record<string, string | null>;
@@ -45,4 +51,11 @@ export interface EntityAdapter<D, C> {
     properties: string[],
   } },
 
+}
+
+export interface HubspotUploader {
+  createEntities(kind: EntityKind, entities: NewEntity[]): Promise<ExistingEntity[]>;
+  updateEntities(kind: EntityKind, entities: ExistingEntity[]): Promise<ExistingEntity[]>;
+  createAssociations(fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void>;
+  deleteAssociations(fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void>;
 }

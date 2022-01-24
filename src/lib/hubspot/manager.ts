@@ -1,9 +1,8 @@
 import assert from 'assert';
 import { AttachableError } from '../util/errors';
 import { isPresent } from '../util/helpers';
-import HubspotAPI from './api';
 import { Entity, Indexer } from './entity';
-import { EntityAdapter, EntityKind, FullEntity, RelativeAssociation } from './interfaces';
+import { EntityAdapter, EntityKind, FullEntity, HubspotUploader, RelativeAssociation } from './interfaces';
 
 export abstract class EntityManager<
   D extends Record<string, any>,
@@ -94,7 +93,7 @@ export abstract class EntityManager<
     return this.entities;
   }
 
-  public async syncUpAllEntities(uploader: HubspotAPI) {
+  public async syncUpAllEntities(uploader: HubspotUploader) {
     await this.syncUpAllEntitiesProperties(uploader);
     for (const index of this.indexes) {
       index.clear();
@@ -131,7 +130,7 @@ export abstract class EntityManager<
     };
   }
 
-  private async syncUpAllEntitiesProperties(uploader: HubspotAPI) {
+  private async syncUpAllEntitiesProperties(uploader: HubspotUploader) {
     const entitiesWithChanges = this.entities.map(e => ({ e, changes: this.getChangedProperties(e) }));
     const toSync = entitiesWithChanges.filter(({ changes }) => Object.keys(changes).length > 0);
 
@@ -193,7 +192,7 @@ export abstract class EntityManager<
     }
   }
 
-  public async syncUpAllAssociations(uploader: HubspotAPI) {
+  public async syncUpAllAssociations(uploader: HubspotUploader) {
     const toSync = (this.entities
       .filter(e => e.hasAssociationChanges())
       .flatMap(e => e.getAssociationChanges()

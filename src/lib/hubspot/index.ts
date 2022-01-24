@@ -1,5 +1,5 @@
 import { hubspotContactConfigFromENV, hubspotDealConfigFromENV } from "../parameters/env-config";
-import HubspotAPI from "./api";
+import { HubspotUploader } from "./interfaces";
 import { CompanyManager } from "./model/company";
 import { ContactManager, HubspotContactConfig } from "./model/contact";
 import { DealManager, HubspotDealConfig } from "./model/deal";
@@ -35,7 +35,7 @@ export class Hubspot {
     public companyManager: CompanyManager,
   ) { }
 
-  public async upsyncChangesLive(api: HubspotAPI) {
+  public async upsyncChanges(api: HubspotUploader) {
     await this.dealManager.syncUpAllEntities(api);
     await this.contactManager.syncUpAllEntities(api);
     await this.companyManager.syncUpAllEntities(api);
