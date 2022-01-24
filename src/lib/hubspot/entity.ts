@@ -78,9 +78,7 @@ export abstract class Entity<
   protected makeDynamicAssociation<T extends Entity<any, any>>(kind: EntityKind) {
     return {
       getAll: () => this.getAssociations(kind) as T[],
-      has: (entity: T) => this.hasAssociation(entity),
       add: (entity: T) => this.addAssociation(entity, { firstSide: true, initial: false }),
-      remove: (entity: T) => this.removeAssociation(entity, { firstSide: true }),
       clear: () => this.clearAssociations(kind),
     };
   }
@@ -91,16 +89,6 @@ export abstract class Entity<
     this.newAssocs.add(entity);
 
     if (meta.firstSide) entity.addAssociation(this, { firstSide: false, initial: meta.initial });
-  }
-
-  private removeAssociation(entity: Entity<any, any>, meta: { firstSide: boolean }) {
-    this.newAssocs.delete(entity);
-
-    if (meta.firstSide) entity.removeAssociation(this, { firstSide: false });
-  }
-
-  private hasAssociation(entity: Entity<any, any>) {
-    return this.newAssocs.has(entity);
   }
 
   private getAssociations(kind: EntityKind) {
