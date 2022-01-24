@@ -14,7 +14,7 @@ log.setLevelFrom(loglevel);
 const dataDir = DataDir.root.subdir('in');
 const logDir = savelogs ? dataDir.subdir(savelogs) : null;
 
-const engine = new Engine(HubspotService.memory(), engineConfigFromENV());
+const engine = new Engine(HubspotService.memoryFromENV(), engineConfigFromENV());
 
 const data = new DataSet(dataDir).load();
 

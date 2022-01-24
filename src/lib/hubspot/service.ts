@@ -15,6 +15,13 @@ export class HubspotService {
     );
   }
 
+  public static memoryFromENV() {
+    return this.memory({
+      contact: hubspotContactConfigFromENV(),
+      deal: hubspotDealConfigFromENV(),
+    });
+  }
+
   public static memory(config?: { deal?: HubspotDealConfig, contact?: HubspotContactConfig }) {
     return new HubspotService(
       new DealManager(null, config?.deal ?? {}),
