@@ -29,15 +29,25 @@ export function printSummary(engine: Engine) {
     engine.tallier.less('Over-accounted: Duplicate deals', -dupTotal);
   }
 
-  const deals = engine.dealManager.getArray();
-
-  log.info('Summary', 'Results of this run:');
-
-  const table = new Table([{}, { align: 'right' }]);
-
   const dealChanges = engine.dealManager.getPrintableChanges();
   const contactChanges = engine.contactManager.getPrintableChanges();
   const companyChanges = engine.companyManager.getPrintableChanges();
+
+  log.verbose('Summary', 'Deals Created', dealChanges.created);
+  log.verbose('Summary', 'Deals Updated', dealChanges.updated);
+  log.verbose('Summary', 'Deal Associations to Create', dealChanges.associationsToCreate);
+  log.verbose('Summary', 'Deal Associations to Delete', dealChanges.associationsToDelete);
+
+  log.verbose('Summary', 'Contacts Created', contactChanges.created);
+  log.verbose('Summary', 'Contacts Updated', contactChanges.updated);
+  log.verbose('Summary', 'Contact Associations to Create', contactChanges.associationsToCreate);
+  log.verbose('Summary', 'Contact Associations to Delete', contactChanges.associationsToDelete);
+
+  log.verbose('Summary', 'Companies Updated', companyChanges.updated);
+
+  const deals = engine.dealManager.getArray();
+
+  const table = new Table([{}, { align: 'right' }]);
 
   table.rows.push(['# Total Deals', formatNumber(deals.length)]);
   table.rows.push(['$ Total Deals', formatMoney(sumDeals(deals))]);
@@ -57,24 +67,12 @@ export function printSummary(engine: Engine) {
 
   table.rows.push(['Companies Updated', formatNumber(companyChanges.updated.length)]);
 
+  log.info('Summary', 'Results of this run:');
   for (const row of table.eachRow()) {
     log.info('Summary', '  ' + row);
   }
 
-  log.verbose('Summary', 'Deals Created', dealChanges.created);
-  log.verbose('Summary', 'Deals Updated', dealChanges.updated);
-  log.verbose('Summary', 'Deal Associations to Create', dealChanges.associationsToCreate);
-  log.verbose('Summary', 'Deal Associations to Delete', dealChanges.associationsToDelete);
-
-  log.verbose('Summary', 'Contacts Created', contactChanges.created);
-  log.verbose('Summary', 'Contacts Updated', contactChanges.updated);
-  log.verbose('Summary', 'Contact Associations to Create', contactChanges.associationsToCreate);
-  log.verbose('Summary', 'Contact Associations to Delete', contactChanges.associationsToDelete);
-
-  log.verbose('Summary', 'Companies Updated', companyChanges.updated);
-
   engine.tallier.less('Deal sum', sumDeals(deals));
-
   engine.tallier.printTable();
 }
 
