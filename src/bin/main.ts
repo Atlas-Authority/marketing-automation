@@ -23,12 +23,16 @@ notifier?.notifyStarting();
 run(runLoopConfig, {
 
   async work() {
+    log.info('Main', 'Downloading data');
     const hubspot = HubspotService.live();
     await downloadAllData(dataSet, hubspot);
+
+    log.info('Main', 'Running engine');
     const data = new DataSet(dataDir).load();
     const engine = new Engine(hubspot, engineConfigFromENV());
     engine.run(data, null);
-    log.info('Upsyncing changes to HubSpot');
+
+    log.info('Main', 'Upsyncing changes to HubSpot');
     await hubspot.upsyncChanges();
   },
 
