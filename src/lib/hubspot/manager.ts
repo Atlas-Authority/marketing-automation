@@ -15,11 +15,6 @@ export abstract class EntityManager<
     private uploader: HubspotAPI | null,
   ) { }
 
-  public createdCount = 0;
-  public updatedCount = 0;
-  public associatedCount = 0;
-  public disassociatedCount = 0;
-
   protected abstract Entity: new (id: string | null, kind: EntityKind, data: D, computed: C, indexer: Indexer<D>) => E;
   protected abstract entityAdapter: EntityAdapter<D, C>;
   protected get kind(): EntityKind { return this.entityAdapter.kind; }
@@ -111,6 +106,37 @@ export abstract class EntityManager<
     }
   }
 
+  public getChangeStats() {
+    const entitiesWithChanges = this.entities.map(e => ({ e, changes: this.getChangedProperties(e) }));
+    const toSyncProperties = entitiesWithChanges.filter(({ changes }) => Object.keys(changes).length > 0);
+
+    let associatedCount = 0;
+    let disassociatedCount = 0;
+
+    const toSyncAssociations = (this.entities
+      .filter(e => e.hasAssociationChanges())
+      .flatMap(e => e.getAssociationChanges()
+        .map(({ op, other }) => ({ op, from: e, to: other }))));
+
+    const upAssociations = (this.entityAdapter.associations
+      .filter(([kind, dir]) => dir.includes('up'))
+      .map(([kind, dir]) => kind));
+
+    for (const otherKind of upAssociations) {
+      const toSyncInKind = toSyncAssociations.filter(changes => changes.to.kind === otherKind);
+
+      associatedCount += toSyncInKind.filter(changes => changes.op === 'add').length;
+      disassociatedCount += toSyncInKind.filter(changes => changes.op === 'del').length;
+    }
+
+    return {
+      createdCount: toSyncProperties.filter(({ e }) => e.id === undefined).length,
+      updatedCount: toSyncProperties.filter(({ e }) => e.id !== undefined).length,
+      associatedCount,
+      disassociatedCount,
+    };
+  }
+
   private async syncUpAllEntitiesProperties() {
     if (!this.uploader) return;
 
@@ -173,9 +199,6 @@ export abstract class EntityManager<
         e.applyPropertyChanges();
       }
     }
-
-    this.createdCount += toCreate.length;
-    this.updatedCount += toUpdate.length;
   }
 
   public async syncUpAllAssociations() {
@@ -216,9 +239,6 @@ export abstract class EntityManager<
         otherKind,
         toDel.map(changes => changes.inputs),
       );
-
-      this.associatedCount += toAdd.length;
-      this.disassociatedCount += toDel.length;
     }
 
     for (const changes of toSync) {

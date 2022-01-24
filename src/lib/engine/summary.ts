@@ -1,6 +1,6 @@
+import { Deal } from "../hubspot/model/deal";
 import log from "../log/logger";
 import { Table } from "../log/table";
-import { Deal } from "../hubspot/model/deal";
 import { formatMoney, formatNumber } from "../util/formatters";
 import { isPresent } from "../util/helpers";
 import { Engine } from "./engine";
@@ -35,23 +35,27 @@ export function printSummary(engine: Engine) {
 
   const table = new Table([{}, { align: 'right' }]);
 
+  const dealStats = engine.dealManager.getChangeStats();
+  const contactStats = engine.contactManager.getChangeStats();
+  const companyStats = engine.companyManager.getChangeStats();
+
   table.rows.push(['# Total Deals', formatNumber(deals.length)]);
   table.rows.push(['$ Total Deals', formatMoney(sumDeals(deals))]);
   table.rows.push(['$ Total Deals Won', formatMoney(sumDeals(deals.filter(d => d.isWon)))]);
   table.rows.push(['$ Total Deals Lost', formatMoney(sumDeals(deals.filter(d => d.isLost)))]);
   table.rows.push(['$ Total Deals Eval', formatMoney(sumDeals(deals.filter(d => d.isEval())))]);
 
-  table.rows.push(['Deals Created', formatNumber(engine.dealManager.createdCount)]);
-  table.rows.push(['Deals Updated', formatNumber(engine.dealManager.updatedCount)]);
-  table.rows.push(['Deals Associated', formatNumber(engine.dealManager.associatedCount)]);
-  table.rows.push(['Deals DisAssociated', formatNumber(engine.dealManager.disassociatedCount)]);
+  table.rows.push(['Deals Created', formatNumber(dealStats.createdCount)]);
+  table.rows.push(['Deals Updated', formatNumber(dealStats.updatedCount)]);
+  table.rows.push(['Deals Associated', formatNumber(dealStats.associatedCount)]);
+  table.rows.push(['Deals DisAssociated', formatNumber(dealStats.disassociatedCount)]);
 
-  table.rows.push(['Contacts Created', formatNumber(engine.contactManager.createdCount)]);
-  table.rows.push(['Contacts Updated', formatNumber(engine.contactManager.updatedCount)]);
-  table.rows.push(['Contacts Associated', formatNumber(engine.contactManager.associatedCount)]);
-  table.rows.push(['Contacts Disassociated', formatNumber(engine.contactManager.disassociatedCount)]);
+  table.rows.push(['Contacts Created', formatNumber(contactStats.createdCount)]);
+  table.rows.push(['Contacts Updated', formatNumber(contactStats.updatedCount)]);
+  table.rows.push(['Contacts Associated', formatNumber(contactStats.associatedCount)]);
+  table.rows.push(['Contacts Disassociated', formatNumber(contactStats.disassociatedCount)]);
 
-  table.rows.push(['Companies Updated', formatNumber(engine.companyManager.updatedCount)]);
+  table.rows.push(['Companies Updated', formatNumber(companyStats.updatedCount)]);
 
   for (const row of table.eachRow()) {
     log.info('Summary', '  ' + row);
