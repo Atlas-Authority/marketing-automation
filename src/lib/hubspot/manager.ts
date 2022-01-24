@@ -60,18 +60,13 @@ export abstract class EntityManager<
         const me = this.get(meId);
         if (!me) throw new Error(`Couldn't find kind=${this.kind} id=${meId}`);
 
-        const { toKind, youId } = this.getAssocInfo(rawAssoc);
+        const [toKind, youId] = rawAssoc.split(':') as [EntityKind, string];
         const you = managers[`${toKind}Manager`].get(youId);
         if (!you) throw new Error(`Couldn't find kind=${toKind} id=${youId}`);
 
         me.addAssociation(you, { firstSide: true, initial: true });
       }
     }
-  }
-
-  private getAssocInfo(a: RelativeAssociation) {
-    const [kind, id] = a.split(':');
-    return { toKind: kind as EntityKind, youId: id };
   }
 
   public create(data: D) {
