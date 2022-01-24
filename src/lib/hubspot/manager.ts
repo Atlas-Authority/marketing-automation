@@ -102,7 +102,7 @@ export abstract class EntityManager<
   }
 
   public getPrintableChanges() {
-    const entitiesWithChanges = this.entities.map(e => ({ id: e.id, properties: this.getChangedProperties(e) }));
+    const entitiesWithChanges = this.entities.map(e => ({ id: e.id, properties: e.getPropertyChanges() }));
     const toSyncProperties = entitiesWithChanges.filter(({ properties }) => Object.keys(properties).length > 0);
 
     const upAssociations = new Set(this.entityAdapter.associations
@@ -131,7 +131,7 @@ export abstract class EntityManager<
   }
 
   private async syncUpAllEntitiesProperties(uploader: HubspotUploader) {
-    const entitiesWithChanges = this.entities.map(e => ({ e, changes: this.getChangedProperties(e) }));
+    const entitiesWithChanges = this.entities.map(e => ({ e, changes: e.getPropertyChanges() }));
     const toSync = entitiesWithChanges.filter(({ changes }) => Object.keys(changes).length > 0);
 
     const toCreate = toSync.filter(({ e }) => e.id === undefined);
@@ -233,17 +233,6 @@ export abstract class EntityManager<
     for (const changes of toSync) {
       changes.from.applyAssociationChanges();
     }
-  }
-
-  private getChangedProperties(e: E) {
-    const properties: Record<string, string> = {};
-    for (const [k, v] of Object.entries(e.getPropertyChanges())) {
-      const spec = this.entityAdapter.data[k];
-      if (spec.property) {
-        properties[spec.property] = spec.up(v);
-      }
-    }
-    return properties;
   }
 
   protected makeIndex(keysFor: (e: E) => string[], deps: (keyof D)[]): (key: string) => E | undefined {

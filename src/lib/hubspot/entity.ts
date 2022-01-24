@@ -85,8 +85,16 @@ export abstract class Entity<
   }
 
   public getPropertyChanges() {
-    if (this.id === undefined) return this._data;
-    return this.newData;
+    const data = (this.id === undefined) ? this._data : this.newData;
+    const properties: Record<string, string> = {};
+    for (const [k, v] of Object.entries(data)) {
+      const spec = this.adapter.data[k];
+      if (spec.property) {
+        properties[spec.property] = spec.up(v);
+      }
+    }
+    return properties;
+
   }
 
   public applyPropertyChanges() {
