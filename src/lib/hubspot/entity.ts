@@ -10,16 +10,12 @@ export abstract class Entity<
   C extends Record<string, any>>
 {
 
-  public id?: string;
+  public id: string | null;
 
-  /** The most recently saved props, or all unsaved props */
-  private _data: D;
-  /** Contains only new changes, and only when an entity is saved */
-  private newData: Partial<D> = {};
+  private _oldData: D = Object.create(null);
+  private newData: D = Object.create(null);
 
-  /** The associations this was created with, whether an existing or new entity */
-  private assocs = new Set<Entity<any, any>>();
-  /** A copy of assocs, which all updates act on, whether an existing or new entity */
+  private oldAssocs = new Set<Entity<any, any>>();
   private newAssocs = new Set<Entity<any, any>>();
 
   public readonly data: D;
@@ -28,18 +24,17 @@ export abstract class Entity<
   public constructor(
     id: string | null,
     public adapter: EntityAdapter<D, C>,
-    data: D,
+    oldData: Partial<D>,
+    newData: D,
     public computed: C,
     private indexer: Indexer<D>,
   ) {
-    if (id) this.id = id;
-    this._data = data;
+    this.id = id;
+    Object.assign(this._oldData, oldData);
+    Object.assign(this.newData, newData);
 
     type K = keyof D;
-    this.data = new Proxy(data, {
-      get: (_target, _key) => {
-        return this.get(_key as K);
-      },
+    this.data = new Proxy(this.newData, {
       set: (_target, _key, _val) => {
         this.set(_key as K, _val as D[K]);
         return true;
@@ -54,52 +49,34 @@ export abstract class Entity<
 
   // Properties
 
-  private get<K extends keyof D>(key: K) {
-    if (this.id === undefined) return this._data[key];
-    if (key in this.newData) return this.newData[key];
-    return this._data[key];
-  }
-
   private set<K extends keyof D>(key: K, val: D[K]) {
     this.indexer.removeIndexesFor(key, this);
-
-    if (this.id === undefined) {
-      this._data[key] = val;
-      this.indexer.addIndexesFor(key, val, this);
-    }
-    else {
-      const oldVal = this._data[key];
-      if (oldVal === val) {
-        delete this.newData[key];
-      }
-      else {
-        this.newData[key] = val;
-      }
-    }
-
+    this.newData[key] = val;
     this.indexer.addIndexesFor(key, val, this);
   }
 
   public hasPropertyChanges() {
-    return this.id === undefined || Object.keys(this.newData).length > 0;
+    return Object.keys(this.getPropertyChanges()).length > 0;
   }
 
   public getPropertyChanges() {
-    const data = (this.id === undefined) ? this._data : this.newData;
-    const properties: Record<string, string> = {};
-    for (const [k, v] of Object.entries(data)) {
+    const upProperties: Partial<{ [K in keyof D]: string }> = Object.create(null);
+    for (const [k, v] of Object.entries(this.newData)) {
+      if (this.newData[k] === this._oldData[k]) continue;
+
       const spec = this.adapter.data[k];
       if (spec.property) {
-        properties[spec.property] = spec.up(v);
+        const upKey = spec.property as keyof D;
+        const upVal = spec.up(v);
+        upProperties[upKey] = upVal;
       }
     }
-    return properties;
+    return upProperties;
 
   }
 
   public applyPropertyChanges() {
-    Object.assign(this._data, this.newData);
-    this.newData = {};
+    Object.assign(this._oldData, this.newData);
   }
 
   // Associations
@@ -116,7 +93,7 @@ export abstract class Entity<
 
   /** Don't use directly; use deal.contacts.add(c) etc. */
   public addAssociation(entity: Entity<any, any>, meta: { firstSide: boolean, initial: boolean }) {
-    if (meta.initial) this.assocs.add(entity);
+    if (meta.initial) this.oldAssocs.add(entity);
     this.newAssocs.add(entity);
 
     if (meta.firstSide) entity.addAssociation(this, { firstSide: false, initial: meta.initial });
@@ -146,14 +123,14 @@ export abstract class Entity<
 
   public hasAssociationChanges() {
     return (
-      [...this.assocs].some(e => !this.newAssocs.has(e)) ||
-      [...this.newAssocs].some(e => !this.assocs.has(e))
+      [...this.oldAssocs].some(e => !this.newAssocs.has(e)) ||
+      [...this.newAssocs].some(e => !this.oldAssocs.has(e))
     );
   }
 
   public getAssociationChanges() {
-    const toAdd = [...this.newAssocs].filter(e => !this.assocs.has(e));
-    const toDel = [...this.assocs].filter(e => !this.newAssocs.has(e));
+    const toAdd = [...this.newAssocs].filter(e => !this.oldAssocs.has(e));
+    const toDel = [...this.oldAssocs].filter(e => !this.newAssocs.has(e));
     return [
       ...toAdd.map(e => ({ op: 'add', other: e })),
       ...toDel.map(e => ({ op: 'del', other: e })),
@@ -161,7 +138,7 @@ export abstract class Entity<
   }
 
   public applyAssociationChanges() {
-    this.assocs = new Set(this.newAssocs);
+    this.oldAssocs = new Set(this.newAssocs);
   }
 
 }
