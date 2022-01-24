@@ -35,9 +35,9 @@ export function printSummary(engine: Engine) {
 
   const table = new Table([{}, { align: 'right' }]);
 
-  const dealStats = engine.dealManager.getChangeStats();
-  const contactStats = engine.contactManager.getChangeStats();
-  const companyStats = engine.companyManager.getChangeStats();
+  const dealChanges = engine.dealManager.getPrintableChanges();
+  const contactChanges = engine.contactManager.getPrintableChanges();
+  const companyChanges = engine.companyManager.getPrintableChanges();
 
   table.rows.push(['# Total Deals', formatNumber(deals.length)]);
   table.rows.push(['$ Total Deals', formatMoney(sumDeals(deals))]);
@@ -45,33 +45,33 @@ export function printSummary(engine: Engine) {
   table.rows.push(['$ Total Deals Lost', formatMoney(sumDeals(deals.filter(d => d.isLost)))]);
   table.rows.push(['$ Total Deals Eval', formatMoney(sumDeals(deals.filter(d => d.isEval())))]);
 
-  table.rows.push(['Deals Created', formatNumber(dealStats.created.length)]);
-  table.rows.push(['Deals Updated', formatNumber(dealStats.updated.length)]);
-  table.rows.push(['Deals Associated', formatNumber(dealStats.associationsToCreate.length)]);
-  table.rows.push(['Deals DisAssociated', formatNumber(dealStats.associationsToDelete.length)]);
+  table.rows.push(['Deals Created', formatNumber(dealChanges.created.length)]);
+  table.rows.push(['Deals Updated', formatNumber(dealChanges.updated.length)]);
+  table.rows.push(['Deals Associated', formatNumber(dealChanges.associationsToCreate.length)]);
+  table.rows.push(['Deals DisAssociated', formatNumber(dealChanges.associationsToDelete.length)]);
 
-  table.rows.push(['Contacts Created', formatNumber(contactStats.created.length)]);
-  table.rows.push(['Contacts Updated', formatNumber(contactStats.updated.length)]);
-  table.rows.push(['Contacts Associated', formatNumber(contactStats.associationsToCreate.length)]);
-  table.rows.push(['Contacts Disassociated', formatNumber(contactStats.associationsToDelete.length)]);
+  table.rows.push(['Contacts Created', formatNumber(contactChanges.created.length)]);
+  table.rows.push(['Contacts Updated', formatNumber(contactChanges.updated.length)]);
+  table.rows.push(['Contacts Associated', formatNumber(contactChanges.associationsToCreate.length)]);
+  table.rows.push(['Contacts Disassociated', formatNumber(contactChanges.associationsToDelete.length)]);
 
-  table.rows.push(['Companies Updated', formatNumber(companyStats.updated.length)]);
+  table.rows.push(['Companies Updated', formatNumber(companyChanges.updated.length)]);
 
   for (const row of table.eachRow()) {
     log.info('Summary', '  ' + row);
   }
 
-  log.verbose('Summary', 'Deals Created', dealStats.created);
-  log.verbose('Summary', 'Deals Updated', dealStats.updated);
-  log.verbose('Summary', 'Deal Associations to Create', dealStats.associationsToCreate);
-  log.verbose('Summary', 'Deal Associations to Delete', dealStats.associationsToDelete);
+  log.verbose('Summary', 'Deals Created', dealChanges.created);
+  log.verbose('Summary', 'Deals Updated', dealChanges.updated);
+  log.verbose('Summary', 'Deal Associations to Create', dealChanges.associationsToCreate);
+  log.verbose('Summary', 'Deal Associations to Delete', dealChanges.associationsToDelete);
 
-  log.verbose('Summary', 'Contacts Created', contactStats.created);
-  log.verbose('Summary', 'Contacts Updated', contactStats.updated);
-  log.verbose('Summary', 'Contact Associations to Create', contactStats.associationsToCreate);
-  log.verbose('Summary', 'Contact Associations to Delete', contactStats.associationsToDelete);
+  log.verbose('Summary', 'Contacts Created', contactChanges.created);
+  log.verbose('Summary', 'Contacts Updated', contactChanges.updated);
+  log.verbose('Summary', 'Contact Associations to Create', contactChanges.associationsToCreate);
+  log.verbose('Summary', 'Contact Associations to Delete', contactChanges.associationsToDelete);
 
-  log.verbose('Summary', 'Companies Updated', companyStats.updated);
+  log.verbose('Summary', 'Companies Updated', companyChanges.updated);
 
   engine.tallier.less('Deal sum', sumDeals(deals));
 

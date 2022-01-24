@@ -102,7 +102,7 @@ export abstract class EntityManager<
     }
   }
 
-  public getChangeStats() {
+  public getPrintableChanges() {
     const entitiesWithChanges = this.entities.map(e => ({ id: e.id, properties: this.getChangedProperties(e) }));
     const toSyncProperties = entitiesWithChanges.filter(({ properties }) => Object.keys(properties).length > 0);
 
