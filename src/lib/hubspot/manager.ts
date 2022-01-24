@@ -91,35 +91,6 @@ export abstract class EntityManager<
     return new HubspotUploader(this.entities, this.entityAdapter);
   }
 
-  public getPrintableChanges() {
-    const entitiesWithChanges = this.entities.map(e => ({ id: e.id, properties: e.getPropertyChanges() }));
-    const toSyncProperties = entitiesWithChanges.filter(({ properties }) => Object.keys(properties).length > 0);
-
-    const upAssociations = new Set(this.entityAdapter.associations
-      .filter(([kind, dir]) => dir.includes('up'))
-      .map(([kind, dir]) => kind));
-
-    const toSyncAssociations = (this.entities
-      .filter(entity => entity.hasAssociationChanges())
-      .flatMap(entity => entity.getAssociationChanges()
-        .map(({ op, other }) => ({
-          op,
-          from: entity.id,
-          to: {
-            kind: other.adapter.kind,
-            id: other.id,
-          },
-        })))
-      .filter(assoc => upAssociations.has(assoc.to.kind)));
-
-    return {
-      created: toSyncProperties.filter(({ id }) => id === undefined),
-      updated: toSyncProperties.filter(({ id }) => id !== undefined),
-      associationsToCreate: toSyncAssociations.filter(assoc => assoc.op === 'add').map(({ from, to }) => ({ from, to })),
-      associationsToDelete: toSyncAssociations.filter(assoc => assoc.op === 'del').map(({ from, to }) => ({ from, to })),
-    };
-  }
-
   protected makeIndex(keysFor: (e: E) => string[], deps: (keyof D)[]): (key: string) => E | undefined {
     const index = new Index(keysFor);
     this.indexes.push(index);

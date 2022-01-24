@@ -29,21 +29,21 @@ export function printSummary(engine: Engine) {
     engine.tallier.less('Over-accounted: Duplicate deals', -dupTotal);
   }
 
-  const dealChanges = engine.dealManager.getPrintableChanges();
-  const contactChanges = engine.contactManager.getPrintableChanges();
-  const companyChanges = engine.companyManager.getPrintableChanges();
+  // const dealChanges = engine.dealManager.getPrintableChanges();
+  // const contactChanges = engine.contactManager.getPrintableChanges();
+  // const companyChanges = engine.companyManager.getPrintableChanges();
 
-  log.verbose('Summary', 'Deals Created', dealChanges.created);
-  log.verbose('Summary', 'Deals Updated', dealChanges.updated);
-  log.verbose('Summary', 'Deal Associations to Create', dealChanges.associationsToCreate);
-  log.verbose('Summary', 'Deal Associations to Delete', dealChanges.associationsToDelete);
+  // log.verbose('Summary', 'Deals Created', dealChanges.created);
+  // log.verbose('Summary', 'Deals Updated', dealChanges.updated);
+  // log.verbose('Summary', 'Deal Associations to Create', dealChanges.associationsToCreate);
+  // log.verbose('Summary', 'Deal Associations to Delete', dealChanges.associationsToDelete);
 
-  log.verbose('Summary', 'Contacts Created', contactChanges.created);
-  log.verbose('Summary', 'Contacts Updated', contactChanges.updated);
-  log.verbose('Summary', 'Contact Associations to Create', contactChanges.associationsToCreate);
-  log.verbose('Summary', 'Contact Associations to Delete', contactChanges.associationsToDelete);
+  // log.verbose('Summary', 'Contacts Created', contactChanges.created);
+  // log.verbose('Summary', 'Contacts Updated', contactChanges.updated);
+  // log.verbose('Summary', 'Contact Associations to Create', contactChanges.associationsToCreate);
+  // log.verbose('Summary', 'Contact Associations to Delete', contactChanges.associationsToDelete);
 
-  log.verbose('Summary', 'Companies Updated', companyChanges.updated);
+  // log.verbose('Summary', 'Companies Updated', companyChanges.updated);
 
   const deals = engine.dealManager.getArray();
 
@@ -55,17 +55,17 @@ export function printSummary(engine: Engine) {
   table.rows.push(['$ Total Deals Lost', formatMoney(sumDeals(deals.filter(d => d.isLost)))]);
   table.rows.push(['$ Total Deals Eval', formatMoney(sumDeals(deals.filter(d => d.isEval())))]);
 
-  table.rows.push(['Deals Created', formatNumber(dealChanges.created.length)]);
-  table.rows.push(['Deals Updated', formatNumber(dealChanges.updated.length)]);
-  table.rows.push(['Deals Associated', formatNumber(dealChanges.associationsToCreate.length)]);
-  table.rows.push(['Deals DisAssociated', formatNumber(dealChanges.associationsToDelete.length)]);
+  // table.rows.push(['Deals Created', formatNumber(dealChanges.created.length)]);
+  // table.rows.push(['Deals Updated', formatNumber(dealChanges.updated.length)]);
+  // table.rows.push(['Deals Associated', formatNumber(dealChanges.associationsToCreate.length)]);
+  // table.rows.push(['Deals DisAssociated', formatNumber(dealChanges.associationsToDelete.length)]);
 
-  table.rows.push(['Contacts Created', formatNumber(contactChanges.created.length)]);
-  table.rows.push(['Contacts Updated', formatNumber(contactChanges.updated.length)]);
-  table.rows.push(['Contacts Associated', formatNumber(contactChanges.associationsToCreate.length)]);
-  table.rows.push(['Contacts Disassociated', formatNumber(contactChanges.associationsToDelete.length)]);
+  // table.rows.push(['Contacts Created', formatNumber(contactChanges.created.length)]);
+  // table.rows.push(['Contacts Updated', formatNumber(contactChanges.updated.length)]);
+  // table.rows.push(['Contacts Associated', formatNumber(contactChanges.associationsToCreate.length)]);
+  // table.rows.push(['Contacts Disassociated', formatNumber(contactChanges.associationsToDelete.length)]);
 
-  table.rows.push(['Companies Updated', formatNumber(companyChanges.updated.length)]);
+  // table.rows.push(['Companies Updated', formatNumber(companyChanges.updated.length)]);
 
   log.info('Summary', 'Results of this run:');
   for (const row of table.eachRow()) {
