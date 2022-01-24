@@ -1,5 +1,4 @@
 import { hubspotContactConfigFromENV, hubspotDealConfigFromENV } from "../parameters/env-config";
-import { HubspotUploader } from "./interfaces";
 import { CompanyManager } from "./model/company";
 import { ContactManager, HubspotContactConfig } from "./model/contact";
 import { DealManager, HubspotDealConfig } from "./model/deal";
@@ -35,14 +34,18 @@ export class Hubspot {
     public companyManager: CompanyManager,
   ) { }
 
-  public async upsyncChanges(api: HubspotUploader) {
-    await this.dealManager.syncUpAllEntities(api);
-    await this.contactManager.syncUpAllEntities(api);
-    await this.companyManager.syncUpAllEntities(api);
+  public async upsyncChangesToHubspot() {
+    const dealUploader = this.dealManager.makeUploader();
+    const contactUploader = this.contactManager.makeUploader();
+    const companyUploader = this.companyManager.makeUploader();
 
-    await this.dealManager.syncUpAllAssociations(api);
-    await this.contactManager.syncUpAllAssociations(api);
-    await this.companyManager.syncUpAllAssociations(api);
+    await dealUploader.syncUpAllEntitiesProperties();
+    await contactUploader.syncUpAllEntitiesProperties();
+    await companyUploader.syncUpAllEntitiesProperties();
+
+    await dealUploader.syncUpAllAssociations();
+    await contactUploader.syncUpAllAssociations();
+    await companyUploader.syncUpAllAssociations();
   }
 
 }

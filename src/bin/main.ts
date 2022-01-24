@@ -5,7 +5,6 @@ import { downloadAllData } from '../lib/engine/download';
 import { Engine } from "../lib/engine/engine";
 import { SlackNotifier } from '../lib/engine/slack-notifier';
 import { Hubspot } from '../lib/hubspot';
-import HubspotAPI from '../lib/hubspot/api';
 import log from '../lib/log/logger';
 import { getCliArgs } from '../lib/parameters/cli-args';
 import { engineConfigFromENV, runLoopConfigFromENV } from "../lib/parameters/env-config";
@@ -34,7 +33,7 @@ run(runLoopConfig, {
     engine.run(data, null);
 
     log.info('Main', 'Upsyncing changes to HubSpot');
-    await hubspot.upsyncChanges(new HubspotAPI());
+    await hubspot.upsyncChangesToHubspot();
   },
 
   async failed(errors) {

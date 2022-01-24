@@ -4,7 +4,7 @@ import log from '../log/logger';
 import { hubspotCredsFromENV } from '../parameters/env-config';
 import { KnownError } from '../util/errors';
 import { batchesOf, isPresent } from '../util/helpers';
-import { Association, EntityAdapter, EntityKind, ExistingEntity, HubspotUploader, NewEntity, RelativeAssociation } from './interfaces';
+import { Association, EntityAdapter, EntityKind, ExistingEntity, NewEntity, RelativeAssociation } from './interfaces';
 import { typedEntries } from './manager';
 
 export type HubspotCreds = {
@@ -13,7 +13,7 @@ export type HubspotCreds = {
   apiKey: string,
 };
 
-export default class HubspotAPI implements HubspotUploader {
+export default class HubspotAPI {
 
   private client: hubspot.Client;
 

@@ -52,10 +52,3 @@ export interface EntityAdapter<D, C> {
   } },
 
 }
-
-export interface HubspotUploader {
-  createEntities(kind: EntityKind, entities: NewEntity[]): Promise<ExistingEntity[]>;
-  updateEntities(kind: EntityKind, entities: ExistingEntity[]): Promise<ExistingEntity[]>;
-  createAssociations(fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void>;
-  deleteAssociations(fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void>;
-}
