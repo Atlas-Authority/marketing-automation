@@ -4,10 +4,10 @@ import { CompanyManager } from "./model/company";
 import { ContactManager, HubspotContactConfig } from "./model/contact";
 import { DealManager, HubspotDealConfig } from "./model/deal";
 
-export class HubspotService {
+export class Hubspot {
 
   public static live() {
-    return new HubspotService(
+    return new Hubspot(
       new DealManager(hubspotDealConfigFromENV()),
       new ContactManager(hubspotContactConfigFromENV()),
       new CompanyManager(),
@@ -22,7 +22,7 @@ export class HubspotService {
   }
 
   public static memory(config?: { deal?: HubspotDealConfig, contact?: HubspotContactConfig }) {
-    return new HubspotService(
+    return new Hubspot(
       new DealManager(config?.deal ?? {}),
       new ContactManager(config?.contact ?? {}),
       new CompanyManager(),

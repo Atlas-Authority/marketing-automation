@@ -6,7 +6,7 @@ import { DealGenerator } from '../lib/engine/deal-generator/generate-deals';
 import { abbrActionDetails, abbrEventDetails } from '../lib/engine/deal-generator/test/utils';
 import { Engine } from "../lib/engine/engine";
 import { RelatedLicenseSet } from '../lib/engine/license-matching/license-grouper';
-import { HubspotService } from '../lib/hubspot/service';
+import { Hubspot } from '../lib/hubspot';
 import { License } from '../lib/marketplace/model/license';
 import { Transaction } from '../lib/marketplace/model/transaction';
 import { engineConfigFromENV } from '../lib/parameters/env-config';
@@ -29,7 +29,7 @@ function main(template: string, testId: string) {
 
   const group = getRedactedMatchGroup(ids);
 
-  const engine = new Engine(HubspotService.memory(), null);
+  const engine = new Engine(Hubspot.memory(), null);
 
   engine.licenses.length = 0;
   engine.licenses.push(...group);
@@ -53,7 +53,7 @@ function format(o: any, breakLength = 50) {
 }
 
 function getRedactedMatchGroup(ids: [string, string[]][]) {
-  const engine = new Engine(HubspotService.memory(), engineConfigFromENV());
+  const engine = new Engine(Hubspot.memory(), engineConfigFromENV());
   const data = new DataSet(DataDir.root.subdir('in')).load();
   engine.importData(data);
 

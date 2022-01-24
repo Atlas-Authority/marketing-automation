@@ -4,8 +4,8 @@ import { DataSet } from '../lib/data/set';
 import { downloadAllData } from '../lib/engine/download';
 import { Engine } from "../lib/engine/engine";
 import { SlackNotifier } from '../lib/engine/slack-notifier';
+import { Hubspot } from '../lib/hubspot';
 import HubspotAPI from '../lib/hubspot/api';
-import { HubspotService } from '../lib/hubspot/service';
 import log from '../lib/log/logger';
 import { getCliArgs } from '../lib/parameters/cli-args';
 import { engineConfigFromENV, runLoopConfigFromENV } from "../lib/parameters/env-config";
@@ -25,7 +25,7 @@ run(runLoopConfig, {
 
   async work() {
     log.info('Main', 'Downloading data');
-    const hubspot = HubspotService.live();
+    const hubspot = Hubspot.live();
     await downloadAllData(dataSet, hubspot);
 
     log.info('Main', 'Running engine');

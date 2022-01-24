@@ -1,10 +1,10 @@
 import chalk from "chalk";
 import DataDir from "../data/dir";
 import { Data } from "../data/set";
+import { Hubspot } from "../hubspot";
 import { CompanyManager } from "../hubspot/model/company";
 import { ContactManager } from "../hubspot/model/contact";
 import { DealManager } from "../hubspot/model/deal";
-import { HubspotService } from "../hubspot/service";
 import log from "../log/logger";
 import { Table } from "../log/table";
 import { Tallier } from "../log/tallier";
@@ -58,7 +58,7 @@ export class Engine {
   public contactManager: ContactManager;
   public companyManager: CompanyManager;
 
-  public constructor(hubspotService: HubspotService, config: EngineConfig | null) {
+  public constructor(hubspotService: Hubspot, config: EngineConfig | null) {
     this.dealManager = hubspotService.dealManager;
     this.contactManager = hubspotService.contactManager;
     this.companyManager = hubspotService.companyManager;
