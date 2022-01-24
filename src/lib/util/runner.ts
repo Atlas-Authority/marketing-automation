@@ -6,7 +6,7 @@ export interface RunLoopConfig {
   retryTimes: number,
 };
 
-export default async function run(loopConfig: RunLoopConfig, { work, failed }: {
+export default function run(loopConfig: RunLoopConfig, { work, failed }: {
   work: () => Promise<void>,
   failed: (errors: Error[]) => Promise<void>,
 }) {
