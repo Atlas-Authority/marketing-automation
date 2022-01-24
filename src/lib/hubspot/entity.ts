@@ -36,7 +36,11 @@ export abstract class Entity<
     type K = keyof D;
     this.data = new Proxy(this.newData, {
       set: (_target, _key, _val) => {
-        this.set(_key as K, _val as D[K]);
+        const key = _key as K;
+        const val = _val as D[K];
+        this.indexer.removeIndexesFor(key, this);
+        this.newData[key] = val;
+        this.indexer.addIndexesFor(key, val, this);
         return true;
       },
     });
@@ -48,12 +52,6 @@ export abstract class Entity<
   }
 
   // Properties
-
-  private set<K extends keyof D>(key: K, val: D[K]) {
-    this.indexer.removeIndexesFor(key, this);
-    this.newData[key] = val;
-    this.indexer.addIndexesFor(key, val, this);
-  }
 
   public hasPropertyChanges() {
     return Object.keys(this.getPropertyChanges()).length > 0;
