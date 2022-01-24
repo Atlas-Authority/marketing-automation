@@ -60,17 +60,16 @@ export abstract class Entity<
   public getPropertyChanges() {
     const upProperties: Partial<{ [K in keyof D]: string }> = Object.create(null);
     for (const [k, v] of Object.entries(this.newData)) {
-      if (this.newData[k] === this._oldData[k]) continue;
-
-      const spec = this.adapter.data[k];
-      if (spec.property) {
-        const upKey = spec.property as keyof D;
-        const upVal = spec.up(v);
-        upProperties[upKey] = upVal;
+      if (this.newData[k] !== this._oldData[k]) {
+        const spec = this.adapter.data[k];
+        if (spec.property) {
+          const upKey = spec.property as keyof D;
+          const upVal = spec.up(v);
+          upProperties[upKey] = upVal;
+        }
       }
     }
     return upProperties;
-
   }
 
   // Associations
