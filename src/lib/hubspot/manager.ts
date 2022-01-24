@@ -11,10 +11,6 @@ export abstract class EntityManager<
   E extends Entity<D, C>>
 {
 
-  public constructor(
-    private uploader: HubspotAPI | null,
-  ) { }
-
   protected abstract Entity: new (id: string | null, kind: EntityKind, data: D, computed: C, indexer: Indexer<D>) => E;
   protected abstract entityAdapter: EntityAdapter<D, C>;
   protected get kind(): EntityKind { return this.entityAdapter.kind; }
@@ -98,8 +94,8 @@ export abstract class EntityManager<
     return this.entities;
   }
 
-  public async syncUpAllEntities() {
-    await this.syncUpAllEntitiesProperties();
+  public async syncUpAllEntities(uploader: HubspotAPI) {
+    await this.syncUpAllEntitiesProperties(uploader);
     for (const index of this.indexes) {
       index.clear();
       index.addIndexesFor(this.entities);
@@ -137,9 +133,7 @@ export abstract class EntityManager<
     };
   }
 
-  private async syncUpAllEntitiesProperties() {
-    if (!this.uploader) return;
-
+  private async syncUpAllEntitiesProperties(uploader: HubspotAPI) {
     const entitiesWithChanges = this.entities.map(e => ({ e, changes: this.getChangedProperties(e) }));
     const toSync = entitiesWithChanges.filter(({ changes }) => Object.keys(changes).length > 0);
 
@@ -147,7 +141,7 @@ export abstract class EntityManager<
     const toUpdate = toSync.filter(({ e }) => e.id !== undefined);
 
     if (toCreate.length > 0) {
-      const results = await this.uploader.createEntities(
+      const results = await uploader.createEntities(
         this.kind,
         toCreate.map(({ changes }) => ({
           properties: changes,
@@ -187,7 +181,7 @@ export abstract class EntityManager<
     }
 
     if (toUpdate.length > 0) {
-      const results = await this.uploader.updateEntities(
+      const results = await uploader.updateEntities(
         this.kind,
         toUpdate.map(({ e, changes }) => ({
           id: e.guaranteedId(),
@@ -201,9 +195,7 @@ export abstract class EntityManager<
     }
   }
 
-  public async syncUpAllAssociations() {
-    if (!this.uploader) return;
-
+  public async syncUpAllAssociations(uploader: HubspotAPI) {
     const toSync = (this.entities
       .filter(e => e.hasAssociationChanges())
       .flatMap(e => e.getAssociationChanges()
@@ -228,13 +220,13 @@ export abstract class EntityManager<
       const toAdd = toSyncInKind.filter(changes => changes.op === 'add');
       const toDel = toSyncInKind.filter(changes => changes.op === 'del');
 
-      await this.uploader.createAssociations(
+      await uploader.createAssociations(
         this.kind,
         otherKind,
         toAdd.map(changes => changes.inputs),
       );
 
-      await this.uploader.deleteAssociations(
+      await uploader.deleteAssociations(
         this.kind,
         otherKind,
         toDel.map(changes => changes.inputs),

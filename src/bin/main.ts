@@ -4,6 +4,7 @@ import { DataSet } from '../lib/data/set';
 import { downloadAllData } from '../lib/engine/download';
 import { Engine } from "../lib/engine/engine";
 import { SlackNotifier } from '../lib/engine/slack-notifier';
+import HubspotAPI from '../lib/hubspot/api';
 import { HubspotService } from '../lib/hubspot/service';
 import log from '../lib/log/logger';
 import { getCliArgs } from '../lib/parameters/cli-args';
@@ -33,7 +34,8 @@ run(runLoopConfig, {
     engine.run(data, null);
 
     log.info('Main', 'Upsyncing changes to HubSpot');
-    await hubspot.upsyncChanges();
+    const api = new HubspotAPI();
+    await hubspot.upsyncChangesLive(api);
   },
 
   async failed(errors) {

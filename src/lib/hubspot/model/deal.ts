@@ -2,7 +2,6 @@ import { uniqueTransactionId } from "../../marketplace/model/transaction";
 import { hubspotAccountIdFromEnv } from "../../parameters/env-config";
 import { AttachableError } from "../../util/errors";
 import { isPresent } from "../../util/helpers";
-import HubspotAPI from "../api";
 import { Entity } from "../entity";
 import { DealStage, EntityAdapter, Pipeline } from "../interfaces";
 import { EntityManager } from "../manager";
@@ -274,11 +273,8 @@ export class DealManager extends EntityManager<DealData, DealComputed, Deal> {
 
   public duplicates = new Map<Deal, Deal[]>();
 
-  constructor(
-    uploader: HubspotAPI | null,
-    config: HubspotDealConfig,
-  ) {
-    super(uploader);
+  constructor(config: HubspotDealConfig) {
+    super();
     this.entityAdapter = makeAdapter(config);
   }
 

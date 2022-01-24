@@ -7,11 +7,10 @@ import { DealManager, HubspotDealConfig } from "./model/deal";
 export class HubspotService {
 
   public static live() {
-    const api = new HubspotAPI();
     return new HubspotService(
-      new DealManager(api, hubspotDealConfigFromENV()),
-      new ContactManager(api, hubspotContactConfigFromENV()),
-      new CompanyManager(api),
+      new DealManager(hubspotDealConfigFromENV()),
+      new ContactManager(hubspotContactConfigFromENV()),
+      new CompanyManager(),
     );
   }
 
@@ -24,9 +23,9 @@ export class HubspotService {
 
   public static memory(config?: { deal?: HubspotDealConfig, contact?: HubspotContactConfig }) {
     return new HubspotService(
-      new DealManager(null, config?.deal ?? {}),
-      new ContactManager(null, config?.contact ?? {}),
-      new CompanyManager(null),
+      new DealManager(config?.deal ?? {}),
+      new ContactManager(config?.contact ?? {}),
+      new CompanyManager(),
     );
   }
 
@@ -36,14 +35,14 @@ export class HubspotService {
     public companyManager: CompanyManager,
   ) { }
 
-  public async upsyncChanges() {
-    await this.dealManager.syncUpAllEntities();
-    await this.contactManager.syncUpAllEntities();
-    await this.companyManager.syncUpAllEntities();
+  public async upsyncChangesLive(api: HubspotAPI) {
+    await this.dealManager.syncUpAllEntities(api);
+    await this.contactManager.syncUpAllEntities(api);
+    await this.companyManager.syncUpAllEntities(api);
 
-    await this.dealManager.syncUpAllAssociations();
-    await this.contactManager.syncUpAllAssociations();
-    await this.companyManager.syncUpAllAssociations();
+    await this.dealManager.syncUpAllAssociations(api);
+    await this.contactManager.syncUpAllAssociations(api);
+    await this.companyManager.syncUpAllAssociations(api);
   }
 
 }

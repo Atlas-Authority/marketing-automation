@@ -1,6 +1,5 @@
 import { License } from "../../marketplace/model/license";
 import { Transaction } from "../../marketplace/model/transaction";
-import HubspotAPI from "../api";
 import { Entity } from "../entity";
 import { EntityAdapter } from "../interfaces";
 import { EntityManager } from "../manager";
@@ -174,11 +173,8 @@ export class ContactManager extends EntityManager<ContactData, ContactComputed, 
 
   public getByEmail = this.makeIndex(c => c.allEmails, ['email']);
 
-  constructor(
-    uploader: HubspotAPI | null,
-    config: HubspotContactConfig,
-  ) {
-    super(uploader);
+  constructor(config: HubspotContactConfig) {
+    super();
     this.entityAdapter = makeAdapter(config);
   }
 
