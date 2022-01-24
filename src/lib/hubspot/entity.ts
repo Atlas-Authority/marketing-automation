@@ -75,10 +75,6 @@ export abstract class Entity<
 
   }
 
-  public applyPropertyChanges() {
-    Object.assign(this._oldData, this.newData);
-  }
-
   // Associations
 
   protected makeDynamicAssociation<T extends Entity<any, any>>(kind: EntityKind) {
@@ -135,10 +131,6 @@ export abstract class Entity<
       ...toAdd.map(e => ({ op: 'add', other: e })),
       ...toDel.map(e => ({ op: 'del', other: e })),
     ] as { op: 'add' | 'del', other: Entity<any, any> }[];
-  }
-
-  public applyAssociationChanges() {
-    this.oldAssocs = new Set(this.newAssocs);
   }
 
 }

@@ -28,10 +28,6 @@ export class HubspotUploader<D extends Record<string, any>, C extends Record<str
         }))
       );
 
-      for (const { e } of toCreate) {
-        e.applyPropertyChanges();
-      }
-
       const identifiers = typedEntries(this.adapter.data).filter(([k, v]) => v.identifier);
 
       for (const { e } of toCreate) {
@@ -68,10 +64,6 @@ export class HubspotUploader<D extends Record<string, any>, C extends Record<str
           properties: changes,
         }))
       );
-
-      for (const { e } of toUpdate) {
-        e.applyPropertyChanges();
-      }
     }
   }
 
@@ -112,11 +104,6 @@ export class HubspotUploader<D extends Record<string, any>, C extends Record<str
         toDel.map(changes => changes.inputs),
       );
     }
-
-    for (const changes of toSync) {
-      changes.from.applyAssociationChanges();
-    }
   }
-
 
 }
