@@ -103,33 +103,31 @@ export abstract class EntityManager<
   }
 
   public getChangeStats() {
-    const entitiesWithChanges = this.entities.map(e => ({ e, changes: this.getChangedProperties(e) }));
-    const toSyncProperties = entitiesWithChanges.filter(({ changes }) => Object.keys(changes).length > 0);
+    const entitiesWithChanges = this.entities.map(e => ({ id: e.id, properties: this.getChangedProperties(e) }));
+    const toSyncProperties = entitiesWithChanges.filter(({ properties }) => Object.keys(properties).length > 0);
 
-    let associatedCount = 0;
-    let disassociatedCount = 0;
-
-    const toSyncAssociations = (this.entities
-      .filter(e => e.hasAssociationChanges())
-      .flatMap(e => e.getAssociationChanges()
-        .map(({ op, other }) => ({ op, from: e, to: other }))));
-
-    const upAssociations = (this.entityAdapter.associations
+    const upAssociations = new Set(this.entityAdapter.associations
       .filter(([kind, dir]) => dir.includes('up'))
       .map(([kind, dir]) => kind));
 
-    for (const otherKind of upAssociations) {
-      const toSyncInKind = toSyncAssociations.filter(changes => changes.to.kind === otherKind);
-
-      associatedCount += toSyncInKind.filter(changes => changes.op === 'add').length;
-      disassociatedCount += toSyncInKind.filter(changes => changes.op === 'del').length;
-    }
+    const toSyncAssociations = (this.entities
+      .filter(entity => entity.hasAssociationChanges())
+      .flatMap(entity => entity.getAssociationChanges()
+        .map(({ op, other }) => ({
+          op,
+          from: entity.id,
+          to: {
+            kind: other.kind,
+            id: other.id,
+          },
+        })))
+      .filter(assoc => upAssociations.has(assoc.to.kind)));
 
     return {
-      createdCount: toSyncProperties.filter(({ e }) => e.id === undefined).length,
-      updatedCount: toSyncProperties.filter(({ e }) => e.id !== undefined).length,
-      associatedCount,
-      disassociatedCount,
+      created: toSyncProperties.filter(({ id }) => id === undefined),
+      updated: toSyncProperties.filter(({ id }) => id !== undefined),
+      associationsToCreate: toSyncAssociations.filter(assoc => assoc.op === 'add').map(({ from, to }) => ({ from, to })),
+      associationsToDelete: toSyncAssociations.filter(assoc => assoc.op === 'del').map(({ from, to }) => ({ from, to })),
     };
   }
 
