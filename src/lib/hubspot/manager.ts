@@ -116,7 +116,7 @@ export abstract class EntityManager<
           op,
           from: entity.id,
           to: {
-            kind: other.kind,
+            kind: other.adapter.kind,
             id: other.id,
           },
         })))
@@ -204,7 +204,7 @@ export abstract class EntityManager<
 
     for (const otherKind of upAssociations) {
       const toSyncInKind = (toSync
-        .filter(changes => changes.to.kind === otherKind)
+        .filter(changes => changes.to.adapter.kind === otherKind)
         .map(changes => ({
           ...changes,
           inputs: {

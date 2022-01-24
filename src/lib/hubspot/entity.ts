@@ -1,4 +1,4 @@
-import { EntityKind } from "./interfaces";
+import { EntityAdapter, EntityKind } from "./interfaces";
 
 export interface Indexer<D> {
   removeIndexesFor<K extends keyof D>(key: K, entity: Entity<D, any>): void;
@@ -27,7 +27,7 @@ export abstract class Entity<
   /** Don't call directly; use manager.create() */
   public constructor(
     id: string | null,
-    public kind: EntityKind,
+    public adapter: EntityAdapter<D, C>,
     data: D,
     public computed: C,
     private indexer: Indexer<D>,
@@ -125,12 +125,12 @@ export abstract class Entity<
   }
 
   private getAssociations(kind: EntityKind) {
-    return [...this.newAssocs].filter(e => e.kind === kind);
+    return [...this.newAssocs].filter(e => e.adapter.kind === kind);
   }
 
   private clearAssociations(kind: EntityKind) {
     for (const e of this.newAssocs) {
-      if (e.kind === kind) {
+      if (e.adapter.kind === kind) {
         this.newAssocs.delete(e);
       }
     }
