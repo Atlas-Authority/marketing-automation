@@ -1,8 +1,8 @@
 import { hubspotContactConfigFromENV, hubspotDealConfigFromENV } from "../parameters/env-config";
 import HubspotAPI from "./api";
 import { CompanyManager } from "./model/company";
-import { ContactManager } from "./model/contact";
-import { DealManager } from "./model/deal";
+import { ContactManager, HubspotContactConfig } from "./model/contact";
+import { DealManager, HubspotDealConfig } from "./model/deal";
 
 export class HubspotService {
 
@@ -15,10 +15,10 @@ export class HubspotService {
     );
   }
 
-  public static memory() {
+  public static memory(config?: { deal?: HubspotDealConfig, contact?: HubspotContactConfig }) {
     return new HubspotService(
-      new DealManager(null, {}),
-      new ContactManager(null, {}),
+      new DealManager(null, config?.deal ?? {}),
+      new ContactManager(null, config?.contact ?? {}),
       new CompanyManager(null),
     );
   }
