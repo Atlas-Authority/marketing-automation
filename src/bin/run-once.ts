@@ -11,7 +11,7 @@ import { engineConfigFromENV } from '../lib/parameters/env-config';
 const { savelogs } = getCliArgs('savelogs');
 
 const dataDir = DataDir.root.subdir('in');
-const logDir = savelogs ? dataDir.subdir(savelogs) : null;
+const logDir = dataDir.subdir(`once-${Date.now()}`);
 
 const log = new ConsoleLogger();
 
@@ -23,4 +23,4 @@ const data = new DataSet(dataDir).load();
 
 engine.run(data, logDir);
 
-logHubspotResults(hubspot, dataDir.subdir('results').file('hubspot-out.txt'));
+logHubspotResults(hubspot, logDir.file('hubspot-out.txt'));

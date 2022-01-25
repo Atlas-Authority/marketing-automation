@@ -15,7 +15,8 @@ const { savelogs } = getCliArgs('savelogs');
 const dataDir = DataDir.root.subdir('in');
 
 let i = 0;
-const nextDataDir = () => savelogs ? dataDir.subdir(`${savelogs}-${++i}`) : null;
+const timestamp = Date.now();
+const nextLogDir = () => dataDir.subdir(`3x-${timestamp}-${++i}`);
 
 const data = new DataSet(dataDir).load();
 
@@ -32,9 +33,9 @@ function runEngine() {
   const log = new ConsoleLogger();
   const hubspot = Hubspot.memoryFromENV(log);
   const engine = new Engine(log, hubspot, engineConfigFromENV());
-  const logDir = nextDataDir();
+  const logDir = nextLogDir();
   engine.run(data, logDir);
-  if (logDir) logHubspotResults(hubspot, logDir.file('hubspot-out.txt'));
+  logHubspotResults(hubspot, logDir.file('hubspot-out.txt'));
   return hubspot;
 }
 
