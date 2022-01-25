@@ -9,7 +9,7 @@ import { isPresent, sorter } from "../lib/util/helpers";
 const engine = new Engine(null, Hubspot.memory(null), engineConfigFromENV());
 const dataDir = DataDir.root.subdir('in');
 const data = new DataSet(dataDir).load();
-// engine.importData(data);
+engine.run(data);
 
 const attributions = (engine
   .licenses

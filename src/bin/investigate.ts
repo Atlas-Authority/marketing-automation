@@ -8,5 +8,5 @@ import { engineConfigFromENV } from '../lib/parameters/env-config';
 
 const engine = new Engine(null, Hubspot.memory(null), engineConfigFromENV());
 const data = new DataSet(DataDir.root.subdir('in')).load();
-// engine.importData(data);
+engine.run(data);
 printSummary(null, engine);
