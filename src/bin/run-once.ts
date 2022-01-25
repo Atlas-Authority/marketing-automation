@@ -23,4 +23,4 @@ const data = new DataSet(dataDir).load();
 
 engine.run(data, logDir);
 
-logHubspotResults(hubspot, dataDir.file('hubspot-out.txt'));
+if (logDir) logHubspotResults(hubspot, logDir.file('hubspot-out.txt'));
