@@ -26,7 +26,6 @@ export abstract class Entity<
     public adapter: EntityAdapter<D, C>,
     protected downloadedData: Record<string, string>,
     data: D,
-    public computed: C,
     private indexer: Indexer<D>,
   ) {
     this.id = id;

@@ -28,7 +28,7 @@ export default class HubspotAPI {
 
     const apiProperties = [
       ...typedEntries(entityAdapter.data).map(([k, v]) => v.property).filter(isPresent),
-      ...typedEntries(entityAdapter.computed).flatMap(([k, v]) => v.properties),
+      ...entityAdapter.additionalProperties,
     ];
 
     let associations = ((inputAssociations.length > 0)

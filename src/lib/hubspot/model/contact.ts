@@ -159,13 +159,7 @@ function makeAdapter(config: HubspotContactConfig): EntityAdapter<ContactData, C
       },
     },
 
-    computed: {
-      otherEmails: {
-        default: [],
-        down: data => data['hs_additional_emails']?.split(';') || [],
-        properties: ['hs_additional_emails'],
-      },
-    },
+    additionalProperties: ['hs_additional_emails'],
 
   };
 }

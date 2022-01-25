@@ -35,7 +35,7 @@ export const CompanyAdapter: EntityAdapter<CompanyData, {}> = {
     },
   },
 
-  computed: {},
+  additionalProperties: [],
 
 };
 

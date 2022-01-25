@@ -45,10 +45,6 @@ export interface EntityAdapter<D, C> {
     identifier?: true,
   } };
 
-  computed: { [K in keyof C]: {
-    default: C[K],
-    down: (data: HubspotProperties) => C[K],
-    properties: string[],
-  } },
+  additionalProperties: string[],
 
 }

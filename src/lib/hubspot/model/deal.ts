@@ -244,38 +244,18 @@ function makeAdapter(config: HubspotDealConfig): EntityAdapter<DealData, DealCom
       },
     },
 
-    computed: {
-      hasActivity: {
-        default: false,
-        down: data => (
-          isNonBlankString(data['hs_user_ids_of_all_owners']) ||
-          isNonBlankString(data['engagements_last_meeting_booked']) ||
-          isNonBlankString(data['hs_latest_meeting_activity']) ||
-          isNonBlankString(data['notes_last_contacted']) ||
-          isNonBlankString(data['notes_last_updated']) ||
-          isNonBlankString(data['notes_next_activity_date']) ||
-          isNonBlankString(data['hs_sales_email_last_replied']) ||
-          isNonZeroNumberString(data['num_contacted_notes']) ||
-          isNonZeroNumberString(data['num_notes'])
-        ),
-        properties: [
-          'hs_user_ids_of_all_owners',
-          'engagements_last_meeting_booked',
-          'hs_latest_meeting_activity',
-          'notes_last_contacted',
-          'notes_last_updated',
-          'notes_next_activity_date',
-          'num_contacted_notes',
-          'num_notes',
-          'hs_sales_email_last_replied',
-        ]
-      },
-      createdDate: {
-        default: '',
-        down: data => data['createdate']!,
-        properties: ['createdate'],
-      }
-    },
+    additionalProperties: [
+      'hs_user_ids_of_all_owners',
+      'engagements_last_meeting_booked',
+      'hs_latest_meeting_activity',
+      'notes_last_contacted',
+      'notes_last_updated',
+      'notes_next_activity_date',
+      'num_contacted_notes',
+      'num_notes',
+      'hs_sales_email_last_replied',
+      'createdate',
+    ],
 
   };
 
