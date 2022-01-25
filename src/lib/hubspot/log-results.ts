@@ -23,7 +23,7 @@ class HubspotResultLogger {
   }
 
   private logEntity(stream: LogWriteStream, entity: Entity<any, any>) {
-    const fromKind = entity.adapter.kind;
+    const fromKind = entity.kind;
 
     const properties = { ...entity.getPropertyChanges() };
     if (Object.keys(properties).length > 0) {
@@ -33,7 +33,7 @@ class HubspotResultLogger {
     }
 
     const associations = entity.getAssociationChanges().filter(assoc => {
-      const otherKind = assoc.other.adapter.kind;
+      const otherKind = assoc.other.kind;
       const found = entity.adapter.associations.find(a => a[0] === otherKind);
       return found?.[1].includes('up');
     });
@@ -42,7 +42,7 @@ class HubspotResultLogger {
       const id = `${fromKind}:${this.idFor(entity)}`;
       const mappedAssociations = associations.map(assoc => [
         assoc.op,
-        `${assoc.other.adapter.kind}:${this.idFor(assoc.other)}`,
+        `${assoc.other.kind}:${this.idFor(assoc.other)}`,
       ]);
       stream.writeLine(stringify({ action, id, mappedAssociations }));
     }
@@ -50,7 +50,7 @@ class HubspotResultLogger {
 
   private idFor<T extends Entity<any, any>>(entity: T) {
     if (!entity.id) {
-      const kind = entity.adapter.kind;
+      const kind = entity.kind;
       this.creating.add(entity);
       entity.id = `fake-${++this.ids[kind]}`;
     }

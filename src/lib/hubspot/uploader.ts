@@ -83,7 +83,7 @@ export class HubspotUploader<D extends Record<string, any>, C extends Record<str
 
     for (const otherKind of upAssociations) {
       const toSyncInKind = (toSync
-        .filter(changes => changes.to.adapter.kind === otherKind)
+        .filter(changes => changes.to.kind === otherKind)
         .map(changes => ({
           ...changes,
           inputs: {

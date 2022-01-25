@@ -45,6 +45,10 @@ export abstract class Entity<
     });
   }
 
+  get kind() {
+    return this.adapter.kind;
+  }
+
   public guaranteedId() {
     if (!this.id) throw new Error('Trying to access null deal id!');
     return this.id;
