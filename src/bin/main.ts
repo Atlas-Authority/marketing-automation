@@ -36,7 +36,10 @@ run(runLoopConfig, {
     log.info('Main', 'Upsyncing changes to HubSpot');
     await hubspot.upsyncChangesToHubspot();
 
+    log.info('Main', 'Writing HubSpot change log file');
     logHubspotResults(hubspot, dataDir.subdir('results').file('hubspot-out.txt'));
+
+    log.info('Main', 'Done');
   },
 
   async failed(errors) {
