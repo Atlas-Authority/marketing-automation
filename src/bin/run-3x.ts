@@ -3,7 +3,7 @@ import DataDir from '../lib/data/dir';
 import { DataSet } from '../lib/data/set';
 import { Engine } from "../lib/engine/engine";
 import { Hubspot } from '../lib/hubspot';
-import log from "../lib/log/logger";
+import { ConsoleLogger } from '../lib/log/logger';
 import { getCliArgs } from '../lib/parameters/cli-args';
 import { engineConfigFromENV } from '../lib/parameters/env-config';
 
@@ -14,30 +14,48 @@ const dataDir = DataDir.root.subdir('in');
 let i = 0;
 const nextDataDir = () => savelogs ? dataDir.subdir(`${savelogs}-${++i}`) : null;
 
-const hubspot = Hubspot.memoryFromENV();
+const data = new DataSet(dataDir).load();
 
-{
-  // First
-  let data = new DataSet(dataDir).load();
-  const engine = new Engine(hubspot, engineConfigFromENV());
-  log.level = log.Levels.Info;
+const log = new ConsoleLogger();
+
+function logFileUploader(dataFile: DataDir) {
+
+}
+
+// const consoleUploader: HubspotUploader = {
+//   createAssociations(fromKind, toKind, inputs) {
+
+//   },
+
+// };
+
+runEngine();
+
+// pipeOutputToInput(hubspot, data);
+runEngine();
+
+// pipeOutputToInput(hubspot, data);
+runEngine();
+
+function runEngine() {
+  const hubspot = Hubspot.memoryFromENV(log);
+  const engine = new Engine(log, hubspot, engineConfigFromENV());
   engine.run(data, nextDataDir());
 }
 
-{
-  // Second
-  const engine = new Engine(hubspot, engineConfigFromENV());
-  let data = new DataSet(dataDir).load();
-  data = { ...data, ...buildInputs(hubspot) };
-  log.level = log.Levels.Verbose;
-  engine.run(data, nextDataDir());
-}
+// function pipeOutputToInput(hubspot: Hubspot, data: Data) {
+//   data.rawDeals = applyChanges(hubspot.dealManager);
+//   data.rawContacts = applyChanges(hubspot.contactManager);
+//   data.rawCompanies = applyChanges(hubspot.companyManager);
+// }
 
-{
-  // Third
-  let data = new DataSet(dataDir).load();
-  const engine = new Engine(hubspot, engineConfigFromENV());
-  data = { ...data, ...buildInputs(hubspot) };
-  log.level = log.Levels.Verbose;
-  engine.run(data, nextDataDir());
-}
+// function applyChanges<D, C, E extends Entity<D, C>>(manager: EntityManager<D, C, E>): FullEntity[] {
+//   let i = 0;
+//   return manager.getArray().map(entity => {
+//     return {
+//       id: entity.id ?? `fake-${entity.kind}:${++i}`,
+//       properties: entity.data,
+//       // associations: [],
+//     } as FullEntity;
+//   });
+// }

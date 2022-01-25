@@ -6,27 +6,29 @@ import { Engine } from "../lib/engine/engine";
 import { SlackNotifier } from '../lib/engine/slack-notifier';
 import { Hubspot } from '../lib/hubspot';
 import { logHubspotResults } from '../lib/hubspot/log-results';
-import log from '../lib/log/logger';
+import { ConsoleLogger } from '../lib/log/logger';
 import { engineConfigFromENV, runLoopConfigFromENV } from "../lib/parameters/env-config";
 import run from "../lib/util/runner";
+
+const log = new ConsoleLogger();
 
 const dataDir = DataDir.root.subdir("in");
 const dataSet = new DataSet(dataDir);
 
 const runLoopConfig = runLoopConfigFromENV();
-const notifier = SlackNotifier.fromENV();
+const notifier = SlackNotifier.fromENV(log);
 notifier?.notifyStarting();
 
-run(runLoopConfig, {
+run(log, runLoopConfig, {
 
   async work() {
     log.info('Main', 'Downloading data');
-    const hubspot = Hubspot.live();
-    await downloadAllData(dataSet, hubspot);
+    const hubspot = Hubspot.live(log);
+    await downloadAllData(log, dataSet, hubspot);
 
     log.info('Main', 'Running engine');
     const data = new DataSet(dataDir).load();
-    const engine = new Engine(hubspot, engineConfigFromENV());
+    const engine = new Engine(log, hubspot, engineConfigFromENV());
     engine.run(data, null);
 
     log.info('Main', 'Upsyncing changes to HubSpot');

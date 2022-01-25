@@ -5,7 +5,7 @@ import { Hubspot } from "../hubspot";
 import { CompanyManager } from "../hubspot/model/company";
 import { ContactManager } from "../hubspot/model/contact";
 import { DealManager } from "../hubspot/model/deal";
-import log from "../log/logger";
+import { ConsoleLogger } from "../log/logger";
 import { Table } from "../log/table";
 import { Tallier } from "../log/tallier";
 import { License } from "../marketplace/model/license";
@@ -47,7 +47,7 @@ export class Engine {
   public partnerDomains = new Set<string>();
   public customerDomains = new Set<string>();
 
-  public tallier = new Tallier();
+  public tallier;
 
   public appToPlatform: { [addonKey: string]: string };
   public archivedApps: Set<string>;
@@ -58,7 +58,9 @@ export class Engine {
   public contactManager: ContactManager;
   public companyManager: CompanyManager;
 
-  public constructor(hubspotService: Hubspot, config: EngineConfig | null) {
+  public constructor(private log: ConsoleLogger | null, hubspotService: Hubspot, config: EngineConfig | null) {
+    this.tallier = new Tallier(log);
+
     this.dealManager = hubspotService.dealManager;
     this.contactManager = hubspotService.contactManager;
     this.companyManager = hubspotService.companyManager;
@@ -83,16 +85,16 @@ export class Engine {
     new ContactGenerator(this).run();
 
     this.logStep('Running Scoring Engine');
-    const allMatches = new LicenseGrouper(this).run(logDir);
+    const allMatches = new LicenseGrouper(this.log, this).run(logDir);
 
     this.logStep('Updating Contacts based on Match Results');
     updateContactsBasedOnMatchResults(this, allMatches);
 
     this.logStep('Generating deals');
-    new DealGenerator(this).run(allMatches, logDir);
+    new DealGenerator(this.log, this).run(allMatches, logDir);
 
     this.logStep('Summary');
-    printSummary(this);
+    printSummary(this.log, this);
 
     this.logStep('Done running engine on given data set');
   }
@@ -114,12 +116,12 @@ export class Engine {
         const allEmails = getEmailsForRecord(record);
         const allGood = allEmails.every(e => emailRe.test(e));
         if (!allGood && !allEmails.every(e => this.ignoredEmails.has(e.toLowerCase()))) {
-          log.warn('Downloader', `${kind} has invalid email(s); will be skipped:`, record);
+          this.log?.warn('Downloader', `${kind} has invalid email(s); will be skipped:`, record);
         }
         return allGood;
       };
 
-    log.info('Database', 'Validating MPAC records: Starting...');
+    this.log?.info('Database', 'Validating MPAC records: Starting...');
 
     const combinedLicenses = [
       ...data.licensesWithDataInsights,
@@ -129,7 +131,7 @@ export class Engine {
     let licenses = combinedLicenses.map(raw => License.fromRaw(raw));
     let transactions = data.transactions.map(raw => Transaction.fromRaw(raw));
 
-    licenses = licenses.filter(validation.hasTechEmail);
+    licenses = licenses.filter(l => validation.hasTechEmail(this.log, l));
     licenses = validation.removeApiBorderDuplicates(licenses);
 
     licenses.forEach(validation.assertRequiredLicenseFields);
@@ -138,11 +140,11 @@ export class Engine {
     licenses = licenses.filter(emailChecker('License'));
     transactions = transactions.filter(emailChecker('Transaction'));
 
-    const structured = buildAndVerifyStructures(licenses, transactions);
+    const structured = buildAndVerifyStructures(this.log, licenses, transactions);
     this.licenses = structured.licenses;
     this.transactions = structured.transactions;
 
-    log.info('Database', 'Validating MPAC records: Done');
+    this.log?.info('Database', 'Validating MPAC records: Done');
 
     const transactionTotal = (this.transactions
       .map(t => t.data.vendorAmount)
@@ -169,15 +171,15 @@ export class Engine {
     table.rows.push(['# Deals', formatNumber(deals.length)]);
     table.rows.push(['$ Deals', formatMoney(dealSum)]);
 
-    log.info('Downloader', 'Download Summary');
+    this.log?.info('Downloader', 'Download Summary');
     for (const row of table.eachRow()) {
-      log.info('Downloader', '  ' + row);
+      this.log?.info('Downloader', '  ' + row);
     }
 
   }
 
   private logStep(description: string) {
-    log.info('Engine', chalk.bold.blueBright(`Step ${++this.step}: ${description}`));
+    this.log?.info('Engine', chalk.bold.blueBright(`Step ${++this.step}: ${description}`));
   }
 
 }

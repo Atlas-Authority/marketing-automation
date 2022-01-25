@@ -1,4 +1,5 @@
 import * as assert from 'assert';
+import { ConsoleLogger } from '../log/logger';
 import { AttachableError } from "../util/errors";
 import HubspotAPI from "./api";
 import { Entity } from './entity';
@@ -7,11 +8,14 @@ import { typedEntries } from "./manager";
 
 export class HubspotUploader<D extends Record<string, any>, C extends Record<string, any>, E extends Entity<D, C>> {
 
-  api = new HubspotAPI();
+  api;
   constructor(
+    log: ConsoleLogger | null,
     private entities: Entity<D, C>[],
     private adapter: EntityAdapter<D, C>,
-  ) { }
+  ) {
+    this.api = new HubspotAPI(log);
+  }
 
   public async syncUpAllEntitiesProperties() {
     const entitiesWithChanges = this.entities.map(e => ({ e, changes: e.getPropertyChanges() }));

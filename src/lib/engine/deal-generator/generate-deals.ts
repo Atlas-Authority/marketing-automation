@@ -1,7 +1,7 @@
 import assert from "assert";
 import DataDir from "../../data/dir";
 import { Deal } from "../../hubspot/model/deal";
-import log from "../../log/logger";
+import { ConsoleLogger } from "../../log/logger";
 import { Table } from "../../log/table";
 import { LicenseData } from "../../marketplace/model/license";
 import { formatMoney } from "../../util/formatters";
@@ -25,8 +25,9 @@ export class DealGenerator {
 
   private ignoredAmounts = new Map<string, number>();
 
-  public constructor(private engine: Engine) {
+  public constructor(private log: ConsoleLogger | null, private engine: Engine) {
     this.actionGenerator = new ActionGenerator(
+      log,
       engine.dealManager,
       engine.dealPropertyConfig,
       this.ignore.bind(this),
@@ -83,9 +84,9 @@ export class DealGenerator {
       table.rows.push([reason, formatMoney(amount)]);
     }
 
-    log.info('Deal Actions', 'Amount of Transactions Ignored');
+    this.log?.info('Deal Actions', 'Amount of Transactions Ignored');
     for (const row of table.eachRow()) {
-      log.info('Deal Actions', '  ' + row);
+      this.log?.info('Deal Actions', '  ' + row);
     }
   }
 

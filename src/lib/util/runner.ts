@@ -1,4 +1,4 @@
-import log from "../log/logger";
+import { ConsoleLogger } from "../log/logger";
 
 export interface RunLoopConfig {
   runInterval: string,
@@ -6,7 +6,7 @@ export interface RunLoopConfig {
   retryTimes: number,
 };
 
-export default function run(loopConfig: RunLoopConfig, { work, failed }: {
+export default function run(log: ConsoleLogger, loopConfig: RunLoopConfig, { work, failed }: {
   work: () => Promise<void>,
   failed: (errors: Error[]) => Promise<void>,
 }) {

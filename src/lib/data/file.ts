@@ -1,7 +1,6 @@
 import fs from "fs";
 import LineReader from 'n-readlines';
 import { URL } from "url";
-import log from "../log/logger";
 import { CsvStream } from "./csv";
 
 export class DataFile<T extends readonly any[]> {
@@ -13,8 +12,7 @@ export class DataFile<T extends readonly any[]> {
 
   public readArray(): T {
     if (!fs.existsSync(this.#url)) {
-      log.error('Dev', `Data file doesn't exist yet; run engine to create`, this.#url);
-      process.exit(1);
+      throw new Error(`Data file doesn't exist yet; run engine to create: ${this.#url}`);
     }
 
     return CsvStream.readFileFromFile(this.readLines()) as T;

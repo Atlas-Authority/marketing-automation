@@ -6,9 +6,9 @@ import { Hubspot } from '../lib/hubspot';
 import { engineConfigFromENV } from '../lib/parameters/env-config';
 import { isPresent, sorter } from "../lib/util/helpers";
 
-const engine = new Engine(Hubspot.memory(), engineConfigFromENV());
+const engine = new Engine(null, Hubspot.memory(null), engineConfigFromENV());
 const data = new DataSet(DataDir.root.subdir('in')).load();
-engine.importData(data);
+// engine.importData(data);
 
 const attributions = (engine
   .licenses

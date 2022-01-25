@@ -6,7 +6,7 @@ import { CompanyManager } from '../hubspot/model/company';
 import { ContactManager } from '../hubspot/model/contact';
 import { DealManager } from '../hubspot/model/deal';
 import { MultiDownloadLogger } from "../log/download-logger";
-import log from "../log/logger";
+import { ConsoleLogger } from "../log/logger";
 import { MarketplaceAPI } from "../marketplace/api";
 
 interface HubspotManagers {
@@ -15,12 +15,12 @@ interface HubspotManagers {
   companyManager: CompanyManager,
 }
 
-export async function downloadAllData(dataSet: DataSet, managers: HubspotManagers): Promise<Data> {
-  const hubspotAPI = new HubspotAPI();
+export async function downloadAllData(log: ConsoleLogger, dataSet: DataSet, managers: HubspotManagers): Promise<Data> {
+  const hubspotAPI = new HubspotAPI(log);
   const marketplaceAPI = new MarketplaceAPI();
 
   log.info('Downloader', 'Starting downloads with API');
-  const logbox = new MultiDownloadLogger();
+  const logbox = new MultiDownloadLogger(log);
 
   const data = await promiseAllProperties({
     tlds: logbox.wrap('Tlds', () =>

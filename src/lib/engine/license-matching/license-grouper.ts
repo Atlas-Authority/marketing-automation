@@ -1,5 +1,5 @@
 import DataDir from '../../data/dir';
-import log from '../../log/logger';
+import { ConsoleLogger } from '../../log/logger';
 import { License } from '../../marketplace/model/license';
 import { sorter } from '../../util/helpers';
 import { Engine } from '../engine';
@@ -13,7 +13,7 @@ export class LicenseGrouper {
 
   private matchGroups = new Map<License, Set<License>>();
 
-  constructor(private engine: Engine) { }
+  constructor(private log: ConsoleLogger | null, private engine: Engine) { }
 
   run(logDir: DataDir | null): RelatedLicenseSet[] {
     return this.withLog(logDir, scoreLogger => {
@@ -27,7 +27,7 @@ export class LicenseGrouper {
 
       scoreLogger?.logMatchResults(matches);
 
-      log.info('Scoring Engine', 'Done');
+      this.log?.info('Scoring Engine', 'Done');
 
       return matches;
     });
@@ -47,7 +47,7 @@ export class LicenseGrouper {
   }
 
   private groupLicensesByProduct() {
-    log.info('Scoring Engine', 'Grouping licenses/transactions by hosting and addonKey');
+    this.log?.info('Scoring Engine', 'Grouping licenses/transactions by hosting and addonKey');
     const productMapping = new Map<string, {
       license: License,
       scorable: ScorableLicense,
@@ -90,13 +90,13 @@ export class LicenseGrouper {
   }
 
   private matchLicenses(scorer: LicenseMatcher, scoreLogger?: LicenseMatchLogger) {
-    log.info('Scoring Engine', 'Scoring licenses within [addonKey + hosting] groups');
+    this.log?.info('Scoring Engine', 'Scoring licenses within [addonKey + hosting] groups');
     const startTime = process.hrtime.bigint();
 
     const productGroups = this.groupLicensesByProduct();
 
     for (const [name, group] of productGroups) {
-      log.info('Scoring Engine', `  Scoring [${name}]`);
+      this.log?.info('Scoring Engine', `  Scoring [${name}]`);
 
       for (let i1 = 0; i1 < group.length; i1++) {
         for (let i2 = i1 + 1; i2 < group.length; i2++) {
@@ -118,7 +118,7 @@ export class LicenseGrouper {
     }
 
     const endTime = process.hrtime.bigint();
-    log.info('Scoring Engine', `Total time: ${timeAsMinutesSeconds(endTime - startTime)}`);
+    this.log?.info('Scoring Engine', `Total time: ${timeAsMinutesSeconds(endTime - startTime)}`);
   }
 
   private joinMatches(license1: License, license2: License) {

@@ -29,7 +29,7 @@ function main(template: string, testId: string) {
 
   const group = getRedactedMatchGroup(ids);
 
-  const engine = new Engine(Hubspot.memory(), null);
+  const engine = new Engine(null, Hubspot.memory(null), null);
 
   engine.licenses.length = 0;
   engine.licenses.push(...group);
@@ -37,7 +37,7 @@ function main(template: string, testId: string) {
   engine.transactions.length = 0;
   engine.transactions.push(...group.flatMap(g => g.transactions));
 
-  const dealGenerator = new DealGenerator(engine);
+  const dealGenerator = new DealGenerator(null, engine);
   const { records, events, actions } = dealGenerator.generateActionsForMatchedGroup(group);
 
   console.log(template
@@ -53,9 +53,9 @@ function format(o: any, breakLength = 50) {
 }
 
 function getRedactedMatchGroup(ids: [string, string[]][]) {
-  const engine = new Engine(Hubspot.memory(), engineConfigFromENV());
+  const engine = new Engine(null, Hubspot.memory(null), engineConfigFromENV());
   const data = new DataSet(DataDir.root.subdir('in')).load();
-  engine.importData(data);
+  // engine.importData(data);
 
   const group: RelatedLicenseSet = [];
   for (const [lid, txids] of ids) {

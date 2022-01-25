@@ -1,6 +1,6 @@
 import chalk from "chalk";
 import { MultiBar, Presets, SingleBar } from "cli-progress";
-import log from "./logger";
+import { ConsoleLogger } from "./logger";
 
 export interface Progress {
   setCount: (count: number) => void;
@@ -8,6 +8,8 @@ export interface Progress {
 }
 
 export class MultiDownloadLogger {
+
+  constructor(private log: ConsoleLogger) { }
 
   private multibar = new MultiBar({
     format: `${chalk.cyan('[{bar}]')} {name}`,
@@ -23,7 +25,7 @@ export class MultiDownloadLogger {
   private makeLine(name: string) {
     let bar = this.multibar.create(1, 0, { name });
     if (bar) return new AnimatedProgressBar(bar);
-    return new SimpleLogProgress(name);
+    return new SimpleLogProgress(this.log, name);
   }
 
   public done() {
@@ -57,19 +59,19 @@ class AnimatedProgressBar {
 
 class SimpleLogProgress {
 
-  public constructor(private name: string) { }
+  public constructor(private log: ConsoleLogger, private name: string) { }
 
   public setCount(count: number) {
-    log.info('Downloader', `Downloading ${this.name} (${count} call${count === 1 ? '' : 's'})`);
+    this.log.info('Downloader', `Downloading ${this.name} (${count} call${count === 1 ? '' : 's'})`);
   }
 
   public tick(moreInfo?: string) {
     moreInfo = moreInfo ? ` (${moreInfo})` : '';
-    log.info('Downloader', `Downloading ${this.name} ${moreInfo}`);
+    this.log.info('Downloader', `Downloading ${this.name} ${moreInfo}`);
   }
 
   public done() {
-    log.info('Downloader', `Done downloading ${this.name}`);
+    this.log.info('Downloader', `Done downloading ${this.name}`);
   }
 
 }

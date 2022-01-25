@@ -1,6 +1,6 @@
 import * as hubspot from '@hubspot/api-client';
 import assert from 'assert';
-import log from '../log/logger';
+import { ConsoleLogger } from '../log/logger';
 import { hubspotCredsFromENV } from '../parameters/env-config';
 import { KnownError } from '../util/errors';
 import { batchesOf, isPresent } from '../util/helpers';
@@ -17,7 +17,7 @@ export default class HubspotAPI {
 
   private client: hubspot.Client;
 
-  constructor() {
+  constructor(private log: ConsoleLogger | null) {
     this.client = new hubspot.Client(hubspotCredsFromENV());
   }
 
@@ -110,7 +110,7 @@ export default class HubspotAPI {
         inputs: inputBatch.map(input => mapAssociationInput(fromKind, input))
       });
       for (const e of response.body.errors ?? []) {
-        log.error('Live Hubspot', e.message);
+        this.log?.error('Live Hubspot', e.message);
       }
     }
   }

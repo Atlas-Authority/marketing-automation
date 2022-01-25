@@ -1,3 +1,4 @@
+import { ConsoleLogger } from '../log/logger';
 import { isPresent } from '../util/helpers';
 import { Entity, Indexer } from './entity';
 import { EntityAdapter, EntityKind, FullEntity, RelativeAssociation } from './interfaces';
@@ -17,6 +18,8 @@ export abstract class EntityManager<
   private indexes: Index<E>[] = [];
   private indexIndex = new Map<keyof D, Index<E>>();
   public get = this.makeIndex(e => [e.id].filter(isPresent), []);
+
+  constructor(private log: ConsoleLogger | null) { }
 
   public importEntities(rawEntities: readonly FullEntity[]) {
     const prelinkedAssociations = new Map<string, Set<RelativeAssociation>>();
@@ -88,7 +91,7 @@ export abstract class EntityManager<
   }
 
   public makeUploader() {
-    return new HubspotUploader(this.entities, this.entityAdapter);
+    return new HubspotUploader(this.log, this.entities, this.entityAdapter);
   }
 
   protected makeIndex(keysFor: (e: E) => string[], deps: (keyof D)[]): (key: string) => E | undefined {

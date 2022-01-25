@@ -1,7 +1,7 @@
 import chalk from "chalk";
 import util from "util";
 
-class ConsoleLogger {
+export class ConsoleLogger {
 
   public error(prefix: string, ...args: any[]) { this.print('error', chalk.red('ERR!'), prefix, ...args); }
   public warn(prefix: string, ...args: any[]) { this.print('error', chalk.dim.redBright('WARN'), prefix, ...args); }
@@ -45,6 +45,3 @@ function formatted(data: unknown, prefixLength: number) {
     maxStringLength: null,
   });
 }
-
-const log = new ConsoleLogger();
-export default log;
