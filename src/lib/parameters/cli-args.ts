@@ -1,10 +1,5 @@
 const Options = {
 
-  loglevel: {
-    values: '<error | warn | info | verbose>',
-    description: '(Optional) What the engine should log to console.log()',
-  },
-
   savelogs: {
     values: '<somedir>',
     description: '(Optional) Log helpful debug files under `data/somedir/`',

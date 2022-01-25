@@ -7,12 +7,8 @@ import { SlackNotifier } from '../lib/engine/slack-notifier';
 import { Hubspot } from '../lib/hubspot';
 import { logHubspotResults } from '../lib/hubspot/log-results';
 import log from '../lib/log/logger';
-import { getCliArgs } from '../lib/parameters/cli-args';
 import { engineConfigFromENV, runLoopConfigFromENV } from "../lib/parameters/env-config";
 import run from "../lib/util/runner";
-
-const { loglevel } = getCliArgs('loglevel');
-log.setLevelFrom(loglevel);
 
 const dataDir = DataDir.root.subdir("in");
 const dataSet = new DataSet(dataDir);

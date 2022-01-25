@@ -9,16 +9,11 @@ enum LogLevel {
 
 class Logger {
 
-  public level = LogLevel.Info;
-  public readonly Levels = LogLevel;
-
   public error(prefix: string, ...args: any[]) { this.print(LogLevel.Error, prefix, ...args); }
   public warn(prefix: string, ...args: any[]) { this.print(LogLevel.Warn, prefix, ...args); }
   public info(prefix: string, ...args: any[]) { this.print(LogLevel.Info, prefix, ...args); }
 
   private print(level: LogLevel, prefix: string, ...args: any[]) {
-    if (level > this.level) return;
-
     const first = levelPrefixes[level];
     const styledPrefix = chalk.magenta(prefix);
 
@@ -44,15 +39,6 @@ class Logger {
       for (const line of formattedLastArg.split('\n')) {
         console.log([styledTime, first, styledPrefix, spacer + line].join(' '));
       }
-    }
-  }
-
-  public setLevelFrom(levelString: string | undefined) {
-    if (!levelString) return;
-    switch (levelString.trim().toLowerCase()) {
-      case 'error': this.level = LogLevel.Error; break;
-      case 'warn': this.level = LogLevel.Warn; break;
-      case 'info': this.level = LogLevel.Info; break;
     }
   }
 }
