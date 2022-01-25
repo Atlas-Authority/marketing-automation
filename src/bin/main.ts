@@ -21,23 +21,23 @@ run(log, runLoopConfig, {
 
   async work() {
 
-    log.info('Main', 'Downloading data');
+    log.printInfo('Main', 'Downloading data');
     const dataSet = new DataSet(dataDir);
     const hubspot = Hubspot.live(log);
     await downloadAllData(log, dataSet, hubspot);
 
-    log.info('Main', 'Running engine');
+    log.printInfo('Main', 'Running engine');
     const data = dataSet.load();
     const engine = new Engine(hubspot, engineConfigFromENV(), log);
     engine.run(data);
 
-    log.info('Main', 'Upsyncing changes to HubSpot');
+    log.printInfo('Main', 'Upsyncing changes to HubSpot');
     await hubspot.upsyncChangesToHubspot();
 
-    log.info('Main', 'Writing HubSpot change log file');
+    log.printInfo('Main', 'Writing HubSpot change log file');
     log.hubspotOutputLogger().logResults(hubspot);
 
-    log.info('Main', 'Done');
+    log.printInfo('Main', 'Done');
   },
 
   async failed(errors) {

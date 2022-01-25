@@ -19,7 +19,7 @@ export async function downloadAllData(log: Logger, dataSet: DataSet, managers: H
   const hubspotAPI = new HubspotAPI(log);
   const marketplaceAPI = new MarketplaceAPI();
 
-  log.info('Downloader', 'Starting downloads with API');
+  log.printInfo('Downloader', 'Starting downloads with API');
   const logbox = new MultiDownloadLogger(log);
 
   const data = await promiseAllProperties({
@@ -51,7 +51,7 @@ export async function downloadAllData(log: Logger, dataSet: DataSet, managers: H
   dataSet.save(data);
 
   logbox.done();
-  log.info('Downloader', 'Done');
+  log.printInfo('Downloader', 'Done');
 
   return data;
 }

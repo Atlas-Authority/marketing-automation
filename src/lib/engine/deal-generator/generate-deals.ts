@@ -69,9 +69,9 @@ export class DealGenerator {
       table.rows.push([reason, formatMoney(amount)]);
     }
 
-    this.engine.log?.info('Deal Actions', 'Amount of Transactions Ignored');
+    this.engine.log?.printInfo('Deal Actions', 'Amount of Transactions Ignored');
     for (const row of table.eachRow()) {
-      this.engine.log?.info('Deal Actions', '  ' + row);
+      this.engine.log?.printInfo('Deal Actions', '  ' + row);
     }
   }
 

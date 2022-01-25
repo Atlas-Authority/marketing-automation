@@ -62,16 +62,16 @@ class SimpleLogProgress {
   public constructor(private log: Logger, private name: string) { }
 
   public setCount(count: number) {
-    this.log.info('Downloader', `Downloading ${this.name} (${count} call${count === 1 ? '' : 's'})`);
+    this.log.printInfo('Downloader', `Downloading ${this.name} (${count} call${count === 1 ? '' : 's'})`);
   }
 
   public tick(moreInfo?: string) {
     moreInfo = moreInfo ? ` (${moreInfo})` : '';
-    this.log.info('Downloader', `Downloading ${this.name} ${moreInfo}`);
+    this.log.printInfo('Downloader', `Downloading ${this.name} ${moreInfo}`);
   }
 
   public done() {
-    this.log.info('Downloader', `Done downloading ${this.name}`);
+    this.log.printInfo('Downloader', `Done downloading ${this.name}`);
   }
 
 }

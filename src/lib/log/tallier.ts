@@ -23,9 +23,9 @@ export class Tallier {
 
     table.rows.push(['Unaccounted for', formatMoney(remainder)]);
 
-    this.log?.info('Totals', 'Transaction amount flow:');
+    this.log?.printInfo('Totals', 'Transaction amount flow:');
     for (const row of table.eachRow()) {
-      this.log?.info('Totals', '  ' + row);
+      this.log?.printInfo('Totals', '  ' + row);
     }
   }
 

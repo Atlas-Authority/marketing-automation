@@ -110,7 +110,7 @@ export default class HubspotAPI {
         inputs: inputBatch.map(input => mapAssociationInput(fromKind, input))
       });
       for (const e of response.body.errors ?? []) {
-        this.log?.error('Live Hubspot', e.message);
+        this.log?.printError('Live Hubspot', e.message);
       }
     }
   }

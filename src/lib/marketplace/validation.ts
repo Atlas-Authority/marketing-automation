@@ -107,7 +107,7 @@ function validateField<T>(o: T, accessor: (o: T) => any) {
 export function hasTechEmail(license: License, log?: Logger) {
   if (!license.data.technicalContact?.email) {
     const id = license.id;
-    log?.warn('Downloader', 'License does not have a tech contact email; will be skipped', id);
+    log?.printWarning('Downloader', 'License does not have a tech contact email; will be skipped', id);
     return false;
   }
   return true;

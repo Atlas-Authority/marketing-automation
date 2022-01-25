@@ -126,7 +126,7 @@ export class ActionGenerator {
   private recordSeen(deal: Deal, event: DealRelevantEvent) {
     if (this.#handledDeals.has(deal)) {
       const existing = this.#handledDeals.get(deal);
-      this.log?.error('Deal Generator', 'Updating deal twice', {
+      this.log?.printError('Deal Generator', 'Updating deal twice', {
         firstEvent: existing && abbrEventDetails(existing),
         currentEvent: abbrEventDetails(event),
         deal: {
@@ -193,7 +193,7 @@ export class ActionGenerator {
         dealToUse = importantDeals[0];
 
         if (importantDeals.length > 1) {
-          this.log?.warn('Deal Generator',
+          this.log?.printWarning('Deal Generator',
             `Found duplicates that can't be auto-deleted.`,
             importantDeals.map(d => ({ id: d.id, ...d.data })));
         }

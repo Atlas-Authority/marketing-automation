@@ -10,12 +10,12 @@ export default function run(log: Logger, loopConfig: RunLoopConfig, { work, fail
   work: () => Promise<void>,
   failed: (errors: Error[]) => Promise<void>,
 }) {
-  log.info('Runner', 'Starting with options:', loopConfig);
+  log.printInfo('Runner', 'Starting with options:', loopConfig);
   const normalInterval = loopConfig.runInterval;
   const errorInterval = loopConfig.retryInterval;
   const errorTries = loopConfig.retryTimes;
 
-  log.info('Runner', 'Running loop');
+  log.printInfo('Runner', 'Running loop');
   const errors: Error[] = [];
   run();
 
@@ -27,17 +27,17 @@ export default function run(log: Logger, loopConfig: RunLoopConfig, { work, fail
         errors.length = 0;
       }
 
-      log.info('Runner', `Finished successfully; waiting ${normalInterval} for next loop.`);
+      log.printInfo('Runner', `Finished successfully; waiting ${normalInterval} for next loop.`);
       setTimeout(run, parseTimeToMs(normalInterval));
     }
     catch (e: any) {
-      log.error('Runner', 'Error:', e);
+      log.printError('Runner', 'Error:', e);
       errors.push(e);
 
       const longTermFailure = (errors.length % errorTries === 0);
       const waitTime = longTermFailure ? normalInterval : errorInterval;
 
-      log.warn('Runner', `Run canceled by error. Trying again in ${waitTime}.`);
+      log.printWarning('Runner', `Run canceled by error. Trying again in ${waitTime}.`);
 
       setTimeout(run, parseTimeToMs(waitTime));
 

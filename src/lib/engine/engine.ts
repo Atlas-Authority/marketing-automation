@@ -115,12 +115,12 @@ export class Engine {
         const allEmails = getEmailsForRecord(record);
         const allGood = allEmails.every(e => emailRe.test(e));
         if (!allGood && !allEmails.every(e => this.ignoredEmails.has(e.toLowerCase()))) {
-          this.log?.warn('Downloader', `${kind} has invalid email(s); will be skipped:`, record);
+          this.log?.printWarning('Downloader', `${kind} has invalid email(s); will be skipped:`, record);
         }
         return allGood;
       };
 
-    this.log?.info('Database', 'Validating MPAC records: Starting...');
+    this.log?.printInfo('Database', 'Validating MPAC records: Starting...');
 
     const combinedLicenses = [
       ...data.licensesWithDataInsights,
@@ -143,7 +143,7 @@ export class Engine {
     this.licenses = structured.licenses;
     this.transactions = structured.transactions;
 
-    this.log?.info('Database', 'Validating MPAC records: Done');
+    this.log?.printInfo('Database', 'Validating MPAC records: Done');
 
     const transactionTotal = (this.transactions
       .map(t => t.data.vendorAmount)
@@ -170,15 +170,15 @@ export class Engine {
     table.rows.push(['# Deals', formatNumber(deals.length)]);
     table.rows.push(['$ Deals', formatMoney(dealSum)]);
 
-    this.log?.info('Downloader', 'Download Summary');
+    this.log?.printInfo('Downloader', 'Download Summary');
     for (const row of table.eachRow()) {
-      this.log?.info('Downloader', '  ' + row);
+      this.log?.printInfo('Downloader', '  ' + row);
     }
 
   }
 
   private logStep(description: string) {
-    this.log?.info('Engine', chalk.bold.blueBright(`Step ${++this.step}: ${description}`));
+    this.log?.printInfo('Engine', chalk.bold.blueBright(`Step ${++this.step}: ${description}`));
   }
 
 }

@@ -53,7 +53,7 @@ export class SlackNotifier {
   }
 
   private async postAttachmentToSlack({ title, content }: { title: string, content: string }) {
-    this.log.info('Slack', title, content);
+    this.log.printInfo('Slack', title, content);
 
     if (this.errorChannelId) {
       await this.client.files.upload({
@@ -65,7 +65,7 @@ export class SlackNotifier {
   }
 
   private async postToSlack(text: string) {
-    this.log.info('Slack', text);
+    this.log.printInfo('Slack', text);
 
     if (this.errorChannelId) {
       await this.client.chat.postMessage({
