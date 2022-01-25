@@ -1,6 +1,6 @@
 import * as hubspot from '@hubspot/api-client';
 import assert from 'assert';
-import { ConsoleLogger } from '../log/console';
+import { Logger } from '../log/logger';
 import { hubspotCredsFromENV } from '../parameters/env-config';
 import { KnownError } from '../util/errors';
 import { batchesOf, isPresent } from '../util/helpers';
@@ -17,7 +17,7 @@ export default class HubspotAPI {
 
   private client: hubspot.Client;
 
-  constructor(private log: ConsoleLogger | null) {
+  constructor(private log: Logger | null) {
     this.client = new hubspot.Client(hubspotCredsFromENV());
   }
 

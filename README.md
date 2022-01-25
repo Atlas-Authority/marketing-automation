@@ -46,9 +46,9 @@ $ npm run watch
 For general development:
 
 ```sh
-$ npm run download -- help  # Download MPAC & HubSpot data
-$ npm run once     -- help  # Dry-run engine once on cached inputs
-$ npm run 3x       -- help  # Dry-run engine 3x, piping output to input
+$ npm run download  # Download MPAC & HubSpot data
+$ npm run once      # Dry-run engine once on cached inputs
+$ npm run 3x        # Dry-run engine 3x, piping output to input
 ```
 
 * Data must be downloaded before local dry-runs.
@@ -73,7 +73,14 @@ $ node out/bin/main.js  # This always uses live inputs/outputs
 
 ### Unreleased
 
-- n/a
+- Engine logs now written to `log` under input directory
+- Removed `loglevel` option
+  - log.info now logged to stdout
+  - log.{warn,error} now logged to stderr
+  - log.verbose replaced with log files
+- Removed `savelogs` option
+  - Now always saves all logs
+  - Added `fast` option to skip slow logs
 
 ### 0.2.0 (2022-01-19)
 

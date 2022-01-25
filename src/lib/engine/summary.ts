@@ -1,11 +1,11 @@
 import { Deal } from "../hubspot/model/deal";
-import { ConsoleLogger } from "../log/console";
+import { Logger } from "../log/logger";
 import { Table } from "../log/table";
 import { formatMoney, formatNumber } from "../util/formatters";
 import { isPresent } from "../util/helpers";
 import { Engine } from "./engine";
 
-export function printSummary(log: ConsoleLogger | null, engine: Engine) {
+export function printSummary(log: Logger | null, engine: Engine) {
 
   if (engine.dealManager.duplicates.size > 0) {
     Table.print({

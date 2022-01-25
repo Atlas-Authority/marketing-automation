@@ -4,16 +4,12 @@ import { DataSet } from '../lib/data/set';
 import { Engine } from "../lib/engine/engine";
 import { Hubspot } from '../lib/hubspot';
 import { logHubspotResults } from '../lib/hubspot/log-results';
-import { ConsoleLogger } from '../lib/log/console';
-import { getCliArgs } from '../lib/parameters/cli-args';
+import { Logger } from '../lib/log/logger';
 import { engineConfigFromENV } from '../lib/parameters/env-config';
-
-const { savelogs } = getCliArgs('savelogs');
 
 const dataDir = DataDir.root.subdir('in');
 const logDir = dataDir.subdir(`once-${Date.now()}`);
-
-const log = new ConsoleLogger();
+const log = new Logger(logDir);
 
 const hubspot = Hubspot.memoryFromENV(log);
 

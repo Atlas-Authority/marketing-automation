@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import { ConsoleLogger } from '../log/console';
+import { Logger } from '../log/logger';
 import { AttachableError } from "../util/errors";
 import HubspotAPI from "./api";
 import { Entity } from './entity';
@@ -10,7 +10,7 @@ export class HubspotUploader<D extends Record<string, any>> {
 
   api;
   constructor(
-    log: ConsoleLogger | null,
+    log: Logger | null,
     private entities: Entity<D>[],
     private adapter: EntityAdapter<D>,
   ) {

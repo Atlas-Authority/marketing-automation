@@ -1,5 +1,5 @@
 import DataDir from '../../data/dir';
-import { ConsoleLogger } from '../../log/console';
+import { Logger } from '../../log/logger';
 import { License } from '../../marketplace/model/license';
 import { sorter } from '../../util/helpers';
 import { Engine } from '../engine';
@@ -13,7 +13,7 @@ export class LicenseGrouper {
 
   private matchGroups = new Map<License, Set<License>>();
 
-  constructor(private log: ConsoleLogger | null, private engine: Engine) { }
+  constructor(private log: Logger | null, private engine: Engine) { }
 
   run(logDir: DataDir | null): RelatedLicenseSet[] {
     const scoreLogger = this.makeScoreLogger(logDir);

@@ -5,8 +5,8 @@ import HubspotAPI from "../hubspot/api";
 import { CompanyManager } from '../hubspot/model/company';
 import { ContactManager } from '../hubspot/model/contact';
 import { DealManager } from '../hubspot/model/deal';
-import { ConsoleLogger } from "../log/console";
 import { MultiDownloadLogger } from "../log/download-logger";
+import { Logger } from "../log/logger";
 import { MarketplaceAPI } from "../marketplace/api";
 
 interface HubspotManagers {
@@ -15,7 +15,7 @@ interface HubspotManagers {
   companyManager: CompanyManager,
 }
 
-export async function downloadAllData(log: ConsoleLogger, dataSet: DataSet, managers: HubspotManagers): Promise<Data> {
+export async function downloadAllData(log: Logger, dataSet: DataSet, managers: HubspotManagers): Promise<Data> {
   const hubspotAPI = new HubspotAPI(log);
   const marketplaceAPI = new MarketplaceAPI();
 

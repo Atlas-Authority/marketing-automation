@@ -1,7 +1,7 @@
 import mustache from 'mustache';
 import { DealStage, Pipeline } from "../../hubspot/interfaces";
 import { Deal, DealData, DealManager } from "../../hubspot/model/deal";
-import { ConsoleLogger } from "../../log/console";
+import { Logger } from "../../log/logger";
 import { License } from "../../marketplace/model/license";
 import { Transaction, uniqueTransactionId } from "../../marketplace/model/transaction";
 import { isPresent, sorter } from "../../util/helpers";
@@ -21,7 +21,7 @@ export class ActionGenerator {
   #handledDeals = new Map<Deal, DealRelevantEvent>();
 
   public constructor(
-    private log: ConsoleLogger | null,
+    private log: Logger | null,
     private dealManager: DealManager,
     private dealPropertyConfig: DealPropertyConfig,
     private ignore: (reason: string, amount: number) => void,

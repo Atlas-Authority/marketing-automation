@@ -1,6 +1,6 @@
 import chalk from "chalk";
 import { MultiBar, Presets, SingleBar } from "cli-progress";
-import { ConsoleLogger } from "./console";
+import { Logger } from "./logger";
 
 export interface Progress {
   setCount: (count: number) => void;
@@ -9,7 +9,7 @@ export interface Progress {
 
 export class MultiDownloadLogger {
 
-  constructor(private log: ConsoleLogger) { }
+  constructor(private log: Logger) { }
 
   private multibar = new MultiBar({
     format: `${chalk.cyan('[{bar}]')} {name}`,
@@ -59,7 +59,7 @@ class AnimatedProgressBar {
 
 class SimpleLogProgress {
 
-  public constructor(private log: ConsoleLogger, private name: string) { }
+  public constructor(private log: Logger, private name: string) { }
 
   public setCount(count: number) {
     this.log.info('Downloader', `Downloading ${this.name} (${count} call${count === 1 ? '' : 's'})`);

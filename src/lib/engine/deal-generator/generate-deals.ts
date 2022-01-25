@@ -1,7 +1,7 @@
 import assert from "assert";
 import DataDir from "../../data/dir";
 import { Deal } from "../../hubspot/model/deal";
-import { ConsoleLogger } from "../../log/console";
+import { Logger } from "../../log/logger";
 import { Table } from "../../log/table";
 import { LicenseData } from "../../marketplace/model/license";
 import { formatMoney } from "../../util/formatters";
@@ -25,7 +25,7 @@ export class DealGenerator {
 
   private ignoredAmounts = new Map<string, number>();
 
-  public constructor(private log: ConsoleLogger | null, private engine: Engine) {
+  public constructor(private log: Logger | null, private engine: Engine) {
     this.actionGenerator = new ActionGenerator(
       log,
       engine.dealManager,

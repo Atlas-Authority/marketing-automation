@@ -6,14 +6,15 @@ import { Engine } from "../lib/engine/engine";
 import { SlackNotifier } from '../lib/engine/slack-notifier';
 import { Hubspot } from '../lib/hubspot';
 import { logHubspotResults } from '../lib/hubspot/log-results';
-import { ConsoleLogger } from '../lib/log/console';
+import { Logger } from '../lib/log/logger';
 import { engineConfigFromENV, runLoopConfigFromENV } from "../lib/parameters/env-config";
 import run from "../lib/util/runner";
 
-const log = new ConsoleLogger();
-
 const dataDir = DataDir.root.subdir("in");
 const dataSet = new DataSet(dataDir);
+
+const logDir = dataDir.subdir('out');
+const log = new Logger(logDir);
 
 const runLoopConfig = runLoopConfigFromENV();
 const notifier = SlackNotifier.fromENV(log);
@@ -22,7 +23,6 @@ notifier?.notifyStarting();
 run(log, runLoopConfig, {
 
   async work() {
-    const logDir = dataDir.subdir('out');
 
     log.info('Main', 'Downloading data');
     const hubspot = Hubspot.live(log);

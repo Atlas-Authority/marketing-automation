@@ -1,5 +1,5 @@
 import * as slack from '@slack/web-api';
-import { ConsoleLogger } from '../log/console';
+import { Logger } from '../log/logger';
 import { slackConfigFromENV } from "../parameters/env-config";
 import { AttachableError, KnownError } from "../util/errors";
 
@@ -11,7 +11,7 @@ interface RunLoopConfig {
 
 export class SlackNotifier {
 
-  static fromENV(log: ConsoleLogger) {
+  static fromENV(log: Logger) {
     const slackConfig = slackConfigFromENV();
     if (!slackConfig.apiToken) return null;
 
@@ -20,7 +20,7 @@ export class SlackNotifier {
   }
 
   private constructor(
-    private log: ConsoleLogger,
+    private log: Logger,
     private client: slack.WebClient,
     private errorChannelId: string | undefined,
   ) { }

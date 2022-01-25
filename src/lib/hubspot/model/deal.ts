@@ -1,4 +1,4 @@
-import { ConsoleLogger } from "../../log/console";
+import { Logger } from "../../log/logger";
 import { uniqueTransactionId } from "../../marketplace/model/transaction";
 import { hubspotAccountIdFromEnv } from "../../parameters/env-config";
 import { AttachableError } from "../../util/errors";
@@ -263,7 +263,7 @@ export class DealManager extends EntityManager<DealData, Deal> {
 
   public duplicates = new Map<Deal, Deal[]>();
 
-  constructor(log: ConsoleLogger | null, config: HubspotDealConfig) {
+  constructor(log: Logger | null, config: HubspotDealConfig) {
     super(log);
     this.entityAdapter = makeAdapter(config);
   }
