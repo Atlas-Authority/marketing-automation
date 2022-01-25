@@ -180,7 +180,7 @@ export class ActionGenerator {
     else if (foundDeals.size > 1) {
       // Has duplicates!
 
-      const importantDeals = [...foundDeals].filter(d => d.computed.hasActivity);
+      const importantDeals = [...foundDeals].filter(d => d.hasActivity());
 
       let toDelete: Deal[] = [];
 

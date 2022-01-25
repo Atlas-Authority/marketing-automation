@@ -68,6 +68,20 @@ export class Deal extends Entity<DealData, DealComputed> {
       : `Deal=${this.id} (see link by setting HUBSPOT_ACCOUNT_ID)`);
   }
 
+  hasActivity() {
+    return (
+      isNonBlankString(this.downloadedData['hs_user_ids_of_all_owners']) ||
+      isNonBlankString(this.downloadedData['engagements_last_meeting_booked']) ||
+      isNonBlankString(this.downloadedData['hs_latest_meeting_activity']) ||
+      isNonBlankString(this.downloadedData['notes_last_contacted']) ||
+      isNonBlankString(this.downloadedData['notes_last_updated']) ||
+      isNonBlankString(this.downloadedData['notes_next_activity_date']) ||
+      isNonBlankString(this.downloadedData['hs_sales_email_last_replied']) ||
+      isNonZeroNumberString(this.downloadedData['num_contacted_notes']) ||
+      isNonZeroNumberString(this.downloadedData['num_notes'])
+    );
+  }
+
 }
 
 export interface HubspotDealConfig {
@@ -94,6 +108,14 @@ export interface HubspotDealConfig {
     associatedPartner?: string,
     duplicateOf?: string,
   },
+}
+
+function isNonBlankString(str: string | null) {
+  return (str ?? '').length > 0;
+}
+
+function isNonZeroNumberString(str: string | null) {
+  return +(str ?? '') > 0;
 }
 
 function makeAdapter(config: HubspotDealConfig): EntityAdapter<DealData, DealComputed> {
@@ -256,14 +278,6 @@ function makeAdapter(config: HubspotDealConfig): EntityAdapter<DealData, DealCom
     },
 
   };
-
-  function isNonBlankString(str: string | null) {
-    return (str ?? '').length > 0;
-  }
-
-  function isNonZeroNumberString(str: string | null) {
-    return +(str ?? '') > 0;
-  }
 
 }
 

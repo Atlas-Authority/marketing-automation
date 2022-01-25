@@ -41,12 +41,16 @@ export class Contact extends Entity<ContactData, ContactComputed> {
 
   public get isExternal() { return !this.data.email || !this.data.contactType; }
 
-  public get allEmails() { return [this.data.email, ...this.computed.otherEmails]; }
+  public get allEmails() { return [this.data.email, ...this.otherEmails()]; }
   public get isPartner() { return this.data.contactType === 'Partner'; }
   public get isCustomer() { return this.data.contactType === 'Customer'; }
 
   /** Sorted newest first */
   public records: (License | Transaction)[] = [];
+
+  otherEmails() {
+    return this.downloadedData['hs_additional_emails']?.split(';') || [];
+  }
 
 }
 

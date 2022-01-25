@@ -24,7 +24,7 @@ export abstract class Entity<
   public constructor(
     id: string | null,
     public adapter: EntityAdapter<D, C>,
-    private downloadedData: Record<string, string>,
+    protected downloadedData: Record<string, string>,
     data: D,
     public computed: C,
     private indexer: Indexer<D>,
