@@ -52,7 +52,7 @@ $ npm run 3x       -- help  # Dry-run engine 3x, piping output to input
 ```
 
 * Data must be downloaded before local dry-runs.
-* Pass `loglevel=verbose` or `savelogs=out` to examine engine logic.
+* Pass `savelogs=out` to examine engine logic.
 
 Running tests:
 

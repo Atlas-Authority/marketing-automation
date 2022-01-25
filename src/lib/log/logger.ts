@@ -5,18 +5,16 @@ enum LogLevel {
   Error,
   Warn,
   Info,
-  Verbose,
 }
 
 class Logger {
 
-  public level = LogLevel.Verbose;
+  public level = LogLevel.Info;
   public readonly Levels = LogLevel;
 
   public error(prefix: string, ...args: any[]) { this.print(LogLevel.Error, prefix, ...args); }
   public warn(prefix: string, ...args: any[]) { this.print(LogLevel.Warn, prefix, ...args); }
   public info(prefix: string, ...args: any[]) { this.print(LogLevel.Info, prefix, ...args); }
-  public verbose(prefix: string, ...args: any[]) { this.print(LogLevel.Verbose, prefix, ...args); }
 
   private print(level: LogLevel, prefix: string, ...args: any[]) {
     if (level > this.level) return;
@@ -55,7 +53,6 @@ class Logger {
       case 'error': this.level = LogLevel.Error; break;
       case 'warn': this.level = LogLevel.Warn; break;
       case 'info': this.level = LogLevel.Info; break;
-      case 'verbose': this.level = LogLevel.Verbose; break;
     }
   }
 }
@@ -64,7 +61,6 @@ const levelPrefixes = {
   [LogLevel.Error]: chalk.red('ERR!'),
   [LogLevel.Warn]: chalk.dim.redBright('WARN'),
   [LogLevel.Info]: chalk.green('info'),
-  [LogLevel.Verbose]: chalk.green('more'),
 };
 
 function formatted(data: unknown, prefixLength: number) {
