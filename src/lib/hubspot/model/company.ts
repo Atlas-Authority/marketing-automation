@@ -18,9 +18,9 @@ export const CompanyAdapter: EntityAdapter<CompanyData> = {
 
   kind: 'company',
 
-  associations: [
-    ['contact', 'down']
-  ],
+  associations: {
+    contact: 'down',
+  },
 
   data: {
     name: {

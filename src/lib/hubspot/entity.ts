@@ -105,8 +105,8 @@ export abstract class Entity<D extends Record<string, any>> {
 
   public upsyncableAssociations() {
     return [...this.newAssocs].filter(other => {
-      const found = this.adapter.associations.find(a => a[0] === other.kind);
-      return found?.[1].includes('up');
+      const found = this.adapter.associations[other.kind];
+      return found?.includes('up');
     });
   }
 

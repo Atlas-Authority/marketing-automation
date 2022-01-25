@@ -3,7 +3,7 @@ import { ConsoleLogger } from '../log/logger';
 import { AttachableError } from "../util/errors";
 import HubspotAPI from "./api";
 import { Entity } from './entity';
-import { EntityAdapter } from './interfaces';
+import { EntityAdapter, EntityKind } from './interfaces';
 import { typedEntries } from "./manager";
 
 export class HubspotUploader<D extends Record<string, any>> {
@@ -77,9 +77,9 @@ export class HubspotUploader<D extends Record<string, any>> {
       .flatMap(e => e.getAssociationChanges()
         .map(({ op, other }) => ({ op, from: e, to: other }))));
 
-    const upAssociations = (this.adapter.associations
+    const upAssociations = (Object.entries(this.adapter.associations)
       .filter(([kind, dir]) => dir.includes('up'))
-      .map(([kind, dir]) => kind));
+      .map(([kind, dir]) => kind as EntityKind));
 
     for (const otherKind of upAssociations) {
       const toSyncInKind = (toSync

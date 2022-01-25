@@ -136,10 +136,10 @@ function makeAdapter(config: HubspotDealConfig): EntityAdapter<DealData> {
 
     kind: 'deal',
 
-    associations: [
-      ['company', 'down/up'],
-      ['contact', 'down/up'],
-    ],
+    associations: {
+      company: 'down/up',
+      contact: 'down/up',
+    },
 
     shouldReject(data) {
       if (data['pipeline'] !== config.pipeline?.mpac) return true;

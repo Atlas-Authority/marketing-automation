@@ -34,7 +34,7 @@ export interface EntityAdapter<D> {
 
   kind: EntityKind;
 
-  associations: [EntityKind, 'down' | 'down/up'][];
+  associations: Partial<Record<EntityKind, 'down' | 'down/up'>>;
 
   shouldReject?: (data: HubspotProperties) => boolean;
 

@@ -69,9 +69,9 @@ function makeAdapter(config: HubspotContactConfig): EntityAdapter<ContactData> {
 
     kind: 'contact',
 
-    associations: [
-      ['company', 'down/up'],
-    ],
+    associations: {
+      company: 'down/up',
+    },
 
     data: {
       contactType: {

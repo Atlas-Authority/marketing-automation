@@ -34,8 +34,8 @@ class HubspotResultLogger {
 
     const associations = entity.getAssociationChanges().filter(assoc => {
       const otherKind = assoc.other.kind;
-      const found = entity.adapter.associations.find(a => a[0] === otherKind);
-      return found?.[1].includes('up');
+      const found = entity.adapter.associations[otherKind];
+      return found?.includes('up');
     });
     if (associations.length > 0) {
       const action = 'associations';

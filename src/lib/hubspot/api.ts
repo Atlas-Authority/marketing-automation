@@ -22,7 +22,7 @@ export default class HubspotAPI {
   }
 
   public async downloadHubspotEntities<D>(entityAdapter: EntityAdapter<D>) {
-    const inputAssociations = (entityAdapter.associations
+    const inputAssociations = (Object.entries(entityAdapter.associations)
       .filter(([kind, dir]) => dir.includes('down'))
       .map(([kind, dir]) => kind));
 
