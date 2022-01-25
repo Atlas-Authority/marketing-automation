@@ -1,5 +1,5 @@
 import DataDir from '../../data/dir';
-import { ConsoleLogger } from '../../log/logger';
+import { ConsoleLogger } from '../../log/console';
 import { License } from '../../marketplace/model/license';
 import { sorter } from '../../util/helpers';
 import { Engine } from '../engine';

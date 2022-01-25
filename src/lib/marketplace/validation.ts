@@ -1,6 +1,6 @@
 import assert from "assert";
 import util from "util";
-import { ConsoleLogger } from '../log/logger';
+import { ConsoleLogger } from '../log/console';
 import { AttachableError } from '../util/errors';
 import { License, LicenseData } from "./model/license";
 import { Transaction } from "./model/transaction";

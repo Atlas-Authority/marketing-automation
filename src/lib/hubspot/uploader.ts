@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import { ConsoleLogger } from '../log/logger';
+import { ConsoleLogger } from '../log/console';
 import { AttachableError } from "../util/errors";
 import HubspotAPI from "./api";
 import { Entity } from './entity';

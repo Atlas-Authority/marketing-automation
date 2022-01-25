@@ -5,8 +5,8 @@ import HubspotAPI from "../hubspot/api";
 import { CompanyManager } from '../hubspot/model/company';
 import { ContactManager } from '../hubspot/model/contact';
 import { DealManager } from '../hubspot/model/deal';
+import { ConsoleLogger } from "../log/console";
 import { MultiDownloadLogger } from "../log/download-logger";
-import { ConsoleLogger } from "../log/logger";
 import { MarketplaceAPI } from "../marketplace/api";
 
 interface HubspotManagers {

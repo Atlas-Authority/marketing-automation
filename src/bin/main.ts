@@ -6,7 +6,7 @@ import { Engine } from "../lib/engine/engine";
 import { SlackNotifier } from '../lib/engine/slack-notifier';
 import { Hubspot } from '../lib/hubspot';
 import { logHubspotResults } from '../lib/hubspot/log-results';
-import { ConsoleLogger } from '../lib/log/logger';
+import { ConsoleLogger } from '../lib/log/console';
 import { engineConfigFromENV, runLoopConfigFromENV } from "../lib/parameters/env-config";
 import run from "../lib/util/runner";
 

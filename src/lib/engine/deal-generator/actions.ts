@@ -1,7 +1,7 @@
 import mustache from 'mustache';
 import { DealStage, Pipeline } from "../../hubspot/interfaces";
 import { Deal, DealData, DealManager } from "../../hubspot/model/deal";
-import { ConsoleLogger } from "../../log/logger";
+import { ConsoleLogger } from "../../log/console";
 import { License } from "../../marketplace/model/license";
 import { Transaction, uniqueTransactionId } from "../../marketplace/model/transaction";
 import { isPresent, sorter } from "../../util/helpers";

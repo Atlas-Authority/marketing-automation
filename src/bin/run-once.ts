@@ -4,7 +4,7 @@ import { DataSet } from '../lib/data/set';
 import { Engine } from "../lib/engine/engine";
 import { Hubspot } from '../lib/hubspot';
 import { logHubspotResults } from '../lib/hubspot/log-results';
-import { ConsoleLogger } from '../lib/log/logger';
+import { ConsoleLogger } from '../lib/log/console';
 import { getCliArgs } from '../lib/parameters/cli-args';
 import { engineConfigFromENV } from '../lib/parameters/env-config';
 

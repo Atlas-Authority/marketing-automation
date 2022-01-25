@@ -1,4 +1,4 @@
-import { ConsoleLogger } from "../log/logger";
+import { ConsoleLogger } from "../log/console";
 import { hubspotContactConfigFromENV, hubspotDealConfigFromENV } from "../parameters/env-config";
 import { CompanyManager } from "./model/company";
 import { ContactManager, HubspotContactConfig } from "./model/contact";

@@ -1,4 +1,4 @@
-import { ConsoleLogger } from '../log/logger';
+import { ConsoleLogger } from '../log/console';
 import { isPresent } from '../util/helpers';
 import { Entity, Indexer } from './entity';
 import { EntityAdapter, EntityKind, FullEntity, RelativeAssociation } from './interfaces';

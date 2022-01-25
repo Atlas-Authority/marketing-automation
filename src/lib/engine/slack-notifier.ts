@@ -1,5 +1,5 @@
 import * as slack from '@slack/web-api';
-import { ConsoleLogger } from '../log/logger';
+import { ConsoleLogger } from '../log/console';
 import { slackConfigFromENV } from "../parameters/env-config";
 import { AttachableError, KnownError } from "../util/errors";
 

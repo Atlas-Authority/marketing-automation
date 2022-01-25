@@ -1,6 +1,6 @@
 import * as hubspot from '@hubspot/api-client';
 import assert from 'assert';
-import { ConsoleLogger } from '../log/logger';
+import { ConsoleLogger } from '../log/console';
 import { hubspotCredsFromENV } from '../parameters/env-config';
 import { KnownError } from '../util/errors';
 import { batchesOf, isPresent } from '../util/helpers';

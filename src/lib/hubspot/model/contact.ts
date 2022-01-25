@@ -1,4 +1,4 @@
-import { ConsoleLogger } from "../../log/logger";
+import { ConsoleLogger } from "../../log/console";
 import { License } from "../../marketplace/model/license";
 import { Transaction } from "../../marketplace/model/transaction";
 import { Entity } from "../entity";

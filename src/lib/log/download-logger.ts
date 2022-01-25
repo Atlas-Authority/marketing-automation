@@ -1,6 +1,6 @@
 import chalk from "chalk";
 import { MultiBar, Presets, SingleBar } from "cli-progress";
-import { ConsoleLogger } from "./logger";
+import { ConsoleLogger } from "./console";
 
 export interface Progress {
   setCount: (count: number) => void;

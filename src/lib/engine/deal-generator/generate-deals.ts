@@ -1,7 +1,7 @@
 import assert from "assert";
 import DataDir from "../../data/dir";
 import { Deal } from "../../hubspot/model/deal";
-import { ConsoleLogger } from "../../log/logger";
+import { ConsoleLogger } from "../../log/console";
 import { Table } from "../../log/table";
 import { LicenseData } from "../../marketplace/model/license";
 import { formatMoney } from "../../util/formatters";

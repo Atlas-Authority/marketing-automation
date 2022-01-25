@@ -1,4 +1,4 @@
-import { ConsoleLogger } from "../log/logger";
+import { ConsoleLogger } from "../log/console";
 import { Table } from "../log/table";
 import { formatMoney } from "../util/formatters";
 import { isPresent } from "../util/helpers";

@@ -1,4 +1,4 @@
-import { ConsoleLogger } from "../../log/logger";
+import { ConsoleLogger } from "../../log/console";
 import { uniqueTransactionId } from "../../marketplace/model/transaction";
 import { hubspotAccountIdFromEnv } from "../../parameters/env-config";
 import { AttachableError } from "../../util/errors";

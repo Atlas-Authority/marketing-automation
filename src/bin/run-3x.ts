@@ -6,7 +6,7 @@ import { Hubspot } from '../lib/hubspot';
 import { Entity } from '../lib/hubspot/entity';
 import { FullEntity, RelativeAssociation } from '../lib/hubspot/interfaces';
 import { logHubspotResults } from '../lib/hubspot/log-results';
-import { ConsoleLogger } from '../lib/log/logger';
+import { ConsoleLogger } from '../lib/log/console';
 import { getCliArgs } from '../lib/parameters/cli-args';
 import { engineConfigFromENV } from '../lib/parameters/env-config';
 

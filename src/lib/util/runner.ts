@@ -1,4 +1,4 @@
-import { ConsoleLogger } from "../log/logger";
+import { ConsoleLogger } from "../log/console";
 
 export interface RunLoopConfig {
   runInterval: string,
