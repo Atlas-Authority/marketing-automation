@@ -22,6 +22,7 @@ export class Logger {
   }
 
   public scoreLogger() {
+    if (this.#fast) return;
     return new LicenseMatchLogger(this.#licenseScoringFile.writeCsvStream());
   }
 
