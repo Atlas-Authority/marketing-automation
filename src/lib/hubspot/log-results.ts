@@ -25,10 +25,11 @@ class HubspotResultLogger {
   private logEntity(stream: LogWriteStream, entity: Entity<any, any>) {
     const fromKind = entity.adapter.kind;
 
-    const properties = entity.getPropertyChanges();
+    const properties = { ...entity.getPropertyChanges() };
     if (Object.keys(properties).length > 0) {
-      const verb = this.creating.has(entity) ? 'Creating' : 'Updating';
-      stream.writeLine(`${verb} [${fromKind}:${this.idFor(entity)}]:\n${stringify(properties)}\n`);
+      const action = this.creating.has(entity) ? 'create' : 'update';
+      const id = `${fromKind}:${this.idFor(entity)}`;
+      stream.writeLine(stringify({ action, id, properties }));
     }
 
     const associations = entity.getAssociationChanges().filter(assoc => {
@@ -37,10 +38,13 @@ class HubspotResultLogger {
       return found?.[1].includes('up');
     });
     if (associations.length > 0) {
-      stream.writeLine(`Associating [${fromKind}:${this.idFor(entity)}]:\n${stringify(associations.map(assoc => [
+      const action = 'associations';
+      const id = `${fromKind}:${this.idFor(entity)}`;
+      const mappedAssociations = associations.map(assoc => [
         assoc.op,
         `${assoc.other.adapter.kind}:${this.idFor(assoc.other)}`,
-      ]))}\n`);
+      ]);
+      stream.writeLine(stringify({ action, id, mappedAssociations }));
     }
   }
 
