@@ -10,7 +10,6 @@ import { engineConfigFromENV, runLoopConfigFromENV } from "../lib/parameters/env
 import run from "../lib/util/runner";
 
 const dataDir = DataDir.root.subdir("in");
-const dataSet = new DataSet(dataDir);
 
 const log = new Logger(dataDir.subdir('out'));
 
@@ -23,11 +22,12 @@ run(log, runLoopConfig, {
   async work() {
 
     log.info('Main', 'Downloading data');
+    const dataSet = new DataSet(dataDir);
     const hubspot = Hubspot.live(log);
     await downloadAllData(log, dataSet, hubspot);
 
     log.info('Main', 'Running engine');
-    const data = new DataSet(dataDir).load();
+    const data = dataSet.load();
     const engine = new Engine(log, hubspot, engineConfigFromENV());
     engine.run(data);
 

@@ -52,7 +52,7 @@ $ npm run 3x        # Dry-run engine 3x, piping output to input
 ```
 
 * Data must be downloaded before local dry-runs.
-* Pass `savelogs=out` to examine engine logic.
+* Engine log files are written under `data/out-[timestamp]/`
 
 Running tests:
 
