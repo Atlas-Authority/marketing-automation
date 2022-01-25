@@ -75,6 +75,19 @@ export abstract class Entity<
     return upProperties;
   }
 
+  public upsyncableData() {
+    const upProperties: Partial<{ [K in keyof D]: string }> = Object.create(null);
+    for (const [k, v] of Object.entries(this.newData)) {
+      const spec = this.adapter.data[k];
+      if (spec.property) {
+        const upKey = spec.property as keyof D;
+        const upVal = spec.up(v);
+        upProperties[upKey] = upVal;
+      }
+    }
+    return upProperties;
+  }
+
   // Associations
 
   protected makeDynamicAssociation<T extends Entity<any, any>>(kind: EntityKind) {
@@ -91,6 +104,13 @@ export abstract class Entity<
     this.newAssocs.add(entity);
 
     if (meta.firstSide) entity.addAssociation(this, { firstSide: false, initial: meta.initial });
+  }
+
+  public upsyncableAssociations() {
+    return [...this.newAssocs].filter(other => {
+      const found = this.adapter.associations.find(a => a[0] === other.kind);
+      return found?.[1].includes('up');
+    });
   }
 
   private getAssociations(kind: EntityKind) {
