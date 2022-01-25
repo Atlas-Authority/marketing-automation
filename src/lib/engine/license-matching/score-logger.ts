@@ -34,4 +34,8 @@ export class LicenseMatchLogger {
     this.scores.push([score, reason]);
   }
 
+  close() {
+    this.stream.close();
+  }
+
 }

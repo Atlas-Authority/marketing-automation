@@ -16,60 +16,60 @@ export class LicenseGrouper {
   constructor(private log: ConsoleLogger | null, private engine: Engine) { }
 
   run(logDir: DataDir | null): RelatedLicenseSet[] {
-    return this.withLog(logDir, scoreLogger => {
-      const threshold = 130;
-      const scorer = new LicenseMatcher(threshold, scoreLogger);
-      this.matchLicenses(scorer, scoreLogger);
+    const scoreLogger = this.makeScoreLogger(logDir);
 
-      const matches = (Array.from(new Set(this.matchGroups.values()))
-        .map(group => Array.from(group)
-          .sort(sorter(license => license.data.maintenanceStartDate))));
+    const threshold = 130;
+    const scorer = new LicenseMatcher(threshold, scoreLogger);
+    this.matchLicenses(scorer, scoreLogger);
 
-      if (logDir) this.logMatchResults(logDir, matches);
+    const matches = (Array.from(new Set(this.matchGroups.values()))
+      .map(group => Array.from(group)
+        .sort(sorter(license => license.data.maintenanceStartDate))));
 
-      this.log?.info('Scoring Engine', 'Done');
+    this.logMatchResults(logDir, matches);
 
-      return matches;
-    });
+    this.log?.info('Scoring Engine', 'Done');
+
+    scoreLogger?.close();
+
+    return matches;
   }
 
-  private withLog<T>(logDir: DataDir | null, fn: (logger: LicenseMatchLogger | undefined) => T) {
+  private makeScoreLogger<T>(logDir: DataDir | null): LicenseMatchLogger | undefined {
     if (logDir) {
-      return logDir.file('license-scoring.csv').writeCsvStream(stream => {
-        const scoreLogger = new LicenseMatchLogger(stream);
-        const result = fn(scoreLogger);
-        return result;
-      });
+      const stream = logDir.file('license-scoring.csv').writeCsvStream();
+      return new LicenseMatchLogger(stream);
     }
-    else {
-      return fn(undefined);
-    }
+    return undefined;
   }
 
-  private logMatchResults(logDir: DataDir, matches: License[][]) {
+  private logMatchResults(logDir: DataDir | null, matches: License[][]) {
+    if (!logDir) return;
+
+    const allMatchGroupsLog = logDir.file('matched-groups-all.csv').writeCsvStream();
+    const checkMatchGroupsLog = logDir.file('matched-groups-to-check.csv').writeCsvStream();
+
     const groups = matches.map(group => group.map(shorterLicenseInfo));
+    for (const match of groups) {
+      for (const shortLicense of match) {
+        allMatchGroupsLog.writeObjectRow(shortLicense);
+      }
+      allMatchGroupsLog.writeBlankRow();
 
-    logDir.file('matched-groups-all.csv').writeCsvStream(allMatchGroupsLog => {
-      logDir.file('matched-groups-to-check.csv').writeCsvStream(checkMatchGroupsLog => {
-        for (const match of groups) {
-          for (const shortLicense of match) {
-            allMatchGroupsLog.writeObjectRow(shortLicense);
-          }
-          allMatchGroupsLog.writeBlankRow();
-
-          if (match.length > 1 && (
-            !match.every(item => item.tech_email === match[0].tech_email) ||
-            !match.every(item => item.company === match[0].company) ||
-            !match.every(item => item.tech_address === match[0].tech_address)
-          )) {
-            for (const shortLicense of match) {
-              checkMatchGroupsLog.writeObjectRow(shortLicense);
-            }
-            checkMatchGroupsLog.writeBlankRow();
-          }
+      if (match.length > 1 && (
+        !match.every(item => item.tech_email === match[0].tech_email) ||
+        !match.every(item => item.company === match[0].company) ||
+        !match.every(item => item.tech_address === match[0].tech_address)
+      )) {
+        for (const shortLicense of match) {
+          checkMatchGroupsLog.writeObjectRow(shortLicense);
         }
-      });
-    });
+        checkMatchGroupsLog.writeBlankRow();
+      }
+    }
+
+    allMatchGroupsLog.close();
+    checkMatchGroupsLog.close();
   }
 
   private groupLicensesByProduct() {

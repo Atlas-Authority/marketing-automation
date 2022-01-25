@@ -124,4 +124,8 @@ export class DealDataLogger {
     });
   }
 
+  close() {
+    this.log.close();
+  }
+
 }

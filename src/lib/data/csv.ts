@@ -79,4 +79,8 @@ export class CsvStream {
     }
   }
 
+  close() {
+    this.stream.close();
+  }
+
 }

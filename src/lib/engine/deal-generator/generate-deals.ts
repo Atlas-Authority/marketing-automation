@@ -35,43 +35,43 @@ export class DealGenerator {
   }
 
   public run(matches: RelatedLicenseSet[], logDir: DataDir | null) {
-    this.withLogger(logDir, logger => {
-      for (const relatedLicenseIds of matches) {
-        const { records, events, actions } = this.generateActionsForMatchedGroup(relatedLicenseIds);
+    const logger = this.withLogger(logDir);
 
-        logger?.logTestID(relatedLicenseIds);
-        logger?.logRecords(records);
-        logger?.logEvents(events);
-        logger?.logActions(actions);
+    for (const relatedLicenseIds of matches) {
+      const { records, events, actions } = this.generateActionsForMatchedGroup(relatedLicenseIds);
 
-        for (const action of actions) {
-          const deal = (action.type === 'create'
-            ? this.engine.dealManager.create(action.properties)
-            : action.deal);
+      logger?.logTestID(relatedLicenseIds);
+      logger?.logRecords(records);
+      logger?.logEvents(events);
+      logger?.logActions(actions);
 
-          if (deal) {
-            this.associateDealContactsAndCompanies(relatedLicenseIds, deal);
-          }
+      for (const action of actions) {
+        const deal = (action.type === 'create'
+          ? this.engine.dealManager.create(action.properties)
+          : action.deal);
+
+        if (deal) {
+          this.associateDealContactsAndCompanies(relatedLicenseIds, deal);
         }
       }
+    }
 
-      for (const [reason, amount] of this.ignoredAmounts) {
-        this.engine.tallier.less('Ignored: ' + reason, amount);
-      }
+    for (const [reason, amount] of this.ignoredAmounts) {
+      this.engine.tallier.less('Ignored: ' + reason, amount);
+    }
 
-      this.printIgnoredTransactionsTable();
-    });
+    this.printIgnoredTransactionsTable();
+
+    logger?.close();
   }
 
-  private withLogger(logDir: DataDir | null, fn: (logger: DealDataLogger | null) => void) {
+  private withLogger(logDir: DataDir | null): DealDataLogger | null {
     if (logDir) {
-      logDir.file('deal-generator.txt').writeStream(stream => {
-        const logger = new DealDataLogger(stream);
-        fn(logger);
-      });
+      const stream = logDir.file('deal-generator.txt').writeStream();
+      return new DealDataLogger(stream);
     }
     else {
-      fn(null);
+      return null;
     }
   }
 

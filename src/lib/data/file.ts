@@ -6,8 +6,8 @@ import { CsvStream } from "./csv";
 export class DataFile<T extends readonly any[]> {
 
   #url: URL;
-  public constructor(base: URL, filename: string) {
-    this.#url = new URL(filename, base);
+  public constructor(url: URL) {
+    this.#url = url;
   }
 
   public readArray(): T {
@@ -33,31 +33,26 @@ export class DataFile<T extends readonly any[]> {
   }
 
   public writeArray(array: T) {
-    this.writeCsvStream(csv => {
-      csv.writeArrayToFile(array);
-    });
+    const csv = this.writeCsvStream();
+    csv.writeArrayToFile(array);
+    csv.close();
   }
 
-  public writeStream<T>(fn: (stream: LogWriteStream) => T) {
+  public writeStream(): LogWriteStream {
     const fd = fs.openSync(this.#url, 'w');
-    const result = fn({
-      writeLine: (text) => {
-        fs.writeSync(fd, text + '\n');
-      },
-    });
-    fs.closeSync(fd);
-    return result;
+    return {
+      writeLine: (text) => fs.writeSync(fd, text + '\n'),
+      close: () => fs.closeSync(fd),
+    };
   }
 
-  public writeCsvStream<FT>(fn: (stream: CsvStream) => FT): FT {
-    return this.writeStream(stream => {
-      const csvStream = new CsvStream(stream);
-      return fn(csvStream);
-    });
+  public writeCsvStream(): CsvStream {
+    return new CsvStream(this.writeStream());
   }
 
 }
 
 export interface LogWriteStream {
   writeLine(text: string): void;
+  close(): void;
 }

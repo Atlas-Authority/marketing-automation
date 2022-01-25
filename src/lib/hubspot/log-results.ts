@@ -15,11 +15,11 @@ class HubspotResultLogger {
   private creating = new Set<Entity<any>>();
 
   public logResults(hubspot: Hubspot, logFile: DataFile<any>) {
-    logFile.writeStream(stream => {
-      hubspot.dealManager.getArray().forEach((entity) => this.logEntity(stream, entity));
-      hubspot.contactManager.getArray().forEach((entity) => this.logEntity(stream, entity));
-      hubspot.companyManager.getArray().forEach((entity) => this.logEntity(stream, entity));
-    });
+    const stream = logFile.writeStream();
+    hubspot.dealManager.getArray().forEach((entity) => this.logEntity(stream, entity));
+    hubspot.contactManager.getArray().forEach((entity) => this.logEntity(stream, entity));
+    hubspot.companyManager.getArray().forEach((entity) => this.logEntity(stream, entity));
+    stream.close();
   }
 
   private logEntity(stream: LogWriteStream, entity: Entity<any>) {

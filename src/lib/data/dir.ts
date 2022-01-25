@@ -13,7 +13,7 @@ export default class DataDir {
   }
 
   public file<T extends readonly any[]>(filename: string): DataFile<T> {
-    return new DataFile<T>(this.#base, filename);
+    return new DataFile<T>(new URL(filename, this.#base));
   }
 
   public subdir(place: string): DataDir {
