@@ -24,7 +24,7 @@ export class HubspotUploader<D extends Record<string, any>, C extends Record<str
       const results = await this.api.createEntities(
         this.adapter.kind,
         toCreate.map(({ changes }) => ({
-          properties: changes,
+          properties: changes as Record<string, string>,
         }))
       );
 
@@ -61,7 +61,7 @@ export class HubspotUploader<D extends Record<string, any>, C extends Record<str
         this.adapter.kind,
         toUpdate.map(({ e, changes }) => ({
           id: e.guaranteedId(),
-          properties: changes,
+          properties: changes as Record<string, string>,
         }))
       );
     }

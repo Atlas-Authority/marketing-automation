@@ -12,7 +12,7 @@ type DealNoOpReason = Exclude<EventMeta, null> | 'properties-up-to-date';
 
 export type Action = CreateDealAction | UpdateDealAction | IgnoreDealAction;
 export type CreateDealAction = { type: 'create'; properties: DealData };
-export type UpdateDealAction = { type: 'update'; deal: Deal; properties: Partial<DealData> };
+export type UpdateDealAction = { type: 'update'; deal: Deal; properties: Record<string, string> };
 export type IgnoreDealAction = { type: 'noop'; deal: Deal | null, reason: DealNoOpReason };
 
 export class ActionGenerator {

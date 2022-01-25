@@ -1,6 +1,5 @@
 import { LogWriteStream } from "../../data/file.js";
 import { DealStage } from '../../hubspot/interfaces.js';
-import { DealData } from "../../hubspot/model/deal.js";
 import { Table } from "../../log/table.js";
 import { License } from "../../marketplace/model/license.js";
 import { Transaction } from "../../marketplace/model/transaction.js";
@@ -44,7 +43,7 @@ export class DealDataLogger {
     }
   }
 
-  private printDealProperties(data: Partial<DealData>) {
+  private printDealProperties(data: Record<string, any>) {
     for (const [k, v] of Object.entries(data)) {
       this.log.writeLine(`    ${k}: ${v}`);
     }
