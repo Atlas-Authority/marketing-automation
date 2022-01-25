@@ -52,7 +52,7 @@ $ npm run 3x        # Dry-run engine 3x, piping output to input
 ```
 
 * Data must be downloaded before local dry-runs.
-* Engine log files are written under `data/out-[timestamp]/`
+* Engine log files are written under `data/[input-dir]/[log-dir]/`
 
 Running tests:
 

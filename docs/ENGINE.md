@@ -143,7 +143,7 @@ In all other case, match scoring is based on a threshold. Certain factors add to
 - Similar tech contact name has a low score
 - Similar tech contact phone has a low score
 
-Check the log file `data/out-[timestamp]/license-scoring.csv` for more details.
+Check the log file `data/[input-dir]/[log-dir]/license-scoring.csv` for more details.
 
 #### Match results
 

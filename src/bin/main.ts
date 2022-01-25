@@ -11,7 +11,7 @@ import run from "../lib/util/runner";
 
 const dataDir = DataDir.root.subdir("in");
 
-const log = new Logger(dataDir.subdir('out'));
+const log = new Logger(dataDir.subdir('main'));
 
 const runLoopConfig = runLoopConfigFromENV();
 const notifier = SlackNotifier.fromENV(log);

@@ -7,7 +7,8 @@ import { engineConfigFromENV } from '../lib/parameters/env-config';
 import { isPresent, sorter } from "../lib/util/helpers";
 
 const engine = new Engine(null, Hubspot.memory(null), engineConfigFromENV());
-const data = new DataSet(DataDir.root.subdir('in')).load();
+const dataDir = DataDir.root.subdir('in');
+const data = new DataSet(dataDir).load();
 // engine.importData(data);
 
 const attributions = (engine
@@ -21,7 +22,7 @@ const attributions = (engine
   ].join(',')))
 );
 
-DataDir.root.subdir('inspect').file('attributions.csv').writeArray(attributions.map(a => ({
+dataDir.subdir('inspect').file('attributions.csv').writeArray(attributions.map(a => ({
   channel: a.channel,
   referrerDomain: a.referrerDomain,
   campaignName: a.campaignName,
