@@ -9,7 +9,7 @@ export abstract class EntityManager<
   E extends Entity<D, C>>
 {
 
-  protected abstract Entity: new (id: string | null, adapter: EntityAdapter<D, C>, oldData: Partial<D>, newData: D, computed: C, indexer: Indexer<D>) => E;
+  protected abstract Entity: new (id: string | null, adapter: EntityAdapter<D, C>, data: D, computed: C, indexer: Indexer<D>) => E;
   protected abstract entityAdapter: EntityAdapter<D, C>;
   protected get kind(): EntityKind { return this.entityAdapter.kind; }
 
@@ -37,7 +37,7 @@ export abstract class EntityManager<
         set.add(item);
       }
 
-      const entity = new this.Entity(rawEntity.id, this.entityAdapter, data, data, computed, this);
+      const entity = new this.Entity(rawEntity.id, this.entityAdapter, data, computed, this);
       this.entities.push(entity);
     }
 
@@ -71,7 +71,7 @@ export abstract class EntityManager<
 
   public create(data: D) {
     const computed = mapObject(this.entityAdapter.computed, spec => spec.default) as C;
-    const e = new this.Entity(null, this.entityAdapter, {}, data, computed, this);
+    const e = new this.Entity(null, this.entityAdapter, data, computed, this);
     this.entities.push(e);
     for (const index of this.indexes) {
       index.addIndexesFor([e]);

@@ -24,14 +24,13 @@ export abstract class Entity<
   public constructor(
     id: string | null,
     public adapter: EntityAdapter<D, C>,
-    oldData: Partial<D>,
-    newData: D,
+    data: D,
     public computed: C,
     private indexer: Indexer<D>,
   ) {
     this.id = id;
-    Object.assign(this._oldData, oldData);
-    Object.assign(this.newData, newData);
+    if (id) Object.assign(this._oldData, data);
+    Object.assign(this.newData, data);
 
     type K = keyof D;
     this.data = new Proxy(this.newData, {
