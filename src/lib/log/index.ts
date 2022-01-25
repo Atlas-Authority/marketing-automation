@@ -1,7 +1,7 @@
 import DataDir from "../data/dir";
-import { HubspotResultLogger } from "../hubspot/log-results";
 import { ConsoleLogger } from "./console";
 import { DealDataLogger } from "./deal-generator";
+import { HubspotOutputLogger } from "./hubspot-output";
 import { LicenseMatchLogger } from "./license-scorer";
 
 export class Logger {
@@ -33,8 +33,8 @@ export class Logger {
     return new DealDataLogger(this.#dealGeneratorFile.writeStream());
   }
 
-  public hubspotResultLogger() {
-    return new HubspotResultLogger(this.#hubspotResultLog);
+  public hubspotOutputLogger() {
+    return new HubspotOutputLogger(this.#hubspotResultLog);
   }
 
   public allMatchGroupsLog() { return this.#allMatchGroupsLog.writeCsvStream() };

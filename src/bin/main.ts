@@ -35,7 +35,7 @@ run(log, runLoopConfig, {
     await hubspot.upsyncChangesToHubspot();
 
     log.info('Main', 'Writing HubSpot change log file');
-    log.hubspotResultLogger().logResults(hubspot);
+    log.hubspotOutputLogger().logResults(hubspot);
 
     log.info('Main', 'Done');
   },

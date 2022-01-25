@@ -5,7 +5,7 @@ import { Hubspot } from '../hubspot';
 import { Entity } from '../hubspot/entity';
 import { EntityKind } from '../hubspot/interfaces';
 
-export class HubspotResultLogger {
+export class HubspotOutputLogger {
 
   private ids: Record<EntityKind, number> = { deal: 0, contact: 0, company: 0 };
   private creating = new Set<Entity<any>>();
