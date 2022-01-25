@@ -5,7 +5,6 @@ import { Engine } from "../lib/engine/engine";
 import { Hubspot } from '../lib/hubspot';
 import { Entity } from '../lib/hubspot/entity';
 import { FullEntity, RelativeAssociation } from '../lib/hubspot/interfaces';
-import { logHubspotResults } from '../lib/hubspot/log-results';
 import { Logger } from '../lib/log';
 import { engineConfigFromENV } from '../lib/parameters/env-config';
 
@@ -27,12 +26,11 @@ pipeOutputToInput(hubspot, data);
 hubspot = runEngine();
 
 function runEngine() {
-  const logDir = nextLogDir();
-  const log = new Logger(logDir);
+  const log = new Logger(nextLogDir());
   const hubspot = Hubspot.memoryFromENV(log);
   const engine = new Engine(log, hubspot, engineConfigFromENV());
   engine.run(data);
-  logHubspotResults(hubspot, logDir.file('hubspot-out.txt'));
+  log.hubspotResultLogger().logResults(hubspot);
   return hubspot;
 }
 

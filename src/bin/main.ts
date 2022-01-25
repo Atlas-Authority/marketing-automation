@@ -5,7 +5,6 @@ import { downloadAllData } from '../lib/engine/download';
 import { Engine } from "../lib/engine/engine";
 import { SlackNotifier } from '../lib/engine/slack-notifier';
 import { Hubspot } from '../lib/hubspot';
-import { logHubspotResults } from '../lib/hubspot/log-results';
 import { Logger } from '../lib/log';
 import { engineConfigFromENV, runLoopConfigFromENV } from "../lib/parameters/env-config";
 import run from "../lib/util/runner";
@@ -13,8 +12,7 @@ import run from "../lib/util/runner";
 const dataDir = DataDir.root.subdir("in");
 const dataSet = new DataSet(dataDir);
 
-const logDir = dataDir.subdir('out');
-const log = new Logger(logDir);
+const log = new Logger(dataDir.subdir('out'));
 
 const runLoopConfig = runLoopConfigFromENV();
 const notifier = SlackNotifier.fromENV(log);
@@ -37,7 +35,7 @@ run(log, runLoopConfig, {
     await hubspot.upsyncChangesToHubspot();
 
     log.info('Main', 'Writing HubSpot change log file');
-    logHubspotResults(hubspot, logDir.file('hubspot-out.txt'));
+    log.hubspotResultLogger().logResults(hubspot);
 
     log.info('Main', 'Done');
   },

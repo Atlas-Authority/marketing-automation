@@ -5,17 +5,15 @@ import { Hubspot } from '../hubspot';
 import { Entity } from '../hubspot/entity';
 import { EntityKind } from '../hubspot/interfaces';
 
-export function logHubspotResults(hubspot: Hubspot, logFile: DataFile<any>) {
-  new HubspotResultLogger().logResults(hubspot, logFile);
-}
-
-class HubspotResultLogger {
+export class HubspotResultLogger {
 
   private ids: Record<EntityKind, number> = { deal: 0, contact: 0, company: 0 };
   private creating = new Set<Entity<any>>();
 
-  public logResults(hubspot: Hubspot, logFile: DataFile<any>) {
-    const stream = logFile.writeStream();
+  constructor(private logFile: DataFile<any>) { }
+
+  public logResults(hubspot: Hubspot) {
+    const stream = this.logFile.writeStream();
     hubspot.dealManager.getArray().forEach((entity) => this.logEntity(stream, entity));
     hubspot.contactManager.getArray().forEach((entity) => this.logEntity(stream, entity));
     hubspot.companyManager.getArray().forEach((entity) => this.logEntity(stream, entity));
