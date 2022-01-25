@@ -1,5 +1,4 @@
 import assert from "assert";
-import DataDir from "../../data/dir";
 import { Deal } from "../../hubspot/model/deal";
 import { Logger } from "../../log/logger";
 import { Table } from "../../log/table";
@@ -10,7 +9,6 @@ import { Engine } from "../engine";
 import { RelatedLicenseSet } from "../license-matching/license-grouper";
 import { ActionGenerator } from "./actions";
 import { EventGenerator } from "./events";
-import { DealDataLogger } from "./logger";
 
 
 export type IgnoredLicense = LicenseData & {
@@ -34,8 +32,8 @@ export class DealGenerator {
     );
   }
 
-  public run(matches: RelatedLicenseSet[], logDir: DataDir | null) {
-    const logger = this.withLogger(logDir);
+  public run(matches: RelatedLicenseSet[]) {
+    const logger = this.log?.dealGeneratorLog();
 
     for (const relatedLicenseIds of matches) {
       const { records, events, actions } = this.generateActionsForMatchedGroup(relatedLicenseIds);
@@ -63,16 +61,6 @@ export class DealGenerator {
     this.printIgnoredTransactionsTable();
 
     logger?.close();
-  }
-
-  private withLogger(logDir: DataDir | null): DealDataLogger | null {
-    if (logDir) {
-      const stream = logDir.file('deal-generator.txt').writeStream();
-      return new DealDataLogger(stream);
-    }
-    else {
-      return null;
-    }
   }
 
   private printIgnoredTransactionsTable() {

@@ -1,5 +1,4 @@
 import chalk from "chalk";
-import DataDir from "../data/dir";
 import { Data } from "../data/set";
 import { Hubspot } from "../hubspot";
 import { CompanyManager } from "../hubspot/model/company";
@@ -74,7 +73,7 @@ export class Engine {
     };
   }
 
-  public run(data: Data, logDir: DataDir | null) {
+  public run(data: Data) {
     this.logStep('Importing given data set into engine');
     this.importData(data);
 
@@ -85,13 +84,13 @@ export class Engine {
     new ContactGenerator(this).run();
 
     this.logStep('Running Scoring Engine');
-    const allMatches = new LicenseGrouper(this.log, this).run(logDir);
+    const allMatches = new LicenseGrouper(this.log, this).run();
 
     this.logStep('Updating Contacts based on Match Results');
     updateContactsBasedOnMatchResults(this, allMatches);
 
     this.logStep('Generating deals');
-    new DealGenerator(this.log, this).run(allMatches, logDir);
+    new DealGenerator(this.log, this).run(allMatches);
 
     this.logStep('Summary');
     printSummary(this.log, this);

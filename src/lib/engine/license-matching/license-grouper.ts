@@ -1,4 +1,3 @@
-import DataDir from '../../data/dir';
 import { Logger } from '../../log/logger';
 import { License } from '../../marketplace/model/license';
 import { sorter } from '../../util/helpers';
@@ -15,8 +14,8 @@ export class LicenseGrouper {
 
   constructor(private log: Logger | null, private engine: Engine) { }
 
-  run(logDir: DataDir | null): RelatedLicenseSet[] {
-    const scoreLogger = this.makeScoreLogger(logDir);
+  run(): RelatedLicenseSet[] {
+    const scoreLogger = this.log?.scoreLogger();
 
     const threshold = 130;
     const scorer = new LicenseMatcher(threshold, scoreLogger);
@@ -26,7 +25,7 @@ export class LicenseGrouper {
       .map(group => Array.from(group)
         .sort(sorter(license => license.data.maintenanceStartDate))));
 
-    this.logMatchResults(logDir, matches);
+    this.logMatchResults(matches);
 
     this.log?.info('Scoring Engine', 'Done');
 
@@ -35,26 +34,16 @@ export class LicenseGrouper {
     return matches;
   }
 
-  private makeScoreLogger<T>(logDir: DataDir | null): LicenseMatchLogger | undefined {
-    if (logDir) {
-      const stream = logDir.file('license-scoring.csv').writeCsvStream();
-      return new LicenseMatchLogger(stream);
-    }
-    return undefined;
-  }
-
-  private logMatchResults(logDir: DataDir | null, matches: License[][]) {
-    if (!logDir) return;
-
-    const allMatchGroupsLog = logDir.file('matched-groups-all.csv').writeCsvStream();
-    const checkMatchGroupsLog = logDir.file('matched-groups-to-check.csv').writeCsvStream();
+  private logMatchResults(matches: License[][]) {
+    const allMatchGroupsLog = this.log?.allMatchGroupsLog();
+    const checkMatchGroupsLog = this.log?.checkMatchGroupsLog();
 
     const groups = matches.map(group => group.map(shorterLicenseInfo));
     for (const match of groups) {
       for (const shortLicense of match) {
-        allMatchGroupsLog.writeObjectRow(shortLicense);
+        allMatchGroupsLog?.writeObjectRow(shortLicense);
       }
-      allMatchGroupsLog.writeBlankRow();
+      allMatchGroupsLog?.writeBlankRow();
 
       if (match.length > 1 && (
         !match.every(item => item.tech_email === match[0].tech_email) ||
@@ -62,14 +51,14 @@ export class LicenseGrouper {
         !match.every(item => item.tech_address === match[0].tech_address)
       )) {
         for (const shortLicense of match) {
-          checkMatchGroupsLog.writeObjectRow(shortLicense);
+          checkMatchGroupsLog?.writeObjectRow(shortLicense);
         }
-        checkMatchGroupsLog.writeBlankRow();
+        checkMatchGroupsLog?.writeBlankRow();
       }
     }
 
-    allMatchGroupsLog.close();
-    checkMatchGroupsLog.close();
+    allMatchGroupsLog?.close();
+    checkMatchGroupsLog?.close();
   }
 
   private groupLicensesByProduct() {

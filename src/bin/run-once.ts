@@ -17,6 +17,6 @@ const engine = new Engine(log, hubspot, engineConfigFromENV());
 
 const data = new DataSet(dataDir).load();
 
-engine.run(data, logDir);
+engine.run(data);
 
 logHubspotResults(hubspot, logDir.file('hubspot-out.txt'));
