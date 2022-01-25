@@ -1,20 +1,13 @@
 import chalk from "chalk";
 import util from "util";
 
-enum LogLevel {
-  Error,
-  Warn,
-  Info,
-}
+class ConsoleLogger {
 
-class Logger {
+  public error(prefix: string, ...args: any[]) { this.print('error', chalk.red('ERR!'), prefix, ...args); }
+  public warn(prefix: string, ...args: any[]) { this.print('error', chalk.dim.redBright('WARN'), prefix, ...args); }
+  public info(prefix: string, ...args: any[]) { this.print('log', chalk.green('info'), prefix, ...args); }
 
-  public error(prefix: string, ...args: any[]) { this.print(LogLevel.Error, prefix, ...args); }
-  public warn(prefix: string, ...args: any[]) { this.print(LogLevel.Warn, prefix, ...args); }
-  public info(prefix: string, ...args: any[]) { this.print(LogLevel.Info, prefix, ...args); }
-
-  private print(level: LogLevel, prefix: string, ...args: any[]) {
-    const first = levelPrefixes[level];
+  private print(printer: 'log' | 'error', style: string, prefix: string, ...args: any[]) {
     const styledPrefix = chalk.magenta(prefix);
 
     const lastDataArg = args.pop();
@@ -27,7 +20,7 @@ class Logger {
     if (args.length > 0) {
       const firstLine = args.join(' ');
       for (const line of firstLine.split('\n')) {
-        console.log([styledTime, first, styledPrefix, line].join(' '));
+        console[printer]([styledTime, style, styledPrefix, line].join(' '));
       }
     }
 
@@ -37,17 +30,11 @@ class Logger {
 
       const formattedLastArg = formatted(lastDataArg, nextLineIndent);
       for (const line of formattedLastArg.split('\n')) {
-        console.log([styledTime, first, styledPrefix, spacer + line].join(' '));
+        console[printer]([styledTime, style, styledPrefix, spacer + line].join(' '));
       }
     }
   }
 }
-
-const levelPrefixes = {
-  [LogLevel.Error]: chalk.red('ERR!'),
-  [LogLevel.Warn]: chalk.dim.redBright('WARN'),
-  [LogLevel.Info]: chalk.green('info'),
-};
 
 function formatted(data: unknown, prefixLength: number) {
   return util.inspect(data, {
@@ -59,5 +46,5 @@ function formatted(data: unknown, prefixLength: number) {
   });
 }
 
-const log = new Logger();
+const log = new ConsoleLogger();
 export default log;
