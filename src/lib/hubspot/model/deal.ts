@@ -1,4 +1,4 @@
-import { Logger } from "../../log/logger";
+import { Logger } from "../../log";
 import { uniqueTransactionId } from "../../marketplace/model/transaction";
 import { hubspotAccountIdFromEnv } from "../../parameters/env-config";
 import { AttachableError } from "../../util/errors";

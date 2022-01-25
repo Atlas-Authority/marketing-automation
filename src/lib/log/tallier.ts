@@ -1,5 +1,5 @@
+import { Logger } from ".";
 import { formatMoney } from "../util/formatters";
-import { Logger } from "./logger";
 import { Table } from "./table";
 
 export class Tallier {

@@ -1,6 +1,6 @@
 import got from 'got';
 import { DateTime, Duration, Interval } from 'luxon';
-import { Progress } from '../log/download-logger';
+import { Progress } from '../log/download';
 import { mpacCredsFromENV } from '../parameters/env-config';
 import { AttachableError, KnownError } from '../util/errors';
 import { RawLicense, RawTransaction } from './raw';

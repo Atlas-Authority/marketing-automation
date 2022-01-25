@@ -1,5 +1,5 @@
 import { Deal } from "../hubspot/model/deal";
-import { Logger } from "../log/logger";
+import { Logger } from "../log";
 import { Table } from "../log/table";
 import { formatMoney, formatNumber } from "../util/formatters";
 import { isPresent } from "../util/helpers";

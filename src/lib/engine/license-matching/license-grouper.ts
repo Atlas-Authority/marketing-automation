@@ -1,9 +1,9 @@
-import { Logger } from '../../log/logger';
+import { Logger } from '../../log';
+import { LicenseMatchLogger } from '../../log/license-scorer';
 import { License } from '../../marketplace/model/license';
 import { sorter } from '../../util/helpers';
 import { Engine } from '../engine';
 import { LicenseMatcher, ScorableLicense } from './license-matcher';
-import { LicenseMatchLogger } from './score-logger';
 
 /** Related via the matching engine. */
 export type RelatedLicenseSet = License[];

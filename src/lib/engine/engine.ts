@@ -4,7 +4,7 @@ import { Hubspot } from "../hubspot";
 import { CompanyManager } from "../hubspot/model/company";
 import { ContactManager } from "../hubspot/model/contact";
 import { DealManager } from "../hubspot/model/deal";
-import { Logger } from "../log/logger";
+import { Logger } from "../log";
 import { Table } from "../log/table";
 import { Tallier } from "../log/tallier";
 import { License } from "../marketplace/model/license";

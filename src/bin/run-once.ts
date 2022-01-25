@@ -4,7 +4,7 @@ import { DataSet } from '../lib/data/set';
 import { Engine } from "../lib/engine/engine";
 import { Hubspot } from '../lib/hubspot';
 import { logHubspotResults } from '../lib/hubspot/log-results';
-import { Logger } from '../lib/log/logger';
+import { Logger } from '../lib/log';
 import { engineConfigFromENV } from '../lib/parameters/env-config';
 
 const dataDir = DataDir.root.subdir('in');

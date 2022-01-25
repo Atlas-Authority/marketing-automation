@@ -1,12 +1,12 @@
-import { LogWriteStream } from "../../data/file.js";
-import { DealStage } from '../../hubspot/interfaces.js';
-import { Table } from "../../log/table.js";
-import { License } from "../../marketplace/model/license.js";
-import { Transaction } from "../../marketplace/model/transaction.js";
-import { formatMoney } from "../../util/formatters.js";
-import { RelatedLicenseSet } from "../license-matching/license-grouper.js";
-import { Action } from "./actions.js";
-import { DealRelevantEvent } from "./events.js";
+import { LogWriteStream } from "../data/file.js";
+import { Action } from "../engine/deal-generator/actions.js";
+import { DealRelevantEvent } from "../engine/deal-generator/events.js";
+import { RelatedLicenseSet } from "../engine/license-matching/license-grouper.js";
+import { DealStage } from '../hubspot/interfaces.js';
+import { License } from "../marketplace/model/license.js";
+import { Transaction } from "../marketplace/model/transaction.js";
+import { formatMoney } from "../util/formatters.js";
+import { Table } from "./table.js";
 
 export class DealDataLogger {
 

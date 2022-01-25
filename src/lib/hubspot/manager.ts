@@ -1,4 +1,4 @@
-import { Logger } from '../log/logger';
+import { Logger } from '../log';
 import { isPresent } from '../util/helpers';
 import { Entity, Indexer } from './entity';
 import { EntityAdapter, EntityKind, FullEntity, RelativeAssociation } from './interfaces';

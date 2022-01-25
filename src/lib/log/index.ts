@@ -1,7 +1,7 @@
 import DataDir from "../data/dir";
-import { DealDataLogger } from "../engine/deal-generator/logger";
-import { LicenseMatchLogger } from "../engine/license-matching/score-logger";
 import { ConsoleLogger } from "./console";
+import { DealDataLogger } from "./deal-generator";
+import { LicenseMatchLogger } from "./license-scorer";
 
 export class Logger {
 

@@ -1,6 +1,6 @@
 import assert from "assert";
 import { Deal } from "../../hubspot/model/deal";
-import { Logger } from "../../log/logger";
+import { Logger } from "../../log";
 import { Table } from "../../log/table";
 import { LicenseData } from "../../marketplace/model/license";
 import { formatMoney } from "../../util/formatters";

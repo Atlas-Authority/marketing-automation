@@ -1,4 +1,4 @@
-import { Logger } from "../../log/logger";
+import { Logger } from "../../log";
 import { License } from "../../marketplace/model/license";
 import { Transaction } from "../../marketplace/model/transaction";
 import { Entity } from "../entity";
