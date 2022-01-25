@@ -21,7 +21,7 @@ export default class HubspotAPI {
     this.client = new hubspot.Client(hubspotCredsFromENV());
   }
 
-  public async downloadHubspotEntities<D, C>(entityAdapter: EntityAdapter<D, C>) {
+  public async downloadHubspotEntities<D>(entityAdapter: EntityAdapter<D>) {
     const inputAssociations = (entityAdapter.associations
       .filter(([kind, dir]) => dir.includes('down'))
       .map(([kind, dir]) => kind));

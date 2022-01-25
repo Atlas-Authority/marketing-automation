@@ -6,12 +6,11 @@ import { HubspotUploader } from './uploader';
 
 export abstract class EntityManager<
   D extends Record<string, any>,
-  C extends Record<string, any>,
-  E extends Entity<D, C>>
+  E extends Entity<D>>
 {
 
-  protected abstract Entity: new (id: string | null, adapter: EntityAdapter<D, C>, downloadedData: Record<string, string>, data: D, indexer: Indexer<D>) => E;
-  protected abstract entityAdapter: EntityAdapter<D, C>;
+  protected abstract Entity: new (id: string | null, adapter: EntityAdapter<D>, downloadedData: Record<string, string>, data: D, indexer: Indexer<D>) => E;
+  protected abstract entityAdapter: EntityAdapter<D>;
   protected get kind(): EntityKind { return this.entityAdapter.kind; }
 
   private entities: E[] = [];
@@ -53,7 +52,7 @@ export abstract class EntityManager<
   public linkEntities(
     prelinkedAssociations: Map<string, Set<RelativeAssociation>>,
     managers: {
-      [K in `${EntityKind}Manager`]: EntityManager<any, any, any>;
+      [K in `${EntityKind}Manager`]: EntityManager<any, any>;
     },
   ) {
     for (const [meId, rawAssocs] of prelinkedAssociations) {
@@ -111,7 +110,7 @@ export abstract class EntityManager<
 
 }
 
-class Index<E extends Entity<any, any>> {
+class Index<E extends Entity<any>> {
 
   private map = new Map<string, E>();
   public constructor(private keysFor: (e: E) => string[]) { }

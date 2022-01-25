@@ -8,13 +8,13 @@ type CompanyData = {
   type: 'Partner' | null;
 };
 
-export class Company extends Entity<CompanyData, {}> {
+export class Company extends Entity<CompanyData> {
 
   public contacts = this.makeDynamicAssociation<Contact>('contact');
 
 }
 
-export const CompanyAdapter: EntityAdapter<CompanyData, {}> = {
+export const CompanyAdapter: EntityAdapter<CompanyData> = {
 
   kind: 'company',
 
@@ -39,7 +39,7 @@ export const CompanyAdapter: EntityAdapter<CompanyData, {}> = {
 
 };
 
-export class CompanyManager extends EntityManager<CompanyData, {}, Company> {
+export class CompanyManager extends EntityManager<CompanyData, Company> {
 
   protected override Entity = Company;
   public override entityAdapter = CompanyAdapter;

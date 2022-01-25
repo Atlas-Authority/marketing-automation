@@ -6,13 +6,13 @@ import { Entity } from './entity';
 import { EntityAdapter } from './interfaces';
 import { typedEntries } from "./manager";
 
-export class HubspotUploader<D extends Record<string, any>, C extends Record<string, any>, E extends Entity<D, C>> {
+export class HubspotUploader<D extends Record<string, any>> {
 
   api;
   constructor(
     log: ConsoleLogger | null,
-    private entities: Entity<D, C>[],
-    private adapter: EntityAdapter<D, C>,
+    private entities: Entity<D>[],
+    private adapter: EntityAdapter<D>,
   ) {
     this.api = new HubspotAPI(log);
   }

@@ -30,7 +30,7 @@ export enum DealStage {
   CLOSED_LOST,
 }
 
-export interface EntityAdapter<D, C> {
+export interface EntityAdapter<D> {
 
   kind: EntityKind;
 

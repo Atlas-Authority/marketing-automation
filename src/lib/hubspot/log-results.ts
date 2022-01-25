@@ -12,7 +12,7 @@ export function logHubspotResults(hubspot: Hubspot, logFile: DataFile<any>) {
 class HubspotResultLogger {
 
   private ids: Record<EntityKind, number> = { deal: 0, contact: 0, company: 0 };
-  private creating = new Set<Entity<any, any>>();
+  private creating = new Set<Entity<any>>();
 
   public logResults(hubspot: Hubspot, logFile: DataFile<any>) {
     logFile.writeStream(stream => {
@@ -22,7 +22,7 @@ class HubspotResultLogger {
     });
   }
 
-  private logEntity(stream: LogWriteStream, entity: Entity<any, any>) {
+  private logEntity(stream: LogWriteStream, entity: Entity<any>) {
     const fromKind = entity.kind;
 
     const properties = { ...entity.getPropertyChanges() };
@@ -48,7 +48,7 @@ class HubspotResultLogger {
     }
   }
 
-  private idFor<T extends Entity<any, any>>(entity: T) {
+  private idFor<T extends Entity<any>>(entity: T) {
     if (!entity.id) {
       const kind = entity.kind;
       this.creating.add(entity);

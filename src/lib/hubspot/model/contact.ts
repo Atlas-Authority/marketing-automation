@@ -31,11 +31,7 @@ export type ContactData = {
   lastAssociatedPartner: string | null;
 };
 
-type ContactComputed = {
-  readonly otherEmails: readonly string[];
-};
-
-export class Contact extends Entity<ContactData, ContactComputed> {
+export class Contact extends Entity<ContactData> {
 
   public companies = this.makeDynamicAssociation<Company>('company');
 
@@ -67,7 +63,7 @@ export interface HubspotContactConfig {
   },
 }
 
-function makeAdapter(config: HubspotContactConfig): EntityAdapter<ContactData, ContactComputed> {
+function makeAdapter(config: HubspotContactConfig): EntityAdapter<ContactData> {
 
   return {
 
@@ -165,10 +161,10 @@ function makeAdapter(config: HubspotContactConfig): EntityAdapter<ContactData, C
 }
 
 
-export class ContactManager extends EntityManager<ContactData, ContactComputed, Contact> {
+export class ContactManager extends EntityManager<ContactData, Contact> {
 
   protected override Entity = Contact;
-  public override entityAdapter: EntityAdapter<ContactData, ContactComputed>;
+  public override entityAdapter: EntityAdapter<ContactData>;
 
   public getByEmail = this.makeIndex(c => c.allEmails, ['email']);
 

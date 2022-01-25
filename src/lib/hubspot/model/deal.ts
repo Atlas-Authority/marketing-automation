@@ -31,12 +31,7 @@ export type DealData = {
   duplicateOf: string | null;
 };
 
-type DealComputed = {
-  readonly hasActivity: boolean;
-  readonly createdDate: string;
-};
-
-export class Deal extends Entity<DealData, DealComputed> {
+export class Deal extends Entity<DealData> {
 
   public contacts = this.makeDynamicAssociation<Contact>('contact');
   public companies = this.makeDynamicAssociation<Company>('company');
@@ -118,7 +113,7 @@ function isNonZeroNumberString(str: string | null) {
   return +(str ?? '') > 0;
 }
 
-function makeAdapter(config: HubspotDealConfig): EntityAdapter<DealData, DealComputed> {
+function makeAdapter(config: HubspotDealConfig): EntityAdapter<DealData> {
 
   function enumFromValue<T extends number>(mapping: Record<T, string>, apiValue: string): T {
     const found = Object.entries(mapping).find(([k, v]) => v === apiValue);
@@ -261,10 +256,10 @@ function makeAdapter(config: HubspotDealConfig): EntityAdapter<DealData, DealCom
 
 }
 
-export class DealManager extends EntityManager<DealData, DealComputed, Deal> {
+export class DealManager extends EntityManager<DealData, Deal> {
 
   protected override Entity = Deal;
-  public override entityAdapter: EntityAdapter<DealData, DealComputed>;
+  public override entityAdapter: EntityAdapter<DealData>;
 
   public duplicates = new Map<Deal, Deal[]>();
 

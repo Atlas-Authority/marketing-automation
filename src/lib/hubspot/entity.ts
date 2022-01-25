@@ -1,29 +1,26 @@
 import { EntityAdapter, EntityKind } from "./interfaces";
 
 export interface Indexer<D> {
-  removeIndexesFor<K extends keyof D>(key: K, entity: Entity<D, any>): void;
-  addIndexesFor<K extends keyof D>(key: K, val: D[K] | undefined, entity: Entity<D, any>): void;
+  removeIndexesFor<K extends keyof D>(key: K, entity: Entity<D>): void;
+  addIndexesFor<K extends keyof D>(key: K, val: D[K] | undefined, entity: Entity<D>): void;
 }
 
-export abstract class Entity<
-  D extends Record<string, any>,
-  C extends Record<string, any>>
-{
+export abstract class Entity<D extends Record<string, any>> {
 
   public id: string | null;
 
   private _oldData: D = Object.create(null);
   private newData: D = Object.create(null);
 
-  private oldAssocs = new Set<Entity<any, any>>();
-  private newAssocs = new Set<Entity<any, any>>();
+  private oldAssocs = new Set<Entity<any>>();
+  private newAssocs = new Set<Entity<any>>();
 
   public readonly data: D;
 
   /** Don't call directly; use manager.create() */
   public constructor(
     id: string | null,
-    public adapter: EntityAdapter<D, C>,
+    public adapter: EntityAdapter<D>,
     protected downloadedData: Record<string, string>,
     data: D,
     private indexer: Indexer<D>,
@@ -90,7 +87,7 @@ export abstract class Entity<
 
   // Associations
 
-  protected makeDynamicAssociation<T extends Entity<any, any>>(kind: EntityKind) {
+  protected makeDynamicAssociation<T extends Entity<any>>(kind: EntityKind) {
     return {
       getAll: () => this.getAssociations(kind) as T[],
       add: (entity: T) => this.addAssociation(entity, { firstSide: true, initial: false }),
@@ -99,7 +96,7 @@ export abstract class Entity<
   }
 
   /** Don't use directly; use deal.contacts.add(c) etc. */
-  public addAssociation(entity: Entity<any, any>, meta: { firstSide: boolean, initial: boolean }) {
+  public addAssociation(entity: Entity<any>, meta: { firstSide: boolean, initial: boolean }) {
     if (meta.initial) this.oldAssocs.add(entity);
     this.newAssocs.add(entity);
 
@@ -138,7 +135,7 @@ export abstract class Entity<
     return [
       ...toAdd.map(e => ({ op: 'add', other: e })),
       ...toDel.map(e => ({ op: 'del', other: e })),
-    ] as { op: 'add' | 'del', other: Entity<any, any> }[];
+    ] as { op: 'add' | 'del', other: Entity<any> }[];
   }
 
 }

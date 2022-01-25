@@ -48,14 +48,14 @@ function pipeOutputToInput(hubspot: Hubspot, data: Data) {
   data.rawCompanies = hubspot.companyManager.getArray().map(toRawEntity);
 }
 
-function fillInIds(entities: Iterable<Entity<any, any>>) {
+function fillInIds(entities: Iterable<Entity<any>>) {
   let id = 0;
   for (const e of entities) {
     if (!e.id) e.id = `fake-${e.kind}-${++id}`;
   }
 }
 
-function toRawEntity(entity: Entity<any, any>): FullEntity {
+function toRawEntity(entity: Entity<any>): FullEntity {
   return {
     id: entity.id!,
     properties: entity.upsyncableData(),
