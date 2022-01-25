@@ -10,9 +10,9 @@ export class HubspotUploader<D extends Record<string, any>> {
 
   api;
   constructor(
-    log: Logger | null,
     private entities: Entity<D>[],
     private adapter: EntityAdapter<D>,
+    log?: Logger,
   ) {
     this.api = new HubspotAPI(log);
   }

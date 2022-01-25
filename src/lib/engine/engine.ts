@@ -57,7 +57,7 @@ export class Engine {
   public contactManager: ContactManager;
   public companyManager: CompanyManager;
 
-  public constructor(private log: Logger | null, hubspotService: Hubspot, config: EngineConfig | null) {
+  public constructor(hubspotService: Hubspot, config?: EngineConfig, public log?: Logger) {
     this.tallier = new Tallier(log);
 
     this.dealManager = hubspotService.dealManager;
@@ -84,16 +84,16 @@ export class Engine {
     new ContactGenerator(this).run();
 
     this.logStep('Running Scoring Engine');
-    const allMatches = new LicenseGrouper(this.log, this).run();
+    const allMatches = new LicenseGrouper(this).run();
 
     this.logStep('Updating Contacts based on Match Results');
     updateContactsBasedOnMatchResults(this, allMatches);
 
     this.logStep('Generating deals');
-    new DealGenerator(this.log, this).run(allMatches);
+    new DealGenerator(this).run(allMatches);
 
     this.logStep('Summary');
-    printSummary(this.log, this);
+    printSummary(this);
 
     this.logStep('Done running engine on given data set');
   }
@@ -130,7 +130,7 @@ export class Engine {
     let licenses = combinedLicenses.map(raw => License.fromRaw(raw));
     let transactions = data.transactions.map(raw => Transaction.fromRaw(raw));
 
-    licenses = licenses.filter(l => validation.hasTechEmail(this.log, l));
+    licenses = licenses.filter(l => validation.hasTechEmail(l, this.log));
     licenses = validation.removeApiBorderDuplicates(licenses);
 
     licenses.forEach(validation.assertRequiredLicenseFields);
@@ -139,7 +139,7 @@ export class Engine {
     licenses = licenses.filter(emailChecker('License'));
     transactions = transactions.filter(emailChecker('Transaction'));
 
-    const structured = buildAndVerifyStructures(this.log, licenses, transactions);
+    const structured = buildAndVerifyStructures(licenses, transactions, this.log);
     this.licenses = structured.licenses;
     this.transactions = structured.transactions;
 

@@ -11,7 +11,7 @@ const log = new Logger(dataDir.subdir(`once-${Date.now()}`));
 
 const hubspot = Hubspot.memoryFromENV(log);
 
-const engine = new Engine(log, hubspot, engineConfigFromENV());
+const engine = new Engine(hubspot, engineConfigFromENV(), log);
 
 const data = new DataSet(dataDir).load();
 

@@ -28,7 +28,7 @@ export function runDealGeneratorTwice(input: TestInput) {
 }
 
 export function runDealGenerator(input: TestInput) {
-  const engine = new Engine(null, Hubspot.memory(null), {
+  const engine = new Engine(Hubspot.memory(), {
     partnerDomains: new Set(input.partnerDomains ?? []),
   });
   const group = reassembleMatchGroup(input.group, input.records);
@@ -48,7 +48,7 @@ export function runDealGenerator(input: TestInput) {
     // deal.applyPropertyChanges();
   }
 
-  const dealGenerator = new DealGenerator(null, engine);
+  const dealGenerator = new DealGenerator(engine);
   const { records, events, actions } = dealGenerator.generateActionsForMatchedGroup(group);
 
   const createdDeals: DealData[] = [];

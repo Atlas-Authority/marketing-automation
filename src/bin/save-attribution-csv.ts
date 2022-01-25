@@ -6,7 +6,7 @@ import { Hubspot } from '../lib/hubspot';
 import { engineConfigFromENV } from '../lib/parameters/env-config';
 import { isPresent, sorter } from "../lib/util/helpers";
 
-const engine = new Engine(null, Hubspot.memory(null), engineConfigFromENV());
+const engine = new Engine(Hubspot.memory(), engineConfigFromENV());
 const dataDir = DataDir.root.subdir('in');
 const data = new DataSet(dataDir).load();
 engine.run(data);

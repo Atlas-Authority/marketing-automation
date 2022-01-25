@@ -21,10 +21,10 @@ export class ActionGenerator {
   #handledDeals = new Map<Deal, DealRelevantEvent>();
 
   public constructor(
-    private log: Logger | null,
     private dealManager: DealManager,
     private dealPropertyConfig: DealPropertyConfig,
     private ignore: (reason: string, amount: number) => void,
+    private log?: Logger,
   ) {
     for (const deal of this.dealManager.getAll()) {
       for (const id of deal.getMpacIds()) {

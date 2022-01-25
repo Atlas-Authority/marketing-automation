@@ -8,23 +8,23 @@ export class Hubspot {
 
   public static live(log: Logger) {
     return new Hubspot(
-      new DealManager(log, hubspotDealConfigFromENV()),
-      new ContactManager(log, hubspotContactConfigFromENV()),
+      new DealManager(hubspotDealConfigFromENV(), log),
+      new ContactManager(hubspotContactConfigFromENV(), log),
       new CompanyManager(log),
     );
   }
 
-  public static memoryFromENV(log: Logger | null) {
-    return this.memory(log, {
+  public static memoryFromENV(log?: Logger) {
+    return this.memory({
       contact: hubspotContactConfigFromENV(),
       deal: hubspotDealConfigFromENV(),
-    });
+    }, log);
   }
 
-  public static memory(log: Logger | null, config?: { deal?: HubspotDealConfig, contact?: HubspotContactConfig }) {
+  public static memory(config?: { deal?: HubspotDealConfig, contact?: HubspotContactConfig }, log?: Logger) {
     return new Hubspot(
-      new DealManager(log, config?.deal ?? {}),
-      new ContactManager(log, config?.contact ?? {}),
+      new DealManager(config?.deal ?? {}, log),
+      new ContactManager(config?.contact ?? {}, log),
       new CompanyManager(log),
     );
   }

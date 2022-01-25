@@ -8,7 +8,7 @@ export class Tallier {
   public first(reason: string, n: number) { this.tally.push([reason, n, 1]); }
   public less(reason: string, n: number) { this.tally.push([reason, n, -1]); }
 
-  constructor(private log: Logger | null) { }
+  constructor(private log?: Logger) { }
 
   public printTable() {
     const remainder = (this.tally

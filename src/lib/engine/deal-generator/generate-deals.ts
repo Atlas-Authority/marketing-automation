@@ -1,6 +1,5 @@
 import assert from "assert";
 import { Deal } from "../../hubspot/model/deal";
-import { Logger } from "../../log";
 import { Table } from "../../log/table";
 import { LicenseData } from "../../marketplace/model/license";
 import { formatMoney } from "../../util/formatters";
@@ -23,17 +22,17 @@ export class DealGenerator {
 
   private ignoredAmounts = new Map<string, number>();
 
-  public constructor(private log: Logger | null, private engine: Engine) {
+  public constructor(private engine: Engine) {
     this.actionGenerator = new ActionGenerator(
-      log,
       engine.dealManager,
       engine.dealPropertyConfig,
       this.ignore.bind(this),
+      engine.log,
     );
   }
 
   public run(matches: RelatedLicenseSet[]) {
-    withAutoClose(this.log?.dealGeneratorLog(), logger => {
+    withAutoClose(this.engine.log?.dealGeneratorLog(), logger => {
       for (const relatedLicenseIds of matches) {
         const { records, events, actions } = this.generateActionsForMatchedGroup(relatedLicenseIds);
 
@@ -70,9 +69,9 @@ export class DealGenerator {
       table.rows.push([reason, formatMoney(amount)]);
     }
 
-    this.log?.info('Deal Actions', 'Amount of Transactions Ignored');
+    this.engine.log?.info('Deal Actions', 'Amount of Transactions Ignored');
     for (const row of table.eachRow()) {
-      this.log?.info('Deal Actions', '  ' + row);
+      this.engine.log?.info('Deal Actions', '  ' + row);
     }
   }
 

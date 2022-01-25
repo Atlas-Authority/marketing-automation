@@ -17,7 +17,7 @@ export default class HubspotAPI {
 
   private client: hubspot.Client;
 
-  constructor(private log: Logger | null) {
+  constructor(private log?: Logger) {
     this.client = new hubspot.Client(hubspotCredsFromENV());
   }
 

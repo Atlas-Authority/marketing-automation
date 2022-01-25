@@ -5,13 +5,13 @@ import { isPresent } from "../util/helpers";
 import { License } from "./model/license";
 import { Transaction, TransactionData } from "./model/transaction";
 
-export function buildAndVerifyStructures(log: Logger | null, licenses: License[], transactions: Transaction[]) {
+export function buildAndVerifyStructures(licenses: License[], transactions: Transaction[], log?: Logger) {
   return new Structurer(log).buildAndVerify(licenses, transactions);
 }
 
 class Structurer {
 
-  constructor(private log: Logger | null) { }
+  constructor(private log?: Logger) { }
 
   buildAndVerify(licenses: License[], transactions: Transaction[]) {
     // All three should be unique on licenses
