@@ -1,7 +1,7 @@
 import { Logger } from '../../log';
 import { LicenseMatchLogger } from '../../log/license-scorer';
 import { License } from '../../marketplace/model/license';
-import { sorter } from '../../util/helpers';
+import { sorter, withAutoClose } from '../../util/helpers';
 import { Engine } from '../engine';
 import { LicenseMatcher, ScorableLicense } from './license-matcher';
 
@@ -15,50 +15,47 @@ export class LicenseGrouper {
   constructor(private log: Logger | null, private engine: Engine) { }
 
   run(): RelatedLicenseSet[] {
-    const scoreLogger = this.log?.scoreLogger();
+    return withAutoClose(this.log?.scoreLogger(), scoreLogger => {
+      const threshold = 130;
+      const scorer = new LicenseMatcher(threshold, scoreLogger);
+      this.matchLicenses(scorer, scoreLogger);
 
-    const threshold = 130;
-    const scorer = new LicenseMatcher(threshold, scoreLogger);
-    this.matchLicenses(scorer, scoreLogger);
+      const matches = (Array.from(new Set(this.matchGroups.values()))
+        .map(group => Array.from(group)
+          .sort(sorter(license => license.data.maintenanceStartDate))));
 
-    const matches = (Array.from(new Set(this.matchGroups.values()))
-      .map(group => Array.from(group)
-        .sort(sorter(license => license.data.maintenanceStartDate))));
+      this.logMatchResults(matches);
 
-    this.logMatchResults(matches);
-
-    this.log?.info('Scoring Engine', 'Done');
-
-    scoreLogger?.close();
-
-    return matches;
+      this.log?.info('Scoring Engine', 'Done');
+      return matches;
+    });
   }
 
   private logMatchResults(matches: License[][]) {
-    const allMatchGroupsLog = this.log?.allMatchGroupsLog();
-    const checkMatchGroupsLog = this.log?.checkMatchGroupsLog();
+    withAutoClose(this.log?.allMatchGroupsLog(), allMatchGroupsLog => {
+      withAutoClose(this.log?.checkMatchGroupsLog(), checkMatchGroupsLog => {
 
-    const groups = matches.map(group => group.map(shorterLicenseInfo));
-    for (const match of groups) {
-      for (const shortLicense of match) {
-        allMatchGroupsLog?.writeObjectRow(shortLicense);
-      }
-      allMatchGroupsLog?.writeBlankRow();
+        const groups = matches.map(group => group.map(shorterLicenseInfo));
+        for (const match of groups) {
+          for (const shortLicense of match) {
+            allMatchGroupsLog?.writeObjectRow(shortLicense);
+          }
+          allMatchGroupsLog?.writeBlankRow();
 
-      if (match.length > 1 && (
-        !match.every(item => item.tech_email === match[0].tech_email) ||
-        !match.every(item => item.company === match[0].company) ||
-        !match.every(item => item.tech_address === match[0].tech_address)
-      )) {
-        for (const shortLicense of match) {
-          checkMatchGroupsLog?.writeObjectRow(shortLicense);
+          if (match.length > 1 && (
+            !match.every(item => item.tech_email === match[0].tech_email) ||
+            !match.every(item => item.company === match[0].company) ||
+            !match.every(item => item.tech_address === match[0].tech_address)
+          )) {
+            for (const shortLicense of match) {
+              checkMatchGroupsLog?.writeObjectRow(shortLicense);
+            }
+            checkMatchGroupsLog?.writeBlankRow();
+          }
         }
-        checkMatchGroupsLog?.writeBlankRow();
-      }
-    }
 
-    allMatchGroupsLog?.close();
-    checkMatchGroupsLog?.close();
+      });
+    });
   }
 
   private groupLicensesByProduct() {

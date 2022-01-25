@@ -1,6 +1,7 @@
 import fs from "fs";
 import LineReader from 'n-readlines';
 import { URL } from "url";
+import { withAutoClose } from "../util/helpers";
 import { CsvStream } from "./csv";
 
 export class DataFile<T extends readonly any[]> {
@@ -33,9 +34,9 @@ export class DataFile<T extends readonly any[]> {
   }
 
   public writeArray(array: T) {
-    const csv = this.writeCsvStream();
-    csv.writeArrayToFile(array);
-    csv.close();
+    withAutoClose(this.writeCsvStream(), csv => {
+      csv.writeArrayToFile(array);
+    });
   }
 
   public writeStream(): LogWriteStream {

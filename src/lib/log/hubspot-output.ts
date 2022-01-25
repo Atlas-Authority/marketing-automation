@@ -3,6 +3,7 @@ import { DataFile, LogWriteStream } from '../data/file';
 import { Hubspot } from '../hubspot';
 import { Entity } from '../hubspot/entity';
 import { EntityKind } from '../hubspot/interfaces';
+import { withAutoClose } from '../util/helpers';
 
 export class HubspotOutputLogger {
 
@@ -12,11 +13,11 @@ export class HubspotOutputLogger {
   constructor(private logFile: DataFile<any>) { }
 
   public logResults(hubspot: Hubspot) {
-    const stream = this.logFile.writeStream();
-    hubspot.dealManager.getArray().forEach((entity) => this.logEntity(stream, entity));
-    hubspot.contactManager.getArray().forEach((entity) => this.logEntity(stream, entity));
-    hubspot.companyManager.getArray().forEach((entity) => this.logEntity(stream, entity));
-    stream.close();
+    withAutoClose(this.logFile.writeStream(), stream => {
+      hubspot.dealManager.getArray().forEach((entity) => this.logEntity(stream, entity));
+      hubspot.contactManager.getArray().forEach((entity) => this.logEntity(stream, entity));
+      hubspot.companyManager.getArray().forEach((entity) => this.logEntity(stream, entity));
+    });
   }
 
   private logEntity(stream: LogWriteStream, entity: Entity<any>) {

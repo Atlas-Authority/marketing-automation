@@ -4,7 +4,7 @@ import { Logger } from "../../log";
 import { Table } from "../../log/table";
 import { LicenseData } from "../../marketplace/model/license";
 import { formatMoney } from "../../util/formatters";
-import { isPresent, sorter } from "../../util/helpers";
+import { isPresent, sorter, withAutoClose } from "../../util/helpers";
 import { Engine } from "../engine";
 import { RelatedLicenseSet } from "../license-matching/license-grouper";
 import { ActionGenerator } from "./actions";
@@ -33,34 +33,32 @@ export class DealGenerator {
   }
 
   public run(matches: RelatedLicenseSet[]) {
-    const logger = this.log?.dealGeneratorLog();
+    withAutoClose(this.log?.dealGeneratorLog(), logger => {
+      for (const relatedLicenseIds of matches) {
+        const { records, events, actions } = this.generateActionsForMatchedGroup(relatedLicenseIds);
 
-    for (const relatedLicenseIds of matches) {
-      const { records, events, actions } = this.generateActionsForMatchedGroup(relatedLicenseIds);
+        logger?.logTestID(relatedLicenseIds);
+        logger?.logRecords(records);
+        logger?.logEvents(events);
+        logger?.logActions(actions);
 
-      logger?.logTestID(relatedLicenseIds);
-      logger?.logRecords(records);
-      logger?.logEvents(events);
-      logger?.logActions(actions);
+        for (const action of actions) {
+          const deal = (action.type === 'create'
+            ? this.engine.dealManager.create(action.properties)
+            : action.deal);
 
-      for (const action of actions) {
-        const deal = (action.type === 'create'
-          ? this.engine.dealManager.create(action.properties)
-          : action.deal);
-
-        if (deal) {
-          this.associateDealContactsAndCompanies(relatedLicenseIds, deal);
+          if (deal) {
+            this.associateDealContactsAndCompanies(relatedLicenseIds, deal);
+          }
         }
       }
-    }
 
-    for (const [reason, amount] of this.ignoredAmounts) {
-      this.engine.tallier.less('Ignored: ' + reason, amount);
-    }
+      for (const [reason, amount] of this.ignoredAmounts) {
+        this.engine.tallier.less('Ignored: ' + reason, amount);
+      }
 
-    this.printIgnoredTransactionsTable();
-
-    logger?.close();
+      this.printIgnoredTransactionsTable();
+    });
   }
 
   private printIgnoredTransactionsTable() {
