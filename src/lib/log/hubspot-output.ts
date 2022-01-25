@@ -1,4 +1,3 @@
-import 'source-map-support/register';
 import util from 'util';
 import { DataFile, LogWriteStream } from '../data/file';
 import { Hubspot } from '../hubspot';
@@ -27,22 +26,22 @@ export class HubspotOutputLogger {
     if (Object.keys(properties).length > 0) {
       const action = this.creating.has(entity) ? 'create' : 'update';
       const id = `${fromKind}:${this.idFor(entity)}`;
-      stream.writeLine(stringify({ action, id, properties }));
+      stream.writeLine(stringify([action, id, properties]));
     }
 
-    const associations = entity.getAssociationChanges().filter(assoc => {
+    const upAssociations = entity.getAssociationChanges().filter(assoc => {
       const otherKind = assoc.other.kind;
       const found = entity.adapter.associations[otherKind];
       return found?.includes('up');
     });
-    if (associations.length > 0) {
-      const action = 'associations';
+
+    if (upAssociations.length > 0) {
       const id = `${fromKind}:${this.idFor(entity)}`;
-      const mappedAssociations = associations.map(assoc => [
+      const associations = upAssociations.map(assoc => [
         assoc.op,
         `${assoc.other.kind}:${this.idFor(assoc.other)}`,
       ]);
-      stream.writeLine(stringify({ action, id, mappedAssociations }));
+      stream.writeLine(stringify(['associate', id, associations]));
     }
   }
 
