@@ -24,6 +24,7 @@ export abstract class Entity<
   public constructor(
     id: string | null,
     public adapter: EntityAdapter<D, C>,
+    private downloadedData: Record<string, string>,
     data: D,
     public computed: C,
     private indexer: Indexer<D>,
@@ -76,13 +77,13 @@ export abstract class Entity<
   }
 
   public upsyncableData() {
-    const upProperties: Partial<{ [K in keyof D]: string }> = Object.create(null);
+    const upProperties: Record<string, string> = { ...this.downloadedData };
     for (const [k, v] of Object.entries(this.newData)) {
       const spec = this.adapter.data[k];
       if (spec.property) {
         const upKey = spec.property as keyof D;
         const upVal = spec.up(v);
-        upProperties[upKey] = upVal;
+        upProperties[upKey as string] = upVal;
       }
     }
     return upProperties;

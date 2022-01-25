@@ -51,14 +51,14 @@ function pipeOutputToInput(hubspot: Hubspot, data: Data) {
 function fillInIds(entities: Iterable<Entity<any, any>>) {
   let id = 0;
   for (const e of entities) {
-    if (!e.id) e.id = `fake-${e.adapter.kind}-${++id}`;
+    if (!e.id) e.id = `fake-${e.kind}-${++id}`;
   }
 }
 
 function toRawEntity(entity: Entity<any, any>): FullEntity {
   return {
     id: entity.id!,
-    properties: entity.upsyncableData() as Record<string, string>,
+    properties: entity.upsyncableData(),
     associations: [...entity.upsyncableAssociations()].map(other => {
       return `${other.kind}:${other.id}` as RelativeAssociation;
     }),
