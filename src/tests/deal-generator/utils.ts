@@ -18,27 +18,29 @@ export type TestInput = {
   contacts?: Contact[];
   companies?: Company[];
   records: ReturnType<typeof abbrRecordDetails>[];
-  partnerDomains?: string[],
+  partnerLicenseIds?: string[],
 };
 
 export function runDealGeneratorTwice(input: TestInput) {
-  const output = runDealGenerator(input);
-  input.deals = output.deals;
-  input.contacts = output.contacts;
-  input.companies = output.companies;
-  return runDealGenerator(input);
+  const { data, config } = processInput(input);
+  const output = runDealGeneratorWith(data, config);
+  data.rawCompanies = output.companies.map(company => company.toRawEntity());
+  data.rawContacts = output.contacts.map(contact => contact.toRawEntity());
+  data.rawDeals = output.deals.map(deal => deal.toRawEntity());
+  return runDealGeneratorWith(data, config);
 }
 
 export function runDealGenerator(input: TestInput) {
-  const { config, data } = processInput(input);
+  const { data, config } = processInput(input);
+  return runDealGeneratorWith(data, config);
+}
+
+function runDealGeneratorWith(data: Data, config: EngineConfig) {
   const hubspot = Hubspot.memory();
   const engine = new Engine(hubspot, config);
   const engineResults = engine.run(data);
-  const [[firstLicenseId,],] = input.records;
-  const dealGeneratorResults = engineResults.dealGeneratorResults.get(firstLicenseId)!;
-
+  const dealGeneratorResults = engineResults.dealGeneratorResults.get(engine.licenses[0].id)!;
   hubspot.populateFakeIds();
-
   return {
     deals: hubspot.dealManager.getArray(),
     contacts: hubspot.contactManager.getArray(),
@@ -50,9 +52,9 @@ export function runDealGenerator(input: TestInput) {
 
 function processInput(input: TestInput): { config: EngineConfig; data: Data; } {
   const data: Data = {
-    rawCompanies: input.companies?.map(company => company.toRawEntity()) ?? [],
-    rawContacts: input.contacts?.map(contact => contact.toRawEntity()) ?? [],
-    rawDeals: input.deals?.map(deal => deal.toRawEntity()) ?? [],
+    rawCompanies: [],
+    rawContacts: [],
+    rawDeals: [],
     transactions: [],
     licensesWithoutDataInsights: [],
     licensesWithDataInsights: [],
@@ -61,7 +63,7 @@ function processInput(input: TestInput): { config: EngineConfig; data: Data; } {
   };
 
   const config: EngineConfig = {
-    partnerDomains: new Set(input.partnerDomains ?? []),
+    partnerDomains: new Set(),
     appToPlatform: Object.create(null),
   };
 
@@ -75,6 +77,10 @@ function processInput(input: TestInput): { config: EngineConfig; data: Data; } {
     for (const [txId, saleDate, saleType, vendorAmount] of txSpec) {
       const rawTransaction = rawTransactionFrom(rawLicense, txId, saleDate, saleType, vendorAmount);
       data.transactions.push(rawTransaction);
+    }
+
+    if (input.partnerLicenseIds?.includes(id)) {
+      config.partnerDomains?.add(email.split('@')[1]);
     }
   }
 

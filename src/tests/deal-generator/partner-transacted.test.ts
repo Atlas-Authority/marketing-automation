@@ -1,22 +1,19 @@
-import { runDealGenerator, runDealGeneratorTwice, testLicense } from "./utils";
+import { runDealGeneratorTwice } from "./utils";
 
 
-it(`Sets partner domain on deal if record is partner-transacted`, () => {
-  const license1 = testLicense("1111111", "2021-12-26", "EVAL", "inactive");
-  const license2 = testLicense("2222222", "2021-12-27", "COMMERCIAL", "active");
-  const partnerDomain = license2.data.technicalContact.email.split('@')[1];
-
-  const { engine } = runDealGeneratorTwice({
-    group: [['1111111', []], ['2222222', []]],
-    records: [license1, license2],
-    partnerDomains: [partnerDomain],
+it.only(`Sets partner domain on deal if record is partner-transacted`, () => {
+  const { deals, contacts } = runDealGeneratorTwice({
+    records: [
+      ["1111111", "2021-12-26", "EVALUATION", "inactive", []],
+      ["2222222", "2021-12-27", "COMMERCIAL", "active", []],
+    ],
+    partnerLicenseIds: ['1111111'],
   });
 
-  const deals = engine.dealManager.getArray();
   expect(deals.length).toBe(1);
+  expect(contacts.length).toBe(1);
 
-  const deal = deals[0];
-  expect(deal.data.associatedPartner).toEqual(partnerDomain);
+  expect(deals[0].data.associatedPartner).toBe(contacts[0].data.email.split('@')[1]);
 });
 
 it(`Sets partner domain on deal if record is partner-transacted even if newer one is not`, () => {
