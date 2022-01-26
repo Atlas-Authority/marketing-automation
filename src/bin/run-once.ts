@@ -17,4 +17,4 @@ const data = new DataSet(dataDir).load();
 
 engine.run(data);
 
-log.hubspotOutputLogger().logResults(hubspot);
+log.hubspotOutputLogger()?.logResults(hubspot);

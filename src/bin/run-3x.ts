@@ -30,7 +30,7 @@ function runEngine() {
   const hubspot = Hubspot.memoryFromENV(log);
   const engine = new Engine(hubspot, engineConfigFromENV(), log);
   engine.run(data);
-  log.hubspotOutputLogger().logResults(hubspot);
+  log.hubspotOutputLogger()?.logResults(hubspot);
   return hubspot;
 }
 
