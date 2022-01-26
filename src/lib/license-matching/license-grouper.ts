@@ -15,6 +15,7 @@ export class LicenseGrouper {
 
   run(): RelatedLicenseSet[] {
     return withAutoClose(this.engine.log?.scoreLogger(), scoreLogger => {
+
       const threshold = 130;
       const scorer = new LicenseMatcher(threshold, scoreLogger);
       this.matchLicenses(scorer, scoreLogger);
@@ -108,6 +109,11 @@ export class LicenseGrouper {
 
     for (const [name, group] of productGroups) {
       this.engine.log?.printInfo('Scoring Engine', `  Scoring [${name}]`);
+
+      if (group.length === 1) {
+        this.initMatch(group[0].license);
+        continue;
+      }
 
       for (let i1 = 0; i1 < group.length; i1++) {
         for (let i2 = i1 + 1; i2 < group.length; i2++) {
