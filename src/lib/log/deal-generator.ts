@@ -1,7 +1,6 @@
 import { LogWriteStream } from "../data/file.js";
 import { Action } from "../engine/deal-generator/actions.js";
 import { DealRelevantEvent } from "../engine/deal-generator/events.js";
-import { RelatedLicenseSet } from "../engine/license-matching/license-grouper.js";
 import { DealStage } from '../hubspot/interfaces.js';
 import { License } from "../marketplace/model/license.js";
 import { Transaction } from "../marketplace/model/transaction.js";
@@ -49,13 +48,9 @@ export class DealDataLogger {
     }
   }
 
-  public logTestID(group: RelatedLicenseSet) {
-    const ids = group.map(l => [l.id, l.transactions.map(t => t.id)]);
-    this.log.writeLine('\n');
-    this.log.writeLine(Buffer.from(JSON.stringify(ids), 'utf8').toString('base64'));
-  }
-
   logRecords(records: (License | Transaction)[]) {
+    this.log.writeLine('\n');
+
     const ifTx = (fn: (r: Transaction) => string) =>
       (r: License | Transaction) =>
         r instanceof Transaction ? fn(r) : '';
