@@ -61,11 +61,10 @@ export class DealDataLogger {
       rows: records,
       cols: [
         [{ title: 'Hosting' }, record => record.data.hosting],
-        [{ title: 'LicenseId' }, record => record.id],
+        [{ title: 'Record Id' }, record => record.id],
         [{ title: 'Date' }, record => record.data.maintenanceStartDate],
-        [{ title: 'LicenseType' }, record => record.data.licenseType],
-        [{ title: 'SaleType' }, ifTx(record => record.data.saleType)],
-        [{ title: 'Transaction' }, ifTx(record => record.data.transactionId)],
+        [{ title: 'License Type' }, record => record.data.licenseType],
+        [{ title: 'Sale Type' }, ifTx(record => record.data.saleType)],
         [{ title: 'Amount', align: 'right' }, ifTx(record => formatMoney(record.data.vendorAmount))],
       ],
     });
