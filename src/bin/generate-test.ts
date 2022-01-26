@@ -2,7 +2,7 @@ import 'source-map-support/register';
 import util from 'util';
 import DataDir from '../lib/data/dir';
 import { DataSet } from '../lib/data/set';
-import { abbrActionDetails, abbrEventDetails } from '../lib/engine/deal-generator/test/utils';
+import { abbrActionDetails, abbrEventDetails } from '../../tests/deal-generator/utils';
 import { Engine } from "../lib/engine/engine";
 import { Hubspot } from '../lib/hubspot';
 import { Logger } from '../lib/log';

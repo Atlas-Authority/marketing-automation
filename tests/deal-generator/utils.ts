@@ -1,17 +1,17 @@
 import Chance from 'chance';
-import { Hubspot } from '../../../hubspot';
-import { DealStage } from '../../../hubspot/interfaces';
-import { DealData } from "../../../hubspot/model/deal";
-import { License, LicenseData } from "../../../marketplace/model/license";
-import { ContactInfo } from '../../../marketplace/model/record';
-import { Transaction, TransactionData } from "../../../marketplace/model/transaction";
-import { ContactGenerator } from '../../contacts/generate-contacts';
-import { updateContactsBasedOnMatchResults } from '../../contacts/update-contacts';
-import { Engine } from '../../engine';
-import { RelatedLicenseSet } from '../../license-matching/license-grouper';
-import { Action } from "../actions";
-import { DealRelevantEvent } from '../events';
-import { DealGenerator } from '../generate-deals';
+import { Hubspot } from '../../src/lib/hubspot';
+import { DealStage } from '../../src/lib/hubspot/interfaces';
+import { DealData } from "../../src/lib/hubspot/model/deal";
+import { License, LicenseData } from "../../src/lib/marketplace/model/license";
+import { ContactInfo } from '../../src/lib/marketplace/model/record';
+import { Transaction, TransactionData } from "../../src/lib/marketplace/model/transaction";
+import { ContactGenerator } from '../../src/lib/engine/contacts/generate-contacts';
+import { updateContactsBasedOnMatchResults } from '../../src/lib/engine/contacts/update-contacts';
+import { Engine } from '../../src/lib/engine/engine';
+import { RelatedLicenseSet } from '../../src/lib/engine/license-matching/license-grouper';
+import { Action } from "../../src/lib/engine/deal-generator/actions";
+import { DealRelevantEvent } from '../../src/lib/engine/deal-generator/events';
+import { DealGenerator } from '../../src/lib/engine/deal-generator/generate-deals';
 
 const chance = new Chance();
 
@@ -49,7 +49,7 @@ export function runDealGenerator(input: TestInput) {
   }
 
   const dealGenerator = new DealGenerator(engine);
-  const { records, events, actions } = dealGenerator.generateActionsForMatchedGroup(group);
+  const { records, events, actions } = dealGenerator.run([group]).get('hi')!;
 
   const createdDeals: DealData[] = [];
   for (const [i, action] of actions.entries()) {
