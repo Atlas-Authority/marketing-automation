@@ -5,7 +5,7 @@ import { DealRelevantEvent } from '../../lib/deal-generator/events';
 import { Engine, EngineConfig } from '../../lib/engine/engine';
 import { Hubspot } from '../../lib/hubspot';
 import { DealStage } from '../../lib/hubspot/interfaces';
-import { RawLicense, RawTransaction } from '../../lib/marketplace/raw';
+import { RawLicense, RawLicenseContact, RawTransaction } from '../../lib/marketplace/raw';
 import { Company } from '../../lib/model/company';
 import { Contact } from '../../lib/model/contact';
 import { Deal } from "../../lib/model/deal";
@@ -67,27 +67,36 @@ function processInput(input: TestInput): { config: EngineConfig; data: Data; } {
     appToPlatform: Object.create(null),
   };
 
-  const email = chance.email();
   const addonKey = chance.word({ capitalize: false, syllables: 3 });
 
+  const baseTechContact: RawLicenseContact = {
+    email: chance.email(),
+    address1: chance.address(),
+    phone: chance.phone(),
+    name: chance.name(),
+  };
+
   for (const [id, start, licenseType, status, txSpec] of input.records) {
-    const rawLicense = rawLicenseFrom(id, addonKey, email, start, licenseType, status);
+    const techContact: RawLicenseContact = { ...baseTechContact };
+
+    if (input.partnerLicenseIds?.includes(id)) {
+      techContact.email = chance.email();
+      config.partnerDomains?.add(techContact.email.split('@')[1]);
+    }
+
+    const rawLicense = rawLicenseFrom(id, addonKey, techContact, start, licenseType, status);
     data.licensesWithDataInsights.push(rawLicense);
     config.appToPlatform![rawLicense.addonKey] = 'Confluence';
     for (const [txId, saleDate, saleType, vendorAmount] of txSpec) {
       const rawTransaction = rawTransactionFrom(rawLicense, txId, saleDate, saleType, vendorAmount);
       data.transactions.push(rawTransaction);
     }
-
-    if (input.partnerLicenseIds?.includes(id)) {
-      config.partnerDomains?.add(email.split('@')[1]);
-    }
   }
 
   return { config, data };
 }
 
-function rawLicenseFrom(id: string, addonKey: string, email: string, start: string, licenseType: string, status: string): RawLicense {
+function rawLicenseFrom(id: string, addonKey: string, techContact: RawLicenseContact, start: string, licenseType: string, status: string): RawLicense {
   return {
     addonKey,
     addonName: chance.sentence({ words: 3, punctuation: false }),
@@ -97,9 +106,7 @@ function rawLicenseFrom(id: string, addonKey: string, email: string, start: stri
       company: chance.company(),
       country: chance.country(),
       region: chance.pickone(['EMEA', 'Americas', 'APAC', 'Unknown']),
-      technicalContact: {
-        email,
-      },
+      technicalContact: techContact,
     },
     appEntitlementId: id,
     licenseId: id,
