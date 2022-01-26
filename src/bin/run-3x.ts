@@ -6,7 +6,7 @@ import { Hubspot } from '../lib/hubspot';
 import { Entity } from '../lib/hubspot/entity';
 import { FullEntity, RelativeAssociation } from '../lib/hubspot/interfaces';
 import { Logger } from '../lib/log';
-import { engineConfigFromENV } from '../lib/parameters/env-config';
+import { engineConfigFromENV } from '../lib/config/env';
 
 const dataDir = DataDir.root.subdir('in');
 

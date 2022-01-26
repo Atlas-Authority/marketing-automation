@@ -1,4 +1,5 @@
 import 'source-map-support/register';
+import { engineConfigFromENV, runLoopConfigFromENV } from "../lib/config/env";
 import DataDir from '../lib/data/dir';
 import { DataSet } from '../lib/data/set';
 import { downloadAllData } from '../lib/engine/download';
@@ -6,7 +7,6 @@ import { Engine } from "../lib/engine/engine";
 import { SlackNotifier } from '../lib/engine/slack-notifier';
 import { Hubspot } from '../lib/hubspot';
 import { Logger } from '../lib/log';
-import { engineConfigFromENV, runLoopConfigFromENV } from "../lib/parameters/env-config";
 import run from "../lib/util/runner";
 
 const dataDir = DataDir.root.subdir("in");

@@ -1,7 +1,7 @@
 import * as hubspot from '@hubspot/api-client';
 import assert from 'assert';
+import { hubspotCredsFromENV } from '../config/env';
 import { Logger } from '../log';
-import { hubspotCredsFromENV } from '../parameters/env-config';
 import { KnownError } from '../util/errors';
 import { batchesOf, isPresent } from '../util/helpers';
 import { Association, EntityAdapter, EntityKind, ExistingEntity, NewEntity, RelativeAssociation } from './interfaces';

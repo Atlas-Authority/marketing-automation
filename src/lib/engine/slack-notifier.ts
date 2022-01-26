@@ -1,6 +1,6 @@
 import * as slack from '@slack/web-api';
+import { slackConfigFromENV } from "../config/env";
 import { Logger } from '../log';
-import { slackConfigFromENV } from "../parameters/env-config";
 import { AttachableError, KnownError } from "../util/errors";
 
 interface RunLoopConfig {

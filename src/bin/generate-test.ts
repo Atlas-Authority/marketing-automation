@@ -1,5 +1,6 @@
 import 'source-map-support/register';
 import util from 'util';
+import { engineConfigFromENV } from '../lib/config/env';
 import DataDir from '../lib/data/dir';
 import { DataSet } from '../lib/data/set';
 import { Engine } from "../lib/engine/engine";
@@ -7,7 +8,6 @@ import { Hubspot } from '../lib/hubspot';
 import { Logger } from '../lib/log';
 import { License } from '../lib/marketplace/model/license';
 import { Transaction } from '../lib/marketplace/model/transaction';
-import { engineConfigFromENV } from '../lib/parameters/env-config';
 import { abbrActionDetails, abbrEventDetails } from '../tests/deal-generator/utils';
 
 function TEMPLATE({ runDealGenerator, GROUP, RECORDS, EVENTS, ACTIONS }: any) {

@@ -1,6 +1,6 @@
 import { Logger } from "../../log";
 import { uniqueTransactionId } from "../../marketplace/model/transaction";
-import { hubspotAccountIdFromEnv } from "../../parameters/env-config";
+import { hubspotAccountIdFromEnv } from "../../config/env";
 import { AttachableError } from "../../util/errors";
 import { isPresent } from "../../util/helpers";
 import { Entity } from "../entity";
