@@ -6,6 +6,8 @@ import { Engine, EngineConfig } from '../../lib/engine/engine';
 import { Hubspot } from '../../lib/hubspot';
 import { DealStage } from '../../lib/hubspot/interfaces';
 import { RawLicense, RawTransaction } from '../../lib/marketplace/raw';
+import { Company } from '../../lib/model/company';
+import { Contact } from '../../lib/model/contact';
 import { Deal } from "../../lib/model/deal";
 import { License } from "../../lib/model/license";
 
@@ -13,6 +15,8 @@ const chance = new Chance();
 
 export type TestInput = {
   deals?: Deal[];
+  contacts?: Contact[];
+  companies?: Company[];
   records: ReturnType<typeof abbrRecordDetails>[];
   partnerDomains?: string[],
 };
@@ -20,12 +24,16 @@ export type TestInput = {
 export function runDealGeneratorTwice(input: TestInput) {
   const output = runDealGenerator(input);
   input.deals = output.deals;
+  input.contacts = output.contacts;
+  input.companies = output.companies;
   return runDealGenerator(input);
 }
 
 export function runDealGenerator(input: TestInput) {
   const { config, data } = processInput(input);
-  const hubspot = Hubspot.memory();
+  const hubspot = Hubspot.memory({
+    deal: { attrs: { appEntitlementId: 'appid' } },
+  });
   const engine = new Engine(hubspot, config);
   const engineResults = engine.run(data);
   const [[firstLicenseId,],] = input.records;
@@ -35,6 +43,8 @@ export function runDealGenerator(input: TestInput) {
 
   return {
     deals: hubspot.dealManager.getArray(),
+    contacts: hubspot.contactManager.getArray(),
+    companies: hubspot.companyManager.getArray(),
     actions: dealGeneratorResults.actions.map(abbrActionDetails),
     events: dealGeneratorResults.events.map(abbrEventDetails),
   };
@@ -42,10 +52,10 @@ export function runDealGenerator(input: TestInput) {
 
 function processInput(input: TestInput): { config: EngineConfig; data: Data; } {
   const data: Data = {
-    rawCompanies: [],
-    rawContacts: [],
-    transactions: [],
+    rawCompanies: input.companies?.map(company => company.toRawEntity()) ?? [],
+    rawContacts: input.contacts?.map(contact => contact.toRawEntity()) ?? [],
     rawDeals: input.deals?.map(deal => deal.toRawEntity()) ?? [],
+    transactions: [],
     licensesWithoutDataInsights: [],
     licensesWithDataInsights: [],
     freeDomains: [],
