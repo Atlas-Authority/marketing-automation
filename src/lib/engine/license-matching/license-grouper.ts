@@ -1,5 +1,5 @@
 import { LicenseMatchLogger } from '../../log/license-scorer';
-import { License } from '../../marketplace/model/license';
+import { License } from '../../model/license';
 import { sorter, withAutoClose } from '../../util/helpers';
 import { Engine } from '../engine';
 import { LicenseMatcher, ScorableLicense } from './license-matcher';

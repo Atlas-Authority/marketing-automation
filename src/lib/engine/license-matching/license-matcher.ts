@@ -1,4 +1,4 @@
-import { Contact } from "../../hubspot/model/contact";
+import { Contact } from "../../model/contact";
 import { scoreSimilarity } from "./similarity-scorer";
 
 const NINETY_DAYS_AS_MS = 1000 * 60 * 60 * 24 * 90;

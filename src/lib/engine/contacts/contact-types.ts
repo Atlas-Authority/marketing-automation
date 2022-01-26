@@ -1,6 +1,6 @@
-import { Contact, domainFor } from "../../hubspot/model/contact";
-import { License } from "../../marketplace/model/license";
-import { Transaction } from "../../marketplace/model/transaction";
+import { Contact, domainFor } from "../../model/contact";
+import { License } from "../../model/license";
+import { Transaction } from "../../model/transaction";
 import { Engine } from "../engine";
 
 export function identifyAndFlagContactTypes(engine: Engine) {

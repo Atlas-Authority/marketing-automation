@@ -1,9 +1,9 @@
 import mustache from 'mustache';
 import { DealStage, Pipeline } from "../../hubspot/interfaces";
-import { Deal, DealData, DealManager } from "../../hubspot/model/deal";
 import { Logger } from "../../log";
-import { License } from "../../marketplace/model/license";
-import { Transaction, uniqueTransactionId } from "../../marketplace/model/transaction";
+import { Deal, DealData, DealManager } from "../../model/deal";
+import { License } from "../../model/license";
+import { Transaction, uniqueTransactionId } from "../../model/transaction";
 import { isPresent, sorter } from "../../util/helpers";
 import { DealPropertyConfig } from '../engine';
 import { abbrEventDetails, DealRelevantEvent, EvalEvent, EventMeta, PurchaseEvent, RefundEvent, RenewalEvent, UpgradeEvent } from "./events";

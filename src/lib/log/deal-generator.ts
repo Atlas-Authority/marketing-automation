@@ -2,8 +2,8 @@ import { LogWriteStream } from "../data/file.js";
 import { Action } from "../engine/deal-generator/actions.js";
 import { DealRelevantEvent } from "../engine/deal-generator/events.js";
 import { DealStage } from '../hubspot/interfaces.js';
-import { License } from "../marketplace/model/license.js";
-import { Transaction } from "../marketplace/model/transaction.js";
+import { License } from "../model/license.js";
+import { Transaction } from "../model/transaction.js";
 import { formatMoney } from "../util/formatters.js";
 import { Table } from "./table.js";
 

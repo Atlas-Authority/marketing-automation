@@ -1,10 +1,10 @@
-import { Logger } from "../../log";
-import { License } from "../../marketplace/model/license";
-import { Transaction } from "../../marketplace/model/transaction";
-import { Entity } from "../entity";
-import { EntityAdapter } from "../interfaces";
-import { EntityManager } from "../manager";
+import { Entity } from "../hubspot/entity";
+import { EntityAdapter } from "../hubspot/interfaces";
+import { EntityManager } from "../hubspot/manager";
+import { Logger } from "../log";
 import { Company } from "./company";
+import { License } from "./license";
+import { Transaction } from "./transaction";
 
 export type ContactType = 'Partner' | 'Customer';
 

@@ -1,5 +1,5 @@
-import { Contact } from "../../hubspot/model/contact";
-import { isPresent } from "../../util/helpers";
+import { isPresent } from "../util/helpers";
+import { Contact } from "./contact";
 import { License } from "./license";
 import { Transaction } from "./transaction";
 

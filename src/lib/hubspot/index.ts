@@ -1,8 +1,8 @@
 import { hubspotContactConfigFromENV, hubspotDealConfigFromENV } from "../config/env";
 import { Logger } from "../log";
-import { CompanyManager } from "./model/company";
-import { ContactManager, HubspotContactConfig } from "./model/contact";
-import { DealManager, HubspotDealConfig } from "./model/deal";
+import { CompanyManager } from "../model/company";
+import { ContactManager, HubspotContactConfig } from "../model/contact";
+import { DealManager, HubspotDealConfig } from "../model/deal";
 
 export class Hubspot {
 

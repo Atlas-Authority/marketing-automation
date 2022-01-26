@@ -1,11 +1,11 @@
-import { Logger } from "../../log";
-import { uniqueTransactionId } from "../../marketplace/model/transaction";
-import { hubspotAccountIdFromEnv } from "../../config/env";
-import { AttachableError } from "../../util/errors";
-import { isPresent } from "../../util/helpers";
-import { Entity } from "../entity";
-import { DealStage, EntityAdapter, Pipeline } from "../interfaces";
-import { EntityManager } from "../manager";
+import { Logger } from "../log";
+import { uniqueTransactionId } from "./transaction";
+import { hubspotAccountIdFromEnv } from "../config/env";
+import { AttachableError } from "../util/errors";
+import { isPresent } from "../util/helpers";
+import { Entity } from "../hubspot/entity";
+import { DealStage, EntityAdapter, Pipeline } from "../hubspot/interfaces";
+import { EntityManager } from "../hubspot/manager";
 import { Company } from "./company";
 import { Contact } from "./contact";
 

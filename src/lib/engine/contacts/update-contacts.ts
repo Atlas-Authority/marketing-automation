@@ -1,6 +1,6 @@
-import { domainFor } from "../../hubspot/model/contact";
-import { License } from "../../marketplace/model/license";
-import { Transaction } from "../../marketplace/model/transaction";
+import { domainFor } from "../../model/contact";
+import { License } from "../../model/license";
+import { Transaction } from "../../model/transaction";
 import { KnownError } from "../../util/errors";
 import { isPresent } from "../../util/helpers";
 import { Engine } from "../engine";

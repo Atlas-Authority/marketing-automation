@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import { getContactInfo, getPartnerInfo, maybeGetContactInfo, RawLicense } from "../raw";
+import { getContactInfo, getPartnerInfo, maybeGetContactInfo, RawLicense } from "../marketplace/raw";
 import { ContactInfo, MpacRecord, PartnerInfo } from './record.js';
 import { Transaction } from './transaction';
 

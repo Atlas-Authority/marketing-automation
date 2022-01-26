@@ -1,4 +1,4 @@
-import { ContactInfo, PartnerInfo } from "./model/record";
+import { ContactInfo, PartnerInfo } from "../model/record";
 
 export type RawTransactionContact = {
   email: string;

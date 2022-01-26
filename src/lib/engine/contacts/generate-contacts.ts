@@ -1,8 +1,8 @@
 import capitalize from "capitalize";
-import { Contact, ContactData, ContactType } from '../../hubspot/model/contact';
-import { License } from '../../marketplace/model/license';
-import { ContactInfo, PartnerBillingInfo } from "../../marketplace/model/record";
-import { Transaction } from '../../marketplace/model/transaction';
+import { Contact, ContactData, ContactType } from '../../model/contact';
+import { License } from '../../model/license';
+import { ContactInfo, PartnerBillingInfo } from "../../model/record";
+import { Transaction } from '../../model/transaction';
 import { sorter } from '../../util/helpers';
 import { Engine } from '../engine';
 

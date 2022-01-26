@@ -2,12 +2,12 @@ import got from 'got';
 import promiseAllProperties from 'promise-all-properties';
 import { Data, DataSet } from '../data/set';
 import HubspotAPI from "../hubspot/api";
-import { CompanyManager } from '../hubspot/model/company';
-import { ContactManager } from '../hubspot/model/contact';
-import { DealManager } from '../hubspot/model/deal';
 import { Logger } from "../log";
 import { MultiDownloadLogger } from "../log/download";
 import { MarketplaceAPI } from "../marketplace/api";
+import { CompanyManager } from '../model/company';
+import { ContactManager } from '../model/contact';
+import { DealManager } from '../model/deal';
 
 interface HubspotManagers {
   dealManager: DealManager,

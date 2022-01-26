@@ -1,6 +1,6 @@
-import { Entity } from "../entity";
-import { EntityAdapter } from "../interfaces";
-import { EntityManager } from "../manager";
+import { Entity } from "../hubspot/entity";
+import { EntityAdapter } from "../hubspot/interfaces";
+import { EntityManager } from "../hubspot/manager";
 import { Contact } from "./contact";
 
 type CompanyData = {

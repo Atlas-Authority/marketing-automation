@@ -8,10 +8,10 @@ import { Engine } from '../../lib/engine/engine';
 import { RelatedLicenseSet } from '../../lib/engine/license-matching/license-grouper';
 import { Hubspot } from '../../lib/hubspot';
 import { DealStage } from '../../lib/hubspot/interfaces';
-import { DealData } from "../../lib/hubspot/model/deal";
-import { License, LicenseData } from "../../lib/marketplace/model/license";
-import { ContactInfo } from '../../lib/marketplace/model/record';
-import { Transaction, TransactionData } from "../../lib/marketplace/model/transaction";
+import { DealData } from "../../lib/model/deal";
+import { License, LicenseData } from "../../lib/model/license";
+import { ContactInfo } from '../../lib/model/record';
+import { Transaction, TransactionData } from "../../lib/model/transaction";
 
 const chance = new Chance();
 

@@ -2,9 +2,9 @@ import assert from "assert";
 import dotenv from "dotenv";
 import { EngineConfig } from "../engine/engine";
 import { HubspotCreds } from "../hubspot/api";
-import { HubspotContactConfig } from "../hubspot/model/contact";
-import { HubspotDealConfig } from "../hubspot/model/deal";
 import { MpacCreds } from "../marketplace/api";
+import { HubspotContactConfig } from "../model/contact";
+import { HubspotDealConfig } from "../model/deal";
 import { RunLoopConfig } from "../util/runner";
 
 dotenv.config();

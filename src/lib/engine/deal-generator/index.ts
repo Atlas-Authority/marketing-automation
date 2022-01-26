@@ -1,8 +1,8 @@
 import assert from "assert";
-import { Deal } from "../../hubspot/model/deal";
 import { Table } from "../../log/table";
-import { License, LicenseData } from "../../marketplace/model/license";
-import { Transaction } from "../../marketplace/model/transaction";
+import { Deal } from "../../model/deal";
+import { License, LicenseData } from "../../model/license";
+import { Transaction } from "../../model/transaction";
 import { formatMoney } from "../../util/formatters";
 import { isPresent, sorter, withAutoClose } from "../../util/helpers";
 import { Engine } from "../engine";
