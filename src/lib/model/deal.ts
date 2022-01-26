@@ -105,6 +105,23 @@ export interface HubspotDealConfig {
   },
 }
 
+export interface HubspotRequiredDealConfig {
+  pipeline: {
+    mpac: string,
+  },
+  dealstage: {
+    eval: string,
+    closedWon: string,
+    closedLost: string,
+  },
+  attrs: {
+    appEntitlementId: string,
+    appEntitlementNumber: string,
+    addonLicenseId: string,
+    transactionId: string,
+  },
+}
+
 function isNonBlankString(str: string | null) {
   return (str ?? '').length > 0;
 }
@@ -114,9 +131,22 @@ function isNonZeroNumberString(str: string | null) {
 }
 
 function makeAdapter(config: HubspotDealConfig): EntityAdapter<DealData> {
-
-  config.pipeline ??= {};
-  config.pipeline.mpac ??= 'Pipeline';
+  const requiredConfig: HubspotRequiredDealConfig = {
+    pipeline: {
+      mpac: config.pipeline?.mpac ?? 'Pipeline',
+    },
+    dealstage: {
+      eval: config.dealstage?.eval ?? 'Eval',
+      closedWon: config.dealstage?.closedWon ?? 'ClosedWon',
+      closedLost: config.dealstage?.closedLost ?? 'ClosedLost',
+    },
+    attrs: {
+      appEntitlementId: config.attrs?.appEntitlementId ?? 'appEntitlementId',
+      appEntitlementNumber: config.attrs?.appEntitlementNumber ?? 'appEntitlementNumber',
+      addonLicenseId: config.attrs?.addonLicenseId ?? 'addonLicenseId',
+      transactionId: config.attrs?.transactionId ?? 'transactionId',
+    },
+  };
 
   function enumFromValue<T extends number>(mapping: Record<T, string>, apiValue: string): T {
     const found = Object.entries(mapping).find(([k, v]) => v === apiValue);
@@ -126,13 +156,13 @@ function makeAdapter(config: HubspotDealConfig): EntityAdapter<DealData> {
   }
 
   const pipelines: Record<Pipeline, string> = {
-    [Pipeline.MPAC]: config.pipeline.mpac,
+    [Pipeline.MPAC]: requiredConfig.pipeline.mpac,
   };
 
   const dealstages: Record<DealStage, string> = {
-    [DealStage.EVAL]: config.dealstage?.eval ?? 'Eval',
-    [DealStage.CLOSED_WON]: config.dealstage?.closedWon ?? 'ClosedWon',
-    [DealStage.CLOSED_LOST]: config.dealstage?.closedLost ?? 'ClosedLost',
+    [DealStage.EVAL]: requiredConfig.dealstage.eval,
+    [DealStage.CLOSED_WON]: requiredConfig.dealstage.closedWon,
+    [DealStage.CLOSED_LOST]: requiredConfig.dealstage.closedLost,
   };
 
   return {
@@ -145,7 +175,7 @@ function makeAdapter(config: HubspotDealConfig): EntityAdapter<DealData> {
     },
 
     shouldReject(data) {
-      if (data['pipeline'] !== config.pipeline!.mpac) return true;
+      if (data['pipeline'] !== requiredConfig.pipeline.mpac) return true;
       if (config.attrs?.duplicateOf && data[config.attrs?.duplicateOf]) return true;
       return false;
     },
@@ -162,13 +192,13 @@ function makeAdapter(config: HubspotDealConfig): EntityAdapter<DealData> {
         up: app => app ?? '',
       },
       addonLicenseId: {
-        property: config.attrs?.addonLicenseId,
+        property: requiredConfig.attrs.addonLicenseId,
         identifier: true,
         down: id => id || null,
         up: id => id || '',
       },
       transactionId: {
-        property: config.attrs?.transactionId,
+        property: requiredConfig.attrs.transactionId,
         identifier: true,
         down: id => id || null,
         up: id => id || '',
@@ -224,13 +254,13 @@ function makeAdapter(config: HubspotDealConfig): EntityAdapter<DealData> {
         up: partner => partner ?? '',
       },
       appEntitlementId: {
-        property: config.attrs?.appEntitlementId,
+        property: requiredConfig.attrs.appEntitlementId,
         identifier: true,
         down: id => id || null,
         up: id => id ?? '',
       },
       appEntitlementNumber: {
-        property: config.attrs?.appEntitlementNumber,
+        property: requiredConfig.attrs.appEntitlementNumber,
         identifier: true,
         down: id => id || null,
         up: id => id ?? '',

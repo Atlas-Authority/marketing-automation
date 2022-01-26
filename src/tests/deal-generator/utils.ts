@@ -31,9 +31,7 @@ export function runDealGeneratorTwice(input: TestInput) {
 
 export function runDealGenerator(input: TestInput) {
   const { config, data } = processInput(input);
-  const hubspot = Hubspot.memory({
-    deal: { attrs: { appEntitlementId: 'appid' } },
-  });
+  const hubspot = Hubspot.memory();
   const engine = new Engine(hubspot, config);
   const engineResults = engine.run(data);
   const [[firstLicenseId,],] = input.records;
