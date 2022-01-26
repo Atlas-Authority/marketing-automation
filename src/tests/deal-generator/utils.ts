@@ -56,9 +56,10 @@ function processInput(input: TestInput): { config: EngineConfig; data: Data; } {
   };
 
   const email = chance.email();
+  const addonKey = chance.word({ capitalize: false, syllables: 3 });
 
   for (const [id, start, licenseType, status, txSpec] of input.records) {
-    const rawLicense = rawLicenseFrom(id, email, start, licenseType, status);
+    const rawLicense = rawLicenseFrom(id, addonKey, email, start, licenseType, status);
     data.licensesWithDataInsights.push(rawLicense);
     config.appToPlatform![rawLicense.addonKey] = 'Confluence';
     for (const [txId, saleDate, saleType, vendorAmount] of txSpec) {
@@ -70,9 +71,9 @@ function processInput(input: TestInput): { config: EngineConfig; data: Data; } {
   return { config, data };
 }
 
-function rawLicenseFrom(id: string, email: string, start: string, licenseType: string, status: string): RawLicense {
+function rawLicenseFrom(id: string, addonKey: string, email: string, start: string, licenseType: string, status: string): RawLicense {
   return {
-    addonKey: chance.word({ capitalize: false, syllables: 3 }),
+    addonKey,
     addonName: chance.sentence({ words: 3, punctuation: false }),
     hosting: 'Server',
     lastUpdated: start,
