@@ -1,4 +1,4 @@
-import { runDealGenerator, runDealGeneratorTwice, testLicense } from "../utils";
+import { runDealGenerator, runDealGeneratorTwice, testLicense } from "./utils";
 
 
 it(`Sets partner domain on deal if record is partner-transacted`, () => {
