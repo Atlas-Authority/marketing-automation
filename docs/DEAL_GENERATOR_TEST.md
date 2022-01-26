@@ -6,9 +6,9 @@
 
 2. Look through `data/out/deal-generator.txt` for test cases.
 
-3. Copy the ID of an interesting one. It'll be in base64 form just above the Records table, e.g. `W1siMjUwODg4NSIsW11dXQ==`.
+3. Copy a License ID from an interesting group, e.g. `L2169473`.
 
-4. Run `npm run generate-test -- W1siMjQ1NDgyMiIsW11dXQ==`.
+4. Run `npm run generate-test L2169473`.
 
 5. Copy the printed test-case into the test suite. Auto-format it. Give it a name. Tweak as needed.
 
