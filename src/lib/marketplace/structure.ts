@@ -20,6 +20,8 @@ class Structurer {
     this.verifyIdIsUnique(licenses, l => l.data.appEntitlementNumber);
 
     const licensesByAddonLicenseId = new Map<string, License>();
+    const licensesByAppEntitlementId = new Map<string, License>();
+    const licensesByAppEntitlementNumber = new Map<string, License>();
 
     // Map all licenses first
     for (const license of licenses) {
@@ -47,9 +49,13 @@ class Structurer {
       }
 
       // Map licenses by their 3 IDs
-      if (license.data.addonLicenseId) {
-        if (license.data.addonLicenseId) licensesByAddonLicenseId.set(license.data.addonLicenseId, license);
+      const maybeAdd = (license: License, id: string | null, coll: Map<string, License>) => {
+        if (id) coll.set(id, license);
       }
+
+      maybeAdd(license, license.data.addonLicenseId, licensesByAddonLicenseId);
+      maybeAdd(license, license.data.appEntitlementId, licensesByAppEntitlementId);
+      maybeAdd(license, license.data.appEntitlementNumber, licensesByAppEntitlementNumber);
     }
 
     // Connect via license's `evaluationLicense` if present
@@ -76,12 +82,12 @@ class Structurer {
       const id2 = transaction.data.appEntitlementNumber;
       const id3 = transaction.data.addonLicenseId;
 
-      const license1 = id1 && licenses.find(l => id1 === l.data.appEntitlementId);
-      const license2 = id2 && licenses.find(l => id2 === l.data.appEntitlementNumber);
-      const license3 = id3 && licenses.find(l => id3 === l.data.addonLicenseId);
+      const license1 = id1 ? licensesByAppEntitlementId.get(id1) : undefined;
+      const license2 = id2 ? licensesByAppEntitlementNumber.get(id2) : undefined;
+      const license3 = id3 ? licensesByAddonLicenseId.get(id3) : undefined;
 
-      this.verifyEqualLicenses(license1 || null, license2 || null);
-      this.verifyEqualLicenses(license2 || null, license3 || null);
+      this.verifyEqualLicenses(license1, license2);
+      this.verifyEqualLicenses(license2, license3);
 
       // Check for transactions with missing licenses
       if (!transaction.license) {
@@ -177,7 +183,7 @@ class Structurer {
     }
   }
 
-  verifyEqualLicenses(license1: License | null, license2: License | null) {
+  verifyEqualLicenses(license1: License | undefined, license2: License | undefined) {
     if (!license1 || !license2) return;
 
     if (license1 !== license2) {
