@@ -104,7 +104,10 @@ export function engineConfigFromENV(): EngineConfig {
 
 function required(key: string) {
   const value = process.env[key];
-  assert.ok(value, `ENV key ${key} is required`);
+  if (!value) {
+    console.error(`ENV key ${key} is required`);
+    process.exit(1);
+  }
   return value;
 }
 
