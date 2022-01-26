@@ -7,7 +7,7 @@ import { Engine } from "../lib/engine/engine";
 import { Hubspot } from '../lib/hubspot';
 import { Logger } from '../lib/log';
 import { License } from '../lib/model/license';
-import { abbrActionDetails, abbrEventDetails } from '../tests/deal-generator/utils';
+import { abbrActionDetails, abbrEventDetails, abbrRecordDetails } from '../tests/deal-generator/utils';
 
 function TEMPLATE({ runDealGenerator, RECORDS, EVENTS, ACTIONS }: any) {
   it(`describe test`, () => {
@@ -58,18 +58,3 @@ const template = (TEMPLATE
   .join('\n'));
 
 main(template, process.argv.slice(2));
-
-function abbrRecordDetails(license: License) {
-  return [
-    license.id,
-    license.data.maintenanceStartDate,
-    license.data.licenseType,
-    license.data.status,
-    license.transactions.map(transaction => [
-      transaction.data.transactionId,
-      transaction.data.saleDate,
-      transaction.data.saleType,
-      transaction.data.vendorAmount,
-    ])
-  ];
-}

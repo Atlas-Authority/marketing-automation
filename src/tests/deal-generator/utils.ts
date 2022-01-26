@@ -8,26 +8,12 @@ import { DealStage } from '../../lib/hubspot/interfaces';
 import { RawLicense, RawTransaction } from '../../lib/marketplace/raw';
 import { DealData } from "../../lib/model/deal";
 import { License } from "../../lib/model/license";
-import { Transaction } from "../../lib/model/transaction";
 
 const chance = new Chance();
 
-type LicenseSpec = [
-  typeof License.prototype.id,
-  typeof License.prototype.data.maintenanceStartDate,
-  typeof License.prototype.data.licenseType,
-  typeof License.prototype.data.status,
-  [
-    typeof Transaction.prototype.data.transactionId,
-    typeof Transaction.prototype.data.saleDate,
-    typeof Transaction.prototype.data.saleType,
-    typeof Transaction.prototype.data.vendorAmount,
-  ][]
-];
-
 export type TestInput = {
   deals?: DealData[];
-  records: LicenseSpec[];
+  records: ReturnType<typeof abbrRecordDetails>[];
   partnerDomains?: string[],
 };
 
@@ -162,4 +148,19 @@ export function abbrActionDetails(action: Action) {
       ]]
     };
   }
+}
+
+export function abbrRecordDetails(license: License) {
+  return [
+    license.id,
+    license.data.maintenanceStartDate,
+    license.data.licenseType,
+    license.data.status,
+    license.transactions.map(transaction => [
+      transaction.data.transactionId,
+      transaction.data.saleDate,
+      transaction.data.saleType,
+      transaction.data.vendorAmount,
+    ] as const)
+  ] as const;
 }
