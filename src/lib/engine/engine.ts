@@ -150,7 +150,7 @@ export class Engine {
 
     const transactionTotal = (this.transactions
       .map(t => t.data.vendorAmount)
-      .reduce((a, b) => a + b));
+      .reduce((a, b) => a + b, 0));
 
     this.printDownloadSummary(transactionTotal);
 
