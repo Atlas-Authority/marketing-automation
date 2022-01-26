@@ -72,13 +72,15 @@ $ node out/bin/main.js  # This always uses live inputs/outputs
 
 ## Changelog
 
-### Unreleased
+### 0.3.0
 
-- Engine logs now written to `log` under input directory
+- Docker image now requires persistent `./data` directory
+- Engine logs now written to input subdirectory
+- Fixed occasional bug when writing large log files
 - Removed `loglevel` option
-  - log.info now logged to stdout
-  - log.{warn,error} now logged to stderr
-  - log.verbose replaced with log files
+  - Info statements are now logged to stdout
+  - Warnings and errors are now logged to stderr
+  - Verbose logs are now written to log files
 - Removed `savelogs` option
   - Now always saves all logs
   - Added `fast` option to skip slow logs
