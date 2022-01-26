@@ -17,7 +17,7 @@ import { deriveMultiProviderDomainsSet } from "./all-free-email-providers";
 import { identifyAndFlagContactTypes } from "./contacts/contact-types";
 import { ContactGenerator } from "./contacts/generate-contacts";
 import { updateContactsBasedOnMatchResults } from "./contacts/update-contacts";
-import { DealGenerator } from "./deal-generator/generate-deals";
+import { DealGenerator } from "./deal-generator";
 import { LicenseGrouper } from "./license-matching/license-grouper";
 import { printSummary } from "./summary";
 
