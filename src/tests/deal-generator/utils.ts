@@ -15,10 +15,24 @@ import { Transaction, TransactionData } from "../../lib/model/transaction";
 
 const chance = new Chance();
 
+type LicenseSpec = [
+  typeof License.prototype.id,
+  typeof License.prototype.data.maintenanceStartDate,
+  typeof License.prototype.data.licenseType,
+  typeof License.prototype.data.status,
+  TransactionSpec[]
+];
+
+type TransactionSpec = [
+  typeof Transaction.prototype.data.transactionId,
+  typeof Transaction.prototype.data.saleDate,
+  typeof Transaction.prototype.data.saleType,
+  typeof Transaction.prototype.data.vendorAmount,
+];
+
 export type TestInput = {
   deals?: DealData[];
-  records: (License | Transaction)[];
-  group: [string, string[]][];
+  records: LicenseSpec[];
   partnerDomains?: string[],
 };
 

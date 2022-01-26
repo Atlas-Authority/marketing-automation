@@ -1,4 +1,4 @@
-import { runDealGenerator, runDealGeneratorTwice, testLicense, testTransaction } from "./utils";
+import { runDealGenerator, runDealGeneratorTwice } from "./utils";
 
 
 it(`Creates deal from purchase`, () => {
