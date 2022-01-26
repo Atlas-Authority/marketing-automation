@@ -2,12 +2,10 @@ import util from 'util';
 import { DataFile, LogWriteStream } from '../data/file';
 import { Hubspot } from '../hubspot';
 import { Entity } from '../hubspot/entity';
-import { EntityKind } from '../hubspot/interfaces';
 import { withAutoClose } from '../util/helpers';
 
 export class HubspotOutputLogger {
 
-  private ids: Record<EntityKind, number> = { deal: 0, contact: 0, company: 0 };
   private creating = new Set<Entity<any>>();
 
   constructor(private logFile: DataFile<any>) { }
@@ -26,7 +24,7 @@ export class HubspotOutputLogger {
     const properties = { ...entity.getPropertyChanges() };
     if (Object.keys(properties).length > 0) {
       const action = this.creating.has(entity) ? 'create' : 'update';
-      const id = `${fromKind}:${this.idFor(entity)}`;
+      const id = `${fromKind}:${entity.id!}`;
       stream.writeLine(stringify([action, id, properties]));
     }
 
@@ -37,22 +35,13 @@ export class HubspotOutputLogger {
     });
 
     if (upAssociations.length > 0) {
-      const id = `${fromKind}:${this.idFor(entity)}`;
+      const id = `${fromKind}:${entity.id!}`;
       const associations = upAssociations.map(assoc => [
         assoc.op,
-        `${assoc.other.kind}:${this.idFor(assoc.other)}`,
+        `${assoc.other.kind}:${assoc.other.id!}`,
       ]);
       stream.writeLine(stringify(['associate', id, associations]));
     }
-  }
-
-  private idFor<T extends Entity<any>>(entity: T) {
-    if (!entity.id) {
-      const kind = entity.kind;
-      this.creating.add(entity);
-      entity.id = `fake-${++this.ids[kind]}`;
-    }
-    return entity.id;
   }
 
 }

@@ -1,12 +1,10 @@
 import 'source-map-support/register';
+import { engineConfigFromENV } from '../lib/config/env';
 import DataDir from '../lib/data/dir';
 import { Data, DataSet } from '../lib/data/set';
 import { Engine } from "../lib/engine/engine";
 import { Hubspot } from '../lib/hubspot';
-import { Entity } from '../lib/hubspot/entity';
-import { FullEntity, RelativeAssociation } from '../lib/hubspot/interfaces';
 import { Logger } from '../lib/log';
-import { engineConfigFromENV } from '../lib/config/env';
 
 const dataDir = DataDir.root.subdir('in');
 
@@ -30,33 +28,13 @@ function runEngine() {
   const hubspot = Hubspot.memoryFromENV(log);
   const engine = new Engine(hubspot, engineConfigFromENV(), log);
   engine.run(data);
+  hubspot.populateFakeIds();
   log.hubspotOutputLogger()?.logResults(hubspot);
   return hubspot;
 }
 
 function pipeOutputToInput(hubspot: Hubspot, data: Data) {
-  fillInIds(hubspot.dealManager.getAll());
-  fillInIds(hubspot.contactManager.getAll());
-  fillInIds(hubspot.companyManager.getAll());
-
-  data.rawDeals = hubspot.dealManager.getArray().map(toRawEntity);
-  data.rawContacts = hubspot.contactManager.getArray().map(toRawEntity);
-  data.rawCompanies = hubspot.companyManager.getArray().map(toRawEntity);
-}
-
-function fillInIds(entities: Iterable<Entity<any>>) {
-  let id = 0;
-  for (const e of entities) {
-    if (!e.id) e.id = `fake-${e.kind}-${++id}`;
-  }
-}
-
-function toRawEntity(entity: Entity<any>): FullEntity {
-  return {
-    id: entity.id!,
-    properties: entity.upsyncableData(),
-    associations: [...entity.upsyncableAssociations()].map(other => {
-      return `${other.kind}:${other.id}` as RelativeAssociation;
-    }),
-  };
+  data.rawDeals = hubspot.dealManager.getArray().map(e => e.toRawEntity());
+  data.rawContacts = hubspot.contactManager.getArray().map(e => e.toRawEntity());
+  data.rawCompanies = hubspot.companyManager.getArray().map(e => e.toRawEntity());
 }

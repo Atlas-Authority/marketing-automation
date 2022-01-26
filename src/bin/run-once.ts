@@ -17,4 +17,5 @@ const data = new DataSet(dataDir).load();
 
 engine.run(data);
 
+hubspot.populateFakeIds();
 log.hubspotOutputLogger()?.logResults(hubspot);

@@ -1,4 +1,4 @@
-import { EntityAdapter, EntityKind } from "./interfaces";
+import { EntityAdapter, EntityKind, FullEntity, RelativeAssociation } from "./interfaces";
 
 export interface Indexer<D> {
   removeIndexesFor<K extends keyof D>(key: K, entity: Entity<D>): void;
@@ -72,19 +72,6 @@ export abstract class Entity<D extends Record<string, any>> {
     return upProperties;
   }
 
-  public upsyncableData() {
-    const upProperties: Record<string, string> = { ...this.downloadedData };
-    for (const [k, v] of Object.entries(this.newData)) {
-      const spec = this.adapter.data[k];
-      if (spec.property) {
-        const upKey = spec.property as keyof D;
-        const upVal = spec.up(v);
-        upProperties[upKey as string] = upVal;
-      }
-    }
-    return upProperties;
-  }
-
   // Associations
 
   protected makeDynamicAssociation<T extends Entity<any>>(kind: EntityKind) {
@@ -101,13 +88,6 @@ export abstract class Entity<D extends Record<string, any>> {
     this.newAssocs.add(entity);
 
     if (meta.firstSide) entity.addAssociation(this, { firstSide: false, initial: meta.initial });
-  }
-
-  public upsyncableAssociations() {
-    return [...this.newAssocs].filter(other => {
-      const found = this.adapter.associations[other.kind];
-      return found?.includes('up');
-    });
   }
 
   private getAssociations(kind: EntityKind) {
@@ -136,6 +116,38 @@ export abstract class Entity<D extends Record<string, any>> {
       ...toAdd.map(e => ({ op: 'add', other: e })),
       ...toDel.map(e => ({ op: 'del', other: e })),
     ] as { op: 'add' | 'del', other: Entity<any> }[];
+  }
+
+  // Back transformation
+
+  public toRawEntity(): FullEntity {
+    return {
+      id: this.id!,
+      properties: this.upsyncableData(),
+      associations: [...this.upsyncableAssociations()].map(other => {
+        return `${other.kind}:${other.id}` as RelativeAssociation;
+      }),
+    };
+  }
+
+  private upsyncableData() {
+    const upProperties: Record<string, string> = { ...this.downloadedData };
+    for (const [k, v] of Object.entries(this.newData)) {
+      const spec = this.adapter.data[k];
+      if (spec.property) {
+        const upKey = spec.property as keyof D;
+        const upVal = spec.up(v);
+        upProperties[upKey as string] = upVal;
+      }
+    }
+    return upProperties;
+  }
+
+  private upsyncableAssociations() {
+    return [...this.newAssocs].filter(other => {
+      const found = this.adapter.associations[other.kind];
+      return found?.includes('up');
+    });
   }
 
 }

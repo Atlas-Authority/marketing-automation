@@ -3,6 +3,7 @@ import { Logger } from "../log";
 import { CompanyManager } from "../model/company";
 import { ContactManager, HubspotContactConfig } from "../model/contact";
 import { DealManager, HubspotDealConfig } from "../model/deal";
+import { Entity } from "./entity";
 
 export class Hubspot {
 
@@ -47,6 +48,19 @@ export class Hubspot {
     await dealUploader.syncUpAllAssociations();
     await contactUploader.syncUpAllAssociations();
     await companyUploader.syncUpAllAssociations();
+  }
+
+  public populateFakeIds() {
+    fillInIds(this.dealManager.getAll());
+    fillInIds(this.contactManager.getAll());
+    fillInIds(this.companyManager.getAll());
+
+    function fillInIds(entities: Iterable<Entity<any>>) {
+      let id = 0;
+      for (const e of entities) {
+        if (!e.id) e.id = `fake-${e.kind}-${++id}`;
+      }
+    }
   }
 
 }

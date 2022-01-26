@@ -6,30 +6,35 @@ import { Engine, EngineConfig } from '../../lib/engine/engine';
 import { Hubspot } from '../../lib/hubspot';
 import { DealStage } from '../../lib/hubspot/interfaces';
 import { RawLicense, RawTransaction } from '../../lib/marketplace/raw';
-import { DealData } from "../../lib/model/deal";
+import { Deal } from "../../lib/model/deal";
 import { License } from "../../lib/model/license";
 
 const chance = new Chance();
 
 export type TestInput = {
-  deals?: DealData[];
+  deals?: Deal[];
   records: ReturnType<typeof abbrRecordDetails>[];
   partnerDomains?: string[],
 };
 
 export function runDealGeneratorTwice(input: TestInput) {
   const output = runDealGenerator(input);
-  return runDealGenerator({ ...input, deals: output.createdDeals });
+  input.deals = output.deals;
+  return runDealGenerator(input);
 }
 
 export function runDealGenerator(input: TestInput) {
   const { config, data } = processInput(input);
-  const engine = new Engine(Hubspot.memory(), config);
+  const hubspot = Hubspot.memory();
+  const engine = new Engine(hubspot, config);
   const engineResults = engine.run(data);
   const [[firstLicenseId,],] = input.records;
   const dealGeneratorResults = engineResults.dealGeneratorResults.get(firstLicenseId)!;
 
+  hubspot.populateFakeIds();
+
   return {
+    deals: hubspot.dealManager.getArray(),
     actions: dealGeneratorResults.actions.map(abbrActionDetails),
     events: dealGeneratorResults.events.map(abbrEventDetails),
   };
@@ -40,7 +45,7 @@ function processInput(input: TestInput): { config: EngineConfig; data: Data; } {
     rawCompanies: [],
     rawContacts: [],
     transactions: [],
-    rawDeals: [],
+    rawDeals: input.deals?.map(deal => deal.toRawEntity()) ?? [],
     licensesWithoutDataInsights: [],
     licensesWithDataInsights: [],
     freeDomains: [],
