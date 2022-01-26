@@ -3,14 +3,14 @@ import { RawLicense, RawTransaction } from "../marketplace/raw";
 import DataDir from "./dir";
 
 export interface Data {
-  tlds: readonly string[];
-  licensesWithDataInsights: readonly RawLicense[];
-  licensesWithoutDataInsights: readonly RawLicense[];
-  transactions: readonly RawTransaction[];
-  freeDomains: readonly string[];
-  rawDeals: readonly FullEntity[];
-  rawCompanies: readonly FullEntity[];
-  rawContacts: readonly FullEntity[];
+  readonly tlds: readonly string[];
+  readonly licensesWithDataInsights: readonly RawLicense[];
+  readonly licensesWithoutDataInsights: readonly RawLicense[];
+  readonly transactions: readonly RawTransaction[];
+  readonly freeDomains: readonly string[];
+  readonly rawDeals: readonly FullEntity[];
+  readonly rawCompanies: readonly FullEntity[];
+  readonly rawContacts: readonly FullEntity[];
 }
 
 export class DataSet {

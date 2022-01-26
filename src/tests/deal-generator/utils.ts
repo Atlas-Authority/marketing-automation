@@ -45,8 +45,11 @@ export function runDealGenerator(input: TestInput) {
   return results.dealGeneratorResults.get(firstLicenseId)!;
 }
 
+// There's got to be a less weird way to do remove -readonly from arrays
+type MutableData = { [K in keyof Data]: Data[K][0][] };
+
 function processInput(input: TestInput): { config: EngineConfig; data: Data; } {
-  const data: Data = {
+  const data: MutableData = {
     rawCompanies: [],
     rawContacts: [],
     transactions: [],
