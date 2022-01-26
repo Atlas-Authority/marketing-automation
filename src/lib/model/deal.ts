@@ -1,13 +1,13 @@
-import { Logger } from "../log";
-import { uniqueTransactionId } from "./transaction";
 import { hubspotAccountIdFromEnv } from "../config/env";
-import { AttachableError } from "../util/errors";
-import { isPresent } from "../util/helpers";
 import { Entity } from "../hubspot/entity";
 import { DealStage, EntityAdapter, Pipeline } from "../hubspot/interfaces";
 import { EntityManager } from "../hubspot/manager";
+import { Logger } from "../log";
+import { AttachableError } from "../util/errors";
+import { isPresent } from "../util/helpers";
 import { Company } from "./company";
 import { Contact } from "./contact";
+import { uniqueTransactionId } from "./transaction";
 
 export type DealData = {
   relatedProducts: string | null;
@@ -115,6 +115,9 @@ function isNonZeroNumberString(str: string | null) {
 
 function makeAdapter(config: HubspotDealConfig): EntityAdapter<DealData> {
 
+  config.pipeline ??= {};
+  config.pipeline.mpac ??= 'Pipeline';
+
   function enumFromValue<T extends number>(mapping: Record<T, string>, apiValue: string): T {
     const found = Object.entries(mapping).find(([k, v]) => v === apiValue);
     if (!found) throw new AttachableError('Cannot find ENV-configured mapping:',
@@ -123,7 +126,7 @@ function makeAdapter(config: HubspotDealConfig): EntityAdapter<DealData> {
   }
 
   const pipelines: Record<Pipeline, string> = {
-    [Pipeline.MPAC]: config.pipeline?.mpac ?? 'Pipeline',
+    [Pipeline.MPAC]: config.pipeline.mpac,
   };
 
   const dealstages: Record<DealStage, string> = {
@@ -142,7 +145,7 @@ function makeAdapter(config: HubspotDealConfig): EntityAdapter<DealData> {
     },
 
     shouldReject(data) {
-      if (data['pipeline'] !== config.pipeline?.mpac) return true;
+      if (data['pipeline'] !== config.pipeline!.mpac) return true;
       if (config.attrs?.duplicateOf && data[config.attrs?.duplicateOf]) return true;
       return false;
     },
