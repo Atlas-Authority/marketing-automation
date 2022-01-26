@@ -25,10 +25,14 @@ export function runDealGeneratorTwice(input: TestInput) {
 export function runDealGenerator(input: TestInput) {
   const { config, data } = processInput(input);
   const engine = new Engine(Hubspot.memory(), config);
-  const results = engine.run(data);
+  const engineResults = engine.run(data);
   const [[firstLicenseId,],] = input.records;
-  // console.log({ firstLicenseId, results: results.dealGeneratorResults })
-  return results.dealGeneratorResults.get(firstLicenseId)!;
+  const dealGeneratorResults = engineResults.dealGeneratorResults.get(firstLicenseId)!;
+
+  return {
+    actions: dealGeneratorResults.actions.map(abbrActionDetails),
+    events: dealGeneratorResults.events.map(abbrEventDetails),
+  };
 }
 
 // There's got to be a less weird way to do remove -readonly from arrays
@@ -51,9 +55,9 @@ function processInput(input: TestInput): { config: EngineConfig; data: Data; } {
     appToPlatform: Object.create(null),
   };
 
-  for (const [id, start, licenseType, status, txSpec] of input.records) {
-    const email = chance.email();
+  const email = chance.email();
 
+  for (const [id, start, licenseType, status, txSpec] of input.records) {
     const rawLicense = rawLicenseFrom(id, email, start, licenseType, status);
     data.licensesWithDataInsights.push(rawLicense);
     config.appToPlatform![rawLicense.addonKey] = 'Confluence';
