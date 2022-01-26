@@ -6,7 +6,7 @@ import { Hubspot } from '../lib/hubspot';
 import { Logger } from '../lib/log';
 
 const dataDir = DataDir.root.subdir("in");
-const log = new Logger(dataDir.subdir("log"));
+const log = new Logger();
 const dataSet = new DataSet(dataDir);
 const hubspot = Hubspot.live(log);
 downloadAllData(log, dataSet, hubspot);
