@@ -1,17 +1,17 @@
 import Chance from 'chance';
-import { ContactGenerator } from '../../src/lib/engine/contacts/generate-contacts';
-import { updateContactsBasedOnMatchResults } from '../../src/lib/engine/contacts/update-contacts';
-import { DealGenerator } from '../../src/lib/engine/deal-generator';
-import { Action } from "../../src/lib/engine/deal-generator/actions";
-import { DealRelevantEvent } from '../../src/lib/engine/deal-generator/events';
-import { Engine } from '../../src/lib/engine/engine';
-import { RelatedLicenseSet } from '../../src/lib/engine/license-matching/license-grouper';
-import { Hubspot } from '../../src/lib/hubspot';
-import { DealStage } from '../../src/lib/hubspot/interfaces';
-import { DealData } from "../../src/lib/hubspot/model/deal";
-import { License, LicenseData } from "../../src/lib/marketplace/model/license";
-import { ContactInfo } from '../../src/lib/marketplace/model/record';
-import { Transaction, TransactionData } from "../../src/lib/marketplace/model/transaction";
+import { ContactGenerator } from '../../lib/engine/contacts/generate-contacts';
+import { updateContactsBasedOnMatchResults } from '../../lib/engine/contacts/update-contacts';
+import { DealGenerator } from '../../lib/engine/deal-generator';
+import { Action } from "../../lib/engine/deal-generator/actions";
+import { DealRelevantEvent } from '../../lib/engine/deal-generator/events';
+import { Engine } from '../../lib/engine/engine';
+import { RelatedLicenseSet } from '../../lib/engine/license-matching/license-grouper';
+import { Hubspot } from '../../lib/hubspot';
+import { DealStage } from '../../lib/hubspot/interfaces';
+import { DealData } from "../../lib/hubspot/model/deal";
+import { License, LicenseData } from "../../lib/marketplace/model/license";
+import { ContactInfo } from '../../lib/marketplace/model/record';
+import { Transaction, TransactionData } from "../../lib/marketplace/model/transaction";
 
 const chance = new Chance();
 

@@ -1,4 +1,4 @@
-import { GeneratedContact, mergeContactInfo } from "../src/lib/engine/contacts/generate-contacts";
+import { GeneratedContact, mergeContactInfo } from "../lib/engine/contacts/generate-contacts";
 
 describe('updating latest contact properties', () => {
 
