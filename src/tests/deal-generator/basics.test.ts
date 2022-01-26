@@ -3,9 +3,8 @@ import { runDealGenerator, runDealGeneratorTwice, testLicense, testTransaction }
 
 it(`Creates deal from purchase`, () => {
   const { events, actions } = runDealGenerator({
-    group: [['2454822', []]],
     records: [
-      testLicense("2454822", "2012-12-27", "COMMERCIAL", "inactive")
+      ['2454822', '2012-12-27', 'COMMERCIAL', 'inactive', []]
     ],
   });
   expect(events).toEqual([
@@ -26,10 +25,9 @@ it(`Creates deal from purchase`, () => {
 
 it(`Does not create deal from purchase when one already exists`, () => {
   const { events, actions } = runDealGeneratorTwice({
-    group: [['2454822', []]],
     records: [
-      testLicense("2454822", "2012-12-27", "COMMERCIAL", "inactive")
-    ],
+      ['2454822', '2012-12-27', 'COMMERCIAL', 'inactive', []]
+    ]
   });
   expect(events).toEqual([
     ['purchase', '2454822']
@@ -43,12 +41,12 @@ it(`Does not create deal from purchase when one already exists`, () => {
 
 it(`Creates deals for renewals and upgrades separately from purchases`, () => {
   const { events, actions } = runDealGenerator({
-    group: [['L2169473', []], ['2479625', ['AT-131949332[2479625]', 'AT-97165138[2479625]']]],
     records: [
-      testLicense("L2169473", "2013-01-21", "EVALUATION", "inactive"),
-      testLicense("2479625", "2013-01-23", "COMMERCIAL", "active"),
-      testTransaction("2479625", "2020-04-07", "COMMERCIAL", "Upgrade", "AT-97165138", 411),
-      testTransaction("2479625", "2021-03-25", "COMMERCIAL", "Renewal", "AT-131949332", 274)
+      ['L2169473', '2013-01-21', 'EVALUATION', 'inactive', []],
+      ['2479625', '2013-01-23', 'COMMERCIAL', 'active', [
+        ['AT-131949332', '2021-03-25', 'COMMERCIAL', 'Renewal', 'AT-131949332', 274],
+        ['AT-97165138', '2020-04-07', 'COMMERCIAL', 'Upgrade', 'AT-97165138', 411]
+      ]]
     ],
   });
   expect(events).toEqual([
@@ -89,12 +87,12 @@ it(`Creates deals for renewals and upgrades separately from purchases`, () => {
 
 it(`Does nothing when upgrades and renewals already have deals`, () => {
   const { events, actions } = runDealGeneratorTwice({
-    group: [['L2169473', []], ['2479625', ['AT-131949332[2479625]', 'AT-97165138[2479625]']]],
     records: [
-      testLicense("L2169473", "2013-01-21", "EVALUATION", "inactive"),
-      testLicense("2479625", "2013-01-23", "COMMERCIAL", "active"),
-      testTransaction("2479625", "2020-04-07", "COMMERCIAL", "Upgrade", "AT-97165138", 411),
-      testTransaction("2479625", "2021-03-25", "COMMERCIAL", "Renewal", "AT-131949332", 274)
+      ['L2169473', '2013-01-21', 'EVALUATION', 'inactive', []],
+      ['2479625', '2013-01-23', 'COMMERCIAL', 'active', [
+        ['AT-131949332', '2021-03-25', 'COMMERCIAL', 'Renewal', 'AT-131949332', 274],
+        ['AT-97165138', '2020-04-07', 'COMMERCIAL', 'Upgrade', 'AT-97165138', 411]
+      ]]
     ],
   });
   expect(events).toEqual([
