@@ -1,6 +1,11 @@
 import chalk from "chalk";
+import { ContactGenerator } from "../contact-generator";
+import { identifyAndFlagContactTypes } from "../contact-generator/contact-types";
+import { updateContactsBasedOnMatchResults } from "../contact-generator/update-contacts";
 import { Data } from "../data/set";
+import { DealGenerator } from "../deal-generator";
 import { Hubspot } from "../hubspot";
+import { LicenseGrouper } from "../license-matching/license-grouper";
 import { Logger } from "../log";
 import { Table } from "../log/table";
 import { Tallier } from "../log/tallier";
@@ -14,11 +19,6 @@ import { getEmailsForRecord } from "../model/record";
 import { Transaction } from "../model/transaction";
 import { formatMoney, formatNumber } from "../util/formatters";
 import { deriveMultiProviderDomainsSet } from "./all-free-email-providers";
-import { ContactGenerator } from "./contact-generator";
-import { identifyAndFlagContactTypes } from "./contact-generator/contact-types";
-import { updateContactsBasedOnMatchResults } from "./contact-generator/update-contacts";
-import { DealGenerator } from "./deal-generator";
-import { LicenseGrouper } from "./license-matching/license-grouper";
 import { printSummary } from "./summary";
 
 export type DealPropertyConfig = {

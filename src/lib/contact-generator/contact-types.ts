@@ -1,7 +1,7 @@
-import { Contact, domainFor } from "../../model/contact";
-import { License } from "../../model/license";
-import { Transaction } from "../../model/transaction";
-import { Engine } from "../engine";
+import { Engine } from "../engine/engine";
+import { Contact, domainFor } from "../model/contact";
+import { License } from "../model/license";
+import { Transaction } from "../model/transaction";
 
 export function identifyAndFlagContactTypes(engine: Engine) {
   // Identifying contact types

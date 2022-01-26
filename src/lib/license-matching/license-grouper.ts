@@ -1,7 +1,7 @@
-import { LicenseMatchLogger } from '../../log/license-scorer';
-import { License } from '../../model/license';
-import { sorter, withAutoClose } from '../../util/helpers';
-import { Engine } from '../engine';
+import { Engine } from '../engine/engine';
+import { LicenseMatchLogger } from '../log/license-scorer';
+import { License } from '../model/license';
+import { sorter, withAutoClose } from '../util/helpers';
 import { LicenseMatcher, ScorableLicense } from './license-matcher';
 
 /** Related via the matching engine. */

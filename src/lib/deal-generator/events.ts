@@ -1,8 +1,8 @@
-import { License } from "../../model/license";
-import { Transaction } from "../../model/transaction";
-import { sorter } from "../../util/helpers";
-import { Engine } from "../engine";
+import { Engine } from "../engine/engine";
 import { RelatedLicenseSet } from "../license-matching/license-grouper";
+import { License } from "../model/license";
+import { Transaction } from "../model/transaction";
+import { sorter } from "../util/helpers";
 
 export type EventMeta = 'partner-only' | 'mass-provider-only' | 'partner-and-mass-provider-only' | 'archived-app' | null;
 

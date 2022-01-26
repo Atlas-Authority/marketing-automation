@@ -1,5 +1,5 @@
 import { CsvStream } from '../data/csv';
-import { shorterLicenseInfo } from '../engine/license-matching/license-grouper';
+import { shorterLicenseInfo } from '../license-matching/license-grouper';
 import { License } from '../model/license';
 
 export class LicenseMatchLogger {

@@ -1,10 +1,10 @@
-import { domainFor } from "../../model/contact";
-import { License } from "../../model/license";
-import { Transaction } from "../../model/transaction";
-import { KnownError } from "../../util/errors";
-import { isPresent } from "../../util/helpers";
-import { Engine } from "../engine";
+import { Engine } from "../engine/engine";
 import { RelatedLicenseSet } from "../license-matching/license-grouper";
+import { domainFor } from "../model/contact";
+import { License } from "../model/license";
+import { Transaction } from "../model/transaction";
+import { KnownError } from "../util/errors";
+import { isPresent } from "../util/helpers";
 import { flagPartnersViaCoworkers } from "./contact-types";
 
 export function updateContactsBasedOnMatchResults(engine: Engine, allMatches: RelatedLicenseSet[]) {

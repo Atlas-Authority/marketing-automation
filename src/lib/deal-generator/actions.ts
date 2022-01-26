@@ -1,11 +1,11 @@
 import mustache from 'mustache';
-import { DealStage, Pipeline } from "../../hubspot/interfaces";
-import { Logger } from "../../log";
-import { Deal, DealData, DealManager } from "../../model/deal";
-import { License } from "../../model/license";
-import { Transaction, uniqueTransactionId } from "../../model/transaction";
-import { isPresent, sorter } from "../../util/helpers";
-import { DealPropertyConfig } from '../engine';
+import { DealPropertyConfig } from '../engine/engine';
+import { DealStage, Pipeline } from "../hubspot/interfaces";
+import { Logger } from "../log";
+import { Deal, DealData, DealManager } from "../model/deal";
+import { License } from "../model/license";
+import { Transaction, uniqueTransactionId } from "../model/transaction";
+import { isPresent, sorter } from "../util/helpers";
 import { abbrEventDetails, DealRelevantEvent, EvalEvent, EventMeta, PurchaseEvent, RefundEvent, RenewalEvent, UpgradeEvent } from "./events";
 
 type DealNoOpReason = Exclude<EventMeta, null> | 'properties-up-to-date';

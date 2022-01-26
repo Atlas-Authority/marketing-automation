@@ -1,12 +1,12 @@
 import assert from "assert";
-import { Table } from "../../log/table";
-import { Deal } from "../../model/deal";
-import { License, LicenseData } from "../../model/license";
-import { Transaction } from "../../model/transaction";
-import { formatMoney } from "../../util/formatters";
-import { isPresent, sorter, withAutoClose } from "../../util/helpers";
-import { Engine } from "../engine";
+import { Engine } from "../engine/engine";
 import { RelatedLicenseSet } from "../license-matching/license-grouper";
+import { Table } from "../log/table";
+import { Deal } from "../model/deal";
+import { License, LicenseData } from "../model/license";
+import { Transaction } from "../model/transaction";
+import { formatMoney } from "../util/formatters";
+import { isPresent, sorter, withAutoClose } from "../util/helpers";
 import { Action, ActionGenerator } from "./actions";
 import { DealRelevantEvent, EventGenerator } from "./events";
 

@@ -1,10 +1,10 @@
 import capitalize from "capitalize";
-import { Contact, ContactData, ContactType } from '../../model/contact';
-import { License } from '../../model/license';
-import { ContactInfo, PartnerBillingInfo } from "../../model/record";
-import { Transaction } from '../../model/transaction';
-import { sorter } from '../../util/helpers';
-import { Engine } from '../engine';
+import { Engine } from '../engine/engine';
+import { Contact, ContactData, ContactType } from '../model/contact';
+import { License } from '../model/license';
+import { ContactInfo, PartnerBillingInfo } from "../model/record";
+import { Transaction } from '../model/transaction';
+import { sorter } from '../util/helpers';
 
 export type GeneratedContact = ContactData & { lastUpdated: string };
 
