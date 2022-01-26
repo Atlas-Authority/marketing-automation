@@ -3,14 +3,14 @@ import { RawLicense, RawTransaction } from "../marketplace/raw";
 import DataDir from "./dir";
 
 export interface Data {
-  readonly tlds: readonly string[];
-  readonly licensesWithDataInsights: readonly RawLicense[];
-  readonly licensesWithoutDataInsights: readonly RawLicense[];
-  readonly transactions: readonly RawTransaction[];
-  readonly freeDomains: readonly string[];
-  readonly rawDeals: readonly FullEntity[];
-  readonly rawCompanies: readonly FullEntity[];
-  readonly rawContacts: readonly FullEntity[];
+  tlds: string[];
+  licensesWithDataInsights: RawLicense[];
+  licensesWithoutDataInsights: RawLicense[];
+  transactions: RawTransaction[];
+  freeDomains: string[];
+  rawDeals: FullEntity[];
+  rawCompanies: FullEntity[];
+  rawContacts: FullEntity[];
 }
 
 export class DataSet {
@@ -25,14 +25,14 @@ export class DataSet {
   private rawContacts;
 
   constructor(dataDir: DataDir) {
-    this.licensesWithDataInsights = dataDir.file<readonly RawLicense[]>('licenses-with.csv');
-    this.licensesWithoutDataInsights = dataDir.file<readonly RawLicense[]>('licenses-without.csv');
-    this.transactions = dataDir.file<readonly RawTransaction[]>('transactions.csv');
-    this.tlds = dataDir.file<readonly { tld: string }[]>('tlds.csv');
-    this.freeDomains = dataDir.file<readonly { domain: string }[]>('domains.csv');
-    this.rawDeals = dataDir.file<readonly FullEntity[]>('deals.csv');
-    this.rawCompanies = dataDir.file<readonly FullEntity[]>('companies.csv');
-    this.rawContacts = dataDir.file<readonly FullEntity[]>('contacts.csv');
+    this.licensesWithDataInsights = dataDir.file<RawLicense[]>('licenses-with.csv');
+    this.licensesWithoutDataInsights = dataDir.file<RawLicense[]>('licenses-without.csv');
+    this.transactions = dataDir.file<RawTransaction[]>('transactions.csv');
+    this.tlds = dataDir.file<{ tld: string }[]>('tlds.csv');
+    this.freeDomains = dataDir.file<{ domain: string }[]>('domains.csv');
+    this.rawDeals = dataDir.file<FullEntity[]>('deals.csv');
+    this.rawCompanies = dataDir.file<FullEntity[]>('companies.csv');
+    this.rawContacts = dataDir.file<FullEntity[]>('contacts.csv');
   }
 
   load(): Data {
