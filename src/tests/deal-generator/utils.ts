@@ -1,6 +1,6 @@
 import Chance from 'chance';
-import { ContactGenerator } from '../../lib/engine/contacts/generate-contacts';
-import { updateContactsBasedOnMatchResults } from '../../lib/engine/contacts/update-contacts';
+import { ContactGenerator } from '../../lib/engine/contact-generator';
+import { updateContactsBasedOnMatchResults } from '../../lib/engine/contact-generator/update-contacts';
 import { DealGenerator } from '../../lib/engine/deal-generator';
 import { Action } from "../../lib/engine/deal-generator/actions";
 import { DealRelevantEvent } from '../../lib/engine/deal-generator/events';
