@@ -8,6 +8,7 @@ it(`Sets partner domain on deal if record is partner-transacted`, () => {
       ["2222222", "2021-12-27", "COMMERCIAL", "active", []],
     ],
     partnerLicenseIds: ['2222222'],
+    uniqueEmailForLicenses: ['2222222'],
   });
 
   expect(deals.length).toBe(1);
@@ -24,6 +25,7 @@ it(`Sets partner domain on deal if record is partner-transacted even if newer on
       ["2222222", "2021-12-27", "COMMERCIAL", "active", []],
     ],
     partnerLicenseIds: ['1111111'],
+    uniqueEmailForLicenses: ['1111111'],
   });
 
   expect(deals.length).toBe(1);
@@ -40,6 +42,7 @@ it(`Sets partner domain on contact if latest record is partner-transacted`, () =
       ["2222222", "2021-12-27", "COMMERCIAL", "active", []],
     ],
     partnerLicenseIds: ['1111111'],
+    uniqueEmailForLicenses: ['1111111'],
   });
 
   expect(contacts.length).toBe(2);
@@ -47,5 +50,25 @@ it(`Sets partner domain on contact if latest record is partner-transacted`, () =
   const [c1, c2] = contacts;
 
   expect(c1.data.lastAssociatedPartner).toEqual(c1.data.email.split('@')[1]);
+  expect(c2.data.lastAssociatedPartner).toEqual(null);
+});
+
+it(`Unsets partner domain on contact if latest record is not partner-transacted`, () => {
+  const { contacts } = runDealGeneratorTwice({
+    records: [
+      ["1111111", "2021-12-26", "EVALUATION", "inactive", []],
+      ["2222222", "2021-12-27", "COMMERCIAL", "active", []],
+    ],
+    partnerLicenseIds: ['1111111'],
+    uniqueEmailForLicenses: ['2222222'],
+  });
+
+  expect(contacts.length).toBe(2);
+
+  const [c1, c2] = contacts;
+
+  expect(c1.isPartner).toBeTruthy();
+  expect(c2.isPartner).toBeTruthy();
+
   expect(c2.data.lastAssociatedPartner).toEqual(null);
 });

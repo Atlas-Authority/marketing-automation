@@ -18,7 +18,8 @@ export type TestInput = {
   contacts?: Contact[];
   companies?: Company[];
   records: ReturnType<typeof abbrRecordDetails>[];
-  partnerLicenseIds?: string[],
+  partnerLicenseIds?: string[];
+  uniqueEmailForLicenses?: string[];
 };
 
 export function runDealGeneratorTwice(input: TestInput) {
@@ -79,8 +80,11 @@ function processInput(input: TestInput): { config: EngineConfig; data: Data; } {
   for (const [id, start, licenseType, status, txSpec] of input.records) {
     const techContact: RawLicenseContact = { ...baseTechContact };
 
-    if (input.partnerLicenseIds?.includes(id)) {
+    if (input.uniqueEmailForLicenses?.includes(id)) {
       techContact.email = chance.email();
+    }
+
+    if (input.partnerLicenseIds?.includes(id)) {
       config.partnerDomains?.add(techContact.email.split('@')[1]);
     }
 
