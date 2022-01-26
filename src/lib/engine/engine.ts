@@ -90,12 +90,15 @@ export class Engine {
     updateContactsBasedOnMatchResults(this, allMatches);
 
     this.logStep('Generating deals');
-    new DealGenerator(this).run(allMatches);
+    const dealGenerator = new DealGenerator(this);
+    const dealGeneratorResults = dealGenerator.run(allMatches);
 
     this.logStep('Summary');
     printSummary(this);
 
     this.logStep('Done running engine on given data set');
+
+    return { dealGeneratorResults };
   }
 
   private importData(data: Data) {

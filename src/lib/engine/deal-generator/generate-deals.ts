@@ -1,19 +1,26 @@
 import assert from "assert";
 import { Deal } from "../../hubspot/model/deal";
 import { Table } from "../../log/table";
-import { LicenseData } from "../../marketplace/model/license";
+import { License, LicenseData } from "../../marketplace/model/license";
+import { Transaction } from "../../marketplace/model/transaction";
 import { formatMoney } from "../../util/formatters";
 import { isPresent, sorter, withAutoClose } from "../../util/helpers";
 import { Engine } from "../engine";
 import { RelatedLicenseSet } from "../license-matching/license-grouper";
-import { ActionGenerator } from "./actions";
-import { EventGenerator } from "./events";
+import { Action, ActionGenerator } from "./actions";
+import { DealRelevantEvent, EventGenerator } from "./events";
 
 
 export type IgnoredLicense = LicenseData & {
   reason: string;
   details: string;
 };
+
+interface DealGeneratorResult {
+  records: (License | Transaction)[];
+  events: DealRelevantEvent[];
+  actions: Action[];
+}
 
 /** Generates deal actions based on match data */
 export class DealGenerator {
@@ -31,15 +38,21 @@ export class DealGenerator {
     );
   }
 
-  public run(matches: RelatedLicenseSet[]) {
-    withAutoClose(this.engine.log?.dealGeneratorLog(), logger => {
-      for (const relatedLicenseIds of matches) {
-        const { records, events, actions } = this.generateActionsForMatchedGroup(relatedLicenseIds);
+  public run(matchGroups: RelatedLicenseSet[]) {
+    return withAutoClose(this.engine.log?.dealGeneratorLog(), logger => {
+      const results = new Map<string, DealGeneratorResult>();
 
-        logger?.logTestID(relatedLicenseIds);
+      for (const relatedLicenses of matchGroups) {
+        const { records, events, actions } = this.generateActionsForMatchedGroup(relatedLicenses);
+
+        logger?.logTestID(relatedLicenses);
         logger?.logRecords(records);
         logger?.logEvents(events);
         logger?.logActions(actions);
+
+        for (const license of relatedLicenses) {
+          results.set(license.id, { records, events, actions })
+        }
 
         for (const action of actions) {
           const deal = (action.type === 'create'
@@ -47,7 +60,7 @@ export class DealGenerator {
             : action.deal);
 
           if (deal) {
-            this.associateDealContactsAndCompanies(relatedLicenseIds, deal);
+            this.associateDealContactsAndCompanies(relatedLicenses, deal);
           }
         }
       }
@@ -57,6 +70,8 @@ export class DealGenerator {
       }
 
       this.printIgnoredTransactionsTable();
+
+      return results;
     });
   }
 
@@ -75,7 +90,7 @@ export class DealGenerator {
     }
   }
 
-  public generateActionsForMatchedGroup(group: RelatedLicenseSet) {
+  private generateActionsForMatchedGroup(group: RelatedLicenseSet) {
     assert.ok(group.length > 0);
 
     const eventGenerator = new EventGenerator(this.engine);
