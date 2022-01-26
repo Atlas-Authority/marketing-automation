@@ -7,14 +7,11 @@ import { Engine } from "../lib/engine/engine";
 import { Hubspot } from '../lib/hubspot';
 import { Logger } from '../lib/log';
 import { License } from '../lib/model/license';
-import { Transaction } from '../lib/model/transaction';
 import { abbrActionDetails, abbrEventDetails } from '../tests/deal-generator/utils';
 
-function TEMPLATE({ runDealGenerator, GROUP, RECORDS, EVENTS, ACTIONS }: any) {
+function TEMPLATE({ runDealGenerator, RECORDS, EVENTS, ACTIONS }: any) {
   it(`describe test`, () => {
     const { events, actions } = runDealGenerator({
-      group: GROUP,
-      deals: [],
       records: RECORDS,
     });
     expect(events).toEqual(EVENTS);
@@ -31,10 +28,10 @@ function main(template: string, licenseIds: string[]) {
     const results = dealGeneratorResults.get(licenseId);
     if (results) {
       const { actions, records, events } = results;
+      const licenses = records.filter(r => r instanceof License) as License[];
       console.log(template
-        // .replace('GROUP', format(ids, 100))
-        .replace('RECORDS', `[\n${records.map(abbrRecordDetails).join(',\n')}\n]`)
-        .replace('EVENTS', `[\n${events.map(event => format(abbrEventDetails(event), Infinity)).join(',\n')}\n]`)
+        .replace('RECORDS', format(licenses.map(abbrRecordDetails), 150))
+        .replace('EVENTS', format(events.map(abbrEventDetails)))
         .replace('ACTIONS', format(actions.map(abbrActionDetails)))
       );
     }
@@ -45,7 +42,12 @@ function main(template: string, licenseIds: string[]) {
 }
 
 function format(o: any, breakLength = 50) {
-  return util.inspect(o, { depth: null, breakLength });
+  return util.inspect(o, {
+    depth: null,
+    breakLength,
+    maxArrayLength: null,
+    maxStringLength: null,
+  });
 }
 
 const template = (TEMPLATE
@@ -56,27 +58,19 @@ const template = (TEMPLATE
 
 main(template, process.argv.slice(2));
 
-function abbrRecordDetails(record: License | Transaction) {
-  if (record instanceof Transaction) {
-    return `testTransaction(${[
-      record.id,
-      record.data.saleDate,
-      record.data.licenseType,
-      record.data.saleType,
-      record.data.transactionId,
-      record.data.vendorAmount,
-    ]
-      .map(s => JSON.stringify(s))
-      .join(', ')})`;
-  }
-  else {
-    return `testLicense(${[
-      record.id,
-      record.data.maintenanceStartDate,
-      record.data.licenseType,
-      record.data.status,
-    ]
-      .map(s => JSON.stringify(s))
-      .join(', ')})`;
-  }
+function abbrRecordDetails(license: License) {
+  return [
+    license.id,
+    license.data.maintenanceStartDate,
+    license.data.licenseType,
+    license.data.status,
+    license.transactions.map(transaction => [
+      transaction.data.transactionId,
+      transaction.data.saleDate,
+      transaction.data.licenseType,
+      transaction.data.saleType,
+      transaction.data.transactionId,
+      transaction.data.vendorAmount,
+    ])
+  ];
 }
