@@ -29,8 +29,9 @@ function main(template: string, licenseIds: string[]) {
     if (results) {
       const { actions, records, events } = results;
       const licenses = records.filter(r => r instanceof License) as License[];
+      console.log(`\n\n---\n\n`)
       console.log(template
-        .replace('RECORDS', format(licenses.map(abbrRecordDetails), 150))
+        .replace('RECORDS', format(licenses.map(abbrRecordDetails), 100))
         .replace('EVENTS', format(events.map(abbrEventDetails)))
         .replace('ACTIONS', format(actions.map(abbrActionDetails)))
       );
@@ -67,9 +68,7 @@ function abbrRecordDetails(license: License) {
     license.transactions.map(transaction => [
       transaction.data.transactionId,
       transaction.data.saleDate,
-      transaction.data.licenseType,
       transaction.data.saleType,
-      transaction.data.transactionId,
       transaction.data.vendorAmount,
     ])
   ];

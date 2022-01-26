@@ -44,8 +44,8 @@ it(`Creates deals for renewals and upgrades separately from purchases`, () => {
     records: [
       ['L2169473', '2013-01-21', 'EVALUATION', 'inactive', []],
       ['2479625', '2013-01-23', 'COMMERCIAL', 'active', [
-        ['AT-131949332', '2021-03-25', 'COMMERCIAL', 'Renewal', 'AT-131949332', 274],
-        ['AT-97165138', '2020-04-07', 'COMMERCIAL', 'Upgrade', 'AT-97165138', 411]
+        ['AT-131949332', '2021-03-25', 'Renewal', 274],
+        ['AT-97165138', '2020-04-07', 'Upgrade', 411]
       ]]
     ],
   });
@@ -90,8 +90,8 @@ it(`Does nothing when upgrades and renewals already have deals`, () => {
     records: [
       ['L2169473', '2013-01-21', 'EVALUATION', 'inactive', []],
       ['2479625', '2013-01-23', 'COMMERCIAL', 'active', [
-        ['AT-131949332', '2021-03-25', 'COMMERCIAL', 'Renewal', 'AT-131949332', 274],
-        ['AT-97165138', '2020-04-07', 'COMMERCIAL', 'Upgrade', 'AT-97165138', 411]
+        ['AT-131949332', '2021-03-25', 'Renewal', 274],
+        ['AT-97165138', '2020-04-07', 'Upgrade', 411]
       ]]
     ],
   });
