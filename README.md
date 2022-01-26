@@ -46,13 +46,14 @@ $ npm run watch
 For general development:
 
 ```sh
-$ npm run download  # Download MPAC & HubSpot data
-$ npm run once      # Dry-run engine once on cached inputs
-$ npm run 3x        # Dry-run engine 3x, piping output to input
+$ npm run download     # Download MPAC & HubSpot data
+$ npm run once [fast]  # Dry-run engine once on cached inputs
+$ npm run 3x   [fast]  # Dry-run engine 3x, piping output to input
 ```
 
-* Data must be downloaded before local dry-runs.
+* Data must be downloaded before local dry-runs
 * Engine log files are written under `data/[input-dir]/[log-dir]/`
+* Running with `fast` skips time-consuming logs
 
 Running tests:
 
