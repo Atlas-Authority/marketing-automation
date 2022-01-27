@@ -164,4 +164,26 @@ describe(`Scheduler`, () => {
     ]);
   });
 
+  it(`Keeps only the first within a day`, () => {
+    const scheduler = new DataSetScheduler({
+      day: 3,
+      week: 0,
+      month: 0,
+    });
+
+    const from = luxon.DateTime.fromISO('2020-01-04T11');
+
+    const t1 = { timestamp: from.minus({ hours: 3 }) };
+    const t2 = { timestamp: from.minus({ hours: 2 }) };
+    const t3 = { timestamp: from.minus({ hours: 1 }) };
+    const t4 = { timestamp: from };
+    const t5 = { timestamp: from.plus({ hours: 1 }) };
+
+    expect(scheduler.check(from,
+      [t1, t2, t3, t4, t5]
+    )).toEqual(
+      [t1]
+    );
+  });
+
 });
