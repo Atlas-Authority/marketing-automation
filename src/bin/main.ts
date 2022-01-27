@@ -7,38 +7,38 @@ import { downloadAllData } from '../lib/engine/download';
 import { SlackNotifier } from '../lib/engine/slack-notifier';
 import { Hubspot } from '../lib/hubspot';
 import { Logger } from '../lib/log';
-import { ConsoleLogger } from '../lib/log/console';
+import { Console } from '../lib/log/console';
 import run from "../lib/util/runner";
 
-const consoleLogger = new ConsoleLogger();
+const console = new Console();
 
 const runLoopConfig = runLoopConfigFromENV();
-const notifier = SlackNotifier.fromENV(new ConsoleLogger());
+const notifier = SlackNotifier.fromENV(new Console());
 notifier?.notifyStarting();
 
-run(consoleLogger, runLoopConfig, {
+run(console, runLoopConfig, {
 
   async work() {
     const dataDir = dataManager.latestDataDir();
     const log = new Logger(dataDir.subdir('main'));
 
-    consoleLogger.printInfo('Main', 'Downloading data');
+    console.printInfo('Main', 'Downloading data');
     const dataSet = new DataSet(dataDir);
-    const hubspot = Hubspot.live(consoleLogger);
-    await downloadAllData(consoleLogger, dataSet, hubspot);
+    const hubspot = Hubspot.live(console);
+    await downloadAllData(console, dataSet, hubspot);
 
-    consoleLogger.printInfo('Main', 'Running engine');
+    console.printInfo('Main', 'Running engine');
     const data = dataSet.load();
-    const engine = new Engine(hubspot, engineConfigFromENV(), consoleLogger, log);
+    const engine = new Engine(hubspot, engineConfigFromENV(), console, log);
     engine.run(data);
 
-    consoleLogger.printInfo('Main', 'Upsyncing changes to HubSpot');
+    console.printInfo('Main', 'Upsyncing changes to HubSpot');
     await hubspot.upsyncChangesToHubspot();
 
-    consoleLogger.printInfo('Main', 'Writing HubSpot change log file');
+    console.printInfo('Main', 'Writing HubSpot change log file');
     log.hubspotOutputLogger()?.logResults(hubspot);
 
-    consoleLogger.printInfo('Main', 'Done');
+    console.printInfo('Main', 'Done');
   },
 
   async failed(errors) {

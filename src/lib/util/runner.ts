@@ -1,4 +1,4 @@
-import { ConsoleLogger } from "../log/console";
+import { Console } from "../log/console";
 
 export interface RunLoopConfig {
   runInterval: string,
@@ -6,16 +6,16 @@ export interface RunLoopConfig {
   retryTimes: number,
 };
 
-export default function run(log: ConsoleLogger, loopConfig: RunLoopConfig, { work, failed }: {
+export default function run(console: Console, loopConfig: RunLoopConfig, { work, failed }: {
   work: () => Promise<void>,
   failed: (errors: Error[]) => Promise<void>,
 }) {
-  log.printInfo('Runner', 'Starting with options:', loopConfig);
+  console.printInfo('Runner', 'Starting with options:', loopConfig);
   const normalInterval = loopConfig.runInterval;
   const errorInterval = loopConfig.retryInterval;
   const errorTries = loopConfig.retryTimes;
 
-  log.printInfo('Runner', 'Running loop');
+  console.printInfo('Runner', 'Running loop');
   const errors: Error[] = [];
   run();
 
@@ -27,17 +27,17 @@ export default function run(log: ConsoleLogger, loopConfig: RunLoopConfig, { wor
         errors.length = 0;
       }
 
-      log.printInfo('Runner', `Finished successfully; waiting ${normalInterval} for next loop.`);
+      console.printInfo('Runner', `Finished successfully; waiting ${normalInterval} for next loop.`);
       setTimeout(run, parseTimeToMs(normalInterval));
     }
     catch (e: any) {
-      log.printError('Runner', 'Error:', e);
+      console.printError('Runner', 'Error:', e);
       errors.push(e);
 
       const longTermFailure = (errors.length % errorTries === 0);
       const waitTime = longTermFailure ? normalInterval : errorInterval;
 
-      log.printWarning('Runner', `Run canceled by error. Trying again in ${waitTime}.`);
+      console.printWarning('Runner', `Run canceled by error. Trying again in ${waitTime}.`);
 
       setTimeout(run, parseTimeToMs(waitTime));
 

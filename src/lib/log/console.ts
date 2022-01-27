@@ -1,7 +1,7 @@
 import chalk from "chalk";
 import util from "util";
 
-export class ConsoleLogger {
+export class Console {
 
   public printError(prefix: string, ...args: any[]) { this.print('error', chalk.red('ERR!'), prefix, ...args); }
   public printWarning(prefix: string, ...args: any[]) { this.print('error', chalk.dim.redBright('WARN'), prefix, ...args); }

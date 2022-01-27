@@ -1,5 +1,5 @@
 import { formatMoney } from "../util/formatters";
-import { ConsoleLogger } from "./console";
+import { Console } from "./console";
 import { Table } from "./table";
 
 export class Tallier {
@@ -8,7 +8,7 @@ export class Tallier {
   public first(reason: string, n: number) { this.tally.push([reason, n, 1]); }
   public less(reason: string, n: number) { this.tally.push([reason, n, -1]); }
 
-  constructor(private log?: ConsoleLogger) { }
+  constructor(private console?: Console) { }
 
   public printTable() {
     const remainder = (this.tally
@@ -23,9 +23,9 @@ export class Tallier {
 
     table.rows.push(['Unaccounted for', formatMoney(remainder)]);
 
-    this.log?.printInfo('Totals', 'Transaction amount flow:');
+    this.console?.printInfo('Totals', 'Transaction amount flow:');
     for (const row of table.eachRow()) {
-      this.log?.printInfo('Totals', '  ' + row);
+      this.console?.printInfo('Totals', '  ' + row);
     }
   }
 

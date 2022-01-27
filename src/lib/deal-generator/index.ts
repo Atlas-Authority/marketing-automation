@@ -34,7 +34,7 @@ export class DealGenerator {
       engine.dealManager,
       engine.dealPropertyConfig,
       this.ignore.bind(this),
-      engine.consoleLogger,
+      engine.console,
     );
   }
 
@@ -83,9 +83,9 @@ export class DealGenerator {
       table.rows.push([reason, formatMoney(amount)]);
     }
 
-    this.engine.consoleLogger?.printInfo('Deal Actions', 'Amount of Transactions Ignored');
+    this.engine.console?.printInfo('Deal Actions', 'Amount of Transactions Ignored');
     for (const row of table.eachRow()) {
-      this.engine.consoleLogger?.printInfo('Deal Actions', '  ' + row);
+      this.engine.console?.printInfo('Deal Actions', '  ' + row);
     }
   }
 

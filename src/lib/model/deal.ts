@@ -2,7 +2,7 @@ import { hubspotAccountIdFromEnv } from "../config/env";
 import { Entity } from "../hubspot/entity";
 import { DealStage, EntityAdapter, Pipeline } from "../hubspot/interfaces";
 import { EntityManager } from "../hubspot/manager";
-import { ConsoleLogger } from "../log/console";
+import { Console } from "../log/console";
 import { AttachableError } from "../util/errors";
 import { isPresent } from "../util/helpers";
 import { Company } from "./company";
@@ -296,8 +296,8 @@ export class DealManager extends EntityManager<DealData, Deal> {
 
   public duplicates = new Map<Deal, Deal[]>();
 
-  constructor(config: HubspotDealConfig, log?: ConsoleLogger) {
-    super(log);
+  constructor(config: HubspotDealConfig, console?: Console) {
+    super(console);
     this.entityAdapter = makeAdapter(config);
   }
 

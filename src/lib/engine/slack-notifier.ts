@@ -1,6 +1,6 @@
 import * as slack from '@slack/web-api';
 import { slackConfigFromENV } from "../config/env";
-import { ConsoleLogger } from '../log/console';
+import { Console } from '../log/console';
 import { AttachableError, KnownError } from "../util/errors";
 
 interface RunLoopConfig {
@@ -11,7 +11,7 @@ interface RunLoopConfig {
 
 export class SlackNotifier {
 
-  static fromENV(log: ConsoleLogger) {
+  static fromENV(log: Console) {
     const slackConfig = slackConfigFromENV();
     if (!slackConfig.apiToken) return null;
 
@@ -20,7 +20,7 @@ export class SlackNotifier {
   }
 
   private constructor(
-    private log: ConsoleLogger,
+    private console: Console,
     private client: slack.WebClient,
     private errorChannelId: string | undefined,
   ) { }
@@ -53,7 +53,7 @@ export class SlackNotifier {
   }
 
   private async postAttachmentToSlack({ title, content }: { title: string, content: string }) {
-    this.log.printInfo('Slack', title, content);
+    this.console.printInfo('Slack', title, content);
 
     if (this.errorChannelId) {
       await this.client.files.upload({
@@ -65,7 +65,7 @@ export class SlackNotifier {
   }
 
   private async postToSlack(text: string) {
-    this.log.printInfo('Slack', text);
+    this.console.printInfo('Slack', text);
 
     if (this.errorChannelId) {
       await this.client.chat.postMessage({

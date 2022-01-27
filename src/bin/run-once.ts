@@ -5,16 +5,16 @@ import { DataSet } from '../lib/data/set';
 import { Engine } from "../lib/engine";
 import { Hubspot } from '../lib/hubspot';
 import { Logger } from '../lib/log';
-import { ConsoleLogger } from '../lib/log/console';
+import { Console } from '../lib/log/console';
 
 const dataDir = dataManager.latestDataDir();
 const log = new Logger(dataDir.subdir(`once-${Date.now()}`));
 
-const consoleLogger = new ConsoleLogger();
+const console = new Console();
 
-const hubspot = Hubspot.memoryFromENV(consoleLogger);
+const hubspot = Hubspot.memoryFromENV(console);
 
-const engine = new Engine(hubspot, engineConfigFromENV(), consoleLogger, log);
+const engine = new Engine(hubspot, engineConfigFromENV(), console, log);
 
 const data = new DataSet(dataDir).load();
 
