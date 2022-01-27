@@ -30,16 +30,15 @@ describe(`Scheduler`, () => {
       month: 0,
     });
 
-    const t1 = { timestamp: luxon.DateTime.fromISO('2020-01-01T08') };
-    const t2 = { timestamp: luxon.DateTime.fromISO('2020-01-02T08') };
-    const t3 = { timestamp: luxon.DateTime.fromISO('2020-01-03T08') };
-    const t4 = { timestamp: luxon.DateTime.fromISO('2020-01-04T08') };
-    const t5 = { timestamp: luxon.DateTime.fromISO('2020-01-05T08') };
+    const from = luxon.DateTime.fromISO('2020-01-04T11');
 
-    expect(scheduler.check(
-      luxon.DateTime.fromISO('2020-01-04T11'),
-      [t1, t2, t3, t4, t5]
-    )).toEqual(
+    const t1 = { timestamp: from.minus({ days: 3 }) };
+    const t2 = { timestamp: from.minus({ days: 2 }) };
+    const t3 = { timestamp: from.minus({ days: 1 }) };
+    const t4 = { timestamp: from };
+    const t5 = { timestamp: from.plus({ days: 1 }) };
+
+    expect(scheduler.check(from, [t1, t2, t3, t4, t5])).toEqual(
       new Set([t2, t3, t4])
     );
   });
