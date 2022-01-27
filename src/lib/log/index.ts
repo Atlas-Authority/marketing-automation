@@ -12,6 +12,7 @@ export class LogDir {
   #allMatchGroupsLog;
   #checkMatchGroupsLog;
   #hubspotResultLog;
+  #attributionsLog;
 
   constructor(logDir?: DataDir) {
     this.#licenseScoringFile = this.#fast ? undefined : logDir?.file('license-scoring.csv');
@@ -19,6 +20,7 @@ export class LogDir {
     this.#allMatchGroupsLog = logDir?.file('matched-groups-all.csv');
     this.#checkMatchGroupsLog = logDir?.file('matched-groups-to-check.csv');
     this.#hubspotResultLog = logDir?.file('hubspot-out.txt');
+    this.#attributionsLog = logDir?.file('attributions.csv');
   }
 
   public scoreLogger() {
@@ -38,5 +40,7 @@ export class LogDir {
 
   public allMatchGroupsLog() { return this.#allMatchGroupsLog?.writeCsvStream() };
   public checkMatchGroupsLog() { return this.#checkMatchGroupsLog?.writeCsvStream() };
+
+  public attributionsLog() { return this.#attributionsLog };
 
 }
