@@ -2,6 +2,8 @@ import { withAutoClose } from "../util/helpers";
 import DataDir from "./dir";
 
 interface Metadata {
+  version: number;
+  dirs: string[];
 }
 
 class DataManager {
@@ -10,7 +12,10 @@ class DataManager {
   meta: Metadata;
 
   constructor() {
-    this.meta = this.#read() ?? {};
+    this.meta = this.#read() ?? {
+      version: 1,
+      dirs: [],
+    };
   }
 
   public newDataDir() {
