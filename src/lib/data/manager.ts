@@ -41,20 +41,26 @@ class DataManager {
   }
 
   public pruneDataSets(console: ConsoleLogger) {
+    console.printInfo('Data Manager', 'Preparing to prune data sets');
+    console.printInfo('Data Manager', 'Checking', this.#meta.timestamps);
+
     const dirs = this.#meta.timestamps.map(ms => {
       const timestamp = luxon.DateTime.fromMillis(ms);
       return { ms, timestamp };
     });
 
-    const toKeep = (
-      this.#scheduler.check(luxon.DateTime.now(), dirs)
-        .map(({ ms }) => ms)
-        .reverse());
+    const toKeep = (this.#scheduler.check(luxon.DateTime.now(), dirs)
+      .map(({ ms }) => ms)
+      .reverse());
+
+    const toDelete = this.#meta.timestamps.filter(ms => !toKeep.includes(ms));
 
     this.#meta.timestamps = toKeep;
     this.#save();
 
-    const toDelete = this.#meta.timestamps.filter(ms => !toKeep.includes(ms));
+    console.printInfo('Data Manager', 'Keeping', toKeep);
+    console.printInfo('Data Manager', 'Pruning', toDelete);
+
     for (const ms of toDelete) {
       const dir = DataDir.root.subdir(`in-${ms}`);
       dir.delete(console);
