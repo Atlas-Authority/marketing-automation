@@ -4,13 +4,13 @@ import { dataManager } from '../lib/data/manager';
 import { DataSet } from '../lib/data/set';
 import { Engine } from "../lib/engine";
 import { Hubspot } from '../lib/hubspot';
-import { LogDir } from '../lib/log';
 import { isPresent, sorter } from "../lib/util/helpers";
 
 const engine = new Engine(Hubspot.memory(), engineConfigFromENV());
 const dataDir = dataManager.latestDataDir();
-const logDir = new LogDir(dataDir.subdir(`inspect-${Date.now()}`));
-const data = new DataSet(dataDir).load();
+const dataSet = new DataSet(dataDir);
+const logDir = dataSet.logDirNamed(`inspect-${Date.now()}`);
+const data = dataSet.load();
 engine.run(data);
 
 const attributions = (engine

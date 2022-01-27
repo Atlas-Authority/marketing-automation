@@ -6,7 +6,6 @@ import { Engine } from "../lib/engine";
 import { downloadAllData } from '../lib/engine/download';
 import { SlackNotifier } from '../lib/engine/slack-notifier';
 import { Hubspot } from '../lib/hubspot';
-import { LogDir } from '../lib/log';
 import { Console } from '../lib/log/console';
 import run from "../lib/util/runner";
 
@@ -20,10 +19,10 @@ run(console, runLoopConfig, {
 
   async work() {
     const dataDir = dataManager.latestDataDir();
-    const logDir = new LogDir(dataDir.subdir('main'));
+    const dataSet = new DataSet(dataDir);
+    const logDir = dataSet.logDirNamed('main');
 
     console.printInfo('Main', 'Downloading data');
-    const dataSet = new DataSet(dataDir);
     const hubspot = Hubspot.live(console);
     await downloadAllData(console, dataSet, hubspot);
 
