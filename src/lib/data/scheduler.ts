@@ -32,7 +32,7 @@ export function parseSchedule(rawSchedule: string): Schedule {
     weeks: 0,
   };
 
-  for (const [, n, k] of rawSchedule.matchAll(/([0-9]+)(d|w|m)/g)) {
+  for (const [, n, k] of rawSchedule.matchAll(/([0-9]+)(d|w|m)/gi)) {
     schedule[keys[k]] = +n;
   }
 
