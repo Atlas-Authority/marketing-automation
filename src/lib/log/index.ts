@@ -3,7 +3,7 @@ import { DealDataLogger } from "./deal-generator";
 import { HubspotOutputLogger } from "./hubspot-output";
 import { LicenseMatchLogger } from "./license-scorer";
 
-export class Logger {
+export class LogDir {
 
   #fast = process.argv.slice(2).includes('fast');
 

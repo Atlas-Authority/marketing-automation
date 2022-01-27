@@ -14,7 +14,7 @@ export class LicenseGrouper {
   constructor(private engine: Engine) { }
 
   run(): RelatedLicenseSet[] {
-    return withAutoClose(this.engine.log?.scoreLogger(), scoreLogger => {
+    return withAutoClose(this.engine.logDir?.scoreLogger(), scoreLogger => {
 
       const threshold = 130;
       const scorer = new LicenseMatcher(threshold, scoreLogger);
@@ -32,8 +32,8 @@ export class LicenseGrouper {
   }
 
   private logMatchResults(matches: License[][]) {
-    withAutoClose(this.engine.log?.allMatchGroupsLog(), allMatchGroupsLog => {
-      withAutoClose(this.engine.log?.checkMatchGroupsLog(), checkMatchGroupsLog => {
+    withAutoClose(this.engine.logDir?.allMatchGroupsLog(), allMatchGroupsLog => {
+      withAutoClose(this.engine.logDir?.checkMatchGroupsLog(), checkMatchGroupsLog => {
 
         const groups = matches.map(group => group.map(shorterLicenseInfo));
         for (const match of groups) {

@@ -39,7 +39,7 @@ export class DealGenerator {
   }
 
   public run(matchGroups: RelatedLicenseSet[]) {
-    return withAutoClose(this.engine.log?.dealGeneratorLog(), logger => {
+    return withAutoClose(this.engine.logDir?.dealGeneratorLog(), logger => {
       const results = new Map<string, DealGeneratorResult>();
 
       for (const relatedLicenses of matchGroups) {

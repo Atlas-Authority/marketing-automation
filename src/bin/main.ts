@@ -6,7 +6,7 @@ import { Engine } from "../lib/engine";
 import { downloadAllData } from '../lib/engine/download';
 import { SlackNotifier } from '../lib/engine/slack-notifier';
 import { Hubspot } from '../lib/hubspot';
-import { Logger } from '../lib/log';
+import { LogDir } from '../lib/log';
 import { Console } from '../lib/log/console';
 import run from "../lib/util/runner";
 
@@ -20,7 +20,7 @@ run(console, runLoopConfig, {
 
   async work() {
     const dataDir = dataManager.latestDataDir();
-    const log = new Logger(dataDir.subdir('main'));
+    const logDir = new LogDir(dataDir.subdir('main'));
 
     console.printInfo('Main', 'Downloading data');
     const dataSet = new DataSet(dataDir);
@@ -29,14 +29,14 @@ run(console, runLoopConfig, {
 
     console.printInfo('Main', 'Running engine');
     const data = dataSet.load();
-    const engine = new Engine(hubspot, engineConfigFromENV(), console, log);
+    const engine = new Engine(hubspot, engineConfigFromENV(), console, logDir);
     engine.run(data);
 
     console.printInfo('Main', 'Upsyncing changes to HubSpot');
     await hubspot.upsyncChangesToHubspot();
 
     console.printInfo('Main', 'Writing HubSpot change log file');
-    log.hubspotOutputLogger()?.logResults(hubspot);
+    logDir.hubspotOutputLogger()?.logResults(hubspot);
 
     console.printInfo('Main', 'Done');
   },
