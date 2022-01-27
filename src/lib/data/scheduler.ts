@@ -20,6 +20,13 @@ export class DataSetScheduler {
 
   public constructor(private schedule: Schedule) { }
 
+  /**
+   * Returns input objects that match the given schedule.
+   * 
+   * @param from The moment to start checking backwards from, inclusive.
+   * @param timestamped Pre-sorted objects.
+   * @returns Input objects that match.
+   */
   check<T extends Timestamped>(from: luxon.DateTime, timestamped: T[]) {
     const ok = new Set<T>();
     for (const unit of ['day', 'week', 'month'] as const) {

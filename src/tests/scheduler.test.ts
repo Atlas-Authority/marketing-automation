@@ -83,4 +83,62 @@ describe(`Scheduler`, () => {
     );
   });
 
+  it(`Can work with combinations of units of time`, () => {
+    const scheduler = new DataSetScheduler({
+      day: 3,
+      week: 3,
+      month: 3,
+    });
+
+    const from = luxon.DateTime.fromISO('2020-05-20T11');
+
+    const d1 = { timestamp: luxon.DateTime.fromISO('2020-05-17T09') };
+    const d2 = { timestamp: luxon.DateTime.fromISO('2020-05-18T09') }; // good
+    const d3 = { timestamp: luxon.DateTime.fromISO('2020-05-19T09') }; // good
+    const d4 = { timestamp: luxon.DateTime.fromISO('2020-05-20T09') }; // good
+    const d5 = { timestamp: luxon.DateTime.fromISO('2020-05-21T09') };
+
+    const w1 = { timestamp: luxon.DateTime.fromISO('2020-04-29T10') };
+    const w2 = { timestamp: luxon.DateTime.fromISO('2020-05-06T10') }; // good
+    const w3 = { timestamp: luxon.DateTime.fromISO('2020-05-13T10') }; // good
+    const w4 = { timestamp: luxon.DateTime.fromISO('2020-05-20T10') }; // good
+    const w5 = { timestamp: luxon.DateTime.fromISO('2020-05-27T10') };
+
+    const m1 = { timestamp: luxon.DateTime.fromISO('2020-02-20T11') };
+    const m2 = { timestamp: luxon.DateTime.fromISO('2020-03-20T11') }; // good
+    const m3 = { timestamp: luxon.DateTime.fromISO('2020-04-20T11') }; // good
+    const m4 = { timestamp: luxon.DateTime.fromISO('2020-05-20T11') }; // good
+    const m5 = { timestamp: luxon.DateTime.fromISO('2020-06-20T11') };
+
+    const input = [
+      d1, d2, d3, d4, d5,
+      w1, w2, w3, w4, w5,
+      m1, m2, m3, m4, m5,
+    ].sort(sortTimestamped);
+
+    const output = [...scheduler.check(from, input)];
+
+    expect(output.sort(sortTimestamped)).toEqual(
+      [
+        d2, d3, d4,
+        w2, w3,
+        m2, m3,
+      ].sort(sortTimestamped)
+    );
+
+    /**
+     * Scheduler rules that are valid but not obvious:
+     * 
+     * Q. Why weren't w4 and m4 in there?
+     * A. They're same as d4, and first match (d4) wins.
+     */
+
+  });
+
 });
+
+function sortTimestamped<T extends { timestamp: luxon.DateTime }>(a: T, b: T) {
+  const t1 = a.timestamp.toMillis();
+  const t2 = b.timestamp.toMillis();
+  return t1 < t2 ? -1 : t1 > t2 ? 1 : 0;
+}
