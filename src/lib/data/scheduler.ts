@@ -15,7 +15,7 @@ interface Timestamped {
 export class DataSetScheduler {
 
   public static fromENV() {
-    const schedule = parseSchedule(keepDataSetConfigFromENV() ?? '1d');
+    const schedule = parseSchedule(keepDataSetConfigFromENV() || '1d');
     return new DataSetScheduler(schedule);
   }
 
