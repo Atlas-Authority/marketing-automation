@@ -3,9 +3,9 @@ import util from "util";
 
 export class ConsoleLogger {
 
-  public error(prefix: string, ...args: any[]) { this.print('error', chalk.red('ERR!'), prefix, ...args); }
-  public warn(prefix: string, ...args: any[]) { this.print('error', chalk.dim.redBright('WARN'), prefix, ...args); }
-  public info(prefix: string, ...args: any[]) { this.print('log', chalk.green('info'), prefix, ...args); }
+  public printError(prefix: string, ...args: any[]) { this.print('error', chalk.red('ERR!'), prefix, ...args); }
+  public printWarning(prefix: string, ...args: any[]) { this.print('error', chalk.dim.redBright('WARN'), prefix, ...args); }
+  public printInfo(prefix: string, ...args: any[]) { this.print('log', chalk.green('info'), prefix, ...args); }
 
   private print(printer: 'log' | 'error', style: string, prefix: string, ...args: any[]) {
     const styledPrefix = chalk.magenta(prefix);

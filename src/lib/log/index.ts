@@ -43,8 +43,8 @@ export class Logger {
   public checkMatchGroupsLog() { return this.#checkMatchGroupsLog?.writeCsvStream() };
 
 
-  public printError(prefix: string, ...args: any[]) { this.#consoleLogger.error(prefix, ...args); }
-  public printWarning(prefix: string, ...args: any[]) { this.#consoleLogger.warn(prefix, ...args); }
-  public printInfo(prefix: string, ...args: any[]) { this.#consoleLogger.info(prefix, ...args); }
+  public printError(prefix: string, ...args: any[]) { this.#consoleLogger.printError(prefix, ...args); }
+  public printWarning(prefix: string, ...args: any[]) { this.#consoleLogger.printWarning(prefix, ...args); }
+  public printInfo(prefix: string, ...args: any[]) { this.#consoleLogger.printInfo(prefix, ...args); }
 
 }
