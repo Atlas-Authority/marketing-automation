@@ -6,12 +6,8 @@ import { Engine } from "../lib/engine";
 import { Hubspot } from '../lib/hubspot';
 import { Console } from '../lib/log/console';
 
+const nextLogDirName = logDirNameGenerator();
 const dataSet = dataManager.latestDataSet();
-
-let i = 0;
-const timestamp = Date.now();
-const nextLogDir = () => `3x-${timestamp}-${++i}`;
-
 const data = dataSet.load();
 
 let hubspot: Hubspot;
@@ -24,7 +20,7 @@ pipeOutputToInput(hubspot, data);
 hubspot = runEngine();
 
 function runEngine() {
-  const logDir = dataSet.logDirNamed(nextLogDir());
+  const logDir = dataSet.logDirNamed(nextLogDirName());
   const hubspot = Hubspot.memoryFromENV(new Console());
   const engine = new Engine(hubspot, engineConfigFromENV(), new Console(), logDir);
   engine.run(data);
@@ -37,4 +33,10 @@ function pipeOutputToInput(hubspot: Hubspot, data: Data) {
   data.rawDeals = hubspot.dealManager.getArray().map(e => e.toRawEntity());
   data.rawContacts = hubspot.contactManager.getArray().map(e => e.toRawEntity());
   data.rawCompanies = hubspot.companyManager.getArray().map(e => e.toRawEntity());
+}
+
+function logDirNameGenerator() {
+  let i = 0;
+  const timestamp = Date.now();
+  return () => `3x-${timestamp}-${++i}`;
 }
