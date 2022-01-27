@@ -1,4 +1,4 @@
-import { Console } from '../log/console';
+import { ConsoleLogger } from '../log/console';
 import { isPresent } from '../util/helpers';
 import { Entity, Indexer } from './entity';
 import { EntityAdapter, EntityKind, FullEntity, RelativeAssociation } from './interfaces';
@@ -18,7 +18,7 @@ export abstract class EntityManager<
   private indexIndex = new Map<keyof D, Index<E>>();
   public get = this.makeIndex(e => [e.id].filter(isPresent), []);
 
-  constructor(private console?: Console) { }
+  constructor(private console?: ConsoleLogger) { }
 
   public importEntities(rawEntities: readonly FullEntity[]) {
     const prelinkedAssociations = new Map<string, Set<RelativeAssociation>>();

@@ -3,9 +3,9 @@ import { engineConfigFromENV } from '../lib/config/env';
 import { dataManager } from '../lib/data/manager';
 import { Engine } from "../lib/engine";
 import { Hubspot } from '../lib/hubspot';
-import { Console } from '../lib/log/console';
+import { ConsoleLogger } from '../lib/log/console';
 
-const console = new Console();
+const console = new ConsoleLogger();
 
 const dataSet = dataManager.latestDataSet();
 const logDir = dataSet.logDirNamed(`once-${Date.now()}`);

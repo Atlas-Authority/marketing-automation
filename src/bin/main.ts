@@ -5,13 +5,13 @@ import { Engine } from "../lib/engine";
 import { downloadAllData } from '../lib/engine/download';
 import { SlackNotifier } from '../lib/engine/slack-notifier';
 import { Hubspot } from '../lib/hubspot';
-import { Console } from '../lib/log/console';
+import { ConsoleLogger } from '../lib/log/console';
 import run from "../lib/util/runner";
 
-const console = new Console();
+const console = new ConsoleLogger();
 
 const runLoopConfig = runLoopConfigFromENV();
-const notifier = SlackNotifier.fromENV(new Console());
+const notifier = SlackNotifier.fromENV(new ConsoleLogger());
 notifier?.notifyStarting();
 
 run(console, runLoopConfig, {

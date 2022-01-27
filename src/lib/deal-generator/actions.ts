@@ -1,7 +1,7 @@
 import mustache from 'mustache';
 import { DealPropertyConfig } from '../engine';
 import { DealStage, Pipeline } from "../hubspot/interfaces";
-import { Console } from '../log/console';
+import { ConsoleLogger } from '../log/console';
 import { Deal, DealData, DealManager } from "../model/deal";
 import { License } from "../model/license";
 import { Transaction, uniqueTransactionId } from "../model/transaction";
@@ -24,7 +24,7 @@ export class ActionGenerator {
     private dealManager: DealManager,
     private dealPropertyConfig: DealPropertyConfig,
     private ignore: (reason: string, amount: number) => void,
-    private console?: Console,
+    private console?: ConsoleLogger,
   ) {
     for (const deal of this.dealManager.getAll()) {
       for (const id of deal.getMpacIds()) {

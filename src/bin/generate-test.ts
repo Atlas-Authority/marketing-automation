@@ -4,7 +4,7 @@ import { engineConfigFromENV } from '../lib/config/env';
 import { dataManager } from '../lib/data/manager';
 import { Engine } from "../lib/engine";
 import { Hubspot } from '../lib/hubspot';
-import { Console } from '../lib/log/console';
+import { ConsoleLogger } from '../lib/log/console';
 import { License } from '../lib/model/license';
 import { abbrActionDetails, abbrEventDetails, abbrRecordDetails } from '../tests/deal-generator/utils';
 
@@ -19,7 +19,7 @@ function TEMPLATE({ runDealGenerator, RECORDS, EVENTS, ACTIONS }: any) {
 }
 
 function main(template: string, licenseIds: string[]) {
-  const engine = new Engine(Hubspot.memory(), engineConfigFromENV(), new Console());
+  const engine = new Engine(Hubspot.memory(), engineConfigFromENV(), new ConsoleLogger());
   const data = dataManager.latestDataSet().load();
   const { dealGeneratorResults } = engine.run(data);
 

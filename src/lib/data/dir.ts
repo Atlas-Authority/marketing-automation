@@ -1,7 +1,7 @@
 import del from 'del';
 import fs from "fs";
 import { fileURLToPath, pathToFileURL, URL } from "url";
-import { Console } from '../log/console';
+import { ConsoleLogger } from '../log/console';
 import { DataFile } from "./file";
 
 export default class DataDir {
@@ -22,7 +22,7 @@ export default class DataDir {
     return new DataDir(place, this.#url);
   }
 
-  public delete(console: Console) {
+  public delete(console: ConsoleLogger) {
     const absolutePath = fileURLToPath(this.#url);
     console.printInfo('Pruning', absolutePath);
     try {
