@@ -11,10 +11,10 @@ interface Metadata {
 class DataManager {
 
   #metafile = DataDir.root.file('meta.json');
-  meta: Metadata;
+  #meta: Metadata;
 
   constructor() {
-    this.meta = this.#read() ?? {
+    this.#meta = this.#read() ?? {
       version: 1,
       dirs: [],
     };
@@ -22,26 +22,26 @@ class DataManager {
 
   public newDataSet() {
     const dirName = `in-${Date.now()}`;
-    this.meta.dirs.push(dirName);
-    this.meta.dirs.sort().reverse();
+    this.#meta.dirs.push(dirName);
+    this.#meta.dirs.sort().reverse();
     this.#save();
     return new DataSet(DataDir.root.subdir(dirName));
   }
 
   public latestDataSet() {
-    if (this.meta.dirs.length === 0) {
+    if (this.#meta.dirs.length === 0) {
       throw new Error(`No data sets available; run engine first`);
     }
 
-    const dirName = this.meta.dirs[0];
+    const dirName = this.#meta.dirs[0];
     return new DataSet(DataDir.root.subdir(dirName));
   }
 
   public pruneDataSets(console: ConsoleLogger) {
     // For now this means just keep the latest one
 
-    const toDelete = this.meta.dirs.slice(1);
-    this.meta.dirs = this.meta.dirs.slice(0, 1);
+    const toDelete = this.#meta.dirs.slice(1);
+    this.#meta.dirs = this.#meta.dirs.slice(0, 1);
     this.#save();
 
     for (const dirName of toDelete) {
@@ -57,7 +57,7 @@ class DataManager {
 
   #save() {
     withAutoClose(this.#metafile.writeStream(), stream => {
-      stream.writeLine(JSON.stringify(this.meta, null, 2));
+      stream.writeLine(JSON.stringify(this.#meta, null, 2));
     });
   }
 
