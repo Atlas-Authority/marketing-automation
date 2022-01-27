@@ -1,4 +1,4 @@
-import { Engine } from '../engine/engine';
+import { Engine } from '../engine';
 import { LicenseMatchLogger } from '../log/license-scorer';
 import { License } from '../model/license';
 import { sorter, withAutoClose } from '../util/helpers';

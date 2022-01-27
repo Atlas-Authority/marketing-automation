@@ -3,7 +3,7 @@ import util from 'util';
 import { engineConfigFromENV } from '../lib/config/env';
 import DataDir from '../lib/data/dir';
 import { DataSet } from '../lib/data/set';
-import { Engine } from "../lib/engine/engine";
+import { Engine } from "../lib/engine";
 import { Hubspot } from '../lib/hubspot';
 import { Logger } from '../lib/log';
 import { License } from '../lib/model/license';

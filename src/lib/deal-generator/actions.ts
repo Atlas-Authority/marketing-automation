@@ -1,5 +1,5 @@
 import mustache from 'mustache';
-import { DealPropertyConfig } from '../engine/engine';
+import { DealPropertyConfig } from '../engine';
 import { DealStage, Pipeline } from "../hubspot/interfaces";
 import { ConsoleLogger } from '../log/console';
 import { Deal, DealData, DealManager } from "../model/deal";

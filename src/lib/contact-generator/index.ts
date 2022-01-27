@@ -1,5 +1,5 @@
 import capitalize from "capitalize";
-import { Engine } from '../engine/engine';
+import { Engine } from '../engine';
 import { Contact, ContactData, ContactType } from '../model/contact';
 import { License } from '../model/license';
 import { ContactInfo, PartnerBillingInfo } from "../model/record";

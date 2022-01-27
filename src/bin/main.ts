@@ -3,7 +3,7 @@ import { engineConfigFromENV, runLoopConfigFromENV } from "../lib/config/env";
 import DataDir from '../lib/data/dir';
 import { DataSet } from '../lib/data/set';
 import { downloadAllData } from '../lib/engine/download';
-import { Engine } from "../lib/engine/engine";
+import { Engine } from "../lib/engine";
 import { SlackNotifier } from '../lib/engine/slack-notifier';
 import { Hubspot } from '../lib/hubspot';
 import { Logger } from '../lib/log';

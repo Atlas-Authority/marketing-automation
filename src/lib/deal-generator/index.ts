@@ -1,5 +1,5 @@
 import assert from "assert";
-import { Engine } from "../engine/engine";
+import { Engine } from "../engine";
 import { RelatedLicenseSet } from "../license-matching/license-grouper";
 import { Table } from "../log/table";
 import { Deal } from "../model/deal";

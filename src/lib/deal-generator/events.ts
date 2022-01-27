@@ -1,4 +1,4 @@
-import { Engine } from "../engine/engine";
+import { Engine } from "../engine";
 import { RelatedLicenseSet } from "../license-matching/license-grouper";
 import { License } from "../model/license";
 import { Transaction } from "../model/transaction";
