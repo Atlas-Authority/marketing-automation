@@ -1,17 +1,17 @@
-import { Logger } from "../log";
+import { ConsoleLogger } from "../log/console";
 import { Table } from "../log/table";
 import { License } from "../model/license";
 import { Transaction, TransactionData } from "../model/transaction";
 import { formatMoney } from "../util/formatters";
 import { isPresent } from "../util/helpers";
 
-export function buildAndVerifyStructures(licenses: License[], transactions: Transaction[], log?: Logger) {
+export function buildAndVerifyStructures(licenses: License[], transactions: Transaction[], log?: ConsoleLogger) {
   return new Structurer(log).buildAndVerify(licenses, transactions);
 }
 
 class Structurer {
 
-  constructor(private log?: Logger) { }
+  constructor(private log?: ConsoleLogger) { }
 
   buildAndVerify(licenses: License[], transactions: Transaction[]) {
     // All three should be unique on licenses

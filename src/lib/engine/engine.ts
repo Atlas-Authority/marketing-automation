@@ -58,7 +58,7 @@ export class Engine {
   public companyManager: CompanyManager;
 
   public constructor(hubspotService: Hubspot, config?: EngineConfig, public log?: Logger) {
-    this.tallier = new Tallier(log);
+    this.tallier = new Tallier(log?.consoleLogger);
 
     this.dealManager = hubspotService.dealManager;
     this.contactManager = hubspotService.contactManager;
@@ -118,12 +118,12 @@ export class Engine {
         const allEmails = getEmailsForRecord(record);
         const allGood = allEmails.every(e => emailRe.test(e));
         if (!allGood && !allEmails.every(e => this.ignoredEmails.has(e.toLowerCase()))) {
-          this.log?.printWarning('Downloader', `${kind} has invalid email(s); will be skipped:`, record);
+          this.log?.consoleLogger.printWarning('Downloader', `${kind} has invalid email(s); will be skipped:`, record);
         }
         return allGood;
       };
 
-    this.log?.printInfo('Database', 'Validating MPAC records: Starting...');
+    this.log?.consoleLogger.printInfo('Database', 'Validating MPAC records: Starting...');
 
     const combinedLicenses = [
       ...data.licensesWithDataInsights,
@@ -133,7 +133,7 @@ export class Engine {
     let licenses = combinedLicenses.map(raw => License.fromRaw(raw));
     let transactions = data.transactions.map(raw => Transaction.fromRaw(raw));
 
-    licenses = licenses.filter(l => validation.hasTechEmail(l, this.log));
+    licenses = licenses.filter(l => validation.hasTechEmail(l, this.log?.consoleLogger));
     licenses = validation.removeApiBorderDuplicates(licenses);
 
     licenses.forEach(validation.assertRequiredLicenseFields);
@@ -142,11 +142,11 @@ export class Engine {
     licenses = licenses.filter(emailChecker('License'));
     transactions = transactions.filter(emailChecker('Transaction'));
 
-    const structured = buildAndVerifyStructures(licenses, transactions, this.log);
+    const structured = buildAndVerifyStructures(licenses, transactions, this.log?.consoleLogger);
     this.licenses = structured.licenses;
     this.transactions = structured.transactions;
 
-    this.log?.printInfo('Database', 'Validating MPAC records: Done');
+    this.log?.consoleLogger.printInfo('Database', 'Validating MPAC records: Done');
 
     const transactionTotal = (this.transactions
       .map(t => t.data.vendorAmount)
@@ -173,15 +173,15 @@ export class Engine {
     table.rows.push(['# Deals', formatNumber(deals.length)]);
     table.rows.push(['$ Deals', formatMoney(dealSum)]);
 
-    this.log?.printInfo('Downloader', 'Download Summary');
+    this.log?.consoleLogger.printInfo('Downloader', 'Download Summary');
     for (const row of table.eachRow()) {
-      this.log?.printInfo('Downloader', '  ' + row);
+      this.log?.consoleLogger.printInfo('Downloader', '  ' + row);
     }
 
   }
 
   private logStep(description: string) {
-    this.log?.printInfo('Engine', chalk.bold.blueBright(`Step ${++this.step}: ${description}`));
+    this.log?.consoleLogger.printInfo('Engine', chalk.bold.blueBright(`Step ${++this.step}: ${description}`));
   }
 
 }

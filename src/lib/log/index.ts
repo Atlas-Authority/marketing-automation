@@ -8,7 +8,7 @@ export class Logger {
 
   #fast = process.argv.slice(2).includes('fast');
 
-  #consoleLogger = new ConsoleLogger();
+  public consoleLogger = new ConsoleLogger();
 
   #licenseScoringFile;
   #dealGeneratorFile;
@@ -41,10 +41,5 @@ export class Logger {
 
   public allMatchGroupsLog() { return this.#allMatchGroupsLog?.writeCsvStream() };
   public checkMatchGroupsLog() { return this.#checkMatchGroupsLog?.writeCsvStream() };
-
-
-  public printError(prefix: string, ...args: any[]) { this.#consoleLogger.printError(prefix, ...args); }
-  public printWarning(prefix: string, ...args: any[]) { this.#consoleLogger.printWarning(prefix, ...args); }
-  public printInfo(prefix: string, ...args: any[]) { this.#consoleLogger.printInfo(prefix, ...args); }
 
 }

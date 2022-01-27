@@ -9,7 +9,7 @@ import { Logger } from '../lib/log';
 const dataDir = DataDir.root.subdir('in');
 const log = new Logger(dataDir.subdir(`once-${Date.now()}`));
 
-const hubspot = Hubspot.memoryFromENV(log);
+const hubspot = Hubspot.memoryFromENV(log.consoleLogger);
 
 const engine = new Engine(hubspot, engineConfigFromENV(), log);
 
