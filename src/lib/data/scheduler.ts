@@ -1,5 +1,6 @@
 import * as luxon from 'luxon';
 import { keepDataSetConfigFromENV } from "../config/env";
+import { sorter } from '../util/helpers';
 
 interface Schedule {
   day: number;
@@ -21,23 +22,24 @@ export class DataSetScheduler {
   public constructor(private schedule: Schedule) { }
 
   /**
-   * Returns input objects that match the given schedule.
-   * 
-   * @param from The moment to start checking backwards from, inclusive.
-   * @param timestamped Pre-sorted (ascending) objects.
-   * @returns Input objects that match.
+   * @param from Moment within the block to start checking backwards from, inclusive.
+   * @returns Input objects that match the schedule.
    */
   check<T extends Timestamped>(from: luxon.DateTime, timestamped: T[]) {
+    const sortByTimestamp = sorter((o: T) => o.timestamp.toMillis());
+    const toCheck = [...timestamped].sort(sortByTimestamp);
+
     const ok = new Set<T>();
     for (const unit of ['day', 'week', 'month'] as const) {
       const start = from.startOf(unit).until(from.endOf(unit));
       for (let i = 0; i < this.schedule[unit]; i++) {
         const block = start.mapEndpoints(d => d.minus({ [unit]: i }));
-        const t = timestamped.find(t => block.contains(t.timestamp));
+        const t = toCheck.find(t => block.contains(t.timestamp));
         if (t) ok.add(t);
       }
     }
-    return ok;
+
+    return [...ok].sort(sortByTimestamp);
   }
 
 }

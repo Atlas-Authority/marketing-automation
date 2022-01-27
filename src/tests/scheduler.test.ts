@@ -1,5 +1,6 @@
 import * as luxon from 'luxon';
 import { DataSetScheduler, parseSchedule } from "../lib/data/scheduler";
+import { sorter } from '../lib/util/helpers';
 
 describe(`Scheduler`, () => {
 
@@ -38,8 +39,10 @@ describe(`Scheduler`, () => {
     const t4 = { timestamp: from };
     const t5 = { timestamp: from.plus({ days: 1 }) };
 
-    expect(scheduler.check(from, [t1, t2, t3, t4, t5])).toEqual(
-      new Set([t2, t3, t4])
+    expect(scheduler.check(from,
+      [t1, t2, t3, t4, t5]
+    )).toEqual(
+      [t2, t3, t4]
     );
   });
 
@@ -58,8 +61,10 @@ describe(`Scheduler`, () => {
     const t4 = { timestamp: from };
     const t5 = { timestamp: from.plus({ weeks: 1 }) };
 
-    expect(scheduler.check(from, [t1, t2, t3, t4, t5])).toEqual(
-      new Set([t2, t3, t4])
+    expect(scheduler.check(from,
+      [t1, t2, t3, t4, t5]
+    )).toEqual(
+      [t2, t3, t4]
     );
   });
 
@@ -78,8 +83,10 @@ describe(`Scheduler`, () => {
     const t4 = { timestamp: from };
     const t5 = { timestamp: from.plus({ months: 1 }) };
 
-    expect(scheduler.check(from, [t1, t2, t3, t4, t5])).toEqual(
-      new Set([t2, t3, t4])
+    expect(scheduler.check(from,
+      [t1, t2, t3, t4, t5]
+    )).toEqual(
+      [t2, t3, t4]
     );
   });
 
@@ -110,21 +117,15 @@ describe(`Scheduler`, () => {
     const m4 = { timestamp: luxon.DateTime.fromISO('2020-05-20T07') }; // good
     const m5 = { timestamp: luxon.DateTime.fromISO('2020-06-20T11') };
 
-    const input = [
+    expect(scheduler.check(from, [
       d1, d2, d3, d4, d5,
       w1, w2, w3, w4, w5,
       m1, m2, m3, m4, m5,
-    ].sort(sortTimestamped);
-
-    const output = [...scheduler.check(from, input)];
-
-    expect(output.sort(sortTimestamped)).toEqual(
-      [
-        d2, d3,
-        w2, w3,
-        m2, m3, m4, // m4 is earlier in the day than w4 and d4
-      ].sort(sortTimestamped)
-    );
+    ])).toEqual([
+      d2, d3,
+      w2, w3,
+      m2, m3, m4, // m4 is earlier in the day than w4 and d4
+    ].sort(sorter(o => o.timestamp.toMillis())));
   });
 
   it(`No schedule matches nothing`, () => {
@@ -154,19 +155,13 @@ describe(`Scheduler`, () => {
     const m4 = { timestamp: luxon.DateTime.fromISO('2020-05-20T11') }; // good
     const m5 = { timestamp: luxon.DateTime.fromISO('2020-06-20T11') };
 
-    const input = [
+    expect(scheduler.check(from, [
       d1, d2, d3, d4, d5,
       w1, w2, w3, w4, w5,
       m1, m2, m3, m4, m5,
-    ].sort(sortTimestamped);
+    ])).toEqual([
 
-    expect(scheduler.check(from, input)).toEqual(new Set());
+    ]);
   });
 
 });
-
-function sortTimestamped<T extends { timestamp: luxon.DateTime }>(a: T, b: T) {
-  const t1 = a.timestamp.toMillis();
-  const t2 = b.timestamp.toMillis();
-  return t1 < t2 ? -1 : t1 > t2 ? 1 : 0;
-}
