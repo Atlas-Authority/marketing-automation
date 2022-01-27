@@ -1,9 +1,14 @@
+import * as luxon from 'luxon';
 import { keepDataSetConfigFromENV } from "../config/env";
 
 interface Schedule {
   days: number;
   weeks: number;
   months: number;
+}
+
+interface Timestamped {
+  timestamp: luxon.DateTime,
 }
 
 export class DataSetScheduler {
@@ -13,8 +18,12 @@ export class DataSetScheduler {
     return new DataSetScheduler(schedule);
   }
 
-  public constructor(schedule: Schedule) {
+  public constructor(private schedule: Schedule) { }
 
+  check<T extends Timestamped>(from: luxon.DateTime, timestamped: T[]) {
+    const ok = new Set<T>();
+
+    return ok;
   }
 
 }
