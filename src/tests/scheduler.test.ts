@@ -101,13 +101,13 @@ describe(`Scheduler`, () => {
     const w1 = { timestamp: luxon.DateTime.fromISO('2020-04-29T10') };
     const w2 = { timestamp: luxon.DateTime.fromISO('2020-05-06T10') }; // good
     const w3 = { timestamp: luxon.DateTime.fromISO('2020-05-13T10') }; // good
-    const w4 = { timestamp: luxon.DateTime.fromISO('2020-05-20T10') }; // good
+    const w4 = { timestamp: luxon.DateTime.fromISO('2020-05-20T08') }; // good
     const w5 = { timestamp: luxon.DateTime.fromISO('2020-05-27T10') };
 
     const m1 = { timestamp: luxon.DateTime.fromISO('2020-02-20T11') };
     const m2 = { timestamp: luxon.DateTime.fromISO('2020-03-20T11') }; // good
     const m3 = { timestamp: luxon.DateTime.fromISO('2020-04-20T11') }; // good
-    const m4 = { timestamp: luxon.DateTime.fromISO('2020-05-20T11') }; // good
+    const m4 = { timestamp: luxon.DateTime.fromISO('2020-05-20T07') }; // good
     const m5 = { timestamp: luxon.DateTime.fromISO('2020-06-20T11') };
 
     const input = [
@@ -120,19 +120,11 @@ describe(`Scheduler`, () => {
 
     expect(output.sort(sortTimestamped)).toEqual(
       [
-        d2, d3, d4,
+        d2, d3,
         w2, w3,
-        m2, m3,
+        m2, m3, m4, // m4 is earlier in the day than w4 and d4
       ].sort(sortTimestamped)
     );
-
-    /**
-     * Scheduler rules that are valid but not obvious:
-     * 
-     * Q. Why weren't w4 and m4 in there?
-     * A. They're same as d4, and first match (d4) wins.
-     */
-
   });
 
   it(`No schedule matches nothing`, () => {
@@ -169,7 +161,6 @@ describe(`Scheduler`, () => {
     ].sort(sortTimestamped);
 
     expect(scheduler.check(from, input)).toEqual(new Set());
-
   });
 
 });
