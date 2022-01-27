@@ -1,59 +1,47 @@
 import 'source-map-support/register';
-import Engine from "../lib/engine/engine";
-import { IO, LiveRemote } from '../lib/io/io';
-import Slack from "../lib/io/slack";
-import log from '../lib/log/logger';
-import { Database } from "../lib/model/database";
-import { getCliArgs } from '../lib/parameters/cli-args';
-import { envConfig, runLoopConfigFromENV, serviceCredsFromENV, slackConfigFromENV } from "../lib/parameters/env-config";
-import { AttachableError, KnownError } from "../lib/util/errors";
+import { engineConfigFromENV, runLoopConfigFromENV } from "../lib/config/env";
+import DataDir from '../lib/data/dir';
+import { DataSet } from '../lib/data/set';
+import { downloadAllData } from '../lib/engine/download';
+import { Engine } from "../lib/engine/engine";
+import { SlackNotifier } from '../lib/engine/slack-notifier';
+import { Hubspot } from '../lib/hubspot';
+import { Logger } from '../lib/log';
 import run from "../lib/util/runner";
 
-main();
-async function main() {
+const dataDir = DataDir.root.subdir("in");
 
-  const { loglevel } = getCliArgs('loglevel');
-  log.setLevelFrom(loglevel);
+const log = new Logger(dataDir.subdir('main'));
 
-  const io = new IO(new LiveRemote(serviceCredsFromENV()));
+const runLoopConfig = runLoopConfigFromENV();
+const notifier = SlackNotifier.fromENV(log);
+notifier?.notifyStarting();
 
-  let slack: Slack | undefined;
-  const slackConfig = slackConfigFromENV();
-  if (slackConfig.apiToken) {
-    const { apiToken, errorChannelId } = slackConfig;
-    slack = new Slack(apiToken, errorChannelId);
-  }
+run(log, runLoopConfig, {
 
-  await slack?.postToSlack(`Starting Marketing Engine`);
+  async work() {
 
-  const loopConfig = runLoopConfigFromENV();
+    log.printInfo('Main', 'Downloading data');
+    const dataSet = new DataSet(dataDir);
+    const hubspot = Hubspot.live(log);
+    await downloadAllData(log, dataSet, hubspot);
 
-  await run(loopConfig, {
+    log.printInfo('Main', 'Running engine');
+    const data = dataSet.load();
+    const engine = new Engine(hubspot, engineConfigFromENV(), log);
+    engine.run(data);
 
-    async work() {
-      const db = new Database(io, envConfig);
-      await new Engine().run(db, null);
-    },
+    log.printInfo('Main', 'Upsyncing changes to HubSpot');
+    await hubspot.upsyncChangesToHubspot();
 
-    async failed(errors) {
-      await slack?.postToSlack(`Failed ${loopConfig.retryTimes} times. Below are the specific errors, in order. Trying again in ${loopConfig.runInterval}.`);
-      for (const error of errors) {
-        if (error instanceof KnownError) {
-          await slack?.postErrorToSlack(error.message);
-        }
-        else if (error instanceof AttachableError) {
-          await slack?.postErrorToSlack(`\`\`\`\n${error.stack}\n\`\`\``);
-          await slack?.postAttachmentToSlack({
-            title: 'Error attachment for ^',
-            content: error.attachment,
-          });
-        }
-        else {
-          await slack?.postErrorToSlack(`\`\`\`\n${error.stack}\n\`\`\``);
-        }
-      }
-    },
+    log.printInfo('Main', 'Writing HubSpot change log file');
+    log.hubspotOutputLogger()?.logResults(hubspot);
 
-  });
+    log.printInfo('Main', 'Done');
+  },
 
-}
+  async failed(errors) {
+    notifier?.notifyErrors(runLoopConfig, errors);
+  },
+
+});

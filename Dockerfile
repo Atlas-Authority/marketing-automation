@@ -10,6 +10,7 @@ RUN npm run build
 # Install deps & build image
 FROM node:16
 WORKDIR /usr/src/app
+VOLUME /usr/src/app/data
 COPY package*.json ./
 RUN npm install --only=production
 COPY --from=build /usr/src/app/out ./out

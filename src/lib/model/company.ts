@@ -1,24 +1,26 @@
+import { Entity } from "../hubspot/entity";
+import { EntityAdapter } from "../hubspot/interfaces";
+import { EntityManager } from "../hubspot/manager";
 import { Contact } from "./contact";
-import { Entity } from "./hubspot/entity";
-import { EntityKind } from "./hubspot/interfaces";
-import { EntityAdapter, EntityManager } from "./hubspot/manager";
 
 type CompanyData = {
   name: string;
   type: 'Partner' | null;
 };
 
-export class Company extends Entity<CompanyData, {}> {
+export class Company extends Entity<CompanyData> {
 
   public contacts = this.makeDynamicAssociation<Contact>('contact');
 
 }
 
-const CompanyAdapter: EntityAdapter<CompanyData, {}> = {
+export const CompanyAdapter: EntityAdapter<CompanyData> = {
 
-  associations: [
-    ['contact', 'down']
-  ],
+  kind: 'company',
+
+  associations: {
+    contact: 'down',
+  },
 
   data: {
     name: {
@@ -33,14 +35,13 @@ const CompanyAdapter: EntityAdapter<CompanyData, {}> = {
     },
   },
 
-  computed: {},
+  additionalProperties: [],
 
 };
 
-export class CompanyManager extends EntityManager<CompanyData, {}, Company> {
+export class CompanyManager extends EntityManager<CompanyData, Company> {
 
   protected override Entity = Company;
-  protected override kind: EntityKind = 'company';
-  protected override entityAdapter = CompanyAdapter;
+  public override entityAdapter = CompanyAdapter;
 
 }

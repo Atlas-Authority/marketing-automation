@@ -1,19 +1,17 @@
 import 'source-map-support/register';
 import util from 'util';
-import { DealGenerator } from '../lib/engine/deal-generator/generate-deals';
-import { abbrActionDetails, abbrEventDetails } from '../lib/engine/deal-generator/test/utils';
-import { RelatedLicenseSet } from '../lib/engine/license-matching/license-grouper';
-import { CachedMemoryRemote, IO } from "../lib/io/io";
-import { Database } from "../lib/model/database";
+import { engineConfigFromENV } from '../lib/config/env';
+import DataDir from '../lib/data/dir';
+import { DataSet } from '../lib/data/set';
+import { Engine } from "../lib/engine/engine";
+import { Hubspot } from '../lib/hubspot';
+import { Logger } from '../lib/log';
 import { License } from '../lib/model/license';
-import { Transaction } from '../lib/model/transaction';
-import { emptyConfig, envConfig } from '../lib/parameters/env-config';
+import { abbrActionDetails, abbrEventDetails, abbrRecordDetails } from '../tests/deal-generator/utils';
 
-function TEMPLATE({ runDealGenerator, GROUP, RECORDS, EVENTS, ACTIONS }: any) {
+function TEMPLATE({ runDealGenerator, RECORDS, EVENTS, ACTIONS }: any) {
   it(`describe test`, () => {
     const { events, actions } = runDealGenerator({
-      group: GROUP,
-      deals: [],
       records: RECORDS,
     });
     expect(events).toEqual(EVENTS);
@@ -21,50 +19,36 @@ function TEMPLATE({ runDealGenerator, GROUP, RECORDS, EVENTS, ACTIONS }: any) {
   });
 }
 
-async function main(template: string, testId: string) {
-  const json = Buffer.from(testId, 'base64').toString('utf8');
-  const ids: [string, string[]][] = JSON.parse(json);
+function main(template: string, licenseIds: string[]) {
+  const engine = new Engine(Hubspot.memory(), engineConfigFromENV(), new Logger());
+  const data = new DataSet(DataDir.root.subdir('in')).load();
+  const { dealGeneratorResults } = engine.run(data);
 
-  const group = await getRedactedMatchGroup(ids);
-
-  const db = new Database(new IO(), emptyConfig);
-
-  db.licenses.length = 0;
-  db.licenses.push(...group);
-
-  db.transactions.length = 0;
-  db.transactions.push(...group.flatMap(g => g.transactions));
-
-  const dealGenerator = new DealGenerator(db);
-  const { records, events, actions } = dealGenerator.generateActionsForMatchedGroup(group);
-
-  console.log(template
-    .replace('GROUP', format(ids, 100))
-    .replace('RECORDS', `[\n${records.map(abbrRecordDetails).join(',\n')}\n]`)
-    .replace('EVENTS', `[\n${events.map(event => format(abbrEventDetails(event), Infinity)).join(',\n')}\n]`)
-    .replace('ACTIONS', format(actions.map(abbrActionDetails)))
-  );
+  for (const licenseId of licenseIds) {
+    const results = dealGeneratorResults.get(licenseId);
+    if (results) {
+      const { actions, records, events } = results;
+      const licenses = records.filter(r => r instanceof License) as License[];
+      console.log(`\n\n---\n\n`)
+      console.log(template
+        .replace('RECORDS', format(licenses.map(abbrRecordDetails), 100))
+        .replace('EVENTS', format(events.map(abbrEventDetails)))
+        .replace('ACTIONS', format(actions.map(abbrActionDetails)))
+      );
+    }
+    else {
+      console.log(`Can't find results for ${licenseId}`);
+    }
+  }
 }
 
 function format(o: any, breakLength = 50) {
-  return util.inspect(o, { depth: null, breakLength });
-}
-
-async function getRedactedMatchGroup(ids: [string, string[]][]) {
-  const db = new Database(new IO(new CachedMemoryRemote()), envConfig);
-  await db.downloadAllData();
-
-  const group: RelatedLicenseSet = [];
-  for (const [lid, txids] of ids) {
-    const license = db.licenses.find(l => l.id === lid)!;
-    group.push(license);
-    for (const tid of txids) {
-      const transaction = db.transactions.find(t => t.id === tid)!;
-      license.transactions.push(transaction);
-      transaction.license = license;
-    }
-  }
-  return group;
+  return util.inspect(o, {
+    depth: null,
+    breakLength,
+    maxArrayLength: null,
+    maxStringLength: null,
+  });
 }
 
 const template = (TEMPLATE
@@ -73,31 +57,4 @@ const template = (TEMPLATE
   .slice(1, -1)
   .join('\n'));
 
-const testId = process.argv.pop()!;
-
-main(template, testId);
-
-function abbrRecordDetails(record: License | Transaction) {
-  if (record instanceof Transaction) {
-    return `testTransaction(${[
-      record.id,
-      record.data.saleDate,
-      record.data.licenseType,
-      record.data.saleType,
-      record.data.transactionId,
-      record.data.vendorAmount,
-    ]
-      .map(s => JSON.stringify(s))
-      .join(', ')})`;
-  }
-  else {
-    return `testLicense(${[
-      record.id,
-      record.data.maintenanceStartDate,
-      record.data.licenseType,
-      record.data.status,
-    ]
-      .map(s => JSON.stringify(s))
-      .join(', ')})`;
-  }
-}
+main(template, process.argv.slice(2));

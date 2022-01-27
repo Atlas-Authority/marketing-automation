@@ -1,42 +1,32 @@
 import 'source-map-support/register';
-import { CsvStream } from '../lib/cache/csv-stream';
-import DataDir from '../lib/cache/datadir';
-import { CachedMemoryRemote, IO } from "../lib/io/io";
-import log from "../lib/log/logger";
-import { Database } from "../lib/model/database";
-import { envConfig } from '../lib/parameters/env-config';
+import { engineConfigFromENV } from '../lib/config/env';
+import DataDir from '../lib/data/dir';
+import { DataSet } from '../lib/data/set';
+import { Engine } from "../lib/engine/engine";
+import { Hubspot } from '../lib/hubspot';
 import { isPresent, sorter } from "../lib/util/helpers";
 
-main();
-async function main() {
+const engine = new Engine(Hubspot.memory(), engineConfigFromENV());
+const dataDir = DataDir.root.subdir('in');
+const data = new DataSet(dataDir).load();
+engine.run(data);
 
-  log.level = log.Levels.Verbose;
-  const db = new Database(new IO(new CachedMemoryRemote()), envConfig);
-  await db.downloadAllData();
+const attributions = (engine
+  .licenses
+  .map(l => l.data.attribution)
+  .filter(isPresent)
+  .sort(sorter(a => [
+    Object.keys(a).length,
+    a.channel,
+    a.referrerDomain,
+  ].join(',')))
+);
 
-  const attributions = (db
-    .licenses
-    .map(l => l.data.attribution)
-    .filter(isPresent)
-    .sort(sorter(a => [
-      Object.keys(a).length,
-      a.channel,
-      a.referrerDomain,
-    ].join(',')))
-  );
-
-  new DataDir('out').file('attributions.csv').writeStream(stream => {
-    const file = new CsvStream(stream);
-    for (const a of attributions) {
-      file.writeRow({
-        channel: a.channel,
-        referrerDomain: a.referrerDomain,
-        campaignName: a.campaignName,
-        campaignSource: a.campaignSource,
-        campaignMedium: a.campaignMedium,
-        campaignContent: a.campaignContent,
-      });
-    }
-  });
-
-}
+dataDir.subdir('inspect').file('attributions.csv').writeArray(attributions.map(a => ({
+  channel: a.channel,
+  referrerDomain: a.referrerDomain,
+  campaignName: a.campaignName,
+  campaignSource: a.campaignSource,
+  campaignMedium: a.campaignMedium,
+  campaignContent: a.campaignContent,
+})));

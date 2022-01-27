@@ -1,14 +1,12 @@
 import 'source-map-support/register';
+import { engineConfigFromENV } from '../lib/config/env';
+import DataDir from '../lib/data/dir';
+import { DataSet } from '../lib/data/set';
+import { Engine } from "../lib/engine/engine";
 import { printSummary } from "../lib/engine/summary";
-import { CachedMemoryRemote, IO } from "../lib/io/io";
-import { Database } from "../lib/model/database";
-import { envConfig } from '../lib/parameters/env-config';
+import { Hubspot } from '../lib/hubspot';
 
-main();
-async function main() {
-
-  const db = new Database(new IO(new CachedMemoryRemote()), envConfig);
-  await db.downloadAllData();
-  printSummary(db);
-
-}
+const engine = new Engine(Hubspot.memory(), engineConfigFromENV());
+const data = new DataSet(DataDir.root.subdir('in')).load();
+engine.run(data);
+printSummary(engine);

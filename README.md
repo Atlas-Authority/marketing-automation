@@ -46,13 +46,14 @@ $ npm run watch
 For general development:
 
 ```sh
-$ npm run download -- help  # Download MPAC & HubSpot data
-$ npm run once     -- help  # Dry-run engine once on cached inputs
-$ npm run 3x       -- help  # Dry-run engine 3x, piping output to input
+$ npm run download     # Download MPAC & HubSpot data
+$ npm run once [fast]  # Dry-run engine once on cached inputs
+$ npm run 3x   [fast]  # Dry-run engine 3x, piping output to input
 ```
 
-* Data must be downloaded before local dry-runs.
-* Pass `loglevel=verbose` or `savelogs=out` to examine engine logic.
+* Data must be downloaded before local dry-runs
+* Engine log files are written under `data/[input-dir]/[log-dir]/`
+* Running with `fast` skips time-consuming logs
 
 Running tests:
 
@@ -71,9 +72,18 @@ $ node out/bin/main.js  # This always uses live inputs/outputs
 
 ## Changelog
 
-### Unreleased
+### 0.3.0
 
-- n/a
+- Docker image now requires persistent `./data` directory
+- Engine logs now written to input subdirectory
+- Fixed occasional bug when writing large log files
+- Removed `loglevel` option
+  - Info statements are now logged to stdout
+  - Warnings and errors are now logged to stderr
+  - Verbose logs are now written to log files
+- Removed `savelogs` option
+  - Now always saves all logs
+  - Added `fast` option to skip slow logs
 
 ### 0.2.0 (2022-01-19)
 

@@ -11,9 +11,6 @@
         "<node_internals>/**"
       ],
       "program": "${workspaceFolder}/src/bin/run-once.ts",
-      "args": [
-        "loglevel=info",
-      ],
       "type": "pwa-node"
     },
     {

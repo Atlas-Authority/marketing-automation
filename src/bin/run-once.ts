@@ -1,23 +1,21 @@
 import 'source-map-support/register';
-import DataDir from '../lib/cache/datadir';
-import Engine from "../lib/engine/engine";
-import { CachedMemoryRemote, IO } from '../lib/io/io';
-import log from '../lib/log/logger';
-import { Database } from "../lib/model/database";
-import { getCliArgs } from '../lib/parameters/cli-args';
-import { envConfig } from '../lib/parameters/env-config';
+import { engineConfigFromENV } from '../lib/config/env';
+import DataDir from '../lib/data/dir';
+import { DataSet } from '../lib/data/set';
+import { Engine } from "../lib/engine/engine";
+import { Hubspot } from '../lib/hubspot';
+import { Logger } from '../lib/log';
 
-main();
-async function main() {
-  const { loglevel, savelogs } = getCliArgs('loglevel', 'savelogs');
+const dataDir = DataDir.root.subdir('in');
+const log = new Logger(dataDir.subdir(`once-${Date.now()}`));
 
-  log.setLevelFrom(loglevel);
+const hubspot = Hubspot.memoryFromENV(log);
 
-  const logDir = savelogs;
-  const dataDir = logDir ? new DataDir(logDir) : null;
+const engine = new Engine(hubspot, engineConfigFromENV(), log);
 
-  const io = new IO(new CachedMemoryRemote());
-  const db = new Database(io, envConfig);
+const data = new DataSet(dataDir).load();
 
-  await new Engine().run(db, dataDir);
-}
+engine.run(data);
+
+hubspot.populateFakeIds();
+log.hubspotOutputLogger()?.logResults(hubspot);

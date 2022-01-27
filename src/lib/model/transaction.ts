@@ -1,8 +1,7 @@
 import assert from "assert";
+import { getContactInfo, getPartnerInfo, maybeGetContactInfo, RawTransaction } from "../marketplace/raw";
 import { License } from "./license";
-import { ContactInfo, getContactInfo, getPartnerInfo, maybeGetContactInfo, PartnerInfo } from "./marketplace/common";
-import { RawTransaction } from "./marketplace/raw";
-import { MpacRecord } from "./marketplace/record";
+import { ContactInfo, MpacRecord, PartnerInfo } from "./record";
 
 export interface TransactionData {
   addonLicenseId: string | null,

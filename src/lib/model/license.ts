@@ -1,7 +1,6 @@
 import * as assert from 'assert';
-import { ContactInfo, getContactInfo, getPartnerInfo, maybeGetContactInfo, PartnerInfo } from "./marketplace/common";
-import { RawLicense } from "./marketplace/raw";
-import { MpacRecord } from './marketplace/record.js';
+import { getContactInfo, getPartnerInfo, maybeGetContactInfo, RawLicense } from "../marketplace/raw";
+import { ContactInfo, MpacRecord, PartnerInfo } from './record.js';
 import { Transaction } from './transaction';
 
 type AttributionData = {

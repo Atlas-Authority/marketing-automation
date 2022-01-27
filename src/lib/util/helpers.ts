@@ -18,3 +18,16 @@ export function sorter<T>(fn: (o: T) => string | number, dir: 'ASC' | 'DSC' = 'A
     fn(a) < fn(b) ? down : up
   );
 }
+
+interface Closeable {
+  close(): void;
+}
+
+export function withAutoClose<T extends Closeable | undefined, R>(closeable: T, fn: (o: T) => R): R {
+  try {
+    return fn(closeable);
+  }
+  finally {
+    closeable?.close();
+  }
+}

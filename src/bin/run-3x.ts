@@ -1,32 +1,40 @@
 import 'source-map-support/register';
-import DataDir from '../lib/cache/datadir';
-import Engine from "../lib/engine/engine";
-import { CachedMemoryRemote, IO } from "../lib/io/io";
-import log from "../lib/log/logger";
-import { Database } from "../lib/model/database";
-import { getCliArgs } from '../lib/parameters/cli-args';
-import { envConfig } from '../lib/parameters/env-config';
+import { engineConfigFromENV } from '../lib/config/env';
+import DataDir from '../lib/data/dir';
+import { Data, DataSet } from '../lib/data/set';
+import { Engine } from "../lib/engine/engine";
+import { Hubspot } from '../lib/hubspot';
+import { Logger } from '../lib/log';
 
-main();
-async function main() {
+const dataDir = DataDir.root.subdir('in');
 
-  let i = 0;
-  const { savelogs } = getCliArgs('savelogs');
-  const nextDataDir = () => savelogs ? new DataDir(`${savelogs}-${++i}`) : null;
+let i = 0;
+const timestamp = Date.now();
+const nextLogDir = () => dataDir.subdir(`3x-${timestamp}-${++i}`);
 
-  log.level = log.Levels.Info;
+const data = new DataSet(dataDir).load();
 
-  const io = new IO(new CachedMemoryRemote());
-  const engine = new Engine();
+let hubspot: Hubspot;
+hubspot = runEngine();
 
-  // First
-  await engine.run(new Database(io, envConfig), nextDataDir());
+pipeOutputToInput(hubspot, data);
+hubspot = runEngine();
 
-  // Second
-  log.level = log.Levels.Verbose;
-  await engine.run(new Database(io, envConfig), nextDataDir());
+pipeOutputToInput(hubspot, data);
+hubspot = runEngine();
 
-  // Third
-  await engine.run(new Database(io, envConfig), nextDataDir());
+function runEngine() {
+  const log = new Logger(nextLogDir());
+  const hubspot = Hubspot.memoryFromENV(log);
+  const engine = new Engine(hubspot, engineConfigFromENV(), log);
+  engine.run(data);
+  hubspot.populateFakeIds();
+  log.hubspotOutputLogger()?.logResults(hubspot);
+  return hubspot;
+}
 
+function pipeOutputToInput(hubspot: Hubspot, data: Data) {
+  data.rawDeals = hubspot.dealManager.getArray().map(e => e.toRawEntity());
+  data.rawContacts = hubspot.contactManager.getArray().map(e => e.toRawEntity());
+  data.rawCompanies = hubspot.companyManager.getArray().map(e => e.toRawEntity());
 }

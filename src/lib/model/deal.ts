@@ -1,11 +1,12 @@
-import env from "../parameters/env-config";
+import { hubspotAccountIdFromEnv } from "../config/env";
+import { Entity } from "../hubspot/entity";
+import { DealStage, EntityAdapter, Pipeline } from "../hubspot/interfaces";
+import { EntityManager } from "../hubspot/manager";
+import { Logger } from "../log";
 import { AttachableError } from "../util/errors";
 import { isPresent } from "../util/helpers";
 import { Company } from "./company";
 import { Contact } from "./contact";
-import { Entity } from "./hubspot/entity";
-import { DealStage, EntityKind, Pipeline } from "./hubspot/interfaces";
-import { EntityAdapter, EntityManager } from "./hubspot/manager";
 import { uniqueTransactionId } from "./transaction";
 
 export type DealData = {
@@ -30,12 +31,7 @@ export type DealData = {
   duplicateOf: string | null;
 };
 
-type DealComputed = {
-  readonly hasActivity: boolean;
-  readonly createdDate: string;
-};
-
-export class Deal extends Entity<DealData, DealComputed> {
+export class Deal extends Entity<DealData> {
 
   public contacts = this.makeDynamicAssociation<Contact>('contact');
   public companies = this.makeDynamicAssociation<Company>('company');
@@ -61,162 +57,69 @@ export class Deal extends Entity<DealData, DealComputed> {
   public isClosed() { return this.isWon || this.isLost; }
 
   public link() {
-    const hsAccountId = env.hubspot.accountId;
+    const hsAccountId = hubspotAccountIdFromEnv;
     return (hsAccountId
       ? `https://app.hubspot.com/contacts/${hsAccountId}/deal/${this.id}/`
       : `Deal=${this.id} (see link by setting HUBSPOT_ACCOUNT_ID)`);
   }
 
+  hasActivity() {
+    return (
+      isNonBlankString(this.downloadedData['hs_user_ids_of_all_owners']) ||
+      isNonBlankString(this.downloadedData['engagements_last_meeting_booked']) ||
+      isNonBlankString(this.downloadedData['hs_latest_meeting_activity']) ||
+      isNonBlankString(this.downloadedData['notes_last_contacted']) ||
+      isNonBlankString(this.downloadedData['notes_last_updated']) ||
+      isNonBlankString(this.downloadedData['notes_next_activity_date']) ||
+      isNonBlankString(this.downloadedData['hs_sales_email_last_replied']) ||
+      isNonZeroNumberString(this.downloadedData['num_contacted_notes']) ||
+      isNonZeroNumberString(this.downloadedData['num_notes'])
+    );
+  }
+
 }
 
-const DealAdapter: EntityAdapter<DealData, DealComputed> = {
-
-  associations: [
-    ['company', 'down/up'],
-    ['contact', 'down/up'],
-  ],
-
-  shouldReject(data) {
-    if (data['pipeline'] !== env.hubspot.pipeline.mpac) return true;
-    if (env.hubspot.attrs.deal.duplicateOf && data[env.hubspot.attrs.deal.duplicateOf]) return true;
-    return false;
+export interface HubspotDealConfig {
+  accountId?: string,
+  pipeline?: {
+    mpac?: string,
   },
-
-  data: {
-    relatedProducts: {
-      property: env.hubspot.attrs.deal.relatedProducts,
-      down: related_products => related_products || null,
-      up: relatedProducts => relatedProducts ?? '',
-    },
-    app: {
-      property: env.hubspot.attrs.deal.app,
-      down: app => app,
-      up: app => app ?? '',
-    },
-    addonLicenseId: {
-      property: env.hubspot.attrs.deal.addonLicenseId,
-      identifier: true,
-      down: id => id || null,
-      up: id => id || '',
-    },
-    transactionId: {
-      property: env.hubspot.attrs.deal.transactionId,
-      identifier: true,
-      down: id => id || null,
-      up: id => id || '',
-    },
-    closeDate: {
-      property: 'closedate',
-      down: closedate => closedate!.substr(0, 10),
-      up: closeDate => closeDate,
-    },
-    country: {
-      property: env.hubspot.attrs.deal.country,
-      down: country => country,
-      up: country => country ?? '',
-    },
-    dealName: {
-      property: 'dealname',
-      down: dealname => dealname!,
-      up: dealName => dealName,
-    },
-    origin: {
-      property: env.hubspot.attrs.deal.origin,
-      down: origin => origin,
-      up: origin => origin ?? '',
-    },
-    deployment: {
-      property: env.hubspot.attrs.deal.deployment,
-      down: deployment => deployment as DealData['deployment'],
-      up: deployment => deployment ?? '',
-    },
-    licenseTier: {
-      property: env.hubspot.attrs.deal.licenseTier,
-      down: license_tier => license_tier ? +license_tier : null,
-      up: licenseTier => licenseTier?.toFixed() ?? '',
-    },
-    pipeline: {
-      property: 'pipeline',
-      down: data => Pipeline.MPAC,
-      up: pipeline => pipelines[pipeline],
-    },
-    dealStage: {
-      property: 'dealstage',
-      down: dealstage => enumFromValue(dealstages, dealstage ?? ''),
-      up: dealstage => dealstages[dealstage],
-    },
-    amount: {
-      property: 'amount',
-      down: amount => !amount ? null : +amount,
-      up: amount => amount?.toString() ?? '',
-    },
-    associatedPartner: {
-      property: env.hubspot.attrs.deal.associatedPartner,
-      down: partner => partner || null,
-      up: partner => partner ?? '',
-    },
-    appEntitlementId: {
-      property: env.hubspot.attrs.deal.appEntitlementId,
-      identifier: true,
-      down: id => id || null,
-      up: id => id ?? '',
-    },
-    appEntitlementNumber: {
-      property: env.hubspot.attrs.deal.appEntitlementNumber,
-      identifier: true,
-      down: id => id || null,
-      up: id => id ?? '',
-    },
-    duplicateOf: {
-      property: env.hubspot.attrs.deal.duplicateOf,
-      down: id => id || null,
-      up: id => id ?? '',
-    },
+  dealstage?: {
+    eval?: string,
+    closedWon?: string,
+    closedLost?: string,
   },
-
-  computed: {
-    hasActivity: {
-      default: false,
-      down: data => (
-        isNonBlankString(data['hs_user_ids_of_all_owners']) ||
-        isNonBlankString(data['engagements_last_meeting_booked']) ||
-        isNonBlankString(data['hs_latest_meeting_activity']) ||
-        isNonBlankString(data['notes_last_contacted']) ||
-        isNonBlankString(data['notes_last_updated']) ||
-        isNonBlankString(data['notes_next_activity_date']) ||
-        isNonBlankString(data['hs_sales_email_last_replied']) ||
-        isNonZeroNumberString(data['num_contacted_notes']) ||
-        isNonZeroNumberString(data['num_notes'])
-      ),
-      properties: [
-        'hs_user_ids_of_all_owners',
-        'engagements_last_meeting_booked',
-        'hs_latest_meeting_activity',
-        'notes_last_contacted',
-        'notes_last_updated',
-        'notes_next_activity_date',
-        'num_contacted_notes',
-        'num_notes',
-        'hs_sales_email_last_replied',
-      ]
-    },
-    createdDate: {
-      default: '',
-      down: data => data['createdate']!,
-      properties: ['createdate'],
-    }
+  attrs?: {
+    appEntitlementId?: string,
+    appEntitlementNumber?: string,
+    addonLicenseId?: string,
+    transactionId?: string,
+    app?: string,
+    origin?: string,
+    country?: string,
+    deployment?: string,
+    licenseTier?: string,
+    relatedProducts?: string,
+    associatedPartner?: string,
+    duplicateOf?: string,
   },
+}
 
-};
-
-export class DealManager extends EntityManager<DealData, DealComputed, Deal> {
-
-  protected override Entity = Deal;
-  protected override kind: EntityKind = 'deal';
-  protected override entityAdapter = DealAdapter;
-
-  public duplicates = new Map<Deal, Deal[]>();
-
+export interface HubspotRequiredDealConfig {
+  pipeline: {
+    mpac: string,
+  },
+  dealstage: {
+    eval: string,
+    closedWon: string,
+    closedLost: string,
+  },
+  attrs: {
+    appEntitlementId: string,
+    appEntitlementNumber: string,
+    addonLicenseId: string,
+    transactionId: string,
+  },
 }
 
 function isNonBlankString(str: string | null) {
@@ -227,19 +130,175 @@ function isNonZeroNumberString(str: string | null) {
   return +(str ?? '') > 0;
 }
 
-function enumFromValue<T extends number>(mapping: Record<T, string>, apiValue: string): T {
-  const found = Object.entries(mapping).find(([k, v]) => v === apiValue);
-  if (!found) throw new AttachableError('Cannot find ENV-configured mapping:',
-    JSON.stringify({ mapping, apiValue }, null, 2));
-  return +found[0] as T;
+function makeAdapter(config: HubspotDealConfig): EntityAdapter<DealData> {
+  const requiredConfig: HubspotRequiredDealConfig = {
+    pipeline: {
+      mpac: config.pipeline?.mpac ?? 'Pipeline',
+    },
+    dealstage: {
+      eval: config.dealstage?.eval ?? 'Eval',
+      closedWon: config.dealstage?.closedWon ?? 'ClosedWon',
+      closedLost: config.dealstage?.closedLost ?? 'ClosedLost',
+    },
+    attrs: {
+      appEntitlementId: config.attrs?.appEntitlementId ?? 'appEntitlementId',
+      appEntitlementNumber: config.attrs?.appEntitlementNumber ?? 'appEntitlementNumber',
+      addonLicenseId: config.attrs?.addonLicenseId ?? 'addonLicenseId',
+      transactionId: config.attrs?.transactionId ?? 'transactionId',
+    },
+  };
+
+  function enumFromValue<T extends number>(mapping: Record<T, string>, apiValue: string): T {
+    const found = Object.entries(mapping).find(([k, v]) => v === apiValue);
+    if (!found) throw new AttachableError('Cannot find ENV-configured mapping:',
+      JSON.stringify({ mapping, apiValue }, null, 2));
+    return +found[0] as T;
+  }
+
+  const pipelines: Record<Pipeline, string> = {
+    [Pipeline.MPAC]: requiredConfig.pipeline.mpac,
+  };
+
+  const dealstages: Record<DealStage, string> = {
+    [DealStage.EVAL]: requiredConfig.dealstage.eval,
+    [DealStage.CLOSED_WON]: requiredConfig.dealstage.closedWon,
+    [DealStage.CLOSED_LOST]: requiredConfig.dealstage.closedLost,
+  };
+
+  return {
+
+    kind: 'deal',
+
+    associations: {
+      company: 'down/up',
+      contact: 'down/up',
+    },
+
+    shouldReject(data) {
+      if (data['pipeline'] !== requiredConfig.pipeline.mpac) return true;
+      if (config.attrs?.duplicateOf && data[config.attrs?.duplicateOf]) return true;
+      return false;
+    },
+
+    data: {
+      relatedProducts: {
+        property: config.attrs?.relatedProducts,
+        down: related_products => related_products || null,
+        up: relatedProducts => relatedProducts ?? '',
+      },
+      app: {
+        property: config.attrs?.app,
+        down: app => app,
+        up: app => app ?? '',
+      },
+      addonLicenseId: {
+        property: requiredConfig.attrs.addonLicenseId,
+        identifier: true,
+        down: id => id || null,
+        up: id => id || '',
+      },
+      transactionId: {
+        property: requiredConfig.attrs.transactionId,
+        identifier: true,
+        down: id => id || null,
+        up: id => id || '',
+      },
+      closeDate: {
+        property: 'closedate',
+        down: closedate => closedate!.substr(0, 10),
+        up: closeDate => closeDate,
+      },
+      country: {
+        property: config.attrs?.country,
+        down: country => country,
+        up: country => country ?? '',
+      },
+      dealName: {
+        property: 'dealname',
+        down: dealname => dealname!,
+        up: dealName => dealName,
+      },
+      origin: {
+        property: config.attrs?.origin,
+        down: origin => origin,
+        up: origin => origin ?? '',
+      },
+      deployment: {
+        property: config.attrs?.deployment,
+        down: deployment => deployment as DealData['deployment'],
+        up: deployment => deployment ?? '',
+      },
+      licenseTier: {
+        property: config.attrs?.licenseTier,
+        down: license_tier => license_tier ? +license_tier : null,
+        up: licenseTier => licenseTier?.toFixed() ?? '',
+      },
+      pipeline: {
+        property: 'pipeline',
+        down: data => Pipeline.MPAC,
+        up: pipeline => pipelines[pipeline],
+      },
+      dealStage: {
+        property: 'dealstage',
+        down: dealstage => enumFromValue(dealstages, dealstage ?? ''),
+        up: dealstage => dealstages[dealstage],
+      },
+      amount: {
+        property: 'amount',
+        down: amount => !amount ? null : +amount,
+        up: amount => amount?.toString() ?? '',
+      },
+      associatedPartner: {
+        property: config.attrs?.associatedPartner,
+        down: partner => partner || null,
+        up: partner => partner ?? '',
+      },
+      appEntitlementId: {
+        property: requiredConfig.attrs.appEntitlementId,
+        identifier: true,
+        down: id => id || null,
+        up: id => id ?? '',
+      },
+      appEntitlementNumber: {
+        property: requiredConfig.attrs.appEntitlementNumber,
+        identifier: true,
+        down: id => id || null,
+        up: id => id ?? '',
+      },
+      duplicateOf: {
+        property: config.attrs?.duplicateOf,
+        down: id => id || null,
+        up: id => id ?? '',
+      },
+    },
+
+    additionalProperties: [
+      'hs_user_ids_of_all_owners',
+      'engagements_last_meeting_booked',
+      'hs_latest_meeting_activity',
+      'notes_last_contacted',
+      'notes_last_updated',
+      'notes_next_activity_date',
+      'num_contacted_notes',
+      'num_notes',
+      'hs_sales_email_last_replied',
+      'createdate',
+    ],
+
+  };
+
 }
 
-const pipelines: Record<Pipeline, string> = {
-  [Pipeline.MPAC]: env.hubspot.pipeline.mpac,
-};
+export class DealManager extends EntityManager<DealData, Deal> {
 
-const dealstages: Record<DealStage, string> = {
-  [DealStage.EVAL]: env.hubspot.dealstage.eval,
-  [DealStage.CLOSED_WON]: env.hubspot.dealstage.closedWon,
-  [DealStage.CLOSED_LOST]: env.hubspot.dealstage.closedLost,
-};
+  protected override Entity = Deal;
+  public override entityAdapter: EntityAdapter<DealData>;
+
+  public duplicates = new Map<Deal, Deal[]>();
+
+  constructor(config: HubspotDealConfig, log?: Logger) {
+    super(log);
+    this.entityAdapter = makeAdapter(config);
+  }
+
+}
