@@ -5,10 +5,12 @@ import { Engine } from "../lib/engine";
 import { Hubspot } from '../lib/hubspot';
 import { Console } from '../lib/log/console';
 
+const console = new Console();
+
+dataManager.pruneDataSets(console);
+
 const dataSet = dataManager.latestDataSet();
 const logDir = dataSet.logDirNamed(`once-${Date.now()}`);
-
-const console = new Console();
 
 const hubspot = Hubspot.memoryFromENV(console);
 

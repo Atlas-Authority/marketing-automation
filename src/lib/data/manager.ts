@@ -1,3 +1,4 @@
+import { Console } from '../log/console';
 import { withAutoClose } from "../util/helpers";
 import DataDir from "./dir";
 import { DataSet } from "./set";
@@ -34,6 +35,19 @@ class DataManager {
 
     const dirName = this.meta.dirs[0];
     return new DataSet(DataDir.root.subdir(dirName));
+  }
+
+  public pruneDataSets(console: Console) {
+    // For now this means just keep the latest one
+
+    const toDelete = this.meta.dirs.slice(1);
+    this.meta.dirs = this.meta.dirs.slice(0, 1);
+    this.#save();
+
+    for (const dirName of toDelete) {
+      const dir = DataDir.root.subdir(dirName);
+      dir.delete(console);
+    }
   }
 
   #read(): Metadata | null {
