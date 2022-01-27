@@ -20,16 +20,25 @@ class DataManager {
   }
 
   public newDataSet() {
-    return new DataSet(DataDir.root.subdir('in'));
+    const dirName = `in-${Date.now()}`;
+    this.meta.dirs.push(dirName);
+    this.meta.dirs.sort().reverse();
+    this.#save();
+    return new DataSet(DataDir.root.subdir(dirName));
   }
 
   public latestDataSet() {
-    return new DataSet(DataDir.root.subdir('in'));
+    if (this.meta.dirs.length === 0) {
+      throw new Error(`No data sets available; run engine first`);
+    }
+
+    const dirName = this.meta.dirs[0];
+    return new DataSet(DataDir.root.subdir(dirName));
   }
 
   #read(): Metadata | null {
-    const lines = this.#metafile.readLinesIfExists();
-    return lines ? JSON.parse([...lines].join('\n')) : null;
+    const lines = [...this.#metafile.readLines()];
+    return lines.length > 0 ? JSON.parse(lines.join('\n')) : null;
   }
 
   #save() {
