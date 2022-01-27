@@ -1,12 +1,12 @@
 import 'source-map-support/register';
 import { engineConfigFromENV } from '../lib/config/env';
-import DataDir from '../lib/data/dir';
+import { dataManager } from '../lib/data/manager';
 import { Data, DataSet } from '../lib/data/set';
 import { Engine } from "../lib/engine";
 import { Hubspot } from '../lib/hubspot';
 import { Logger } from '../lib/log';
 
-const dataDir = DataDir.root.subdir('in');
+const dataDir = dataManager.latestDataDir();
 
 let i = 0;
 const timestamp = Date.now();

@@ -1,12 +1,12 @@
 import 'source-map-support/register';
-import DataDir from '../lib/data/dir';
+import { dataManager } from '../lib/data/manager';
 import { DataSet } from '../lib/data/set';
 import { RawLicense, RawTransaction } from '../lib/marketplace/raw';
 
 main();
 function main() {
 
-  const data = new DataSet(DataDir.root.subdir('in')).load();
+  const data = new DataSet(dataManager.latestDataDir()).load();
 
   const licensesWith = data.licensesWithDataInsights;
   const licensesWithout = data.licensesWithoutDataInsights;

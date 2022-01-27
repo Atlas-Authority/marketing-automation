@@ -1,20 +1,16 @@
 import 'source-map-support/register';
 import { engineConfigFromENV, runLoopConfigFromENV } from "../lib/config/env";
-import DataDir from '../lib/data/dir';
+import { dataManager } from '../lib/data/manager';
 import { DataSet } from '../lib/data/set';
-import { downloadAllData } from '../lib/engine/download';
 import { Engine } from "../lib/engine";
+import { downloadAllData } from '../lib/engine/download';
 import { SlackNotifier } from '../lib/engine/slack-notifier';
 import { Hubspot } from '../lib/hubspot';
 import { Logger } from '../lib/log';
 import { ConsoleLogger } from '../lib/log/console';
 import run from "../lib/util/runner";
 
-const dataDir = DataDir.root.subdir("in");
-
-const log = new Logger(dataDir.subdir('main'));
-
-const consoleLogger = log.consoleLogger;
+const consoleLogger = new ConsoleLogger();
 
 const runLoopConfig = runLoopConfigFromENV();
 const notifier = SlackNotifier.fromENV(new ConsoleLogger());
@@ -23,6 +19,8 @@ notifier?.notifyStarting();
 run(consoleLogger, runLoopConfig, {
 
   async work() {
+    const dataDir = dataManager.latestDataDir();
+    const log = new Logger(dataDir.subdir('main'));
 
     consoleLogger.printInfo('Main', 'Downloading data');
     const dataSet = new DataSet(dataDir);
