@@ -16,8 +16,16 @@ export class DataFile<T extends readonly any[]> {
   }
 
   public readLines(): Iterable<string> {
-    if (!fs.existsSync(this.#url)) {
+    const lines = this.readLinesIfExists();
+    if (!lines) {
       throw new Error(`Data file doesn't exist yet; run engine to create: ${this.#url}`);
+    }
+    return lines;
+  }
+
+  public readLinesIfExists(): Iterable<string> | null {
+    if (!fs.existsSync(this.#url)) {
+      return null;
     }
 
     const reader = new LineReader(this.#url);
