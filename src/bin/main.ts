@@ -29,7 +29,7 @@ run(consoleLogger, runLoopConfig, {
 
     consoleLogger.printInfo('Main', 'Running engine');
     const data = dataSet.load();
-    const engine = new Engine(hubspot, engineConfigFromENV(), log);
+    const engine = new Engine(hubspot, engineConfigFromENV(), consoleLogger, log);
     engine.run(data);
 
     consoleLogger.printInfo('Main', 'Upsyncing changes to HubSpot');

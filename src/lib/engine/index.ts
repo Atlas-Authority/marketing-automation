@@ -7,6 +7,7 @@ import { DealGenerator } from "../deal-generator";
 import { Hubspot } from "../hubspot";
 import { LicenseGrouper } from "../license-matching/license-grouper";
 import { Logger } from "../log";
+import { ConsoleLogger } from "../log/console";
 import { Table } from "../log/table";
 import { Tallier } from "../log/tallier";
 import { buildAndVerifyStructures } from "../marketplace/structure";
@@ -57,8 +58,8 @@ export class Engine {
   public contactManager: ContactManager;
   public companyManager: CompanyManager;
 
-  public constructor(hubspotService: Hubspot, config?: EngineConfig, public log?: Logger) {
-    this.tallier = new Tallier(log?.consoleLogger);
+  public constructor(hubspotService: Hubspot, config?: EngineConfig, public consoleLogger?: ConsoleLogger, public log?: Logger) {
+    this.tallier = new Tallier(consoleLogger);
 
     this.dealManager = hubspotService.dealManager;
     this.contactManager = hubspotService.contactManager;
@@ -118,12 +119,12 @@ export class Engine {
         const allEmails = getEmailsForRecord(record);
         const allGood = allEmails.every(e => emailRe.test(e));
         if (!allGood && !allEmails.every(e => this.ignoredEmails.has(e.toLowerCase()))) {
-          this.log?.consoleLogger.printWarning('Downloader', `${kind} has invalid email(s); will be skipped:`, record);
+          this.consoleLogger?.printWarning('Downloader', `${kind} has invalid email(s); will be skipped:`, record);
         }
         return allGood;
       };
 
-    this.log?.consoleLogger.printInfo('Database', 'Validating MPAC records: Starting...');
+    this.consoleLogger?.printInfo('Database', 'Validating MPAC records: Starting...');
 
     const combinedLicenses = [
       ...data.licensesWithDataInsights,
@@ -133,7 +134,7 @@ export class Engine {
     let licenses = combinedLicenses.map(raw => License.fromRaw(raw));
     let transactions = data.transactions.map(raw => Transaction.fromRaw(raw));
 
-    licenses = licenses.filter(l => validation.hasTechEmail(l, this.log?.consoleLogger));
+    licenses = licenses.filter(l => validation.hasTechEmail(l, this.consoleLogger));
     licenses = validation.removeApiBorderDuplicates(licenses);
 
     licenses.forEach(validation.assertRequiredLicenseFields);
@@ -142,11 +143,11 @@ export class Engine {
     licenses = licenses.filter(emailChecker('License'));
     transactions = transactions.filter(emailChecker('Transaction'));
 
-    const structured = buildAndVerifyStructures(licenses, transactions, this.log?.consoleLogger);
+    const structured = buildAndVerifyStructures(licenses, transactions, this.consoleLogger);
     this.licenses = structured.licenses;
     this.transactions = structured.transactions;
 
-    this.log?.consoleLogger.printInfo('Database', 'Validating MPAC records: Done');
+    this.consoleLogger?.printInfo('Database', 'Validating MPAC records: Done');
 
     const transactionTotal = (this.transactions
       .map(t => t.data.vendorAmount)
@@ -173,15 +174,15 @@ export class Engine {
     table.rows.push(['# Deals', formatNumber(deals.length)]);
     table.rows.push(['$ Deals', formatMoney(dealSum)]);
 
-    this.log?.consoleLogger.printInfo('Downloader', 'Download Summary');
+    this.consoleLogger?.printInfo('Downloader', 'Download Summary');
     for (const row of table.eachRow()) {
-      this.log?.consoleLogger.printInfo('Downloader', '  ' + row);
+      this.consoleLogger?.printInfo('Downloader', '  ' + row);
     }
 
   }
 
   private logStep(description: string) {
-    this.log?.consoleLogger.printInfo('Engine', chalk.bold.blueBright(`Step ${++this.step}: ${description}`));
+    this.consoleLogger?.printInfo('Engine', chalk.bold.blueBright(`Step ${++this.step}: ${description}`));
   }
 
 }
