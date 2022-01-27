@@ -1,6 +1,6 @@
 import got from 'got';
 import promiseAllProperties from 'promise-all-properties';
-import { Data, DataSet } from '../data/set';
+import { dataManager } from '../data/manager';
 import HubspotAPI from "../hubspot/api";
 import { Console } from '../log/console';
 import { MultiDownloadLogger } from "../log/download";
@@ -15,7 +15,7 @@ interface HubspotManagers {
   companyManager: CompanyManager,
 }
 
-export async function downloadAllData(console: Console, dataSet: DataSet, managers: HubspotManagers): Promise<Data> {
+export async function downloadAllData(console: Console, managers: HubspotManagers) {
   const hubspotAPI = new HubspotAPI(console);
   const marketplaceAPI = new MarketplaceAPI();
 
@@ -48,12 +48,13 @@ export async function downloadAllData(console: Console, dataSet: DataSet, manage
       hubspotAPI.downloadHubspotEntities(managers.contactManager.entityAdapter)),
   });
 
+  const dataSet = dataManager.newDataSet();
   dataSet.save(data);
 
   logbox.done();
   console.printInfo('Downloader', 'Done');
 
-  return data;
+  return { dataSet, data };
 }
 
 async function downloadAllTlds(): Promise<string[]> {

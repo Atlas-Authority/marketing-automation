@@ -1,6 +1,5 @@
 import 'source-map-support/register';
 import { engineConfigFromENV, runLoopConfigFromENV } from "../lib/config/env";
-import { dataManager } from '../lib/data/manager';
 import { Engine } from "../lib/engine";
 import { downloadAllData } from '../lib/engine/download';
 import { SlackNotifier } from '../lib/engine/slack-notifier';
@@ -17,15 +16,12 @@ notifier?.notifyStarting();
 run(console, runLoopConfig, {
 
   async work() {
-    const dataSet = dataManager.latestDataSet();
-    const logDir = dataSet.logDirNamed('main');
-
     console.printInfo('Main', 'Downloading data');
     const hubspot = Hubspot.live(console);
-    await downloadAllData(console, dataSet, hubspot);
+    const { dataSet, data } = await downloadAllData(console, hubspot);
+    const logDir = dataSet.logDirNamed('main');
 
     console.printInfo('Main', 'Running engine');
-    const data = dataSet.load();
     const engine = new Engine(hubspot, engineConfigFromENV(), console, logDir);
     engine.run(data);
 
