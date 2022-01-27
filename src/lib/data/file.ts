@@ -12,14 +12,14 @@ export class DataFile<T extends readonly any[]> {
   }
 
   public readArray(): T {
+    return CsvStream.readFileFromFile(this.readLines()) as T;
+  }
+
+  private readLines(): Iterator<string> & Iterable<string> {
     if (!fs.existsSync(this.#url)) {
       throw new Error(`Data file doesn't exist yet; run engine to create: ${this.#url}`);
     }
 
-    return CsvStream.readFileFromFile(this.readLines()) as T;
-  }
-
-  public readLines(): Iterator<string> & Iterable<string> {
     const reader = new LineReader(this.#url);
     return {
       [Symbol.iterator]() {
