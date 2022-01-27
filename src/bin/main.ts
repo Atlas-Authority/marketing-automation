@@ -1,7 +1,6 @@
 import 'source-map-support/register';
 import { engineConfigFromENV, runLoopConfigFromENV } from "../lib/config/env";
 import { dataManager } from '../lib/data/manager';
-import { DataSet } from '../lib/data/set';
 import { Engine } from "../lib/engine";
 import { downloadAllData } from '../lib/engine/download';
 import { SlackNotifier } from '../lib/engine/slack-notifier';
@@ -18,8 +17,7 @@ notifier?.notifyStarting();
 run(console, runLoopConfig, {
 
   async work() {
-    const dataDir = dataManager.latestDataDir();
-    const dataSet = new DataSet(dataDir);
+    const dataSet = dataManager.latestDataSet();
     const logDir = dataSet.logDirNamed('main');
 
     console.printInfo('Main', 'Downloading data');

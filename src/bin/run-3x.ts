@@ -1,18 +1,17 @@
 import 'source-map-support/register';
 import { engineConfigFromENV } from '../lib/config/env';
 import { dataManager } from '../lib/data/manager';
-import { Data, DataSet } from '../lib/data/set';
+import { Data } from '../lib/data/set';
 import { Engine } from "../lib/engine";
 import { Hubspot } from '../lib/hubspot';
 import { Console } from '../lib/log/console';
 
-const dataDir = dataManager.latestDataDir();
+const dataSet = dataManager.latestDataSet();
 
 let i = 0;
 const timestamp = Date.now();
 const nextLogDir = () => `3x-${timestamp}-${++i}`;
 
-const dataSet = new DataSet(dataDir);
 const data = dataSet.load();
 
 let hubspot: Hubspot;

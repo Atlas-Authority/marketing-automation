@@ -2,7 +2,6 @@ import 'source-map-support/register';
 import util from 'util';
 import { engineConfigFromENV } from '../lib/config/env';
 import { dataManager } from '../lib/data/manager';
-import { DataSet } from '../lib/data/set';
 import { Engine } from "../lib/engine";
 import { Hubspot } from '../lib/hubspot';
 import { Console } from '../lib/log/console';
@@ -21,7 +20,7 @@ function TEMPLATE({ runDealGenerator, RECORDS, EVENTS, ACTIONS }: any) {
 
 function main(template: string, licenseIds: string[]) {
   const engine = new Engine(Hubspot.memory(), engineConfigFromENV(), new Console());
-  const data = new DataSet(dataManager.latestDataDir()).load();
+  const data = dataManager.latestDataSet().load();
   const { dealGeneratorResults } = engine.run(data);
 
   for (const licenseId of licenseIds) {

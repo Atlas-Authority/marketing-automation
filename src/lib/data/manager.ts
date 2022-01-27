@@ -1,5 +1,6 @@
 import { withAutoClose } from "../util/helpers";
 import DataDir from "./dir";
+import { DataSet } from "./set";
 
 interface Metadata {
   version: number;
@@ -18,12 +19,12 @@ class DataManager {
     };
   }
 
-  public newDataDir() {
-    return DataDir.root.subdir('in');
+  public newDataSet() {
+    return new DataSet(DataDir.root.subdir('in'));
   }
 
-  public latestDataDir() {
-    return DataDir.root.subdir('in');
+  public latestDataSet() {
+    return new DataSet(DataDir.root.subdir('in'));
   }
 
   #read(): Metadata | null {
