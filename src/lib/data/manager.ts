@@ -5,7 +5,7 @@ import { DataSet } from "./set";
 
 interface Metadata {
   version: number;
-  dirs: string[];
+  timestamps: number[];
 }
 
 class DataManager {
@@ -15,37 +15,36 @@ class DataManager {
 
   constructor() {
     this.#meta = this.#read() ?? {
-      version: 1,
-      dirs: [],
+      version: 2,
+      timestamps: [],
     };
   }
 
   public newDataSet() {
-    const dirName = `in-${Date.now()}`;
-    this.#meta.dirs.push(dirName);
-    this.#meta.dirs.sort().reverse();
+    const ms = Date.now();
+    this.#meta.timestamps.unshift(ms);
     this.#save();
-    return new DataSet(DataDir.root.subdir(dirName));
+    return new DataSet(DataDir.root.subdir(`in-${ms}`));
   }
 
   public latestDataSet() {
-    if (this.#meta.dirs.length === 0) {
+    if (this.#meta.timestamps.length === 0) {
       throw new Error(`No data sets available; run engine first`);
     }
 
-    const dirName = this.#meta.dirs[0];
-    return new DataSet(DataDir.root.subdir(dirName));
+    const ms = this.#meta.timestamps[0];
+    return new DataSet(DataDir.root.subdir(`in-${ms}`));
   }
 
   public pruneDataSets(console: ConsoleLogger) {
     // For now this means just keep the latest one
 
-    const toDelete = this.#meta.dirs.slice(1);
-    this.#meta.dirs = this.#meta.dirs.slice(0, 1);
+    const toDelete = this.#meta.timestamps.slice(1);
+    this.#meta.timestamps = this.#meta.timestamps.slice(0, 1);
     this.#save();
 
-    for (const dirName of toDelete) {
-      const dir = DataDir.root.subdir(dirName);
+    for (const ms of toDelete) {
+      const dir = DataDir.root.subdir(`in-${ms}`);
       dir.delete(console);
     }
   }
