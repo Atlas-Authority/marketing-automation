@@ -23,6 +23,14 @@ export class DataSetScheduler {
   check<T extends Timestamped>(from: luxon.DateTime, timestamped: T[]) {
     const ok = new Set<T>();
 
+    const startDay = from.startOf('day').until(from.endOf('day'));
+
+    for (let i = 0; i < this.schedule.days; i++) {
+      const day = startDay.mapEndpoints(d => d.minus({ day: i }));
+      const t = timestamped.find(t => day.contains(t.timestamp));
+      if (t) ok.add(t);
+    }
+
     return ok;
   }
 
