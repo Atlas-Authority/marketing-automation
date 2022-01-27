@@ -1,6 +1,8 @@
+import * as luxon from 'luxon';
 import { ConsoleLogger } from '../log/console';
 import { withAutoClose } from "../util/helpers";
 import DataDir from "./dir";
+import { DataSetScheduler } from './scheduler';
 import { DataSet } from "./set";
 
 interface Metadata {
@@ -12,6 +14,8 @@ class DataManager {
 
   #metafile = DataDir.root.file('meta.json');
   #meta: Metadata;
+
+  #scheduler = DataSetScheduler.fromENV();
 
   constructor() {
     this.#meta = this.#read() ?? {
@@ -37,12 +41,20 @@ class DataManager {
   }
 
   public pruneDataSets(console: ConsoleLogger) {
-    // For now this means just keep the latest one
+    const dirs = this.#meta.timestamps.map(ms => {
+      const timestamp = luxon.DateTime.fromMillis(ms);
+      return { ms, timestamp };
+    });
 
-    const toDelete = this.#meta.timestamps.slice(1);
-    this.#meta.timestamps = this.#meta.timestamps.slice(0, 1);
+    const toKeep = (
+      this.#scheduler.check(luxon.DateTime.now(), dirs)
+        .map(({ ms }) => ms)
+        .reverse());
+
+    this.#meta.timestamps = toKeep;
     this.#save();
 
+    const toDelete = this.#meta.timestamps.filter(ms => !toKeep.includes(ms));
     for (const ms of toDelete) {
       const dir = DataDir.root.subdir(`in-${ms}`);
       dir.delete(console);
