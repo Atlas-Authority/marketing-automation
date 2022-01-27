@@ -24,7 +24,7 @@ export class DataSetScheduler {
    * Returns input objects that match the given schedule.
    * 
    * @param from The moment to start checking backwards from, inclusive.
-   * @param timestamped Pre-sorted objects.
+   * @param timestamped Pre-sorted (ascending) objects.
    * @returns Input objects that match.
    */
   check<T extends Timestamped>(from: luxon.DateTime, timestamped: T[]) {

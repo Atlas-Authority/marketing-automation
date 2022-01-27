@@ -135,6 +135,43 @@ describe(`Scheduler`, () => {
 
   });
 
+  it(`No schedule matches nothing`, () => {
+    const scheduler = new DataSetScheduler({
+      day: 0,
+      week: 0,
+      month: 0,
+    });
+
+    const from = luxon.DateTime.fromISO('2020-05-20T11');
+
+    const d1 = { timestamp: luxon.DateTime.fromISO('2020-05-17T09') };
+    const d2 = { timestamp: luxon.DateTime.fromISO('2020-05-18T09') }; // good
+    const d3 = { timestamp: luxon.DateTime.fromISO('2020-05-19T09') }; // good
+    const d4 = { timestamp: luxon.DateTime.fromISO('2020-05-20T09') }; // good
+    const d5 = { timestamp: luxon.DateTime.fromISO('2020-05-21T09') };
+
+    const w1 = { timestamp: luxon.DateTime.fromISO('2020-04-29T10') };
+    const w2 = { timestamp: luxon.DateTime.fromISO('2020-05-06T10') }; // good
+    const w3 = { timestamp: luxon.DateTime.fromISO('2020-05-13T10') }; // good
+    const w4 = { timestamp: luxon.DateTime.fromISO('2020-05-20T10') }; // good
+    const w5 = { timestamp: luxon.DateTime.fromISO('2020-05-27T10') };
+
+    const m1 = { timestamp: luxon.DateTime.fromISO('2020-02-20T11') };
+    const m2 = { timestamp: luxon.DateTime.fromISO('2020-03-20T11') }; // good
+    const m3 = { timestamp: luxon.DateTime.fromISO('2020-04-20T11') }; // good
+    const m4 = { timestamp: luxon.DateTime.fromISO('2020-05-20T11') }; // good
+    const m5 = { timestamp: luxon.DateTime.fromISO('2020-06-20T11') };
+
+    const input = [
+      d1, d2, d3, d4, d5,
+      w1, w2, w3, w4, w5,
+      m1, m2, m3, m4, m5,
+    ].sort(sortTimestamped);
+
+    expect(scheduler.check(from, input)).toEqual(new Set());
+
+  });
+
 });
 
 function sortTimestamped<T extends { timestamp: luxon.DateTime }>(a: T, b: T) {
