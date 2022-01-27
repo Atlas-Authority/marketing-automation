@@ -7,8 +7,6 @@ import { Console } from '../lib/log/console';
 
 const console = new Console();
 
-dataManager.pruneDataSets(console);
-
 const dataSet = dataManager.latestDataSet();
 const logDir = dataSet.logDirNamed(`once-${Date.now()}`);
 
