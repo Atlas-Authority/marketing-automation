@@ -1,8 +1,22 @@
+import { keepDataSetConfigFromENV } from "../config/env";
 
 interface Schedule {
   days: number;
   weeks: number;
   months: number;
+}
+
+export class DataSetScheduler {
+
+  public static fromENV() {
+    const schedule = parseSchedule(keepDataSetConfigFromENV() ?? '1d');
+    return new DataSetScheduler(schedule);
+  }
+
+  public constructor(schedule: Schedule) {
+
+  }
+
 }
 
 export function parseSchedule(rawSchedule: string): Schedule {
