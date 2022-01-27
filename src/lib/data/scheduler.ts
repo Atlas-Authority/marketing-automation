@@ -2,9 +2,9 @@ import * as luxon from 'luxon';
 import { keepDataSetConfigFromENV } from "../config/env";
 
 interface Schedule {
-  days: number;
-  weeks: number;
-  months: number;
+  day: number;
+  week: number;
+  month: number;
 }
 
 interface Timestamped {
@@ -25,7 +25,7 @@ export class DataSetScheduler {
 
     const startDay = from.startOf('day').until(from.endOf('day'));
 
-    for (let i = 0; i < this.schedule.days; i++) {
+    for (let i = 0; i < this.schedule.day; i++) {
       const day = startDay.mapEndpoints(d => d.minus({ day: i }));
       const t = timestamped.find(t => day.contains(t.timestamp));
       if (t) ok.add(t);
@@ -38,15 +38,15 @@ export class DataSetScheduler {
 
 export function parseSchedule(rawSchedule: string): Schedule {
   const keys: Record<string, keyof Schedule> = {
-    d: 'days',
-    w: 'weeks',
-    m: 'months',
+    d: 'day',
+    w: 'week',
+    m: 'month',
   };
 
   const schedule = {
-    days: 0,
-    months: 0,
-    weeks: 0,
+    day: 0,
+    month: 0,
+    week: 0,
   };
 
   for (const [, n, k] of rawSchedule.matchAll(/([0-9]+)(d|w|m)/gi)) {

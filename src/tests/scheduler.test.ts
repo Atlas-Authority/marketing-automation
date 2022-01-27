@@ -5,29 +5,29 @@ describe(`Scheduler`, () => {
 
   it(`Can parse syntax`, () => {
     expect(parseSchedule(`8d 5w 2m`)).toEqual({
-      days: 8,
-      weeks: 5,
-      months: 2,
+      day: 8,
+      week: 5,
+      month: 2,
     });
 
     expect(parseSchedule(`10w`)).toEqual({
-      days: 0,
-      weeks: 10,
-      months: 0,
+      day: 0,
+      week: 10,
+      month: 0,
     });
 
     expect(parseSchedule(``)).toEqual({
-      days: 0,
-      weeks: 0,
-      months: 0,
+      day: 0,
+      week: 0,
+      month: 0,
     });
   });
 
   it(`Can tell if timestamps are within schedule`, () => {
     const scheduler = new DataSetScheduler({
-      days: 3,
-      weeks: 0,
-      months: 0,
+      day: 3,
+      week: 0,
+      month: 0,
     });
 
     const t1 = { timestamp: luxon.DateTime.fromISO('2020-01-01T08') };
