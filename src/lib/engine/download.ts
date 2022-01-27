@@ -2,7 +2,7 @@ import got from 'got';
 import promiseAllProperties from 'promise-all-properties';
 import { dataManager } from '../data/manager';
 import HubspotAPI from "../hubspot/api";
-import { Console } from '../log/console';
+import { ConsoleLogger } from '../log/console';
 import { MultiDownloadLogger } from "../log/download";
 import { MarketplaceAPI } from "../marketplace/api";
 import { CompanyManager } from '../model/company';
@@ -15,7 +15,7 @@ interface HubspotManagers {
   companyManager: CompanyManager,
 }
 
-export async function downloadAllData(console: Console, managers: HubspotManagers) {
+export async function downloadAllData(console: ConsoleLogger, managers: HubspotManagers) {
   const hubspotAPI = new HubspotAPI(console);
   const marketplaceAPI = new MarketplaceAPI();
 

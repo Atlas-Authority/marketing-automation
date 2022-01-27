@@ -1,4 +1,4 @@
-import { Console } from '../log/console';
+import { ConsoleLogger } from '../log/console';
 import { withAutoClose } from "../util/helpers";
 import DataDir from "./dir";
 import { DataSet } from "./set";
@@ -37,7 +37,7 @@ class DataManager {
     return new DataSet(DataDir.root.subdir(dirName));
   }
 
-  public pruneDataSets(console: Console) {
+  public pruneDataSets(console: ConsoleLogger) {
     // For now this means just keep the latest one
 
     const toDelete = this.meta.dirs.slice(1);

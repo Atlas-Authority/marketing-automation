@@ -1,17 +1,17 @@
-import { Console } from "../log/console";
+import { ConsoleLogger } from "../log/console";
 import { Table } from "../log/table";
 import { License } from "../model/license";
 import { Transaction, TransactionData } from "../model/transaction";
 import { formatMoney } from "../util/formatters";
 import { isPresent } from "../util/helpers";
 
-export function buildAndVerifyStructures(licenses: License[], transactions: Transaction[], console?: Console) {
+export function buildAndVerifyStructures(licenses: License[], transactions: Transaction[], console?: ConsoleLogger) {
   return new Structurer(console).buildAndVerify(licenses, transactions);
 }
 
 class Structurer {
 
-  constructor(private console?: Console) { }
+  constructor(private console?: ConsoleLogger) { }
 
   buildAndVerify(licenses: License[], transactions: Transaction[]) {
     // All three should be unique on licenses

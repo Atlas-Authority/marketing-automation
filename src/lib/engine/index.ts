@@ -7,7 +7,7 @@ import { DealGenerator } from "../deal-generator";
 import { Hubspot } from "../hubspot";
 import { LicenseGrouper } from "../license-matching/license-grouper";
 import { LogDir } from "../log";
-import { Console } from "../log/console";
+import { ConsoleLogger } from "../log/console";
 import { Table } from "../log/table";
 import { Tallier } from "../log/tallier";
 import { buildAndVerifyStructures } from "../marketplace/structure";
@@ -58,7 +58,7 @@ export class Engine {
   public contactManager: ContactManager;
   public companyManager: CompanyManager;
 
-  public constructor(hubspotService: Hubspot, config?: EngineConfig, public console?: Console, public logDir?: LogDir) {
+  public constructor(hubspotService: Hubspot, config?: EngineConfig, public console?: ConsoleLogger, public logDir?: LogDir) {
     this.tallier = new Tallier(console);
 
     this.dealManager = hubspotService.dealManager;

@@ -1,5 +1,5 @@
 import { formatMoney } from "../util/formatters";
-import { Console } from "./console";
+import { ConsoleLogger } from "./console";
 import { Table } from "./table";
 
 export class Tallier {
@@ -8,7 +8,7 @@ export class Tallier {
   public first(reason: string, n: number) { this.tally.push([reason, n, 1]); }
   public less(reason: string, n: number) { this.tally.push([reason, n, -1]); }
 
-  constructor(private console?: Console) { }
+  constructor(private console?: ConsoleLogger) { }
 
   public printTable() {
     const remainder = (this.tally
