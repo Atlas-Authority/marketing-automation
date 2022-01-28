@@ -92,13 +92,7 @@ export class Engine {
   }
 
   private importData(data: Data) {
-    const dealPrelinks = this.hubspot.dealManager.importEntities(data.rawDeals);
-    const companyPrelinks = this.hubspot.companyManager.importEntities(data.rawCompanies);
-    const contactPrelinks = this.hubspot.contactManager.importEntities(data.rawContacts);
-
-    this.hubspot.dealManager.linkEntities(dealPrelinks, this.hubspot);
-    this.hubspot.companyManager.linkEntities(companyPrelinks, this.hubspot);
-    this.hubspot.contactManager.linkEntities(contactPrelinks, this.hubspot);
+    this.hubspot.importData(data);
 
     this.freeEmailDomains = deriveMultiProviderDomainsSet(data.freeDomains);
 
