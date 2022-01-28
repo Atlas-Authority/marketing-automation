@@ -4,14 +4,16 @@ import { CompanyManager } from "../model/company";
 import { ContactManager, HubspotContactConfig } from "../model/contact";
 import { DealManager, HubspotDealConfig } from "../model/deal";
 import { Entity } from "./entity";
+import { HubspotUploader } from "./uploader";
 
 export class Hubspot {
 
   public static live(console: ConsoleLogger) {
     return new Hubspot(
-      new DealManager(hubspotDealConfigFromENV(), console),
-      new ContactManager(hubspotContactConfigFromENV(), console),
-      new CompanyManager(console),
+      new DealManager(hubspotDealConfigFromENV()),
+      new ContactManager(hubspotContactConfigFromENV()),
+      new CompanyManager(),
+      console,
     );
   }
 
@@ -24,9 +26,10 @@ export class Hubspot {
 
   public static memory(config?: { deal?: HubspotDealConfig, contact?: HubspotContactConfig }, console?: ConsoleLogger) {
     return new Hubspot(
-      new DealManager(config?.deal ?? {}, console),
-      new ContactManager(config?.contact ?? {}, console),
-      new CompanyManager(console),
+      new DealManager(config?.deal ?? {}),
+      new ContactManager(config?.contact ?? {}),
+      new CompanyManager(),
+      console,
     );
   }
 
@@ -34,12 +37,13 @@ export class Hubspot {
     public dealManager: DealManager,
     public contactManager: ContactManager,
     public companyManager: CompanyManager,
+    private console?: ConsoleLogger,
   ) { }
 
   public async upsyncChangesToHubspot() {
-    const dealUploader = this.dealManager.makeUploader();
-    const contactUploader = this.contactManager.makeUploader();
-    const companyUploader = this.companyManager.makeUploader();
+    const dealUploader = new HubspotUploader(this.dealManager.getArray(), this.dealManager.entityAdapter, this.console);
+    const contactUploader = new HubspotUploader(this.contactManager.getArray(), this.contactManager.entityAdapter, this.console);
+    const companyUploader = new HubspotUploader(this.companyManager.getArray(), this.companyManager.entityAdapter, this.console);
 
     await dealUploader.syncUpAllEntitiesProperties();
     await contactUploader.syncUpAllEntitiesProperties();
