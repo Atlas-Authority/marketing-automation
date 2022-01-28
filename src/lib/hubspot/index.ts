@@ -1,5 +1,4 @@
 import { hubspotContactConfigFromENV, hubspotDealConfigFromENV } from "../config/env";
-import { ConsoleLogger } from "../log/console";
 import { CompanyManager } from "../model/company";
 import { ContactManager, HubspotContactConfig } from "../model/contact";
 import { DealManager, HubspotDealConfig } from "../model/deal";
@@ -7,28 +6,26 @@ import { Entity } from "./entity";
 
 export class Hubspot {
 
-  public static live(console: ConsoleLogger) {
+  public static live() {
     return new Hubspot(
       new DealManager(hubspotDealConfigFromENV()),
       new ContactManager(hubspotContactConfigFromENV()),
       new CompanyManager(),
-      console,
     );
   }
 
-  public static memoryFromENV(console?: ConsoleLogger) {
+  public static memoryFromENV() {
     return this.memory({
       contact: hubspotContactConfigFromENV(),
       deal: hubspotDealConfigFromENV(),
-    }, console);
+    });
   }
 
-  public static memory(config?: { deal?: HubspotDealConfig, contact?: HubspotContactConfig }, console?: ConsoleLogger) {
+  public static memory(config?: { deal?: HubspotDealConfig, contact?: HubspotContactConfig }) {
     return new Hubspot(
       new DealManager(config?.deal ?? {}),
       new ContactManager(config?.contact ?? {}),
       new CompanyManager(),
-      console,
     );
   }
 
@@ -36,7 +33,6 @@ export class Hubspot {
     public dealManager: DealManager,
     public contactManager: ContactManager,
     public companyManager: CompanyManager,
-    private console?: ConsoleLogger,
   ) { }
 
   public populateFakeIds() {
