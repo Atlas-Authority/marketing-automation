@@ -34,8 +34,6 @@ export class Engine {
   private step = 0;
 
   public mpac;
-  get licenses() { return this.mpac.licenses; }
-  get transactions() { return this.mpac.transactions; }
 
   public freeEmailDomains = new Set<string>();
   public partnerDomains = new Set<string>();
@@ -92,7 +90,7 @@ export class Engine {
     this.hubspot.importData(data);
     this.mpac.importData(data);
 
-    const transactionTotal = (this.transactions
+    const transactionTotal = (this.mpac.transactions
       .map(t => t.data.vendorAmount)
       .reduce((a, b) => a + b, 0));
 
@@ -110,8 +108,8 @@ export class Engine {
     const contacts = this.hubspot.contactManager.getArray();
 
     const table = new Table([{}, { align: 'right' }]);
-    table.rows.push(['# Licenses', formatNumber(this.licenses.length)]);
-    table.rows.push(['# Transactions', formatNumber(this.transactions.length)]);
+    table.rows.push(['# Licenses', formatNumber(this.mpac.licenses.length)]);
+    table.rows.push(['# Transactions', formatNumber(this.mpac.transactions.length)]);
     table.rows.push(['$ Transactions', formatMoney(transactionTotal)]);
     table.rows.push(['# Contacts', formatNumber(contacts.length)]);
     table.rows.push(['# Deals', formatNumber(deals.length)]);

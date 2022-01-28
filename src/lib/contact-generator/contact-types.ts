@@ -5,8 +5,8 @@ import { Transaction } from "../model/transaction";
 
 export function identifyAndFlagContactTypes(engine: Engine) {
   // Identifying contact types
-  identifyContactTypesFromRecordDomains(engine, engine.licenses);
-  identifyContactTypesFromRecordDomains(engine, engine.transactions);
+  identifyContactTypesFromRecordDomains(engine, engine.mpac.licenses);
+  identifyContactTypesFromRecordDomains(engine, engine.mpac.transactions);
   removeFreeEmailDomainsFromPartnerDomains(engine);
   separatePartnerDomainsFromCustomerDomains(engine);
 

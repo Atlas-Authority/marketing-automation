@@ -65,7 +65,7 @@ export class LicenseGrouper {
       scorable: ScorableLicense,
     }[]>();
 
-    for (const license of this.engine.licenses) {
+    for (const license of this.engine.mpac.licenses) {
       const addonKey = license.data.addonKey;
       const hosting = license.data.hosting;
       const key = `${addonKey}, ${hosting}`;

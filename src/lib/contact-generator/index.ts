@@ -22,7 +22,7 @@ export class ContactGenerator {
   }
 
   private generateContacts() {
-    for (const record of [...this.engine.licenses, ...this.engine.transactions]) {
+    for (const record of [...this.engine.mpac.licenses, ...this.engine.mpac.transactions]) {
       this.generateContact(record, record.data.technicalContact);
       this.generateContact(record, record.data.billingContact);
       this.generateContact(record, record.data.partnerDetails?.billingContact ?? null);
@@ -37,7 +37,7 @@ export class ContactGenerator {
   }
 
   private associateContacts() {
-    for (const record of [...this.engine.licenses, ...this.engine.transactions]) {
+    for (const record of [...this.engine.mpac.licenses, ...this.engine.mpac.transactions]) {
       record.techContact = this.findContact(record.data.technicalContact.email)!;
       record.billingContact = this.findContact(record.data.billingContact?.email);
       record.partnerContact = this.findContact(record.data.partnerDetails?.billingContact.email);

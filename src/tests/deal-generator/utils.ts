@@ -40,7 +40,7 @@ function runDealGeneratorWith(data: Data, config: EngineConfig) {
   const hubspot = new Hubspot();
   const engine = new Engine(hubspot, config);
   const engineResults = engine.run(data);
-  const dealGeneratorResults = engineResults.dealGeneratorResults.get(engine.licenses[0].id)!;
+  const dealGeneratorResults = engineResults.dealGeneratorResults.get(engine.mpac.licenses[0].id)!;
   hubspot.populateFakeIds();
   return {
     deals: hubspot.dealManager.getArray(),

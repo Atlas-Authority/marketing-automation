@@ -12,7 +12,7 @@ const data = dataSet.load();
 engine.run(data);
 
 const attributions = (engine
-  .licenses
+  .mpac.licenses
   .map(l => l.data.attribution)
   .filter(isPresent)
   .sort(sorter(a => [

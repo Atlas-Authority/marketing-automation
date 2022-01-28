@@ -50,8 +50,8 @@ export function updateContactsBasedOnMatchResults(engine: Engine, allMatches: Re
     }
   }
 
-  setPartnerDomainFor(engine.partnerDomains, engine.licenses);
-  setPartnerDomainFor(engine.partnerDomains, engine.transactions);
+  setPartnerDomainFor(engine.partnerDomains, engine.mpac.licenses);
+  setPartnerDomainFor(engine.partnerDomains, engine.mpac.transactions);
 
   /**
    * If the contact's most recent record has a partner,
