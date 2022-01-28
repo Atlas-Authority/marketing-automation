@@ -1,11 +1,10 @@
 import 'source-map-support/register';
 import { engineConfigFromENV } from '../lib/config/env';
 import { cliArgs } from '../lib/config/params';
+import { DataSet } from '../lib/data/data';
 import { dataManager } from '../lib/data/manager';
 import { Engine } from "../lib/engine";
-import { Hubspot } from '../lib/hubspot';
 import { ConsoleLogger } from '../lib/log/console';
-import { Marketplace } from '../lib/marketplace';
 
 const dataSetId = cliArgs[0];
 
@@ -18,9 +17,10 @@ const { data, logDir } = (dataSetId
   ? dataManager.dataSetFrom(+dataSetId, logDirName)
   : dataManager.latestDataSet(logDirName));
 
-const hubspot = Hubspot.fromENV();
+const dataSet = DataSet.fromENV();
+const hubspot = dataSet.hubspot;
 
-const engine = new Engine(hubspot, Marketplace.fromENV(), engineConfigFromENV(), console, logDir);
+const engine = new Engine(dataSet, engineConfigFromENV(), console, logDir);
 
 engine.run(data);
 

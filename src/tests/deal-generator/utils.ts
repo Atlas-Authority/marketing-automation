@@ -1,4 +1,5 @@
 import Chance from 'chance';
+import { DataSet } from '../../lib/data/data';
 import { RawDataSet } from '../../lib/data/raw';
 import { Action } from "../../lib/deal-generator/actions";
 import { DealRelevantEvent } from '../../lib/deal-generator/events';
@@ -39,7 +40,8 @@ export function runDealGenerator(input: TestInput) {
 
 function runDealGeneratorWith(data: RawDataSet, config: EngineConfig) {
   const hubspot = new Hubspot();
-  const engine = new Engine(hubspot, new Marketplace(), config);
+  const dataSet = new DataSet(hubspot, new Marketplace());
+  const engine = new Engine(dataSet, config);
   const engineResults = engine.run(data);
   const dealGeneratorResults = engineResults.dealGeneratorResults.get(engine.mpac.licenses[0].id)!;
   hubspot.populateFakeIds();

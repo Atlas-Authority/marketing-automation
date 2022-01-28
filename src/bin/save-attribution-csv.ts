@@ -1,12 +1,11 @@
 import 'source-map-support/register';
 import { engineConfigFromENV } from '../lib/config/env';
+import { DataSet } from '../lib/data/data';
 import { dataManager } from '../lib/data/manager';
 import { Engine } from "../lib/engine";
-import { Hubspot } from '../lib/hubspot';
-import { Marketplace } from '../lib/marketplace';
 import { isPresent, sorter } from "../lib/util/helpers";
 
-const engine = new Engine(Hubspot.fromENV(), Marketplace.fromENV(), engineConfigFromENV());
+const engine = new Engine(DataSet.fromENV(), engineConfigFromENV());
 const { data, logDir } = dataManager.latestDataSet(`inspect-${Date.now()}`);
 engine.run(data);
 

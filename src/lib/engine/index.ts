@@ -2,15 +2,14 @@ import chalk from "chalk";
 import { ContactGenerator } from "../contact-generator";
 import { identifyAndFlagContactTypes } from "../contact-generator/contact-types";
 import { updateContactsBasedOnMatchResults } from "../contact-generator/update-contacts";
+import { DataSet } from "../data/data";
 import { RawDataSet } from "../data/raw";
 import { DealGenerator } from "../deal-generator";
-import { Hubspot } from "../hubspot";
 import { LicenseGrouper } from "../license-matching/license-grouper";
 import { LogDir } from "../log";
 import { ConsoleLogger } from "../log/console";
 import { Table } from "../log/table";
 import { Tallier } from "../log/tallier";
-import { Marketplace } from "../marketplace";
 import { formatMoney, formatNumber } from "../util/formatters";
 import { deriveMultiProviderDomainsSet } from "./all-free-email-providers";
 import { printSummary } from "./summary";
@@ -42,7 +41,10 @@ export class Engine {
   public archivedApps: Set<string>;
   public dealPropertyConfig: DealPropertyConfig;
 
-  public constructor(public hubspot: Hubspot, public mpac: Marketplace, config?: EngineConfig, public console?: ConsoleLogger, public logDir?: LogDir) {
+  get hubspot() { return this.data.hubspot; }
+  get mpac() { return this.data.mpac; }
+
+  public constructor(public data: DataSet, config?: EngineConfig, public console?: ConsoleLogger, public logDir?: LogDir) {
     this.tallier = new Tallier(console);
 
     this.appToPlatform = config?.appToPlatform ?? Object.create(null);

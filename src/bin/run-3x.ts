@@ -1,11 +1,11 @@
 import 'source-map-support/register';
 import { engineConfigFromENV } from '../lib/config/env';
+import { DataSet } from '../lib/data/data';
 import { dataManager } from '../lib/data/manager';
 import { RawDataSet } from '../lib/data/raw';
 import { Engine } from "../lib/engine";
 import { Hubspot } from '../lib/hubspot';
 import { ConsoleLogger } from '../lib/log/console';
-import { Marketplace } from '../lib/marketplace';
 
 const nextLogDirName = logDirNameGenerator();
 const { data } = dataManager.latestDataSet();
@@ -21,8 +21,9 @@ hubspot = runEngine();
 
 function runEngine() {
   const { logDir } = dataManager.latestDataSet(nextLogDirName());
-  const hubspot = Hubspot.fromENV();
-  const engine = new Engine(hubspot, Marketplace.fromENV(), engineConfigFromENV(), new ConsoleLogger(), logDir);
+  const dataSet = DataSet.fromENV();
+  const hubspot = dataSet.hubspot;
+  const engine = new Engine(dataSet, engineConfigFromENV(), new ConsoleLogger(), logDir);
   engine.run(data);
   hubspot.populateFakeIds();
   logDir.hubspotOutputLogger()?.logResults(hubspot);

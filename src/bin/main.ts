@@ -1,13 +1,12 @@
 import 'source-map-support/register';
 import { engineConfigFromENV, runLoopConfigFromENV } from "../lib/config/env";
+import { DataSet } from '../lib/data/data';
 import { dataManager } from '../lib/data/manager';
 import { Engine } from "../lib/engine";
 import { downloadAllData } from '../lib/engine/download';
 import { SlackNotifier } from '../lib/engine/slack-notifier';
-import { Hubspot } from '../lib/hubspot';
 import { HubspotUploader } from '../lib/hubspot/uploader';
 import { ConsoleLogger } from '../lib/log/console';
-import { Marketplace } from '../lib/marketplace';
 import run from "../lib/util/runner";
 
 const console = new ConsoleLogger();
@@ -23,13 +22,15 @@ run(console, runLoopConfig, {
     console.printInfo('Main', 'Pruning data sets');
     dataManager.pruneDataSets(console);
 
+    const dataSet = DataSet.fromENV();
+
     console.printInfo('Main', 'Downloading data');
-    const hubspot = Hubspot.fromENV();
+    const hubspot = dataSet.hubspot;
     const ms = await downloadAllData(console, hubspot);
-    const { data, logDir } = dataManager.dataSetFrom(ms, 'main')
+    const { data, logDir } = dataManager.dataSetFrom(ms, 'main');
 
     console.printInfo('Main', 'Running engine');
-    const engine = new Engine(hubspot, Marketplace.fromENV(), engineConfigFromENV(), console, logDir);
+    const engine = new Engine(dataSet, engineConfigFromENV(), console, logDir);
     engine.run(data);
 
     console.printInfo('Main', 'Upsyncing changes to HubSpot');
