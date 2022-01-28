@@ -1,5 +1,5 @@
 import { mpacConfigFromENV } from "../config/env";
-import { Data } from "../data/set";
+import { DataSet } from "../data/set";
 import { ConsoleLogger } from "../log/console";
 import * as validation from "../marketplace/validation";
 import { License } from "../model/license";
@@ -22,7 +22,7 @@ export class Marketplace {
 
   public constructor(private config?: MpacConfig) { }
 
-  public importData(data: Data, console?: ConsoleLogger) {
+  public importData(data: DataSet, console?: ConsoleLogger) {
     console?.printInfo('Database', 'Validating MPAC records: Starting...');
 
     const emailRe = new RegExp(`.+@.+\\.(${data.tlds.join('|')})`);

@@ -1,5 +1,5 @@
 import Chance from 'chance';
-import { Data } from '../../lib/data/set';
+import { DataSet } from '../../lib/data/set';
 import { Action } from "../../lib/deal-generator/actions";
 import { DealRelevantEvent } from '../../lib/deal-generator/events';
 import { Engine, EngineConfig } from '../../lib/engine';
@@ -37,7 +37,7 @@ export function runDealGenerator(input: TestInput) {
   return runDealGeneratorWith(data, config);
 }
 
-function runDealGeneratorWith(data: Data, config: EngineConfig) {
+function runDealGeneratorWith(data: DataSet, config: EngineConfig) {
   const hubspot = new Hubspot();
   const engine = new Engine(hubspot, new Marketplace(), config);
   const engineResults = engine.run(data);
@@ -52,8 +52,8 @@ function runDealGeneratorWith(data: Data, config: EngineConfig) {
   };
 }
 
-function processInput(input: TestInput): { config: EngineConfig; data: Data; } {
-  const data: Data = {
+function processInput(input: TestInput): { config: EngineConfig; data: DataSet; } {
+  const data: DataSet = {
     rawCompanies: [],
     rawContacts: [],
     rawDeals: [],

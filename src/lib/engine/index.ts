@@ -2,7 +2,7 @@ import chalk from "chalk";
 import { ContactGenerator } from "../contact-generator";
 import { identifyAndFlagContactTypes } from "../contact-generator/contact-types";
 import { updateContactsBasedOnMatchResults } from "../contact-generator/update-contacts";
-import { Data } from "../data/set";
+import { DataSet } from "../data/set";
 import { DealGenerator } from "../deal-generator";
 import { Hubspot } from "../hubspot";
 import { LicenseGrouper } from "../license-matching/license-grouper";
@@ -53,7 +53,7 @@ export class Engine {
     };
   }
 
-  public run(data: Data) {
+  public run(data: DataSet) {
     this.logStep('Importing given data set into engine');
     this.importData(data);
 
@@ -81,7 +81,7 @@ export class Engine {
     return { dealGeneratorResults };
   }
 
-  private importData(data: Data) {
+  private importData(data: DataSet) {
     this.freeEmailDomains = deriveMultiProviderDomainsSet(data.freeDomains);
     this.hubspot.importData(data);
     this.mpac.importData(data);

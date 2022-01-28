@@ -1,7 +1,7 @@
 import { FullEntity } from "../hubspot/interfaces";
 import { RawLicense, RawTransaction } from "../marketplace/raw";
 
-export interface Data {
+export interface DataSet {
   tlds: string[];
   licensesWithDataInsights: RawLicense[];
   licensesWithoutDataInsights: RawLicense[];

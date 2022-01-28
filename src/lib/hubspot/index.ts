@@ -1,5 +1,5 @@
 import { hubspotContactConfigFromENV, hubspotDealConfigFromENV } from "../config/env";
-import { Data } from "../data/set";
+import { DataSet } from "../data/set";
 import { CompanyManager } from "../model/company";
 import { ContactManager, HubspotContactConfig } from "../model/contact";
 import { DealManager, HubspotDealConfig } from "../model/deal";
@@ -24,7 +24,7 @@ export class Hubspot {
     this.companyManager = new CompanyManager();
   }
 
-  public importData(data: Data) {
+  public importData(data: DataSet) {
     const dealPrelinks = this.dealManager.importEntities(data.rawDeals);
     const companyPrelinks = this.companyManager.importEntities(data.rawCompanies);
     const contactPrelinks = this.contactManager.importEntities(data.rawContacts);
