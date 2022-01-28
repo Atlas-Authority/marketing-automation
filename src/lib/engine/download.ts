@@ -48,8 +48,7 @@ export async function downloadAllData(console: ConsoleLogger, managers: HubspotM
       hubspotAPI.downloadHubspotEntities(managers.contactManager.entityAdapter)),
   });
 
-  const dataSet = dataManager.newDataSet();
-  dataSet.save(data);
+  const dataSet = dataManager.createDataSet(data);
 
   logbox.done();
   console.printInfo('Downloader', 'Done');

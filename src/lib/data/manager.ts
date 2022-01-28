@@ -3,7 +3,7 @@ import { ConsoleLogger } from '../log/console';
 import { withAutoClose } from "../util/helpers";
 import DataDir from "./dir";
 import { DataSetScheduler } from './scheduler';
-import { DataSet } from "./set";
+import { Data, DataSet } from "./set";
 
 interface Metadata {
   version: number;
@@ -24,11 +24,13 @@ class DataManager {
     };
   }
 
-  public newDataSet() {
+  public createDataSet(data: Data) {
     const ms = Date.now();
     this.#meta.timestamps.unshift(ms);
     this.#save();
-    return new DataSet(DataDir.root.subdir(`in-${ms}`));
+    const dataSet = new DataSet(DataDir.root.subdir(`in-${ms}`));
+    dataSet.save(data);
+    return dataSet;
   }
 
   public dataSetFrom(ms: number) {
