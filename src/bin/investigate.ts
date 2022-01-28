@@ -6,7 +6,7 @@ import { printSummary } from "../lib/engine/summary";
 import { Hubspot } from '../lib/hubspot';
 import { Marketplace } from '../lib/marketplace';
 
-const engine = new Engine(new Hubspot(), Marketplace.fromENV(), engineConfigFromENV());
+const engine = new Engine(Hubspot.withConfigFromENV(), Marketplace.fromENV(), engineConfigFromENV());
 const data = dataManager.latestDataSet().load();
 engine.run(data);
 printSummary(engine);
