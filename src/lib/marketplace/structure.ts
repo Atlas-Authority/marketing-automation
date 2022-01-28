@@ -5,10 +5,10 @@ import { Transaction, TransactionData } from "../model/transaction";
 import { formatMoney } from "../util/formatters";
 
 export function buildAndVerifyStructures(licenses: License[], transactions: Transaction[], console?: ConsoleLogger) {
-  return new Structurer(console).buildAndVerify(licenses, transactions);
+  return new MpacStructurer(console).buildAndVerify(licenses, transactions);
 }
 
-class Structurer {
+class MpacStructurer {
 
   constructor(private console?: ConsoleLogger) { }
 
