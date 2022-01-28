@@ -48,12 +48,12 @@ export async function downloadAllData(console: ConsoleLogger, managers: HubspotM
       hubspotAPI.downloadHubspotEntities(managers.contactManager.entityAdapter)),
   });
 
-  const dataSet = dataManager.createDataSet(data);
+  const ms = dataManager.createDataSet(data);
 
   logbox.done();
   console.printInfo('Downloader', 'Done');
 
-  return { dataSet, data };
+  return ms;
 }
 
 async function downloadAllTlds(): Promise<string[]> {

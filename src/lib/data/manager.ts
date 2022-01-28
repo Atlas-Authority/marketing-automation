@@ -30,7 +30,7 @@ class DataManager {
     this.#save();
     const dataSet = new DataSet(DataDir.root.subdir(`in-${ms}`));
     dataSet.save(data);
-    return dataSet;
+    return ms;
   }
 
   public dataSetFrom(ms: number) {
@@ -38,7 +38,10 @@ class DataManager {
     if (!this.#meta.timestamps.includes(ms)) {
       throw new Error(`Data set [${dirName}] does not exist`);
     }
-    return new DataSet(DataDir.root.subdir(dirName));
+    const dataDir = DataDir.root.subdir(dirName);
+    const dataSet = new DataSet(dataDir);
+    return dataSet;
+
   }
 
   public latestDataSet() {
