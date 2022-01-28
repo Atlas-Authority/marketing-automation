@@ -134,4 +134,20 @@ describe(`Scheduler`, () => {
     );
   });
 
+  it(`Takes all inputs into account within a limited schedule.`, () => {
+    const scheduler = new DataSetScheduler({
+      day: 0,
+      week: 3,
+      month: 0,
+    });
+
+    expect(scheduler.check(d4.timestamp.plus({ hour: 2 }), [
+      d1, d2, d3, d4, d5,
+      w1, w2, w3, w4, w5,
+      m1, m2, m3, m4, m5,
+    ])).toEqual([
+      w2, w3, d2, // d2 is earlier in the same week as w4
+    ].sort(sorter(o => o.timestamp.toMillis())));
+  });
+
 });
