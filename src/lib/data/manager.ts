@@ -31,13 +31,19 @@ class DataManager {
     return new DataSet(DataDir.root.subdir(`in-${ms}`));
   }
 
+  public dataSetFrom(ms: number) {
+    const dirName = `in-${ms}`;
+    if (!this.#meta.timestamps.includes(ms)) {
+      throw new Error(`Data set [${dirName}] does not exist`);
+    }
+    return new DataSet(DataDir.root.subdir(dirName));
+  }
+
   public latestDataSet() {
     if (this.#meta.timestamps.length === 0) {
       throw new Error(`No data sets available; run engine first`);
     }
-
-    const ms = this.#meta.timestamps[0];
-    return new DataSet(DataDir.root.subdir(`in-${ms}`));
+    return this.dataSetFrom(this.#meta.timestamps[0]);
   }
 
   public pruneDataSets(console: ConsoleLogger) {

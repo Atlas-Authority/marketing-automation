@@ -1,6 +1,7 @@
 import 'source-map-support/register';
 import util from 'util';
 import { engineConfigFromENV } from '../lib/config/env';
+import { cliArgs } from '../lib/config/params';
 import { dataManager } from '../lib/data/manager';
 import { Engine } from "../lib/engine";
 import { Hubspot } from '../lib/hubspot';
@@ -56,4 +57,4 @@ const template = (TEMPLATE
   .slice(1, -1)
   .join('\n'));
 
-main(template, process.argv.slice(2));
+main(template, cliArgs);

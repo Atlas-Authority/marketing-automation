@@ -1,11 +1,10 @@
+import { fastMode } from "../config/params";
 import DataDir from "../data/dir";
 import { DealDataLogger } from "./deal-generator";
 import { HubspotOutputLogger } from "./hubspot-output";
 import { LicenseMatchLogger } from "./license-scorer";
 
 export class LogDir {
-
-  #fast = process.argv.slice(2).includes('fast');
 
   #licenseScoringFile;
   #dealGeneratorFile;
@@ -15,7 +14,7 @@ export class LogDir {
   #attributionsLog;
 
   constructor(logDir?: DataDir) {
-    this.#licenseScoringFile = this.#fast ? undefined : logDir?.file('license-scoring.csv');
+    this.#licenseScoringFile = fastMode ? undefined : logDir?.file('license-scoring.csv');
     this.#dealGeneratorFile = logDir?.file('deal-generator.txt');
     this.#allMatchGroupsLog = logDir?.file('matched-groups-all.csv');
     this.#checkMatchGroupsLog = logDir?.file('matched-groups-to-check.csv');
