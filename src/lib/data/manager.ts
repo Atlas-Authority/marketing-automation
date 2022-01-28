@@ -4,7 +4,8 @@ import { ConsoleLogger } from '../log/console';
 import { withAutoClose } from "../util/helpers";
 import DataDir from "./dir";
 import { DataSetScheduler } from './scheduler';
-import { Data, DataSet } from "./set";
+import { Data } from './set';
+import { DataSetStore } from './store';
 
 interface Metadata {
   version: number;
@@ -29,7 +30,7 @@ class DataManager {
     const ms = Date.now();
     this.#meta.timestamps.unshift(ms);
     this.#save();
-    const dataSet = new DataSet(DataDir.root.subdir(`in-${ms}`));
+    const dataSet = new DataSetStore(DataDir.root.subdir(`in-${ms}`));
     dataSet.save(data);
     return ms;
   }
@@ -43,11 +44,10 @@ class DataManager {
       throw new Error(`Data set [${dirName}] does not exist`);
     }
     const dataDir = DataDir.root.subdir(dirName);
-    const dataSet = new DataSet(dataDir);
+    const dataSet = new DataSetStore(dataDir);
     const logDir = logDirName ? new LogDir(dataDir.subdir(logDirName)) : null;
     const data = dataSet.load();
     return { logDir, data };
-
   }
 
   public latestDataSet(): { data: Data };
