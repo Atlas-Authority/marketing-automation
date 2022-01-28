@@ -23,7 +23,7 @@ run(console, runLoopConfig, {
     dataManager.pruneDataSets(console);
 
     console.printInfo('Main', 'Downloading data');
-    const hubspot = Hubspot.live();
+    const hubspot = Hubspot.withConfigFromENV();
     const { dataSet, data } = await downloadAllData(console, hubspot);
     const logDir = dataSet.logDirNamed('main');
 

@@ -37,7 +37,7 @@ export function runDealGenerator(input: TestInput) {
 }
 
 function runDealGeneratorWith(data: Data, config: EngineConfig) {
-  const hubspot = Hubspot.memory();
+  const hubspot = new Hubspot();
   const engine = new Engine(hubspot, config);
   const engineResults = engine.run(data);
   const dealGeneratorResults = engineResults.dealGeneratorResults.get(engine.licenses[0].id)!;

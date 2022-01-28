@@ -20,7 +20,7 @@ function TEMPLATE({ runDealGenerator, RECORDS, EVENTS, ACTIONS }: any) {
 }
 
 function main(template: string, licenseIds: string[]) {
-  const engine = new Engine(Hubspot.memory(), engineConfigFromENV(), new ConsoleLogger());
+  const engine = new Engine(new Hubspot(), engineConfigFromENV(), new ConsoleLogger());
   const data = dataManager.latestDataSet().load();
   const { dealGeneratorResults } = engine.run(data);
 

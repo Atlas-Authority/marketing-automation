@@ -6,34 +6,22 @@ import { Entity } from "./entity";
 
 export class Hubspot {
 
-  public static live() {
-    return new Hubspot(
-      new DealManager(hubspotDealConfigFromENV()),
-      new ContactManager(hubspotContactConfigFromENV()),
-      new CompanyManager(),
-    );
-  }
-
-  public static memoryFromENV() {
-    return this.memory({
+  public static withConfigFromENV() {
+    return new Hubspot({
       contact: hubspotContactConfigFromENV(),
       deal: hubspotDealConfigFromENV(),
     });
   }
 
-  public static memory(config?: { deal?: HubspotDealConfig, contact?: HubspotContactConfig }) {
-    return new Hubspot(
-      new DealManager(config?.deal ?? {}),
-      new ContactManager(config?.contact ?? {}),
-      new CompanyManager(),
-    );
-  }
+  public dealManager;
+  public contactManager;
+  public companyManager;
 
-  private constructor(
-    public dealManager: DealManager,
-    public contactManager: ContactManager,
-    public companyManager: CompanyManager,
-  ) { }
+  public constructor(config?: { deal?: HubspotDealConfig, contact?: HubspotContactConfig }) {
+    this.dealManager = new DealManager(config?.deal ?? {});
+    this.contactManager = new ContactManager(config?.contact ?? {});
+    this.companyManager = new CompanyManager();
+  }
 
   public populateFakeIds() {
     fillInIds(this.dealManager.getAll());

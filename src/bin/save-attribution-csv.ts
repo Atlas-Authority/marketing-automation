@@ -5,7 +5,7 @@ import { Engine } from "../lib/engine";
 import { Hubspot } from '../lib/hubspot';
 import { isPresent, sorter } from "../lib/util/helpers";
 
-const engine = new Engine(Hubspot.memory(), engineConfigFromENV());
+const engine = new Engine(new Hubspot(), engineConfigFromENV());
 const dataSet = dataManager.latestDataSet();
 const logDir = dataSet.logDirNamed(`inspect-${Date.now()}`);
 const data = dataSet.load();

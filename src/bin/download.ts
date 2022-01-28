@@ -4,5 +4,5 @@ import { Hubspot } from '../lib/hubspot';
 import { ConsoleLogger } from '../lib/log/console';
 
 const console = new ConsoleLogger();
-const hubspot = Hubspot.live();
+const hubspot = Hubspot.withConfigFromENV();
 downloadAllData(console, hubspot);
