@@ -10,21 +10,18 @@ import { EntityManager, typedEntries } from "./manager";
 export class HubspotUploader {
 
   api;
-  constructor(
-    private hubspot: Hubspot,
-    console?: ConsoleLogger,
-  ) {
+  constructor(console?: ConsoleLogger) {
     this.api = new HubspotAPI(console);
   }
 
-  public async upsyncChangesToHubspot() {
-    await this.syncUpAllEntitiesProperties(this.hubspot.dealManager);
-    await this.syncUpAllEntitiesProperties(this.hubspot.contactManager);
-    await this.syncUpAllEntitiesProperties(this.hubspot.companyManager);
+  public async upsyncChangesToHubspot(hubspot: Hubspot) {
+    await this.syncUpAllEntitiesProperties(hubspot.dealManager);
+    await this.syncUpAllEntitiesProperties(hubspot.contactManager);
+    await this.syncUpAllEntitiesProperties(hubspot.companyManager);
 
-    await this.syncUpAllAssociations(this.hubspot.dealManager);
-    await this.syncUpAllAssociations(this.hubspot.contactManager);
-    await this.syncUpAllAssociations(this.hubspot.companyManager);
+    await this.syncUpAllAssociations(hubspot.dealManager);
+    await this.syncUpAllAssociations(hubspot.contactManager);
+    await this.syncUpAllAssociations(hubspot.companyManager);
   }
 
   private async syncUpAllEntitiesProperties<D, E extends Entity<D>>(manager: EntityManager<D, E>) {

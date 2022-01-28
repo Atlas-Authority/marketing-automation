@@ -4,7 +4,6 @@ import { CompanyManager } from "../model/company";
 import { ContactManager, HubspotContactConfig } from "../model/contact";
 import { DealManager, HubspotDealConfig } from "../model/deal";
 import { Entity } from "./entity";
-import { HubspotUploader } from "./uploader";
 
 export class Hubspot {
 
@@ -39,10 +38,6 @@ export class Hubspot {
     public companyManager: CompanyManager,
     private console?: ConsoleLogger,
   ) { }
-
-  public async upsyncChangesToHubspot() {
-    new HubspotUploader(this, this.console).upsyncChangesToHubspot();
-  }
 
   public populateFakeIds() {
     fillInIds(this.dealManager.getAll());

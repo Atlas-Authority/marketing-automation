@@ -5,10 +5,12 @@ import { Engine } from "../lib/engine";
 import { downloadAllData } from '../lib/engine/download';
 import { SlackNotifier } from '../lib/engine/slack-notifier';
 import { Hubspot } from '../lib/hubspot';
+import { HubspotUploader } from '../lib/hubspot/uploader';
 import { ConsoleLogger } from '../lib/log/console';
 import run from "../lib/util/runner";
 
 const console = new ConsoleLogger();
+const uploader = new HubspotUploader(console);
 
 const runLoopConfig = runLoopConfigFromENV();
 const notifier = SlackNotifier.fromENV(new ConsoleLogger());
@@ -30,7 +32,7 @@ run(console, runLoopConfig, {
     engine.run(data);
 
     console.printInfo('Main', 'Upsyncing changes to HubSpot');
-    await hubspot.upsyncChangesToHubspot();
+    await uploader.upsyncChangesToHubspot(hubspot);
 
     console.printInfo('Main', 'Writing HubSpot change log file');
     logDir.hubspotOutputLogger()?.logResults(hubspot);
