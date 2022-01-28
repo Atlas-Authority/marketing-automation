@@ -7,8 +7,7 @@ import { Marketplace } from '../lib/marketplace';
 import { isPresent, sorter } from "../lib/util/helpers";
 
 const engine = new Engine(Hubspot.fromENV(), Marketplace.fromENV(), engineConfigFromENV());
-const dataSet = dataManager.latestDataSet();
-const logDir = dataSet.logDirNamed(`inspect-${Date.now()}`);
+const { dataSet, logDir } = dataManager.latestDataSet(`inspect-${Date.now()}`);
 const data = dataSet.load();
 engine.run(data);
 

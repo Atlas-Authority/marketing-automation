@@ -13,11 +13,10 @@ const console = new ConsoleLogger();
 
 console.printInfo('Run once', `Running on [${dataSetId ?? 'latest'}] data set`);
 
-const dataSet = (dataSetId
-  ? dataManager.dataSetFrom(+dataSetId)
-  : dataManager.latestDataSet());
-
-const logDir = dataSet.logDirNamed(`once-${Date.now()}`);
+const logDirName = `once-${Date.now()}`;
+const { dataSet, logDir } = (dataSetId
+  ? dataManager.dataSetFrom(+dataSetId, logDirName)
+  : dataManager.latestDataSet(logDirName));
 
 const hubspot = Hubspot.fromENV();
 

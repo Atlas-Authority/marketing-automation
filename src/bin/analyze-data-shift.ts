@@ -8,4 +8,4 @@ console.printInfo('Analyze Data Shift', `Starting...`);
 
 const dataSets = dataManager.allDataSets();
 
-const datas = dataSets.map(ds => ds.load());
+const datas = dataSets.map(ds => ds.dataSet.load());

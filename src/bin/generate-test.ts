@@ -22,7 +22,7 @@ function TEMPLATE({ runDealGenerator, RECORDS, EVENTS, ACTIONS }: any) {
 
 function main(template: string, licenseIds: string[]) {
   const engine = new Engine(Hubspot.fromENV(), Marketplace.fromENV(), engineConfigFromENV(), new ConsoleLogger());
-  const data = dataManager.latestDataSet().load();
+  const data = dataManager.latestDataSet().dataSet.load();
   const { dealGeneratorResults } = engine.run(data);
 
   for (const licenseId of licenseIds) {

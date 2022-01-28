@@ -8,7 +8,7 @@ import { ConsoleLogger } from '../lib/log/console';
 import { Marketplace } from '../lib/marketplace';
 
 const nextLogDirName = logDirNameGenerator();
-const dataSet = dataManager.latestDataSet();
+const { dataSet } = dataManager.latestDataSet();
 const data = dataSet.load();
 
 let hubspot: Hubspot;
@@ -21,7 +21,7 @@ pipeOutputToInput(hubspot, data);
 hubspot = runEngine();
 
 function runEngine() {
-  const logDir = dataSet.logDirNamed(nextLogDirName());
+  const { logDir } = dataManager.latestDataSet(nextLogDirName());
   const hubspot = Hubspot.fromENV();
   const engine = new Engine(hubspot, Marketplace.fromENV(), engineConfigFromENV(), new ConsoleLogger(), logDir);
   engine.run(data);

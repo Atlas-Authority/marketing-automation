@@ -1,4 +1,5 @@
 import * as luxon from 'luxon';
+import { LogDir } from '../log';
 import { ConsoleLogger } from '../log/console';
 import { withAutoClose } from "../util/helpers";
 import DataDir from "./dir";
@@ -33,22 +34,28 @@ class DataManager {
     return ms;
   }
 
-  public dataSetFrom(ms: number) {
+  public dataSetFrom(ms: number): { dataSet: DataSet };
+  public dataSetFrom(ms: number, logDirName: string): { dataSet: DataSet; logDir: LogDir };
+  public dataSetFrom(ms: number, logDirName: string | undefined): { dataSet: DataSet, logDir: LogDir | null };
+  public dataSetFrom(ms: number, logDirName?: string) {
     const dirName = `in-${ms}`;
     if (!this.#meta.timestamps.includes(ms)) {
       throw new Error(`Data set [${dirName}] does not exist`);
     }
     const dataDir = DataDir.root.subdir(dirName);
     const dataSet = new DataSet(dataDir);
-    return dataSet;
+    const logDir = logDirName ? new LogDir(dataDir.subdir(logDirName)) : null;
+    return { dataSet, logDir };
 
   }
 
-  public latestDataSet() {
+  public latestDataSet(): { dataSet: DataSet; };
+  public latestDataSet(logDirName: string): { dataSet: DataSet; logDir: LogDir; };
+  public latestDataSet(logDirName?: string) {
     if (this.#meta.timestamps.length === 0) {
       throw new Error(`No data sets available; run engine first`);
     }
-    return this.dataSetFrom(this.#meta.timestamps[0]);
+    return this.dataSetFrom(this.#meta.timestamps[0], logDirName);
   }
 
   public allDataSets() {

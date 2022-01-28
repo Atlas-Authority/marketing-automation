@@ -7,6 +7,6 @@ import { Hubspot } from '../lib/hubspot';
 import { Marketplace } from '../lib/marketplace';
 
 const engine = new Engine(Hubspot.fromENV(), Marketplace.fromENV(), engineConfigFromENV());
-const data = dataManager.latestDataSet().load();
+const data = dataManager.latestDataSet().dataSet.load();
 engine.run(data);
 printSummary(engine);
