@@ -10,11 +10,7 @@ import { LogDir } from "../log";
 import { ConsoleLogger } from "../log/console";
 import { Table } from "../log/table";
 import { Tallier } from "../log/tallier";
-import { buildAndVerifyStructures } from "../marketplace/structure";
-import * as validation from "../marketplace/validation";
-import { License } from "../model/license";
-import { getEmailsForRecord } from "../model/record";
-import { Transaction } from "../model/transaction";
+import { Marketplace } from "../marketplace";
 import { formatMoney, formatNumber } from "../util/formatters";
 import { deriveMultiProviderDomainsSet } from "./all-free-email-providers";
 import { printSummary } from "./summary";
@@ -37,8 +33,9 @@ export class Engine {
 
   private step = 0;
 
-  public licenses: License[] = [];
-  public transactions: Transaction[] = [];
+  public mpac;
+  get licenses() { return this.mpac.licenses; }
+  get transactions() { return this.mpac.transactions; }
 
   public freeEmailDomains = new Set<string>();
   public partnerDomains = new Set<string>();
@@ -49,15 +46,14 @@ export class Engine {
   public appToPlatform: { [addonKey: string]: string };
   public archivedApps: Set<string>;
   public dealPropertyConfig: DealPropertyConfig;
-  private ignoredEmails: Set<string>;
 
   public constructor(public hubspot: Hubspot, config?: EngineConfig, public console?: ConsoleLogger, public logDir?: LogDir) {
     this.tallier = new Tallier(console);
+    this.mpac = new Marketplace(config);
 
     this.appToPlatform = config?.appToPlatform ?? Object.create(null);
     this.archivedApps = config?.archivedApps ?? new Set();
     this.partnerDomains = config?.partnerDomains ?? new Set();
-    this.ignoredEmails = config?.ignoredEmails ?? new Set();
     this.dealPropertyConfig = config?.dealProperties ?? {
       dealDealName: 'Deal'
     };
@@ -92,45 +88,9 @@ export class Engine {
   }
 
   private importData(data: Data) {
-    this.hubspot.importData(data);
-
     this.freeEmailDomains = deriveMultiProviderDomainsSet(data.freeDomains);
-
-    const emailRe = new RegExp(`.+@.+\\.(${data.tlds.join('|')})`);
-    const emailChecker = (kind: 'License' | 'Transaction') =>
-      (record: License | Transaction) => {
-        const allEmails = getEmailsForRecord(record);
-        const allGood = allEmails.every(e => emailRe.test(e));
-        if (!allGood && !allEmails.every(e => this.ignoredEmails.has(e.toLowerCase()))) {
-          this.console?.printWarning('Downloader', `${kind} has invalid email(s); will be skipped:`, record);
-        }
-        return allGood;
-      };
-
-    this.console?.printInfo('Database', 'Validating MPAC records: Starting...');
-
-    const combinedLicenses = [
-      ...data.licensesWithDataInsights,
-      ...data.licensesWithoutDataInsights,
-    ];
-
-    let licenses = combinedLicenses.map(raw => License.fromRaw(raw));
-    let transactions = data.transactions.map(raw => Transaction.fromRaw(raw));
-
-    licenses = licenses.filter(l => validation.hasTechEmail(l, this.console));
-    licenses = validation.removeApiBorderDuplicates(licenses);
-
-    licenses.forEach(validation.assertRequiredLicenseFields);
-    transactions.forEach(validation.assertRequiredTransactionFields);
-
-    licenses = licenses.filter(emailChecker('License'));
-    transactions = transactions.filter(emailChecker('Transaction'));
-
-    const structured = buildAndVerifyStructures(licenses, transactions, this.console);
-    this.licenses = structured.licenses;
-    this.transactions = structured.transactions;
-
-    this.console?.printInfo('Database', 'Validating MPAC records: Done');
+    this.hubspot.importData(data);
+    this.mpac.importData(data);
 
     const transactionTotal = (this.transactions
       .map(t => t.data.vendorAmount)
