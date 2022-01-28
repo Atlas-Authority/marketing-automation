@@ -31,7 +31,6 @@ export class Engine {
 
   private step = 0;
 
-  public freeEmailDomains = new Set<string>();
   public partnerDomains = new Set<string>();
   public customerDomains = new Set<string>();
 
@@ -43,6 +42,7 @@ export class Engine {
 
   get hubspot() { return this.data.hubspot; }
   get mpac() { return this.data.mpac; }
+  get freeEmailDomains() { return this.data.freeEmailDomains; }
 
   public constructor(public data: DataSet, config?: EngineConfig, public console?: ConsoleLogger, public logDir?: LogDir) {
     this.tallier = new Tallier(console);
@@ -84,7 +84,7 @@ export class Engine {
   }
 
   private importData(data: RawDataSet) {
-    this.freeEmailDomains = deriveMultiProviderDomainsSet(data.freeDomains);
+    this.data.freeEmailDomains = deriveMultiProviderDomainsSet(data.freeDomains);
     this.hubspot.importData(data);
     this.mpac.importData(data);
 
