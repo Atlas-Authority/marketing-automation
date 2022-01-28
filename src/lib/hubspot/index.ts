@@ -41,17 +41,7 @@ export class Hubspot {
   ) { }
 
   public async upsyncChangesToHubspot() {
-    const dealUploader = new HubspotUploader(this.dealManager.getArray(), this.dealManager.entityAdapter, this.console);
-    const contactUploader = new HubspotUploader(this.contactManager.getArray(), this.contactManager.entityAdapter, this.console);
-    const companyUploader = new HubspotUploader(this.companyManager.getArray(), this.companyManager.entityAdapter, this.console);
-
-    await dealUploader.syncUpAllEntitiesProperties();
-    await contactUploader.syncUpAllEntitiesProperties();
-    await companyUploader.syncUpAllEntitiesProperties();
-
-    await dealUploader.syncUpAllAssociations();
-    await contactUploader.syncUpAllAssociations();
-    await companyUploader.syncUpAllAssociations();
+    new HubspotUploader(this, this.console).upsyncChangesToHubspot();
   }
 
   public populateFakeIds() {

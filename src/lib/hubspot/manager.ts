@@ -8,7 +8,7 @@ export abstract class EntityManager<
 {
 
   protected abstract Entity: new (id: string | null, adapter: EntityAdapter<D>, downloadedData: Record<string, string>, data: D, indexer: Indexer<D>) => E;
-  protected abstract entityAdapter: EntityAdapter<D>;
+  public abstract entityAdapter: EntityAdapter<D>;
   protected get kind(): EntityKind { return this.entityAdapter.kind; }
 
   private entities: E[] = [];

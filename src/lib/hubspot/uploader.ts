@@ -1,24 +1,34 @@
 import * as assert from 'assert';
+import { Hubspot } from '.';
 import { ConsoleLogger } from '../log/console';
 import { AttachableError } from "../util/errors";
 import HubspotAPI from "./api";
 import { Entity } from './entity';
-import { EntityAdapter, EntityKind } from './interfaces';
-import { typedEntries } from "./manager";
+import { EntityKind } from './interfaces';
+import { EntityManager, typedEntries } from "./manager";
 
-export class HubspotUploader<D extends Record<string, any>> {
+export class HubspotUploader {
 
   api;
   constructor(
-    private entities: Entity<D>[],
-    private adapter: EntityAdapter<D>,
+    private hubspot: Hubspot,
     console?: ConsoleLogger,
   ) {
     this.api = new HubspotAPI(console);
   }
 
-  public async syncUpAllEntitiesProperties() {
-    const entitiesWithChanges = this.entities.map(e => ({ e, changes: e.getPropertyChanges() }));
+  public async upsyncChangesToHubspot() {
+    await this.syncUpAllEntitiesProperties(this.hubspot.dealManager);
+    await this.syncUpAllEntitiesProperties(this.hubspot.contactManager);
+    await this.syncUpAllEntitiesProperties(this.hubspot.companyManager);
+
+    await this.syncUpAllAssociations(this.hubspot.dealManager);
+    await this.syncUpAllAssociations(this.hubspot.contactManager);
+    await this.syncUpAllAssociations(this.hubspot.companyManager);
+  }
+
+  private async syncUpAllEntitiesProperties<D, E extends Entity<D>>(manager: EntityManager<D, E>) {
+    const entitiesWithChanges = manager.getArray().map(e => ({ e, changes: e.getPropertyChanges() }));
     const toSync = entitiesWithChanges.filter(({ changes }) => Object.keys(changes).length > 0);
 
     const toCreate = toSync.filter(({ e }) => e.id === undefined);
@@ -26,13 +36,13 @@ export class HubspotUploader<D extends Record<string, any>> {
 
     if (toCreate.length > 0) {
       const results = await this.api.createEntities(
-        this.adapter.kind,
+        manager.entityAdapter.kind,
         toCreate.map(({ changes }) => ({
           properties: changes as Record<string, string>,
         }))
       );
 
-      const identifiers = typedEntries(this.adapter.data).filter(([k, v]) => v.identifier);
+      const identifiers = typedEntries(manager.entityAdapter.data).filter(([k, v]) => v.identifier);
 
       for (const { e } of toCreate) {
         const found = results.find(result => {
@@ -62,7 +72,7 @@ export class HubspotUploader<D extends Record<string, any>> {
 
     if (toUpdate.length > 0) {
       const results = await this.api.updateEntities(
-        this.adapter.kind,
+        manager.entityAdapter.kind,
         toUpdate.map(({ e, changes }) => ({
           id: e.guaranteedId(),
           properties: changes as Record<string, string>,
@@ -71,13 +81,13 @@ export class HubspotUploader<D extends Record<string, any>> {
     }
   }
 
-  public async syncUpAllAssociations() {
-    const toSync = (this.entities
+  private async syncUpAllAssociations<D, E extends Entity<D>>(manager: EntityManager<D, E>) {
+    const toSync = (manager.getArray()
       .filter(e => e.hasAssociationChanges())
       .flatMap(e => e.getAssociationChanges()
         .map(({ op, other }) => ({ op, from: e, to: other }))));
 
-    const upAssociations = (Object.entries(this.adapter.associations)
+    const upAssociations = (Object.entries(manager.entityAdapter.associations)
       .filter(([kind, dir]) => dir.includes('up'))
       .map(([kind, dir]) => kind as EntityKind));
 
@@ -97,13 +107,13 @@ export class HubspotUploader<D extends Record<string, any>> {
       const toDel = toSyncInKind.filter(changes => changes.op === 'del');
 
       await this.api.createAssociations(
-        this.adapter.kind,
+        manager.entityAdapter.kind,
         otherKind,
         toAdd.map(changes => changes.inputs),
       );
 
       await this.api.deleteAssociations(
-        this.adapter.kind,
+        manager.entityAdapter.kind,
         otherKind,
         toDel.map(changes => changes.inputs),
       );
