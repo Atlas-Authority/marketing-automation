@@ -1,5 +1,4 @@
 import { FullEntity } from "../hubspot/interfaces";
-import { LogDir } from "../log";
 import { RawLicense, RawTransaction } from "../marketplace/raw";
 import DataDir from "./dir";
 
@@ -34,10 +33,6 @@ export class DataSet {
     this.rawDeals = dataDir.file<FullEntity[]>('deals.csv');
     this.rawCompanies = dataDir.file<FullEntity[]>('companies.csv');
     this.rawContacts = dataDir.file<FullEntity[]>('contacts.csv');
-  }
-
-  logDirNamed(name: string) {
-    return new LogDir(this.dataDir.subdir(name));
   }
 
   load(): Data {
