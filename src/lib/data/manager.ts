@@ -46,6 +46,10 @@ class DataManager {
     return this.dataSetFrom(this.#meta.timestamps[0]);
   }
 
+  public allDataSets() {
+    return this.#meta.timestamps.map(ts => this.dataSetFrom(ts));
+  }
+
   public pruneDataSets(console: ConsoleLogger) {
     console.printInfo('Data Manager', 'Preparing to prune data sets');
     console.printInfo('Data Manager', 'Using backup schedule', this.#scheduler.readableSchedule());

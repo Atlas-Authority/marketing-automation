@@ -7,6 +7,7 @@
     "build": "tsc",
     "watch": "tsc --watch",
     "once": "node out/bin/run-once.js",
+    "analyze-data-shift": "node out/bin/analyze-data-shift.js",
     "generate-test": "node out/bin/generate-test.js",
     "3x": "node out/bin/run-3x.js",
     "download": "node out/bin/download.js",
