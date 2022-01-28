@@ -34,9 +34,9 @@ class DataManager {
     return ms;
   }
 
-  public dataSetFrom(ms: number): { dataSet: DataSet, data: Data };
-  public dataSetFrom(ms: number, logDirName: string): { dataSet: DataSet, data: Data, logDir: LogDir };
-  public dataSetFrom(ms: number, logDirName: string | undefined): { dataSet: DataSet, data: Data, logDir: LogDir | null };
+  public dataSetFrom(ms: number): { data: Data };
+  public dataSetFrom(ms: number, logDirName: string): { data: Data, logDir: LogDir };
+  public dataSetFrom(ms: number, logDirName: string | undefined): { data: Data, logDir: LogDir | null };
   public dataSetFrom(ms: number, logDirName?: string) {
     const dirName = `in-${ms}`;
     if (!this.#meta.timestamps.includes(ms)) {
@@ -46,12 +46,12 @@ class DataManager {
     const dataSet = new DataSet(dataDir);
     const logDir = logDirName ? new LogDir(dataDir.subdir(logDirName)) : null;
     const data = dataSet.load();
-    return { dataSet, logDir, data };
+    return { logDir, data };
 
   }
 
-  public latestDataSet(): { dataSet: DataSet, data: Data };
-  public latestDataSet(logDirName: string): { dataSet: DataSet, data: Data, logDir: LogDir };
+  public latestDataSet(): { data: Data };
+  public latestDataSet(logDirName: string): { data: Data, logDir: LogDir };
   public latestDataSet(logDirName?: string) {
     if (this.#meta.timestamps.length === 0) {
       throw new Error(`No data sets available; run engine first`);
