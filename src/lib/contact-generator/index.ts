@@ -53,24 +53,24 @@ export class ContactGenerator {
   }
 
   private sortContactRecords() {
-    for (const contact of this.engine.contactManager.getAll()) {
+    for (const contact of this.engine.hubspot.contactManager.getAll()) {
       contact.records.sort(sorter(r => r.data.maintenanceStartDate, 'DSC'));
     }
   }
 
   private findContact(email: string | undefined): Contact | null {
     if (!email) return null;
-    return this.engine.contactManager.getByEmail(email)!;
+    return this.engine.hubspot.contactManager.getByEmail(email)!;
   }
 
   private generateContact(item: License | Transaction, info: ContactInfo | PartnerBillingInfo | null) {
     if (!info) return;
     const generated = this.contactFrom(item, info);
 
-    let contact = this.engine.contactManager.getByEmail(generated.email);
+    let contact = this.engine.hubspot.contactManager.getByEmail(generated.email);
     if (!contact) {
       const { lastUpdated, ...generatedWithoutLastUpdated } = generated;
-      contact = this.engine.contactManager.create(generatedWithoutLastUpdated);
+      contact = this.engine.hubspot.contactManager.create(generatedWithoutLastUpdated);
     }
 
     let entry = this.toMerge.get(contact);

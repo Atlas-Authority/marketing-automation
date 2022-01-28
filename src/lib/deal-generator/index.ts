@@ -31,7 +31,7 @@ export class DealGenerator {
 
   public constructor(private engine: Engine) {
     this.actionGenerator = new ActionGenerator(
-      engine.dealManager,
+      engine.hubspot.dealManager,
       engine.dealPropertyConfig,
       this.ignore.bind(this),
       engine.console,
@@ -55,7 +55,7 @@ export class DealGenerator {
 
         for (const action of actions) {
           const deal = (action.type === 'create'
-            ? this.engine.dealManager.create(action.properties)
+            ? this.engine.hubspot.dealManager.create(action.properties)
             : action.deal);
 
           if (deal) {
@@ -105,7 +105,7 @@ export class DealGenerator {
     const records = group.flatMap(license => [license, ...license.transactions]);
     const emails = [...new Set(records.flatMap(r => r.allContacts.map(c => c.data.email)))];
     const contacts = (emails
-      .map(email => this.engine.contactManager.getByEmail(email))
+      .map(email => this.engine.hubspot.contactManager.getByEmail(email))
       .filter(isPresent));
     contacts.sort(sorter(c => c.isCustomer ? -1 : 0));
 

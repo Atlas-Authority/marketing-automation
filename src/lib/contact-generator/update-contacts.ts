@@ -9,7 +9,7 @@ import { flagPartnersViaCoworkers } from "./contact-types";
 
 export function updateContactsBasedOnMatchResults(engine: Engine, allMatches: RelatedLicenseSet[]) {
   for (const license of allMatches) {
-    const contacts = new Set(license.map(license => engine.contactManager.getByEmail(license.data.technicalContact.email)!));
+    const contacts = new Set(license.map(license => engine.hubspot.contactManager.getByEmail(license.data.technicalContact.email)!));
 
     flagPartnersViaCoworkers([...contacts]);
 
@@ -58,7 +58,7 @@ export function updateContactsBasedOnMatchResults(engine: Engine, allMatches: Re
    * set that partner's domain as last associated partner.
    * Otherwise set it to blank, ignoring previous records.
    */
-  for (const contact of engine.contactManager.getAll()) {
+  for (const contact of engine.hubspot.contactManager.getAll()) {
     const lastRecord = contact.records[0];
     contact.data.lastAssociatedPartner = lastRecord?.partnerDomain ?? null;
   }

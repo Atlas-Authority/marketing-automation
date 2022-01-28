@@ -6,7 +6,7 @@ import { isPresent } from "../util/helpers";
 
 export function printSummary(engine: Engine) {
 
-  if (engine.dealManager.duplicates.size > 0) {
+  if (engine.hubspot.dealManager.duplicates.size > 0) {
     Table.print({
       title: 'Duplicate Deals',
       log: s => engine.console?.printWarning('Dups', s),
@@ -14,21 +14,21 @@ export function printSummary(engine: Engine) {
         [{ title: 'Primary' }, s => s[0].link()],
         [{ title: 'Duplicate(s)' }, s => s[1].map(d => d.link())],
       ],
-      rows: engine.dealManager.duplicates,
+      rows: engine.hubspot.dealManager.duplicates,
     });
 
-    const dupTotal = ([...engine.dealManager.duplicates]
+    const dupTotal = ([...engine.hubspot.dealManager.duplicates]
       .flatMap(([primary, dups]) => dups)
       .map((dup) => dup.data.amount ?? 0)
       .reduce((a, b) => a + b));
 
     engine.console?.printWarning('Deal Generator', 'Total of duplicates:', formatMoney(dupTotal));
-    engine.console?.printWarning('Deal Generator', 'Total duplicates:', engine.dealManager.duplicates.size);
+    engine.console?.printWarning('Deal Generator', 'Total duplicates:', engine.hubspot.dealManager.duplicates.size);
 
     engine.tallier.less('Over-accounted: Duplicate deals', -dupTotal);
   }
 
-  const deals = engine.dealManager.getArray();
+  const deals = engine.hubspot.dealManager.getArray();
 
   const table = new Table([{}, { align: 'right' }]);
 

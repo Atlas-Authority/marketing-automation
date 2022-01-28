@@ -38,7 +38,7 @@ function separatePartnerDomainsFromCustomerDomains(engine: Engine) {
 }
 
 function flagKnownContactTypesByDomain(engine: Engine) {
-  for (const contact of engine.contactManager.getAll()) {
+  for (const contact of engine.hubspot.contactManager.getAll()) {
     if (usesDomains(contact, engine.partnerDomains)) {
       contact.data.contactType = 'Partner';
     }
@@ -49,7 +49,7 @@ function flagKnownContactTypesByDomain(engine: Engine) {
 }
 
 function setPartnersViaCoworkers(engine: Engine) {
-  for (const contact of engine.contactManager.getAll()) {
+  for (const contact of engine.hubspot.contactManager.getAll()) {
     const companies = contact.companies.getAll();
     const coworkers = companies.flatMap(company => company.contacts.getAll());
     flagPartnersViaCoworkers(coworkers);

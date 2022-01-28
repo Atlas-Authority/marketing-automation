@@ -12,9 +12,6 @@ import { Table } from "../log/table";
 import { Tallier } from "../log/tallier";
 import { buildAndVerifyStructures } from "../marketplace/structure";
 import * as validation from "../marketplace/validation";
-import { CompanyManager } from "../model/company";
-import { ContactManager } from "../model/contact";
-import { DealManager } from "../model/deal";
 import { License } from "../model/license";
 import { getEmailsForRecord } from "../model/record";
 import { Transaction } from "../model/transaction";
@@ -54,16 +51,8 @@ export class Engine {
   public dealPropertyConfig: DealPropertyConfig;
   private ignoredEmails: Set<string>;
 
-  public dealManager: DealManager;
-  public contactManager: ContactManager;
-  public companyManager: CompanyManager;
-
-  public constructor(hubspotService: Hubspot, config?: EngineConfig, public console?: ConsoleLogger, public logDir?: LogDir) {
+  public constructor(public hubspot: Hubspot, config?: EngineConfig, public console?: ConsoleLogger, public logDir?: LogDir) {
     this.tallier = new Tallier(console);
-
-    this.dealManager = hubspotService.dealManager;
-    this.contactManager = hubspotService.contactManager;
-    this.companyManager = hubspotService.companyManager;
 
     this.appToPlatform = config?.appToPlatform ?? Object.create(null);
     this.archivedApps = config?.archivedApps ?? new Set();
@@ -103,13 +92,13 @@ export class Engine {
   }
 
   private importData(data: Data) {
-    const dealPrelinks = this.dealManager.importEntities(data.rawDeals);
-    const companyPrelinks = this.companyManager.importEntities(data.rawCompanies);
-    const contactPrelinks = this.contactManager.importEntities(data.rawContacts);
+    const dealPrelinks = this.hubspot.dealManager.importEntities(data.rawDeals);
+    const companyPrelinks = this.hubspot.companyManager.importEntities(data.rawCompanies);
+    const contactPrelinks = this.hubspot.contactManager.importEntities(data.rawContacts);
 
-    this.dealManager.linkEntities(dealPrelinks, this);
-    this.companyManager.linkEntities(companyPrelinks, this);
-    this.contactManager.linkEntities(contactPrelinks, this);
+    this.hubspot.dealManager.linkEntities(dealPrelinks, this.hubspot);
+    this.hubspot.companyManager.linkEntities(companyPrelinks, this.hubspot);
+    this.hubspot.contactManager.linkEntities(contactPrelinks, this.hubspot);
 
     this.freeEmailDomains = deriveMultiProviderDomainsSet(data.freeDomains);
 
@@ -159,12 +148,12 @@ export class Engine {
   }
 
   private printDownloadSummary(transactionTotal: number) {
-    const deals = this.dealManager.getArray();
+    const deals = this.hubspot.dealManager.getArray();
     const dealSum = (deals
       .map(d => d.data.amount ?? 0)
       .reduce((a, b) => a + b, 0));
 
-    const contacts = this.contactManager.getArray();
+    const contacts = this.hubspot.contactManager.getArray();
 
     const table = new Table([{}, { align: 'right' }]);
     table.rows.push(['# Licenses', formatNumber(this.licenses.length)]);
