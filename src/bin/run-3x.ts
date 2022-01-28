@@ -1,7 +1,7 @@
 import 'source-map-support/register';
 import { engineConfigFromENV } from '../lib/config/env';
 import { dataManager } from '../lib/data/manager';
-import { DataSet } from '../lib/data/set';
+import { RawDataSet } from '../lib/data/raw';
 import { Engine } from "../lib/engine";
 import { Hubspot } from '../lib/hubspot';
 import { ConsoleLogger } from '../lib/log/console';
@@ -29,7 +29,7 @@ function runEngine() {
   return hubspot;
 }
 
-function pipeOutputToInput(hubspot: Hubspot, data: DataSet) {
+function pipeOutputToInput(hubspot: Hubspot, data: RawDataSet) {
   data.rawDeals = hubspot.dealManager.getArray().map(e => e.toRawEntity());
   data.rawContacts = hubspot.contactManager.getArray().map(e => e.toRawEntity());
   data.rawCompanies = hubspot.companyManager.getArray().map(e => e.toRawEntity());

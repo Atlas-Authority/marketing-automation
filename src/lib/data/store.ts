@@ -1,7 +1,7 @@
 import { FullEntity } from "../hubspot/interfaces";
 import { RawLicense, RawTransaction } from "../marketplace/raw";
 import DataDir from "./dir";
-import { DataSet } from "./set";
+import { RawDataSet } from "./raw";
 
 export class DataSetStore {
 
@@ -25,7 +25,7 @@ export class DataSetStore {
     this.rawContacts = dataDir.file<FullEntity[]>('contacts.csv');
   }
 
-  load(): DataSet {
+  load(): RawDataSet {
     return {
       licensesWithDataInsights: this.licensesWithDataInsights.readArray(),
       licensesWithoutDataInsights: this.licensesWithoutDataInsights.readArray(),
@@ -38,7 +38,7 @@ export class DataSetStore {
     }
   }
 
-  save(data: DataSet) {
+  save(data: RawDataSet) {
     this.transactions.writeArray(data.transactions);
     this.licensesWithoutDataInsights.writeArray(data.licensesWithoutDataInsights);
     this.licensesWithDataInsights.writeArray(data.licensesWithDataInsights);

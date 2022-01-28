@@ -3,8 +3,8 @@ import { LogDir } from '../log';
 import { ConsoleLogger } from '../log/console';
 import { withAutoClose } from "../util/helpers";
 import DataDir from "./dir";
+import { RawDataSet } from './raw';
 import { DataSetScheduler } from './scheduler';
-import { DataSet } from './set';
 import { DataSetStore } from './store';
 
 interface Metadata {
@@ -26,7 +26,7 @@ class DataManager {
     };
   }
 
-  public createDataSet(data: DataSet) {
+  public createDataSet(data: RawDataSet) {
     const ms = Date.now();
     this.#meta.timestamps.unshift(ms);
     this.#save();
@@ -35,9 +35,9 @@ class DataManager {
     return ms;
   }
 
-  public dataSetFrom(ms: number): { data: DataSet };
-  public dataSetFrom(ms: number, logDirName: string): { data: DataSet, logDir: LogDir };
-  public dataSetFrom(ms: number, logDirName: string | undefined): { data: DataSet, logDir: LogDir | null };
+  public dataSetFrom(ms: number): { data: RawDataSet };
+  public dataSetFrom(ms: number, logDirName: string): { data: RawDataSet, logDir: LogDir };
+  public dataSetFrom(ms: number, logDirName: string | undefined): { data: RawDataSet, logDir: LogDir | null };
   public dataSetFrom(ms: number, logDirName?: string) {
     const dirName = `in-${ms}`;
     if (!this.#meta.timestamps.includes(ms)) {
@@ -50,8 +50,8 @@ class DataManager {
     return { logDir, data };
   }
 
-  public latestDataSet(): { data: DataSet };
-  public latestDataSet(logDirName: string): { data: DataSet, logDir: LogDir };
+  public latestDataSet(): { data: RawDataSet };
+  public latestDataSet(logDirName: string): { data: RawDataSet, logDir: LogDir };
   public latestDataSet(logDirName?: string) {
     if (this.#meta.timestamps.length === 0) {
       throw new Error(`No data sets available; run engine first`);
