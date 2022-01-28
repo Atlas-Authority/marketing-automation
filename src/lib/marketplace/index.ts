@@ -1,3 +1,4 @@
+import { mpacConfigFromENV } from "../config/env";
 import { Data } from "../data/set";
 import { ConsoleLogger } from "../log/console";
 import * as validation from "../marketplace/validation";
@@ -6,12 +7,20 @@ import { getEmailsForRecord } from "../model/record";
 import { Transaction } from "../model/transaction";
 import { buildAndVerifyStructures } from "./structure";
 
+export interface MpacConfig {
+  ignoredEmails?: Set<string>;
+}
+
 export class Marketplace {
 
   public licenses: License[] = [];
   public transactions: Transaction[] = [];
 
-  constructor(private config?: { ignoredEmails?: Set<string> }) { }
+  public static fromENV() {
+    return new Marketplace(mpacConfigFromENV());
+  }
+
+  public constructor(private config?: MpacConfig) { }
 
   public importData(data: Data, console?: ConsoleLogger) {
     console?.printInfo('Database', 'Validating MPAC records: Starting...');

@@ -5,6 +5,7 @@ import { dataManager } from '../lib/data/manager';
 import { Engine } from "../lib/engine";
 import { Hubspot } from '../lib/hubspot';
 import { ConsoleLogger } from '../lib/log/console';
+import { Marketplace } from '../lib/marketplace';
 
 const dataSetId = cliArgs[0];
 
@@ -20,7 +21,7 @@ const logDir = dataSet.logDirNamed(`once-${Date.now()}`);
 
 const hubspot = Hubspot.withConfigFromENV();
 
-const engine = new Engine(hubspot, engineConfigFromENV(), console, logDir);
+const engine = new Engine(hubspot, Marketplace.fromENV(), engineConfigFromENV(), console, logDir);
 
 const data = dataSet.load();
 

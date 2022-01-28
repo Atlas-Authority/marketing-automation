@@ -7,6 +7,7 @@ import { SlackNotifier } from '../lib/engine/slack-notifier';
 import { Hubspot } from '../lib/hubspot';
 import { HubspotUploader } from '../lib/hubspot/uploader';
 import { ConsoleLogger } from '../lib/log/console';
+import { Marketplace } from '../lib/marketplace';
 import run from "../lib/util/runner";
 
 const console = new ConsoleLogger();
@@ -28,7 +29,7 @@ run(console, runLoopConfig, {
     const logDir = dataSet.logDirNamed('main');
 
     console.printInfo('Main', 'Running engine');
-    const engine = new Engine(hubspot, engineConfigFromENV(), console, logDir);
+    const engine = new Engine(hubspot, Marketplace.fromENV(), engineConfigFromENV(), console, logDir);
     engine.run(data);
 
     console.printInfo('Main', 'Upsyncing changes to HubSpot');

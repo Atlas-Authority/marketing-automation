@@ -5,6 +5,7 @@ import { Data } from '../lib/data/set';
 import { Engine } from "../lib/engine";
 import { Hubspot } from '../lib/hubspot';
 import { ConsoleLogger } from '../lib/log/console';
+import { Marketplace } from '../lib/marketplace';
 
 const nextLogDirName = logDirNameGenerator();
 const dataSet = dataManager.latestDataSet();
@@ -22,7 +23,7 @@ hubspot = runEngine();
 function runEngine() {
   const logDir = dataSet.logDirNamed(nextLogDirName());
   const hubspot = Hubspot.withConfigFromENV();
-  const engine = new Engine(hubspot, engineConfigFromENV(), new ConsoleLogger(), logDir);
+  const engine = new Engine(hubspot, Marketplace.fromENV(), engineConfigFromENV(), new ConsoleLogger(), logDir);
   engine.run(data);
   hubspot.populateFakeIds();
   logDir.hubspotOutputLogger()?.logResults(hubspot);

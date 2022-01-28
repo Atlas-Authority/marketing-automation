@@ -3,9 +3,10 @@ import { engineConfigFromENV } from '../lib/config/env';
 import { dataManager } from '../lib/data/manager';
 import { Engine } from "../lib/engine";
 import { Hubspot } from '../lib/hubspot';
+import { Marketplace } from '../lib/marketplace';
 import { isPresent, sorter } from "../lib/util/helpers";
 
-const engine = new Engine(new Hubspot(), engineConfigFromENV());
+const engine = new Engine(new Hubspot(), Marketplace.fromENV(), engineConfigFromENV());
 const dataSet = dataManager.latestDataSet();
 const logDir = dataSet.logDirNamed(`inspect-${Date.now()}`);
 const data = dataSet.load();

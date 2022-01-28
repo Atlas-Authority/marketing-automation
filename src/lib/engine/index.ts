@@ -25,15 +25,12 @@ export interface EngineConfig {
   partnerDomains?: Set<string>;
   appToPlatform?: { [addonKey: string]: string };
   archivedApps?: Set<string>;
-  ignoredEmails?: Set<string>;
   dealProperties?: DealPropertyConfig;
 }
 
 export class Engine {
 
   private step = 0;
-
-  public mpac;
 
   public freeEmailDomains = new Set<string>();
   public partnerDomains = new Set<string>();
@@ -45,9 +42,8 @@ export class Engine {
   public archivedApps: Set<string>;
   public dealPropertyConfig: DealPropertyConfig;
 
-  public constructor(public hubspot: Hubspot, config?: EngineConfig, public console?: ConsoleLogger, public logDir?: LogDir) {
+  public constructor(public hubspot: Hubspot, public mpac: Marketplace, config?: EngineConfig, public console?: ConsoleLogger, public logDir?: LogDir) {
     this.tallier = new Tallier(console);
-    this.mpac = new Marketplace(config);
 
     this.appToPlatform = config?.appToPlatform ?? Object.create(null);
     this.archivedApps = config?.archivedApps ?? new Set();
