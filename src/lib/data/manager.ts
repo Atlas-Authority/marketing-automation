@@ -42,7 +42,8 @@ class DataManager {
 
   public pruneDataSets(console: ConsoleLogger) {
     console.printInfo('Data Manager', 'Preparing to prune data sets');
-    console.printInfo('Data Manager', 'Checking', this.#meta.timestamps);
+    console.printInfo('Data Manager', 'Using backup schedule', this.#scheduler.readableSchedule());
+    console.printInfo('Data Manager', 'Checking', this.#meta.timestamps.map(readableTimestamp));
 
     const dirs = this.#meta.timestamps.map(ms => {
       const timestamp = luxon.DateTime.fromMillis(ms);
@@ -58,8 +59,8 @@ class DataManager {
     this.#meta.timestamps = toKeep;
     this.#save();
 
-    console.printInfo('Data Manager', 'Keeping', toKeep);
-    console.printInfo('Data Manager', 'Pruning', toDelete);
+    console.printInfo('Data Manager', 'Keeping', toKeep.map(readableTimestamp));
+    console.printInfo('Data Manager', 'Pruning', toDelete.map(readableTimestamp));
 
     for (const ms of toDelete) {
       const dir = DataDir.root.subdir(`in-${ms}`);
@@ -81,3 +82,10 @@ class DataManager {
 }
 
 export const dataManager = new DataManager();
+
+function readableTimestamp(ms: number) {
+  return {
+    dir: `in-${ms}`,
+    created: luxon.DateTime.fromMillis(ms).toString(),
+  };
+}

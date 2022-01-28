@@ -21,11 +21,18 @@ export class DataSetScheduler {
 
   public constructor(private schedule: Schedule) { }
 
+  public readableSchedule() {
+    return (Object.entries(this.schedule)
+      .filter(([unit, n]) => n > 0)
+      .map(([unit, n]) => `First each ${unit} for past ${n} ${unit}s`)
+    );
+  }
+
   /**
    * @param from Moment within the block to start checking backwards from, inclusive.
    * @returns Input objects that match the schedule.
    */
-  check<T extends Timestamped>(from: luxon.DateTime, timestamped: T[]) {
+  public check<T extends Timestamped>(from: luxon.DateTime, timestamped: T[]) {
     const sortByTimestamp = sorter((o: T) => o.timestamp.toMillis());
     const toCheck = [...timestamped].sort(sortByTimestamp);
 
