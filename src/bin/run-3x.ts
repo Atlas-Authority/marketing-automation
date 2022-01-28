@@ -8,8 +8,7 @@ import { ConsoleLogger } from '../lib/log/console';
 import { Marketplace } from '../lib/marketplace';
 
 const nextLogDirName = logDirNameGenerator();
-const { dataSet } = dataManager.latestDataSet();
-const data = dataSet.load();
+const { data } = dataManager.latestDataSet();
 
 let hubspot: Hubspot;
 hubspot = runEngine();

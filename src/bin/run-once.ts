@@ -14,15 +14,13 @@ const console = new ConsoleLogger();
 console.printInfo('Run once', `Running on [${dataSetId ?? 'latest'}] data set`);
 
 const logDirName = `once-${Date.now()}`;
-const { dataSet, logDir } = (dataSetId
+const { data, logDir } = (dataSetId
   ? dataManager.dataSetFrom(+dataSetId, logDirName)
   : dataManager.latestDataSet(logDirName));
 
 const hubspot = Hubspot.fromENV();
 
 const engine = new Engine(hubspot, Marketplace.fromENV(), engineConfigFromENV(), console, logDir);
-
-const data = dataSet.load();
 
 engine.run(data);
 

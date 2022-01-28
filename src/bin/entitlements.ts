@@ -5,7 +5,7 @@ import { RawLicense, RawTransaction } from '../lib/marketplace/raw';
 main();
 function main() {
 
-  const data = dataManager.latestDataSet().dataSet.load();
+  const { data } = dataManager.latestDataSet();
 
   const licensesWith = data.licensesWithDataInsights;
   const licensesWithout = data.licensesWithoutDataInsights;

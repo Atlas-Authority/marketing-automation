@@ -24,7 +24,7 @@ export class DataSet {
   private rawCompanies;
   private rawContacts;
 
-  constructor(private dataDir: DataDir) {
+  constructor(dataDir: DataDir) {
     this.licensesWithDataInsights = dataDir.file<RawLicense[]>('licenses-with.csv');
     this.licensesWithoutDataInsights = dataDir.file<RawLicense[]>('licenses-without.csv');
     this.transactions = dataDir.file<RawTransaction[]>('transactions.csv');
