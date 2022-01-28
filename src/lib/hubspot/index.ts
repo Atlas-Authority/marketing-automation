@@ -7,7 +7,7 @@ import { Entity } from "./entity";
 
 export class Hubspot {
 
-  public static withConfigFromENV() {
+  public static fromENV() {
     return new Hubspot({
       contact: hubspotContactConfigFromENV(),
       deal: hubspotDealConfigFromENV(),

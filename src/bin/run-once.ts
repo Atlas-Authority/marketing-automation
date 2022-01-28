@@ -19,7 +19,7 @@ const dataSet = (dataSetId
 
 const logDir = dataSet.logDirNamed(`once-${Date.now()}`);
 
-const hubspot = Hubspot.withConfigFromENV();
+const hubspot = Hubspot.fromENV();
 
 const engine = new Engine(hubspot, Marketplace.fromENV(), engineConfigFromENV(), console, logDir);
 
