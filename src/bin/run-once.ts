@@ -1,8 +1,8 @@
 import 'source-map-support/register';
 import { engineConfigFromENV } from '../lib/config/env';
 import { cliArgs } from '../lib/config/params';
-import { DataSet, dataSetConfigFromENV } from '../lib/data/data';
 import { dataManager } from '../lib/data/manager';
+import { DataSet, dataSetConfigFromENV } from '../lib/data/set';
 import { Engine } from "../lib/engine";
 import { ConsoleLogger } from '../lib/log/console';
 

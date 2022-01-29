@@ -1,6 +1,6 @@
 import Chance from 'chance';
-import { DataSet } from '../../lib/data/data';
 import { RawDataSet } from '../../lib/data/raw';
+import { DataSet } from '../../lib/data/set';
 import { Action } from "../../lib/deal-generator/actions";
 import { DealRelevantEvent } from '../../lib/deal-generator/events';
 import { Engine, EngineConfig } from '../../lib/engine';

@@ -1,7 +1,7 @@
 import 'source-map-support/register';
 import { engineConfigFromENV, runLoopConfigFromENV } from "../lib/config/env";
-import { DataSet, dataSetConfigFromENV } from '../lib/data/data';
 import { dataManager } from '../lib/data/manager';
+import { DataSet, dataSetConfigFromENV } from '../lib/data/set';
 import { Engine } from "../lib/engine";
 import { downloadAllData } from '../lib/engine/download';
 import { SlackNotifier } from '../lib/engine/slack-notifier';

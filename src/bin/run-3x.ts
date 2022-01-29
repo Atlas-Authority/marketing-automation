@@ -1,8 +1,8 @@
 import 'source-map-support/register';
 import { engineConfigFromENV } from '../lib/config/env';
-import { DataSet, dataSetConfigFromENV } from '../lib/data/data';
 import { dataManager } from '../lib/data/manager';
 import { RawDataSet } from '../lib/data/raw';
+import { DataSet, dataSetConfigFromENV } from '../lib/data/set';
 import { Engine } from "../lib/engine";
 import { Hubspot } from '../lib/hubspot';
 import { ConsoleLogger } from '../lib/log/console';
