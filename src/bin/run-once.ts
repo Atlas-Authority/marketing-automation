@@ -18,11 +18,10 @@ const { data, logDir } = (dataSetId
   : dataManager.latestDataSet(logDirName));
 
 const dataSet = DataSet.fromENV();
-const hubspot = dataSet.hubspot;
 
 const engine = new Engine(dataSet, engineConfigFromENV(), console, logDir);
 
 engine.run(data);
 
-hubspot.populateFakeIds();
-logDir.hubspotOutputLogger()?.logResults(hubspot);
+dataSet.hubspot.populateFakeIds();
+logDir.hubspotOutputLogger()?.logResults(dataSet.hubspot);

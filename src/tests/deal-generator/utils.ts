@@ -39,16 +39,15 @@ export function runDealGenerator(input: TestInput) {
 }
 
 function runDealGeneratorWith(data: RawDataSet, config: EngineConfig) {
-  const hubspot = new Hubspot();
-  const dataSet = new DataSet(hubspot, new Marketplace());
+  const dataSet = new DataSet(new Hubspot(), new Marketplace());
   const engine = new Engine(dataSet, config);
   const engineResults = engine.run(data);
   const dealGeneratorResults = engineResults.dealGeneratorResults.get(engine.mpac.licenses[0].id)!;
-  hubspot.populateFakeIds();
+  dataSet.hubspot.populateFakeIds();
   return {
-    deals: hubspot.dealManager.getArray(),
-    contacts: hubspot.contactManager.getArray(),
-    companies: hubspot.companyManager.getArray(),
+    deals: dataSet.hubspot.dealManager.getArray(),
+    contacts: dataSet.hubspot.contactManager.getArray(),
+    companies: dataSet.hubspot.companyManager.getArray(),
     actions: dealGeneratorResults.actions.map(abbrActionDetails),
     events: dealGeneratorResults.events.map(abbrEventDetails),
   };

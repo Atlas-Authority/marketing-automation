@@ -22,12 +22,11 @@ hubspot = runEngine();
 function runEngine() {
   const { logDir } = dataManager.latestDataSet(nextLogDirName());
   const dataSet = DataSet.fromENV();
-  const hubspot = dataSet.hubspot;
   const engine = new Engine(dataSet, engineConfigFromENV(), new ConsoleLogger(), logDir);
   engine.run(data);
-  hubspot.populateFakeIds();
-  logDir.hubspotOutputLogger()?.logResults(hubspot);
-  return hubspot;
+  dataSet.hubspot.populateFakeIds();
+  logDir.hubspotOutputLogger()?.logResults(dataSet.hubspot);
+  return dataSet.hubspot;
 }
 
 function pipeOutputToInput(hubspot: Hubspot, data: RawDataSet) {
