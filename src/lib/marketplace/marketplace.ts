@@ -1,10 +1,10 @@
 import { RawDataSet } from "../data/raw";
 import { ConsoleLogger } from "../log/console";
-import * as validation from "../marketplace/validation";
 import { License } from "../model/license";
 import { getEmailsForRecord } from "../model/record";
 import { Transaction } from "../model/transaction";
 import { buildAndVerifyStructures } from "./structure";
+import * as validation from "./validation";
 
 export interface MpacConfig {
   ignoredEmails?: Set<string>;

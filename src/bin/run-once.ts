@@ -3,7 +3,7 @@ import { engineConfigFromENV } from '../lib/config/env';
 import { cliArgs } from '../lib/config/params';
 import { dataManager } from '../lib/data/manager';
 import { dataSetConfigFromENV } from '../lib/data/set';
-import { Engine } from "../lib/engine";
+import { Engine } from "../lib/engine/engine";
 import { ConsoleLogger } from '../lib/log/console';
 
 const dataSetId = cliArgs[0];

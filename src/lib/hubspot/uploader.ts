@@ -1,9 +1,9 @@
 import * as assert from 'assert';
-import { Hubspot } from '.';
 import { ConsoleLogger } from '../log/console';
 import { AttachableError } from "../util/errors";
 import HubspotAPI from "./api";
 import { Entity } from './entity';
+import { Hubspot } from './hubspot';
 import { EntityKind } from './interfaces';
 import { EntityManager, typedEntries } from "./manager";
 

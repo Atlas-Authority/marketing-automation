@@ -1,12 +1,12 @@
 import chalk from "chalk";
-import { ContactGenerator } from "../contact-generator";
+import { ContactGenerator } from "../contact-generator/contact-generator";
 import { identifyAndFlagContactTypes } from "../contact-generator/contact-types";
 import { updateContactsBasedOnMatchResults } from "../contact-generator/update-contacts";
 import { DataSet } from "../data/set";
-import { DealGenerator } from "../deal-generator";
+import { DealGenerator } from "../deal-generator/deal-generator";
 import { LicenseGrouper } from "../license-matching/license-grouper";
-import { LogDir } from "../log";
 import { ConsoleLogger } from "../log/console";
+import { LogDir } from "../log/logdir";
 import { Table } from "../log/table";
 import { Tallier } from "../log/tallier";
 import { formatMoney, formatNumber } from "../util/formatters";

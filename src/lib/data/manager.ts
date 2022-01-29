@@ -1,6 +1,6 @@
 import * as luxon from 'luxon';
-import { LogDir } from '../log';
 import { ConsoleLogger } from '../log/console';
+import { LogDir } from '../log/logdir';
 import { withAutoClose } from "../util/helpers";
 import DataDir from "./dir";
 import { RawDataSet } from './raw';

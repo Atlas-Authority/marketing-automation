@@ -1,8 +1,8 @@
 import { mpacConfigFromENV } from "../config/env";
 import { deriveMultiProviderDomainsSet } from "../engine/all-free-email-providers";
-import { Hubspot, HubspotConfig, hubspotConfigFromENV } from "../hubspot";
-import { LogDir } from "../log";
-import { Marketplace, MpacConfig } from "../marketplace";
+import { Hubspot, HubspotConfig, hubspotConfigFromENV } from "../hubspot/hubspot";
+import { LogDir } from "../log/logdir";
+import { Marketplace, MpacConfig } from "../marketplace/marketplace";
 import { RawDataSet } from "./raw";
 
 export type DataSetConfig = {

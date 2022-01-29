@@ -1,7 +1,7 @@
 import util from 'util';
 import { DataFile, LogWriteStream } from '../data/file';
-import { Hubspot } from '../hubspot';
 import { Entity } from '../hubspot/entity';
+import { Hubspot } from '../hubspot/hubspot';
 import { withAutoClose } from '../util/helpers';
 
 export class HubspotOutputLogger {

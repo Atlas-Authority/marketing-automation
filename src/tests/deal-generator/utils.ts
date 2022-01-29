@@ -3,7 +3,7 @@ import { RawDataSet } from '../../lib/data/raw';
 import { DataSet } from '../../lib/data/set';
 import { Action } from "../../lib/deal-generator/actions";
 import { DealRelevantEvent } from '../../lib/deal-generator/events';
-import { Engine, EngineConfig } from '../../lib/engine';
+import { Engine, EngineConfig } from '../../lib/engine/engine';
 import { DealStage } from '../../lib/hubspot/interfaces';
 import { RawLicense, RawLicenseContact, RawTransaction } from '../../lib/marketplace/raw';
 import { Company } from '../../lib/model/company';

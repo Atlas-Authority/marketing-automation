@@ -4,7 +4,7 @@ import { engineConfigFromENV } from '../lib/config/env';
 import { cliArgs } from '../lib/config/params';
 import { dataManager } from '../lib/data/manager';
 import { dataSetConfigFromENV } from '../lib/data/set';
-import { Engine } from "../lib/engine";
+import { Engine } from "../lib/engine/engine";
 import { ConsoleLogger } from '../lib/log/console';
 import { License } from '../lib/model/license';
 import { abbrActionDetails, abbrEventDetails, abbrRecordDetails } from '../tests/deal-generator/utils';

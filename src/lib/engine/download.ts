@@ -1,8 +1,8 @@
 import got from 'got';
 import promiseAllProperties from 'promise-all-properties';
 import { dataManager } from '../data/manager';
-import { Hubspot, HubspotConfig } from '../hubspot';
 import HubspotAPI from "../hubspot/api";
+import { Hubspot, HubspotConfig } from '../hubspot/hubspot';
 import { ConsoleLogger } from '../log/console';
 import { MultiDownloadLogger } from "../log/download";
 import { MarketplaceAPI } from "../marketplace/api";

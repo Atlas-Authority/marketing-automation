@@ -1,4 +1,4 @@
-import { Engine } from "../engine";
+import { Engine } from "../engine/engine";
 import { RelatedLicenseSet } from "../license-matching/license-grouper";
 import { domainFor } from "../model/contact";
 import { License } from "../model/license";
