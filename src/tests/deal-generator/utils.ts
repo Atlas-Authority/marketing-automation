@@ -34,8 +34,8 @@ export function runDealGenerator(input: TestInput) {
 }
 
 function runDealGeneratorWith(dataSet: DataSet, config: EngineConfig) {
-  const engine = new Engine(dataSet, config);
-  const engineResults = engine.run();
+  const engine = new Engine(config);
+  const engineResults = engine.run(dataSet);
   const dealGeneratorResults = engineResults.dealGeneratorResults.get(engine.mpac.licenses[0].id)!;
   dataSet.hubspot.populateFakeIds();
   return {

@@ -29,8 +29,8 @@ run(console, runLoopConfig, {
     const logDir = dataSet.makeLogDir!('main');
 
     console.printInfo('Main', 'Running engine');
-    const engine = new Engine(dataSet, engineConfigFromENV(), console, logDir);
-    engine.run();
+    const engine = new Engine(engineConfigFromENV(), console, logDir);
+    engine.run(dataSet);
 
     console.printInfo('Main', 'Upsyncing changes to HubSpot');
     await uploader.upsyncChangesToHubspot(dataSet.hubspot);

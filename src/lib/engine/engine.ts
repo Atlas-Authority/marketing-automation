@@ -4,11 +4,13 @@ import { identifyAndFlagContactTypes } from "../contact-generator/contact-types"
 import { updateContactsBasedOnMatchResults } from "../contact-generator/update-contacts";
 import { DataSet } from "../data/set";
 import { DealGenerator } from "../deal-generator/deal-generator";
+import { Hubspot } from "../hubspot/hubspot";
 import { LicenseGrouper } from "../license-matching/license-grouper";
 import { ConsoleLogger } from "../log/console";
 import { LogDir } from "../log/logdir";
 import { Table } from "../log/table";
 import { Tallier } from "../log/tallier";
+import { Marketplace } from "../marketplace/marketplace";
 import { formatMoney, formatNumber } from "../util/formatters";
 import { printSummary } from "./summary";
 
@@ -38,11 +40,11 @@ export class Engine {
   public archivedApps: Set<string>;
   public dealPropertyConfig: DealPropertyConfig;
 
-  get hubspot() { return this.data.hubspot; }
-  get mpac() { return this.data.mpac; }
-  get freeEmailDomains() { return this.data.freeEmailDomains; }
+  public hubspot!: Hubspot;
+  public mpac!: Marketplace;
+  public freeEmailDomains!: Set<string>;
 
-  public constructor(public data: DataSet, config?: EngineConfig, public console?: ConsoleLogger, public logDir?: LogDir) {
+  public constructor(config?: EngineConfig, public console?: ConsoleLogger, public logDir?: LogDir) {
     this.tallier = new Tallier(console);
 
     this.appToPlatform = config?.appToPlatform ?? Object.create(null);
@@ -53,7 +55,11 @@ export class Engine {
     };
   }
 
-  public run() {
+  public run(data: DataSet) {
+    this.hubspot = data.hubspot;
+    this.mpac = data.mpac;
+    this.freeEmailDomains = data.freeEmailDomains;
+
     this.logStep('Starting engine');
     this.startEngine();
 

@@ -7,8 +7,8 @@ import { isPresent, sorter } from "../lib/util/helpers";
 
 const dataSet = dataManager.latestDataSet(dataSetConfigFromENV());
 const logDir = dataSet.makeLogDir!(`inspect-${Date.now()}`);
-const engine = new Engine(dataSet, engineConfigFromENV());
-engine.run();
+const engine = new Engine(engineConfigFromENV());
+engine.run(dataSet);
 
 const attributions = (engine
   .mpac.licenses

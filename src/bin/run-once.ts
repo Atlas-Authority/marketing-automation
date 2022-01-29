@@ -18,9 +18,9 @@ const dataSet = (dataSetId
 
 const logDir = dataSet.makeLogDir!(`once-${Date.now()}`);
 
-const engine = new Engine(dataSet, engineConfigFromENV(), console, logDir);
+const engine = new Engine(engineConfigFromENV(), console, logDir);
 
-engine.run();
+engine.run(dataSet);
 
 dataSet.hubspot.populateFakeIds();
 logDir.hubspotOutputLogger()?.logResults(dataSet.hubspot);

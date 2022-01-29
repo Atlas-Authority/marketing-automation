@@ -14,8 +14,8 @@ dataSet = runEngine(dataSet);
 
 function runEngine(dataSet: DataSet) {
   const logDir = dataSet.makeLogDir!(nextLogDirName());
-  const engine = new Engine(dataSet, engineConfigFromENV(), new ConsoleLogger(), logDir);
-  engine.run();
+  const engine = new Engine(engineConfigFromENV(), new ConsoleLogger(), logDir);
+  engine.run(dataSet);
   dataSet.hubspot.populateFakeIds();
   logDir.hubspotOutputLogger()?.logResults(dataSet.hubspot);
   return DataSet.fromDataSet(dataSet);
