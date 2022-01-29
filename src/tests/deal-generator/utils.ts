@@ -23,26 +23,23 @@ export type TestInput = {
 };
 
 export function runDealGeneratorTwice(input: TestInput) {
-  const { data, config } = processInput(input);
-  const output = runDealGeneratorWith(data, config);
-  data.rawCompanies = output.companies.map(company => company.toRawEntity());
-  data.rawContacts = output.contacts.map(contact => contact.toRawEntity());
-  data.rawDeals = output.deals.map(deal => deal.toRawEntity());
-  return runDealGeneratorWith(data, config);
+  const { dataSet, config } = processInput(input);
+  const output = runDealGeneratorWith(dataSet, config);
+  return runDealGeneratorWith(DataSet.fromDataSet(output.dataSet), config);
 }
 
 export function runDealGenerator(input: TestInput) {
-  const { data, config } = processInput(input);
-  return runDealGeneratorWith(data, config);
+  const { dataSet, config } = processInput(input);
+  return runDealGeneratorWith(dataSet, config);
 }
 
-function runDealGeneratorWith(data: RawDataSet, config: EngineConfig) {
-  const dataSet = new DataSet(data);
+function runDealGeneratorWith(dataSet: DataSet, config: EngineConfig) {
   const engine = new Engine(dataSet, config);
   const engineResults = engine.run();
   const dealGeneratorResults = engineResults.dealGeneratorResults.get(engine.mpac.licenses[0].id)!;
   dataSet.hubspot.populateFakeIds();
   return {
+    dataSet,
     deals: dataSet.hubspot.dealManager.getArray(),
     contacts: dataSet.hubspot.contactManager.getArray(),
     companies: dataSet.hubspot.companyManager.getArray(),
@@ -51,7 +48,7 @@ function runDealGeneratorWith(data: RawDataSet, config: EngineConfig) {
   };
 }
 
-function processInput(input: TestInput): { config: EngineConfig; data: RawDataSet; } {
+function processInput(input: TestInput): { config: EngineConfig; dataSet: DataSet; } {
   const data: RawDataSet = {
     rawCompanies: [],
     rawContacts: [],
@@ -97,7 +94,9 @@ function processInput(input: TestInput): { config: EngineConfig; data: RawDataSe
     }
   }
 
-  return { config, data };
+  const dataSet = new DataSet(data);
+
+  return { config, dataSet };
 }
 
 function rawLicenseFrom(id: string, addonKey: string, techContact: RawLicenseContact, start: string, licenseType: string, status: string): RawLicense {
