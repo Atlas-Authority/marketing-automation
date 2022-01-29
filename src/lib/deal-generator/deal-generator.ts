@@ -33,7 +33,7 @@ export class DealGenerator {
     this.actionGenerator = new ActionGenerator(
       engine.hubspot.dealManager,
       engine.dealPropertyConfig,
-      this.ignore.bind(this),
+      (reason, amount) => this.ignore(reason, amount),
       engine.console,
     );
   }
