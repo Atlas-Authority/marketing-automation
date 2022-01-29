@@ -1,6 +1,6 @@
 import chalk from "chalk";
 import { ContactGenerator } from "../contact-generator/contact-generator";
-import { identifyAndFlagContactTypes } from "../contact-generator/contact-types";
+import { ContactTypeFlagger } from "../contact-generator/contact-types";
 import { updateContactsBasedOnMatchResults } from "../contact-generator/update-contacts";
 import { DataSet } from "../data/set";
 import { DealGenerator } from "../deal-generator/deal-generator";
@@ -64,7 +64,8 @@ export class Engine {
     this.startEngine();
 
     this.logStep('Identifying and Flagging Contact Types');
-    identifyAndFlagContactTypes(this);
+    const contactTypeFlagger = new ContactTypeFlagger(this);
+    contactTypeFlagger.identifyAndFlagContactTypes();
 
     this.logStep('Generating contacts');
     const contactGenerator = new ContactGenerator(
