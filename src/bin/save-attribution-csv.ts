@@ -5,7 +5,8 @@ import { dataSetConfigFromENV } from '../lib/data/set';
 import { Engine } from "../lib/engine";
 import { isPresent, sorter } from "../lib/util/helpers";
 
-const { data, logDir, dataSet } = dataManager.latestDataSet(dataSetConfigFromENV(), `inspect-${Date.now()}`);
+const { data, dataSet } = dataManager.latestDataSet(dataSetConfigFromENV());
+const logDir = dataSet.makeLogDir!(`inspect-${Date.now()}`);
 const engine = new Engine(dataSet, engineConfigFromENV());
 engine.run(data);
 

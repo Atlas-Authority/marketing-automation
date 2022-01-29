@@ -12,10 +12,11 @@ const console = new ConsoleLogger();
 
 console.printInfo('Run once', `Running on [${dataSetId ?? 'latest'}] data set`);
 
-const logDirName = `once-${Date.now()}`;
-const { data, logDir, dataSet } = (dataSetId
-  ? dataManager.dataSetFrom(+dataSetId, dataSetConfigFromENV(), logDirName)
-  : dataManager.latestDataSet(dataSetConfigFromENV(), logDirName));
+const { data, dataSet } = (dataSetId
+  ? dataManager.dataSetFrom(+dataSetId, dataSetConfigFromENV())
+  : dataManager.latestDataSet(dataSetConfigFromENV()));
+
+const logDir = dataSet.makeLogDir!(`once-${Date.now()}`);
 
 const engine = new Engine(dataSet, engineConfigFromENV(), console, logDir);
 

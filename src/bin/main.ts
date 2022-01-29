@@ -25,7 +25,8 @@ run(console, runLoopConfig, {
 
     console.printInfo('Main', 'Downloading data');
     const ms = await downloadAllData(console, hubspotConfigFromENV());
-    const { data, dataSet, logDir } = dataManager.dataSetFrom(ms, dataSetConfigFromENV(), 'main');
+    const { data, dataSet } = dataManager.dataSetFrom(ms, dataSetConfigFromENV());
+    const logDir = dataSet.makeLogDir!('main');
 
     console.printInfo('Main', 'Running engine');
     const engine = new Engine(dataSet, engineConfigFromENV(), console, logDir);

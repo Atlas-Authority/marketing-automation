@@ -20,7 +20,7 @@ pipeOutputToInput(hubspot, data);
 hubspot = runEngine();
 
 function runEngine() {
-  const { logDir } = dataManager.latestDataSet(dataSetConfigFromENV(), nextLogDirName());
+  const logDir = dataSet.makeLogDir!(nextLogDirName());
   const engine = new Engine(dataSet, engineConfigFromENV(), new ConsoleLogger(), logDir);
   engine.run(data);
   dataSet.hubspot.populateFakeIds();
