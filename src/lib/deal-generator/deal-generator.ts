@@ -92,7 +92,11 @@ export class DealGenerator {
   private generateActionsForMatchedGroup(group: RelatedLicenseSet) {
     assert.ok(group.length > 0);
 
-    const eventGenerator = new EventGenerator(this.engine);
+    const eventGenerator = new EventGenerator(
+      this.engine.archivedApps,
+      this.engine.partnerDomains,
+      this.engine.freeEmailDomains,
+    );
 
     const records = eventGenerator.getSortedRecords(group);
     const events = eventGenerator.interpretAsEvents(records);
