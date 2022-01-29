@@ -1,6 +1,5 @@
 import capitalize from "capitalize";
-import { Engine } from '../engine/engine';
-import { Contact, ContactData, ContactType } from '../model/contact';
+import { Contact, ContactData, ContactManager, ContactType } from '../model/contact';
 import { License } from '../model/license';
 import { ContactInfo, PartnerBillingInfo } from "../model/record";
 import { Transaction } from '../model/transaction';
@@ -12,7 +11,13 @@ export class ContactGenerator {
 
   private toMerge = new Map<Contact, GeneratedContact[]>();
 
-  public constructor(private engine: Engine) { }
+  public constructor(
+    private licenses: License[],
+    private transactions: Transaction[],
+    private contactManager: ContactManager,
+    private partnerDomains: Set<string>,
+    private archivedApps: Set<string>,
+  ) { }
 
   public run() {
     this.generateContacts();
@@ -22,7 +27,7 @@ export class ContactGenerator {
   }
 
   private generateContacts() {
-    for (const record of [...this.engine.mpac.licenses, ...this.engine.mpac.transactions]) {
+    for (const record of [...this.licenses, ...this.transactions]) {
       this.generateContact(record, record.data.technicalContact);
       this.generateContact(record, record.data.billingContact);
       this.generateContact(record, record.data.partnerDetails?.billingContact ?? null);
@@ -37,7 +42,7 @@ export class ContactGenerator {
   }
 
   private associateContacts() {
-    for (const record of [...this.engine.mpac.licenses, ...this.engine.mpac.transactions]) {
+    for (const record of [...this.licenses, ...this.transactions]) {
       record.techContact = this.findContact(record.data.technicalContact.email)!;
       record.billingContact = this.findContact(record.data.billingContact?.email);
       record.partnerContact = this.findContact(record.data.partnerDetails?.billingContact.email);
@@ -53,24 +58,24 @@ export class ContactGenerator {
   }
 
   private sortContactRecords() {
-    for (const contact of this.engine.hubspot.contactManager.getAll()) {
+    for (const contact of this.contactManager.getAll()) {
       contact.records.sort(sorter(r => r.data.maintenanceStartDate, 'DSC'));
     }
   }
 
   private findContact(email: string | undefined): Contact | null {
     if (!email) return null;
-    return this.engine.hubspot.contactManager.getByEmail(email)!;
+    return this.contactManager.getByEmail(email)!;
   }
 
   private generateContact(item: License | Transaction, info: ContactInfo | PartnerBillingInfo | null) {
     if (!info) return;
     const generated = this.contactFrom(item, info);
 
-    let contact = this.engine.hubspot.contactManager.getByEmail(generated.email);
+    let contact = this.contactManager.getByEmail(generated.email);
     if (!contact) {
       const { lastUpdated, ...generatedWithoutLastUpdated } = generated;
-      contact = this.engine.hubspot.contactManager.create(generatedWithoutLastUpdated);
+      contact = this.contactManager.create(generatedWithoutLastUpdated);
     }
 
     let entry = this.toMerge.get(contact);
@@ -87,7 +92,7 @@ export class ContactGenerator {
     if (lastName.match(NAME_URL_RE)) lastName = lastName.replace(NAME_URL_RE, '$1_$2');
 
     const domain = info.email.split('@')[1];
-    const contactType: ContactType = (this.engine.partnerDomains.has(domain) ? 'Partner' : 'Customer');
+    const contactType: ContactType = (this.partnerDomains.has(domain) ? 'Partner' : 'Customer');
 
     return {
       email: info.email,
@@ -101,7 +106,7 @@ export class ContactGenerator {
       region: item.data.region,
       relatedProducts: new Set(),
       deployment: item.data.hosting,
-      products: new Set([item.data.addonKey].filter(key => notIgnored(this.engine, key))),
+      products: new Set([item.data.addonKey].filter(key => notIgnored(this.archivedApps, key))),
       licenseTier: null,
       lastMpacEvent: '',
       lastUpdated: (item instanceof License ? item.data.lastUpdated : item.data.saleDate),
@@ -165,6 +170,6 @@ export function mergeContactInfo(contact: ContactData, contacts: GeneratedContac
   }
 }
 
-function notIgnored(engine: Engine, addonKey: string) {
-  return !engine.archivedApps.has(addonKey);
+function notIgnored(archivedApps: Set<string>, addonKey: string) {
+  return !archivedApps.has(addonKey);
 }

@@ -67,7 +67,14 @@ export class Engine {
     identifyAndFlagContactTypes(this);
 
     this.logStep('Generating contacts');
-    new ContactGenerator(this).run();
+    const contactGenerator = new ContactGenerator(
+      this.mpac.licenses,
+      this.mpac.transactions,
+      this.hubspot.contactManager,
+      this.partnerDomains,
+      this.archivedApps,
+    );
+    contactGenerator.run();
 
     this.logStep('Running Scoring Engine');
     const allMatches = new LicenseGrouper(this).run();
