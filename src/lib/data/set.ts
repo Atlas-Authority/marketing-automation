@@ -18,13 +18,13 @@ export class DataSet {
 
   makeLogDir?: (name: string) => LogDir;
 
-  public constructor(data: RawDataSet, config?: DataSetConfig) {
+  public constructor(public rawData: RawDataSet, config?: DataSetConfig) {
     this.hubspot = new Hubspot(config?.hubspotConfig);
     this.mpac = new Marketplace(config?.mpacConfig);
 
-    this.freeEmailDomains = deriveMultiProviderDomainsSet(data.freeDomains);
-    this.hubspot.importData(data);
-    this.mpac.importData(data);
+    this.freeEmailDomains = deriveMultiProviderDomainsSet(rawData.freeDomains);
+    this.hubspot.importData(rawData);
+    this.mpac.importData(rawData);
   }
 
 }

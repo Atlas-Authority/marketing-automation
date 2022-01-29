@@ -48,7 +48,7 @@ class DataManager {
 
     dataSet.makeLogDir = (name) => new LogDir(dataDir.subdir(name));
 
-    return { data, dataSet };
+    return dataSet;
   }
 
   public latestDataSet(config: DataSetConfig) {

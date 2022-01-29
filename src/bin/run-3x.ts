@@ -8,7 +8,8 @@ import { Hubspot } from '../lib/hubspot';
 import { ConsoleLogger } from '../lib/log/console';
 
 const nextLogDirName = logDirNameGenerator();
-const { data, dataSet } = dataManager.latestDataSet(dataSetConfigFromENV());
+const dataSet = dataManager.latestDataSet(dataSetConfigFromENV());
+const data = dataSet.rawData;
 
 let hubspot: Hubspot;
 hubspot = runEngine();

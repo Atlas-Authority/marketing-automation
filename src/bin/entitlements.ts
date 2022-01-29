@@ -6,11 +6,11 @@ import { RawLicense, RawTransaction } from '../lib/marketplace/raw';
 main();
 function main() {
 
-  const { data } = dataManager.latestDataSet(dataSetConfigFromENV());
+  const dataSet = dataManager.latestDataSet(dataSetConfigFromENV());
 
-  const licensesWith = data.licensesWithDataInsights;
-  const licensesWithout = data.licensesWithoutDataInsights;
-  const transactions = data.transactions;
+  const licensesWith = dataSet.rawData.licensesWithDataInsights;
+  const licensesWithout = dataSet.rawData.licensesWithoutDataInsights;
+  const transactions = dataSet.rawData.transactions;
 
   function checkMapping(k1: K, k2: K) {
     const map = new Map<string, string>();

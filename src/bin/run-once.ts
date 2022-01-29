@@ -12,7 +12,7 @@ const console = new ConsoleLogger();
 
 console.printInfo('Run once', `Running on [${dataSetId ?? 'latest'}] data set`);
 
-const { dataSet } = (dataSetId
+const dataSet = (dataSetId
   ? dataManager.dataSetFrom(+dataSetId, dataSetConfigFromENV())
   : dataManager.latestDataSet(dataSetConfigFromENV()));
 
