@@ -1,5 +1,5 @@
-import { hubspotContactConfigFromENV, hubspotDealConfigFromENV, mpacConfigFromENV } from "../config/env";
-import { Hubspot, HubspotConfig } from "../hubspot";
+import { mpacConfigFromENV } from "../config/env";
+import { Hubspot, HubspotConfig, hubspotConfigFromENV } from "../hubspot";
 import { Marketplace, MpacConfig } from "../marketplace";
 
 export type DataSetConfig = {
@@ -24,9 +24,6 @@ export class DataSet {
 export function dataSetConfigFromENV(): DataSetConfig {
   return {
     mpacConfig: mpacConfigFromENV(),
-    hubspotConfig: {
-      contact: hubspotContactConfigFromENV(),
-      deal: hubspotDealConfigFromENV(),
-    },
+    hubspotConfig: hubspotConfigFromENV(),
   };
 }

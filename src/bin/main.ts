@@ -5,6 +5,7 @@ import { dataManager } from '../lib/data/manager';
 import { Engine } from "../lib/engine";
 import { downloadAllData } from '../lib/engine/download';
 import { SlackNotifier } from '../lib/engine/slack-notifier';
+import { hubspotConfigFromENV } from '../lib/hubspot';
 import { HubspotUploader } from '../lib/hubspot/uploader';
 import { ConsoleLogger } from '../lib/log/console';
 import run from "../lib/util/runner";
@@ -25,7 +26,7 @@ run(console, runLoopConfig, {
     const dataSet = new DataSet(dataSetConfigFromENV());
 
     console.printInfo('Main', 'Downloading data');
-    const ms = await downloadAllData(console, dataSet.hubspot);
+    const ms = await downloadAllData(console, hubspotConfigFromENV());
     const { data, logDir } = dataManager.dataSetFrom(ms, 'main');
 
     console.printInfo('Main', 'Running engine');

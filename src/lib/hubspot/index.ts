@@ -1,3 +1,4 @@
+import { hubspotContactConfigFromENV, hubspotDealConfigFromENV } from "../config/env";
 import { RawDataSet } from "../data/raw";
 import { CompanyManager } from "../model/company";
 import { ContactManager, HubspotContactConfig } from "../model/contact";
@@ -44,4 +45,11 @@ export class Hubspot {
     }
   }
 
+}
+
+export function hubspotConfigFromENV() {
+  return {
+    contact: hubspotContactConfigFromENV(),
+    deal: hubspotDealConfigFromENV(),
+  };
 }
