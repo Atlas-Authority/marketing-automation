@@ -85,7 +85,12 @@ export class Engine {
     contactGenerator.run();
 
     this.logStep('Running Scoring Engine');
-    const allMatches = new LicenseGrouper(this).run();
+    const licenseGrouper = new LicenseGrouper(
+      this.freeEmailDomains,
+      this.console,
+      this.logDir,
+    );
+    const allMatches = licenseGrouper.run(this.mpac.licenses);
 
     this.logStep('Updating Contacts based on Match Results');
     updateContactsBasedOnMatchResults(this, allMatches);

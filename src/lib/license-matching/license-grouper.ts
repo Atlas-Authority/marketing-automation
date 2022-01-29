@@ -1,5 +1,6 @@
-import { Engine } from '../engine/engine';
+import { ConsoleLogger } from '../log/console';
 import { LicenseMatchLogger } from '../log/license-scorer';
+import { LogDir } from '../log/logdir';
 import { License } from '../model/license';
 import { sorter, withAutoClose } from '../util/helpers';
 import { LicenseMatcher, ScorableLicense } from './license-matcher';
@@ -11,14 +12,18 @@ export class LicenseGrouper {
 
   private matchGroups = new Map<License, Set<License>>();
 
-  constructor(private engine: Engine) { }
+  constructor(
+    private freeEmailDomains: Set<string>,
+    private console?: ConsoleLogger,
+    private logDir?: LogDir,
+  ) { }
 
-  run(): RelatedLicenseSet[] {
-    return withAutoClose(this.engine.logDir?.scoreLogger(), scoreLogger => {
+  run(licenses: License[]): RelatedLicenseSet[] {
+    return withAutoClose(this.logDir?.scoreLogger(), scoreLogger => {
 
       const threshold = 130;
       const scorer = new LicenseMatcher(threshold, scoreLogger);
-      this.matchLicenses(scorer, scoreLogger);
+      this.matchLicenses(licenses, scorer, scoreLogger);
 
       const matches = (Array.from(new Set(this.matchGroups.values()))
         .map(group => Array.from(group)
@@ -26,14 +31,14 @@ export class LicenseGrouper {
 
       this.logMatchResults(matches);
 
-      this.engine.console?.printInfo('Scoring Engine', 'Done');
+      this.console?.printInfo('Scoring Engine', 'Done');
       return matches;
     });
   }
 
   private logMatchResults(matches: License[][]) {
-    withAutoClose(this.engine.logDir?.allMatchGroupsLog(), allMatchGroupsLog => {
-      withAutoClose(this.engine.logDir?.checkMatchGroupsLog(), checkMatchGroupsLog => {
+    withAutoClose(this.logDir?.allMatchGroupsLog(), allMatchGroupsLog => {
+      withAutoClose(this.logDir?.checkMatchGroupsLog(), checkMatchGroupsLog => {
 
         const groups = matches.map(group => group.map(shorterLicenseInfo));
         for (const match of groups) {
@@ -58,14 +63,14 @@ export class LicenseGrouper {
     });
   }
 
-  private groupLicensesByProduct() {
-    this.engine.console?.printInfo('Scoring Engine', 'Grouping licenses/transactions by hosting and addonKey');
+  private groupLicensesByProduct(licenses: License[]) {
+    this.console?.printInfo('Scoring Engine', 'Grouping licenses/transactions by hosting and addonKey');
     const productMapping = new Map<string, {
       license: License,
       scorable: ScorableLicense,
     }[]>();
 
-    for (const license of this.engine.mpac.licenses) {
+    for (const license of licenses) {
       const addonKey = license.data.addonKey;
       const hosting = license.data.hosting;
       const key = `${addonKey}, ${hosting}`;
@@ -88,7 +93,7 @@ export class LicenseGrouper {
           billingContact: license.billingContact,
 
           company: normalizeString(license.data.company)?.toLowerCase(),
-          companyDomain: this.engine.freeEmailDomains.has(techContactDomain) ? '' : normalizeString(techContactDomain),
+          companyDomain: this.freeEmailDomains.has(techContactDomain) ? '' : normalizeString(techContactDomain),
 
           techContactEmailPart,
           techContactAddress: normalizeString(license.data.technicalContact.address1)?.toLowerCase(),
@@ -101,14 +106,14 @@ export class LicenseGrouper {
     return productMapping;
   }
 
-  private matchLicenses(scorer: LicenseMatcher, scoreLogger?: LicenseMatchLogger) {
-    this.engine.console?.printInfo('Scoring Engine', 'Scoring licenses within [addonKey + hosting] groups');
+  private matchLicenses(licenses: License[], scorer: LicenseMatcher, scoreLogger?: LicenseMatchLogger) {
+    this.console?.printInfo('Scoring Engine', 'Scoring licenses within [addonKey + hosting] groups');
     const startTime = process.hrtime.bigint();
 
-    const productGroups = this.groupLicensesByProduct();
+    const productGroups = this.groupLicensesByProduct(licenses);
 
     for (const [name, group] of productGroups) {
-      this.engine.console?.printInfo('Scoring Engine', `  Scoring [${name}]`);
+      this.console?.printInfo('Scoring Engine', `  Scoring [${name}]`);
 
       if (group.length === 1) {
         this.initMatch(group[0].license);
@@ -135,7 +140,7 @@ export class LicenseGrouper {
     }
 
     const endTime = process.hrtime.bigint();
-    this.engine.console?.printInfo('Scoring Engine', `Total time: ${timeAsMinutesSeconds(endTime - startTime)}`);
+    this.console?.printInfo('Scoring Engine', `Total time: ${timeAsMinutesSeconds(endTime - startTime)}`);
   }
 
   private joinMatches(license1: License, license2: License) {
