@@ -12,7 +12,7 @@ const console = new ConsoleLogger();
 
 console.printInfo('Run once', `Running on [${dataSetId ?? 'latest'}] data set`);
 
-const { data, dataSet } = (dataSetId
+const { dataSet } = (dataSetId
   ? dataManager.dataSetFrom(+dataSetId, dataSetConfigFromENV())
   : dataManager.latestDataSet(dataSetConfigFromENV()));
 
@@ -20,7 +20,7 @@ const logDir = dataSet.makeLogDir!(`once-${Date.now()}`);
 
 const engine = new Engine(dataSet, engineConfigFromENV(), console, logDir);
 
-engine.run(data);
+engine.run();
 
 dataSet.hubspot.populateFakeIds();
 logDir.hubspotOutputLogger()?.logResults(dataSet.hubspot);

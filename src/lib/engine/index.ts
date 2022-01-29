@@ -2,7 +2,6 @@ import chalk from "chalk";
 import { ContactGenerator } from "../contact-generator";
 import { identifyAndFlagContactTypes } from "../contact-generator/contact-types";
 import { updateContactsBasedOnMatchResults } from "../contact-generator/update-contacts";
-import { RawDataSet } from "../data/raw";
 import { DataSet } from "../data/set";
 import { DealGenerator } from "../deal-generator";
 import { LicenseGrouper } from "../license-matching/license-grouper";
@@ -11,7 +10,6 @@ import { ConsoleLogger } from "../log/console";
 import { Table } from "../log/table";
 import { Tallier } from "../log/tallier";
 import { formatMoney, formatNumber } from "../util/formatters";
-import { deriveMultiProviderDomainsSet } from "./all-free-email-providers";
 import { printSummary } from "./summary";
 
 export type DealPropertyConfig = {
@@ -55,9 +53,9 @@ export class Engine {
     };
   }
 
-  public run(data: RawDataSet) {
-    this.logStep('Importing given data set into engine');
-    this.importData(data);
+  public run() {
+    this.logStep('Starting engine');
+    this.startEngine();
 
     this.logStep('Identifying and Flagging Contact Types');
     identifyAndFlagContactTypes(this);
@@ -83,11 +81,7 @@ export class Engine {
     return { dealGeneratorResults };
   }
 
-  private importData(data: RawDataSet) {
-    this.data.freeEmailDomains = deriveMultiProviderDomainsSet(data.freeDomains);
-    this.hubspot.importData(data);
-    this.mpac.importData(data);
-
+  private startEngine() {
     const transactionTotal = (this.mpac.transactions
       .map(t => t.data.vendorAmount)
       .reduce((a, b) => a + b, 0));

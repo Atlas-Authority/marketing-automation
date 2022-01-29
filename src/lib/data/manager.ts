@@ -44,7 +44,7 @@ class DataManager {
     const dataDir = DataDir.root.subdir(dirName);
     const dataStore = new DataSetStore(dataDir);
     const data = dataStore.load();
-    const dataSet = new DataSet(config);
+    const dataSet = new DataSet(data, config);
 
     dataSet.makeLogDir = (name) => new LogDir(dataDir.subdir(name));
 

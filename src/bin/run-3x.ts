@@ -22,7 +22,7 @@ hubspot = runEngine();
 function runEngine() {
   const logDir = dataSet.makeLogDir!(nextLogDirName());
   const engine = new Engine(dataSet, engineConfigFromENV(), new ConsoleLogger(), logDir);
-  engine.run(data);
+  engine.run();
   dataSet.hubspot.populateFakeIds();
   logDir.hubspotOutputLogger()?.logResults(dataSet.hubspot);
   return dataSet.hubspot;

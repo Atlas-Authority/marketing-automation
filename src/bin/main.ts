@@ -25,12 +25,12 @@ run(console, runLoopConfig, {
 
     console.printInfo('Main', 'Downloading data');
     const ms = await downloadAllData(console, hubspotConfigFromENV());
-    const { data, dataSet } = dataManager.dataSetFrom(ms, dataSetConfigFromENV());
+    const { dataSet } = dataManager.dataSetFrom(ms, dataSetConfigFromENV());
     const logDir = dataSet.makeLogDir!('main');
 
     console.printInfo('Main', 'Running engine');
     const engine = new Engine(dataSet, engineConfigFromENV(), console, logDir);
-    engine.run(data);
+    engine.run();
 
     console.printInfo('Main', 'Upsyncing changes to HubSpot');
     await uploader.upsyncChangesToHubspot(dataSet.hubspot);

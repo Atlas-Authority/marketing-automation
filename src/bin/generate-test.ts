@@ -20,9 +20,9 @@ function TEMPLATE({ runDealGenerator, RECORDS, EVENTS, ACTIONS }: any) {
 }
 
 function main(template: string, licenseIds: string[]) {
-  const { data, dataSet } = dataManager.latestDataSet(dataSetConfigFromENV());
+  const { dataSet } = dataManager.latestDataSet(dataSetConfigFromENV());
   const engine = new Engine(dataSet, engineConfigFromENV(), new ConsoleLogger());
-  const { dealGeneratorResults } = engine.run(data);
+  const { dealGeneratorResults } = engine.run();
 
   for (const licenseId of licenseIds) {
     const results = dealGeneratorResults.get(licenseId);
