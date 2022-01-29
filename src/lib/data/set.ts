@@ -12,13 +12,23 @@ export type DataSetConfig = {
 
 export class DataSet {
 
+  public static fromDataSet(other: DataSet) {
+    other.rawData.rawDeals = other.hubspot.dealManager.getArray().map(e => e.toRawEntity());
+    other.rawData.rawContacts = other.hubspot.contactManager.getArray().map(e => e.toRawEntity());
+    other.rawData.rawCompanies = other.hubspot.companyManager.getArray().map(e => e.toRawEntity());
+
+    const newDataSet = new DataSet(other.rawData, other.config);
+    newDataSet.makeLogDir = other.makeLogDir;
+    return newDataSet;
+  }
+
   public freeEmailDomains = new Set<string>();
   public hubspot;
   public mpac;
 
-  makeLogDir?: (name: string) => LogDir;
+  public makeLogDir?: (name: string) => LogDir;
 
-  public constructor(public rawData: RawDataSet, config?: DataSetConfig) {
+  public constructor(public rawData: RawDataSet, private config?: DataSetConfig) {
     this.hubspot = new Hubspot(config?.hubspotConfig);
     this.mpac = new Marketplace(config?.mpacConfig);
 
