@@ -1,16 +1,22 @@
-import { Engine } from "../engine/engine";
-import { Contact, domainFor } from "../model/contact";
+import { Contact, ContactManager, domainFor } from "../model/contact";
 import { License } from "../model/license";
 import { Transaction } from "../model/transaction";
 
 export class ContactTypeFlagger {
 
-  constructor(private engine: Engine) { }
+  constructor(
+    private licenses: License[],
+    private transactions: Transaction[],
+    private contactManager: ContactManager,
+    private freeEmailDomains: Set<string>,
+    private partnerDomains: Set<string>,
+    private customerDomains: Set<string>,
+  ) { }
 
   public identifyAndFlagContactTypes() {
     // Identifying contact types
-    this.identifyContactTypesFromRecordDomains(this.engine.mpac.licenses);
-    this.identifyContactTypesFromRecordDomains(this.engine.mpac.transactions);
+    this.identifyContactTypesFromRecordDomains(this.licenses);
+    this.identifyContactTypesFromRecordDomains(this.transactions);
     this.removeFreeEmailDomainsFromPartnerDomains();
     this.separatePartnerDomainsFromCustomerDomains();
 
@@ -21,39 +27,39 @@ export class ContactTypeFlagger {
 
   private identifyContactTypesFromRecordDomains(records: (Transaction | License)[]) {
     for (const record of records) {
-      maybeAddDomain(this.engine.partnerDomains, record.data.partnerDetails?.billingContact.email);
-      maybeAddDomain(this.engine.customerDomains, record.data.billingContact?.email);
-      maybeAddDomain(this.engine.customerDomains, record.data.technicalContact.email);
+      maybeAddDomain(this.partnerDomains, record.data.partnerDetails?.billingContact.email);
+      maybeAddDomain(this.customerDomains, record.data.billingContact?.email);
+      maybeAddDomain(this.customerDomains, record.data.technicalContact.email);
     }
   }
 
   private removeFreeEmailDomainsFromPartnerDomains() {
-    for (const domain of this.engine.freeEmailDomains) {
-      this.engine.partnerDomains.delete(domain);
-      this.engine.customerDomains.add(domain);
+    for (const domain of this.freeEmailDomains) {
+      this.partnerDomains.delete(domain);
+      this.customerDomains.add(domain);
     }
   }
 
   private separatePartnerDomainsFromCustomerDomains() {
     // If it's a partner domain, then it's not a customer domain
-    for (const domain of this.engine.partnerDomains) {
-      this.engine.customerDomains.delete(domain);
+    for (const domain of this.partnerDomains) {
+      this.customerDomains.delete(domain);
     }
   }
 
   private flagKnownContactTypesByDomain() {
-    for (const contact of this.engine.hubspot.contactManager.getAll()) {
-      if (usesDomains(contact, this.engine.partnerDomains)) {
+    for (const contact of this.contactManager.getAll()) {
+      if (usesDomains(contact, this.partnerDomains)) {
         contact.data.contactType = 'Partner';
       }
-      else if (usesDomains(contact, this.engine.customerDomains)) {
+      else if (usesDomains(contact, this.customerDomains)) {
         contact.data.contactType = 'Customer';
       }
     }
   }
 
   private setPartnersViaCoworkers() {
-    for (const contact of this.engine.hubspot.contactManager.getAll()) {
+    for (const contact of this.contactManager.getAll()) {
       const companies = contact.companies.getAll();
       const coworkers = companies.flatMap(company => company.contacts.getAll());
       flagPartnersViaCoworkers(coworkers);

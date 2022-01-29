@@ -64,7 +64,14 @@ export class Engine {
     this.startEngine();
 
     this.logStep('Identifying and Flagging Contact Types');
-    const contactTypeFlagger = new ContactTypeFlagger(this);
+    const contactTypeFlagger = new ContactTypeFlagger(
+      this.mpac.licenses,
+      this.mpac.transactions,
+      this.hubspot.contactManager,
+      this.freeEmailDomains,
+      this.partnerDomains,
+      this.customerDomains,
+    );
     contactTypeFlagger.identifyAndFlagContactTypes();
 
     this.logStep('Generating contacts');
