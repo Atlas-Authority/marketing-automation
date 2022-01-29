@@ -4,9 +4,7 @@ import { RawDataSet } from '../../lib/data/raw';
 import { Action } from "../../lib/deal-generator/actions";
 import { DealRelevantEvent } from '../../lib/deal-generator/events';
 import { Engine, EngineConfig } from '../../lib/engine';
-import { Hubspot } from '../../lib/hubspot';
 import { DealStage } from '../../lib/hubspot/interfaces';
-import { Marketplace } from '../../lib/marketplace';
 import { RawLicense, RawLicenseContact, RawTransaction } from '../../lib/marketplace/raw';
 import { Company } from '../../lib/model/company';
 import { Contact } from '../../lib/model/contact';
@@ -39,7 +37,7 @@ export function runDealGenerator(input: TestInput) {
 }
 
 function runDealGeneratorWith(data: RawDataSet, config: EngineConfig) {
-  const dataSet = new DataSet(new Hubspot(), new Marketplace());
+  const dataSet = new DataSet();
   const engine = new Engine(dataSet, config);
   const engineResults = engine.run(data);
   const dealGeneratorResults = engineResults.dealGeneratorResults.get(engine.mpac.licenses[0].id)!;

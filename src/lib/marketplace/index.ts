@@ -1,4 +1,3 @@
-import { mpacConfigFromENV } from "../config/env";
 import { RawDataSet } from "../data/raw";
 import { ConsoleLogger } from "../log/console";
 import * as validation from "../marketplace/validation";
@@ -15,10 +14,6 @@ export class Marketplace {
 
   public licenses: License[] = [];
   public transactions: Transaction[] = [];
-
-  public static fromENV() {
-    return new Marketplace(mpacConfigFromENV());
-  }
 
   public constructor(private config?: MpacConfig) { }
 

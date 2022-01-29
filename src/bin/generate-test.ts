@@ -2,7 +2,7 @@ import 'source-map-support/register';
 import util from 'util';
 import { engineConfigFromENV } from '../lib/config/env';
 import { cliArgs } from '../lib/config/params';
-import { DataSet } from '../lib/data/data';
+import { DataSet, dataSetConfigFromENV } from '../lib/data/data';
 import { dataManager } from '../lib/data/manager';
 import { Engine } from "../lib/engine";
 import { ConsoleLogger } from '../lib/log/console';
@@ -20,7 +20,7 @@ function TEMPLATE({ runDealGenerator, RECORDS, EVENTS, ACTIONS }: any) {
 }
 
 function main(template: string, licenseIds: string[]) {
-  const engine = new Engine(DataSet.fromENV(), engineConfigFromENV(), new ConsoleLogger());
+  const engine = new Engine(new DataSet(dataSetConfigFromENV()), engineConfigFromENV(), new ConsoleLogger());
   const { data } = dataManager.latestDataSet();
   const { dealGeneratorResults } = engine.run(data);
 

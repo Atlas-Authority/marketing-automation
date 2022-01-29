@@ -1,18 +1,32 @@
-import { Hubspot } from "../hubspot";
-import { Marketplace } from "../marketplace";
+import { hubspotContactConfigFromENV, hubspotDealConfigFromENV, mpacConfigFromENV } from "../config/env";
+import { Hubspot, HubspotConfig } from "../hubspot";
+import { Marketplace, MpacConfig } from "../marketplace";
+
+export type DataSetConfig = {
+  mpacConfig?: MpacConfig;
+  hubspotConfig?: HubspotConfig;
+};
 
 export class DataSet {
 
   public freeEmailDomains = new Set<string>();
 
-  public static fromENV() {
-    return new DataSet(Hubspot.fromENV(), Marketplace.fromENV());
+  public hubspot;
+  public mpac;
+
+  public constructor(config?: DataSetConfig) {
+    this.hubspot = new Hubspot(config?.hubspotConfig);
+    this.mpac = new Marketplace(config?.mpacConfig);
   }
 
-  public constructor(
-    public hubspot: Hubspot,
-    public mpac: Marketplace,
-  ) {
-  }
+}
 
+export function dataSetConfigFromENV(): DataSetConfig {
+  return {
+    mpacConfig: mpacConfigFromENV(),
+    hubspotConfig: {
+      contact: hubspotContactConfigFromENV(),
+      deal: hubspotDealConfigFromENV(),
+    },
+  };
 }

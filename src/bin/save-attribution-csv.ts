@@ -1,11 +1,11 @@
 import 'source-map-support/register';
 import { engineConfigFromENV } from '../lib/config/env';
-import { DataSet } from '../lib/data/data';
+import { DataSet, dataSetConfigFromENV } from '../lib/data/data';
 import { dataManager } from '../lib/data/manager';
 import { Engine } from "../lib/engine";
 import { isPresent, sorter } from "../lib/util/helpers";
 
-const engine = new Engine(DataSet.fromENV(), engineConfigFromENV());
+const engine = new Engine(new DataSet(dataSetConfigFromENV()), engineConfigFromENV());
 const { data, logDir } = dataManager.latestDataSet(`inspect-${Date.now()}`);
 engine.run(data);
 

@@ -1,6 +1,6 @@
 import 'source-map-support/register';
 import { engineConfigFromENV, runLoopConfigFromENV } from "../lib/config/env";
-import { DataSet } from '../lib/data/data';
+import { DataSet, dataSetConfigFromENV } from '../lib/data/data';
 import { dataManager } from '../lib/data/manager';
 import { Engine } from "../lib/engine";
 import { downloadAllData } from '../lib/engine/download';
@@ -22,7 +22,7 @@ run(console, runLoopConfig, {
     console.printInfo('Main', 'Pruning data sets');
     dataManager.pruneDataSets(console);
 
-    const dataSet = DataSet.fromENV();
+    const dataSet = new DataSet(dataSetConfigFromENV());
 
     console.printInfo('Main', 'Downloading data');
     const ms = await downloadAllData(console, dataSet.hubspot);

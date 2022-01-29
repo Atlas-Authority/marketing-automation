@@ -1,8 +1,8 @@
 import 'source-map-support/register';
+import { DataSet, dataSetConfigFromENV } from '../lib/data/data';
 import { downloadAllData } from '../lib/engine/download';
-import { Hubspot } from '../lib/hubspot';
 import { ConsoleLogger } from '../lib/log/console';
 
 const console = new ConsoleLogger();
-const hubspot = Hubspot.fromENV();
-downloadAllData(console, hubspot);
+const dataSet = new DataSet(dataSetConfigFromENV());
+downloadAllData(console, dataSet.hubspot);

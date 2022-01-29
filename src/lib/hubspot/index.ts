@@ -1,24 +1,21 @@
-import { hubspotContactConfigFromENV, hubspotDealConfigFromENV } from "../config/env";
 import { RawDataSet } from "../data/raw";
 import { CompanyManager } from "../model/company";
 import { ContactManager, HubspotContactConfig } from "../model/contact";
 import { DealManager, HubspotDealConfig } from "../model/deal";
 import { Entity } from "./entity";
 
-export class Hubspot {
+export type HubspotConfig = {
+  deal?: HubspotDealConfig;
+  contact?: HubspotContactConfig;
+};
 
-  public static fromENV() {
-    return new Hubspot({
-      contact: hubspotContactConfigFromENV(),
-      deal: hubspotDealConfigFromENV(),
-    });
-  }
+export class Hubspot {
 
   public dealManager;
   public contactManager;
   public companyManager;
 
-  public constructor(config?: { deal?: HubspotDealConfig, contact?: HubspotContactConfig }) {
+  public constructor(config?: HubspotConfig) {
     this.dealManager = new DealManager(config?.deal ?? {});
     this.contactManager = new ContactManager(config?.contact ?? {});
     this.companyManager = new CompanyManager();
