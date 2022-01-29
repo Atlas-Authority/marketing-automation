@@ -2,7 +2,7 @@ import 'source-map-support/register';
 import { engineConfigFromENV } from '../lib/config/env';
 import { cliArgs } from '../lib/config/params';
 import { dataManager } from '../lib/data/manager';
-import { DataSet, dataSetConfigFromENV } from '../lib/data/set';
+import { dataSetConfigFromENV } from '../lib/data/set';
 import { Engine } from "../lib/engine";
 import { ConsoleLogger } from '../lib/log/console';
 
@@ -13,11 +13,9 @@ const console = new ConsoleLogger();
 console.printInfo('Run once', `Running on [${dataSetId ?? 'latest'}] data set`);
 
 const logDirName = `once-${Date.now()}`;
-const { data, logDir } = (dataSetId
-  ? dataManager.dataSetFrom(+dataSetId, logDirName)
-  : dataManager.latestDataSet(logDirName));
-
-const dataSet = new DataSet(dataSetConfigFromENV());
+const { data, logDir, dataSet } = (dataSetId
+  ? dataManager.dataSetFrom(+dataSetId, dataSetConfigFromENV(), logDirName)
+  : dataManager.latestDataSet(dataSetConfigFromENV(), logDirName));
 
 const engine = new Engine(dataSet, engineConfigFromENV(), console, logDir);
 

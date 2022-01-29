@@ -10,7 +10,6 @@ export type DataSetConfig = {
 export class DataSet {
 
   public freeEmailDomains = new Set<string>();
-
   public hubspot;
   public mpac;
 

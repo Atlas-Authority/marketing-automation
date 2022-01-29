@@ -2,13 +2,13 @@ import 'source-map-support/register';
 import { engineConfigFromENV } from '../lib/config/env';
 import { dataManager } from '../lib/data/manager';
 import { RawDataSet } from '../lib/data/raw';
-import { DataSet, dataSetConfigFromENV } from '../lib/data/set';
+import { dataSetConfigFromENV } from '../lib/data/set';
 import { Engine } from "../lib/engine";
 import { Hubspot } from '../lib/hubspot';
 import { ConsoleLogger } from '../lib/log/console';
 
 const nextLogDirName = logDirNameGenerator();
-const { data } = dataManager.latestDataSet();
+const { data, dataSet } = dataManager.latestDataSet(dataSetConfigFromENV());
 
 let hubspot: Hubspot;
 hubspot = runEngine();
@@ -20,8 +20,7 @@ pipeOutputToInput(hubspot, data);
 hubspot = runEngine();
 
 function runEngine() {
-  const { logDir } = dataManager.latestDataSet(nextLogDirName());
-  const dataSet = new DataSet(dataSetConfigFromENV());
+  const { logDir } = dataManager.latestDataSet(dataSetConfigFromENV(), nextLogDirName());
   const engine = new Engine(dataSet, engineConfigFromENV(), new ConsoleLogger(), logDir);
   engine.run(data);
   dataSet.hubspot.populateFakeIds();

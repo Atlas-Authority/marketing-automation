@@ -3,7 +3,7 @@ import util from 'util';
 import { engineConfigFromENV } from '../lib/config/env';
 import { cliArgs } from '../lib/config/params';
 import { dataManager } from '../lib/data/manager';
-import { DataSet, dataSetConfigFromENV } from '../lib/data/set';
+import { dataSetConfigFromENV } from '../lib/data/set';
 import { Engine } from "../lib/engine";
 import { ConsoleLogger } from '../lib/log/console';
 import { License } from '../lib/model/license';
@@ -20,8 +20,8 @@ function TEMPLATE({ runDealGenerator, RECORDS, EVENTS, ACTIONS }: any) {
 }
 
 function main(template: string, licenseIds: string[]) {
-  const engine = new Engine(new DataSet(dataSetConfigFromENV()), engineConfigFromENV(), new ConsoleLogger());
-  const { data } = dataManager.latestDataSet();
+  const { data, dataSet } = dataManager.latestDataSet(dataSetConfigFromENV());
+  const engine = new Engine(dataSet, engineConfigFromENV(), new ConsoleLogger());
   const { dealGeneratorResults } = engine.run(data);
 
   for (const licenseId of licenseIds) {

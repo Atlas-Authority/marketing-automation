@@ -1,11 +1,12 @@
 import 'source-map-support/register';
 import { dataManager } from '../lib/data/manager';
+import { dataSetConfigFromENV } from '../lib/data/set';
 import { RawLicense, RawTransaction } from '../lib/marketplace/raw';
 
 main();
 function main() {
 
-  const { data } = dataManager.latestDataSet();
+  const { data } = dataManager.latestDataSet(dataSetConfigFromENV());
 
   const licensesWith = data.licensesWithDataInsights;
   const licensesWithout = data.licensesWithoutDataInsights;
