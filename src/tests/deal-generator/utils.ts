@@ -1,4 +1,5 @@
 import Chance from 'chance';
+import { DateTime } from 'luxon';
 import { RawDataSet } from '../../lib/data/raw';
 import { DataSet } from '../../lib/data/set';
 import { Action } from "../../lib/deal-generator/actions";
@@ -94,7 +95,7 @@ function processInput(input: TestInput): { config: EngineConfig; dataSet: DataSe
     }
   }
 
-  const dataSet = new DataSet(data);
+  const dataSet = new DataSet(data, DateTime.now());
 
   return { config, dataSet };
 }

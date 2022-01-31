@@ -1,4 +1,5 @@
 import * as luxon from 'luxon';
+import { DateTime } from 'luxon';
 import { ConsoleLogger } from '../log/console';
 import { LogDir } from '../log/logdir';
 import { withAutoClose } from "../util/helpers";
@@ -44,7 +45,7 @@ class DataManager {
     const dataDir = DataDir.root.subdir(dirName);
     const dataStore = new DataSetStore(dataDir);
     const data = dataStore.load();
-    const dataSet = new DataSet(data, config);
+    const dataSet = new DataSet(data, DateTime.fromMillis(ms), config);
 
     dataSet.makeLogDir = (name) => new LogDir(dataDir.subdir(name));
 
