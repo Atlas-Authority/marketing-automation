@@ -32,7 +32,7 @@ export class Engine {
   private step = 0;
 
   public partnerDomains = new Set<string>();
-  public customerDomains = new Set<string>();
+  private customerDomains = new Set<string>();
 
   public tallier;
 
