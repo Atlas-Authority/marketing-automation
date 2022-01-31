@@ -90,7 +90,11 @@ class MpacStructurer {
       }
 
       if (license.data.newEvalData) {
-        const evalLicense = licensesByAddonLicenseId.get(license.data.newEvalData.evaluationLicense);
+        const evalLicense = (
+          licensesByAddonLicenseId.get(license.data.newEvalData.evaluationLicense) ??
+          licensesByAppEntitlementId.get(license.data.newEvalData.evaluationLicense) ??
+          licensesByAppEntitlementNumber.get(license.data.newEvalData.evaluationLicense)
+        );
         license.evaluatedFrom = evalLicense;
         evalLicense!.evaluatedTo = license;
       }
