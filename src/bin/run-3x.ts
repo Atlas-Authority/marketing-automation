@@ -1,12 +1,12 @@
 import 'source-map-support/register';
 import { engineConfigFromENV } from '../lib/config/env';
 import { dataManager } from '../lib/data/manager';
-import { DataSet, dataSetConfigFromENV } from '../lib/data/set';
+import { DataSet } from '../lib/data/set';
 import { Engine } from "../lib/engine/engine";
 import { ConsoleLogger } from '../lib/log/console';
 
 const nextLogDirName = logDirNameGenerator();
-let dataSet = dataManager.latestDataSet(dataSetConfigFromENV());
+let dataSet = dataManager.latestDataSet();
 
 dataSet = runEngine(dataSet);
 dataSet = runEngine(dataSet);

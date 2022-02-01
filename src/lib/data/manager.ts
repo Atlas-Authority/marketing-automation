@@ -6,7 +6,7 @@ import { withAutoClose } from "../util/helpers";
 import DataDir from "./dir";
 import { RawDataSet } from './raw';
 import { DataSetScheduler } from './scheduler';
-import { DataSet, DataSetConfig } from './set';
+import { DataSet, dataSetConfigFromENV } from './set';
 import { DataSetStore } from './store';
 
 interface Metadata {
@@ -37,7 +37,7 @@ class DataManager {
     return ms;
   }
 
-  public dataSetFrom(ms: number, config: DataSetConfig) {
+  public dataSetFrom(ms: number) {
     const dirName = `in-${ms}`;
     if (!this.#meta.timestamps.includes(ms)) {
       throw new Error(`Data set [${dirName}] does not exist`);
@@ -45,22 +45,22 @@ class DataManager {
     const dataDir = DataDir.root.subdir(dirName);
     const dataStore = new DataSetStore(dataDir);
     const data = dataStore.load();
-    const dataSet = new DataSet(data, DateTime.fromMillis(ms), config);
+    const dataSet = new DataSet(data, DateTime.fromMillis(ms), dataSetConfigFromENV());
 
     dataSet.makeLogDir = (name) => new LogDir(dataDir.subdir(name));
 
     return dataSet;
   }
 
-  public latestDataSet(config: DataSetConfig) {
+  public latestDataSet() {
     if (this.#meta.timestamps.length === 0) {
       throw new Error(`No data sets available; run engine first`);
     }
-    return this.dataSetFrom(this.#meta.timestamps[0], config);
+    return this.dataSetFrom(this.#meta.timestamps[0]);
   }
 
-  public allDataSets(config: DataSetConfig) {
-    return this.#meta.timestamps.map(ts => this.dataSetFrom(ts, config));
+  public allDataSets() {
+    return this.#meta.timestamps.map(ts => this.dataSetFrom(ts));
   }
 
   public pruneDataSets(console: ConsoleLogger) {
