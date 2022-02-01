@@ -41,7 +41,13 @@ export class DataFile<T extends readonly any[]> {
 
   public writeJsonArray(array: T) {
     withAutoClose(this.writeStream(), stream => {
-      stream.writeLine(JSON.stringify(array, null, 2));
+      stream.writeLine('[');
+      for (const [i, o] of array.entries()) {
+        let line = JSON.stringify(o);
+        if (i < array.length - 1) line += ',';
+        stream.writeLine(line);
+      }
+      stream.writeLine(']');
     });
   }
 
