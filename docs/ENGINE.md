@@ -111,7 +111,7 @@ Once we have this match info, we'll be able to generate deals from them. So it's
 
 #### Logs
 
-Since this phase of engine logic is very dependent on data, and requires a lot of fine tuning via trial/error, copious logs are output to data/out, all prefixed with the string "match" or "matched" for inspection.
+Since this phase of engine logic is very dependent on data, and requires a lot of fine tuning via trial/error, copious logs are output to `data/[input-dir]/[log-dir]/matched*` for inspection.
 
 For a deeper understanding of this phase, run the engine with out=local, and inspect the logs. For convenience, they're output in both JSON and CSV formats, but they're the same data.
 
@@ -176,7 +176,7 @@ Then, for each contact in each group, we set these fields, if configured via Hub
 
 The following logic all runs on each Related License Set.
 
-During this phase, generated events and actions are saved for inspection in data/out/deal-generator.txt. Examining this file after a local run will help make sense of what this phase is doing and how it works.
+During this phase, generated events and actions are saved for inspection in `data/[input-dir]/[log-dir]/deal-generator.txt`. Examining this file after a local run will help make sense of what this phase is doing and how it works.
 
 #### Generating Events
 
