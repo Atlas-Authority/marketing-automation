@@ -15,38 +15,50 @@ export class DataSetStore {
   private rawContacts;
 
   constructor(dataDir: DataDir) {
-    this.licensesWithDataInsights = dataDir.file<RawLicense[]>('licenses-with.csv');
-    this.licensesWithoutDataInsights = dataDir.file<RawLicense[]>('licenses-without.csv');
-    this.transactions = dataDir.file<RawTransaction[]>('transactions.csv');
-    this.tlds = dataDir.file<{ tld: string }[]>('tlds.csv');
-    this.freeDomains = dataDir.file<{ domain: string }[]>('domains.csv');
-    this.rawDeals = dataDir.file<FullEntity[]>('deals.csv');
-    this.rawCompanies = dataDir.file<FullEntity[]>('companies.csv');
-    this.rawContacts = dataDir.file<FullEntity[]>('contacts.csv');
+    this.licensesWithDataInsights = (ext: string) => dataDir.file<RawLicense[]>('licenses-with.' + ext);
+    this.licensesWithoutDataInsights = (ext: string) => dataDir.file<RawLicense[]>('licenses-without.' + ext);
+    this.transactions = (ext: string) => dataDir.file<RawTransaction[]>('transactions.' + ext);
+    this.tlds = (ext: string) => dataDir.file<{ tld: string }[]>('tlds.' + ext);
+    this.freeDomains = (ext: string) => dataDir.file<{ domain: string }[]>('domains.' + ext);
+    this.rawDeals = (ext: string) => dataDir.file<FullEntity[]>('deals.' + ext);
+    this.rawCompanies = (ext: string) => dataDir.file<FullEntity[]>('companies.' + ext);
+    this.rawContacts = (ext: string) => dataDir.file<FullEntity[]>('contacts.' + ext);
   }
 
   load(): RawDataSet {
     return {
-      licensesWithDataInsights: this.licensesWithDataInsights.readArray(),
-      licensesWithoutDataInsights: this.licensesWithoutDataInsights.readArray(),
-      transactions: this.transactions.readArray(),
-      tlds: this.tlds.readArray().map(({ tld }) => tld),
-      freeDomains: this.freeDomains.readArray().map(({ domain }) => domain),
-      rawDeals: this.rawDeals.readArray(),
-      rawCompanies: this.rawCompanies.readArray(),
-      rawContacts: this.rawContacts.readArray(),
+      licensesWithDataInsights: this.licensesWithDataInsights('csv').readArray(),
+      licensesWithoutDataInsights: this.licensesWithoutDataInsights('csv').readArray(),
+      transactions: this.transactions('csv').readArray(),
+      tlds: this.tlds('csv').readArray().map(({ tld }) => tld),
+      freeDomains: this.freeDomains('csv').readArray().map(({ domain }) => domain),
+      rawDeals: this.rawDeals('csv').readArray(),
+      rawCompanies: this.rawCompanies('csv').readArray(),
+      rawContacts: this.rawContacts('csv').readArray(),
     }
   }
 
   save(data: RawDataSet) {
-    this.transactions.writeArray(data.transactions);
-    this.licensesWithoutDataInsights.writeArray(data.licensesWithoutDataInsights);
-    this.licensesWithDataInsights.writeArray(data.licensesWithDataInsights);
-    this.freeDomains.writeArray(data.freeDomains.map(domain => ({ domain })));
-    this.tlds.writeArray(data.tlds.map(tld => ({ tld })));
-    this.rawDeals.writeArray(data.rawDeals);
-    this.rawCompanies.writeArray(data.rawCompanies);
-    this.rawContacts.writeArray(data.rawContacts);
+    this.transactions('csv').writeArray(data.transactions);
+    this.licensesWithoutDataInsights('csv').writeArray(data.licensesWithoutDataInsights);
+    this.licensesWithDataInsights('csv').writeArray(data.licensesWithDataInsights);
+    this.freeDomains('csv').writeArray(data.freeDomains.map(domain => ({ domain })));
+    this.tlds('csv').writeArray(data.tlds.map(tld => ({ tld })));
+    this.rawDeals('csv').writeArray(data.rawDeals);
+    this.rawCompanies('csv').writeArray(data.rawCompanies);
+    this.rawContacts('csv').writeArray(data.rawContacts);
+  }
+
+  inflate() {
+    const data = this.load();
+    this.transactions('json').writeJsonArray(data.transactions);
+    this.licensesWithoutDataInsights('json').writeJsonArray(data.licensesWithoutDataInsights);
+    this.licensesWithDataInsights('json').writeJsonArray(data.licensesWithDataInsights);
+    this.freeDomains('json').writeJsonArray(data.freeDomains.map(domain => ({ domain })));
+    this.tlds('json').writeJsonArray(data.tlds.map(tld => ({ tld })));
+    this.rawDeals('json').writeJsonArray(data.rawDeals);
+    this.rawCompanies('json').writeJsonArray(data.rawCompanies);
+    this.rawContacts('json').writeJsonArray(data.rawContacts);
   }
 
 }

@@ -52,6 +52,16 @@ class DataManager {
     return dataSet;
   }
 
+  public inflateDataSetFrom(ms: number) {
+    const dirName = `in-${ms}`;
+    if (!this.#meta.timestamps.includes(ms)) {
+      throw new Error(`Data set [${dirName}] does not exist`);
+    }
+    const dataDir = DataDir.root.subdir(dirName);
+    const dataStore = new DataSetStore(dataDir);
+    dataStore.inflate();
+  }
+
   public latestDataSet() {
     if (this.#meta.timestamps.length === 0) {
       throw new Error(`No data sets available; run engine first`);
