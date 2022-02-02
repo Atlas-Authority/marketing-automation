@@ -1,18 +1,16 @@
 import 'source-map-support/register';
 import { engineConfigFromENV } from '../lib/config/env';
 import { dataManager } from '../lib/data/manager';
-import { Engine } from "../lib/engine";
-import { Hubspot } from '../lib/hubspot';
+import { Engine } from "../lib/engine/engine";
 import { isPresent, sorter } from "../lib/util/helpers";
 
-const engine = new Engine(Hubspot.memory(), engineConfigFromENV());
 const dataSet = dataManager.latestDataSet();
-const logDir = dataSet.logDirNamed(`inspect-${Date.now()}`);
-const data = dataSet.load();
-engine.run(data);
+const logDir = dataSet.makeLogDir!(`inspect-${Date.now()}`);
+const engine = new Engine(engineConfigFromENV());
+engine.run(dataSet);
 
 const attributions = (engine
-  .licenses
+  .mpac.licenses
   .map(l => l.data.attribution)
   .filter(isPresent)
   .sort(sorter(a => [

@@ -1,14 +1,16 @@
 import 'source-map-support/register';
 import { engineConfigFromENV, runLoopConfigFromENV } from "../lib/config/env";
 import { dataManager } from '../lib/data/manager';
-import { Engine } from "../lib/engine";
 import { downloadAllData } from '../lib/engine/download';
+import { Engine } from "../lib/engine/engine";
 import { SlackNotifier } from '../lib/engine/slack-notifier';
-import { Hubspot } from '../lib/hubspot';
+import { hubspotConfigFromENV } from '../lib/hubspot/hubspot';
+import { HubspotUploader } from '../lib/hubspot/uploader';
 import { ConsoleLogger } from '../lib/log/console';
 import run from "../lib/util/runner";
 
 const console = new ConsoleLogger();
+const uploader = new HubspotUploader(console);
 
 const runLoopConfig = runLoopConfigFromENV();
 const notifier = SlackNotifier.fromENV(new ConsoleLogger());
@@ -21,19 +23,19 @@ run(console, runLoopConfig, {
     dataManager.pruneDataSets(console);
 
     console.printInfo('Main', 'Downloading data');
-    const hubspot = Hubspot.live(console);
-    const { dataSet, data } = await downloadAllData(console, hubspot);
-    const logDir = dataSet.logDirNamed('main');
+    const ms = await downloadAllData(console, hubspotConfigFromENV());
+    const dataSet = dataManager.dataSetFrom(ms);
+    const logDir = dataSet.makeLogDir!('main');
 
     console.printInfo('Main', 'Running engine');
-    const engine = new Engine(hubspot, engineConfigFromENV(), console, logDir);
-    engine.run(data);
+    const engine = new Engine(engineConfigFromENV(), console, logDir);
+    engine.run(dataSet);
 
     console.printInfo('Main', 'Upsyncing changes to HubSpot');
-    await hubspot.upsyncChangesToHubspot();
+    await uploader.upsyncChangesToHubspot(dataSet.hubspot);
 
     console.printInfo('Main', 'Writing HubSpot change log file');
-    logDir.hubspotOutputLogger()?.logResults(hubspot);
+    logDir.hubspotOutputLogger()?.logResults(dataSet.hubspot);
 
     console.printInfo('Main', 'Done');
   },

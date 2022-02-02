@@ -1,8 +1,6 @@
-import { ConsoleLogger } from '../log/console';
 import { isPresent } from '../util/helpers';
 import { Entity, Indexer } from './entity';
 import { EntityAdapter, EntityKind, FullEntity, RelativeAssociation } from './interfaces';
-import { HubspotUploader } from './uploader';
 
 export abstract class EntityManager<
   D extends Record<string, any>,
@@ -10,15 +8,13 @@ export abstract class EntityManager<
 {
 
   protected abstract Entity: new (id: string | null, adapter: EntityAdapter<D>, downloadedData: Record<string, string>, data: D, indexer: Indexer<D>) => E;
-  protected abstract entityAdapter: EntityAdapter<D>;
+  public abstract entityAdapter: EntityAdapter<D>;
   protected get kind(): EntityKind { return this.entityAdapter.kind; }
 
   private entities: E[] = [];
   private indexes: Index<E>[] = [];
   private indexIndex = new Map<keyof D, Index<E>>();
   public get = this.makeIndex(e => [e.id].filter(isPresent), []);
-
-  constructor(private console?: ConsoleLogger) { }
 
   public importEntities(rawEntities: readonly FullEntity[]) {
     const prelinkedAssociations = new Map<string, Set<RelativeAssociation>>();
@@ -84,10 +80,6 @@ export abstract class EntityManager<
 
   public getArray(): E[] {
     return this.entities;
-  }
-
-  public makeUploader() {
-    return new HubspotUploader(this.entities, this.entityAdapter, this.console);
   }
 
   protected makeIndex(keysFor: (e: E) => string[], deps: (keyof D)[]): (key: string) => E | undefined {

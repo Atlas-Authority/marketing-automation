@@ -1,38 +1,24 @@
 import 'source-map-support/register';
 import { engineConfigFromENV } from '../lib/config/env';
 import { dataManager } from '../lib/data/manager';
-import { Data } from '../lib/data/set';
-import { Engine } from "../lib/engine";
-import { Hubspot } from '../lib/hubspot';
+import { DataSet } from '../lib/data/set';
+import { Engine } from "../lib/engine/engine";
 import { ConsoleLogger } from '../lib/log/console';
 
 const nextLogDirName = logDirNameGenerator();
-const dataSet = dataManager.latestDataSet();
-const data = dataSet.load();
+let dataSet = dataManager.latestDataSet();
 
-let hubspot: Hubspot;
-hubspot = runEngine();
+dataSet = runEngine(dataSet);
+dataSet = runEngine(dataSet);
+dataSet = runEngine(dataSet);
 
-pipeOutputToInput(hubspot, data);
-hubspot = runEngine();
-
-pipeOutputToInput(hubspot, data);
-hubspot = runEngine();
-
-function runEngine() {
-  const logDir = dataSet.logDirNamed(nextLogDirName());
-  const hubspot = Hubspot.memoryFromENV(new ConsoleLogger());
-  const engine = new Engine(hubspot, engineConfigFromENV(), new ConsoleLogger(), logDir);
-  engine.run(data);
-  hubspot.populateFakeIds();
-  logDir.hubspotOutputLogger()?.logResults(hubspot);
-  return hubspot;
-}
-
-function pipeOutputToInput(hubspot: Hubspot, data: Data) {
-  data.rawDeals = hubspot.dealManager.getArray().map(e => e.toRawEntity());
-  data.rawContacts = hubspot.contactManager.getArray().map(e => e.toRawEntity());
-  data.rawCompanies = hubspot.companyManager.getArray().map(e => e.toRawEntity());
+function runEngine(dataSet: DataSet) {
+  const logDir = dataSet.makeLogDir!(nextLogDirName());
+  const engine = new Engine(engineConfigFromENV(), new ConsoleLogger(), logDir);
+  engine.run(dataSet);
+  dataSet.hubspot.populateFakeIds();
+  logDir.hubspotOutputLogger()?.logResults(dataSet.hubspot);
+  return DataSet.fromDataSet(dataSet);
 }
 
 function logDirNameGenerator() {

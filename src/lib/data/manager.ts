@@ -1,9 +1,13 @@
 import * as luxon from 'luxon';
+import { DateTime } from 'luxon';
 import { ConsoleLogger } from '../log/console';
+import { LogDir } from '../log/logdir';
 import { withAutoClose } from "../util/helpers";
 import DataDir from "./dir";
+import { RawDataSet } from './raw';
 import { DataSetScheduler } from './scheduler';
-import { DataSet } from "./set";
+import { DataSet, dataSetConfigFromENV } from './set';
+import { DataSetStore } from './store';
 
 interface Metadata {
   version: number;
@@ -24,20 +28,49 @@ class DataManager {
     };
   }
 
-  public newDataSet() {
+  public createDataSet(data: RawDataSet) {
     const ms = Date.now();
     this.#meta.timestamps.unshift(ms);
     this.#save();
-    return new DataSet(DataDir.root.subdir(`in-${ms}`));
+    const dataStore = new DataSetStore(DataDir.root.subdir(`in-${ms}`));
+    dataStore.save(data);
+    return ms;
+  }
+
+  public dataSetFrom(ms: number) {
+    const dirName = `in-${ms}`;
+    if (!this.#meta.timestamps.includes(ms)) {
+      throw new Error(`Data set [${dirName}] does not exist`);
+    }
+    const dataDir = DataDir.root.subdir(dirName);
+    const dataStore = new DataSetStore(dataDir);
+    const data = dataStore.load();
+    const dataSet = new DataSet(data, DateTime.fromMillis(ms), dataSetConfigFromENV());
+
+    dataSet.makeLogDir = (name) => new LogDir(dataDir.subdir(name));
+
+    return dataSet;
+  }
+
+  public inflateDataSetFrom(ms: number) {
+    const dirName = `in-${ms}`;
+    if (!this.#meta.timestamps.includes(ms)) {
+      throw new Error(`Data set [${dirName}] does not exist`);
+    }
+    const dataDir = DataDir.root.subdir(dirName);
+    const dataStore = new DataSetStore(dataDir);
+    dataStore.inflate();
   }
 
   public latestDataSet() {
     if (this.#meta.timestamps.length === 0) {
       throw new Error(`No data sets available; run engine first`);
     }
+    return this.dataSetFrom(this.#meta.timestamps[0]);
+  }
 
-    const ms = this.#meta.timestamps[0];
-    return new DataSet(DataDir.root.subdir(`in-${ms}`));
+  public allDataSets() {
+    return this.#meta.timestamps.map(ts => this.dataSetFrom(ts));
   }
 
   public pruneDataSets(console: ConsoleLogger) {

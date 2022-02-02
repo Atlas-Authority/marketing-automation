@@ -2,22 +2,16 @@ import got from 'got';
 import promiseAllProperties from 'promise-all-properties';
 import { dataManager } from '../data/manager';
 import HubspotAPI from "../hubspot/api";
+import { Hubspot, HubspotConfig } from '../hubspot/hubspot';
 import { ConsoleLogger } from '../log/console';
 import { MultiDownloadLogger } from "../log/download";
 import { MarketplaceAPI } from "../marketplace/api";
-import { CompanyManager } from '../model/company';
-import { ContactManager } from '../model/contact';
-import { DealManager } from '../model/deal';
 
-interface HubspotManagers {
-  dealManager: DealManager,
-  contactManager: ContactManager,
-  companyManager: CompanyManager,
-}
-
-export async function downloadAllData(console: ConsoleLogger, managers: HubspotManagers) {
+export async function downloadAllData(console: ConsoleLogger, hubspotConfig: HubspotConfig) {
   const hubspotAPI = new HubspotAPI(console);
   const marketplaceAPI = new MarketplaceAPI();
+
+  const hubspot = new Hubspot(hubspotConfig);
 
   console.printInfo('Downloader', 'Starting downloads with API');
   const logbox = new MultiDownloadLogger(console);
@@ -39,22 +33,21 @@ export async function downloadAllData(console: ConsoleLogger, managers: HubspotM
       downloadFreeEmailProviders()),
 
     rawDeals: logbox.wrap('Deals', () =>
-      hubspotAPI.downloadHubspotEntities(managers.dealManager.entityAdapter)),
+      hubspotAPI.downloadHubspotEntities(hubspot.dealManager.entityAdapter)),
 
     rawCompanies: logbox.wrap('Companies', () =>
-      hubspotAPI.downloadHubspotEntities(managers.companyManager.entityAdapter)),
+      hubspotAPI.downloadHubspotEntities(hubspot.companyManager.entityAdapter)),
 
     rawContacts: logbox.wrap('Contacts', () =>
-      hubspotAPI.downloadHubspotEntities(managers.contactManager.entityAdapter)),
+      hubspotAPI.downloadHubspotEntities(hubspot.contactManager.entityAdapter)),
   });
 
-  const dataSet = dataManager.newDataSet();
-  dataSet.save(data);
+  const ms = dataManager.createDataSet(data);
 
   logbox.done();
   console.printInfo('Downloader', 'Done');
 
-  return { dataSet, data };
+  return ms;
 }
 
 async function downloadAllTlds(): Promise<string[]> {

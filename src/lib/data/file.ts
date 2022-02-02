@@ -39,6 +39,18 @@ export class DataFile<T extends readonly any[]> {
     });
   }
 
+  public writeJsonArray(array: T) {
+    withAutoClose(this.writeStream(), stream => {
+      stream.writeLine('[');
+      for (const [i, o] of array.entries()) {
+        let line = JSON.stringify(o, null, 2);
+        if (i < array.length - 1) line += ',';
+        stream.writeLine(line);
+      }
+      stream.writeLine(']');
+    });
+  }
+
   public writeStream(): LogWriteStream {
     const fd = fs.openSync(this.#url, 'w');
     return {

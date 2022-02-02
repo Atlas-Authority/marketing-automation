@@ -1,9 +1,10 @@
 import Chance from 'chance';
-import { Data } from '../../lib/data/set';
+import { DateTime } from 'luxon';
+import { RawDataSet } from '../../lib/data/raw';
+import { DataSet } from '../../lib/data/set';
 import { Action } from "../../lib/deal-generator/actions";
 import { DealRelevantEvent } from '../../lib/deal-generator/events';
-import { Engine, EngineConfig } from '../../lib/engine';
-import { Hubspot } from '../../lib/hubspot';
+import { Engine, EngineConfig } from '../../lib/engine/engine';
 import { DealStage } from '../../lib/hubspot/interfaces';
 import { RawLicense, RawLicenseContact, RawTransaction } from '../../lib/marketplace/raw';
 import { Company } from '../../lib/model/company';
@@ -23,36 +24,33 @@ export type TestInput = {
 };
 
 export function runDealGeneratorTwice(input: TestInput) {
-  const { data, config } = processInput(input);
-  const output = runDealGeneratorWith(data, config);
-  data.rawCompanies = output.companies.map(company => company.toRawEntity());
-  data.rawContacts = output.contacts.map(contact => contact.toRawEntity());
-  data.rawDeals = output.deals.map(deal => deal.toRawEntity());
-  return runDealGeneratorWith(data, config);
+  const { dataSet, config } = processInput(input);
+  const output = runDealGeneratorWith(dataSet, config);
+  return runDealGeneratorWith(DataSet.fromDataSet(output.dataSet), config);
 }
 
 export function runDealGenerator(input: TestInput) {
-  const { data, config } = processInput(input);
-  return runDealGeneratorWith(data, config);
+  const { dataSet, config } = processInput(input);
+  return runDealGeneratorWith(dataSet, config);
 }
 
-function runDealGeneratorWith(data: Data, config: EngineConfig) {
-  const hubspot = Hubspot.memory();
-  const engine = new Engine(hubspot, config);
-  const engineResults = engine.run(data);
-  const dealGeneratorResults = engineResults.dealGeneratorResults.get(engine.licenses[0].id)!;
-  hubspot.populateFakeIds();
+function runDealGeneratorWith(dataSet: DataSet, config: EngineConfig) {
+  const engine = new Engine(config);
+  const engineResults = engine.run(dataSet);
+  const dealGeneratorResults = engineResults.dealGeneratorResults.get(engine.mpac.licenses[0].id)!;
+  dataSet.hubspot.populateFakeIds();
   return {
-    deals: hubspot.dealManager.getArray(),
-    contacts: hubspot.contactManager.getArray(),
-    companies: hubspot.companyManager.getArray(),
+    dataSet,
+    deals: dataSet.hubspot.dealManager.getArray(),
+    contacts: dataSet.hubspot.contactManager.getArray(),
+    companies: dataSet.hubspot.companyManager.getArray(),
     actions: dealGeneratorResults.actions.map(abbrActionDetails),
     events: dealGeneratorResults.events.map(abbrEventDetails),
   };
 }
 
-function processInput(input: TestInput): { config: EngineConfig; data: Data; } {
-  const data: Data = {
+function processInput(input: TestInput): { config: EngineConfig; dataSet: DataSet; } {
+  const data: RawDataSet = {
     rawCompanies: [],
     rawContacts: [],
     rawDeals: [],
@@ -97,7 +95,9 @@ function processInput(input: TestInput): { config: EngineConfig; data: Data; } {
     }
   }
 
-  return { config, data };
+  const dataSet = new DataSet(data, DateTime.now());
+
+  return { config, dataSet };
 }
 
 function rawLicenseFrom(id: string, addonKey: string, techContact: RawLicenseContact, start: string, licenseType: string, status: string): RawLicense {

@@ -1,5 +1,5 @@
 import assert from "assert";
-import { Engine } from "../engine";
+import { Engine } from "../engine/engine";
 import { RelatedLicenseSet } from "../license-matching/license-grouper";
 import { Table } from "../log/table";
 import { Deal } from "../model/deal";
@@ -31,9 +31,9 @@ export class DealGenerator {
 
   public constructor(private engine: Engine) {
     this.actionGenerator = new ActionGenerator(
-      engine.dealManager,
+      engine.hubspot.dealManager,
       engine.dealPropertyConfig,
-      this.ignore.bind(this),
+      (reason, amount) => this.ignore(reason, amount),
       engine.console,
     );
   }
@@ -55,7 +55,7 @@ export class DealGenerator {
 
         for (const action of actions) {
           const deal = (action.type === 'create'
-            ? this.engine.dealManager.create(action.properties)
+            ? this.engine.hubspot.dealManager.create(action.properties)
             : action.deal);
 
           if (deal) {
@@ -92,7 +92,11 @@ export class DealGenerator {
   private generateActionsForMatchedGroup(group: RelatedLicenseSet) {
     assert.ok(group.length > 0);
 
-    const eventGenerator = new EventGenerator(this.engine);
+    const eventGenerator = new EventGenerator(
+      this.engine.archivedApps,
+      this.engine.partnerDomains,
+      this.engine.freeEmailDomains,
+    );
 
     const records = eventGenerator.getSortedRecords(group);
     const events = eventGenerator.interpretAsEvents(records);
@@ -105,7 +109,7 @@ export class DealGenerator {
     const records = group.flatMap(license => [license, ...license.transactions]);
     const emails = [...new Set(records.flatMap(r => r.allContacts.map(c => c.data.email)))];
     const contacts = (emails
-      .map(email => this.engine.contactManager.getByEmail(email))
+      .map(email => this.engine.hubspot.contactManager.getByEmail(email))
       .filter(isPresent));
     contacts.sort(sorter(c => c.isCustomer ? -1 : 0));
 

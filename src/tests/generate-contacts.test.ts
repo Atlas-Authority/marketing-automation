@@ -1,4 +1,4 @@
-import { GeneratedContact, mergeContactInfo } from "../lib/contact-generator";
+import { GeneratedContact, mergeContactInfo } from "../lib/contact-generator/contact-generator";
 
 describe('updating latest contact properties', () => {
 

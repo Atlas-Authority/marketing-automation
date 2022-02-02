@@ -1,67 +1,48 @@
-import { FullEntity } from "../hubspot/interfaces";
-import { LogDir } from "../log";
-import { RawLicense, RawTransaction } from "../marketplace/raw";
-import DataDir from "./dir";
+import { DateTime } from "luxon";
+import { mpacConfigFromENV } from "../config/env";
+import { deriveMultiProviderDomainsSet } from "../engine/all-free-email-providers";
+import { Hubspot, HubspotConfig, hubspotConfigFromENV } from "../hubspot/hubspot";
+import { LogDir } from "../log/logdir";
+import { Marketplace, MpacConfig } from "../marketplace/marketplace";
+import { RawDataSet } from "./raw";
 
-export interface Data {
-  tlds: string[];
-  licensesWithDataInsights: RawLicense[];
-  licensesWithoutDataInsights: RawLicense[];
-  transactions: RawTransaction[];
-  freeDomains: string[];
-  rawDeals: FullEntity[];
-  rawCompanies: FullEntity[];
-  rawContacts: FullEntity[];
-}
+export type DataSetConfig = {
+  mpacConfig?: MpacConfig;
+  hubspotConfig?: HubspotConfig;
+};
 
 export class DataSet {
 
-  private licensesWithDataInsights;
-  private licensesWithoutDataInsights;
-  private transactions;
-  private tlds;
-  private freeDomains;
-  private rawDeals;
-  private rawCompanies;
-  private rawContacts;
+  public static fromDataSet(other: DataSet) {
+    other.rawData.rawDeals = other.hubspot.dealManager.getArray().map(e => e.toRawEntity());
+    other.rawData.rawContacts = other.hubspot.contactManager.getArray().map(e => e.toRawEntity());
+    other.rawData.rawCompanies = other.hubspot.companyManager.getArray().map(e => e.toRawEntity());
 
-  constructor(private dataDir: DataDir) {
-    this.licensesWithDataInsights = dataDir.file<RawLicense[]>('licenses-with.csv');
-    this.licensesWithoutDataInsights = dataDir.file<RawLicense[]>('licenses-without.csv');
-    this.transactions = dataDir.file<RawTransaction[]>('transactions.csv');
-    this.tlds = dataDir.file<{ tld: string }[]>('tlds.csv');
-    this.freeDomains = dataDir.file<{ domain: string }[]>('domains.csv');
-    this.rawDeals = dataDir.file<FullEntity[]>('deals.csv');
-    this.rawCompanies = dataDir.file<FullEntity[]>('companies.csv');
-    this.rawContacts = dataDir.file<FullEntity[]>('contacts.csv');
+    const newDataSet = new DataSet(other.rawData, other.timestamp, other.config);
+    newDataSet.makeLogDir = other.makeLogDir;
+    return newDataSet;
   }
 
-  logDirNamed(name: string) {
-    return new LogDir(this.dataDir.subdir(name));
+  public freeEmailDomains = new Set<string>();
+  public hubspot;
+  public mpac;
+
+  public makeLogDir?: (name: string) => LogDir;
+
+  public constructor(public rawData: RawDataSet, private timestamp: DateTime, private config?: DataSetConfig) {
+    this.hubspot = new Hubspot(config?.hubspotConfig);
+    this.mpac = new Marketplace(config?.mpacConfig);
+
+    this.freeEmailDomains = deriveMultiProviderDomainsSet(rawData.freeDomains);
+    this.hubspot.importData(rawData);
+    this.mpac.importData(rawData);
   }
 
-  load(): Data {
-    return {
-      licensesWithDataInsights: this.licensesWithDataInsights.readArray(),
-      licensesWithoutDataInsights: this.licensesWithoutDataInsights.readArray(),
-      transactions: this.transactions.readArray(),
-      tlds: this.tlds.readArray().map(({ tld }) => tld),
-      freeDomains: this.freeDomains.readArray().map(({ domain }) => domain),
-      rawDeals: this.rawDeals.readArray(),
-      rawCompanies: this.rawCompanies.readArray(),
-      rawContacts: this.rawContacts.readArray(),
-    }
-  }
+}
 
-  save(data: Data) {
-    this.transactions.writeArray(data.transactions);
-    this.licensesWithoutDataInsights.writeArray(data.licensesWithoutDataInsights);
-    this.licensesWithDataInsights.writeArray(data.licensesWithDataInsights);
-    this.freeDomains.writeArray(data.freeDomains.map(domain => ({ domain })));
-    this.tlds.writeArray(data.tlds.map(tld => ({ tld })));
-    this.rawDeals.writeArray(data.rawDeals);
-    this.rawCompanies.writeArray(data.rawCompanies);
-    this.rawContacts.writeArray(data.rawContacts);
-  }
-
+export function dataSetConfigFromENV(): DataSetConfig {
+  return {
+    mpacConfig: mpacConfigFromENV(),
+    hubspotConfig: hubspotConfigFromENV(),
+  };
 }

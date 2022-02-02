@@ -1,7 +1,6 @@
 import { Entity } from "../hubspot/entity";
 import { EntityAdapter } from "../hubspot/interfaces";
 import { EntityManager } from "../hubspot/manager";
-import { ConsoleLogger } from "../log/console";
 import { Company } from "./company";
 import { License } from "./license";
 import { Transaction } from "./transaction";
@@ -168,8 +167,8 @@ export class ContactManager extends EntityManager<ContactData, Contact> {
 
   public getByEmail = this.makeIndex(c => c.allEmails, ['email']);
 
-  constructor(config: HubspotContactConfig, console?: ConsoleLogger) {
-    super(console);
+  constructor(config: HubspotContactConfig) {
+    super();
     this.entityAdapter = makeAdapter(config);
   }
 

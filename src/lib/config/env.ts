@@ -1,8 +1,9 @@
 import assert from "assert";
 import dotenv from "dotenv";
-import { EngineConfig } from "../engine";
+import { EngineConfig } from "../engine/engine";
 import { HubspotCreds } from "../hubspot/api";
 import { MpacCreds } from "../marketplace/api";
+import { MpacConfig } from "../marketplace/marketplace";
 import { HubspotContactConfig } from "../model/contact";
 import { HubspotDealConfig } from "../model/deal";
 import { RunLoopConfig } from "../util/runner";
@@ -88,6 +89,12 @@ export function hubspotContactConfigFromENV(): HubspotContactConfig {
   };
 }
 
+export function mpacConfigFromENV(): MpacConfig {
+  return {
+    ignoredEmails: new Set((optional('IGNORED_EMAILS')?.split(',') ?? []).map(e => e.toLowerCase())),
+  };
+}
+
 export function engineConfigFromENV(): EngineConfig {
   return {
     partnerDomains: new Set(optional('PARTNER_DOMAINS')?.split(/\s*,\s*/g) ?? []),
@@ -97,7 +104,6 @@ export function engineConfigFromENV(): EngineConfig {
         .map(kv => kv.split('=') as [string, string])
     ),
     archivedApps: new Set(optional('IGNORED_APPS')?.split(',') ?? []),
-    ignoredEmails: new Set((optional('IGNORED_EMAILS')?.split(',') ?? []).map(e => e.toLowerCase())),
     dealProperties: {
       dealOrigin: optional('DEAL_ORIGIN'),
       dealRelatedProducts: optional('DEAL_RELATED_PRODUCTS'),

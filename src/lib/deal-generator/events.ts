@@ -1,4 +1,3 @@
-import { Engine } from "../engine";
 import { RelatedLicenseSet } from "../license-matching/license-grouper";
 import { License } from "../model/license";
 import { Transaction } from "../model/transaction";
@@ -22,7 +21,11 @@ export type DealRelevantEvent = (
 
 export class EventGenerator {
 
-  constructor(private engine: Engine) { }
+  constructor(
+    private archivedApps: Set<string>,
+    private partnerDomains: Set<string>,
+    private freeEmailDomains: Set<string>,
+  ) { }
 
   private events: DealRelevantEvent[] = [];
 
@@ -60,13 +63,13 @@ export class EventGenerator {
   }
 
   private getEventMeta(records: (License | Transaction)[]): EventMeta {
-    if (this.engine.archivedApps.has(records[0].data.addonKey)) {
+    if (this.archivedApps.has(records[0].data.addonKey)) {
       return 'archived-app';
     }
 
     const domains = new Set(records.map(license => license.data.technicalContact.email.toLowerCase().split('@')[1]));
-    const partnerDomains = [...domains].filter(domain => this.engine.partnerDomains.has(domain));
-    const freeEmailDomains = [...domains].filter(domain => this.engine.freeEmailDomains.has(domain));
+    const partnerDomains = [...domains].filter(domain => this.partnerDomains.has(domain));
+    const freeEmailDomains = [...domains].filter(domain => this.freeEmailDomains.has(domain));
 
     if (domains.size == partnerDomains.length + freeEmailDomains.length) {
       if (partnerDomains.length > 0 && freeEmailDomains.length > 0) {
