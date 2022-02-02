@@ -35,7 +35,7 @@ export class DataSet {
     this.mpac = new Marketplace(config?.mpacConfig);
 
     this.freeEmailDomains = deriveMultiProviderDomainsSet(rawData.freeDomains);
-    this.hubspot.importData(rawData);
+    this.hubspot.importData(rawData, console);
     this.mpac.importData(rawData, console);
   }
 
