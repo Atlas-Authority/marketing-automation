@@ -1,4 +1,4 @@
-import { flatten, unflatten } from 'flat';
+import { flatten } from 'flat';
 import { LogWriteStream } from "./file";
 
 export class CsvStream {
@@ -39,10 +39,7 @@ export class CsvStream {
       }
 
       const vals = JSON.parse(`[${line}]`);
-      const entries = keys.map((key, i) => [key, vals[i]]);
-      const normalized = entries.filter(([k, v]) => v !== null && v !== undefined);
-      const object = Object.fromEntries(normalized);
-      const restored = unflatten(object);
+      const restored = unflatten(keys, vals);
       array.push(restored);
     }
 
@@ -83,4 +80,26 @@ export class CsvStream {
     this.stream.close();
   }
 
+}
+
+function unflatten(keys: string[], vals: any[]) {
+  const o = Object.create(null);
+
+  for (let i = 0; i < keys.length; i++) {
+    const key = keys[i];
+    const val = vals[i];
+    if (val === undefined || val === null) continue;
+
+    let sub = o;
+    const parts = key.split('.');
+    const last = parts.pop()!;
+    const lastKey = +last >= 0 ? +last : last;
+    const isArray = typeof lastKey === 'number';
+    for (const part of parts) {
+      sub = sub[part] ??= (isArray ? [] : Object.create(null));
+    }
+    sub[lastKey] = val;
+  }
+
+  return o;
 }
