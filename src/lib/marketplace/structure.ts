@@ -19,6 +19,12 @@ class MpacStructurer {
     const licensesByAppEntitlementId = new Map<string, License>();
     const licensesByAppEntitlementNumber = new Map<string, License>();
 
+    this.console?.printInfo('MPAC Verifier', 'Checking License Multi-ID uniqueness...');
+    this.checkIfIdIsUnique(licensesByAddonLicenseId, licensesByAppEntitlementId, licensesByAppEntitlementNumber);
+    this.checkIfIdIsUnique(licensesByAppEntitlementId, licensesByAddonLicenseId, licensesByAppEntitlementNumber);
+    this.checkIfIdIsUnique(licensesByAppEntitlementNumber, licensesByAddonLicenseId, licensesByAppEntitlementId);
+    this.console?.printInfo('MPAC Verifier', 'Done');
+
     const addLicense = (license: License, id: string | null, mapping: Map<string, License>) => {
       if (!id) return;
       const existing = mapping.get(id);
@@ -39,6 +45,12 @@ class MpacStructurer {
     const transactionsByAddonLicenseId = new Map<string, Set<Transaction>>();
     const transactionsByAppEntitlementId = new Map<string, Set<Transaction>>();
     const transactionsByAppEntitlementNumber = new Map<string, Set<Transaction>>();
+
+    this.console?.printInfo('MPAC Verifier', 'Checking Transaction Multi-ID uniqueness...');
+    this.checkIfIdIsUnique(transactionsByAddonLicenseId, transactionsByAppEntitlementId, transactionsByAppEntitlementNumber);
+    this.checkIfIdIsUnique(transactionsByAppEntitlementId, transactionsByAddonLicenseId, transactionsByAppEntitlementNumber);
+    this.checkIfIdIsUnique(transactionsByAppEntitlementNumber, transactionsByAddonLicenseId, transactionsByAppEntitlementId);
+    this.console?.printInfo('MPAC Verifier', 'Done');
 
     const addTransaction = (transaction: Transaction, id: string | null, mapping: Map<string, Set<Transaction>>) => {
       if (!id) return;
@@ -189,6 +201,14 @@ class MpacStructurer {
 
     if (license1 !== license2) {
       this.console?.printError('MPAC Verifier', `License IDs do not point to same License from Transaction`);
+    }
+  }
+
+  private checkIfIdIsUnique(a: Map<string, any>, b: Map<string, any>, c: Map<string, any>) {
+    for (const key of a.keys()) {
+      if (b.has(key) || c.has(key)) {
+        this.console?.printWarning('MPAC Verifier', 'ID is not unique:', key);
+      }
     }
   }
 
