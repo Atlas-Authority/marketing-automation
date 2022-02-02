@@ -9,6 +9,10 @@ import { RunLoopConfig } from "../util/runner";
 
 dotenv.config();
 
+export function keepDataSetConfigFromENV() {
+  return optional('KEEP_DATA_SETS');
+}
+
 export function hubspotCredsFromENV(): HubspotCreds {
   return requireOneOf([
     { accessToken: 'HUBSPOT_ACCESS_TOKEN' },
