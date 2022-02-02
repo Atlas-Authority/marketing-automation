@@ -30,7 +30,7 @@ export class DataSet {
 
   public makeLogDir?: (name: string) => LogDir;
 
-  public constructor(public rawData: RawDataSet, private timestamp: DateTime, private config?: DataSetConfig, console?: ConsoleLogger) {
+  public constructor(public rawData: RawDataSet, public timestamp: DateTime, private config?: DataSetConfig, console?: ConsoleLogger) {
     this.hubspot = new Hubspot(config?.hubspotConfig);
     this.mpac = new Marketplace(config?.mpacConfig);
 
