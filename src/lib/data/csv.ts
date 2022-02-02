@@ -30,16 +30,18 @@ export class CsvStream {
 
   static readArrayFromCsvLines(lines: Iterable<string>): unknown {
     let keys: string[] | undefined;
+    let unflattener!: Unflattener;
     const array: any[] = [];
 
     for (const line of lines) {
       if (!keys) {
         keys = line.split(',');
+        unflattener = new Unflattener(keys);
         continue;
       }
 
       const vals = JSON.parse(`[${line}]`);
-      const restored = unflatten(keys, vals);
+      const restored = unflattener.run(vals);
       array.push(restored);
     }
 
@@ -80,15 +82,6 @@ export class CsvStream {
     this.stream.close();
   }
 
-}
-
-const unflatteners = new Map<string, Unflattener>();
-
-function unflatten(keys: string[], vals: any[]) {
-  const unflattenerKey = keys.join(',');
-  let unflattener = unflatteners.get(unflattenerKey);
-  if (!unflattener) unflatteners.set(unflattenerKey, unflattener = new Unflattener(keys));
-  return unflattener.run(vals);
 }
 
 class Unflattener {
