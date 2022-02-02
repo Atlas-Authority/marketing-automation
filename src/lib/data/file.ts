@@ -12,7 +12,7 @@ export class DataFile<T extends readonly any[]> {
   }
 
   public readArray(): T {
-    return CsvStream.readFileFromFile(this.readLines()) as T;
+    return CsvStream.readArrayFromCsvLines(this.readLines()) as T;
   }
 
   public readLines(): Iterable<string> {

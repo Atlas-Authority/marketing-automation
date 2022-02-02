@@ -28,7 +28,7 @@ export class CsvStream {
     this.stream.writeLine(','.repeat(this.keyCount - 1));
   }
 
-  static readFileFromFile(lines: Iterable<string>): unknown {
+  static readArrayFromCsvLines(lines: Iterable<string>): unknown {
     let keys: string[] | undefined;
     const array: any[] = [];
 
