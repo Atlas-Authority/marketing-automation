@@ -38,14 +38,20 @@ class DataManager {
   }
 
   public dataSetFrom(ms: number) {
+    const logger = new ConsoleLogger();
+
     const dirName = `in-${ms}`;
     if (!this.#meta.timestamps.includes(ms)) {
       throw new Error(`Data set [${dirName}] does not exist`);
     }
     const dataDir = DataDir.root.subdir(dirName);
     const dataStore = new DataSetStore(dataDir);
+
+    logger.printInfo('Data manager', `Loading data set from disk...`);
     const data = dataStore.load();
-    const dataSet = new DataSet(data, DateTime.fromMillis(ms), dataSetConfigFromENV());
+    logger.printInfo('Data manager', `Done.`);
+
+    const dataSet = new DataSet(data, DateTime.fromMillis(ms), dataSetConfigFromENV(), logger);
 
     dataSet.makeLogDir = (name) => new LogDir(dataDir.subdir(name));
 

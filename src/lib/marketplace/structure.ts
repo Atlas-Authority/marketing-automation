@@ -123,7 +123,7 @@ class MpacStructurer {
     const refundedAmount = [...maybeRefunded].map(t => t.data.vendorAmount).reduce((a, b) => a + b, 0);
 
     if (-refundAmount !== refundedAmount) {
-      this.console?.printWarning('Scoring Engine', "The following transactions have no accompanying licenses:");
+      this.console?.printWarning('MPAC Verifier', "The following transactions have no accompanying licenses:");
 
       const sameById = (tx1: Transaction, tx2: Transaction, id: keyof TransactionData) => (
         tx1.data[id] && tx1.data[id] === tx2.data[id]
@@ -146,7 +146,7 @@ class MpacStructurer {
       if (refunds.size > 0) {
         Table.print({
           title: 'Refunds',
-          log: s => this.console?.printWarning('Scoring Engine', '  ' + s),
+          log: s => this.console?.printWarning('MPAC Verifier', '  ' + s),
           cols: [
             [{ title: 'Transaction[License]', align: 'right' }, tx => tx.id],
             [{ title: 'Amount', align: 'right' }, tx => formatMoney(tx.data.vendorAmount)],
@@ -158,7 +158,7 @@ class MpacStructurer {
       if (maybeRefunded.size > 0) {
         Table.print({
           title: 'Non-Refunds',
-          log: s => this.console?.printWarning('Scoring Engine', '  ' + s),
+          log: s => this.console?.printWarning('MPAC Verifier', '  ' + s),
           cols: [
             [{ title: 'Transaction[License]', align: 'right' }, tx => tx.id],
             [{ title: 'Amount', align: 'right' }, tx => formatMoney(tx.data.vendorAmount)],
@@ -180,7 +180,7 @@ class MpacStructurer {
 
     const same = set1.size === set2.size && [...set1].every(t => set2.has(t));
     if (!same) {
-      this.console?.printError('Database', `License IDs do not point to same transactions`);
+      this.console?.printError('MPAC Verifier', `License IDs do not point to same transactions`);
     }
   }
 
@@ -188,7 +188,7 @@ class MpacStructurer {
     if (!license1 || !license2) return;
 
     if (license1 !== license2) {
-      this.console?.printError('Database', `License IDs do not point to same License from Transaction`);
+      this.console?.printError('MPAC Verifier', `License IDs do not point to same License from Transaction`);
     }
   }
 

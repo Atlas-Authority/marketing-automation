@@ -18,7 +18,7 @@ export class Marketplace {
   public constructor(private config?: MpacConfig) { }
 
   public importData(data: RawDataSet, console?: ConsoleLogger) {
-    console?.printInfo('Database', 'Validating MPAC records: Starting...');
+    console?.printInfo('MPAC', 'Validating MPAC records: Starting...');
 
     const emailRe = new RegExp(`.+@.+\\.(${data.tlds.join('|')})`);
     const emailChecker = (kind: 'License' | 'Transaction') =>
@@ -26,7 +26,7 @@ export class Marketplace {
         const allEmails = getEmailsForRecord(record);
         const allGood = allEmails.every(e => emailRe.test(e));
         if (!allGood && !allEmails.every(e => this.config?.ignoredEmails?.has(e.toLowerCase()))) {
-          console?.printWarning('Downloader', `${kind} has invalid email(s); will be skipped:`, record);
+          console?.printWarning('MPAC', `${kind} has invalid email(s); will be skipped:`, record);
         }
         return allGood;
       };
@@ -52,7 +52,7 @@ export class Marketplace {
     this.licenses = structured.licenses;
     this.transactions = structured.transactions;
 
-    console?.printInfo('Database', 'Validating MPAC records: Done');
+    console?.printInfo('MPAC', 'Validating MPAC records: Done');
   }
 
 }
