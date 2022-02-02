@@ -1,43 +1,41 @@
 import 'source-map-support/register';
 import { engineConfigFromENV, runLoopConfigFromENV } from "../lib/config/env";
-import DataDir from '../lib/data/dir';
-import { DataSet } from '../lib/data/set';
+import { dataManager } from '../lib/data/manager';
+import { Engine } from "../lib/engine";
 import { downloadAllData } from '../lib/engine/download';
-import { Engine } from "../lib/engine/engine";
 import { SlackNotifier } from '../lib/engine/slack-notifier';
 import { Hubspot } from '../lib/hubspot';
-import { Logger } from '../lib/log';
+import { ConsoleLogger } from '../lib/log/console';
 import run from "../lib/util/runner";
 
-const dataDir = DataDir.root.subdir("in");
-
-const log = new Logger(dataDir.subdir('main'));
+const console = new ConsoleLogger();
 
 const runLoopConfig = runLoopConfigFromENV();
-const notifier = SlackNotifier.fromENV(log);
+const notifier = SlackNotifier.fromENV(new ConsoleLogger());
 notifier?.notifyStarting();
 
-run(log, runLoopConfig, {
+run(console, runLoopConfig, {
 
   async work() {
+    console.printInfo('Main', 'Pruning data sets');
+    dataManager.pruneDataSets(console);
 
-    log.printInfo('Main', 'Downloading data');
-    const dataSet = new DataSet(dataDir);
-    const hubspot = Hubspot.live(log);
-    await downloadAllData(log, dataSet, hubspot);
+    console.printInfo('Main', 'Downloading data');
+    const hubspot = Hubspot.live(console);
+    const { dataSet, data } = await downloadAllData(console, hubspot);
+    const logDir = dataSet.logDirNamed('main');
 
-    log.printInfo('Main', 'Running engine');
-    const data = dataSet.load();
-    const engine = new Engine(hubspot, engineConfigFromENV(), log);
+    console.printInfo('Main', 'Running engine');
+    const engine = new Engine(hubspot, engineConfigFromENV(), console, logDir);
     engine.run(data);
 
-    log.printInfo('Main', 'Upsyncing changes to HubSpot');
+    console.printInfo('Main', 'Upsyncing changes to HubSpot');
     await hubspot.upsyncChangesToHubspot();
 
-    log.printInfo('Main', 'Writing HubSpot change log file');
-    log.hubspotOutputLogger()?.logResults(hubspot);
+    console.printInfo('Main', 'Writing HubSpot change log file');
+    logDir.hubspotOutputLogger()?.logResults(hubspot);
 
-    log.printInfo('Main', 'Done');
+    console.printInfo('Main', 'Done');
   },
 
   async failed(errors) {

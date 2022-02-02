@@ -2,7 +2,7 @@ import Chance from 'chance';
 import { Data } from '../../lib/data/set';
 import { Action } from "../../lib/deal-generator/actions";
 import { DealRelevantEvent } from '../../lib/deal-generator/events';
-import { Engine, EngineConfig } from '../../lib/engine/engine';
+import { Engine, EngineConfig } from '../../lib/engine';
 import { Hubspot } from '../../lib/hubspot';
 import { DealStage } from '../../lib/hubspot/interfaces';
 import { RawLicense, RawLicenseContact, RawTransaction } from '../../lib/marketplace/raw';

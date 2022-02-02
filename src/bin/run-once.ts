@@ -1,21 +1,22 @@
 import 'source-map-support/register';
 import { engineConfigFromENV } from '../lib/config/env';
-import DataDir from '../lib/data/dir';
-import { DataSet } from '../lib/data/set';
-import { Engine } from "../lib/engine/engine";
+import { dataManager } from '../lib/data/manager';
+import { Engine } from "../lib/engine";
 import { Hubspot } from '../lib/hubspot';
-import { Logger } from '../lib/log';
+import { ConsoleLogger } from '../lib/log/console';
 
-const dataDir = DataDir.root.subdir('in');
-const log = new Logger(dataDir.subdir(`once-${Date.now()}`));
+const console = new ConsoleLogger();
 
-const hubspot = Hubspot.memoryFromENV(log);
+const dataSet = dataManager.latestDataSet();
+const logDir = dataSet.logDirNamed(`once-${Date.now()}`);
 
-const engine = new Engine(hubspot, engineConfigFromENV(), log);
+const hubspot = Hubspot.memoryFromENV(console);
 
-const data = new DataSet(dataDir).load();
+const engine = new Engine(hubspot, engineConfigFromENV(), console, logDir);
+
+const data = dataSet.load();
 
 engine.run(data);
 
 hubspot.populateFakeIds();
-log.hubspotOutputLogger()?.logResults(hubspot);
+logDir.hubspotOutputLogger()?.logResults(hubspot);

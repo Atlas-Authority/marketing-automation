@@ -1,17 +1,17 @@
-import { Logger } from "../log";
+import { ConsoleLogger } from "../log/console";
 import { Table } from "../log/table";
 import { License } from "../model/license";
 import { Transaction, TransactionData } from "../model/transaction";
 import { formatMoney } from "../util/formatters";
 import { isPresent } from "../util/helpers";
 
-export function buildAndVerifyStructures(licenses: License[], transactions: Transaction[], log?: Logger) {
-  return new Structurer(log).buildAndVerify(licenses, transactions);
+export function buildAndVerifyStructures(licenses: License[], transactions: Transaction[], console?: ConsoleLogger) {
+  return new Structurer(console).buildAndVerify(licenses, transactions);
 }
 
 class Structurer {
 
-  constructor(private log?: Logger) { }
+  constructor(private console?: ConsoleLogger) { }
 
   buildAndVerify(licenses: License[], transactions: Transaction[]) {
     // All three should be unique on licenses
@@ -105,7 +105,7 @@ class Structurer {
     const refundedAmount = [...maybeRefunded].map(t => t.data.vendorAmount).reduce((a, b) => a + b, 0);
 
     if (-refundAmount !== refundedAmount) {
-      this.log?.printWarning('Scoring Engine', "The following transactions have no accompanying licenses:");
+      this.console?.printWarning('Scoring Engine', "The following transactions have no accompanying licenses:");
 
       const sameById = (tx1: Transaction, tx2: Transaction, id: keyof TransactionData) => (
         tx1.data[id] && tx1.data[id] === tx2.data[id]
@@ -128,7 +128,7 @@ class Structurer {
       if (refunds.size > 0) {
         Table.print({
           title: 'Refunds',
-          log: s => this.log?.printWarning('Scoring Engine', '  ' + s),
+          log: s => this.console?.printWarning('Scoring Engine', '  ' + s),
           cols: [
             [{ title: 'Transaction[License]', align: 'right' }, tx => tx.id],
             [{ title: 'Amount', align: 'right' }, tx => formatMoney(tx.data.vendorAmount)],
@@ -140,7 +140,7 @@ class Structurer {
       if (maybeRefunded.size > 0) {
         Table.print({
           title: 'Non-Refunds',
-          log: s => this.log?.printWarning('Scoring Engine', '  ' + s),
+          log: s => this.console?.printWarning('Scoring Engine', '  ' + s),
           cols: [
             [{ title: 'Transaction[License]', align: 'right' }, tx => tx.id],
             [{ title: 'Amount', align: 'right' }, tx => formatMoney(tx.data.vendorAmount)],
@@ -162,14 +162,14 @@ class Structurer {
     const idSet = new Set(ids);
     if (ids.length !== idSet.size) {
       const idName = getter.toString().replace(/(\w+) => \1\.data\./, '');
-      this.log?.printError('Database', 'License IDs not unique:', idName);
+      this.console?.printError('Database', 'License IDs not unique:', idName);
     }
   }
 
   uniqueTransactionSetFrom(transactions: Transaction[]) {
     const set = new Set(transactions);
     if (set.size !== transactions.length) {
-      this.log?.printError('Database', `Transactions aren't unique: got ${set.size} out of ${transactions.length}`);
+      this.console?.printError('Database', `Transactions aren't unique: got ${set.size} out of ${transactions.length}`);
     }
     return set;
   }
@@ -179,7 +179,7 @@ class Structurer {
 
     const same = set1.size === set2.size && [...set1].every(t => set2.has(t));
     if (!same) {
-      this.log?.printError('Database', `License IDs do not point to same transactions`);
+      this.console?.printError('Database', `License IDs do not point to same transactions`);
     }
   }
 
@@ -187,7 +187,7 @@ class Structurer {
     if (!license1 || !license2) return;
 
     if (license1 !== license2) {
-      this.log?.printError('Database', `License IDs do not point to same License from Transaction`);
+      this.console?.printError('Database', `License IDs do not point to same License from Transaction`);
     }
   }
 

@@ -1,20 +1,18 @@
 import DataDir from "../data/dir";
-import { ConsoleLogger } from "./console";
 import { DealDataLogger } from "./deal-generator";
 import { HubspotOutputLogger } from "./hubspot-output";
 import { LicenseMatchLogger } from "./license-scorer";
 
-export class Logger {
+export class LogDir {
 
   #fast = process.argv.slice(2).includes('fast');
-
-  #consoleLogger = new ConsoleLogger();
 
   #licenseScoringFile;
   #dealGeneratorFile;
   #allMatchGroupsLog;
   #checkMatchGroupsLog;
   #hubspotResultLog;
+  #attributionsLog;
 
   constructor(logDir?: DataDir) {
     this.#licenseScoringFile = this.#fast ? undefined : logDir?.file('license-scoring.csv');
@@ -22,6 +20,7 @@ export class Logger {
     this.#allMatchGroupsLog = logDir?.file('matched-groups-all.csv');
     this.#checkMatchGroupsLog = logDir?.file('matched-groups-to-check.csv');
     this.#hubspotResultLog = logDir?.file('hubspot-out.txt');
+    this.#attributionsLog = logDir?.file('attributions.csv');
   }
 
   public scoreLogger() {
@@ -42,9 +41,6 @@ export class Logger {
   public allMatchGroupsLog() { return this.#allMatchGroupsLog?.writeCsvStream() };
   public checkMatchGroupsLog() { return this.#checkMatchGroupsLog?.writeCsvStream() };
 
-
-  public printError(prefix: string, ...args: any[]) { this.#consoleLogger.error(prefix, ...args); }
-  public printWarning(prefix: string, ...args: any[]) { this.#consoleLogger.warn(prefix, ...args); }
-  public printInfo(prefix: string, ...args: any[]) { this.#consoleLogger.info(prefix, ...args); }
+  public attributionsLog() { return this.#attributionsLog };
 
 }

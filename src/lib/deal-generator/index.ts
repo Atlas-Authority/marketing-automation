@@ -1,5 +1,5 @@
 import assert from "assert";
-import { Engine } from "../engine/engine";
+import { Engine } from "../engine";
 import { RelatedLicenseSet } from "../license-matching/license-grouper";
 import { Table } from "../log/table";
 import { Deal } from "../model/deal";
@@ -34,12 +34,12 @@ export class DealGenerator {
       engine.dealManager,
       engine.dealPropertyConfig,
       this.ignore.bind(this),
-      engine.log,
+      engine.console,
     );
   }
 
   public run(matchGroups: RelatedLicenseSet[]) {
-    return withAutoClose(this.engine.log?.dealGeneratorLog(), logger => {
+    return withAutoClose(this.engine.logDir?.dealGeneratorLog(), logger => {
       const results = new Map<string, DealGeneratorResult>();
 
       for (const relatedLicenses of matchGroups) {
@@ -83,9 +83,9 @@ export class DealGenerator {
       table.rows.push([reason, formatMoney(amount)]);
     }
 
-    this.engine.log?.printInfo('Deal Actions', 'Amount of Transactions Ignored');
+    this.engine.console?.printInfo('Deal Actions', 'Amount of Transactions Ignored');
     for (const row of table.eachRow()) {
-      this.engine.log?.printInfo('Deal Actions', '  ' + row);
+      this.engine.console?.printInfo('Deal Actions', '  ' + row);
     }
   }
 

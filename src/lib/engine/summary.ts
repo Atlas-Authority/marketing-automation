@@ -1,15 +1,15 @@
+import { Engine } from ".";
 import { Table } from "../log/table";
 import { Deal } from "../model/deal";
 import { formatMoney, formatNumber } from "../util/formatters";
 import { isPresent } from "../util/helpers";
-import { Engine } from "./engine";
 
 export function printSummary(engine: Engine) {
 
   if (engine.dealManager.duplicates.size > 0) {
     Table.print({
       title: 'Duplicate Deals',
-      log: s => engine.log?.printWarning('Dups', s),
+      log: s => engine.console?.printWarning('Dups', s),
       cols: [
         [{ title: 'Primary' }, s => s[0].link()],
         [{ title: 'Duplicate(s)' }, s => s[1].map(d => d.link())],
@@ -22,8 +22,8 @@ export function printSummary(engine: Engine) {
       .map((dup) => dup.data.amount ?? 0)
       .reduce((a, b) => a + b));
 
-    engine.log?.printWarning('Deal Generator', 'Total of duplicates:', formatMoney(dupTotal));
-    engine.log?.printWarning('Deal Generator', 'Total duplicates:', engine.dealManager.duplicates.size);
+    engine.console?.printWarning('Deal Generator', 'Total of duplicates:', formatMoney(dupTotal));
+    engine.console?.printWarning('Deal Generator', 'Total duplicates:', engine.dealManager.duplicates.size);
 
     engine.tallier.less('Over-accounted: Duplicate deals', -dupTotal);
   }
@@ -38,9 +38,9 @@ export function printSummary(engine: Engine) {
   table.rows.push(['$ Total Deals Lost', formatMoney(sumDeals(deals.filter(d => d.isLost)))]);
   table.rows.push(['$ Total Deals Eval', formatMoney(sumDeals(deals.filter(d => d.isEval())))]);
 
-  engine.log?.printInfo('Summary', 'Results of this run:');
+  engine.console?.printInfo('Summary', 'Results of this run:');
   for (const row of table.eachRow()) {
-    engine.log?.printInfo('Summary', '  ' + row);
+    engine.console?.printInfo('Summary', '  ' + row);
   }
 
   engine.tallier.less('Deal sum', sumDeals(deals));

@@ -1,4 +1,4 @@
-import { Engine } from "../engine/engine";
+import { Engine } from "../engine";
 import { Contact, domainFor } from "../model/contact";
 import { License } from "../model/license";
 import { Transaction } from "../model/transaction";

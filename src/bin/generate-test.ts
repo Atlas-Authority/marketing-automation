@@ -1,11 +1,10 @@
 import 'source-map-support/register';
 import util from 'util';
 import { engineConfigFromENV } from '../lib/config/env';
-import DataDir from '../lib/data/dir';
-import { DataSet } from '../lib/data/set';
-import { Engine } from "../lib/engine/engine";
+import { dataManager } from '../lib/data/manager';
+import { Engine } from "../lib/engine";
 import { Hubspot } from '../lib/hubspot';
-import { Logger } from '../lib/log';
+import { ConsoleLogger } from '../lib/log/console';
 import { License } from '../lib/model/license';
 import { abbrActionDetails, abbrEventDetails, abbrRecordDetails } from '../tests/deal-generator/utils';
 
@@ -20,8 +19,8 @@ function TEMPLATE({ runDealGenerator, RECORDS, EVENTS, ACTIONS }: any) {
 }
 
 function main(template: string, licenseIds: string[]) {
-  const engine = new Engine(Hubspot.memory(), engineConfigFromENV(), new Logger());
-  const data = new DataSet(DataDir.root.subdir('in')).load();
+  const engine = new Engine(Hubspot.memory(), engineConfigFromENV(), new ConsoleLogger());
+  const data = dataManager.latestDataSet().load();
   const { dealGeneratorResults } = engine.run(data);
 
   for (const licenseId of licenseIds) {

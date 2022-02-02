@@ -1,14 +1,14 @@
 import 'source-map-support/register';
 import { engineConfigFromENV } from '../lib/config/env';
-import DataDir from '../lib/data/dir';
-import { DataSet } from '../lib/data/set';
-import { Engine } from "../lib/engine/engine";
+import { dataManager } from '../lib/data/manager';
+import { Engine } from "../lib/engine";
 import { Hubspot } from '../lib/hubspot';
 import { isPresent, sorter } from "../lib/util/helpers";
 
 const engine = new Engine(Hubspot.memory(), engineConfigFromENV());
-const dataDir = DataDir.root.subdir('in');
-const data = new DataSet(dataDir).load();
+const dataSet = dataManager.latestDataSet();
+const logDir = dataSet.logDirNamed(`inspect-${Date.now()}`);
+const data = dataSet.load();
 engine.run(data);
 
 const attributions = (engine
@@ -22,7 +22,7 @@ const attributions = (engine
   ].join(',')))
 );
 
-dataDir.subdir('inspect').file('attributions.csv').writeArray(attributions.map(a => ({
+logDir.attributionsLog()!.writeArray(attributions.map(a => ({
   channel: a.channel,
   referrerDomain: a.referrerDomain,
   campaignName: a.campaignName,

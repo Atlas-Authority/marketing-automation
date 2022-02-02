@@ -1,6 +1,6 @@
 import assert from "assert";
 import util from "util";
-import { Logger } from '../log';
+import { ConsoleLogger } from "../log/console";
 import { License, LicenseData } from "../model/license";
 import { Transaction } from "../model/transaction";
 import { AttachableError } from '../util/errors';
@@ -104,10 +104,10 @@ function validateField<T>(o: T, accessor: (o: T) => any) {
   if (!val) throw new AttachableError(`Missing field: ${path} (found ${JSON.stringify(val)})`, JSON.stringify(o, null, 2));
 }
 
-export function hasTechEmail(license: License, log?: Logger) {
+export function hasTechEmail(license: License, console?: ConsoleLogger) {
   if (!license.data.technicalContact?.email) {
     const id = license.id;
-    log?.printWarning('Downloader', 'License does not have a tech contact email; will be skipped', id);
+    console?.printWarning('Downloader', 'License does not have a tech contact email; will be skipped', id);
     return false;
   }
   return true;

@@ -1,23 +1,36 @@
+import del from 'del';
 import fs from "fs";
-import { pathToFileURL, URL } from "url";
+import { fileURLToPath, pathToFileURL, URL } from "url";
+import { ConsoleLogger } from '../log/console';
 import { DataFile } from "./file";
 
 export default class DataDir {
 
   static root = new DataDir('data', new URL(`../../`, pathToFileURL(__dirname)));
 
-  #base: URL;
+  #url: URL;
   private constructor(place: string, base?: URL) {
-    this.#base = new URL(`${place}/`, base);
-    if (!fs.existsSync(this.#base)) fs.mkdirSync(this.#base);
+    this.#url = new URL(`${place}/`, base);
+    if (!fs.existsSync(this.#url)) fs.mkdirSync(this.#url);
   }
 
   public file<T extends readonly any[]>(filename: string): DataFile<T> {
-    return new DataFile<T>(new URL(filename, this.#base));
+    return new DataFile<T>(new URL(filename, this.#url));
   }
 
   public subdir(place: string): DataDir {
-    return new DataDir(place, this.#base);
+    return new DataDir(place, this.#url);
+  }
+
+  public delete(console: ConsoleLogger) {
+    const absolutePath = fileURLToPath(this.#url);
+    console.printInfo('Pruning', absolutePath);
+    try {
+      del.sync(absolutePath);
+    }
+    catch (e: any) {
+      console.printWarning('Pruning', 'Failed to delete file', e.message, e.stack);
+    }
   }
 
 }

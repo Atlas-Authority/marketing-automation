@@ -1,5 +1,5 @@
 import { hubspotContactConfigFromENV, hubspotDealConfigFromENV } from "../config/env";
-import { Logger } from "../log";
+import { ConsoleLogger } from "../log/console";
 import { CompanyManager } from "../model/company";
 import { ContactManager, HubspotContactConfig } from "../model/contact";
 import { DealManager, HubspotDealConfig } from "../model/deal";
@@ -7,26 +7,26 @@ import { Entity } from "./entity";
 
 export class Hubspot {
 
-  public static live(log: Logger) {
+  public static live(console: ConsoleLogger) {
     return new Hubspot(
-      new DealManager(hubspotDealConfigFromENV(), log),
-      new ContactManager(hubspotContactConfigFromENV(), log),
-      new CompanyManager(log),
+      new DealManager(hubspotDealConfigFromENV(), console),
+      new ContactManager(hubspotContactConfigFromENV(), console),
+      new CompanyManager(console),
     );
   }
 
-  public static memoryFromENV(log?: Logger) {
+  public static memoryFromENV(console?: ConsoleLogger) {
     return this.memory({
       contact: hubspotContactConfigFromENV(),
       deal: hubspotDealConfigFromENV(),
-    }, log);
+    }, console);
   }
 
-  public static memory(config?: { deal?: HubspotDealConfig, contact?: HubspotContactConfig }, log?: Logger) {
+  public static memory(config?: { deal?: HubspotDealConfig, contact?: HubspotContactConfig }, console?: ConsoleLogger) {
     return new Hubspot(
-      new DealManager(config?.deal ?? {}, log),
-      new ContactManager(config?.contact ?? {}, log),
-      new CompanyManager(log),
+      new DealManager(config?.deal ?? {}, console),
+      new ContactManager(config?.contact ?? {}, console),
+      new CompanyManager(console),
     );
   }
 

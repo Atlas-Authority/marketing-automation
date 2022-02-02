@@ -1,7 +1,7 @@
 import mustache from 'mustache';
-import { DealPropertyConfig } from '../engine/engine';
+import { DealPropertyConfig } from '../engine';
 import { DealStage, Pipeline } from "../hubspot/interfaces";
-import { Logger } from "../log";
+import { ConsoleLogger } from '../log/console';
 import { Deal, DealData, DealManager } from "../model/deal";
 import { License } from "../model/license";
 import { Transaction, uniqueTransactionId } from "../model/transaction";
@@ -24,7 +24,7 @@ export class ActionGenerator {
     private dealManager: DealManager,
     private dealPropertyConfig: DealPropertyConfig,
     private ignore: (reason: string, amount: number) => void,
-    private log?: Logger,
+    private console?: ConsoleLogger,
   ) {
     for (const deal of this.dealManager.getAll()) {
       for (const id of deal.getMpacIds()) {
@@ -126,7 +126,7 @@ export class ActionGenerator {
   private recordSeen(deal: Deal, event: DealRelevantEvent) {
     if (this.#handledDeals.has(deal)) {
       const existing = this.#handledDeals.get(deal);
-      this.log?.printError('Deal Generator', 'Updating deal twice', {
+      this.console?.printError('Deal Generator', 'Updating deal twice', {
         firstEvent: existing && abbrEventDetails(existing),
         currentEvent: abbrEventDetails(event),
         deal: {
@@ -193,7 +193,7 @@ export class ActionGenerator {
         dealToUse = importantDeals[0];
 
         if (importantDeals.length > 1) {
-          this.log?.printWarning('Deal Generator',
+          this.console?.printWarning('Deal Generator',
             `Found duplicates that can't be auto-deleted.`,
             importantDeals.map(d => ({ id: d.id, ...d.data })));
         }
