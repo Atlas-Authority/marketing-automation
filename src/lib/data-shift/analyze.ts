@@ -6,24 +6,24 @@ export class DataShiftAnalyzer {
 
   private console;
   public constructor() {
-    this.console = new ConsoleLogger();
+    this.console = new LabeledConsoleLogger('Analyze Data Shift');
   }
 
   public run([firstDataset, ...dataSets]: DataSet[]) {
-    this.console.printInfo('Analyze Data Shift', `Preparing initial licenses`);
+    this.console.printInfo(`Preparing initial licenses`);
     const licensesById = new Map<string, License>();
     for (const license of firstDataset.mpac.licenses) {
       licensesById.set(license.id, license);
     }
-    this.console.printInfo('Analyze Data Shift', `Done.`);
+    this.console.printInfo(`Done.`);
 
-    this.console.printInfo('Analyze Data Shift', `Analyzing license data shift`);
+    this.console.printInfo(`Analyzing license data shift`);
     for (const ds of dataSets) {
 
       for (const license of ds.mpac.licenses) {
         const found = licensesById.get(license.id);
         if (!found) {
-          this.console.printWarning('Analyze Data Shift', 'License went missing:', {
+          this.console.printWarning('License went missing:', {
             timestampChecked: ds.timestamp,
             license: license.id,
           });
@@ -33,7 +33,7 @@ export class DataShiftAnalyzer {
       for (const license of ds.mpac.licenses) {
         const found = licensesById.get(license.id);
         if (!found) {
-          this.console.printWarning('Analyze Data Shift', 'License went missing:', {
+          this.console.printWarning('License went missing:', {
             timestampChecked: ds.timestamp,
             license: license.id,
           });
@@ -41,7 +41,20 @@ export class DataShiftAnalyzer {
       }
 
     }
-    this.console.printInfo('Analyze Data Shift', `Done.`);
+    this.console.printInfo(`Done.`);
   }
+
+}
+
+class LabeledConsoleLogger {
+
+  console;
+  constructor(private label: string) {
+    this.console = new ConsoleLogger();
+  }
+
+  printInfo(...args: any[]) { this.console.printInfo(this.label, ...args); }
+  printWarning(...args: any[]) { this.console.printWarning(this.label, ...args); }
+  printError(...args: any[]) { this.console.printError(this.label, ...args); }
 
 }
