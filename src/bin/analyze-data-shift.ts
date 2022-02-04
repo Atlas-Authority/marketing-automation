@@ -5,7 +5,7 @@ import { ConsoleLogger } from '../lib/log/console';
 
 const console = new ConsoleLogger();
 console.printInfo('Data Shift Analyzer', 'Loading data sets: Starting...');
-const dataSets = dataManager.allDataSetIds().map(id => {
+const dataSets = dataManager.allDataSetIds().sort().map(id => {
   console.printInfo('Data Shift Analyzer', `Loading data set ${id}: Starting...`);
   const ds = dataManager.dataSetFrom(id);
   console.printInfo('Data Shift Analyzer', `Loading data set ${id}: Done`);

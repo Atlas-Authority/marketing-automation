@@ -4,7 +4,7 @@ import { License } from "../model/license";
 
 export class DataShiftAnalyzer {
 
-  licensesById = new LicenseMap();
+  lastLicenseMap!: LicenseMap;
 
   private console;
   public constructor() {
@@ -18,10 +18,13 @@ export class DataShiftAnalyzer {
 
   analyzeLicensesInDataSets(dataSets: DataSet[]) {
     this.console.printInfo(`Analyzing license data shift`);
+
     for (const ds of dataSets) {
 
-      for (const license of ds.mpac.licenses) {
-        const found = this.licensesById.get(license);
+      const currentLicenseMap = new LicenseMap(ds.mpac.licenses);
+
+      for (const license of this.lastLicenseMap.values()) {
+        const found = currentLicenseMap.get(license);
         if (!found) {
           this.console.printWarning('License went missing:', {
             timestampChecked: ds.timestamp.toISO(),
@@ -30,17 +33,16 @@ export class DataShiftAnalyzer {
         }
       }
 
+      this.lastLicenseMap = currentLicenseMap;
+
     }
+
     this.console.printInfo(`Done.`);
   }
 
   prepareInitialLicenses(firstDataset: DataSet) {
     this.console.printInfo(`Preparing initial licenses`);
-
-    for (const license of firstDataset.mpac.licenses) {
-      this.licensesById.add(license);
-    }
-
+    this.lastLicenseMap = new LicenseMap(firstDataset.mpac.licenses);
     this.console.printInfo(`Done.`);
   }
 
@@ -61,9 +63,12 @@ class LabeledConsoleLogger {
 
 class LicenseMap {
 
-  #m;
-  constructor() {
-    this.#m = new Map<string, License>();
+  #map;
+  constructor(licenses: License[]) {
+    this.#map = new Map<string, License>();
+    for (const license of licenses) {
+      this.add(license);
+    }
   }
 
   get(record: License): License | undefined {
@@ -74,15 +79,19 @@ class LicenseMap {
     );
   }
 
+  values() {
+    return this.#map.values();
+  }
+
   maybeGet(id: string | null): License | undefined {
-    if (id) return this.#m.get(id);
+    if (id) return this.#map.get(id);
     return undefined;
   }
 
   add(record: License) {
-    if (record.data.addonLicenseId) this.#m.set(record.data.addonLicenseId, record);
-    if (record.data.appEntitlementId) this.#m.set(record.data.appEntitlementId, record);
-    if (record.data.appEntitlementNumber) this.#m.set(record.data.appEntitlementNumber, record);
+    if (record.data.addonLicenseId) this.#map.set(record.data.addonLicenseId, record);
+    if (record.data.appEntitlementId) this.#map.set(record.data.appEntitlementId, record);
+    if (record.data.appEntitlementNumber) this.#map.set(record.data.appEntitlementNumber, record);
   }
 
 }
