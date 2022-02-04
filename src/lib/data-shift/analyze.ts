@@ -1,6 +1,7 @@
 import { DataSet } from "../data/set";
 import { ConsoleLogger } from "../log/console";
 import { License } from "../model/license";
+import { Transaction } from "../model/transaction";
 
 export class DataShiftAnalyzer {
 
@@ -14,12 +15,12 @@ export class DataShiftAnalyzer {
   private checkForDeletedLicenses([firstDataset, ...remainingDataSets]: DataSet[]) {
     this.#console.printInfo(`Checking for deleted licenses: Starting...`);
 
-    let lastLicenseMap = new LicenseMap(firstDataset.mpac.licenses);
+    let lastLicenseMap = new RecordMap(firstDataset.mpac.licenses);
 
     for (const ds of remainingDataSets) {
-      const currentLicenseMap = new LicenseMap(ds.mpac.licenses);
+      const currentLicenseMap = new RecordMap(ds.mpac.licenses);
 
-      for (const license of lastLicenseMap.allLicenses()) {
+      for (const license of lastLicenseMap.allRecords()) {
         const found = currentLicenseMap.get(license);
         if (!found) {
           this.#console.printWarning('License went missing:', {
@@ -57,37 +58,33 @@ class LabeledConsoleLogger {
 
 }
 
-class LicenseMap {
+class RecordMap<T extends License | Transaction> {
 
   #map;
-  constructor(licenses: License[]) {
-    this.#map = new Map<string, License>();
-    for (const license of licenses) {
-      this.add(license);
+  constructor(records: T[]) {
+    this.#map = new Map<string, T>();
+    for (const record of records) {
+      this.add(record);
     }
   }
 
-  get(record: License): License | undefined {
-    return (
-      this.maybeGet(record.data.addonLicenseId) ??
-      this.maybeGet(record.data.appEntitlementId) ??
-      this.maybeGet(record.data.appEntitlementNumber)
-    );
+  get(record: T): T | undefined {
+    return (record.ids.map(id => this.maybeGet(id)).find(record => record));
   }
 
-  allLicenses() {
+  allRecords() {
     return new Set(this.#map.values());
   }
 
-  maybeGet(id: string | null): License | undefined {
+  maybeGet(id: string | null): T | undefined {
     if (id) return this.#map.get(id);
     return undefined;
   }
 
-  add(record: License) {
-    if (record.data.addonLicenseId) this.#map.set(record.data.addonLicenseId, record);
-    if (record.data.appEntitlementId) this.#map.set(record.data.appEntitlementId, record);
-    if (record.data.appEntitlementNumber) this.#map.set(record.data.appEntitlementNumber, record);
+  add(record: T) {
+    for (const id of record.ids) {
+      this.#map.set(id, record);
+    }
   }
 
 }
