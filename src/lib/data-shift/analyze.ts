@@ -4,26 +4,24 @@ import { License } from "../model/license";
 
 export class DataShiftAnalyzer {
 
-  lastLicenseMap!: LicenseMap;
-
   private console;
   public constructor() {
     this.console = new LabeledConsoleLogger('Analyze Data Shift');
   }
 
-  public run([firstDataset, ...dataSets]: DataSet[]) {
-    this.prepareInitialLicenses(firstDataset);
-    this.analyzeLicensesInDataSets(dataSets);
+  public run(dataSets: DataSet[]) {
+    this.checkForDeletedLicenses(dataSets);
   }
 
-  analyzeLicensesInDataSets(dataSets: DataSet[]) {
-    this.console.printInfo(`Analyzing license data shift`);
+  private checkForDeletedLicenses([firstDataset, ...dataSets]: DataSet[]) {
+    this.console.printInfo(`Checking for deleted licenses: Starting...`);
+
+    let lastLicenseMap = new LicenseMap(firstDataset.mpac.licenses);
 
     for (const ds of dataSets) {
-
       const currentLicenseMap = new LicenseMap(ds.mpac.licenses);
 
-      for (const license of this.lastLicenseMap.values()) {
+      for (const license of lastLicenseMap.values()) {
         const found = currentLicenseMap.get(license);
         if (!found) {
           this.console.printWarning('License went missing:', {
@@ -33,17 +31,10 @@ export class DataShiftAnalyzer {
         }
       }
 
-      this.lastLicenseMap = currentLicenseMap;
-
+      lastLicenseMap = currentLicenseMap;
     }
 
-    this.console.printInfo(`Done.`);
-  }
-
-  prepareInitialLicenses(firstDataset: DataSet) {
-    this.console.printInfo(`Preparing initial licenses`);
-    this.lastLicenseMap = new LicenseMap(firstDataset.mpac.licenses);
-    this.console.printInfo(`Done.`);
+    this.console.printInfo(`Checking for deleted licenses: Done`);
   }
 
 }
