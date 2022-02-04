@@ -11,12 +11,12 @@ interface RunLoopConfig {
 
 export class SlackNotifier {
 
-  static fromENV(log: ConsoleLogger) {
+  static fromENV(console: ConsoleLogger) {
     const slackConfig = slackConfigFromENV();
     if (!slackConfig.apiToken) return null;
 
     const client = new slack.WebClient(slackConfig.apiToken);
-    return new SlackNotifier(log, client, slackConfig.errorChannelId);
+    return new SlackNotifier(console, client, slackConfig.errorChannelId);
   }
 
   private constructor(
