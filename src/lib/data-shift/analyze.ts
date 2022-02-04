@@ -24,7 +24,7 @@ export class DataShiftAnalyzer {
         const found = this.licensesById.get(license.id);
         if (!found) {
           this.console.printWarning('License went missing:', {
-            timestampChecked: ds.timestamp,
+            timestampChecked: ds.timestamp.toISO(),
             license: license.id,
           });
         }
@@ -34,7 +34,7 @@ export class DataShiftAnalyzer {
         const found = this.licensesById.get(license.id);
         if (!found) {
           this.console.printWarning('License went missing:', {
-            timestampChecked: ds.timestamp,
+            timestampChecked: ds.timestamp.toISO(),
             license: license.id,
           });
         }
