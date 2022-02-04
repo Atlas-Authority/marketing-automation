@@ -8,7 +8,7 @@ export class DataShiftAnalyzer {
 
   public run(dataSets: DataSet[]) {
     this.checkForDeletedLicenses(dataSets);
-    this.checkForLicensesAddedLater(dataSets);
+    this.checkForWrongTransactionDates(dataSets);
   }
 
   private checkForDeletedLicenses([firstDataset, ...remainingDataSets]: DataSet[]) {
@@ -35,12 +35,13 @@ export class DataShiftAnalyzer {
     this.#console.printInfo(`Checking for deleted licenses: Done`);
   }
 
-  private checkForLicensesAddedLater([firstDataset, ...remainingDataSets]: DataSet[]) {
-    this.#console.printInfo(`Checking for licenses added later: Starting...`);
+  private checkForWrongTransactionDates(dataSets: DataSet[]) {
+    this.#console.printInfo(`Checking for late transactions: Starting...`);
 
+    for (const ds of [...dataSets].reverse()) {
+    }
 
-
-    this.#console.printInfo(`Checking for licenses added later: Done`);
+    this.#console.printInfo(`Checking for late transactions: Done`);
   }
 
 }
