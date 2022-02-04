@@ -1,11 +1,10 @@
 import { DataSet } from "../data/set";
 import { ConsoleLogger } from "../log/console";
 import { License } from "../model/license";
-import { Transaction } from "../model/transaction";
 
 export class DataShiftAnalyzer {
 
-  licensesById = new MpacMap<License>();
+  licensesById = new LicenseMap();
 
   private console;
   public constructor() {
@@ -39,7 +38,7 @@ export class DataShiftAnalyzer {
     this.console.printInfo(`Preparing initial licenses`);
 
     for (const license of firstDataset.mpac.licenses) {
-      this.licensesById.addKeys(license);
+      this.licensesById.add(license);
     }
 
     this.console.printInfo(`Done.`);
@@ -60,14 +59,14 @@ class LabeledConsoleLogger {
 
 }
 
-class MpacMap<T extends License | Transaction>  {
+class LicenseMap {
 
   #m;
   constructor() {
-    this.#m = new Map<string, T>();
+    this.#m = new Map<string, License>();
   }
 
-  get(record: T): T | undefined {
+  get(record: License): License | undefined {
     return (
       this.maybeGet(record.data.addonLicenseId) ??
       this.maybeGet(record.data.appEntitlementId) ??
@@ -75,17 +74,15 @@ class MpacMap<T extends License | Transaction>  {
     );
   }
 
-  maybeGet(id: string | null): T | undefined {
+  maybeGet(id: string | null): License | undefined {
     if (id) return this.#m.get(id);
     return undefined;
   }
 
-  addKeys(record: T) {
+  add(record: License) {
     if (record.data.addonLicenseId) this.#m.set(record.data.addonLicenseId, record);
     if (record.data.appEntitlementId) this.#m.set(record.data.appEntitlementId, record);
     if (record.data.appEntitlementNumber) this.#m.set(record.data.appEntitlementNumber, record);
   }
 
 }
-
-const m = new MpacMap<Transaction>();
