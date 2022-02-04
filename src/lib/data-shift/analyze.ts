@@ -31,16 +31,6 @@ export class DataShiftAnalyzer {
         }
       }
 
-      for (const license of ds.mpac.licenses) {
-        const found = this.licensesById.get(license);
-        if (!found) {
-          this.console.printWarning('License went missing:', {
-            timestampChecked: ds.timestamp.toISO(),
-            license: license.id,
-          });
-        }
-      }
-
     }
     this.console.printInfo(`Done.`);
   }
