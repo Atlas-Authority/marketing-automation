@@ -4,24 +4,24 @@ import { License } from "../model/license";
 
 export class DataShiftAnalyzer {
 
+  licensesById = new Map<string, License>();
+
   private console;
   public constructor() {
     this.console = new LabeledConsoleLogger('Analyze Data Shift');
   }
 
   public run([firstDataset, ...dataSets]: DataSet[]) {
-    this.console.printInfo(`Preparing initial licenses`);
-    const licensesById = new Map<string, License>();
-    for (const license of firstDataset.mpac.licenses) {
-      licensesById.set(license.id, license);
-    }
-    this.console.printInfo(`Done.`);
+    this.prepareInitialLicenses(firstDataset);
+    this.analyzeLicensesInDataSets(dataSets);
+  }
 
+  analyzeLicensesInDataSets(dataSets: DataSet[]) {
     this.console.printInfo(`Analyzing license data shift`);
     for (const ds of dataSets) {
 
       for (const license of ds.mpac.licenses) {
-        const found = licensesById.get(license.id);
+        const found = this.licensesById.get(license.id);
         if (!found) {
           this.console.printWarning('License went missing:', {
             timestampChecked: ds.timestamp,
@@ -31,7 +31,7 @@ export class DataShiftAnalyzer {
       }
 
       for (const license of ds.mpac.licenses) {
-        const found = licensesById.get(license.id);
+        const found = this.licensesById.get(license.id);
         if (!found) {
           this.console.printWarning('License went missing:', {
             timestampChecked: ds.timestamp,
@@ -41,6 +41,16 @@ export class DataShiftAnalyzer {
       }
 
     }
+    this.console.printInfo(`Done.`);
+  }
+
+  prepareInitialLicenses(firstDataset: DataSet) {
+    this.console.printInfo(`Preparing initial licenses`);
+
+    for (const license of firstDataset.mpac.licenses) {
+      this.licensesById.set(license.id, license);
+    }
+
     this.console.printInfo(`Done.`);
   }
 
