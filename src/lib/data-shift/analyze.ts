@@ -19,7 +19,7 @@ export class DataShiftAnalyzer {
     for (const ds of remainingDataSets) {
       const currentLicenseMap = new LicenseMap(ds.mpac.licenses);
 
-      for (const license of lastLicenseMap.values()) {
+      for (const license of lastLicenseMap.allLicenses()) {
         const found = currentLicenseMap.get(license);
         if (!found) {
           this.#console.printWarning('License went missing:', {
@@ -74,8 +74,8 @@ class LicenseMap {
     );
   }
 
-  values() {
-    return this.#map.values();
+  allLicenses() {
+    return new Set(this.#map.values());
   }
 
   maybeGet(id: string | null): License | undefined {
