@@ -16,10 +16,17 @@ export class DataShiftAnalyzer {
     this.#console.printInfo(`Checking for deleted licenses: Starting...`);
 
     const [firstDataset, ...remainingDataSets] = dataSetsAsc;
-    let lastLicenseMap = new RecordMap(firstDataset.mpac.licenses);
+
+    let lastLicenseMap = new RecordMap<License, true>();
+    for (const license of firstDataset.mpac.licenses) {
+      lastLicenseMap.set(license, true);
+    }
 
     for (const ds of remainingDataSets) {
-      const currentLicenseMap = new RecordMap(ds.mpac.licenses);
+      const currentLicenseMap = new RecordMap<License, true>();
+      for (const license of ds.mpac.licenses) {
+        currentLicenseMap.set(license, true);
+      }
 
       for (const license of lastLicenseMap.allRecords()) {
         const found = currentLicenseMap.get(license);
@@ -41,18 +48,12 @@ export class DataShiftAnalyzer {
     this.#console.printInfo(`Checking for late transactions: Starting...`);
 
     const dataSetsDesc = [...dataSetsAsc].reverse();
-    const transactionMap = new RecordMap<Transaction>([]);
+    const transactionMap = new RecordMap<Transaction, string>();
 
     for (const ds of dataSetsDesc) {
       for (const transaction of ds.mpac.transactions) {
-
         const found = transactionMap.get(transaction);
-        if (!found) transactionMap.add(transaction);
-
-
-
-
-        // transaction.data.saleDate;
+        if (!found) transactionMap.set(transaction, transaction.data.saleDate);
       }
     }
 
@@ -72,37 +73,41 @@ class LabeledConsoleLogger {
 
 }
 
-class RecordMap<T extends License | Transaction> {
+class RecordMap<T extends License | Transaction, U> {
 
-  #map;
-  constructor(records: T[]) {
-    this.#map = new Map<string, T>();
-    for (const record of records) {
-      this.add(record);
-    }
-  }
+  #keys = new Map<string, T>();
+  #map = new Map<T, U>();
 
-  get(record: T): T | undefined {
-    return (record
+  public get(record: T): U | undefined {
+    const key = (record
       .ids
-      .map(id => this.maybeGet(id))
+      .map(id => this.#maybeGet(id))
       .find(record => record)
     );
-  }
-
-  allRecords() {
-    return new Set(this.#map.values());
-  }
-
-  maybeGet(id: string | null): T | undefined {
-    if (id) return this.#map.get(id);
+    if (key) {
+      const val = this.#map.get(key);
+      if (val !== undefined) {
+        this.set(record, val);
+      }
+      return val;
+    }
     return undefined;
   }
 
-  add(record: T) {
-    for (const id of record.ids) {
-      this.#map.set(id, record);
+  #maybeGet(id: string | null): T | undefined {
+    if (id) return this.#keys.get(id);
+    return undefined;
+  }
+
+  public allRecords() {
+    return new Set(this.#keys.values());
+  }
+
+  public set(key: T, val: U) {
+    for (const id of key.ids) {
+      this.#keys.set(id, key);
     }
+    this.#map.set(key, val);
   }
 
 }
