@@ -7,14 +7,15 @@ export class DataShiftAnalyzer {
 
   #console = new LabeledConsoleLogger('Analyze Data Shift');
 
-  public run(dataSets: DataSet[]) {
-    this.checkForDeletedLicenses(dataSets);
-    this.checkForWrongTransactionDates(dataSets);
+  public run(dataSetsAsc: DataSet[]) {
+    this.checkForDeletedLicenses(dataSetsAsc);
+    this.checkForWrongTransactionDates(dataSetsAsc);
   }
 
-  private checkForDeletedLicenses([firstDataset, ...remainingDataSets]: DataSet[]) {
+  private checkForDeletedLicenses(dataSetsAsc: DataSet[]) {
     this.#console.printInfo(`Checking for deleted licenses: Starting...`);
 
+    const [firstDataset, ...remainingDataSets] = dataSetsAsc;
     let lastLicenseMap = new RecordMap(firstDataset.mpac.licenses);
 
     for (const ds of remainingDataSets) {
@@ -36,10 +37,23 @@ export class DataShiftAnalyzer {
     this.#console.printInfo(`Checking for deleted licenses: Done`);
   }
 
-  private checkForWrongTransactionDates(dataSets: DataSet[]) {
+  private checkForWrongTransactionDates(dataSetsAsc: DataSet[]) {
     this.#console.printInfo(`Checking for late transactions: Starting...`);
 
-    for (const ds of [...dataSets].reverse()) {
+    const dataSetsDesc = [...dataSetsAsc].reverse();
+    const transactionMap = new RecordMap<Transaction>([]);
+
+    for (const ds of dataSetsDesc) {
+      for (const transaction of ds.mpac.transactions) {
+
+        const found = transactionMap.get(transaction);
+        if (!found) transactionMap.add(transaction);
+
+
+
+
+        // transaction.data.saleDate;
+      }
     }
 
     this.#console.printInfo(`Checking for late transactions: Done`);
@@ -69,7 +83,11 @@ class RecordMap<T extends License | Transaction> {
   }
 
   get(record: T): T | undefined {
-    return (record.ids.map(id => this.maybeGet(id)).find(record => record));
+    return (record
+      .ids
+      .map(id => this.maybeGet(id))
+      .find(record => record)
+    );
   }
 
   allRecords() {
