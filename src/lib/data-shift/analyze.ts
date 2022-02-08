@@ -1,7 +1,11 @@
+import { DateTime } from "luxon";
 import { DataSet } from "../data/set";
 import { ConsoleLogger } from "../log/console";
 import { License } from "../model/license";
 import { Transaction } from "../model/transaction";
+import { MultiRecordMap } from "./multi-id-map";
+
+const LATE_TRANSACTION_THRESHOLD = 30;
 
 export class DataShiftAnalyzer {
 
@@ -48,12 +52,30 @@ export class DataShiftAnalyzer {
     this.#console.printInfo(`Checking for late transactions: Starting...`);
 
     const dataSetsDesc = [...dataSetsAsc].reverse();
-    const transactionMap = new RecordMap<Transaction, string>();
+    const transactionMap = new MultiRecordMap<Transaction, DateTime>();
 
     for (const ds of dataSetsDesc) {
       for (const transaction of ds.mpac.transactions) {
-        const found = transactionMap.get(transaction);
-        if (!found) transactionMap.set(transaction, transaction.data.saleDate);
+        transactionMap.set(transaction, ds.timestamp);
+      }
+    }
+
+    const earliest = dataSetsDesc[dataSetsDesc.length - 1].timestamp;
+
+    for (const [transaction, foundDate] of transactionMap.entries()) {
+      const claimedDate = DateTime.fromISO(transaction.data.saleDate);
+      const diff = foundDate.diff(claimedDate, 'days');
+
+      if (foundDate.toMillis() === earliest.toMillis()) {
+        continue;
+      }
+
+      if (diff.days > LATE_TRANSACTION_THRESHOLD) {
+        this.#console.printError('Transaction is far off', {
+          id: transaction.id,
+          expected: transaction.data.saleDate,
+          found: foundDate.toISO(),
+        });
       }
     }
 
