@@ -2,7 +2,7 @@ import { DateTime } from "luxon";
 import { DataSet } from "../data/set";
 import { ConsoleLogger } from "../log/console";
 import { License } from "../model/license";
-import { Transaction } from "../model/transaction";
+import { Transaction, TransactionData } from "../model/transaction";
 import { MultiRecordMap } from "./multi-id-map";
 
 const LATE_TRANSACTION_THRESHOLD = 30;
@@ -14,6 +14,7 @@ export class DataShiftAnalyzer {
   public run(dataSetsAsc: DataSet[]) {
     this.checkForDeletedLicenses(dataSetsAsc);
     this.checkForWrongTransactionDates(dataSetsAsc);
+    this.checkForAlteredData(dataSetsAsc);
   }
 
   private checkForDeletedLicenses(dataSetsAsc: DataSet[]) {
@@ -80,6 +81,45 @@ export class DataShiftAnalyzer {
     }
 
     this.#console.printInfo(`Checking for late transactions: Done`);
+  }
+
+  private checkForAlteredData(dataSetsAsc: DataSet[]) {
+    this.#console.printInfo(`Checking for altered data: Starting...`);
+
+    const map = new MultiRecordMap<Transaction, TransactionData>();
+
+    for (const dataSet of dataSetsAsc) {
+      for (const transaction of dataSet.mpac.transactions) {
+        const data = transaction.data;
+        const lastData = map.get(transaction);
+        if (lastData) {
+          const keysToExamine: (keyof TransactionData)[] = [
+            'saleDate', 'saleType',
+            'addonKey', 'addonName',
+            'country', 'region',
+            'purchasePrice', 'vendorAmount',
+            'billingPeriod',
+            'maintenanceStartDate', 'maintenanceEndDate',
+          ];
+          for (const key of keysToExamine) {
+            const val = data[key];
+            const lastVal = lastData[key];
+            if (val !== lastVal) {
+              this.#console.printError(`Altered transaction data`, {
+                id: transaction.id,
+                key,
+                val,
+                lastVal,
+              });
+            }
+          }
+
+        }
+        map.set(transaction, data);
+      }
+    }
+
+    this.#console.printInfo(`Checking for altered data: Done`);
   }
 
 }
