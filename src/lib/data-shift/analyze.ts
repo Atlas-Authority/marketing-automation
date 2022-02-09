@@ -8,14 +8,41 @@ import { MultiRecordMap } from "./multi-id-map";
 
 const LATE_TRANSACTION_THRESHOLD = 30;
 
+interface DeletedRecordIssue {
+  kind: string,
+  id: string,
+  timestampChecked: string,
+}
+
+interface LateTransactionIssue {
+  id: string,
+  expected: string,
+  found: string,
+}
+
+interface AlteredRecordIssue {
+  kind: string,
+  id: string,
+  key: string,
+  val: any,
+  lastVal: any,
+}
+
 export class DataShiftAnalyzer {
 
   #logStep = (...args: any[]) => this.console?.printInfo('Analyze Data Shift', ...args);
-  #issues: any[] = [];
+
+  #deletedRecords: DeletedRecordIssue[] = [];
+  #lateTransactions: LateTransactionIssue[] = [];
+  #alteredRecords: AlteredRecordIssue[] = [];
 
   constructor(
     private console?: ConsoleLogger,
-    private reportIssues?: (issues: any[]) => void,
+    private reportIssues?: (issues: {
+      deletedRecords: DeletedRecordIssue[],
+      lateTransactions: LateTransactionIssue[],
+      alteredRecords: AlteredRecordIssue[],
+    }) => void,
   ) { }
 
   public run(dataSetsAsc: DataSet[]) {
@@ -25,12 +52,11 @@ export class DataShiftAnalyzer {
     this.#checkForAlteredTransactionData(dataSetsAsc);
     this.#checkForAlteredLicenseData(dataSetsAsc);
 
-    if (this.#issues.length === 0) {
-      this.#logStep('No issues found');
-    }
-    else {
-      this.reportIssues?.(this.#issues);
-    }
+    this.reportIssues?.({
+      deletedRecords: this.#deletedRecords,
+      lateTransactions: this.#lateTransactions,
+      alteredRecords: this.#alteredRecords,
+    });
   }
 
   #checkForDeletedRecords(dataSetsAsc: DataSet[], kind: 'license' | 'transaction') {
@@ -54,10 +80,10 @@ export class DataShiftAnalyzer {
       for (const [record,] of lastRecordMap.entries()) {
         const found = currentRecordMap.get(record);
         if (!found) {
-          this.#issues.push({
-            issue: `${kind === 'license' ? 'License' : 'Transaction'} went missing:`,
+          this.#deletedRecords.push({
+            kind,
+            id: record.id,
             timestampChecked: ds.timestamp.toISO(),
-            license: record.id,
           });
         }
       }
@@ -91,8 +117,7 @@ export class DataShiftAnalyzer {
       }
 
       if (diff.days > LATE_TRANSACTION_THRESHOLD) {
-        this.#issues.push({
-          issue: 'Transaction is far off',
+        this.#lateTransactions.push({
           id: transaction.id,
           expected: transaction.data.saleDate,
           found: foundDate.toISO(),
@@ -125,8 +150,8 @@ export class DataShiftAnalyzer {
             const val = data[key];
             const lastVal = lastData[key];
             if (val !== lastVal) {
-              this.#issues.push({
-                issue: `Altered transaction data`,
+              this.#alteredRecords.push({
+                kind: `transaction`,
                 id: transaction.id,
                 key,
                 val,
@@ -160,8 +185,8 @@ export class DataShiftAnalyzer {
             const val = data[key];
             const lastVal = lastData[key];
             if (val !== lastVal) {
-              this.#issues.push({
-                issue: `Altered license data`,
+              this.#alteredRecords.push({
+                kind: `license`,
                 id: license.id,
                 key,
                 val,
