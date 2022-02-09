@@ -32,17 +32,12 @@ export class DataShiftAnalyzer {
 
   #logStep = (...args: any[]) => this.console?.printInfo('Analyze Data Shift', ...args);
 
-  #deletedRecords: DeletedRecordIssue[] = [];
-  #lateTransactions: LateTransactionIssue[] = [];
-  #alteredRecords: AlteredRecordIssue[] = [];
+  deletedRecords: DeletedRecordIssue[] = [];
+  lateTransactions: LateTransactionIssue[] = [];
+  alteredRecords: AlteredRecordIssue[] = [];
 
   constructor(
     private console?: ConsoleLogger,
-    private reportIssues?: (issues: {
-      deletedRecords: DeletedRecordIssue[],
-      lateTransactions: LateTransactionIssue[],
-      alteredRecords: AlteredRecordIssue[],
-    }) => void,
   ) { }
 
   public run(dataSetsAsc: DataSet[]) {
@@ -51,12 +46,6 @@ export class DataShiftAnalyzer {
     this.#checkForWrongTransactionDates(dataSetsAsc);
     this.#checkForAlteredTransactionData(dataSetsAsc);
     this.#checkForAlteredLicenseData(dataSetsAsc);
-
-    this.reportIssues?.({
-      deletedRecords: this.#deletedRecords,
-      lateTransactions: this.#lateTransactions,
-      alteredRecords: this.#alteredRecords,
-    });
   }
 
   #checkForDeletedRecords(dataSetsAsc: DataSet[], kind: 'license' | 'transaction') {
@@ -80,7 +69,7 @@ export class DataShiftAnalyzer {
       for (const [record,] of lastRecordMap.entries()) {
         const found = currentRecordMap.get(record);
         if (!found) {
-          this.#deletedRecords.push({
+          this.deletedRecords.push({
             kind,
             id: record.id,
             timestampChecked: ds.timestamp.toISO(),
@@ -117,7 +106,7 @@ export class DataShiftAnalyzer {
       }
 
       if (diff.days > LATE_TRANSACTION_THRESHOLD) {
-        this.#lateTransactions.push({
+        this.lateTransactions.push({
           id: transaction.id,
           expected: transaction.data.saleDate,
           found: foundDate.toISO(),
@@ -150,7 +139,7 @@ export class DataShiftAnalyzer {
             const val = data[key];
             const lastVal = lastData[key];
             if (val !== lastVal) {
-              this.#alteredRecords.push({
+              this.alteredRecords.push({
                 kind: `transaction`,
                 id: transaction.id,
                 key,
@@ -185,7 +174,7 @@ export class DataShiftAnalyzer {
             const val = data[key];
             const lastVal = lastData[key];
             if (val !== lastVal) {
-              this.#alteredRecords.push({
+              this.alteredRecords.push({
                 kind: `license`,
                 id: license.id,
                 key,
