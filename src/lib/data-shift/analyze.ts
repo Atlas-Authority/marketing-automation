@@ -1,7 +1,7 @@
 import { DateTime } from "luxon";
 import { DataSet } from "../data/set";
 import { ConsoleLogger } from "../log/console";
-import { License } from "../model/license";
+import { License, LicenseData } from "../model/license";
 import { Transaction, TransactionData } from "../model/transaction";
 import { MultiRecordMap } from "./multi-id-map";
 
@@ -14,7 +14,8 @@ export class DataShiftAnalyzer {
   public run(dataSetsAsc: DataSet[]) {
     this.#checkForDeletedLicenses(dataSetsAsc);
     this.#checkForWrongTransactionDates(dataSetsAsc);
-    this.#checkForAlteredData(dataSetsAsc);
+    this.#checkForAlteredTransactionData(dataSetsAsc);
+    this.#checkForAlteredLicenseData(dataSetsAsc);
   }
 
   #checkForDeletedLicenses(dataSetsAsc: DataSet[]) {
@@ -83,8 +84,8 @@ export class DataShiftAnalyzer {
     this.#console.printInfo(`Checking for late transactions: Done`);
   }
 
-  #checkForAlteredData(dataSetsAsc: DataSet[]) {
-    this.#console.printInfo(`Checking for altered data: Starting...`);
+  #checkForAlteredTransactionData(dataSetsAsc: DataSet[]) {
+    this.#console.printInfo(`Checking for altered transaction data: Starting...`);
 
     const map = new MultiRecordMap<Transaction, TransactionData>();
 
@@ -95,7 +96,7 @@ export class DataShiftAnalyzer {
         if (lastData) {
           const keysToExamine: (keyof TransactionData)[] = [
             'saleDate', 'saleType',
-            'addonKey', 'addonName',
+            'addonKey', 'addonName', 'hosting',
             'country', 'region',
             'purchasePrice', 'vendorAmount',
             'billingPeriod',
@@ -119,7 +120,42 @@ export class DataShiftAnalyzer {
       }
     }
 
-    this.#console.printInfo(`Checking for altered data: Done`);
+    this.#console.printInfo(`Checking for altered transaction data: Done`);
+  }
+
+  #checkForAlteredLicenseData(dataSetsAsc: DataSet[]) {
+    this.#console.printInfo(`Checking for altered license data: Starting...`);
+
+    const map = new MultiRecordMap<License, LicenseData>();
+
+    for (const dataSet of dataSetsAsc) {
+      for (const license of dataSet.mpac.licenses) {
+        const data = license.data;
+        const lastData = map.get(license);
+        if (lastData) {
+          const keysToExamine: (keyof LicenseData)[] = [
+            'addonKey', 'addonName', 'hosting',
+            'maintenanceStartDate',
+          ];
+          for (const key of keysToExamine) {
+            const val = data[key];
+            const lastVal = lastData[key];
+            if (val !== lastVal) {
+              this.#console.printError(`Altered license data`, {
+                id: license.id,
+                key,
+                val,
+                lastVal,
+              });
+            }
+          }
+
+        }
+        map.set(license, data);
+      }
+    }
+
+    this.#console.printInfo(`Checking for altered license data: Done`);
   }
 
 }
