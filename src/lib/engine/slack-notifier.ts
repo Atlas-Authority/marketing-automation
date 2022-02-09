@@ -11,7 +11,7 @@ interface RunLoopConfig {
 
 export class SlackNotifier {
 
-  static fromENV(console: ConsoleLogger) {
+  public static fromENV(console: ConsoleLogger) {
     const slackConfig = slackConfigFromENV();
     if (!slackConfig.apiToken) return null;
 
@@ -26,33 +26,33 @@ export class SlackNotifier {
   ) { }
 
   public async notifyStarting() {
-    this.postToSlack(`Starting Marketing Engine`);
+    this.#postToSlack(`Starting Marketing Engine`);
   }
 
   public async notifyErrors(loopConfig: RunLoopConfig, errors: any[]) {
-    await this.postToSlack(`Failed ${loopConfig.retryTimes} times. Below are the specific errors, in order. Trying again in ${loopConfig.runInterval}.`);
+    await this.#postToSlack(`Failed ${loopConfig.retryTimes} times. Below are the specific errors, in order. Trying again in ${loopConfig.runInterval}.`);
     for (const error of errors) {
       if (error instanceof KnownError) {
-        await this.postToSlack(error.message);
+        await this.#postToSlack(error.message);
       }
       else if (error instanceof AttachableError) {
-        await this.postErrorToSlack(error);
-        await this.postAttachmentToSlack({
+        await this.#postErrorToSlack(error);
+        await this.#postAttachmentToSlack({
           title: 'Error attachment for ^',
           content: error.attachment,
         });
       }
       else {
-        await this.postErrorToSlack(error);
+        await this.#postErrorToSlack(error);
       }
     }
   }
 
-  private async postErrorToSlack(error: Error) {
-    await this.postToSlack(`\`\`\`\n${error.stack}\n\`\`\``);
+  async #postErrorToSlack(error: Error) {
+    await this.#postToSlack(`\`\`\`\n${error.stack}\n\`\`\``);
   }
 
-  private async postAttachmentToSlack({ title, content }: { title: string, content: string }) {
+  async #postAttachmentToSlack({ title, content }: { title: string, content: string }) {
     this.console.printInfo('Slack', title, content);
 
     if (this.errorChannelId) {
@@ -64,7 +64,7 @@ export class SlackNotifier {
     }
   }
 
-  private async postToSlack(text: string) {
+  async #postToSlack(text: string) {
     this.console.printInfo('Slack', text);
 
     if (this.errorChannelId) {
