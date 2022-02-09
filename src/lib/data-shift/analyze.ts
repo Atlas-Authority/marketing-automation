@@ -12,12 +12,12 @@ export class DataShiftAnalyzer {
   #console = new LabeledConsoleLogger('Analyze Data Shift');
 
   public run(dataSetsAsc: DataSet[]) {
-    this.checkForDeletedLicenses(dataSetsAsc);
-    this.checkForWrongTransactionDates(dataSetsAsc);
-    this.checkForAlteredData(dataSetsAsc);
+    this.#checkForDeletedLicenses(dataSetsAsc);
+    this.#checkForWrongTransactionDates(dataSetsAsc);
+    this.#checkForAlteredData(dataSetsAsc);
   }
 
-  private checkForDeletedLicenses(dataSetsAsc: DataSet[]) {
+  #checkForDeletedLicenses(dataSetsAsc: DataSet[]) {
     this.#console.printInfo(`Checking for deleted licenses: Starting...`);
 
     const [firstDataset, ...remainingDataSets] = dataSetsAsc;
@@ -49,7 +49,7 @@ export class DataShiftAnalyzer {
     this.#console.printInfo(`Checking for deleted licenses: Done`);
   }
 
-  private checkForWrongTransactionDates(dataSetsAsc: DataSet[]) {
+  #checkForWrongTransactionDates(dataSetsAsc: DataSet[]) {
     this.#console.printInfo(`Checking for late transactions: Starting...`);
 
     const dataSetsDesc = [...dataSetsAsc].reverse();
@@ -83,7 +83,7 @@ export class DataShiftAnalyzer {
     this.#console.printInfo(`Checking for late transactions: Done`);
   }
 
-  private checkForAlteredData(dataSetsAsc: DataSet[]) {
+  #checkForAlteredData(dataSetsAsc: DataSet[]) {
     this.#console.printInfo(`Checking for altered data: Starting...`);
 
     const map = new MultiRecordMap<Transaction, TransactionData>();
