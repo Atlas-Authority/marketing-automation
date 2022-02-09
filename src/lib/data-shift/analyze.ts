@@ -8,18 +8,18 @@ import { MultiRecordMap } from "./multi-id-map";
 
 const LATE_TRANSACTION_THRESHOLD = 30;
 
-interface DeletedRecordIssue {
+export interface DeletedRecordIssue {
   id: string,
   timestampChecked: string,
 }
 
-interface LateTransactionIssue {
+export interface LateTransactionIssue {
   id: string,
   expected: string,
   found: string,
 }
 
-interface AlteredRecordIssue {
+export interface AlteredRecordIssue {
   id: string,
   key: string,
   val: any,
