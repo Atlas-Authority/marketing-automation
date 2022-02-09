@@ -9,7 +9,6 @@ import { MultiRecordMap } from "./multi-id-map";
 const LATE_TRANSACTION_THRESHOLD = 30;
 
 interface DeletedRecordIssue {
-  kind: string,
   id: string,
   timestampChecked: string,
 }
@@ -21,7 +20,6 @@ interface LateTransactionIssue {
 }
 
 interface AlteredRecordIssue {
-  kind: string,
   id: string,
   key: string,
   val: any,
@@ -81,7 +79,6 @@ export class DataShiftAnalyzer {
         const found = currentRecordMap.get(record);
         if (!found) {
           deletedRecords.push({
-            kind,
             id: record.id,
             timestampChecked: ds.timestamp.toISO(),
           });
@@ -159,7 +156,6 @@ export class DataShiftAnalyzer {
             const lastVal = lastData[key];
             if (val !== lastVal) {
               alteredRecords.push({
-                kind: `transaction`,
                 id: transaction.id,
                 key,
                 val,
@@ -198,7 +194,6 @@ export class DataShiftAnalyzer {
             const lastVal = lastData[key];
             if (val !== lastVal) {
               alteredRecords.push({
-                kind: `license`,
                 id: license.id,
                 key,
                 val,
