@@ -38,10 +38,10 @@ export class DataShiftAnalyzer {
     return {
 
       deletedLicenses:
-        this.#checkForDeletedRecords(dataSetsAsc, 'license'),
+        this.#checkForDeletedRecords(dataSetsAsc, 'license', mpac => mpac.licenses),
 
       deletedTransactions:
-        this.#checkForDeletedRecords(dataSetsAsc, 'transaction'),
+        this.#checkForDeletedRecords(dataSetsAsc, 'transaction', mpac => mpac.transactions),
 
       lateTransactions:
         this.#checkForWrongTransactionDates(dataSetsAsc),
@@ -55,10 +55,8 @@ export class DataShiftAnalyzer {
     };
   }
 
-  #checkForDeletedRecords(dataSetsAsc: DataSet[], kind: 'license' | 'transaction') {
+  #checkForDeletedRecords<T extends License | Transaction>(dataSetsAsc: DataSet[], kind: 'license' | 'transaction', getRecords: (mpac: Marketplace) => T[]) {
     const deletedRecords: DeletedRecordIssue[] = [];
-
-    const getRecords = (mpac: Marketplace) => kind === 'license' ? mpac.licenses : mpac.transactions;
 
     this.#logStep(`Checking for deleted ${kind}s: Starting...`);
 
