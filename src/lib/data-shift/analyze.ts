@@ -32,23 +32,34 @@ export class DataShiftAnalyzer {
 
   #logStep = (...args: any[]) => this.console?.printInfo('Analyze Data Shift', ...args);
 
-  deletedRecords: DeletedRecordIssue[] = [];
-  lateTransactions: LateTransactionIssue[] = [];
-  alteredRecords: AlteredRecordIssue[] = [];
-
   constructor(
     private console?: ConsoleLogger,
   ) { }
 
   public run(dataSetsAsc: DataSet[]) {
-    this.#checkForDeletedRecords(dataSetsAsc, 'license');
-    this.#checkForDeletedRecords(dataSetsAsc, 'transaction');
-    this.#checkForWrongTransactionDates(dataSetsAsc);
-    this.#checkForAlteredTransactionData(dataSetsAsc);
-    this.#checkForAlteredLicenseData(dataSetsAsc);
+    return {
+
+      deletedLicenses:
+        this.#checkForDeletedRecords(dataSetsAsc, 'license'),
+
+      deletedTransactions:
+        this.#checkForDeletedRecords(dataSetsAsc, 'transaction'),
+
+      lateTransactions:
+        this.#checkForWrongTransactionDates(dataSetsAsc),
+
+      alteredTransactions:
+        this.#checkForAlteredTransactionData(dataSetsAsc),
+
+      alteredLicenses:
+        this.#checkForAlteredLicenseData(dataSetsAsc),
+
+    };
   }
 
   #checkForDeletedRecords(dataSetsAsc: DataSet[], kind: 'license' | 'transaction') {
+    const deletedRecords: DeletedRecordIssue[] = [];
+
     const getRecords = (mpac: Marketplace) => kind === 'license' ? mpac.licenses : mpac.transactions;
 
     this.#logStep(`Checking for deleted ${kind}s: Starting...`);
@@ -69,7 +80,7 @@ export class DataShiftAnalyzer {
       for (const [record,] of lastRecordMap.entries()) {
         const found = currentRecordMap.get(record);
         if (!found) {
-          this.deletedRecords.push({
+          deletedRecords.push({
             kind,
             id: record.id,
             timestampChecked: ds.timestamp.toISO(),
@@ -81,9 +92,13 @@ export class DataShiftAnalyzer {
     }
 
     this.#logStep(`Checking for deleted ${kind}s: Done`);
+
+    return deletedRecords;
   }
 
   #checkForWrongTransactionDates(dataSetsAsc: DataSet[]) {
+    const lateTransactions: LateTransactionIssue[] = [];
+
     this.#logStep(`Checking for late transactions: Starting...`);
 
     const dataSetsDesc = [...dataSetsAsc].reverse();
@@ -106,7 +121,7 @@ export class DataShiftAnalyzer {
       }
 
       if (diff.days > LATE_TRANSACTION_THRESHOLD) {
-        this.lateTransactions.push({
+        lateTransactions.push({
           id: transaction.id,
           expected: transaction.data.saleDate,
           found: foundDate.toISO(),
@@ -115,9 +130,13 @@ export class DataShiftAnalyzer {
     }
 
     this.#logStep(`Checking for late transactions: Done`);
+
+    return lateTransactions;
   }
 
   #checkForAlteredTransactionData(dataSetsAsc: DataSet[]) {
+    const alteredRecords: AlteredRecordIssue[] = [];
+
     this.#logStep(`Checking for altered transaction data: Starting...`);
 
     const map = new MultiRecordMap<Transaction, TransactionData>();
@@ -139,7 +158,7 @@ export class DataShiftAnalyzer {
             const val = data[key];
             const lastVal = lastData[key];
             if (val !== lastVal) {
-              this.alteredRecords.push({
+              alteredRecords.push({
                 kind: `transaction`,
                 id: transaction.id,
                 key,
@@ -154,9 +173,13 @@ export class DataShiftAnalyzer {
     }
 
     this.#logStep(`Checking for altered transaction data: Done`);
+
+    return alteredRecords;
   }
 
   #checkForAlteredLicenseData(dataSetsAsc: DataSet[]) {
+    const alteredRecords: AlteredRecordIssue[] = [];
+
     this.#logStep(`Checking for altered license data: Starting...`);
 
     const map = new MultiRecordMap<License, LicenseData>();
@@ -174,7 +197,7 @@ export class DataShiftAnalyzer {
             const val = data[key];
             const lastVal = lastData[key];
             if (val !== lastVal) {
-              this.alteredRecords.push({
+              alteredRecords.push({
                 kind: `license`,
                 id: license.id,
                 key,
@@ -190,6 +213,8 @@ export class DataShiftAnalyzer {
     }
 
     this.#logStep(`Checking for altered license data: Done`);
+
+    return alteredRecords;
   }
 
 }
