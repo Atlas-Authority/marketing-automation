@@ -147,7 +147,7 @@ export class DataShiftAnalyzer {
         lateTransactions.push({
           id: transaction.id,
           expected: transaction.data.saleDate,
-          found: foundDate.toISO(),
+          found: foundDate.toISODate(),
         });
       }
     }
