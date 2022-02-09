@@ -2,8 +2,8 @@ import { DateTime } from "luxon";
 import { DataSet } from "../data/set";
 import { ConsoleLogger } from "../log/console";
 import { Marketplace } from "../marketplace/marketplace";
-import { License, LicenseData } from "../model/license";
-import { Transaction, TransactionData } from "../model/transaction";
+import { License } from "../model/license";
+import { Transaction } from "../model/transaction";
 import { MultiRecordMap } from "./multi-id-map";
 
 const LATE_TRANSACTION_THRESHOLD = 30;
@@ -38,19 +38,47 @@ export class DataShiftAnalyzer {
     return {
 
       deletedLicenses:
-        this.#checkForDeletedRecords(dataSetsAsc, 'license', mpac => mpac.licenses),
+        this.#checkForDeletedRecords(dataSetsAsc, 'license',
+          mpac => mpac.licenses),
 
       deletedTransactions:
-        this.#checkForDeletedRecords(dataSetsAsc, 'transaction', mpac => mpac.transactions),
+        this.#checkForDeletedRecords(dataSetsAsc, 'transaction',
+          mpac => mpac.transactions),
 
       lateTransactions:
         this.#checkForWrongTransactionDates(dataSetsAsc),
 
       alteredTransactions:
-        this.#checkForAlteredTransactionData(dataSetsAsc),
+        this.#checkForAlteredRecordData(dataSetsAsc, 'transaction',
+          mpac => mpac.transactions, [
+          d => d.saleDate,
+          d => d.saleType,
+
+          d => d.addonKey,
+          d => d.addonName,
+          d => d.hosting,
+
+          d => d.country,
+          d => d.region,
+
+          d => d.purchasePrice.toString(),
+          d => d.vendorAmount.toString(),
+
+          d => d.billingPeriod,
+
+          d => d.maintenanceStartDate,
+          d => d.maintenanceEndDate,
+        ]),
 
       alteredLicenses:
-        this.#checkForAlteredLicenseData(dataSetsAsc),
+        this.#checkForAlteredRecordData(dataSetsAsc, 'license',
+          mpac => mpac.licenses, [
+          d => d.addonKey,
+          d => d.addonName,
+          d => d.hosting,
+
+          d => d.maintenanceStartDate,
+        ]),
 
     };
   }
@@ -129,83 +157,41 @@ export class DataShiftAnalyzer {
     return lateTransactions;
   }
 
-  #checkForAlteredTransactionData(dataSetsAsc: DataSet[]) {
+  #checkForAlteredRecordData<T extends License | Transaction, D = T['data']>(
+    dataSetsAsc: DataSet[],
+    recordKind: 'license' | 'transaction',
+    getRecords: (mpac: Marketplace) => T[],
+    fieldsToExamine: ((data: D) => string)[],
+  ) {
     const alteredRecords: AlteredRecordIssue[] = [];
 
-    this.#logStep(`Checking for altered transaction data: Starting...`);
+    this.#logStep(`Checking for altered ${recordKind} data: Starting...`);
 
-    const map = new MultiRecordMap<Transaction, TransactionData>();
+    const map = new MultiRecordMap<T, D>();
 
     for (const dataSet of dataSetsAsc) {
-      for (const transaction of dataSet.mpac.transactions) {
-        const data = transaction.data;
-        const lastData = map.get(transaction);
+      for (const record of getRecords(dataSet.mpac)) {
+        const data = record.data as unknown as D;
+        const lastData = map.get(record);
         if (lastData) {
-          const keysToExamine: (keyof TransactionData)[] = [
-            'saleDate', 'saleType',
-            'addonKey', 'addonName', 'hosting',
-            'country', 'region',
-            'purchasePrice', 'vendorAmount',
-            'billingPeriod',
-            'maintenanceStartDate', 'maintenanceEndDate',
-          ];
-          for (const key of keysToExamine) {
-            const val = data[key];
-            const lastVal = lastData[key];
+          for (const key of fieldsToExamine) {
+            const val = key(data);
+            const lastVal = key(lastData);
             if (val !== lastVal) {
               alteredRecords.push({
-                id: transaction.id,
-                key,
+                id: record.id,
+                key: key.toString().replace(/^d => d\./, ''),
                 val,
                 lastVal,
               });
             }
           }
         }
-        map.set(transaction, data);
+        map.set(record, data);
       }
     }
 
-    this.#logStep(`Checking for altered transaction data: Done`);
-
-    return alteredRecords;
-  }
-
-  #checkForAlteredLicenseData(dataSetsAsc: DataSet[]) {
-    const alteredRecords: AlteredRecordIssue[] = [];
-
-    this.#logStep(`Checking for altered license data: Starting...`);
-
-    const map = new MultiRecordMap<License, LicenseData>();
-
-    for (const dataSet of dataSetsAsc) {
-      for (const license of dataSet.mpac.licenses) {
-        const data = license.data;
-        const lastData = map.get(license);
-        if (lastData) {
-          const keysToExamine: (keyof LicenseData)[] = [
-            'addonKey', 'addonName', 'hosting',
-            'maintenanceStartDate',
-          ];
-          for (const key of keysToExamine) {
-            const val = data[key];
-            const lastVal = lastData[key];
-            if (val !== lastVal) {
-              alteredRecords.push({
-                id: license.id,
-                key,
-                val,
-                lastVal,
-              });
-            }
-          }
-
-        }
-        map.set(license, data);
-      }
-    }
-
-    this.#logStep(`Checking for altered license data: Done`);
+    this.#logStep(`Checking for altered ${recordKind} data: Done`);
 
     return alteredRecords;
   }
