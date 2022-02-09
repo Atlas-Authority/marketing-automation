@@ -52,4 +52,25 @@ describe(`Multi-ID Map`, () => {
     ]);
   });
 
+  it(`Can get individual entries`, () => {
+    const map = new MultiRecordMap();
+    map.set(o1a, 22);
+    map.set(o1b, 33);
+    map.set(o1c, 44);
+    map.set(o2, 55);
+    expect(map.get(o1a)).toBe(44);
+    expect(map.get(o1b)).toBe(44);
+    expect(map.get(o1c)).toBe(44);
+    expect(map.get(o2)).toBe(55);
+  });
+
+  it(`Returns undefined for keys with absent id-keys`, () => {
+    const map = new MultiRecordMap();
+    map.set(o1a, 22);
+    expect(map.get(o1a)).toBe(22);
+    expect(map.get(o1b)).toBe(22);
+    expect(map.get(o1c)).toBe(undefined);
+    expect(map.get(o2)).toBe(undefined);
+  });
+
 });
