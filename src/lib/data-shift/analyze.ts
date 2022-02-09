@@ -10,7 +10,13 @@ const LATE_TRANSACTION_THRESHOLD = 30;
 
 export class DataShiftAnalyzer {
 
-  #console = new LabeledConsoleLogger('Analyze Data Shift');
+  #logStep = (...args: any[]) => this.console?.printInfo('Analyze Data Shift', ...args);
+  #issues: any[] = [];
+
+  constructor(
+    private console?: ConsoleLogger,
+    private reportIssues?: (issues: any[]) => void,
+  ) { }
 
   public run(dataSetsAsc: DataSet[]) {
     this.#checkForDeletedRecords(dataSetsAsc, 'license');
@@ -18,12 +24,19 @@ export class DataShiftAnalyzer {
     this.#checkForWrongTransactionDates(dataSetsAsc);
     this.#checkForAlteredTransactionData(dataSetsAsc);
     this.#checkForAlteredLicenseData(dataSetsAsc);
+
+    if (this.#issues.length === 0) {
+      this.#logStep('No issues found');
+    }
+    else {
+      this.reportIssues?.(this.#issues);
+    }
   }
 
   #checkForDeletedRecords(dataSetsAsc: DataSet[], kind: 'license' | 'transaction') {
     const getRecords = (mpac: Marketplace) => kind === 'license' ? mpac.licenses : mpac.transactions;
 
-    this.#console.printInfo(`Checking for deleted ${kind}s: Starting...`);
+    this.#logStep(`Checking for deleted ${kind}s: Starting...`);
 
     const [firstDataset, ...remainingDataSets] = dataSetsAsc;
 
@@ -41,7 +54,8 @@ export class DataShiftAnalyzer {
       for (const [record,] of lastRecordMap.entries()) {
         const found = currentRecordMap.get(record);
         if (!found) {
-          this.#console.printWarning(`${kind === 'license' ? 'License' : 'Transaction'} went missing:`, {
+          this.#issues.push({
+            issue: `${kind === 'license' ? 'License' : 'Transaction'} went missing:`,
             timestampChecked: ds.timestamp.toISO(),
             license: record.id,
           });
@@ -51,11 +65,11 @@ export class DataShiftAnalyzer {
       lastRecordMap = currentRecordMap;
     }
 
-    this.#console.printInfo(`Checking for deleted ${kind}s: Done`);
+    this.#logStep(`Checking for deleted ${kind}s: Done`);
   }
 
   #checkForWrongTransactionDates(dataSetsAsc: DataSet[]) {
-    this.#console.printInfo(`Checking for late transactions: Starting...`);
+    this.#logStep(`Checking for late transactions: Starting...`);
 
     const dataSetsDesc = [...dataSetsAsc].reverse();
     const transactionMap = new MultiRecordMap<Transaction, DateTime>();
@@ -77,7 +91,8 @@ export class DataShiftAnalyzer {
       }
 
       if (diff.days > LATE_TRANSACTION_THRESHOLD) {
-        this.#console.printError('Transaction is far off', {
+        this.#issues.push({
+          issue: 'Transaction is far off',
           id: transaction.id,
           expected: transaction.data.saleDate,
           found: foundDate.toISO(),
@@ -85,11 +100,11 @@ export class DataShiftAnalyzer {
       }
     }
 
-    this.#console.printInfo(`Checking for late transactions: Done`);
+    this.#logStep(`Checking for late transactions: Done`);
   }
 
   #checkForAlteredTransactionData(dataSetsAsc: DataSet[]) {
-    this.#console.printInfo(`Checking for altered transaction data: Starting...`);
+    this.#logStep(`Checking for altered transaction data: Starting...`);
 
     const map = new MultiRecordMap<Transaction, TransactionData>();
 
@@ -110,7 +125,8 @@ export class DataShiftAnalyzer {
             const val = data[key];
             const lastVal = lastData[key];
             if (val !== lastVal) {
-              this.#console.printError(`Altered transaction data`, {
+              this.#issues.push({
+                issue: `Altered transaction data`,
                 id: transaction.id,
                 key,
                 val,
@@ -118,17 +134,16 @@ export class DataShiftAnalyzer {
               });
             }
           }
-
         }
         map.set(transaction, data);
       }
     }
 
-    this.#console.printInfo(`Checking for altered transaction data: Done`);
+    this.#logStep(`Checking for altered transaction data: Done`);
   }
 
   #checkForAlteredLicenseData(dataSetsAsc: DataSet[]) {
-    this.#console.printInfo(`Checking for altered license data: Starting...`);
+    this.#logStep(`Checking for altered license data: Starting...`);
 
     const map = new MultiRecordMap<License, LicenseData>();
 
@@ -145,7 +160,8 @@ export class DataShiftAnalyzer {
             const val = data[key];
             const lastVal = lastData[key];
             if (val !== lastVal) {
-              this.#console.printError(`Altered license data`, {
+              this.#issues.push({
+                issue: `Altered license data`,
                 id: license.id,
                 key,
                 val,
@@ -159,18 +175,7 @@ export class DataShiftAnalyzer {
       }
     }
 
-    this.#console.printInfo(`Checking for altered license data: Done`);
+    this.#logStep(`Checking for altered license data: Done`);
   }
-
-}
-
-class LabeledConsoleLogger {
-
-  #console = new ConsoleLogger();
-  constructor(private label: string) { }
-
-  printInfo(...args: any[]) { this.#console.printInfo(this.label, ...args); }
-  printWarning(...args: any[]) { this.#console.printWarning(this.label, ...args); }
-  printError(...args: any[]) { this.#console.printError(this.label, ...args); }
 
 }
