@@ -21,18 +21,18 @@ export class DataShiftAnalyzer {
 
     const [firstDataset, ...remainingDataSets] = dataSetsAsc;
 
-    let lastLicenseMap = new RecordMap<License, true>();
+    let lastLicenseMap = new MultiRecordMap<License, true>();
     for (const license of firstDataset.mpac.licenses) {
       lastLicenseMap.set(license, true);
     }
 
     for (const ds of remainingDataSets) {
-      const currentLicenseMap = new RecordMap<License, true>();
+      const currentLicenseMap = new MultiRecordMap<License, true>();
       for (const license of ds.mpac.licenses) {
         currentLicenseMap.set(license, true);
       }
 
-      for (const license of lastLicenseMap.allRecords()) {
+      for (const [license,] of lastLicenseMap.entries()) {
         const found = currentLicenseMap.get(license);
         if (!found) {
           this.#console.printWarning('License went missing:', {
@@ -92,44 +92,5 @@ class LabeledConsoleLogger {
   printInfo(...args: any[]) { this.#console.printInfo(this.label, ...args); }
   printWarning(...args: any[]) { this.#console.printWarning(this.label, ...args); }
   printError(...args: any[]) { this.#console.printError(this.label, ...args); }
-
-}
-
-class RecordMap<T extends License | Transaction, U> {
-
-  #keys = new Map<string, T>();
-  #map = new Map<T, U>();
-
-  public get(record: T): U | undefined {
-    const key = (record
-      .ids
-      .map(id => this.#maybeGet(id))
-      .find(record => record)
-    );
-    if (key) {
-      const val = this.#map.get(key);
-      if (val !== undefined) {
-        this.set(record, val);
-      }
-      return val;
-    }
-    return undefined;
-  }
-
-  #maybeGet(id: string | null): T | undefined {
-    if (id) return this.#keys.get(id);
-    return undefined;
-  }
-
-  public allRecords() {
-    return new Set(this.#keys.values());
-  }
-
-  public set(key: T, val: U) {
-    for (const id of key.ids) {
-      this.#keys.set(id, key);
-    }
-    this.#map.set(key, val);
-  }
 
 }
