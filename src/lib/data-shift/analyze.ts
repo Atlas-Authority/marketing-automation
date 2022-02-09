@@ -1,6 +1,7 @@
 import { DateTime } from "luxon";
 import { DataSet } from "../data/set";
 import { ConsoleLogger } from "../log/console";
+import { Marketplace } from "../marketplace/marketplace";
 import { License, LicenseData } from "../model/license";
 import { Transaction, TransactionData } from "../model/transaction";
 import { MultiRecordMap } from "./multi-id-map";
@@ -12,42 +13,45 @@ export class DataShiftAnalyzer {
   #console = new LabeledConsoleLogger('Analyze Data Shift');
 
   public run(dataSetsAsc: DataSet[]) {
-    this.#checkForDeletedLicenses(dataSetsAsc);
+    this.#checkForDeletedRecords(dataSetsAsc, 'license');
+    this.#checkForDeletedRecords(dataSetsAsc, 'transaction');
     this.#checkForWrongTransactionDates(dataSetsAsc);
     this.#checkForAlteredTransactionData(dataSetsAsc);
     this.#checkForAlteredLicenseData(dataSetsAsc);
   }
 
-  #checkForDeletedLicenses(dataSetsAsc: DataSet[]) {
-    this.#console.printInfo(`Checking for deleted licenses: Starting...`);
+  #checkForDeletedRecords(dataSetsAsc: DataSet[], kind: 'license' | 'transaction') {
+    const getRecords = (mpac: Marketplace) => kind === 'license' ? mpac.licenses : mpac.transactions;
+
+    this.#console.printInfo(`Checking for deleted ${kind}s: Starting...`);
 
     const [firstDataset, ...remainingDataSets] = dataSetsAsc;
 
-    let lastLicenseMap = new MultiRecordMap<License, true>();
-    for (const license of firstDataset.mpac.licenses) {
-      lastLicenseMap.set(license, true);
+    let lastRecordMap = new MultiRecordMap<License | Transaction, true>();
+    for (const record of getRecords(firstDataset.mpac)) {
+      lastRecordMap.set(record, true);
     }
 
     for (const ds of remainingDataSets) {
-      const currentLicenseMap = new MultiRecordMap<License, true>();
-      for (const license of ds.mpac.licenses) {
-        currentLicenseMap.set(license, true);
+      const currentRecordMap = new MultiRecordMap<License | Transaction, true>();
+      for (const record of getRecords(ds.mpac)) {
+        currentRecordMap.set(record, true);
       }
 
-      for (const [license,] of lastLicenseMap.entries()) {
-        const found = currentLicenseMap.get(license);
+      for (const [record,] of lastRecordMap.entries()) {
+        const found = currentRecordMap.get(record);
         if (!found) {
-          this.#console.printWarning('License went missing:', {
+          this.#console.printWarning(`${kind === 'license' ? 'License' : 'Transaction'} went missing:`, {
             timestampChecked: ds.timestamp.toISO(),
-            license: license.id,
+            license: record.id,
           });
         }
       }
 
-      lastLicenseMap = currentLicenseMap;
+      lastRecordMap = currentRecordMap;
     }
 
-    this.#console.printInfo(`Checking for deleted licenses: Done`);
+    this.#console.printInfo(`Checking for deleted ${kind}s: Done`);
   }
 
   #checkForWrongTransactionDates(dataSetsAsc: DataSet[]) {
