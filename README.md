@@ -72,7 +72,7 @@ $ node out/bin/main.js  # This always uses live inputs/outputs
 
 ## Changelog
 
-### Unreleased
+### 0.4.0
 
 - Added `KEEP_DATA_SETS` ENV variable.
 - Added `LATE_TRANSACTION_THRESHOLD_DAYS` ENV variable.
