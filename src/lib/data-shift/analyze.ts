@@ -36,12 +36,12 @@ export class DataShiftAnalyzer {
 
   #logStep = (...args: any[]) => this.console?.printInfo('Analyze Data Shift', ...args);
 
-  config;
+  #config;
   constructor(
     config?: DataShiftConfig,
     private console?: ConsoleLogger,
   ) {
-    this.config = config ?? defaultConfig;
+    this.#config = config ?? defaultConfig;
   }
 
   public run(dataSetsAsc: DataSet[]) {
@@ -153,7 +153,7 @@ export class DataShiftAnalyzer {
         continue;
       }
 
-      if (diff.days > this.config.lateTransactionThresholdDays) {
+      if (diff.days > this.#config.lateTransactionThresholdDays) {
         lateTransactions.push({
           id: transaction.id,
           expected: transaction.data.saleDate,
