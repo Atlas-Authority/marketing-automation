@@ -69,6 +69,8 @@ $ npm run test -- --watchAll  # Run during dev
 $ node out/bin/main.js  # This always uses live inputs/outputs
 ```
 
+See [Analize Data Shift](./docs/ANALIZE_DATA_SHIFT.md) docs for this sub-functionality.
+
 
 ## Changelog
 
