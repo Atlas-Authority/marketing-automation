@@ -13,7 +13,7 @@ const console = new ConsoleLogger();
 const uploader = new HubspotUploader(console);
 
 const runLoopConfig = runLoopConfigFromENV();
-const notifier = SlackNotifier.fromENV(new ConsoleLogger());
+const notifier = SlackNotifier.fromENV(console);
 notifier?.notifyStarting();
 
 run(console, runLoopConfig, {

@@ -68,7 +68,7 @@ export class SlackNotifier {
         channels: this.errorChannelId,
         title: title,
         content: content,
-      })
+      });
     }
   }
 
