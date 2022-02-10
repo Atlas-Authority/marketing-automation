@@ -28,8 +28,8 @@ export class HubspotUploader {
     const entitiesWithChanges = manager.getArray().map(e => ({ e, changes: e.getPropertyChanges() }));
     const toSync = entitiesWithChanges.filter(({ changes }) => Object.keys(changes).length > 0);
 
-    const toCreate = toSync.filter(({ e }) => e.id === undefined);
-    const toUpdate = toSync.filter(({ e }) => e.id !== undefined);
+    const toCreate = toSync.filter(({ e }) => e.id === null);
+    const toUpdate = toSync.filter(({ e }) => e.id !== null);
 
     if (toCreate.length > 0) {
       const results = await this.api.createEntities(
