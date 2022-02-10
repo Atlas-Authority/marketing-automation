@@ -1,5 +1,8 @@
 import 'source-map-support/register';
 import { engineConfigFromENV, runLoopConfigFromENV } from "../lib/config/env";
+import { DataShiftAnalyzer } from '../lib/data-shift/analyze';
+import { loadDataSets } from '../lib/data-shift/loader';
+import { DataShiftReporter } from '../lib/data-shift/reporter';
 import { dataManager } from '../lib/data/manager';
 import { downloadAllData } from '../lib/engine/download';
 import { Engine } from "../lib/engine/engine";
@@ -36,6 +39,13 @@ run(console, runLoopConfig, {
 
     console.printInfo('Main', 'Writing HubSpot change log file');
     logDir.hubspotOutputLogger()?.logResults(dataSet.hubspot);
+
+    console.printInfo('Main', 'Analyzing data shift');
+    const dataSets = loadDataSets(console);
+    const analyzer = new DataShiftAnalyzer(console);
+    const results = analyzer.run(dataSets);
+    const reporter = new DataShiftReporter(console);
+    reporter.report(results);
 
     console.printInfo('Main', 'Done');
   },
