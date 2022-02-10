@@ -6,7 +6,13 @@ import { License } from "../model/license";
 import { Transaction } from "../model/transaction";
 import { MultiRecordMap } from "./multi-id-map";
 
-const LATE_TRANSACTION_THRESHOLD = 30;
+export interface DataShiftConfig {
+  lateTransactionThresholdDays: number,
+}
+
+const defaultConfig: DataShiftConfig = {
+  lateTransactionThresholdDays: 30,
+};
 
 export interface DeletedRecordIssue {
   id: string,
@@ -30,9 +36,13 @@ export class DataShiftAnalyzer {
 
   #logStep = (...args: any[]) => this.console?.printInfo('Analyze Data Shift', ...args);
 
+  config;
   constructor(
+    config?: DataShiftConfig,
     private console?: ConsoleLogger,
-  ) { }
+  ) {
+    this.config = config ?? defaultConfig;
+  }
 
   public run(dataSetsAsc: DataSet[]) {
     return {
@@ -143,7 +153,7 @@ export class DataShiftAnalyzer {
         continue;
       }
 
-      if (diff.days > LATE_TRANSACTION_THRESHOLD) {
+      if (diff.days > this.config.lateTransactionThresholdDays) {
         lateTransactions.push({
           id: transaction.id,
           expected: transaction.data.saleDate,

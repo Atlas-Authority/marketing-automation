@@ -8,7 +8,7 @@ const console = new ConsoleLogger();
 
 const dataSets = loadDataSets(console);
 
-const analyzer = new DataShiftAnalyzer(console);
+const analyzer = new DataShiftAnalyzer(undefined, console);
 const results = analyzer.run(dataSets);
 
 const reporter = new DataShiftReporter(console);

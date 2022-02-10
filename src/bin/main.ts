@@ -1,5 +1,5 @@
 import 'source-map-support/register';
-import { engineConfigFromENV, runLoopConfigFromENV } from "../lib/config/env";
+import { dataShiftConfigFromENV, engineConfigFromENV, runLoopConfigFromENV } from "../lib/config/env";
 import { DataShiftAnalyzer } from '../lib/data-shift/analyze';
 import { loadDataSets } from '../lib/data-shift/loader';
 import { DataShiftReporter } from '../lib/data-shift/reporter';
@@ -42,7 +42,7 @@ run(console, runLoopConfig, {
 
     console.printInfo('Main', 'Analyzing data shift');
     const dataSets = loadDataSets(console);
-    const analyzer = new DataShiftAnalyzer(console);
+    const analyzer = new DataShiftAnalyzer(dataShiftConfigFromENV(), console);
     const results = analyzer.run(dataSets);
     const reporter = new DataShiftReporter(console, notifier);
     reporter.report(results);

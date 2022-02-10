@@ -1,5 +1,6 @@
 import assert from "assert";
 import dotenv from "dotenv";
+import { DataShiftConfig } from "../data-shift/analyze";
 import { EngineConfig } from "../engine/engine";
 import { HubspotCreds } from "../hubspot/api";
 import { MpacCreds } from "../marketplace/api";
@@ -26,6 +27,14 @@ export function mpacCredsFromENV(): MpacCreds {
     user: required('MPAC_USER'),
     apiKey: required('MPAC_API_KEY'),
     sellerId: required('MPAC_SELLER_ID'),
+  };
+}
+
+export function dataShiftConfigFromENV(): DataShiftConfig | undefined {
+  const threshold = optional('LATE_TRANSACTION_THRESHOLD_DAYS');
+  if (!threshold) return undefined;
+  return {
+    lateTransactionThresholdDays: +threshold,
   };
 }
 
