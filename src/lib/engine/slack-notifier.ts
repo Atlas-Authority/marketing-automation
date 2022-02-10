@@ -13,7 +13,7 @@ export class SlackNotifier {
 
   public static fromENV(console: ConsoleLogger) {
     const slackConfig = slackConfigFromENV();
-    if (!slackConfig.apiToken) return null;
+    if (!slackConfig.apiToken) return undefined;
 
     const client = new slack.WebClient(slackConfig.apiToken);
     return new SlackNotifier(console, client, slackConfig.errorChannelId);

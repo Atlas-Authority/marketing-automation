@@ -44,7 +44,7 @@ run(console, runLoopConfig, {
     const dataSets = loadDataSets(console);
     const analyzer = new DataShiftAnalyzer(console);
     const results = analyzer.run(dataSets);
-    const reporter = new DataShiftReporter(console);
+    const reporter = new DataShiftReporter(console, notifier);
     reporter.report(results);
 
     console.printInfo('Main', 'Done');
