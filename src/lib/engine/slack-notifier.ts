@@ -48,6 +48,14 @@ export class SlackNotifier {
     }
   }
 
+  public async notifyDataShiftIssues(resultLabel: string, table: string) {
+    await this.#postAttachmentToSlack({
+      title: `Data Shift Issue for ${resultLabel}:`,
+      content: table,
+    });
+
+  }
+
   async #postErrorToSlack(error: Error) {
     await this.#postToSlack(`\`\`\`\n${error.stack}\n\`\`\``);
   }

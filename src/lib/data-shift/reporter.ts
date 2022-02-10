@@ -1,3 +1,4 @@
+import { SlackNotifier } from "../engine/slack-notifier";
 import { ConsoleLogger } from "../log/console";
 import { Table } from "../log/table";
 import { sorter } from "../util/helpers";
@@ -7,6 +8,7 @@ export class DataShiftReporter {
 
   public constructor(
     private console: ConsoleLogger,
+    private slack?: SlackNotifier,
   ) { }
 
   public report(results: {
@@ -49,18 +51,23 @@ export class DataShiftReporter {
 
   }
 
-  #reportResult<T>(resultKind: string, resultItems: T[], colSpecs: [{ title: string }, (t: T) => string][]) {
+  #reportResult<T>(resultLabel: string, resultItems: T[], colSpecs: [{ title: string }, (t: T) => string][]) {
     if (resultItems.length === 0) {
-      this.console.printInfo('Data Shift Analyzer', `No ${resultKind} found`);
+      this.console.printInfo('Data Shift Analyzer', `No ${resultLabel} found`);
     }
     else {
       resultItems.sort(sorter(JSON.stringify));
       Table.print({
-        title: resultKind,
+        title: resultLabel,
         log: str => this.console.printWarning('Data Shift Analyzer', str),
         cols: colSpecs,
         rows: resultItems,
       });
+
+      this.slack?.notifyDataShiftIssues(resultLabel, Table.toString({
+        cols: colSpecs,
+        rows: resultItems,
+      }));
     }
   }
 
