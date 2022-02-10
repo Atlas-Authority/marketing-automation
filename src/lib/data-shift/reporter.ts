@@ -20,31 +20,31 @@ export class DataShiftReporter {
   }) {
 
     this.#reportResult('Altered Licenses', results.alteredLicenses, [
-      [{ title: 'ID' }, row => row.id],
+      [{ title: 'License' }, row => row.id],
       [{ title: 'Field' }, row => row.key],
       [{ title: 'Value' }, row => row.val],
       [{ title: 'Last Value' }, row => row.lastVal],
     ]);
 
     this.#reportResult('Altered Transactions', results.alteredTransactions, [
-      [{ title: 'ID' }, row => row.id],
+      [{ title: 'Transaction' }, row => row.id],
       [{ title: 'Field' }, row => row.key],
       [{ title: 'Value' }, row => row.val],
       [{ title: 'Last Value' }, row => row.lastVal],
     ]);
 
     this.#reportResult('Deleted Licenses', results.deletedLicenses, [
-      [{ title: 'ID' }, row => row.id],
+      [{ title: 'License' }, row => row.id],
       [{ title: 'Timestamp' }, row => row.timestampChecked],
     ]);
 
     this.#reportResult('Deleted Transactions', results.deletedTransactions, [
-      [{ title: 'ID' }, row => row.id],
+      [{ title: 'Transaction' }, row => row.id],
       [{ title: 'Timestamp' }, row => row.timestampChecked],
     ]);
 
     this.#reportResult('Late Transactions', results.lateTransactions, [
-      [{ title: 'ID' }, row => row.id],
+      [{ title: 'Transaction' }, row => row.id],
       [{ title: 'Date Expected' }, row => row.expected],
       [{ title: 'Date Found' }, row => row.found],
     ]);
