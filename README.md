@@ -72,6 +72,13 @@ $ node out/bin/main.js  # This always uses live inputs/outputs
 
 ## Changelog
 
+### 0.4.0
+
+- Added `KEEP_DATA_SETS` ENV variable.
+- Added `LATE_TRANSACTION_THRESHOLD_DAYS` ENV variable.
+- Added `npm run analyze-data-shift` task.
+- Main loop now analyzes and reports on data shift.
+
 ### 0.3.0
 
 - Docker image now requires persistent `./data` directory

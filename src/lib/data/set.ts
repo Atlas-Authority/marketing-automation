@@ -2,6 +2,7 @@ import { DateTime } from "luxon";
 import { mpacConfigFromENV } from "../config/env";
 import { deriveMultiProviderDomainsSet } from "../engine/all-free-email-providers";
 import { Hubspot, HubspotConfig, hubspotConfigFromENV } from "../hubspot/hubspot";
+import { ConsoleLogger } from "../log/console";
 import { LogDir } from "../log/logdir";
 import { Marketplace, MpacConfig } from "../marketplace/marketplace";
 import { RawDataSet } from "./raw";
@@ -29,13 +30,13 @@ export class DataSet {
 
   public makeLogDir?: (name: string) => LogDir;
 
-  public constructor(public rawData: RawDataSet, private timestamp: DateTime, private config?: DataSetConfig) {
+  public constructor(public rawData: RawDataSet, public timestamp: DateTime, private config?: DataSetConfig, console?: ConsoleLogger) {
     this.hubspot = new Hubspot(config?.hubspotConfig);
     this.mpac = new Marketplace(config?.mpacConfig);
 
     this.freeEmailDomains = deriveMultiProviderDomainsSet(rawData.freeDomains);
-    this.hubspot.importData(rawData);
-    this.mpac.importData(rawData);
+    this.hubspot.importData(rawData, console);
+    this.mpac.importData(rawData, console);
   }
 
 }

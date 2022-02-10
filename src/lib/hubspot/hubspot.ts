@@ -1,5 +1,6 @@
 import { hubspotContactConfigFromENV, hubspotDealConfigFromENV } from "../config/env";
 import { RawDataSet } from "../data/raw";
+import { ConsoleLogger } from "../log/console";
 import { CompanyManager } from "../model/company";
 import { ContactManager, HubspotContactConfig } from "../model/contact";
 import { DealManager, HubspotDealConfig } from "../model/deal";
@@ -22,14 +23,18 @@ export class Hubspot {
     this.companyManager = new CompanyManager();
   }
 
-  public importData(data: RawDataSet) {
+  public importData(data: RawDataSet, console?: ConsoleLogger) {
+    console?.printInfo('Hubspot', 'Importing entities...');
     const dealPrelinks = this.dealManager.importEntities(data.rawDeals);
     const companyPrelinks = this.companyManager.importEntities(data.rawCompanies);
     const contactPrelinks = this.contactManager.importEntities(data.rawContacts);
+    console?.printInfo('Hubspot', 'Done.');
 
+    console?.printInfo('Hubspot', 'Linking entities...');
     this.dealManager.linkEntities(dealPrelinks, this);
     this.companyManager.linkEntities(companyPrelinks, this);
     this.contactManager.linkEntities(contactPrelinks, this);
+    console?.printInfo('Hubspot', 'Done.');
   }
 
   public populateFakeIds() {

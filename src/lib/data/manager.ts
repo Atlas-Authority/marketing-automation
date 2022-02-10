@@ -37,15 +37,19 @@ class DataManager {
     return ms;
   }
 
-  public dataSetFrom(ms: number) {
+  public dataSetFrom(ms: number, console?: ConsoleLogger) {
     const dirName = `in-${ms}`;
     if (!this.#meta.timestamps.includes(ms)) {
       throw new Error(`Data set [${dirName}] does not exist`);
     }
     const dataDir = DataDir.root.subdir(dirName);
     const dataStore = new DataSetStore(dataDir);
+
+    console?.printInfo('Data manager', `Loading data set from disk...`);
     const data = dataStore.load();
-    const dataSet = new DataSet(data, DateTime.fromMillis(ms), dataSetConfigFromENV());
+    console?.printInfo('Data manager', `Done.`);
+
+    const dataSet = new DataSet(data, DateTime.fromMillis(ms), dataSetConfigFromENV(), console);
 
     dataSet.makeLogDir = (name) => new LogDir(dataDir.subdir(name));
 
@@ -69,8 +73,8 @@ class DataManager {
     return this.dataSetFrom(this.#meta.timestamps[0]);
   }
 
-  public allDataSets() {
-    return this.#meta.timestamps.map(ts => this.dataSetFrom(ts));
+  public allDataSetIds() {
+    return this.#meta.timestamps;
   }
 
   public pruneDataSets(console: ConsoleLogger) {

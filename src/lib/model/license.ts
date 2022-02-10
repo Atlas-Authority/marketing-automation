@@ -63,6 +63,8 @@ export class License extends MpacRecord<LicenseData> {
 
   /** Unique ID for this License. */
   declare id;
+  public ids: string[] = [];
+
   declare tier;
 
   public transactions: Transaction[] = [];
@@ -130,11 +132,17 @@ export class License extends MpacRecord<LicenseData> {
 
   public constructor(data: LicenseData) {
     super(data);
-    this.id = (
-      this.data.addonLicenseId ??
-      this.data.appEntitlementId ??
-      this.data.appEntitlementNumber!
-    );
+
+    const maybeAdd = (id: string | null) => {
+      if (id) this.ids.push(id);
+    };
+
+    maybeAdd(this.data.addonLicenseId);
+    maybeAdd(this.data.appEntitlementId);
+    maybeAdd(this.data.appEntitlementNumber);
+
+    this.id = this.ids.find(id => id)!;
+
     this.tier = Math.max(this.parseTier(), this.tierFromEvalOpportunity());
     this.active = this.data.status === 'active';
   }

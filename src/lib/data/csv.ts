@@ -1,4 +1,4 @@
-import { flatten, unflatten } from 'flat';
+import { flatten } from 'flat';
 import { LogWriteStream } from "./file";
 
 export class CsvStream {
@@ -28,21 +28,20 @@ export class CsvStream {
     this.stream.writeLine(','.repeat(this.keyCount - 1));
   }
 
-  static readFileFromFile(lines: Iterable<string>): unknown {
+  static readArrayFromCsvLines(lines: Iterable<string>): unknown {
     let keys: string[] | undefined;
+    let unflattener!: Unflattener;
     const array: any[] = [];
 
     for (const line of lines) {
       if (!keys) {
         keys = line.split(',');
+        unflattener = new Unflattener(keys);
         continue;
       }
 
       const vals = JSON.parse(`[${line}]`);
-      const entries = keys.map((key, i) => [key, vals[i]]);
-      const normalized = entries.filter(([k, v]) => v !== null && v !== undefined);
-      const object = Object.fromEntries(normalized);
-      const restored = unflatten(object);
+      const restored = unflattener.run(vals);
       array.push(restored);
     }
 
@@ -81,6 +80,45 @@ export class CsvStream {
 
   close() {
     this.stream.close();
+  }
+
+}
+
+class Unflattener {
+
+  #specs: {
+    parts: string[],
+    isArray: boolean,
+    lastKey: string | number,
+  }[] = [];
+
+  constructor(keys: string[]) {
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i];
+      const parts = key.split('.');
+      const last = parts.pop()!;
+      const lastKey = +last >= 0 ? +last : last;
+      const isArray = typeof lastKey === 'number';
+      this.#specs.push({ parts, isArray, lastKey });
+    }
+  }
+
+  run(vals: any[]) {
+    const o = Object.create(null);
+
+    for (let i = 0; i < this.#specs.length; i++) {
+      const val = vals[i];
+      if (val === undefined || val === null) continue;
+
+      const { isArray, parts, lastKey } = this.#specs[i];
+      let sub = o;
+      for (let i = 0; i < parts.length; i++) {
+        sub = sub[parts[i]] ??= (isArray ? [] : Object.create(null));
+      }
+      sub[lastKey] = val;
+    }
+
+    return o;
   }
 
 }

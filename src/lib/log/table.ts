@@ -23,6 +23,17 @@ export class Table {
     }
   }
 
+  public static toString<T>(opts: {
+    rows: Iterable<T>,
+    cols: [ColSpec, (t: T) => string | string[]][],
+  }) {
+    const table = new Table(opts.cols.map(([spec,]) => spec));
+    for (const row of opts.rows) {
+      table.rows.push(opts.cols.map(([, fn]) => fn(row)));
+    }
+    return table.eachRow().join('\n');
+  }
+
   public rows: Row[] = [];
 
   public constructor(private colSpecs: ColSpec[]) {

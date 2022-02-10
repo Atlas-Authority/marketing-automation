@@ -9,7 +9,7 @@ export interface Progress {
 
 export class MultiDownloadLogger {
 
-  constructor(private log: ConsoleLogger) { }
+  constructor(private console: ConsoleLogger) { }
 
   private multibar = new MultiBar({
     format: `${chalk.cyan('[{bar}]')} {name}`,
@@ -25,7 +25,7 @@ export class MultiDownloadLogger {
   private makeLine(name: string) {
     let bar = this.multibar.create(1, 0, { name });
     if (bar) return new AnimatedProgressBar(bar);
-    return new SimpleLogProgress(this.log, name);
+    return new SimpleLogProgress(this.console, name);
   }
 
   public done() {

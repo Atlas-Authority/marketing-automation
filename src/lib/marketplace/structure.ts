@@ -19,6 +19,12 @@ class MpacStructurer {
     const licensesByAppEntitlementId = new Map<string, License>();
     const licensesByAppEntitlementNumber = new Map<string, License>();
 
+    this.console?.printInfo('MPAC Verifier', 'Checking License Multi-ID uniqueness...');
+    this.checkIfIdIsUnique(licensesByAddonLicenseId, licensesByAppEntitlementId, licensesByAppEntitlementNumber);
+    this.checkIfIdIsUnique(licensesByAppEntitlementId, licensesByAddonLicenseId, licensesByAppEntitlementNumber);
+    this.checkIfIdIsUnique(licensesByAppEntitlementNumber, licensesByAddonLicenseId, licensesByAppEntitlementId);
+    this.console?.printInfo('MPAC Verifier', 'Done');
+
     const addLicense = (license: License, id: string | null, mapping: Map<string, License>) => {
       if (!id) return;
       const existing = mapping.get(id);
@@ -39,6 +45,12 @@ class MpacStructurer {
     const transactionsByAddonLicenseId = new Map<string, Set<Transaction>>();
     const transactionsByAppEntitlementId = new Map<string, Set<Transaction>>();
     const transactionsByAppEntitlementNumber = new Map<string, Set<Transaction>>();
+
+    this.console?.printInfo('MPAC Verifier', 'Checking Transaction Multi-ID uniqueness...');
+    this.checkIfIdIsUnique(transactionsByAddonLicenseId, transactionsByAppEntitlementId, transactionsByAppEntitlementNumber);
+    this.checkIfIdIsUnique(transactionsByAppEntitlementId, transactionsByAddonLicenseId, transactionsByAppEntitlementNumber);
+    this.checkIfIdIsUnique(transactionsByAppEntitlementNumber, transactionsByAddonLicenseId, transactionsByAppEntitlementId);
+    this.console?.printInfo('MPAC Verifier', 'Done');
 
     const addTransaction = (transaction: Transaction, id: string | null, mapping: Map<string, Set<Transaction>>) => {
       if (!id) return;
@@ -123,7 +135,7 @@ class MpacStructurer {
     const refundedAmount = [...maybeRefunded].map(t => t.data.vendorAmount).reduce((a, b) => a + b, 0);
 
     if (-refundAmount !== refundedAmount) {
-      this.console?.printWarning('Scoring Engine', "The following transactions have no accompanying licenses:");
+      this.console?.printWarning('MPAC Verifier', "The following transactions have no accompanying licenses:");
 
       const sameById = (tx1: Transaction, tx2: Transaction, id: keyof TransactionData) => (
         tx1.data[id] && tx1.data[id] === tx2.data[id]
@@ -146,7 +158,7 @@ class MpacStructurer {
       if (refunds.size > 0) {
         Table.print({
           title: 'Refunds',
-          log: s => this.console?.printWarning('Scoring Engine', '  ' + s),
+          log: s => this.console?.printWarning('MPAC Verifier', '  ' + s),
           cols: [
             [{ title: 'Transaction[License]', align: 'right' }, tx => tx.id],
             [{ title: 'Amount', align: 'right' }, tx => formatMoney(tx.data.vendorAmount)],
@@ -158,7 +170,7 @@ class MpacStructurer {
       if (maybeRefunded.size > 0) {
         Table.print({
           title: 'Non-Refunds',
-          log: s => this.console?.printWarning('Scoring Engine', '  ' + s),
+          log: s => this.console?.printWarning('MPAC Verifier', '  ' + s),
           cols: [
             [{ title: 'Transaction[License]', align: 'right' }, tx => tx.id],
             [{ title: 'Amount', align: 'right' }, tx => formatMoney(tx.data.vendorAmount)],
@@ -180,7 +192,7 @@ class MpacStructurer {
 
     const same = set1.size === set2.size && [...set1].every(t => set2.has(t));
     if (!same) {
-      this.console?.printError('Database', `License IDs do not point to same transactions`);
+      this.console?.printError('MPAC Verifier', `License IDs do not point to same transactions`);
     }
   }
 
@@ -188,7 +200,15 @@ class MpacStructurer {
     if (!license1 || !license2) return;
 
     if (license1 !== license2) {
-      this.console?.printError('Database', `License IDs do not point to same License from Transaction`);
+      this.console?.printError('MPAC Verifier', `License IDs do not point to same License from Transaction`);
+    }
+  }
+
+  private checkIfIdIsUnique(a: Map<string, any>, b: Map<string, any>, c: Map<string, any>) {
+    for (const key of a.keys()) {
+      if (b.has(key) || c.has(key)) {
+        this.console?.printWarning('MPAC Verifier', 'ID is not unique:', key);
+      }
     }
   }
 

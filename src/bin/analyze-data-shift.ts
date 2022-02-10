@@ -1,11 +1,15 @@
 import 'source-map-support/register';
-import { dataManager } from '../lib/data/manager';
+import { DataShiftAnalyzer } from '../lib/data-shift/analyze';
+import { loadDataSets } from '../lib/data-shift/loader';
+import { DataShiftReporter } from '../lib/data-shift/reporter';
 import { ConsoleLogger } from '../lib/log/console';
 
 const console = new ConsoleLogger();
 
-console.printInfo('Analyze Data Shift', `Starting...`);
+const dataSets = loadDataSets(console);
 
-const dataSets = dataManager.allDataSets();
+const analyzer = new DataShiftAnalyzer(undefined, console);
+const results = analyzer.run(dataSets);
 
-// const datas = dataSets.map(ds => ds.dataSet.load());
+const reporter = new DataShiftReporter(console);
+reporter.report(results);
