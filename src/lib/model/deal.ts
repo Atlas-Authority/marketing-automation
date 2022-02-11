@@ -102,6 +102,7 @@ export interface HubspotDealConfig {
     associatedPartner?: string,
     duplicateOf?: string,
   },
+  managedFields?: Set<string>,
 }
 
 export interface HubspotRequiredDealConfig {
@@ -283,6 +284,8 @@ function makeAdapter(config: HubspotDealConfig): EntityAdapter<DealData> {
       'hs_sales_email_last_replied',
       'createdate',
     ],
+
+    managedFields: config.managedFields ?? new Set(),
 
   };
 

@@ -60,6 +60,7 @@ export interface HubspotContactConfig {
     relatedProducts?: string,
     lastAssociatedPartner?: string,
   },
+  managedFields?: Set<string>,
 }
 
 function makeAdapter(config: HubspotContactConfig): EntityAdapter<ContactData> {
@@ -155,6 +156,8 @@ function makeAdapter(config: HubspotContactConfig): EntityAdapter<ContactData> {
     },
 
     additionalProperties: ['hs_additional_emails'],
+
+    managedFields: config.managedFields ?? new Set(),
 
   };
 }
