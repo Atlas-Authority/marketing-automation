@@ -1,4 +1,6 @@
-## HubSpot Setup
+# HubSpot Setup
+
+## Required Fields
 
 Add any of these fields in HubSpot, and assign their internal IDs to an ENV var:
 
@@ -32,3 +34,18 @@ Add any of these fields in HubSpot, and assign their internal IDs to an ENV var:
 | TransactionId        | 1-line Text | (for engine use)           | `HUBSPOT_DEAL_TRANSACTIONID_ATTR`        | ✔️        |
 | AppEntitlementId     | 1-line Text | (for engine use)           | `HUBSPOT_DEAL_APPENTITLEMENTID_ATTR`     | ✔️        |
 | AppEntitlementNumber | 1-line Text | (for engine use)           | `HUBSPOT_DEAL_APPENTITLEMENTNUMBER_ATTR` | ✔️        |
+
+## Managed Fields
+
+Managed fields are HubSpot fields that the Marketing Automation Engine may only update if the field is currently empty.
+
+The purpose of managed fields is to allow manual data cleanup/sanitation, after the engine creates HubSpot entities.
+
+For example, if Contact.FirstName is managed:
+
+* When creating a contact, first name will be set
+* When updating a contact:
+  * If first name is blank, first name will be set
+  * If first name is already set, first name will not be updated
+
+See the sample .env file for how to set managed fields via ENV variables.

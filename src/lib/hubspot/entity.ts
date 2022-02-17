@@ -34,12 +34,20 @@ export abstract class Entity<D extends Record<string, any>> {
       set: (_target, _key, _val) => {
         const key = _key as K;
         const val = _val as D[K];
-        this.indexer.removeIndexesFor(key, this);
-        this.newData[key] = val;
-        this.indexer.addIndexesFor(key, val, this);
+        if (!this._oldData[key] || !this.#isFieldManaged(key as string)) {
+          this.indexer.removeIndexesFor(key, this);
+          this.newData[key] = val;
+          this.indexer.addIndexesFor(key, val, this);
+        }
         return true;
       },
     });
+  }
+
+  #isFieldManaged(key: string): boolean {
+    const hsFieldName = this.adapter.data[key].property;
+    if (!hsFieldName) return false;
+    return this.adapter.managedFields.has(hsFieldName);
   }
 
   get kind() {

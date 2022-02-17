@@ -78,6 +78,7 @@ export function hubspotDealConfigFromENV(): HubspotDealConfig {
       associatedPartner: optional('HUBSPOT_DEAL_ASSOCIATED_PARTNER'),
       duplicateOf: optional('HUBSPOT_DEAL_DUPLICATEOF_ATTR'),
     },
+    managedFields: new Set(optional('HUBSPOT_MANAGED_DEAL_FIELDS')?.split(/\s*,\s*/g) ?? []),
   };
 }
 
@@ -95,6 +96,7 @@ export function hubspotContactConfigFromENV(): HubspotContactConfig {
       relatedProducts: optional('HUBSPOT_CONTACT_RELATED_PRODUCTS_ATTR'),
       lastAssociatedPartner: optional('HUBSPOT_CONTACT_LAST_ASSOCIATED_PARTNER'),
     },
+    managedFields: new Set(optional('HUBSPOT_MANAGED_CONTACT_FIELDS')?.split(/\s*,\s*/g) ?? []),
   };
 }
 

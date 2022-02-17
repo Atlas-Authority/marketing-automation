@@ -74,6 +74,10 @@ See [Analize Data Shift](./docs/ANALIZE_DATA_SHIFT.md) docs for this sub-functio
 
 ## Changelog
 
+### 0.4.1
+
+- Added Managed Fields; see [HUBSPOT.md](./docs/HUBSPOT.md) for details
+
 ### 0.4.0
 
 - Added `KEEP_DATA_SETS` ENV variable.

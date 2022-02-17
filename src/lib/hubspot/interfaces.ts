@@ -47,4 +47,6 @@ export interface EntityAdapter<D> {
 
   additionalProperties: string[],
 
+  managedFields: Set<string>,
+
 }

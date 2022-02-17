@@ -37,6 +37,8 @@ export const CompanyAdapter: EntityAdapter<CompanyData> = {
 
   additionalProperties: [],
 
+  managedFields: new Set(),
+
 };
 
 export class CompanyManager extends EntityManager<CompanyData, Company> {
