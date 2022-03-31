@@ -294,6 +294,7 @@ export class ActionGenerator {
       transactionId: (record instanceof Transaction ? record.data.transactionId : null),
       appEntitlementId: record.data.appEntitlementId,
       duplicateOf: null,
+      maintenanceEndDate: record.data.maintenanceEndDate,
       appEntitlementNumber: record.data.appEntitlementNumber,
       dealStage,
       amount: (dealStage === DealStage.EVAL
