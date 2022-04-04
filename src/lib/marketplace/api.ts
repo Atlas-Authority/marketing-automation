@@ -40,10 +40,15 @@ export class MarketplaceAPI {
 
   private async downloadMarketplaceData<T>(subpath: string): Promise<T[]> {
     const res = await got.get(`https://marketplace.atlassian.com/rest/2/vendors/${this.creds.sellerId}/reporting${subpath}`, {
+      throwHttpErrors: false,
       headers: {
         'Authorization': 'Basic ' + Buffer.from(this.creds.user + ':' + this.creds.apiKey).toString('base64'),
       },
     });
+
+    if (res.statusCode !== 200) {
+      throw new KnownError(`Marketpalce API: ${res.statusCode} ${res.statusMessage}`);
+    }
 
     let text;
     try {
