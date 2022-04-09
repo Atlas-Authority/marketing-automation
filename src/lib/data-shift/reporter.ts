@@ -35,12 +35,12 @@ export class DataShiftReporter {
 
     this.#reportResult('Deleted Licenses', results.deletedLicenses, [
       [{ title: 'License' }, row => row.id],
-      [{ title: 'Timestamp' }, row => row.timestampChecked],
+      [{ title: 'Timestamp' }, row => row.timestampNotFound],
     ]);
 
     this.#reportResult('Deleted Transactions', results.deletedTransactions, [
       [{ title: 'Transaction' }, row => row.id],
-      [{ title: 'Timestamp' }, row => row.timestampChecked],
+      [{ title: 'Timestamp' }, row => row.timestampNotFound],
     ]);
 
     this.#reportResult('Late Transactions', results.lateTransactions, [
