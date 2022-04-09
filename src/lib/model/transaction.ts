@@ -86,13 +86,13 @@ export class Transaction extends MpacRecord<TransactionData> {
   public constructor(data: TransactionData) {
     super(data);
 
-    const maybeAdd = (id: string | null) => {
-      if (id) this.ids.push(uniqueTransactionId(this.data.transactionId, id));
+    const maybeAdd = (prefix: string, id: string | null) => {
+      if (id) this.ids.push(uniqueTransactionId(this.data.transactionId, `${prefix}-${id}`));
     };
 
-    maybeAdd(this.data.addonLicenseId);
-    maybeAdd(this.data.appEntitlementId);
-    maybeAdd(this.data.appEntitlementNumber);
+    maybeAdd('ALI', this.data.addonLicenseId);
+    maybeAdd('AEI', this.data.appEntitlementId);
+    maybeAdd('AEN', this.data.appEntitlementNumber);
 
     this.id = this.ids.find(id => id)!;
 
@@ -118,5 +118,6 @@ export class Transaction extends MpacRecord<TransactionData> {
 }
 
 export function uniqueTransactionId(transactionId: string, licenseId: string) {
+  if (!transactionId.startsWith('AT')) transactionId = `(AT)${transactionId}`;
   return `${transactionId}[${licenseId}]`
 }
