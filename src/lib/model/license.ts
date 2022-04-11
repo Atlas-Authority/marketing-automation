@@ -133,13 +133,13 @@ export class License extends MpacRecord<LicenseData> {
   public constructor(data: LicenseData) {
     super(data);
 
-    const maybeAdd = (id: string | null) => {
-      if (id) this.ids.push(id);
+    const maybeAdd = (prefix: string, id: string | null) => {
+      if (id) this.ids.push(`${prefix}-${id}`);
     };
 
-    maybeAdd(this.data.addonLicenseId);
-    maybeAdd(this.data.appEntitlementId);
-    maybeAdd(this.data.appEntitlementNumber);
+    maybeAdd('ALI', this.data.addonLicenseId);
+    maybeAdd('AEI', this.data.appEntitlementId);
+    maybeAdd('AEN', this.data.appEntitlementNumber);
 
     this.id = this.ids.find(id => id)!;
 

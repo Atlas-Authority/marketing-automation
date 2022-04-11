@@ -16,7 +16,8 @@ const defaultConfig: DataShiftConfig = {
 
 export interface DeletedRecordIssue {
   id: string,
-  timestampChecked: string,
+  timestampNotFound: string,
+  timestampLastSeen: string,
 }
 
 export interface LateTransactionIssue {
@@ -100,23 +101,24 @@ export class DataShiftAnalyzer {
 
     const [firstDataset, ...remainingDataSets] = dataSetsAsc;
 
-    let lastRecordMap = new MultiRecordMap<License | Transaction, true>();
+    let lastRecordMap = new MultiRecordMap<License | Transaction, DateTime>();
     for (const record of getRecords(firstDataset.mpac)) {
-      lastRecordMap.set(record, true);
+      lastRecordMap.set(record, firstDataset.timestamp);
     }
 
     for (const ds of remainingDataSets) {
-      const currentRecordMap = new MultiRecordMap<License | Transaction, true>();
+      const currentRecordMap = new MultiRecordMap<License | Transaction, DateTime>();
       for (const record of getRecords(ds.mpac)) {
-        currentRecordMap.set(record, true);
+        currentRecordMap.set(record, ds.timestamp);
       }
 
-      for (const [record,] of lastRecordMap.entries()) {
+      for (const [record, dateLastSeen] of lastRecordMap.entries()) {
         const found = currentRecordMap.get(record);
         if (!found) {
           deletedRecords.push({
             id: record.id,
-            timestampChecked: ds.timestamp.toISO(),
+            timestampNotFound: ds.timestamp.toISO(),
+            timestampLastSeen: dateLastSeen.toISO(),
           });
         }
       }

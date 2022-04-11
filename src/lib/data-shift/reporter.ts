@@ -20,31 +20,33 @@ export class DataShiftReporter {
   }) {
 
     this.#reportResult('Altered Licenses', results.alteredLicenses, [
-      [{ title: 'License' }, row => row.id],
+      [{ title: 'License ID' }, row => row.id],
       [{ title: 'Field' }, row => row.key],
       [{ title: 'Value' }, row => row.val],
       [{ title: 'Last Value' }, row => row.lastVal],
     ]);
 
     this.#reportResult('Altered Transactions', results.alteredTransactions, [
-      [{ title: 'Transaction' }, row => row.id],
+      [{ title: 'Transaction Unique ID' }, row => row.id],
       [{ title: 'Field' }, row => row.key],
       [{ title: 'Value' }, row => row.val],
       [{ title: 'Last Value' }, row => row.lastVal],
     ]);
 
     this.#reportResult('Deleted Licenses', results.deletedLicenses, [
-      [{ title: 'License' }, row => row.id],
-      [{ title: 'Timestamp' }, row => row.timestampChecked],
+      [{ title: 'License ID' }, row => row.id],
+      [{ title: 'When Last Seen' }, row => row.timestampLastSeen],
+      [{ title: 'When Not Found' }, row => row.timestampNotFound],
     ]);
 
     this.#reportResult('Deleted Transactions', results.deletedTransactions, [
-      [{ title: 'Transaction' }, row => row.id],
-      [{ title: 'Timestamp' }, row => row.timestampChecked],
+      [{ title: 'Transaction Unique ID' }, row => row.id],
+      [{ title: 'When Last Seen' }, row => row.timestampLastSeen],
+      [{ title: 'When Not Found' }, row => row.timestampNotFound],
     ]);
 
     this.#reportResult('Late Transactions', results.lateTransactions, [
-      [{ title: 'Transaction' }, row => row.id],
+      [{ title: 'Transaction Unique ID' }, row => row.id],
       [{ title: 'Date Expected' }, row => row.expected],
       [{ title: 'Date Found' }, row => row.found],
     ]);
