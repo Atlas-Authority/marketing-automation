@@ -34,6 +34,12 @@ describe(`Scheduler`, () => {
       week: 10,
       month: 0,
     });
+
+    expect(parseSchedule(`  8d   5w   `)).toEqual({
+      day: 8,
+      week: 5,
+      month: 0,
+    });
   });
 
   it(`Can tell if timestamps are within schedule`, () => {
