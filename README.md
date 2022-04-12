@@ -16,7 +16,7 @@ This runs in an ENV-configurable loop.
 
 Read about the engine logic in detail in [docs/ENGINE.md](./docs/ENGINE.md).
 
-Implemented in Node.js (TypeScript) and can build a Docker image.
+Implemented in Node.js (TypeScript) and can build a Docker image (hosted by [GitHub](https://github.com/Atlas-Authority/marketing-automation/pkgs/container/marketing-automation)).
 
 ---
 
