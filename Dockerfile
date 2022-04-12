@@ -7,7 +7,6 @@ COPY jest.config.js ./
 COPY src ./src
 RUN npm install
 RUN npm run build
-RUN npm test
 
 # Install deps & build image
 FROM node:16

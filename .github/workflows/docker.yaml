@@ -1,8 +1,12 @@
 name: Publish Docker image
 on:
   push:
+  pull_request:
     branches:
       - main
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+
 jobs:
   test:
     name: Run tests
@@ -18,6 +22,7 @@ jobs:
       - run: npm test
   push_to_registry:
     name: Push Docker image to GitHub Packages
+    if: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && github.base_ref == 'main') }}
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
