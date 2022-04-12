@@ -17,5 +17,3 @@ RUN npm install --only=production
 COPY --from=build /usr/src/app/out ./out
 ENV NODE_ENV=production
 CMD [ "node", "out/bin/main.js" ]
-
-
