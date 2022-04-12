@@ -16,7 +16,7 @@ it(`Creates deal from purchase`, () => {
         dealStage: 'CLOSED_WON',
         addonLicenseId: '2454822',
         transactionId: null,
-        closeDate: '2012-12-27',
+        closeDate: '201-12-27',
         amount: 0
       }
     }
