@@ -51,7 +51,7 @@ run(console, runLoopConfig, {
   },
 
   async failed(errors) {
-    notifier?.notifyErrors(runLoopConfig, errors);
+    await notifier?.notifyErrors(runLoopConfig, errors);
   },
 
 });
