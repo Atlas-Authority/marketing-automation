@@ -56,8 +56,10 @@ export abstract class EntityManager<
         const me = this.get(meId);
         if (!me) throw new Error(`Couldn't find kind=${this.kind} id=${meId}`);
 
-        const [toKind, youId] = rawAssoc.split(':') as [EntityKind, string];
-        const you = managers[`${toKind}Manager`].get(youId);
+        const [toKind, youId] = rawAssoc.split(':') as [string, string];
+        const FIX_TOKIND_REGEX = /_unlabeled$/;
+        const normalizedToKind = (toKind.match(FIX_TOKIND_REGEX) ? toKind.replace(FIX_TOKIND_REGEX, '') : toKind) as EntityKind;
+        const you = managers[`${normalizedToKind}Manager`].get(youId);
         if (!you) throw new Error(`Couldn't find kind=${toKind} id=${youId}`);
 
         me.addAssociation(you, { firstSide: true, initial: true });
