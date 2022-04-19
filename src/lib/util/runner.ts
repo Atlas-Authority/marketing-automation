@@ -4,7 +4,7 @@ export interface RunLoopConfig {
   runInterval: string,
   retryInterval: string,
   retryTimes: number,
-};
+}
 
 export default function run(console: ConsoleLogger, loopConfig: RunLoopConfig, { work, failed }: {
   work: () => Promise<void>,
@@ -17,7 +17,7 @@ export default function run(console: ConsoleLogger, loopConfig: RunLoopConfig, {
 
   console.printInfo('Runner', 'Running loop');
   const errors: Error[] = [];
-  run();
+  void run();
 
   async function run() {
     try {
