@@ -34,7 +34,6 @@ export function removeApiBorderDuplicates(licenses: readonly License[]) {
         licenseType: dup.data.licenseType,
         maintenanceEndDate: dup.data.maintenanceEndDate,
         maintenanceStartDate: dup.data.maintenanceStartDate,
-        status: dup.data.status,
         tier: dup.data.tier,
         addonLicenseId: dup.data.addonLicenseId,
         appEntitlementId: dup.data.appEntitlementId,
