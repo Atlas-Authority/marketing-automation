@@ -69,7 +69,7 @@ export class ContactGenerator {
   }
 
   private generateContact(item: License | Transaction, info: ContactInfo | PartnerBillingInfo | null) {
-    if (!info) return;
+    if (!info || (!info.email && !info.name)) return;
     const generated = this.contactFrom(item, info);
 
     let contact = this.contactManager.getByEmail(generated.email);
