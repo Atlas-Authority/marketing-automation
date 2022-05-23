@@ -11,9 +11,45 @@ export interface MpacCreds {
   sellerId: string,
 }
 
+export interface MultiMpacCreds {
+  user: string,
+  apiKey: string,
+  sellerIds: string[],
+}
+
 export class MarketplaceAPI {
 
-  private creds = mpacCredsFromENV();
+  private creds: MultiMpacCreds = mpacCredsFromENV();
+
+  private singleApis = this.creds.sellerIds.map(sellerId => new SingleMarketplaceAPI({
+    apiKey: this.creds.apiKey,
+    user: this.creds.user,
+    sellerId,
+  }));
+
+  public async downloadTransactions(): Promise<RawTransaction[]> {
+    const transactionGroups = await Promise.all(this.singleApis.map(api => api.downloadTransactions()));
+    return transactionGroups.flat();
+  }
+
+  public async downloadLicensesWithoutDataInsights(): Promise<RawLicense[]> {
+    const licenseGroups = await Promise.all(this.singleApis.map(api => api.downloadLicensesWithoutDataInsights()));
+    return licenseGroups.flat();
+  }
+
+  public async downloadLicensesWithDataInsights(progress: Progress): Promise<RawLicense[]> {
+    const dates = dataInsightDateRanges();
+    progress.setCount(dates.length * this.singleApis.length);
+
+    const licenseGroups = await Promise.all(this.singleApis.map(api => api.downloadLicensesWithDataInsights(progress)));
+    return licenseGroups.flat();
+  }
+
+}
+
+export class SingleMarketplaceAPI {
+
+  constructor(private creds: MpacCreds) { }
 
   public async downloadTransactions(): Promise<RawTransaction[]> {
     const transactions = await this.downloadMarketplaceData('/sales/transactions/export');
@@ -28,7 +64,6 @@ export class MarketplaceAPI {
 
   public async downloadLicensesWithDataInsights(progress: Progress): Promise<RawLicense[]> {
     const dates = dataInsightDateRanges();
-    progress.setCount(dates.length);
     const promises = dates.map(async ({ startDate, endDate }) => {
       const json: RawLicense[] = await this.downloadMarketplaceData(`/licenses/export?withDataInsights=true&startDate=${startDate}&endDate=${endDate}`);
       progress.tick(`${startDate}-${endDate}`);

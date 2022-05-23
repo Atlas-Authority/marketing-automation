@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import { DataShiftConfig } from "../data-shift/analyze";
 import { EngineConfig } from "../engine/engine";
 import { HubspotCreds } from "../hubspot/api";
-import { MpacCreds } from "../marketplace/api";
+import { MultiMpacCreds } from "../marketplace/api";
 import { MpacConfig } from "../marketplace/marketplace";
 import { HubspotContactConfig } from "../model/contact";
 import { HubspotDealConfig } from "../model/deal";
@@ -22,11 +22,11 @@ export function hubspotCredsFromENV(): HubspotCreds {
   ]);
 }
 
-export function mpacCredsFromENV(): MpacCreds {
+export function mpacCredsFromENV(): MultiMpacCreds {
   return {
     user: required('MPAC_USER'),
     apiKey: required('MPAC_API_KEY'),
-    sellerId: required('MPAC_SELLER_ID'),
+    sellerIds: required('MPAC_SELLER_ID').split(','),
   };
 }
 
