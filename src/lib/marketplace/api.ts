@@ -52,7 +52,7 @@ export class SingleMarketplaceAPI {
   constructor(private creds: MpacCreds) { }
 
   public async downloadTransactions(): Promise<RawTransaction[]> {
-    const transactions = await this.downloadMarketplaceData('/sales/transactions/export');
+    const transactions = await this.downloadMarketplaceData('/sales/transactions/export?excludeZeroTransactions=true');
     if ((transactions as any).code === 401) throw new KnownError("MPAC_API_KEY is an invalid API key.");
     return transactions as RawTransaction[];
   }
