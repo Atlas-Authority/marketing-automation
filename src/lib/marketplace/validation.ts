@@ -90,17 +90,17 @@ export function assertRequiredTransactionFields(transaction: Transaction) {
   validateField(transaction, transaction => transaction.data.licenseType);
   validateField(transaction, transaction => transaction.data.hosting);
   validateField(transaction, transaction => transaction.data.billingPeriod);
-  validateField(transaction, transaction => transaction.data.purchasePrice);
+  validateField(transaction, transaction => transaction.data.purchasePrice, n => typeof n === 'number');
   validateField(transaction, transaction => transaction.data.vendorAmount);
   validateField(transaction, transaction => transaction.data.saleType);
   validateField(transaction, transaction => transaction.data.maintenanceStartDate);
   validateField(transaction, transaction => transaction.data.maintenanceEndDate);
 }
 
-function validateField<T>(o: T, accessor: (o: T) => any) {
+function validateField<T>(o: T, accessor: (o: T) => any, validator: (o: T) => boolean = o => !!o) {
   const val = accessor(o);
   const path = accessor.toString().replace(/^(\w+) => /, '');
-  if (!val) throw new AttachableError(`Missing field: ${path} (found ${JSON.stringify(val)})`, JSON.stringify(o, null, 2));
+  if (!validator(val)) throw new AttachableError(`Missing field: ${path} (found ${JSON.stringify(val)})`, JSON.stringify(o, null, 2));
 }
 
 export function hasTechEmail(license: License, console?: ConsoleLogger) {
