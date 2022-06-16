@@ -91,7 +91,7 @@ export function assertRequiredTransactionFields(transaction: Transaction) {
   validateField(transaction, transaction => transaction.data.hosting);
   validateField(transaction, transaction => transaction.data.billingPeriod);
   validateField(transaction, transaction => transaction.data.purchasePrice, n => typeof n === 'number');
-  validateField(transaction, transaction => transaction.data.vendorAmount);
+  validateField(transaction, transaction => transaction.data.vendorAmount, n => typeof n === 'number');
   validateField(transaction, transaction => transaction.data.saleType);
   validateField(transaction, transaction => transaction.data.maintenanceStartDate);
   validateField(transaction, transaction => transaction.data.maintenanceEndDate);
