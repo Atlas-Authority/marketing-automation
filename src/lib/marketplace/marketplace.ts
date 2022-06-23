@@ -19,16 +19,18 @@ export class Marketplace {
 
   public importData(data: RawDataSet, console?: ConsoleLogger) {
     console?.printInfo('MPAC', 'Validating MPAC records: Starting...');
+    console?.printInfo("MPAC", 'ignored emails', this.config?.ignoredEmails)
 
     const emailRe = new RegExp(`.+@.+\\.(${data.tlds.join('|')})`);
     const emailChecker = (kind: 'License' | 'Transaction') =>
       (record: License | Transaction) => {
         const allEmails = getEmailsForRecord(record);
         const allGood = allEmails.every(e => emailRe.test(e));
-        if (!allGood && !allEmails.every(e => this.config?.ignoredEmails?.has(e.toLowerCase()))) {
+        const isIgnored = allEmails.some(e => this.config?.ignoredEmails?.has(e.toLowerCase()));
+        if (!allGood || isIgnored) {
           console?.printWarning('MPAC', `${kind} has invalid email(s); will be skipped:`, record);
         }
-        return allGood;
+        return allGood && !isIgnored;
       };
 
     const combinedLicenses = [
