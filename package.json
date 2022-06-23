@@ -29,7 +29,7 @@
     "dotenv": "^8.2.0",
     "email-providers": "^1.0.3",
     "flat": "^5.0.2",
-    "got": "^11.8.3",
+    "got": "^11.8.5",
     "luxon": "^2.3.0",
     "mustache": "^4.2.0",
     "n-readlines": "^1.0.1",
