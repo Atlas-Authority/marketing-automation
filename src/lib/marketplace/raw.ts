@@ -17,7 +17,7 @@ export type RawPartnerDetails = {
 export interface RawTransaction {
   transactionId: string;
   addonLicenseId?: string;
-  licenseId: string;
+  licenseId?: string;
   addonKey: string;
   addonName: string;
   lastUpdated: string;
@@ -60,7 +60,7 @@ export type RawLicenseContact = {
 
 export interface RawLicense {
   addonLicenseId?: string;
-  licenseId: string;
+  licenseId?: string;
   addonKey: string;
   addonName: string;
   lastUpdated: string;

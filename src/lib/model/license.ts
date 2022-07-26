@@ -32,7 +32,7 @@ export interface LicenseData {
   appEntitlementId: string | null,
   appEntitlementNumber: string | null,
 
-  licenseId: string,
+  licenseId: string | null,
   addonKey: string,
   addonName: string,
   lastUpdated: string,
@@ -100,7 +100,7 @@ export class License extends MpacRecord<LicenseData> {
       appEntitlementId: rawLicense.appEntitlementId ?? null,
       appEntitlementNumber: rawLicense.appEntitlementNumber ?? null,
 
-      licenseId: rawLicense.licenseId,
+      licenseId: rawLicense.licenseId ?? null,
       addonKey: rawLicense.addonKey,
       addonName: rawLicense.addonName,
       lastUpdated: rawLicense.lastUpdated,

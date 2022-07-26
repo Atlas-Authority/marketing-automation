@@ -8,7 +8,7 @@ export interface TransactionData {
   appEntitlementId: string | null,
   appEntitlementNumber: string | null,
 
-  licenseId: string,
+  licenseId: string | null,
   addonKey: string,
   addonName: string,
   lastUpdated: string,
@@ -56,7 +56,7 @@ export class Transaction extends MpacRecord<TransactionData> {
       appEntitlementId: rawTransaction.appEntitlementId ?? null,
       appEntitlementNumber: rawTransaction.appEntitlementNumber ?? null,
 
-      licenseId: rawTransaction.licenseId,
+      licenseId: rawTransaction.licenseId ?? null,
       addonKey: rawTransaction.addonKey,
       addonName: rawTransaction.addonName,
       lastUpdated: rawTransaction.lastUpdated,
