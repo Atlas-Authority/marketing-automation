@@ -97,7 +97,7 @@ export function assertRequiredTransactionFields(transaction: Transaction) {
   validateField(transaction, transaction => transaction.data.maintenanceEndDate);
 }
 
-function validateField<T>(o: T, accessor: (o: T) => any, validator: (o: T) => boolean = o => !!o) {
+function validateField<T, V>(o: T, accessor: (o: T) => V, validator: (o: V) => boolean = o => !!o) {
   const val = accessor(o);
   const path = accessor.toString().replace(/^(\w+) => /, '');
   if (!validator(val)) throw new AttachableError(`Missing field: ${path} (found ${JSON.stringify(val)})`, JSON.stringify(o, null, 2));
