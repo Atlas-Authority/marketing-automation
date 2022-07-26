@@ -1,9 +1,9 @@
 import { MultiRecordMap } from "../lib/data-shift/multi-id-map";
 
-const o1a = { ids: ['a', 'b'] };
-const o1b = { ids: ['b', 'c'] };
-const o1c = { ids: ['c'] };
-const o2 = { ids: ['d'] };
+const o1a = { ids: new Set(['a', 'b']) };
+const o1b = { ids: new Set(['b', 'c']) };
+const o1c = { ids: new Set(['c']) };
+const o2 = { ids: new Set(['d']) };
 
 describe(`Multi-ID Map`, () => {
 

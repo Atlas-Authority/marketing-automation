@@ -1,4 +1,4 @@
-export class MultiRecordMap<T extends { ids: string[] }, U> {
+export class MultiRecordMap<T extends { ids: Set<string> }, U> {
 
   #idsToKeys = new Map<string, T[]>();
   #realMap = new Map<T, U>();
@@ -31,7 +31,7 @@ export class MultiRecordMap<T extends { ids: string[] }, U> {
   }
 
   #realKeysForKey(key: T) {
-    return key.ids.map(id => this.#idsToKeys.get(id)).find(o => o);
+    return [...key.ids].map(id => this.#idsToKeys.get(id)).find(o => o);
   }
 
 }
