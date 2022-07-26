@@ -6,7 +6,7 @@ import { Transaction } from "../model/transaction";
 import { AttachableError } from '../util/errors';
 
 export function removeApiBorderDuplicates(licenses: readonly License[]) {
-  const groups: { [addonLicenseId: string]: License[] } = {};
+  const groups: { [id: string]: License[] } = {};
 
   for (const license of licenses) {
     if (!groups[license.id]) {
