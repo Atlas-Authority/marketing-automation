@@ -4,6 +4,7 @@ import { ConsoleLogger } from "../log/console";
 import { License, LicenseData } from "../model/license";
 import { Transaction } from "../model/transaction";
 import { AttachableError } from '../util/errors';
+import { detailedDiff } from "deep-object-diff";
 
 export function removeApiBorderDuplicates(licenses: readonly License[]) {
   const groups: { [id: string]: License[] } = {};
@@ -20,29 +21,39 @@ export function removeApiBorderDuplicates(licenses: readonly License[]) {
   // These are created at the very edge of the 2018-07-01 cutoff between with/without attributions
   const edgeCases = Object.values(groups).filter(ls => ls.length > 1);
   for (const dups of edgeCases) {
-    assert.ok(dups
-      .map(dup => ({
-        addonKey: dup.data.addonKey,
-        addonName: dup.data.addonName,
-        company: dup.data.company,
-        country: dup.data.country,
-        region: dup.data.region,
-        technicalContact: dup.data.technicalContact,
-        hosting: dup.data.hosting,
-        lastUpdated: dup.data.lastUpdated,
-        licenseId: dup.data.licenseId,
-        licenseType: dup.data.licenseType,
-        maintenanceEndDate: dup.data.maintenanceEndDate,
-        maintenanceStartDate: dup.data.maintenanceStartDate,
-        tier: dup.data.tier,
-        addonLicenseId: dup.data.addonLicenseId,
-        appEntitlementId: dup.data.appEntitlementId,
-        appEntitlementNumber: dup.data.appEntitlementNumber,
-        partnerDetails: dup.data.partnerDetails,
-      }) as Partial<LicenseData>)
-      .every((dup, i, array) => util.isDeepStrictEqual(dup, array[0])),
-      util.inspect(dups, { colors: true, depth: null })
-    );
+    const strippedDups = dups.map(dup => ({
+      addonKey: dup.data.addonKey,
+      addonName: dup.data.addonName,
+      company: dup.data.company,
+      country: dup.data.country,
+      region: dup.data.region,
+      technicalContact: dup.data.technicalContact,
+      hosting: dup.data.hosting,
+      lastUpdated: dup.data.lastUpdated,
+      licenseId: dup.data.licenseId,
+      licenseType: dup.data.licenseType,
+      maintenanceEndDate: dup.data.maintenanceEndDate,
+      maintenanceStartDate: dup.data.maintenanceStartDate,
+      tier: dup.data.tier,
+      addonLicenseId: dup.data.addonLicenseId,
+      appEntitlementId: dup.data.appEntitlementId,
+      appEntitlementNumber: dup.data.appEntitlementNumber,
+      partnerDetails: dup.data.partnerDetails,
+    }));
+
+    for (let i = 0; i < strippedDups.length - 1; i++) {
+      const a = strippedDups[i];
+      const b = strippedDups[i + 1];
+
+      if (!util.isDeepStrictEqual(a, b)) {
+        const diff = detailedDiff(a, b);
+        const json = {
+          data: a,
+          diff,
+        };
+        throw new AttachableError('Duplicate deals found at API border', JSON.stringify(json, null, 2));
+      }
+    }
 
     // Keep the first one with attributions
     dups.sort((a, b) => a.data.evaluationOpportunitySize ? -1 : 1);
@@ -71,6 +82,7 @@ export function assertRequiredLicenseFields(license: License) {
   validateField(license, license => license.data.maintenanceStartDate);
   validateField(license, license => license.data.maintenanceEndDate);
   validateField(license, license => license.data.status);
+  validateField(license, license => license.data.partnerDetails?.billingContact, o => !o || typeof o.email === 'string');
 }
 
 export function assertRequiredTransactionFields(transaction: Transaction) {
@@ -93,9 +105,10 @@ export function assertRequiredTransactionFields(transaction: Transaction) {
   validateField(transaction, transaction => transaction.data.saleType);
   validateField(transaction, transaction => transaction.data.maintenanceStartDate);
   validateField(transaction, transaction => transaction.data.maintenanceEndDate);
+  validateField(transaction, transaction => transaction.data.partnerDetails?.billingContact, o => !o || typeof o.email === 'string');
 }
 
-function validateField<T>(o: T, accessor: (o: T) => any, validator: (o: T) => boolean = o => !!o) {
+function validateField<T, V>(o: T, accessor: (o: T) => V, validator: (o: V) => boolean = o => !!o) {
   const val = accessor(o);
   const path = accessor.toString().replace(/^(\w+) => /, '');
   if (!validator(val)) throw new AttachableError(`Missing field: ${path} (found ${JSON.stringify(val)})`, JSON.stringify(o, null, 2));
