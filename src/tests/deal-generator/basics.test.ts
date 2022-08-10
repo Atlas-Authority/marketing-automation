@@ -106,25 +106,3 @@ it(`Does nothing when upgrades and renewals already have deals`, () => {
     { Nothing: ['properties-up-to-date', ["AT-131949332[2479625]", "CLOSED_WON", 274,]] },
   ]);
 });
-
-it(`Creates deal from purchase 2`, () => {
-  const { events, actions } = runDealGenerator({
-    records: [
-      ['2454822', '2012-12-27', 'COMMERCIAL', 'inactive', []]
-    ],
-  });
-  expect(events).toEqual([
-    ['purchase', 'ALI-2454822']
-  ]);
-  expect(actions).toEqual([
-    {
-      Create: {
-        dealStage: 'CLOSED_WON',
-        addonLicenseId: '2454822',
-        transactionId: null,
-        closeDate: '2012-12-27',
-        amount: 0
-      }
-    }
-  ]);
-});
