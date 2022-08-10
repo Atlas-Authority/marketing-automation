@@ -8,7 +8,7 @@ it(`Creates deal from purchase`, () => {
     ],
   });
   expect(events).toEqual([
-    ['purchase', 'AEI-2454822']
+    ['purchase', 'ALI-2454822']
   ]);
   expect(actions).toEqual([
     {
@@ -30,7 +30,7 @@ it(`Does not create deal from purchase when one already exists`, () => {
     ]
   });
   expect(events).toEqual([
-    ['purchase', 'AEI-2454822']
+    ['purchase', 'ALI-2454822']
   ]);
   expect(actions).toEqual([
     {
@@ -50,7 +50,7 @@ it(`Creates deals for renewals and upgrades separately from purchases`, () => {
     ],
   });
   expect(events).toEqual([
-    ['purchase', 'AEI-L2169473', 'AEI-2479625'],
+    ['purchase', 'ALI-L2169473', 'ALI-2479625'],
     ['upgrade', 'AT-97165138[AEI-2479625]'],
     ['renewal', 'AT-131949332[AEI-2479625]']
   ]);
@@ -96,7 +96,7 @@ it(`Does nothing when upgrades and renewals already have deals`, () => {
     ],
   });
   expect(events).toEqual([
-    ['purchase', 'AEI-L2169473', 'AEI-2479625'],
+    ['purchase', 'ALI-L2169473', 'ALI-2479625'],
     ['upgrade', 'AT-97165138[AEI-2479625]'],
     ['renewal', 'AT-131949332[AEI-2479625]']
   ]);
@@ -104,5 +104,27 @@ it(`Does nothing when upgrades and renewals already have deals`, () => {
     { Nothing: ['properties-up-to-date', ["2479625", "CLOSED_WON", 0,]] },
     { Nothing: ['properties-up-to-date', ["AT-97165138[2479625]", "CLOSED_WON", 411,]] },
     { Nothing: ['properties-up-to-date', ["AT-131949332[2479625]", "CLOSED_WON", 274,]] },
+  ]);
+});
+
+it(`Creates deal from purchase 2`, () => {
+  const { events, actions } = runDealGenerator({
+    records: [
+      ['2454822', '2012-12-27', 'COMMERCIAL', 'inactive', []]
+    ],
+  });
+  expect(events).toEqual([
+    ['purchase', 'ALI-2454822']
+  ]);
+  expect(actions).toEqual([
+    {
+      Create: {
+        dealStage: 'CLOSED_WON',
+        addonLicenseId: '2454822',
+        transactionId: null,
+        closeDate: '2012-12-27',
+        amount: 0
+      }
+    }
   ]);
 });
