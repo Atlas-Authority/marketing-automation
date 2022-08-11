@@ -19,12 +19,6 @@ class MpacStructurer {
     const licensesByAppEntitlementId = new Map<string, License>();
     const licensesByAppEntitlementNumber = new Map<string, License>();
 
-    this.console?.printInfo('MPAC Verifier', 'Checking License Multi-ID uniqueness...');
-    this.checkIfIdIsUnique(licensesByAddonLicenseId, licensesByAppEntitlementId, licensesByAppEntitlementNumber);
-    this.checkIfIdIsUnique(licensesByAppEntitlementId, licensesByAddonLicenseId, licensesByAppEntitlementNumber);
-    this.checkIfIdIsUnique(licensesByAppEntitlementNumber, licensesByAddonLicenseId, licensesByAppEntitlementId);
-    this.console?.printInfo('MPAC Verifier', 'Done');
-
     const addLicense = (license: License, id: string | null, mapping: Map<string, License>) => {
       if (!id) return;
       const existing = mapping.get(id);
@@ -40,17 +34,17 @@ class MpacStructurer {
       addLicense(license, license.data.appEntitlementNumber, licensesByAppEntitlementNumber);
     }
 
+    this.console?.printInfo('MPAC Verifier', 'Checking License Multi-ID uniqueness...');
+    this.checkIfIdIsUnique(licensesByAddonLicenseId, licensesByAppEntitlementId, licensesByAppEntitlementNumber);
+    this.checkIfIdIsUnique(licensesByAppEntitlementId, licensesByAddonLicenseId, licensesByAppEntitlementNumber);
+    this.checkIfIdIsUnique(licensesByAppEntitlementNumber, licensesByAddonLicenseId, licensesByAppEntitlementId);
+    this.console?.printInfo('MPAC Verifier', 'Done');
+
     // Build transaction mappings
 
     const transactionsByAddonLicenseId = new Map<string, Set<Transaction>>();
     const transactionsByAppEntitlementId = new Map<string, Set<Transaction>>();
     const transactionsByAppEntitlementNumber = new Map<string, Set<Transaction>>();
-
-    this.console?.printInfo('MPAC Verifier', 'Checking Transaction Multi-ID uniqueness...');
-    this.checkIfIdIsUnique(transactionsByAddonLicenseId, transactionsByAppEntitlementId, transactionsByAppEntitlementNumber);
-    this.checkIfIdIsUnique(transactionsByAppEntitlementId, transactionsByAddonLicenseId, transactionsByAppEntitlementNumber);
-    this.checkIfIdIsUnique(transactionsByAppEntitlementNumber, transactionsByAddonLicenseId, transactionsByAppEntitlementId);
-    this.console?.printInfo('MPAC Verifier', 'Done');
 
     const addTransaction = (transaction: Transaction, id: string | null, mapping: Map<string, Set<Transaction>>) => {
       if (!id) return;
@@ -64,6 +58,12 @@ class MpacStructurer {
       addTransaction(transaction, transaction.data.appEntitlementId, transactionsByAppEntitlementId);
       addTransaction(transaction, transaction.data.appEntitlementNumber, transactionsByAppEntitlementNumber);
     }
+
+    this.console?.printInfo('MPAC Verifier', 'Checking Transaction Multi-ID uniqueness...');
+    this.checkIfIdIsUnique(transactionsByAddonLicenseId, transactionsByAppEntitlementId, transactionsByAppEntitlementNumber);
+    this.checkIfIdIsUnique(transactionsByAppEntitlementId, transactionsByAddonLicenseId, transactionsByAppEntitlementNumber);
+    this.checkIfIdIsUnique(transactionsByAppEntitlementNumber, transactionsByAddonLicenseId, transactionsByAppEntitlementId);
+    this.console?.printInfo('MPAC Verifier', 'Done');
 
     // Verify id characteristics
 

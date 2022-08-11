@@ -37,11 +37,11 @@ export class Deal extends Entity<DealData> {
   public companies = this.makeDynamicAssociation<Company>('company');
 
   public getMpacIds() {
-    return [
+    return new Set([
       this.deriveId(this.data.addonLicenseId),
       this.deriveId(this.data.appEntitlementId),
       this.deriveId(this.data.appEntitlementNumber),
-    ].filter(isPresent);
+    ].filter(isPresent));
   }
 
   private deriveId(id: string | null) {

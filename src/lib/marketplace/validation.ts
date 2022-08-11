@@ -7,7 +7,7 @@ import { AttachableError } from '../util/errors';
 import { detailedDiff } from "deep-object-diff";
 
 export function removeApiBorderDuplicates(licenses: readonly License[]) {
-  const groups: { [addonLicenseId: string]: License[] } = {};
+  const groups: { [id: string]: License[] } = {};
 
   for (const license of licenses) {
     if (!groups[license.id]) {
@@ -68,7 +68,6 @@ export function removeApiBorderDuplicates(licenses: readonly License[]) {
 }
 
 export function assertRequiredLicenseFields(license: License) {
-  validateField(license, license => license.data.licenseId);
   validateField(license, license => license.data.addonKey);
   validateField(license, license => license.data.addonName);
   validateField(license, license => license.data.lastUpdated);
@@ -88,7 +87,6 @@ export function assertRequiredLicenseFields(license: License) {
 
 export function assertRequiredTransactionFields(transaction: Transaction) {
   validateField(transaction, transaction => transaction.data.transactionId);
-  validateField(transaction, transaction => transaction.data.licenseId);
   validateField(transaction, transaction => transaction.data.addonKey);
   validateField(transaction, transaction => transaction.data.addonName);
   validateField(transaction, transaction => transaction.data.lastUpdated);

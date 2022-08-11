@@ -8,7 +8,7 @@ export interface TransactionData {
   appEntitlementId: string | null,
   appEntitlementNumber: string | null,
 
-  licenseId: string,
+  licenseId: string | null,
   addonKey: string,
   addonName: string,
   lastUpdated: string,
@@ -41,7 +41,7 @@ export class Transaction extends MpacRecord<TransactionData> {
 
   /** Unique ID for this Transaction. */
   declare id;
-  public ids: string[] = [];
+  public ids = new Set<string>();
 
   declare tier;
 
@@ -56,7 +56,7 @@ export class Transaction extends MpacRecord<TransactionData> {
       appEntitlementId: rawTransaction.appEntitlementId ?? null,
       appEntitlementNumber: rawTransaction.appEntitlementNumber ?? null,
 
-      licenseId: rawTransaction.licenseId,
+      licenseId: rawTransaction.licenseId ?? null,
       addonKey: rawTransaction.addonKey,
       addonName: rawTransaction.addonName,
       lastUpdated: rawTransaction.lastUpdated,
@@ -87,14 +87,14 @@ export class Transaction extends MpacRecord<TransactionData> {
     super(data);
 
     const maybeAdd = (prefix: string, id: string | null) => {
-      if (id) this.ids.push(uniqueTransactionId(this.data.transactionId, `${prefix}-${id}`));
+      if (id) this.ids.add(uniqueTransactionId(this.data.transactionId, `${prefix}-${id}`));
     };
 
     maybeAdd('ALI', this.data.addonLicenseId);
     maybeAdd('AEI', this.data.appEntitlementId);
     maybeAdd('AEN', this.data.appEntitlementNumber);
 
-    this.id = this.ids.find(id => id)!;
+    this.id = [...this.ids][0];
 
     this.tier = this.parseTier();
   }
