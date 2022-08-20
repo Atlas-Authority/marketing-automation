@@ -77,6 +77,7 @@ See [Analize Data Shift](./docs/ANALIZE_DATA_SHIFT.md) docs for this sub-functio
 ### Unreleased
 
 - Changed Contact 'Deployment' field; see field in [HUBSPOT.md](./docs/HUBSPOT.md) for details
+- Fixed bug that might have prevented some multi-select fields from updating
 
 ### 0.4.1
 
