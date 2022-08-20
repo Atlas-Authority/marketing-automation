@@ -56,6 +56,10 @@ export function updateContactsBasedOnMatchResults(engine: Engine, allMatches: Re
   for (const contact of engine.hubspot.contactManager.getAll()) {
     const lastRecord = contact.records[0];
     contact.data.lastAssociatedPartner = lastRecord?.partnerDomain ?? null;
+
+    // This is needed when migrating from old Deployment schema to new one
+    contact.data.deployment = new Set(contact.data.deployment);
+    contact.data.deployment.delete('Multiple' as any);
   }
 }
 

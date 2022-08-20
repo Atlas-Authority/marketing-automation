@@ -136,9 +136,7 @@ function makeAdapter(config: HubspotContactConfig): EntityAdapter<ContactData> {
       },
       deployment: {
         property: config.attrs?.deployment,
-        down: deployment => deployment === 'Multiple' || !deployment
-          ? new Set()
-          : new Set(deployment.split(';')) as ContactData['deployment'],
+        down: deployment => new Set(deployment?.split(';') ?? []) as ContactData['deployment'],
         up: deployment => [...deployment].join(';'),
         makeComparable: setToComparableString,
       },
