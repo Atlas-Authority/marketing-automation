@@ -59,7 +59,7 @@ export function updateContactsBasedOnMatchResults(engine: Engine, allMatches: Re
 
     // This is needed when migrating from old Deployment schema to new one
     contact.data.deployment = new Set(contact.data.deployment);
-    contact.data.deployment.delete('Multiple' as any);
+    contact.data.deployment.delete('Multiple');
   }
 }
 

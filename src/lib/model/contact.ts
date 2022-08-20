@@ -21,7 +21,7 @@ export type ContactData = {
   region: string | null;
 
   products: Set<string>;
-  deployment: Set<'Cloud' | 'Data Center' | 'Server'>;
+  deployment: Set<string>;
 
   relatedProducts: Set<string>;
   licenseTier: number | null;
@@ -136,7 +136,7 @@ function makeAdapter(config: HubspotContactConfig): EntityAdapter<ContactData> {
       },
       deployment: {
         property: config.attrs?.deployment,
-        down: deployment => new Set(deployment?.split(';') ?? []) as ContactData['deployment'],
+        down: deployment => new Set(deployment?.split(';') ?? []),
         up: deployment => [...deployment].join(';'),
         makeComparable: setToComparableString,
       },
