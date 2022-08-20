@@ -7,7 +7,6 @@ describe('updating latest contact properties', () => {
       lastUpdated: '2021-04-02',
       country: 'country2',
       region: 'region2',
-      deployment: 'Cloud',
       email: 'email2',
     });
 
@@ -30,7 +29,7 @@ describe('updating latest contact properties', () => {
       lastUpdated: '2021-04-02',
       country: 'country2',
       region: 'region2',
-      deployment: 'Cloud',
+      deployment: new Set(['Server']),
       email: 'email2',
       firstName: 'firstName',
       lastName: 'lastName',
@@ -190,6 +189,17 @@ describe('updating latest contact properties', () => {
     expect(a).toEqual(fakeContact({ products: new Set(['p1', 'p2', 'p3']) }));
   });
 
+  it('merges deployments', () => {
+    const a = fakeContact({ deployment: new Set(['Server']) });
+
+    mergeContactInfo(a, [
+      fakeContact({ deployment: new Set(['Cloud']) }),
+      a,
+    ]);
+
+    expect(a).toEqual(fakeContact({ deployment: new Set(['Cloud', 'Server']) }));
+  });
+
 });
 
 function fakeContact(props: Partial<GeneratedContact>): GeneratedContact {
@@ -199,7 +209,7 @@ function fakeContact(props: Partial<GeneratedContact>): GeneratedContact {
     contactType: 'Customer',
     country: 'country1',
     region: 'region1',
-    deployment: 'Server',
+    deployment: new Set(['Server']),
     firstName: null,
     lastName: null,
     phone: null,

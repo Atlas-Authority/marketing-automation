@@ -41,12 +41,7 @@ export function updateContactsBasedOnMatchResults(engine: Engine, allMatches: Re
       }
 
       const hosting = license[0].data.hosting;
-      if (!contact.data.deployment) {
-        contact.data.deployment = hosting;
-      }
-      else if (contact.data.deployment !== hosting) {
-        contact.data.deployment = 'Multiple';
-      }
+      contact.data.deployment.add(hosting);
     }
   }
 
