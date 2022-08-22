@@ -105,7 +105,7 @@ export class ContactGenerator {
       country: capitalize.words(item.data.country),
       region: item.data.region,
       relatedProducts: new Set(),
-      deployment: item.data.hosting,
+      deployment: new Set([item.data.hosting]),
       products: new Set([item.data.addonKey].filter(key => notIgnored(this.archivedApps, key))),
       licenseTier: null,
       lastMpacEvent: '',
@@ -166,6 +166,9 @@ export function mergeContactInfo(contact: ContactData, contacts: GeneratedContac
   for (const other of contacts) {
     for (const product of other.products) {
       contact.products.add(product);
+    }
+    for (const deployment of other.deployment) {
+      contact.deployment.add(deployment);
     }
   }
 }

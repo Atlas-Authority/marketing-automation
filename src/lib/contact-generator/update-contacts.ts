@@ -41,12 +41,7 @@ export function updateContactsBasedOnMatchResults(engine: Engine, allMatches: Re
       }
 
       const hosting = license[0].data.hosting;
-      if (!contact.data.deployment) {
-        contact.data.deployment = hosting;
-      }
-      else if (contact.data.deployment !== hosting) {
-        contact.data.deployment = 'Multiple';
-      }
+      contact.data.deployment.add(hosting);
     }
   }
 
@@ -61,6 +56,10 @@ export function updateContactsBasedOnMatchResults(engine: Engine, allMatches: Re
   for (const contact of engine.hubspot.contactManager.getAll()) {
     const lastRecord = contact.records[0];
     contact.data.lastAssociatedPartner = lastRecord?.partnerDomain ?? null;
+
+    // This is needed when migrating from old Deployment schema to new one
+    contact.data.deployment = new Set(contact.data.deployment);
+    contact.data.deployment.delete('Multiple');
   }
 }
 

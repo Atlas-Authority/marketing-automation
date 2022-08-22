@@ -42,6 +42,7 @@ export interface EntityAdapter<D> {
     property: string | undefined,
     down: (data: string | null) => D[K],
     up: (data: D[K]) => string,
+    makeComparable?: (v: D[K]) => string,
     identifier?: true,
   } };
 

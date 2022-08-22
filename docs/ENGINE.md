@@ -170,7 +170,7 @@ Then, for each contact in each group, we set these fields, if configured via Hub
 - License Tier is set to the highest one found in their group
 - Last MPAC Event is set to the latest one found in their group
 - Related Products has the app key added
-- Deployment is set to app hosting, or "Multiple" if different from contact's current hosting
+- Deployment set has app hosting added to it
 
 ### Generating deals based on matches
 

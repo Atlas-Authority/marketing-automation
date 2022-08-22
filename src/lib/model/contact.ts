@@ -21,7 +21,7 @@ export type ContactData = {
   region: string | null;
 
   products: Set<string>;
-  deployment: 'Cloud' | 'Data Center' | 'Server' | 'Multiple' | null;
+  deployment: Set<string>;
 
   relatedProducts: Set<string>;
   licenseTier: number | null;
@@ -127,6 +127,7 @@ function makeAdapter(config: HubspotContactConfig): EntityAdapter<ContactData> {
         property: config.attrs?.relatedProducts,
         down: related_products => new Set(related_products ? related_products.split(';') : []),
         up: relatedProducts => [...relatedProducts].join(';'),
+        makeComparable: setToComparableString,
       },
       licenseTier: {
         property: config.attrs?.licenseTier,
@@ -135,13 +136,15 @@ function makeAdapter(config: HubspotContactConfig): EntityAdapter<ContactData> {
       },
       deployment: {
         property: config.attrs?.deployment,
-        down: deployment => deployment as ContactData['deployment'] ?? null,
-        up: deployment => deployment ?? '',
+        down: deployment => new Set(deployment?.split(';') ?? []),
+        up: deployment => [...deployment].join(';'),
+        makeComparable: setToComparableString,
       },
       products: {
         property: config.attrs?.products,
         down: products => new Set(products?.split(';') || []),
         up: products => [...products].join(';'),
+        makeComparable: setToComparableString,
       },
       lastMpacEvent: {
         property: config.attrs?.lastMpacEvent,
@@ -179,4 +182,8 @@ export class ContactManager extends EntityManager<ContactData, Contact> {
 
 export function domainFor(email: string): string {
   return email.split('@')[1];
+}
+
+function setToComparableString(a: Set<string>) {
+  return [...a].sort().join();
 }
