@@ -69,12 +69,12 @@ export abstract class Entity<D extends Record<string, any>> {
     const upProperties: Partial<{ [K in keyof D]: string }> = Object.create(null);
     for (const [k, v] of Object.entries(this.newData)) {
       const spec = this.adapter.data[k];
-      const v2 = this._oldData[k];
-      if (
-        (spec.makeComparable?.(v) ?? v)
-        !==
-        (spec.makeComparable?.(v2) ?? v2)
-      ) {
+      const oldValue = this._oldData[k];
+
+      const compString1 = oldValue === undefined ? '' : (spec.makeComparable?.(oldValue) ?? oldValue);
+      const compString2 = spec.makeComparable?.(v) ?? v;
+
+      if (compString1 !== compString2) {
         if (spec.property) {
           const upKey = spec.property as keyof D;
           const upVal = spec.up(v);
