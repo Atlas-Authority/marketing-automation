@@ -184,6 +184,6 @@ export function domainFor(email: string): string {
   return email.split('@')[1];
 }
 
-function setToComparableString(a: Set<string> | undefined) {
-  return a ? [...a].sort().join() : '';
+function setToComparableString(a: Set<string>) {
+  return [...a].sort().join();
 }
