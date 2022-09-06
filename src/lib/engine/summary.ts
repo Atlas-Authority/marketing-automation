@@ -20,7 +20,7 @@ export function printSummary(engine: Engine) {
     const dupTotal = ([...engine.hubspot.dealManager.duplicates]
       .flatMap(([primary, dups]) => dups)
       .map((dup) => dup.data.amount ?? 0)
-      .reduce((a, b) => a + b));
+      .reduce((a, b) => a + b, 0));
 
     engine.console?.printWarning('Deal Generator', 'Total of duplicates:', formatMoney(dupTotal));
     engine.console?.printWarning('Deal Generator', 'Total duplicates:', engine.hubspot.dealManager.duplicates.size);
