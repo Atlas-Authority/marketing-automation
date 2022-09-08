@@ -198,11 +198,7 @@ export class ActionGenerator {
             importantDeals.map(d => ({ id: d.id, ...d.data })));
         }
 
-        for (const deal of foundDeals) {
-          if (!importantDeals.includes(deal)) {
-            toDelete.push(deal);
-          }
-        }
+        toDelete = [...foundDeals].filter(deal => !importantDeals.includes(deal));
       }
 
       if (this.dealManager.duplicates.has(dealToUse)) {
