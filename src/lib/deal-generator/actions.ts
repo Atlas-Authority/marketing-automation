@@ -205,7 +205,9 @@ export class ActionGenerator {
         throw new Error(`Primary duplicate is accounted for twice: ${dealToUse.id}`);
       }
 
-      this.dealManager.duplicates.set(dealToUse, toDelete);
+      if (toDelete.length > 0) {
+        this.dealManager.duplicates.set(dealToUse, toDelete);
+      }
 
       for (const dup of toDelete) {
         dup.data.duplicateOf = dealToUse.id ?? null;
