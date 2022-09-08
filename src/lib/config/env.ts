@@ -1,4 +1,3 @@
-import assert from "assert";
 import dotenv from "dotenv";
 import { DataShiftConfig } from "../data-shift/analyze";
 import { EngineConfig } from "../engine/engine";
@@ -16,10 +15,9 @@ export function keepDataSetConfigFromENV() {
 }
 
 export function hubspotCredsFromENV(): HubspotCreds {
-  return requireOneOf([
-    { accessToken: 'HUBSPOT_ACCESS_TOKEN' },
-    { apiKey: 'HUBSPOT_API_KEY' },
-  ]);
+  return {
+    accessToken: required('HUBSPOT_ACCESS_TOKEN'),
+  };
 }
 
 export function mpacCredsFromENV(): MultiMpacCreds {
@@ -135,18 +133,4 @@ function required(key: string) {
 
 function optional(key: string) {
   return process.env[key];
-}
-
-function requireOneOf<T>(opts: T[]): T {
-  const all = opts.flatMap(opt => Object.entries(opt).map(([localKey, envKey]) => ({
-    localKey,
-    envKey,
-    value: process.env[envKey],
-  })));
-
-  const firstValid = all.find(opt => opt.value);
-  assert.ok(firstValid, `One of ENV keys ${all.map(o => o.envKey).join(' or ')} are required`);
-
-  const { localKey, value } = firstValid;
-  return { [localKey]: value } as unknown as T;
 }
