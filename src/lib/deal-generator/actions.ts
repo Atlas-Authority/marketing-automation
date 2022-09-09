@@ -198,18 +198,16 @@ export class ActionGenerator {
             importantDeals.map(d => ({ id: d.id, ...d.data })));
         }
 
-        for (const deal of foundDeals) {
-          if (!importantDeals.includes(deal)) {
-            toDelete.push(deal);
-          }
-        }
+        toDelete = [...foundDeals].filter(deal => !importantDeals.includes(deal));
       }
 
       if (this.dealManager.duplicates.has(dealToUse)) {
         throw new Error(`Primary duplicate is accounted for twice: ${dealToUse.id}`);
       }
 
-      this.dealManager.duplicates.set(dealToUse, toDelete);
+      if (toDelete.length > 0) {
+        this.dealManager.duplicates.set(dealToUse, toDelete);
+      }
 
       for (const dup of toDelete) {
         dup.data.duplicateOf = dealToUse.id ?? null;
