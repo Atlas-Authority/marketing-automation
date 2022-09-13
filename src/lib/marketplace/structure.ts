@@ -107,8 +107,17 @@ class MpacStructurer {
           licensesByAppEntitlementId.get(license.data.newEvalData.evaluationLicense) ??
           licensesByAppEntitlementNumber.get(license.data.newEvalData.evaluationLicense)
         );
-        license.evaluatedFrom = evalLicense;
-        evalLicense!.evaluatedTo = license;
+
+        if (evalLicense) {
+          license.evaluatedFrom = evalLicense;
+          evalLicense.evaluatedTo = license;
+        }
+        else {
+          this.console?.printWarning('MPAC Verifier', `Cannot find evaluation license`, {
+            newEvalData: license.data.newEvalData,
+            onLicense: license.id,
+          });
+        }
       }
     }
 
