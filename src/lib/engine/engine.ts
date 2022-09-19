@@ -60,6 +60,10 @@ export class Engine {
     this.mpac = data.mpac;
     this.freeEmailDomains = data.freeEmailDomains;
 
+    if (process.env['HUBSPOT_API_KEY']) {
+      this.console?.printWarning('Deprecation Notice', 'HUBSPOT_API_KEY is deprecated. See changelog for details.');
+    }
+
     this.logStep('Starting engine');
     this.startEngine();
 
