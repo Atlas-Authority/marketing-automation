@@ -18,6 +18,7 @@ export type DealData = {
   dealName: string;
   origin: string | null;
   deployment: 'Server' | 'Cloud' | 'Data Center' | null;
+  saleType: 'New' |  'Refund' | 'Renewal' | 'Upgrade' | null;
   licenseTier: number | null;
   pipeline: Pipeline;
   dealStage: DealStage;
@@ -98,6 +99,7 @@ export interface HubspotDealConfig {
     origin?: string,
     country?: string,
     deployment?: string,
+    saleType?:string,
     licenseTier?: string,
     relatedProducts?: string,
     associatedPartner?: string,
@@ -229,6 +231,11 @@ function makeAdapter(config: HubspotDealConfig): EntityAdapter<DealData> {
         property: config.attrs?.deployment,
         down: deployment => deployment as DealData['deployment'],
         up: deployment => deployment ?? '',
+      },
+      saleType: {
+        property: config.attrs?.saleType,
+        down: sale_type => sale_type as DealData['saleType'],
+        up: saleType => saleType ?? '',
       },
       licenseTier: {
         property: config.attrs?.licenseTier,

@@ -280,6 +280,9 @@ export class ActionGenerator {
         ? record.data.saleDate
         : record.data.maintenanceStartDate),
       deployment: record.data.hosting,
+      saleType: (record instanceof Transaction
+          ? record.data.saleType
+          : null),
       app: record.data.addonKey,
       licenseTier: record.tier,
       country: record.data.country,

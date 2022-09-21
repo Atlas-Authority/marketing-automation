@@ -21,7 +21,7 @@ Add any of these fields in HubSpot, and assign their internal IDs to an ENV var:
 ### Deals
 
 | Field                | Type        | Allowed Values                       | ENV var                                  | Required |
-|----------------------|-------------|--------------------------------------| ---------------------------------------- |----------|
+|----------------------|-------------|--------------------------------------|------------------------------------------|----------|
 | License Tier         | Number      | *                                    | `HUBSPOT_DEAL_LICENSE_TIER_ATTR`         | ❌       |
 | Related Products     | 1-Select    | `DEAL_RELATED_PRODUCTS`              | `HUBSPOT_DEAL_RELATED_PRODUCTS_ATTR`     | ❌       |
 | Origin               | 1-Select    | `DEAL_ORIGIN`                        | `HUBSPOT_DEAL_ORIGIN_ATTR`               | ❌       |
@@ -35,6 +35,7 @@ Add any of these fields in HubSpot, and assign their internal IDs to an ENV var:
 | TransactionId        | 1-line Text | (for engine use)                     | `HUBSPOT_DEAL_TRANSACTIONID_ATTR`        | ✔️        |
 | AppEntitlementId     | 1-line Text | (for engine use)                     | `HUBSPOT_DEAL_APPENTITLEMENTID_ATTR`     | ✔️        |
 | AppEntitlementNumber | 1-line Text | (for engine use)                     | `HUBSPOT_DEAL_APPENTITLEMENTNUMBER_ATTR` | ✔️        |
+| Sale Type            | 1-Select    | "saleType" of MPAC records           | `HUBSPOT_DEAL_SALE_TYPE_ATTR`            | ❌       |
 
 ## Managed Fields
 
