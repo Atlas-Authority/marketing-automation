@@ -18,7 +18,7 @@ export type DealData = {
   dealName: string;
   origin: string | null;
   deployment: 'Server' | 'Cloud' | 'Data Center' | null;
-  saleType: 'New' |  'Refund' | 'Renewal' | 'Upgrade' | null;
+  saleType: 'New' | 'Refund' | 'Renewal' | 'Upgrade' | null;
   licenseTier: number | null;
   pipeline: Pipeline;
   dealStage: DealStage;
@@ -99,7 +99,7 @@ export interface HubspotDealConfig {
     origin?: string,
     country?: string,
     deployment?: string,
-    saleType?:string,
+    saleType?: string,
     licenseTier?: string,
     relatedProducts?: string,
     associatedPartner?: string,
