@@ -18,7 +18,7 @@ export type DealData = {
   dealName: string;
   origin: string | null;
   deployment: 'Server' | 'Cloud' | 'Data Center' | null;
-  saleType: 'New' | 'Refund' | 'Renewal' | 'Upgrade' | null;
+  saleType: 'New' | 'Renewal' | 'Upgrade' | null;
   licenseTier: number | null;
   pipeline: Pipeline;
   dealStage: DealStage;

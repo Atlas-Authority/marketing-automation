@@ -280,7 +280,7 @@ export class ActionGenerator {
         ? record.data.saleDate
         : record.data.maintenanceStartDate),
       deployment: record.data.hosting,
-      saleType: (record instanceof Transaction
+      saleType: (record instanceof Transaction && record.data.saleType !== 'Refund'
         ? record.data.saleType
         : null),
       app: record.data.addonKey,
