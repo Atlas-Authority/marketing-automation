@@ -29,7 +29,6 @@ export function removeApiBorderDuplicates(licenses: readonly License[]) {
       region: dup.data.region,
       technicalContact: dup.data.technicalContact,
       hosting: dup.data.hosting,
-      lastUpdated: dup.data.lastUpdated,
       licenseId: dup.data.licenseId,
       licenseType: dup.data.licenseType,
       maintenanceEndDate: dup.data.maintenanceEndDate,
