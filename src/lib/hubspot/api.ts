@@ -42,7 +42,7 @@ export default class HubspotAPI {
           .flatMap(([, { results }]) => (
             results.map(item => {
               const prefix = `${entityAdapter.kind}_to_`;
-              assert.ok(item.type.startsWith(prefix), `"${item.type}" does not start with "${prefix}"`);
+              assert.ok(item.type.startsWith(prefix), `"${item.type}" does not start with "${prefix}" for "${id}" to "${item.id}"`);
               const otherKind = item.type.substr(prefix.length) as EntityKind;
               return `${otherKind}:${item.id}` as RelativeAssociation;
             })
