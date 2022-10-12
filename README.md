@@ -74,6 +74,10 @@ See [Analize Data Shift](./docs/ANALIZE_DATA_SHIFT.md) docs for this sub-functio
 
 ## Changelog
 
+### 0.5.1
+
+- Fixed bug preventing `HUBSPOT_ASSOCIATION_TYPE_MAPPINGS` from being used
+
 ### 0.5.0
 
 - Changed Contact 'Deployment' field; see field in [HUBSPOT.md](./docs/HUBSPOT.md) for details
