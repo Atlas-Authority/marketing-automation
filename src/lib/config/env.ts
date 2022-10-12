@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 import { DataShiftConfig } from "../data-shift/analyze";
 import { EngineConfig } from "../engine/engine";
-import { HubspotCreds } from "../hubspot/api";
+import { HubspotCreds, HubspotSettings } from "../hubspot/api";
 import { MultiMpacCreds } from "../marketplace/api";
 import { MpacConfig } from "../marketplace/marketplace";
 import { HubspotContactConfig } from "../model/contact";
@@ -17,6 +17,18 @@ export function keepDataSetConfigFromENV() {
 export function hubspotCredsFromENV(): HubspotCreds {
   return {
     accessToken: required('HUBSPOT_ACCESS_TOKEN'),
+  };
+}
+
+export function hubspotSettingsFromENV(): HubspotSettings {
+  const typeMappings = optional('HUBSPOT_ASSOCIATION_TYPE_MAPPINGS');
+  return {
+    typeMappings: (typeMappings
+      ? new Map(
+        typeMappings
+          .split(',')
+          .map(kv => kv.split(':') as [string, string]))
+      : undefined),
   };
 }
 

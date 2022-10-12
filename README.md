@@ -80,6 +80,7 @@ See [Analize Data Shift](./docs/ANALIZE_DATA_SHIFT.md) docs for this sub-functio
 - Fixed bug that might have prevented some multi-select fields from updating
 - Fixed bug that crashed the engine when deals have duplicates and they all have some manual activity
 - Deprecated `HUBSPOT_API_KEY` in favor of `HUBSPOT_ACCESS_TOKEN` with [private apps](https://developers.hubspot.com/docs/api/migrate-an-api-key-integration-to-a-private-app)
+- Added support for custom HubSpot API associations via ENV variable `HUBSPOT_ASSOCIATION_TYPE_MAPPINGS`
 
 ### 0.4.1
 
