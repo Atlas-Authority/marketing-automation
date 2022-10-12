@@ -1,5 +1,5 @@
 import 'source-map-support/register';
-import { dataShiftConfigFromENV, engineConfigFromENV, runLoopConfigFromENV } from "../lib/config/env";
+import { dataShiftConfigFromENV, engineConfigFromENV, hubspotSettingsFromENV, runLoopConfigFromENV } from "../lib/config/env";
 import { DataShiftAnalyzer } from '../lib/data-shift/analyze';
 import { loadDataSets } from '../lib/data-shift/loader';
 import { DataShiftReporter } from '../lib/data-shift/reporter';
@@ -26,7 +26,7 @@ run(console, runLoopConfig, {
     dataManager.pruneDataSets(console);
 
     console.printInfo('Main', 'Downloading data');
-    const ms = await downloadAllData(console, hubspotConfigFromENV());
+    const ms = await downloadAllData(console, hubspotConfigFromENV(), hubspotSettingsFromENV());
     const dataSet = dataManager.dataSetFrom(ms);
     const logDir = dataSet.makeLogDir!('main');
 
