@@ -161,11 +161,11 @@ class Index<E extends Entity<any>> {
 
 }
 
-function mapObject<T, K extends keyof T, O>(o: T, fn: (e: T[K]) => O): { [K in keyof T]: O } {
+function mapObject<T extends Record<string, any>, K extends keyof T, O>(o: T, fn: (e: T[K]) => O): { [K in keyof T]: O } {
   const mapped = typedEntries(o).map(([k, v]) => [k, fn(v as T[K])]);
   return Object.fromEntries(mapped);
 }
 
-export function typedEntries<T, K extends keyof T, O>(o: T) {
+export function typedEntries<T extends Record<string, any>, K extends keyof T>(o: T) {
   return Object.entries(o) as [K, T[K]][];
 }

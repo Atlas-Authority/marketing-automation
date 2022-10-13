@@ -23,7 +23,7 @@ export class MultiDownloadLogger {
   }
 
   private makeLine(name: string) {
-    let bar = this.multibar.create(1, 0, { name });
+    const bar = this.multibar.create(1, 0, { name });
     if (bar) return new AnimatedProgressBar(bar);
     return new SimpleLogProgress(this.console, name);
   }

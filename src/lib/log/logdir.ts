@@ -37,9 +37,9 @@ export class LogDir {
     return new HubspotOutputLogger(this.#hubspotResultLog);
   }
 
-  public allMatchGroupsLog() { return this.#allMatchGroupsLog?.writeCsvStream() };
-  public checkMatchGroupsLog() { return this.#checkMatchGroupsLog?.writeCsvStream() };
+  public allMatchGroupsLog() { return this.#allMatchGroupsLog?.writeCsvStream() }
+  public checkMatchGroupsLog() { return this.#checkMatchGroupsLog?.writeCsvStream() }
 
-  public attributionsLog() { return this.#attributionsLog };
+  public attributionsLog() { return this.#attributionsLog }
 
 }

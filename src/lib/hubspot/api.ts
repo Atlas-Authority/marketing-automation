@@ -28,7 +28,7 @@ export default class HubspotAPI {
       ...entityAdapter.additionalProperties,
     ];
 
-    let associations = ((inputAssociations.length > 0)
+    const associations = ((inputAssociations.length > 0)
       ? inputAssociations
       : undefined);
 

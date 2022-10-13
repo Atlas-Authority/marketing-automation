@@ -105,10 +105,10 @@ export class Transaction extends MpacRecord<TransactionData> {
     if (tier === 'Unlimited Users') return 10001;
 
     let m;
-    if (m = tier.match(/^Per Unit Pricing \((\d+) users\)$/i)) {
+    if ((m = tier.match(/^Per Unit Pricing \((\d+) users\)$/i))) {
       return +m[1];
     }
-    if (m = tier.match(/^(\d+) Users$/)) {
+    if ((m = tier.match(/^(\d+) Users$/))) {
       return +m[1];
     }
 

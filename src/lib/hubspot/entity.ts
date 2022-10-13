@@ -1,6 +1,6 @@
 import { EntityAdapter, EntityKind, FullEntity, RelativeAssociation } from "./interfaces";
 
-export interface Indexer<D> {
+export interface Indexer<D extends Record<string, any>> {
   removeIndexesFor<K extends keyof D>(key: K, entity: Entity<D>): void;
   addIndexesFor<K extends keyof D>(key: K, val: D[K] | undefined, entity: Entity<D>): void;
 }

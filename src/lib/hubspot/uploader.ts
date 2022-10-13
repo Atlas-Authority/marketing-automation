@@ -24,7 +24,7 @@ export class HubspotUploader {
     await this.syncUpAllAssociations(hubspot.companyManager);
   }
 
-  private async syncUpAllEntitiesProperties<D, E extends Entity<D>>(manager: EntityManager<D, E>) {
+  private async syncUpAllEntitiesProperties<D extends Record<string, any>, E extends Entity<D>>(manager: EntityManager<D, E>) {
     const entitiesWithChanges = manager.getArray().map(e => ({ e, changes: e.getPropertyChanges() }));
     const toSync = entitiesWithChanges.filter(({ changes }) => Object.keys(changes).length > 0);
 
@@ -78,7 +78,7 @@ export class HubspotUploader {
     }
   }
 
-  private async syncUpAllAssociations<D, E extends Entity<D>>(manager: EntityManager<D, E>) {
+  private async syncUpAllAssociations<D extends Record<string, any>, E extends Entity<D>>(manager: EntityManager<D, E>) {
     const toSync = (manager.getArray()
       .filter(e => e.hasAssociationChanges())
       .flatMap(e => e.getAssociationChanges()
