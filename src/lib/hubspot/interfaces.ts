@@ -8,7 +8,7 @@ export type ResultEntity = {
   associations: RelativeAssociation[],
 };
 
-export type RelativeAssociation = `${EntityKind}:${string}`;
+export type RelativeAssociation = `${string}:${string}`;
 
 export type HubspotProperties = Record<string, string | null>;
 

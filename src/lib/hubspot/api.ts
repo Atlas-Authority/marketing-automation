@@ -1,5 +1,4 @@
 import * as hubspot from '@hubspot/api-client';
-import assert from 'assert';
 import { hubspotCredsFromENV } from '../config/env';
 import { ConsoleLogger } from '../log/console';
 import { KnownError } from '../util/errors';
@@ -11,15 +10,11 @@ export type HubspotCreds = {
   accessToken: string,
 };
 
-export type HubspotSettings = {
-  typeMappings?: Map<string, string>,
-};
-
 export default class HubspotAPI {
 
   private client: hubspot.Client;
 
-  constructor(private console?: ConsoleLogger, private settings?: HubspotSettings) {
+  constructor(private console?: ConsoleLogger) {
     this.client = new hubspot.Client(hubspotCredsFromENV());
   }
 
@@ -44,21 +39,9 @@ export default class HubspotAPI {
         properties,
         associations: Object.entries(associations || {})
           .flatMap(([, { results }]) => (
-            results.map(item => {
-              const prefix = `${entityAdapter.kind}_to_`;
-              let itemType = item.type;
-              if (!itemType.startsWith(prefix)) {
-                const mapping = this.settings?.typeMappings?.get(itemType);
-                if (mapping) {
-                  itemType = mapping;
-                }
-                else {
-                  assert.fail(`Custom type "${itemType}" does not start with "${prefix}" for "${id}" to "${item.id}", and there's no ENV mapping for it yet`);
-                }
-              }
-              const otherKind = itemType.substr(prefix.length) as EntityKind;
-              return `${otherKind}:${item.id}` as RelativeAssociation;
-            })
+            results.map(item =>
+              `${item.type}:${item.id}` as RelativeAssociation
+            )
           )),
       }));
       return normalizedEntities;

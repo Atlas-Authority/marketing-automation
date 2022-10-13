@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 import { DataShiftConfig } from "../data-shift/analyze";
 import { EngineConfig } from "../engine/engine";
-import { HubspotCreds, HubspotSettings } from "../hubspot/api";
+import { HubspotCreds } from "../hubspot/api";
 import { MultiMpacCreds } from "../marketplace/api";
 import { MpacConfig } from "../marketplace/marketplace";
 import { HubspotContactConfig } from "../model/contact";
@@ -20,16 +20,14 @@ export function hubspotCredsFromENV(): HubspotCreds {
   };
 }
 
-export function hubspotSettingsFromENV(): HubspotSettings {
+export function hubspotSettingsFromENV() {
   const typeMappings = optional('HUBSPOT_ASSOCIATION_TYPE_MAPPINGS');
-  return {
-    typeMappings: (typeMappings
-      ? new Map(
-        typeMappings
-          .split(',')
-          .map(kv => kv.split(':') as [string, string]))
-      : undefined),
-  };
+  return (typeMappings
+    ? new Map(
+      typeMappings
+        .split(',')
+        .map(kv => kv.split(':') as [string, string]))
+    : undefined);
 }
 
 export function mpacCredsFromENV(): MultiMpacCreds {

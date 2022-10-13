@@ -1,14 +1,14 @@
 import got from 'got';
 import promiseAllProperties from 'promise-all-properties';
 import { dataManager } from '../data/manager';
-import HubspotAPI, { HubspotSettings } from "../hubspot/api";
+import HubspotAPI from "../hubspot/api";
 import { Hubspot, HubspotConfig } from '../hubspot/hubspot';
 import { ConsoleLogger } from '../log/console';
 import { MultiDownloadLogger } from "../log/download";
 import { MarketplaceAPI } from "../marketplace/api";
 
-export async function downloadAllData(console: ConsoleLogger, hubspotConfig: HubspotConfig, hubspotSettings?: HubspotSettings) {
-  const hubspotAPI = new HubspotAPI(console, hubspotSettings);
+export async function downloadAllData(console: ConsoleLogger, hubspotConfig: HubspotConfig) {
+  const hubspotAPI = new HubspotAPI(console);
   const marketplaceAPI = new MarketplaceAPI();
 
   const hubspot = new Hubspot(hubspotConfig);

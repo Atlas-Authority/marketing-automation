@@ -16,6 +16,10 @@ export abstract class EntityManager<
   private indexIndex = new Map<keyof D, Index<E>>();
   public get = this.makeIndex(e => [e.id].filter(isPresent), []);
 
+  public constructor(
+    private typeMappings: Map<string, string>,
+  ) { }
+
   public importEntities(rawEntities: readonly FullEntity[]) {
     const prelinkedAssociations = new Map<string, Set<RelativeAssociation>>();
 
@@ -56,11 +60,25 @@ export abstract class EntityManager<
         const me = this.get(meId);
         if (!me) throw new Error(`Couldn't find kind=${this.kind} id=${meId}`);
 
-        const [toKind, youId] = rawAssoc.split(':') as [string, string];
-        const FIX_TOKIND_REGEX = /_unlabeled$/;
-        const normalizedToKind = (toKind.match(FIX_TOKIND_REGEX) ? toKind.replace(FIX_TOKIND_REGEX, '') : toKind) as EntityKind;
-        const you = managers[`${normalizedToKind}Manager`].get(youId);
-        if (!you) throw new Error(`Couldn't find kind=${toKind} id=${youId}`);
+        const [toKindRaw, youId] = rawAssoc.split(':') as [string, string];
+        let toKind = toKindRaw.replace(/_unlabeled$/, '');
+
+        if (!toKind.includes('_to_')) {
+          const mappedType = this.typeMappings.get(toKind);
+          if (mappedType) {
+            toKind = mappedType;
+          }
+          else {
+            throw new Error(`Unknown association type "${toKind}" for ${me.kind}:${meId} to ${youId}`);
+          }
+        }
+
+        const bothKinds = new Set(toKind.split('_to_') as EntityKind[]);
+        bothKinds.delete(me.kind);
+        const otherKind = [...bothKinds][0];
+
+        const you = managers[`${otherKind}Manager`].get(youId);
+        if (!you) throw new Error(`Couldn't find kind=${toKindRaw} id=${youId}`);
 
         me.addAssociation(you, { firstSide: true, initial: true });
       }

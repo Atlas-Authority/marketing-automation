@@ -173,8 +173,8 @@ export class ContactManager extends EntityManager<ContactData, Contact> {
 
   public getByEmail = this.makeIndex(c => c.allEmails, ['email']);
 
-  constructor(config: HubspotContactConfig) {
-    super();
+  constructor(typeMappings: Map<string, string>, config: HubspotContactConfig) {
+    super(typeMappings);
     this.entityAdapter = makeAdapter(config);
   }
 
