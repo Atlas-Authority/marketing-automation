@@ -107,10 +107,10 @@ export function assertRequiredTransactionFields(transaction: Transaction) {
   validateField(transaction, transaction => transaction.data.partnerDetails?.billingContact, o => !o || typeof o.email === 'string');
 }
 
-function validateField<T, V>(o: T, accessor: (o: T) => V, validator: (o: V) => boolean = o => !!o) {
+function validateField<T extends Transaction | License, V>(o: T, accessor: (o: T) => V, validator: (o: V) => boolean = o => !!o) {
   const val = accessor(o);
   const path = accessor.toString().replace(/^(\w+) => /, '');
-  if (!validator(val)) throw new AttachableError(`Missing field: ${path} (found ${JSON.stringify(val)})`, JSON.stringify(o, null, 2));
+  if (!validator(val)) throw new AttachableError(`Missing field (in ${o.id}): ${path} (found ${JSON.stringify(val)})`, JSON.stringify(o, null, 2));
 }
 
 export function hasTechEmail(license: License, console?: ConsoleLogger) {
