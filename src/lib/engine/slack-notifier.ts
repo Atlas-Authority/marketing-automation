@@ -26,7 +26,7 @@ export class SlackNotifier {
   ) { }
 
   public async notifyStarting() {
-    this.#postToSlack(`Starting Marketing Engine`);
+    void this.#postToSlack(`Starting Marketing Engine`);
   }
 
   public async notifyErrors(loopConfig: RunLoopConfig, errors: any[]) {

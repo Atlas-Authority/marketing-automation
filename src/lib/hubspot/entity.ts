@@ -1,6 +1,6 @@
 import { EntityAdapter, EntityKind, FullEntity, RelativeAssociation } from "./interfaces";
 
-export interface Indexer<D> {
+export interface Indexer<D extends Record<string, any>> {
   removeIndexesFor<K extends keyof D>(key: K, entity: Entity<D>): void;
   addIndexesFor<K extends keyof D>(key: K, val: D[K] | undefined, entity: Entity<D>): void;
 }
@@ -138,7 +138,7 @@ export abstract class Entity<D extends Record<string, any>> {
       id: this.id!,
       properties: this.upsyncableData(),
       associations: [...this.upsyncableAssociations()].map(other => {
-        return `${other.kind}:${other.id}` as RelativeAssociation;
+        return `${this.kind}_to_${other.kind}:${other.id}` as RelativeAssociation;
       }),
     };
   }
@@ -148,9 +148,9 @@ export abstract class Entity<D extends Record<string, any>> {
     for (const [k, v] of Object.entries(this.newData)) {
       const spec = this.adapter.data[k];
       if (spec.property) {
-        const upKey = spec.property as keyof D;
+        const upKey = spec.property;
         const upVal = spec.up(v);
-        upProperties[upKey as string] = upVal;
+        upProperties[upKey] = upVal;
       }
     }
     return upProperties;

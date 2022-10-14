@@ -220,7 +220,7 @@ export class ActionGenerator {
   maybeMakeMetaAction(event: Exclude<DealRelevantEvent, RefundEvent>, deal: Deal | null, amount: number): Action | null {
     switch (event.meta) {
       case 'archived-app':
-      case 'mass-provider-only':
+      case 'mass-provider-only': {
         const reason = (event.meta === 'archived-app'
           ? 'Archived-app transaction'
           : 'Free-email-provider transaction'
@@ -229,6 +229,7 @@ export class ActionGenerator {
           this.ignore(reason, amount);
         }
         return { type: 'noop', deal, reason: event.meta };
+      }
       default:
         return null;
     }

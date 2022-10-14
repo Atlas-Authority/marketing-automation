@@ -66,7 +66,7 @@ export class DataShiftReporter {
         rows: resultItems,
       });
 
-      this.slack?.notifyDataShiftIssues(resultLabel, Table.toString({
+      void this.slack?.notifyDataShiftIssues(resultLabel, Table.toString({
         cols: colSpecs,
         rows: resultItems,
       }));

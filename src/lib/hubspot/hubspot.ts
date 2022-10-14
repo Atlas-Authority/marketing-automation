@@ -1,4 +1,4 @@
-import { hubspotContactConfigFromENV, hubspotDealConfigFromENV } from "../config/env";
+import { hubspotContactConfigFromENV, hubspotDealConfigFromENV, hubspotSettingsFromENV } from "../config/env";
 import { RawDataSet } from "../data/raw";
 import { ConsoleLogger } from "../log/console";
 import { CompanyManager } from "../model/company";
@@ -9,6 +9,7 @@ import { Entity } from "./entity";
 export type HubspotConfig = {
   deal?: HubspotDealConfig;
   contact?: HubspotContactConfig;
+  typeMappings?: Map<string, string>,
 };
 
 export class Hubspot {
@@ -18,9 +19,11 @@ export class Hubspot {
   public companyManager;
 
   public constructor(config?: HubspotConfig) {
-    this.dealManager = new DealManager(config?.deal ?? {});
-    this.contactManager = new ContactManager(config?.contact ?? {});
-    this.companyManager = new CompanyManager();
+    const typeMappings = config?.typeMappings ?? new Map();
+
+    this.dealManager = new DealManager(typeMappings, config?.deal ?? {});
+    this.contactManager = new ContactManager(typeMappings, config?.contact ?? {});
+    this.companyManager = new CompanyManager(typeMappings);
   }
 
   public importData(data: RawDataSet, console?: ConsoleLogger) {
@@ -52,9 +55,10 @@ export class Hubspot {
 
 }
 
-export function hubspotConfigFromENV() {
+export function hubspotConfigFromENV(): HubspotConfig {
   return {
     contact: hubspotContactConfigFromENV(),
     deal: hubspotDealConfigFromENV(),
+    typeMappings: hubspotSettingsFromENV(),
   };
 }

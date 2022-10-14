@@ -312,8 +312,8 @@ export class DealManager extends EntityManager<DealData, Deal> {
 
   public duplicates = new Map<Deal, Deal[]>();
 
-  constructor(config: HubspotDealConfig) {
-    super();
+  constructor(typeMappings: Map<string, string>, config: HubspotDealConfig) {
+    super(typeMappings);
     this.entityAdapter = makeAdapter(config);
   }
 

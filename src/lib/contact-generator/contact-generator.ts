@@ -84,7 +84,8 @@ export class ContactGenerator {
   }
 
   private contactFrom(item: License | Transaction, info: ContactInfo | PartnerBillingInfo): GeneratedContact {
-    let [firstName, ...lastNameGroup] = (info.name || ' ').split(' ');
+    const [firstNameRaw, ...lastNameGroup] = (info.name || ' ').split(' ');
+    let firstName = firstNameRaw;
     let lastName = lastNameGroup.filter(n => n).join(' ');
 
     const NAME_URL_RE = /(.)\.([a-zA-Z]{2})/g;
