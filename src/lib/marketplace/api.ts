@@ -82,7 +82,7 @@ export class SingleMarketplaceAPI {
     });
 
     if (res.statusCode !== 200) {
-      throw new KnownError(`Marketpalce API: ${res.statusCode} ${res.statusMessage}`);
+      throw new KnownError(`Marketplace API: ${res.statusCode} ${res.statusMessage}`);
     }
 
     let text;
