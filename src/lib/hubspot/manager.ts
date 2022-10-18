@@ -55,6 +55,8 @@ export abstract class EntityManager<
       [K in `${EntityKind}Manager`]: EntityManager<any, any>;
     },
   ) {
+    const toKinds = new Set<EntityKind>(['company', 'contact', 'deal']);
+
     for (const [meId, rawAssocs] of prelinkedAssociations) {
       for (const rawAssoc of rawAssocs) {
         const me = this.get(meId);
@@ -63,19 +65,25 @@ export abstract class EntityManager<
         const [toKindRaw, youId] = rawAssoc.split(':') as [string, string];
         let toKind = toKindRaw.replace(/_unlabeled$/, '');
 
-        if (!toKind.includes('_to_')) {
-          const mappedType = this.typeMappings.get(toKind);
-          if (mappedType) {
-            toKind = mappedType;
-          }
-          else {
-            throw new Error(`Unknown association type "${toKind}" for ${me.kind}:${meId} to ${youId}`);
-          }
+        let otherKind: EntityKind;
+        if (toKinds.has(toKind as any)) {
+          otherKind = toKind as any;
         }
+        else {
+          if (!toKind.includes('_to_')) {
+            const mappedType = this.typeMappings.get(toKind);
+            if (mappedType) {
+              toKind = mappedType;
+            }
+            else {
+              throw new Error(`Unknown association type "${toKind}" for ${me.kind}:${meId} to ${youId}`);
+            }
+          }
 
-        const bothKinds = new Set(toKind.split('_to_') as EntityKind[]);
-        bothKinds.delete(me.kind);
-        const otherKind = [...bothKinds][0];
+          const bothKinds = new Set(toKind.split('_to_') as EntityKind[]);
+          bothKinds.delete(me.kind);
+          otherKind = [...bothKinds][0];
+        }
 
         const you = managers[`${otherKind}Manager`].get(youId);
         if (!you) throw new Error(`Couldn't find kind=${toKindRaw} id=${youId}`);

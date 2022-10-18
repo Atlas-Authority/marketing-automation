@@ -33,6 +33,15 @@
         "<node_internals>/**"
       ],
       "type": "pwa-node"
+    },
+    {
+      "name": "Analyze Data Shift",
+      "program": "${workspaceFolder}/src/bin/analyze-data-shift.ts",
+      "request": "launch",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "type": "pwa-node"
     }
   ]
 }
