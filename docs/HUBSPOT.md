@@ -51,3 +51,22 @@ For example, if Contact.FirstName is managed:
   * If first name is already set, first name will not be updated
 
 See the sample .env file for how to set managed fields via ENV variables.
+
+## Custom Association Types
+
+HubSpot allows custom association types, for example, a Partner can be an association between a Company and a Contact.
+
+This project supports custom association types via an ENV variable, using the following format derivation rules:
+
+* The ENV variable is `HUBSPOT_ASSOCIATION_TYPE_MAPPINGS`
+* The format must be `partner=company_to_contact,[...]`
+* The format allows for multiple comma-separated mappings
+* The left hand side of each mapping (e.g. `partner` or `board_member`) is derived via:
+  * Take the name of the custom association, e.g. `Board Member`
+  * Lower-case it, e.g. `board member`
+  * Replace spaces with underscores, e.g. `board_member`
+* The right hand side of each mapping (e.g. `company_to_contact`) is derived via:
+  * Take the names of both entity types in the association (e.g. `Contact` and `Company`)
+  * Apply the same rules as the LHS above (e.g. `contact` and `company`)
+  * Join them with the string `_to_` (e.g. `contact_to_company`)
+  * Note: the order does not matter in this mapping (e.g. `company_to_contact` is equivalent to the above)
