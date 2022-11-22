@@ -68,20 +68,20 @@ export default class HubspotAPI {
   }
 
   public async createEntities(kind: EntityKind, entities: NewEntity[]): Promise<ExistingEntity[]> {
-    return await this.batchDo(kind, entities, async entities => {
+    return await this.batchUpsert(kind, entities, async entities => {
       const response = await this.apiFor(kind).batchApi.create({ inputs: entities });
       return response.body.results;
     });
   }
 
   public async updateEntities(kind: EntityKind, entities: ExistingEntity[]): Promise<ExistingEntity[]> {
-    return await this.batchDo(kind, entities, async entities => {
+    return await this.batchUpsert(kind, entities, async entities => {
       const response = await this.apiFor(kind).batchApi.update({ inputs: entities });
       return response.body.results;
     });
   }
 
-  private async batchDo<T, U>(kind: EntityKind, entities: T[], fn: (array: T[]) => Promise<U[]>) {
+  private async batchUpsert<T, U>(kind: EntityKind, entities: T[], fn: (array: T[]) => Promise<U[]>) {
     const batchSize = kind === 'contact' ? 10 : 100;
     const entityGroups = batchesOf(entities, batchSize);
 
@@ -90,7 +90,8 @@ export default class HubspotAPI {
         return await fn(entities);
       }
       catch (e: any) {
-        throw new Error(e.response.body.message);
+        const errMsg = e.response?.body?.message || e;
+        throw new Error(errMsg);
       }
     });
 
