@@ -74,7 +74,7 @@ export default class HubspotAPI {
         return response.body.results;
       }
       catch (e) {
-        this.console?.printError('HubSpot API', 'Error creating entities', { entities });
+        this.console?.printError('HubSpot API', 'Error creating entities', { kind, entities });
         throw e;
       }
     });
@@ -87,7 +87,7 @@ export default class HubspotAPI {
         return response.body.results;
       }
       catch (e) {
-        this.console?.printError('HubSpot API', 'Error updating entities', { entities });
+        this.console?.printError('HubSpot API', 'Error updating entities', { kind, entities });
         throw e;
       }
     });
