@@ -69,15 +69,27 @@ export default class HubspotAPI {
 
   public async createEntities(kind: EntityKind, entities: NewEntity[]): Promise<ExistingEntity[]> {
     return await this.batchUpsert(kind, entities, async entities => {
-      const response = await this.apiFor(kind).batchApi.create({ inputs: entities });
-      return response.body.results;
+      try {
+        const response = await this.apiFor(kind).batchApi.create({ inputs: entities });
+        return response.body.results;
+      }
+      catch (e) {
+        this.console?.printError('HubSpot API', 'Error creating entities', { entities });
+        throw e;
+      }
     });
   }
 
   public async updateEntities(kind: EntityKind, entities: ExistingEntity[]): Promise<ExistingEntity[]> {
     return await this.batchUpsert(kind, entities, async entities => {
-      const response = await this.apiFor(kind).batchApi.update({ inputs: entities });
-      return response.body.results;
+      try {
+        const response = await this.apiFor(kind).batchApi.update({ inputs: entities });
+        return response.body.results;
+      }
+      catch (e) {
+        this.console?.printError('HubSpot API', 'Error updating entities', { entities });
+        throw e;
+      }
     });
   }
 
