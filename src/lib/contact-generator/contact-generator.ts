@@ -84,7 +84,7 @@ export class ContactGenerator {
   }
 
   private contactFrom(item: License | Transaction, info: ContactInfo | PartnerBillingInfo): GeneratedContact {
-    const [firstNameRaw, ...lastNameGroup] = (info.name || ' ').split(' ');
+    const [firstNameRaw, ...lastNameGroup] = (info.name || ' ').replace(/[<>]/, '').split(' ');
     let firstName = firstNameRaw;
     let lastName = lastNameGroup.filter(n => n).join(' ');
 
