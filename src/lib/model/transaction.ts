@@ -111,6 +111,9 @@ export class Transaction extends MpacRecord<TransactionData> {
     if ((m = tier.match(/^(\d+) Users$/))) {
       return +m[1];
     }
+    if ((m = tier.match(/^(\d+) User$/))) {
+      return +m[1];
+    }
 
     assert.fail(`Unknown transaction tier: ${tier}`);
   }
