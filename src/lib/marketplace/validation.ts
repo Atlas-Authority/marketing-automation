@@ -6,15 +6,26 @@ import { Transaction } from "../model/transaction";
 import { AttachableError } from '../util/errors';
 import { detailedDiff } from "deep-object-diff";
 
-export function removeApiBorderDuplicates(licenses: readonly License[]) {
+// In case a duplicated license is found, return the last updated value
+function useLatestLicense(lA: License, lB: License): License {
+  const lastUpdatedA = new Date(lA.data.lastUpdated);
+  const lastUpdatedB = new Date(lB.data.lastUpdated);
+  return lastUpdatedA >= lastUpdatedB ? lA : lB;
+}
+
+export function removeApiBorderDuplicates(licenses: readonly License[], console?: ConsoleLogger) {
   const groups: { [id: string]: License[] } = {};
 
   for (const license of licenses) {
     if (!groups[license.id]) {
       groups[license.id] = [license];
     }
-    else if (!groups[license.id].some(other => util.isDeepStrictEqual(license, other))) {
-      groups[license.id].push(license);
+    else if (!util.isDeepStrictEqual(license, groups[license.id][0])) {
+      const latestLicense = useLatestLicense(license, groups[license.id][0]);
+      // for now just printing a warning, notify via slack when resolving issue #137
+      console?.printWarning('Duplicate License found at API border', JSON.stringify({licenseA: license, licenseB: groups[license.id][0] }, null, 2));
+      console?.printWarning('Using latest updated (other license will be ignored)', JSON.stringify({ data: latestLicense.data }, null, 2));
+      groups[license.id] = [latestLicense];
     }
   }
 

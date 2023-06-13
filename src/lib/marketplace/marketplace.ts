@@ -42,7 +42,7 @@ export class Marketplace {
     let transactions = data.transactions.map(raw => Transaction.fromRaw(raw));
 
     licenses = licenses.filter(l => validation.hasTechEmail(l, console));
-    licenses = validation.removeApiBorderDuplicates(licenses);
+    licenses = validation.removeApiBorderDuplicates(licenses, console);
 
     licenses.forEach(validation.assertRequiredLicenseFields);
     transactions.forEach(validation.assertRequiredTransactionFields);
