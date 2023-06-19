@@ -1,3 +1,4 @@
+import { ConsoleLogger } from "../log/console";
 import { ContactInfo, PartnerInfo } from "../model/record";
 
 export type RawTransactionContact = {
@@ -119,8 +120,11 @@ export function getContactInfo(contactInfo: RawLicenseContact | RawTransactionCo
   };
 }
 
-export function maybeGetContactInfo(contactInfo: RawLicenseContact | RawTransactionContact | undefined): ContactInfo | null {
-  if (!contactInfo) return null;
+export function maybeGetContactInfo(contactInfo: RawLicenseContact | RawTransactionContact | undefined, console?: ConsoleLogger): ContactInfo | null {
+  if (!contactInfo) {
+    console?.printError('Marketplace Raw', 'Billing/Technical contact info missing, results may be affected. Check logs for potentially deleted deals');
+    return null;
+  }
   return getContactInfo(contactInfo);
 }
 
@@ -130,8 +134,8 @@ export function getPartnerInfo(info: RawPartnerDetails | undefined): PartnerInfo
     partnerName: info.partnerName,
     partnerType: info.partnerType,
     billingContact: {
-      email: info.billingContact.email,
-      name: info.billingContact.name,
+      email: info.billingContact?.email,
+      name: info.billingContact?.name,
     },
   };
 }

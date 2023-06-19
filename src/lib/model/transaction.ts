@@ -1,7 +1,8 @@
 import assert from "assert";
-import { getContactInfo, getPartnerInfo, maybeGetContactInfo, RawTransaction } from "../marketplace/raw";
+import { getPartnerInfo, maybeGetContactInfo, RawTransaction } from "../marketplace/raw";
 import { License } from "./license";
 import { ContactInfo, MpacRecord, PartnerInfo } from "./record";
+import { ConsoleLogger } from "../log/console";
 
 export interface TransactionData {
   addonLicenseId: string | null,
@@ -13,7 +14,7 @@ export interface TransactionData {
   addonName: string,
   lastUpdated: string,
 
-  technicalContact: ContactInfo,
+  technicalContact: ContactInfo | null,
   billingContact: ContactInfo | null,
   partnerDetails: PartnerInfo | null,
 
@@ -48,7 +49,7 @@ export class Transaction extends MpacRecord<TransactionData> {
   public license!: License;
   public refunded = false;
 
-  static fromRaw(rawTransaction: RawTransaction) {
+  static fromRaw(rawTransaction: RawTransaction, console?: ConsoleLogger) {
     return new Transaction({
       transactionId: rawTransaction.transactionId,
 
@@ -61,8 +62,8 @@ export class Transaction extends MpacRecord<TransactionData> {
       addonName: rawTransaction.addonName,
       lastUpdated: rawTransaction.lastUpdated,
 
-      technicalContact: getContactInfo(rawTransaction.customerDetails.technicalContact),
-      billingContact: maybeGetContactInfo(rawTransaction.customerDetails.billingContact),
+      technicalContact: maybeGetContactInfo(rawTransaction.customerDetails.technicalContact, console),
+      billingContact: maybeGetContactInfo(rawTransaction.customerDetails.billingContact, console),
       partnerDetails: getPartnerInfo(rawTransaction.partnerDetails),
 
       company: rawTransaction.customerDetails.company,

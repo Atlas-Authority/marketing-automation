@@ -1,7 +1,8 @@
 import * as assert from 'assert';
-import { getContactInfo, getPartnerInfo, maybeGetContactInfo, RawLicense } from "../marketplace/raw";
+import { getPartnerInfo, maybeGetContactInfo, RawLicense } from "../marketplace/raw";
 import { ContactInfo, MpacRecord, PartnerInfo } from './record.js';
 import { Transaction } from './transaction';
+import { ConsoleLogger } from '../log/console';
 
 type AttributionData = {
   channel: string;
@@ -37,7 +38,7 @@ export interface LicenseData {
   addonName: string,
   lastUpdated: string,
 
-  technicalContact: ContactInfo,
+  technicalContact: ContactInfo | null,
   billingContact: ContactInfo | null,
   partnerDetails: PartnerInfo | null,
 
@@ -70,7 +71,7 @@ export class License extends MpacRecord<LicenseData> {
   public transactions: Transaction[] = [];
   public active: boolean;
 
-  static fromRaw(rawLicense: RawLicense) {
+  static fromRaw(rawLicense: RawLicense, console?: ConsoleLogger) {
     let newEvalData: NewEvalData | null = null;
     if (rawLicense.evaluationLicense) {
       newEvalData = {
@@ -105,8 +106,8 @@ export class License extends MpacRecord<LicenseData> {
       addonName: rawLicense.addonName,
       lastUpdated: rawLicense.lastUpdated,
 
-      technicalContact: getContactInfo(rawLicense.contactDetails.technicalContact),
-      billingContact: maybeGetContactInfo(rawLicense.contactDetails.billingContact),
+      technicalContact: maybeGetContactInfo(rawLicense.contactDetails.technicalContact, console),
+      billingContact: maybeGetContactInfo(rawLicense.contactDetails.billingContact, console),
       partnerDetails: getPartnerInfo(rawLicense.partnerDetails),
 
       company: rawLicense.contactDetails.company,

@@ -43,7 +43,7 @@ export class ContactGenerator {
 
   private associateContacts() {
     for (const record of [...this.licenses, ...this.transactions]) {
-      record.techContact = this.findContact(record.data.technicalContact.email)!;
+      record.techContact = this.findContact(record.data.technicalContact?.email)!;
       record.billingContact = this.findContact(record.data.billingContact?.email);
       record.partnerContact = this.findContact(record.data.partnerDetails?.billingContact.email);
 

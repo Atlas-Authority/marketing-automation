@@ -43,7 +43,7 @@ export type PartnerInfo = {
 
 export function getEmailsForRecord(record: License | Transaction) {
   return [
-    record.data.technicalContact.email,
+    record.data.technicalContact?.email,
     record.data.billingContact?.email,
     record.data.partnerDetails?.billingContact.email,
   ].filter(isPresent);

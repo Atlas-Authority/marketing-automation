@@ -85,7 +85,7 @@ export function assertRequiredLicenseFields(license: License) {
   validateField(license, license => license.data.country);
   validateField(license, license => license.data.region);
   validateField(license, license => license.data.technicalContact);
-  validateField(license, license => license.data.technicalContact.email);
+  validateField(license, license => license.data.technicalContact?.email);
   validateField(license, license => license.data.tier);
   validateField(license, license => license.data.licenseType);
   validateField(license, license => license.data.hosting);
@@ -104,7 +104,7 @@ export function assertRequiredTransactionFields(transaction: Transaction) {
   validateField(transaction, transaction => transaction.data.country);
   validateField(transaction, transaction => transaction.data.region);
   validateField(transaction, transaction => transaction.data.technicalContact);
-  validateField(transaction, transaction => transaction.data.technicalContact.email);
+  validateField(transaction, transaction => transaction.data.technicalContact?.email);
   validateField(transaction, transaction => transaction.data.saleDate);
   validateField(transaction, transaction => transaction.data.tier);
   validateField(transaction, transaction => transaction.data.licenseType);

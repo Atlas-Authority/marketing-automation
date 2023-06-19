@@ -9,7 +9,7 @@ import { flagPartnersViaCoworkers } from "./contact-types";
 
 export function updateContactsBasedOnMatchResults(engine: Engine, allMatches: RelatedLicenseSet[]) {
   for (const license of allMatches) {
-    const contacts = new Set(license.map(license => engine.hubspot.contactManager.getByEmail(license.data.technicalContact.email)!));
+    const contacts = new Set(license.map(license => engine.hubspot.contactManager.getByEmail(license.data.technicalContact?.email || '')!));
 
     flagPartnersViaCoworkers([...contacts]);
 

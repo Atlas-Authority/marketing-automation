@@ -38,7 +38,7 @@ export class Marketplace {
       ...data.licensesWithoutDataInsights,
     ];
 
-    let licenses = combinedLicenses.map(raw => License.fromRaw(raw));
+    let licenses = combinedLicenses.map(raw => License.fromRaw(raw, console));
     let transactions = data.transactions.map(raw => Transaction.fromRaw(raw));
 
     licenses = licenses.filter(l => validation.hasTechEmail(l, console));
