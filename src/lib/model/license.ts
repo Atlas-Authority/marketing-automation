@@ -37,19 +37,19 @@ export interface LicenseData {
   addonName: string,
   lastUpdated: string,
 
-  technicalContact: ContactInfo,
+  technicalContact: ContactInfo | null,
   billingContact: ContactInfo | null,
   partnerDetails: PartnerInfo | null,
 
-  company: string,
-  country: string,
-  region: string,
+  company: string | null,
+  country: string | null,
+  region: string | null,
 
   tier: string,
   licenseType: 'COMMERCIAL' | 'ACADEMIC' | 'COMMUNITY' | 'EVALUATION' | 'OPEN_SOURCE' | 'DEMONSTRATION' | 'INTERNAL USE',
   hosting: 'Server' | 'Cloud' | 'Data Center',
   maintenanceStartDate: string,
-  maintenanceEndDate: string,
+  maintenanceEndDate: string | null,
 
   status: 'inactive' | 'active' | 'cancelled',
 
@@ -105,23 +105,23 @@ export class License extends MpacRecord<LicenseData> {
       addonName: rawLicense.addonName,
       lastUpdated: rawLicense.lastUpdated,
 
-      technicalContact: getContactInfo(rawLicense.contactDetails.technicalContact),
+      technicalContact: rawLicense.contactDetails.technicalContact ? getContactInfo(rawLicense.contactDetails.technicalContact) : null,
       billingContact: maybeGetContactInfo(rawLicense.contactDetails.billingContact),
       partnerDetails: getPartnerInfo(rawLicense.partnerDetails),
 
-      company: rawLicense.contactDetails.company,
-      country: rawLicense.contactDetails.country,
-      region: rawLicense.contactDetails.region,
+      company: rawLicense.contactDetails.company ?? null,
+      country: rawLicense.contactDetails.country ?? null,
+      region: rawLicense.contactDetails.region ?? null,
 
       tier: rawLicense.tier,
       licenseType: rawLicense.licenseType,
       hosting: rawLicense.hosting,
       maintenanceStartDate: rawLicense.maintenanceStartDate,
-      maintenanceEndDate: rawLicense.maintenanceEndDate,
+      maintenanceEndDate: rawLicense.maintenanceEndDate ?? null,
 
       status: rawLicense.status,
       evaluationOpportunitySize: rawLicense.evaluationOpportunitySize ?? '',
-      attribution: rawLicense.attribution ?? null,
+      attribution: rawLicense.attribution?.channel ? {...rawLicense.attribution, channel: rawLicense.attribution.channel, }  : null,
       parentInfo,
       newEvalData,
     });

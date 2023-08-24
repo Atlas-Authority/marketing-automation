@@ -7,7 +7,7 @@ export type RawTransactionContact = {
 
 export type RawPartnerDetails = {
   partnerName: string;
-  partnerType?: string;
+  partnerType: string;
   billingContact: {
     email: string;
     name: string;
@@ -60,29 +60,29 @@ export type RawLicenseContact = {
 
 export interface RawLicense {
   addonLicenseId?: string;
-  licenseId?: string;
+  licenseId: string;
   addonKey: string;
   addonName: string;
   lastUpdated: string;
   contactDetails: {
-    company: string;
-    country: string;
-    region: string;
-    technicalContact: RawLicenseContact;
+    company?: string;
+    country?: string;
+    region?: string;
+    technicalContact?: RawLicenseContact;
     billingContact?: RawLicenseContact;
   };
   tier: string;
   licenseType: 'EVALUATION' | 'COMMERCIAL' | 'COMMUNITY' | 'ACADEMIC' | 'OPEN_SOURCE' | 'DEMONSTRATION' | 'INTERNAL USE';
   hosting: 'Server' | 'Cloud' | 'Data Center';
   maintenanceStartDate: string;
-  maintenanceEndDate: string;
+  maintenanceEndDate?: string;
   partnerDetails?: RawPartnerDetails;
   status: 'inactive' | 'active' | 'cancelled';
 
   evaluationOpportunitySize?: string;
 
   attribution?: {
-    channel: string;
+    channel?: string;
     referrerDomain?: string;
     campaignName?: string;
     campaignSource?: string;
@@ -125,7 +125,7 @@ export function maybeGetContactInfo(contactInfo: RawLicenseContact | RawTransact
 }
 
 export function getPartnerInfo(info: RawPartnerDetails | undefined): PartnerInfo | null {
-  if (!info) return null;
+  if (!info?.billingContact) return null;
   return {
     partnerName: info.partnerName,
     partnerType: info.partnerType,

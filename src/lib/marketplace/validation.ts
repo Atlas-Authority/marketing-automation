@@ -84,8 +84,8 @@ export function assertRequiredLicenseFields(license: License) {
   // validateField(license, license => license.data.company);
   validateField(license, license => license.data.country);
   validateField(license, license => license.data.region);
-  validateField(license, license => license.data.technicalContact);
-  validateField(license, license => license.data.technicalContact.email);
+  // validateField(license, license => license.data.technicalContact);
+  // validateField(license, license => license.data.technicalContact.email);
   validateField(license, license => license.data.tier);
   validateField(license, license => license.data.licenseType);
   validateField(license, license => license.data.hosting);

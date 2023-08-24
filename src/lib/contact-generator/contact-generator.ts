@@ -43,7 +43,7 @@ export class ContactGenerator {
 
   private associateContacts() {
     for (const record of [...this.licenses, ...this.transactions]) {
-      record.techContact = this.findContact(record.data.technicalContact.email)!;
+      record.techContact = this.findContact(record.data.technicalContact?.email)!;
       record.billingContact = this.findContact(record.data.billingContact?.email);
       record.partnerContact = this.findContact(record.data.partnerDetails?.billingContact.email);
 
@@ -103,7 +103,7 @@ export class ContactGenerator {
       phone: 'phone' in info ? info.phone?.trim() ?? null : null,
       city: 'city' in info ? capitalize.words(info.city || '') : null,
       state: 'state' in info ? capitalize.words(info.state || '') : null,
-      country: capitalize.words(item.data.country),
+      country: item.data.country ? capitalize.words(item.data.country) : null,
       region: item.data.region,
       relatedProducts: new Set(),
       deployment: new Set([item.data.hosting]),

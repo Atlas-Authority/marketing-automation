@@ -6,7 +6,7 @@ import { Action } from "../../lib/deal-generator/actions";
 import { DealRelevantEvent } from '../../lib/deal-generator/events';
 import { Engine, EngineConfig } from '../../lib/engine/engine';
 import { DealStage } from '../../lib/hubspot/interfaces';
-import { RawLicense, RawLicenseContact, RawTransaction } from '../../lib/marketplace/raw';
+import {RawLicense, RawLicenseContact, RawTransaction, RawTransactionContact} from '../../lib/marketplace/raw';
 import { Company } from '../../lib/model/company';
 import { Contact } from '../../lib/model/contact';
 import { Deal } from "../../lib/model/deal";
@@ -131,7 +131,13 @@ function rawTransactionFrom(rawLicense: RawLicense, txId: string, saleDate: stri
     addonKey: rawLicense.addonKey,
     addonName: rawLicense.addonName,
     lastUpdated: rawLicense.lastUpdated,
-    customerDetails: rawLicense.contactDetails,
+    customerDetails: {
+      ...rawLicense.contactDetails,
+      company: rawLicense.contactDetails.company ?? 'random company',
+      country: rawLicense.contactDetails.country ?? 'us',
+      region: rawLicense.contactDetails.region ?? 'CA',
+      technicalContact: rawLicense.contactDetails.technicalContact ?? { email: 'technical_contact@example.com'}
+    },
     transactionId: txId,
     purchaseDetails: {
       billingPeriod: "Monthly",

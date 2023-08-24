@@ -67,7 +67,9 @@ export class EventGenerator {
       return 'archived-app';
     }
 
-    const domains = new Set(records.map(license => license.data.technicalContact.email.toLowerCase().split('@')[1]));
+    const domains = new Set(records
+        .filter(license => license.data.technicalContact)
+        .map(license => license.data.technicalContact!.email.toLowerCase().split('@')[1]));
     const partnerDomains = [...domains].filter(domain => this.partnerDomains.has(domain));
     const freeEmailDomains = [...domains].filter(domain => this.freeEmailDomains.has(domain));
 
