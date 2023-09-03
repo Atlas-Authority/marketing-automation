@@ -29,7 +29,7 @@ export class ContactTypeFlagger {
     for (const record of records) {
       maybeAddDomain(this.partnerDomains, record.data.partnerDetails?.billingContact.email);
       maybeAddDomain(this.customerDomains, record.data.billingContact?.email);
-      maybeAddDomain(this.customerDomains, record.data.technicalContact.email);
+      maybeAddDomain(this.customerDomains, record.data.technicalContact?.email);
     }
   }
 

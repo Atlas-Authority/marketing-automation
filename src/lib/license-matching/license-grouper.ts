@@ -81,13 +81,13 @@ export class LicenseGrouper {
       const [techContactEmailPart, techContactDomain] = license.techContact.data.email.split('@');
 
       const NON_EMPTY_FIELD = /[A-Za-z0-9]/;
-      const normalizeString = (s: string | undefined) => s && NON_EMPTY_FIELD.test(s) ? s : '';
+      const normalizeString = (s: string | undefined | null) => s && NON_EMPTY_FIELD.test(s) ? s : '';
 
       list.push({
         license,
         scorable: {
           momentStarted: new Date(license.data.maintenanceStartDate).getTime(),
-          momentEnded: new Date(license.data.maintenanceEndDate).getTime(),
+          momentEnded: license.data.maintenanceEndDate ? new Date(license.data.maintenanceEndDate).getTime() : Number.MAX_SAFE_INTEGER,
 
           techContact: license.techContact,
           billingContact: license.billingContact,
@@ -96,9 +96,9 @@ export class LicenseGrouper {
           companyDomain: this.freeEmailDomains.has(techContactDomain) ? '' : normalizeString(techContactDomain),
 
           techContactEmailPart,
-          techContactAddress: normalizeString(license.data.technicalContact.address1)?.toLowerCase(),
-          techContactName: normalizeString(license.data.technicalContact.name)?.toLowerCase(),
-          techContactPhone: normalizeString(license.data.technicalContact.phone)?.toLowerCase(),
+          techContactAddress: normalizeString(license.data.technicalContact?.address1)?.toLowerCase(),
+          techContactName: normalizeString(license.data.technicalContact?.name)?.toLowerCase(),
+          techContactPhone: normalizeString(license.data.technicalContact?.phone)?.toLowerCase(),
         },
       });
     }
@@ -172,15 +172,15 @@ export function shorterLicenseInfo(license: License) {
 
     company: license.data.company,
 
-    tech_email: license.data.technicalContact.email,
-    tech_name: license.data.technicalContact.name,
-    tech_address: license.data.technicalContact.address1,
-    tech_city: license.data.technicalContact.city,
-    tech_phone: license.data.technicalContact.phone,
-    tech_state: license.data.technicalContact.state,
-    tech_zip: license.data.technicalContact.postcode,
+    tech_email: license.data.technicalContact?.email,
+    tech_name: license.data.technicalContact?.name,
+    tech_address: license.data.technicalContact?.address1,
+    tech_city: license.data.technicalContact?.city,
+    tech_phone: license.data.technicalContact?.phone,
+    tech_state: license.data.technicalContact?.state,
+    tech_zip: license.data.technicalContact?.postcode,
     tech_country: license.data.country,
-    tech_address2: license.data.technicalContact.address2,
+    tech_address2: license.data.technicalContact?.address2,
 
     start: license.data.maintenanceStartDate,
     end: license.data.maintenanceEndDate,
