@@ -90,7 +90,7 @@ export function assertRequiredLicenseFields(license: License) {
   validateField(license, license => license.data.licenseType);
   validateField(license, license => license.data.hosting);
   validateField(license, license => license.data.maintenanceStartDate);
-  validateField(license, license => license.data.maintenanceEndDate);
+  //validateField(license, license => license.data.maintenanceEndDate);
   validateField(license, license => license.data.status);
   validateField(license, license => license.data.partnerDetails?.billingContact, o => !o || typeof o.email === 'string');
 }
@@ -114,7 +114,7 @@ export function assertRequiredTransactionFields(transaction: Transaction) {
   validateField(transaction, transaction => transaction.data.vendorAmount, n => typeof n === 'number');
   validateField(transaction, transaction => transaction.data.saleType);
   validateField(transaction, transaction => transaction.data.maintenanceStartDate);
-  validateField(transaction, transaction => transaction.data.maintenanceEndDate);
+  //validateField(transaction, transaction => transaction.data.maintenanceEndDate);
   validateField(transaction, transaction => transaction.data.partnerDetails?.billingContact, o => !o || typeof o.email === 'string');
 }
 
