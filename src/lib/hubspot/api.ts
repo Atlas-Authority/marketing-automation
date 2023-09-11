@@ -68,32 +68,32 @@ export default class HubspotAPI {
   }
 
   public async createEntities(kind: EntityKind, entities: NewEntity[]): Promise<ExistingEntity[]> {
-    return await this.batchUpsert(kind, entities, async entities => {
-      try {
-        const response = await this.apiFor(kind).batchApi.create({ inputs: entities });
-        return response.body.results;
-      }
-      catch (e) {
-        this.console?.printError('HubSpot API', 'Error creating entities', { kind, entities });
-        throw e;
-      }
-    });
+    const created: ExistingEntity[] = [];
+    await this.batchUpsert(kind, entities, async (batch) => await this.apiFor(kind).batchApi.create({inputs: batch})
+        .then(
+            ({body}) => created.push(...body.results),
+            (err) => {
+              this.console?.printError('HubSpot API', 'Error creating entities in batch', {kind, batch});
+              this.console?.printError('HubSpot API', 'Error', err.response?.body?.message ?? err);
+            })
+    );
+    return created;
   }
 
   public async updateEntities(kind: EntityKind, entities: ExistingEntity[]): Promise<ExistingEntity[]> {
-    return await this.batchUpsert(kind, entities, async entities => {
-      try {
-        const response = await this.apiFor(kind).batchApi.update({ inputs: entities });
-        return response.body.results;
-      }
-      catch (e) {
-        this.console?.printError('HubSpot API', 'Error updating entities', { kind, entities });
-        throw e;
-      }
-    });
+    const updated: ExistingEntity[] = [];
+    await this.batchUpsert(kind, entities, async (batch) => this.apiFor(kind).batchApi.update({inputs: batch})
+        .then(
+            ({body}) => updated.push(...body.results),
+            (err) => {
+              this.console?.printError('HubSpot API', 'Error updating entities in batch', {kind, batch});
+              this.console?.printError('HubSpot API', 'Error', err.response?.body?.message ?? err);
+            })
+    );
+    return updated;
   }
 
-  private async batchUpsert<T, U>(kind: EntityKind, entities: T[], fn: (array: T[]) => Promise<U[]>) {
+  private async batchUpsert<T, U>(kind: EntityKind, entities: T[], fn: (array: T[]) => Promise<unknown>): Promise<void> {
     const batchSize = kind === 'contact' ? 10 : 100;
     const entityGroups = batchesOf(entities, batchSize);
 
@@ -107,18 +107,21 @@ export default class HubspotAPI {
       }
     });
 
-    const resultGroups = await Promise.all(promises);
-    return resultGroups.flat(1);
+    await Promise.allSettled(promises);
   }
 
   public async createAssociations(fromKind: EntityKind, toKind: EntityKind, inputs: Association[]): Promise<void> {
     for (const inputBatch of batchesOf(inputs, 100)) {
-      const response = await this.client.crm.associations.batchApi.create(fromKind, toKind, {
+      await this.client.crm.associations.batchApi.create(fromKind, toKind, {
         inputs: inputBatch.map(input => mapAssociationInput(fromKind, input))
+      }).catch(({response}) => {
+        this.console?.printError('HubSpot API', 'Error deleting associations', {
+          fromKind,
+          toKind,
+          inputBatch,
+          hubspotResponse: response.body
+        });
       });
-      for (const e of response.body.errors ?? []) {
-        this.console?.printError('Live Hubspot', e.message);
-      }
     }
   }
 
@@ -126,6 +129,13 @@ export default class HubspotAPI {
     for (const inputBatch of batchesOf(inputs, 100)) {
       await this.client.crm.associations.batchApi.archive(fromKind, toKind, {
         inputs: inputBatch.map(input => mapAssociationInput(fromKind, input))
+      }).catch(({response}) => {
+        this.console?.printError('HubSpot API', 'Error deleting associations', {
+          fromKind,
+          toKind,
+          inputBatch,
+          hubspotResponse: response.body
+        });
       });
     }
   }
