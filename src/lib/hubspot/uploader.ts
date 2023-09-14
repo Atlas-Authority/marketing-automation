@@ -1,16 +1,16 @@
-import * as assert from 'assert';
 import { ConsoleLogger } from '../log/console';
-import { AttachableError } from "../util/errors";
 import HubspotAPI from "./api";
 import { Entity } from './entity';
 import { Hubspot } from './hubspot';
-import { EntityKind } from './interfaces';
+import {EntityKind, ExistingEntity} from './interfaces';
 import { EntityManager, typedEntries } from "./manager";
 
 export class HubspotUploader {
 
+  #console?: ConsoleLogger;
   api;
   constructor(console?: ConsoleLogger) {
+    this.#console = console;
     this.api = new HubspotAPI(console);
   }
 
@@ -32,7 +32,7 @@ export class HubspotUploader {
     const toUpdate = toSync.filter(({ e }) => e.id !== null);
 
     if (toCreate.length > 0) {
-      const results = await this.api.createEntities(
+      const created = await this.api.createEntities(
         manager.entityAdapter.kind,
         toCreate.map(({ changes }) => ({
           properties: changes as Record<string, string>,
@@ -42,7 +42,7 @@ export class HubspotUploader {
       const identifiers = typedEntries(manager.entityAdapter.data).filter(([k, v]) => v.identifier);
 
       for (const { e } of toCreate) {
-        const found = results.find(result => {
+        const found = created.find(result => {
           for (const [localIdKey, spec] of identifiers) {
             const localVal = e.data[localIdKey];
             const hsLocal = spec.up(localVal);
@@ -53,22 +53,21 @@ export class HubspotUploader {
         });
 
         if (!found) {
-          throw new AttachableError("Couldn't find ", JSON.stringify({
+          this.#console?.printError("Uploader", "Couldn't find", JSON.stringify({
             local: e.data,
-            remotes: results.map(r => ({
+            remotes: created.map(r => ({
               id: r.id,
               properties: r.properties,
             })),
           }, null, 2));
-        }
-
-        assert.ok(found);
+        } else {
         e.id = found.id;
       }
     }
+    }
 
     if (toUpdate.length > 0) {
-      const results = await this.api.updateEntities(
+      await this.api.updateEntities(
         manager.entityAdapter.kind,
         toUpdate.map(({ e, changes }) => ({
           id: e.guaranteedId(),
