@@ -90,6 +90,13 @@ export class HubspotUploader {
     for (const otherKind of upAssociations) {
       const toSyncInKind = (toSync
         .filter(changes => changes.to.kind === otherKind)
+        .filter(changes => {
+          if (!changes.from.id || !changes.to.id) {
+            this.#console?.printError("Uploader", `Will skip association of [${changes.to.kind}] between ${JSON.stringify(changes.from)} and ${JSON.stringify(changes.to)} due to missing Id`);
+            return false;
+          }
+          return true;
+        })
         .map(changes => ({
           ...changes,
           inputs: {
