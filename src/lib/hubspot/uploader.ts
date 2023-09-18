@@ -92,7 +92,7 @@ export class HubspotUploader {
         .filter(changes => changes.to.kind === otherKind)
         .filter(changes => {
           if (!changes.from.id || !changes.to.id) {
-            this.#console?.printError("Uploader", `Will skip association of [${changes.to.kind}] between ${JSON.stringify(changes.from)} and ${JSON.stringify(changes.to)} due to missing Id`);
+            this.#console?.printError("Uploader", `Will skip association of [${changes.to.kind}] between [${changes.from.id ?? 'unknown'}] and [${changes.to.id ?? 'unknown'}] due to missing Id`);
             return false;
           }
           return true;
