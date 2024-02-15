@@ -50,6 +50,7 @@ export class ActionGenerator {
   }
 
   private actionForEval(records: (License | Transaction)[], event: EvalEvent): Action {
+    console.log('Get action for event', event.type, ', License IDs:', event.licenses.map(license => license.id));
     const deal = this.singleDeal(this.getDealsForRecords(event.licenses));
     if (deal) this.recordSeen(deal, event);
 
@@ -75,6 +76,7 @@ export class ActionGenerator {
   }
 
   private actionForPurchase(records: (License | Transaction)[], event: PurchaseEvent): Action {
+    console.log('Get action for event', event.type, ', License IDs:', event.licenses.map(license => license.id), ', Transaction ID:', event.transaction?.id);
     const recordsToSearch = [event.transaction, ...event.licenses].filter(isPresent);
     const deal = this.singleDeal(this.getDealsForRecords(recordsToSearch));
     if (deal) this.recordSeen(deal, event);
@@ -99,6 +101,7 @@ export class ActionGenerator {
   }
 
   private actionForRenewal(records: (License | Transaction)[], event: RenewalEvent | UpgradeEvent): Action {
+    console.log('Get action for event', event.type, ', Transaction ID:', event.transaction.id);
     const deal = this.singleDeal(this.getDealsForRecords([event.transaction]));
     if (deal) this.recordSeen(deal, event);
 
@@ -200,6 +203,8 @@ export class ActionGenerator {
 
         toDelete = [...foundDeals].filter(deal => !importantDeals.includes(deal));
       }
+
+      console.log('Found duplicate deals. Pick single deal: ', dealToUse.id, ', deals to delete:', toDelete.map(deal => deal.id));
 
       if (this.dealManager.duplicates.has(dealToUse)) {
         throw new Error(`Primary duplicate is accounted for twice: ${dealToUse.id}`);
