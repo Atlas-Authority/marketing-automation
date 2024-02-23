@@ -54,7 +54,7 @@ describe('AsyncMarketplaceAPI', () => {
       .post(`/rest/2/vendors/${credentials.sellerId}/reporting/licenses/async/export?endDate=2018-07-01`)
       .reply(200, exportResponseMock);
 
-    const marketplaceAPI = new AsyncMarketplaceAPI(credentials);
+    const marketplaceAPI = new AsyncMarketplaceAPI(credentials, 1);
     const licenses = await marketplaceAPI.downloadLicensesWithoutDataInsights();
     expect(licenses).toEqual(licensesOrTransactionsResponseMock);
     scope.done();
@@ -66,7 +66,7 @@ describe('AsyncMarketplaceAPI', () => {
     const scope = nock(`https://marketplace.atlassian.com`)
       .post(`/rest/2/vendors/${credentials.sellerId}/reporting/licenses/async/export?startDate=2018-07-01`)
       .reply(200, exportResponseMock);
-    const marketplaceAPI = new AsyncMarketplaceAPI(credentials);
+    const marketplaceAPI = new AsyncMarketplaceAPI(credentials, 1);
     const licenses = await marketplaceAPI.downloadLicensesWithDataInsights(progressMock);
     expect(licenses).toEqual(licensesOrTransactionsResponseMock);
     scope.done();
