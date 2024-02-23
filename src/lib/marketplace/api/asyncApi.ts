@@ -10,6 +10,8 @@ type ExportProcessInfo = {
   downloadUrl: string;
 };
 
+const MARKETPLACE_BASE_URL = 'https://marketplace.atlassian.com';
+
 export class AsyncMarketplaceAPI {
   constructor(private creds: MpacCreds, private statusPollingTime: number = 5000) {}
 
@@ -30,7 +32,7 @@ export class AsyncMarketplaceAPI {
   }
 
   private async downloadMarketplaceData<T>(subpath: string, queryParams: string = ''): Promise<T[]> {
-    const reportingBaseUrl = `https://marketplace.atlassian.com/rest/2/vendors/${this.creds.sellerId}/reporting`;
+    const reportingBaseUrl = `${MARKETPLACE_BASE_URL}/rest/2/vendors/${this.creds.sellerId}/reporting`;
     const exportProcessInfo = await this.initiateExport(
       reportingBaseUrl,
       subpath,
@@ -44,8 +46,8 @@ export class AsyncMarketplaceAPI {
     const url = `${baseUrl}/${subpath}/async/export${queryParams}`;
     const response = await this.makeMarketplaceRequest(url, true);
     return {
-      statusUrl: response._links.status.href! as string,
-      downloadUrl: response._links.download.href! as string,
+      statusUrl: `${MARKETPLACE_BASE_URL}${response._links.status.href}`,
+      downloadUrl: `${MARKETPLACE_BASE_URL}${response._links.download.href}`,
       exportId: response.export.id! as string,
     };
   }

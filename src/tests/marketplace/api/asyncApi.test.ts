@@ -13,8 +13,8 @@ const exportResponseMock = {
     id: '123',
   },
   _links: {
-    status: { href: 'https://marketplace.url/status' },
-    download: { href: 'https://marketplace.url/download' },
+    status: { href: '/status' },
+    download: { href: '/download' },
   },
 };
 const statusInProgressResponseMock = {
@@ -33,9 +33,9 @@ const licensesOrTransactionsResponseMock = ['license1', 'license2'];
 
 describe('AsyncMarketplaceAPI', () => {
   beforeEach(() => {
-    nock('https://marketplace.url/').get('/status').reply(200, statusInProgressResponseMock);
-    nock('https://marketplace.url/').get('/status').reply(200, statusCompletedResponseMock);
-    nock('https://marketplace.url/').get('/download').reply(200, licensesOrTransactionsResponseMock);
+    nock('https://marketplace.atlassian.com').get('/status').reply(200, statusInProgressResponseMock);
+    nock('https://marketplace.atlassian.com').get('/status').reply(200, statusCompletedResponseMock);
+    nock('https://marketplace.atlassian.com').get('/download').reply(200, licensesOrTransactionsResponseMock);
   });
 
   it('should use the correct marketplace APIs when downloadTransactions', async () => {
