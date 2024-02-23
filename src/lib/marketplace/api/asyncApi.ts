@@ -27,7 +27,7 @@ export class AsyncMarketplaceAPI {
 
   public async downloadLicensesWithDataInsights(progress: Progress): Promise<RawLicense[]> {
     const licenses = await this.downloadMarketplaceData('licenses', 'startDate=2018-07-01');
-    progress.setCount(0);
+    progress.tick();
     return licenses as RawLicense[];
   }
 

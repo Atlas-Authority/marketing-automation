@@ -2,7 +2,10 @@ import { DateTime, Duration, Interval } from 'luxon';
 import { mpacCredsFromENV } from '../../config/env';
 import { Progress } from '../../log/download';
 import { RawLicense, RawTransaction } from '../raw';
+import { AsyncMarketplaceAPI } from './asyncApi';
 import { SyncMarketplaceAPI } from './syncApi';
+
+const useAsyncApis = process.env.MPAC_USE_ASYNC_APIS === 'true';
 
 export interface MpacCreds {
   user: string;
@@ -16,17 +19,19 @@ export interface MultiMpacCreds {
   sellerIds: string[];
 }
 
+function createMarketplaceAPI(multiMpacCreds: MultiMpacCreds, sellerId: string) {
+  const mpacCreds = {
+    apiKey: multiMpacCreds.apiKey,
+    user: multiMpacCreds.user,
+    sellerId,
+  };
+  return useAsyncApis ? new AsyncMarketplaceAPI(mpacCreds) : new SyncMarketplaceAPI(mpacCreds);
+}
+
 export class MarketplaceAPI {
   private creds: MultiMpacCreds = mpacCredsFromENV();
 
-  private singleApis = this.creds.sellerIds.map(
-    (sellerId) =>
-      new SyncMarketplaceAPI({
-        apiKey: this.creds.apiKey,
-        user: this.creds.user,
-        sellerId,
-      })
-  );
+  private singleApis = this.creds.sellerIds.map((sellerId) => createMarketplaceAPI(this.creds, sellerId));
 
   public async downloadTransactions(): Promise<RawTransaction[]> {
     const transactionGroups = await Promise.all(this.singleApis.map((api) => api.downloadTransactions()));
@@ -39,13 +44,19 @@ export class MarketplaceAPI {
   }
 
   public async downloadLicensesWithDataInsights(progress: Progress): Promise<RawLicense[]> {
-    const dates = dataInsightDateRanges();
-    progress.setCount(dates.length * this.singleApis.length);
-
+    this.configureProgress(progress);
     const licenseGroups = await Promise.all(
       this.singleApis.map((api) => api.downloadLicensesWithDataInsights(progress))
     );
     return licenseGroups.flat();
+  }
+
+  private configureProgress(progress: Progress) {
+    if (useAsyncApis) progress.setCount(this.singleApis.length);
+    else {
+      const dates = dataInsightDateRanges();
+      progress.setCount(dates.length * this.singleApis.length);
+    }
   }
 }
 
