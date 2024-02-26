@@ -1,12 +1,12 @@
-import dotenv from "dotenv";
-import { DataShiftConfig } from "../data-shift/analyze";
-import { EngineConfig } from "../engine/engine";
-import { HubspotCreds } from "../hubspot/api";
-import { MultiMpacCreds } from "../marketplace/api";
-import { MpacConfig } from "../marketplace/marketplace";
-import { HubspotContactConfig } from "../model/contact";
-import { HubspotDealConfig } from "../model/deal";
-import { RunLoopConfig } from "../util/runner";
+import dotenv from 'dotenv';
+import { DataShiftConfig } from '../data-shift/analyze';
+import { EngineConfig } from '../engine/engine';
+import { HubspotCreds } from '../hubspot/api';
+import { MultiMpacCreds } from '../marketplace/api/api';
+import { MpacConfig } from '../marketplace/marketplace';
+import { HubspotContactConfig } from '../model/contact';
+import { HubspotDealConfig } from '../model/deal';
+import { RunLoopConfig } from '../util/runner';
 
 dotenv.config();
 
@@ -22,12 +22,7 @@ export function hubspotCredsFromENV(): HubspotCreds {
 
 export function hubspotSettingsFromENV() {
   const typeMappings = optional('HUBSPOT_ASSOCIATION_TYPE_MAPPINGS');
-  return (typeMappings
-    ? new Map(
-      typeMappings
-        .split(',')
-        .map(kv => kv.split(':') as [string, string]))
-    : undefined);
+  return typeMappings ? new Map(typeMappings.split(',').map((kv) => kv.split(':') as [string, string])) : undefined;
 }
 
 export function mpacCredsFromENV(): MultiMpacCreds {
@@ -112,7 +107,7 @@ export function hubspotContactConfigFromENV(): HubspotContactConfig {
 
 export function mpacConfigFromENV(): MpacConfig {
   return {
-    ignoredEmails: new Set((optional('IGNORED_EMAILS')?.split(',') ?? []).map(e => e.toLowerCase())),
+    ignoredEmails: new Set((optional('IGNORED_EMAILS')?.split(',') ?? []).map((e) => e.toLowerCase())),
   };
 }
 
@@ -122,7 +117,7 @@ export function engineConfigFromENV(): EngineConfig {
     appToPlatform: Object.fromEntries<string>(
       required('ADDONKEY_PLATFORMS')
         .split(',')
-        .map(kv => kv.split('=') as [string, string])
+        .map((kv) => kv.split('=') as [string, string])
     ),
     archivedApps: new Set(optional('IGNORED_APPS')?.split(',') ?? []),
     dealProperties: {
