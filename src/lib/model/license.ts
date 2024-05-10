@@ -149,6 +149,12 @@ export class License extends MpacRecord<LicenseData> {
 
   private parseTier() {
     const tier = this.data.tier;
+
+    if (!tier) {
+      console.warn('License tier is not present! License data:', this.data);
+      return -1;
+    }
+
     switch (tier) {
       case 'Unlimited Users':
         return 10001;
