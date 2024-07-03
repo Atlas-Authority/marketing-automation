@@ -5,7 +5,7 @@ import { DataSet } from '../../lib/data/set';
 import { Action } from "../../lib/deal-generator/actions";
 import { DealRelevantEvent } from '../../lib/deal-generator/events';
 import { Engine, EngineConfig } from '../../lib/engine/engine';
-import { DealStage } from '../../lib/hubspot/interfaces';
+import {DealStage, FullEntity} from '../../lib/hubspot/interfaces'
 import {RawLicense, RawLicenseContact, RawTransaction, RawTransactionContact} from '../../lib/marketplace/raw';
 import { Company } from '../../lib/model/company';
 import { Contact } from '../../lib/model/contact';
@@ -15,6 +15,7 @@ import { License } from "../../lib/model/license";
 const chance = new Chance();
 
 export type TestInput = {
+  addonKey?: string,
   deals?: Deal[];
   contacts?: Contact[];
   companies?: Company[];
@@ -66,7 +67,7 @@ function processInput(input: TestInput): { config: EngineConfig; dataSet: DataSe
     appToPlatform: Object.create(null),
   };
 
-  const addonKey = chance.word({ capitalize: false, syllables: 3 });
+  const addonKey = input.addonKey || chance.word({ capitalize: false, syllables: 3 });
 
   const baseTechContact: RawLicenseContact = {
     email: chance.email(),
@@ -89,15 +90,39 @@ function processInput(input: TestInput): { config: EngineConfig; dataSet: DataSe
     const rawLicense = rawLicenseFrom(id, addonKey, techContact, start, licenseType, status);
     data.licensesWithDataInsights.push(rawLicense);
     config.appToPlatform![rawLicense.addonKey] = 'Confluence';
-    for (const [txId, saleDate, saleType, vendorAmount] of txSpec) {
-      const rawTransaction = rawTransactionFrom(rawLicense, txId, saleDate, saleType, vendorAmount);
+    for (const [txId, txLineId, saleDate, saleType, vendorAmount] of txSpec) {
+      const rawTransaction = rawTransactionFrom(rawLicense, txId, txLineId, saleDate, saleType, vendorAmount);
       data.transactions.push(rawTransaction);
     }
   }
 
+  input.deals?.forEach(deal => data.rawDeals.push(rawDealFrom(deal, addonKey)))
+
   const dataSet = new DataSet(data, DateTime.now());
 
   return { config, dataSet };
+}
+
+function rawDealFrom({ id, data }:Deal, addonKey: string): FullEntity {
+  return {
+    id: id!,
+    properties: {
+      aa_app: addonKey,
+      addonLicenseId: data.addonLicenseId!,
+      amount: String(data.amount!),
+      appEntitlementId: data.addonLicenseId!,
+      appEntitlementNumber: data.addonLicenseId!,
+      dealname: `Deal: ${data.addonLicenseId}`,
+      transactionId: data.transactionId!,
+      transactionLineItemId: data.transactionLineItemId || '',
+      licenseTier: 'Unlimited Users',
+      maintenance_end_date: data.maintenanceEndDate!,
+      pipeline: 'Pipeline',
+      closedate: data.closeDate + 'T00:00:00Z',
+      dealstage: 'ClosedWon'
+    },
+    associations: []
+  }
 }
 
 function rawLicenseFrom(id: string, addonKey: string, techContact: RawLicenseContact, start: string, licenseType: string, status: string): RawLicense {
@@ -124,7 +149,7 @@ function rawLicenseFrom(id: string, addonKey: string, techContact: RawLicenseCon
   };
 }
 
-function rawTransactionFrom(rawLicense: RawLicense, txId: string, saleDate: string, saleType: string, vendorAmount: number): RawTransaction {
+function rawTransactionFrom(rawLicense: RawLicense, txId: string, txLineId: string, saleDate: string, saleType: string, vendorAmount: number): RawTransaction {
   return {
     appEntitlementId: rawLicense.appEntitlementId,
     licenseId: rawLicense.appEntitlementId!,
@@ -139,6 +164,7 @@ function rawTransactionFrom(rawLicense: RawLicense, txId: string, saleDate: stri
       technicalContact: rawLicense.contactDetails.technicalContact ?? { email: 'technical_contact@example.com'}
     },
     transactionId: txId,
+    transactionLineItemId: txLineId,
     purchaseDetails: {
       billingPeriod: "Monthly",
       tier: 'Unlimited Users',
@@ -171,6 +197,7 @@ export function abbrActionDetails(action: Action) {
         dealStage: DealStage[action.properties.dealStage],
         addonLicenseId: action.properties.addonLicenseId ?? action.properties.appEntitlementId ?? action.properties.appEntitlementNumber!,
         transactionId: action.properties.transactionId,
+        transactionLineItemId: action.properties.transactionLineItemId,
         closeDate: action.properties.closeDate,
         amount: action.properties.amount,
       },
@@ -198,6 +225,7 @@ export function abbrRecordDetails(license: License) {
     license.data.status,
     license.transactions.map(transaction => [
       transaction.data.transactionId,
+      transaction.data.transactionLineItemId,
       transaction.data.saleDate,
       transaction.data.saleType,
       transaction.data.vendorAmount,

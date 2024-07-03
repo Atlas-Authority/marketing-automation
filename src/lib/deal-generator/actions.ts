@@ -4,7 +4,7 @@ import { DealStage, Pipeline } from "../hubspot/interfaces";
 import { ConsoleLogger } from '../log/console';
 import { Deal, DealData, DealManager } from "../model/deal";
 import { License } from "../model/license";
-import { Transaction, uniqueTransactionId } from "../model/transaction";
+import {isTransaction, Transaction, uniqueLegacyTransactionId, uniqueTransactionLineId} from '../model/transaction'
 import { isPresent, sorter } from "../util/helpers";
 import { abbrEventDetails, DealRelevantEvent, EvalEvent, EventMeta, PurchaseEvent, RefundEvent, RenewalEvent, UpgradeEvent } from "./events";
 
@@ -143,15 +143,29 @@ export class ActionGenerator {
     }
   }
 
+  private getDealsForTransactionsWithIdOnly(records: (License | Transaction)[]) {
+    const ids = new Set<string | null>();
+
+    records.filter(isTransaction).forEach(record => {
+      const txId = record.data.transactionId;
+      ids.add(record.data.addonLicenseId && uniqueLegacyTransactionId(txId, record.data.addonLicenseId));
+      ids.add(record.data.appEntitlementId && uniqueLegacyTransactionId(txId, record.data.appEntitlementId));
+      ids.add(record.data.appEntitlementNumber && uniqueLegacyTransactionId(txId, record.data.appEntitlementNumber));
+    })
+
+    return this.getDealsForIds(ids)
+  }
+
   private getDealsForRecords(records: (License | Transaction)[]) {
     const ids = new Set<string | null>();
 
     for (const record of records) {
       if (record instanceof Transaction) {
         const txId = record.data.transactionId;
-        ids.add(record.data.addonLicenseId && uniqueTransactionId(txId, record.data.addonLicenseId));
-        ids.add(record.data.appEntitlementId && uniqueTransactionId(txId, record.data.appEntitlementId));
-        ids.add(record.data.appEntitlementNumber && uniqueTransactionId(txId, record.data.appEntitlementNumber));
+        const txLineId = record.data.transactionLineItemId;
+        ids.add(record.data.addonLicenseId && uniqueTransactionLineId(txId, txLineId, record.data.addonLicenseId));
+        ids.add(record.data.appEntitlementId && uniqueTransactionLineId(txId, txLineId, record.data.appEntitlementId));
+        ids.add(record.data.appEntitlementNumber && uniqueTransactionLineId(txId, txLineId, record.data.appEntitlementNumber));
       }
       else {
         ids.add(record.data.addonLicenseId);
@@ -160,18 +174,21 @@ export class ActionGenerator {
       }
     }
 
-    const deals = new Set<Deal>();
-    for (const id of ids) {
-      if (id) {
-        const set = this.#mpacIndex.get(id);
-        if (set) {
-          for (const deal of set) {
-            deals.add(deal);
-          }
-        }
-      }
+    const deals = this.getDealsForIds(ids)
+    if (deals.size > 0) {
+      return deals
+    } else {
+      return this.getDealsForTransactionsWithIdOnly(records)
     }
-    return deals;
+  }
+
+  private getDealsForIds(ids: Set<string | null>) {
+    return new Set<Deal>(
+      Array.from(ids)
+        .filter(id => Boolean(id))
+        .map(id => this.#mpacIndex.get(id!) || new Set<Deal>())
+        .flatMap(deals => Array.from(deals))
+    )
   }
 
   private singleDeal(foundDeals: Set<Deal>) {
@@ -299,6 +316,7 @@ export class ActionGenerator {
       associatedPartner,
       addonLicenseId: record.data.addonLicenseId,
       transactionId: (record instanceof Transaction ? record.data.transactionId : null),
+      transactionLineItemId: (record instanceof Transaction ? record.data.transactionLineItemId : null),
       appEntitlementId: record.data.appEntitlementId,
       duplicateOf: null,
       maintenanceEndDate: record.data.maintenanceEndDate,

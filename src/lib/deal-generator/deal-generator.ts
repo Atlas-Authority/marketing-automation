@@ -96,6 +96,7 @@ export class DealGenerator {
       this.engine.archivedApps,
       this.engine.partnerDomains,
       this.engine.freeEmailDomains,
+      this.engine.console
     );
 
     const records = eventGenerator.getSortedRecords(group);

@@ -77,6 +77,7 @@ export function hubspotDealConfigFromENV(): HubspotDealConfig {
       appEntitlementNumber: required('HUBSPOT_DEAL_APPENTITLEMENTNUMBER_ATTR'),
       addonLicenseId: required('HUBSPOT_DEAL_ADDONLICENESID_ATTR'),
       transactionId: required('HUBSPOT_DEAL_TRANSACTIONID_ATTR'),
+      transactionLineItemId: required('HUBSPOT_DEAL_TRANSACTIONLINEITEMID_ATTR'),
       licenseTier: optional('HUBSPOT_DEAL_LICENSE_TIER_ATTR'),
       relatedProducts: optional('HUBSPOT_DEAL_RELATED_PRODUCTS_ATTR'),
       associatedPartner: optional('HUBSPOT_DEAL_ASSOCIATED_PARTNER'),
