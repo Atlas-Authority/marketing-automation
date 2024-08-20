@@ -1,0 +1,6 @@
+services:
+  marketing-automation:
+    env_file:
+      - .env
+    build:
+      dockerfile: ./Dockerfile
