@@ -9,6 +9,7 @@ import { formatMoney } from "../util/formatters";
 import { isPresent, sorter, withAutoClose } from "../util/helpers";
 import { Action, ActionGenerator } from "./actions";
 import { DealRelevantEvent, EventGenerator } from "./events";
+import {BlockingDeal} from '../util/errors'
 
 
 export type IgnoredLicense = LicenseData & {
@@ -43,23 +44,36 @@ export class DealGenerator {
       const results = new Map<string, DealGeneratorResult>();
 
       for (const relatedLicenses of matchGroups) {
-        const { records, events, actions } = this.generateActionsForMatchedGroup(relatedLicenses);
+        try {
+          const { records, events, actions } = this.generateActionsForMatchedGroup(relatedLicenses);
 
-        logger?.logRecords(records);
-        logger?.logEvents(events);
-        logger?.logActions(actions);
+          logger?.logRecords(records);
+          logger?.logEvents(events);
+          logger?.logActions(actions);
 
-        for (const license of relatedLicenses) {
-          results.set(license.id, { records, events, actions })
-        }
+          for (const license of relatedLicenses) {
+            results.set(license.id, { records, events, actions })
+          }
 
-        for (const action of actions) {
-          const deal = (action.type === 'create'
-            ? this.engine.hubspot.dealManager.create(action.properties)
-            : action.deal);
+          for (const action of actions) {
+            const deal = (action.type === 'create'
+              ? this.engine.hubspot.dealManager.create(action.properties)
+              : action.deal);
 
-          if (deal) {
-            this.associateDealContactsAndCompanies(relatedLicenses, deal);
+            if (deal) {
+              this.associateDealContactsAndCompanies(relatedLicenses, deal);
+            }
+          }
+        } catch (error: unknown) {
+          if (error instanceof BlockingDeal) {
+            this.engine.console?.printError('Deal Generator', 'Blocking deal detected', {
+              deal: {
+                id: error.deal.id,
+                data: error.deal.data
+              }
+            })
+          } else {
+            throw error;
           }
         }
       }

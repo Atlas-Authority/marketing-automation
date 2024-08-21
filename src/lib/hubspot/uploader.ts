@@ -2,8 +2,10 @@ import { ConsoleLogger } from '../log/console';
 import HubspotAPI from "./api";
 import { Entity } from './entity';
 import { Hubspot } from './hubspot';
-import {EntityKind, ExistingEntity} from './interfaces';
+import {EntityKind} from './interfaces';
 import { EntityManager, typedEntries } from "./manager";
+import {DealManager} from '../model/deal'
+import {deleteBlockingDeals} from '../config/env'
 
 export class HubspotUploader {
 
@@ -15,6 +17,10 @@ export class HubspotUploader {
   }
 
   public async upsyncChangesToHubspot(hubspot: Hubspot) {
+    if (deleteBlockingDeals() && hubspot.dealManager.blockingDeals.size > 0) {
+      await this.deleteBlockingDeals(hubspot.dealManager);
+    }
+
     await this.syncUpAllEntitiesProperties(hubspot.dealManager);
     await this.syncUpAllEntitiesProperties(hubspot.contactManager);
     await this.syncUpAllEntitiesProperties(hubspot.companyManager);
@@ -22,6 +28,12 @@ export class HubspotUploader {
     await this.syncUpAllAssociations(hubspot.dealManager);
     await this.syncUpAllAssociations(hubspot.contactManager);
     await this.syncUpAllAssociations(hubspot.companyManager);
+  }
+
+  private async deleteBlockingDeals(dealManager: DealManager) {
+    const blockingDealsIds = dealManager.blockingDealIds()
+    this.#console?.printInfo(`Deleting ${blockingDealsIds.length} deals (blocking deals and their duplicates)`);
+    return this.api.archiveEntities(dealManager.entityAdapter.kind, blockingDealsIds.map(id => ({ id })))
   }
 
   private async syncUpAllEntitiesProperties<D extends Record<string, any>, E extends Entity<D>>(manager: EntityManager<D, E>) {

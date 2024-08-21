@@ -7,6 +7,7 @@ import { License } from "../model/license";
 import {isTransaction, Transaction, uniqueLegacyTransactionId, uniqueTransactionLineId} from '../model/transaction'
 import { isPresent, sorter } from "../util/helpers";
 import { abbrEventDetails, DealRelevantEvent, EvalEvent, EventMeta, PurchaseEvent, RefundEvent, RenewalEvent, UpgradeEvent } from "./events";
+import {BlockingDeal} from '../util/errors'
 
 type DealNoOpReason = Exclude<EventMeta, null> | 'properties-up-to-date';
 
@@ -224,7 +225,8 @@ export class ActionGenerator {
       console.log('Found duplicate deals. Pick single deal: ', dealToUse.id, ', deals to delete:', toDelete.map(deal => deal.id));
 
       if (this.dealManager.duplicates.has(dealToUse)) {
-        throw new Error(`Primary duplicate is accounted for twice: ${dealToUse.id}`);
+        this.dealManager.blocking(dealToUse);
+        throw new BlockingDeal(`Primary duplicate is accounted for twice: ${dealToUse.id}`, dealToUse);
       }
 
       if (toDelete.length > 0) {

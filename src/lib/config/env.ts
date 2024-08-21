@@ -14,6 +14,10 @@ export function keepDataSetConfigFromENV() {
   return optional('KEEP_DATA_SETS');
 }
 
+export function deleteBlockingDeals() {
+  return optional('DELETE_BLOCKING_DEALS')?.toLowerCase() === 'yes';
+}
+
 export function hubspotCredsFromENV(): HubspotCreds {
   return {
     accessToken: required('HUBSPOT_ACCESS_TOKEN'),

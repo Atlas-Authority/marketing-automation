@@ -3,7 +3,7 @@ import { hubspotCredsFromENV } from '../config/env';
 import { ConsoleLogger } from '../log/console';
 import { KnownError } from '../util/errors';
 import { batchesOf, isPresent } from '../util/helpers';
-import { Association, EntityAdapter, EntityKind, ExistingEntity, NewEntity, RelativeAssociation } from './interfaces';
+import {Association, EntityAdapter, EntityId, EntityKind, ExistingEntity, NewEntity, RelativeAssociation} from './interfaces'
 import { typedEntries } from './manager';
 
 export type HubspotCreds = {
@@ -65,6 +65,17 @@ export default class HubspotAPI {
         throw new Error(`Failed downloading ${entityAdapter.kind}s.\n  Response body: ${JSON.stringify(body)}\n  Error stacktrace: ${e.stack}`);
       }
     }
+  }
+
+  public async archiveEntities(kind: EntityKind, entities: EntityId[]): Promise<void> {
+    await this.batchUpsert(kind, entities, async (batch) => await this.apiFor(kind).batchApi.archive({ inputs: batch })
+      .then(
+        () => {},
+        (err) => {
+          this.console?.printError('HubSpot API', 'Error archiving entities in batch', {kind, batch});
+          this.console?.printError('HubSpot API', 'Error', err.response?.body?.message ?? err);
+        })
+    );
   }
 
   public async createEntities(kind: EntityKind, entities: NewEntity[]): Promise<ExistingEntity[]> {

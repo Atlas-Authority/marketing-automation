@@ -322,10 +322,27 @@ export class DealManager extends EntityManager<DealData, Deal> {
   public override entityAdapter: EntityAdapter<DealData>;
 
   public duplicates = new Map<Deal, Deal[]>();
+  public blockingDeals = new Set<Deal>();
 
   constructor(typeMappings: Map<string, string>, config: HubspotDealConfig) {
     super(typeMappings);
     this.entityAdapter = makeAdapter(config);
   }
 
+  public blocking(deal: Deal) {
+    const blockedAndDuplicates = [
+      deal,
+      ...this.duplicates.get(deal) || []
+    ];
+    blockedAndDuplicates.forEach(deal => {
+      this.blockingDeals.add(deal);
+      this.remove(deal);
+    })
+  }
+
+  public blockingDealIds(): string[] {
+    return Array.from(this.blockingDeals)
+      .map(({ id}) => id)
+      .filter<string>(isPresent)
+  }
 }

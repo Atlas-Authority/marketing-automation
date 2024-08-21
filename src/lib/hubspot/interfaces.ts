@@ -1,5 +1,6 @@
+export type EntityId = { id: string };
 export type NewEntity = { properties: Record<string, string> };
-export type ExistingEntity = NewEntity & { id: string };
+export type ExistingEntity = NewEntity & EntityId;
 export type FullEntity = ExistingEntity & { associations: RelativeAssociation[] };
 
 export type ResultEntity = {
