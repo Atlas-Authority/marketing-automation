@@ -4,7 +4,7 @@ export function isPresent<T>(o: T | undefined | null): o is T {
 
 export function batchesOf<T>(array: T[], count: number): T[][] {
   const tmp = [...array];
-  const batches = [];
+  const batches: T[][] = [];
   while (tmp.length) {
     batches.push(tmp.splice(0, count));
   }

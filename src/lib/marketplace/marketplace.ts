@@ -8,6 +8,7 @@ import * as validation from "./validation";
 
 export interface MpacConfig {
   ignoredEmails?: Set<string>;
+  emailMappings?: Record<string, string>
 }
 
 export class Marketplace {

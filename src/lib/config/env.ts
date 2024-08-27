@@ -113,6 +113,11 @@ export function hubspotContactConfigFromENV(): HubspotContactConfig {
 export function mpacConfigFromENV(): MpacConfig {
   return {
     ignoredEmails: new Set((optional('IGNORED_EMAILS')?.split(',') ?? []).map((e) => e.toLowerCase())),
+    emailMappings: optional('EMAIL_MAPPINGS')?.split(',').reduce((p: Record<string, string>, c: string) => {
+      let mapping = c.split('=')
+      p[mapping[0]] = mapping[1]
+      return p
+    }, {})
   };
 }
 
