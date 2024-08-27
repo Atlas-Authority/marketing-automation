@@ -44,11 +44,11 @@ export class Marketplace {
     licenses = licenses.filter(l => validation.hasTechEmail(l, console));
     licenses = validation.removeApiBorderDuplicates(licenses, console);
 
-    licenses.forEach(validation.assertRequiredLicenseFields);
-    transactions.forEach(validation.assertRequiredTransactionFields);
-
     licenses = licenses.filter(emailChecker('License'));
     transactions = transactions.filter(emailChecker('Transaction'));
+
+    licenses.forEach(validation.assertRequiredLicenseFields);
+    transactions.forEach(validation.assertRequiredTransactionFields);
 
     const structured = buildAndVerifyStructures(licenses, transactions, console);
     this.licenses = structured.licenses;

@@ -1,7 +1,8 @@
 import { RelatedLicenseSet } from "../license-matching/license-grouper";
 import { License } from "../model/license";
-import { Transaction } from "../model/transaction";
+import {Transaction, uniqueTransactionLineId} from '../model/transaction'
 import { sorter } from "../util/helpers";
+import {ConsoleLogger} from '../log/console'
 
 export type EventMeta = 'partner-only' | 'mass-provider-only' | 'partner-and-mass-provider-only' | 'archived-app' | null;
 
@@ -19,12 +20,21 @@ export type DealRelevantEvent = (
   UpgradeEvent
 );
 
+type TransactionDeal = DealRelevantEvent & {
+  transaction: Transaction
+}
+
+function hasTransaction(event: DealRelevantEvent): event is TransactionDeal {
+  return (event as any).transaction
+}
+
 export class EventGenerator {
 
   constructor(
     private archivedApps: Set<string>,
     private partnerDomains: Set<string>,
     private freeEmailDomains: Set<string>,
+    private console?: ConsoleLogger
   ) { }
 
   private events: DealRelevantEvent[] = [];

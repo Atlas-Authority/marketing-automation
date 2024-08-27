@@ -28,6 +28,17 @@ export function printSummary(engine: Engine) {
     engine.tallier.less('Over-accounted: Duplicate deals', -dupTotal);
   }
 
+  if (engine.hubspot.dealManager.blockingDeals.size > 0) {
+    Table.print({
+      title: 'Blocking Deals',
+      log: s => engine.console?.printWarning('Blck', s),
+      cols: [
+        [{ title: 'Deal' }, s => s.link()]
+      ],
+      rows: engine.hubspot.dealManager.blockingDeals
+    })
+  }
+
   const deals = engine.hubspot.dealManager.getArray();
 
   const table = new Table([{}, { align: 'right' }]);

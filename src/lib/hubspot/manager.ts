@@ -93,6 +93,17 @@ export abstract class EntityManager<
     }
   }
 
+  public remove(e: E) {
+    const i = this.entities.indexOf(e)
+    if (i) {
+      this.entities.splice(i, 1)
+      for (const index of this.indexes) {
+        index.removeIndexesFor([e])
+      }
+    }
+    return e;
+  }
+
   public create(data: D) {
     const e = new this.Entity(null, this.entityAdapter, {}, data, this);
     this.entities.push(e);

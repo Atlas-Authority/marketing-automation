@@ -28,6 +28,7 @@ export interface TransactionData {
   maintenanceEndDate: string,
 
   transactionId: string,
+  transactionLineItemId: string,
   saleDate: string,
   saleType: 'Renewal' | 'Upgrade' | 'New' | 'Refund',
 
@@ -35,6 +36,10 @@ export interface TransactionData {
 
   purchasePrice: number,
   vendorAmount: number,
+}
+
+export function isTransaction(value: Transaction | License): value is Transaction {
+  return value instanceof Transaction
 }
 
 export class Transaction extends MpacRecord<TransactionData> {
@@ -51,6 +56,7 @@ export class Transaction extends MpacRecord<TransactionData> {
   static fromRaw(rawTransaction: RawTransaction) {
     return new Transaction({
       transactionId: rawTransaction.transactionId,
+      transactionLineItemId: rawTransaction.transactionLineItemId,
 
       addonLicenseId: rawTransaction.addonLicenseId ?? null,
       appEntitlementId: rawTransaction.appEntitlementId ?? null,
@@ -87,7 +93,7 @@ export class Transaction extends MpacRecord<TransactionData> {
     super(data);
 
     const maybeAdd = (prefix: string, id: string | null) => {
-      if (id) this.ids.add(uniqueTransactionId(this.data.transactionId, `${prefix}-${id}`));
+      if (id) this.ids.add(uniqueTransactionLineId(this.data.transactionId, this.data.transactionLineItemId, `${prefix}-${id}`));
     };
 
     maybeAdd('ALI', this.data.addonLicenseId);
@@ -125,7 +131,13 @@ export class Transaction extends MpacRecord<TransactionData> {
 
 }
 
-export function uniqueTransactionId(transactionId: string, licenseId: string) {
+export function uniqueLegacyTransactionId(transactionId: string, licenseId: string) {
   if (!transactionId.startsWith('AT')) transactionId = `(AT)${transactionId}`;
   return `${transactionId}[${licenseId}]`
+}
+
+
+export function uniqueTransactionLineId(transactionId: string, transactionLineId: string, licenseId: string) {
+  if (!transactionId.startsWith('AT')) transactionId = `(AT)${transactionId}`;
+  return `${transactionId}/${transactionLineId}[${licenseId}]`
 }

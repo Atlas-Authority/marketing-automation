@@ -6,13 +6,14 @@ import { AttachableError } from "../util/errors";
 import { isPresent } from "../util/helpers";
 import { Company } from "./company";
 import { Contact } from "./contact";
-import { uniqueTransactionId } from "./transaction";
+import {uniqueLegacyTransactionId, uniqueTransactionLineId} from './transaction'
 
 export type DealData = {
   relatedProducts: string | null;
   app: string | null;
   addonLicenseId: string | null;
   transactionId: string | null;
+  transactionLineItemId: string | null;
   closeDate: string;
   country: string | null;
   dealName: string;
@@ -47,8 +48,9 @@ export class Deal extends Entity<DealData> {
 
   private deriveId(id: string | null) {
     if (!id) return null;
-    if (!this.data.transactionId) return id;
-    return uniqueTransactionId(this.data.transactionId, id);
+    if (!this.data.transactionId && !this.data.transactionLineItemId) return id;
+    if (!this.data.transactionLineItemId) return uniqueLegacyTransactionId(this.data.transactionId!, id);
+    return uniqueTransactionLineId(this.data.transactionId!, this.data.transactionLineItemId, id);
   }
 
   public get isWon() { return this.data.dealStage === DealStage.CLOSED_WON }
@@ -95,6 +97,7 @@ export interface HubspotDealConfig {
     appEntitlementNumber?: string,
     addonLicenseId?: string,
     transactionId?: string,
+    transactionLineItemId?: string,
     app?: string,
     origin?: string,
     country?: string,
@@ -123,6 +126,7 @@ export interface HubspotRequiredDealConfig {
     appEntitlementNumber: string,
     addonLicenseId: string,
     transactionId: string,
+    transactionLineItemId: string,
   },
 }
 
@@ -149,6 +153,7 @@ function makeAdapter(config: HubspotDealConfig): EntityAdapter<DealData> {
       appEntitlementNumber: config.attrs?.appEntitlementNumber ?? 'appEntitlementNumber',
       addonLicenseId: config.attrs?.addonLicenseId ?? 'addonLicenseId',
       transactionId: config.attrs?.transactionId ?? 'transactionId',
+      transactionLineItemId: config.attrs?.transactionLineItemId ?? 'transactionLineItemId'
     },
   };
 
@@ -203,6 +208,12 @@ function makeAdapter(config: HubspotDealConfig): EntityAdapter<DealData> {
       },
       transactionId: {
         property: requiredConfig.attrs.transactionId,
+        identifier: true,
+        down: id => id || null,
+        up: id => id || '',
+      },
+      transactionLineItemId: {
+        property: requiredConfig.attrs.transactionLineItemId,
         identifier: true,
         down: id => id || null,
         up: id => id || '',
@@ -311,10 +322,27 @@ export class DealManager extends EntityManager<DealData, Deal> {
   public override entityAdapter: EntityAdapter<DealData>;
 
   public duplicates = new Map<Deal, Deal[]>();
+  public blockingDeals = new Set<Deal>();
 
   constructor(typeMappings: Map<string, string>, config: HubspotDealConfig) {
     super(typeMappings);
     this.entityAdapter = makeAdapter(config);
   }
 
+  public blocking(deal: Deal) {
+    const blockedAndDuplicates = [
+      deal,
+      ...this.duplicates.get(deal) || []
+    ];
+    blockedAndDuplicates.forEach(deal => {
+      this.blockingDeals.add(deal);
+      this.remove(deal);
+    })
+  }
+
+  public blockingDealIds(): string[] {
+    return Array.from(this.blockingDeals)
+      .map(({ id}) => id)
+      .filter<string>(isPresent)
+  }
 }

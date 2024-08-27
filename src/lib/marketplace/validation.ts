@@ -97,6 +97,7 @@ export function assertRequiredLicenseFields(license: License) {
 
 export function assertRequiredTransactionFields(transaction: Transaction) {
   validateField(transaction, transaction => transaction.data.transactionId);
+  validateField(transaction, transaction => transaction.data.transactionLineItemId);
   validateField(transaction, transaction => transaction.data.addonKey);
   validateField(transaction, transaction => transaction.data.addonName);
   validateField(transaction, transaction => transaction.data.lastUpdated);
