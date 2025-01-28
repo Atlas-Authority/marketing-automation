@@ -21,7 +21,7 @@
     "@slack/web-api": "^6.0.0",
     "ansi-regex": "^6.0.1",
     "burner-email-providers": "^1.0.42",
-    "capitalize": "^2.0.3",
+    "capitalize": "^2.0.4",
     "chalk": "^4.1.2",
     "chance": "^1.1.8",
     "cli-progress": "^3.9.1",
@@ -39,7 +39,7 @@
     "source-map-support": "^0.5.21"
   },
   "devDependencies": {
-    "@types/capitalize": "^2.0.0",
+    "@types/capitalize": "^2.0.2",
     "@types/chance": "^1.1.3",
     "@types/cli-progress": "^3.9.2",
     "@types/flat": "^5.0.2",
