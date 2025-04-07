@@ -125,7 +125,7 @@ export function maybeGetContactInfo(contactInfo: RawLicenseContact | RawTransact
 }
 
 export function getPartnerInfo(info: RawPartnerDetails | undefined): PartnerInfo | null {
-  if (!info?.billingContact) return null;
+  if (!info?.billingContact || Object.keys(info?.billingContact).length === 0) return null;
   return {
     partnerName: info.partnerName,
     partnerType: info.partnerType,
