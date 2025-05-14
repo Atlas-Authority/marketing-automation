@@ -16,4 +16,4 @@ COPY package*.json ./
 RUN npm install --only=production
 COPY --from=build /usr/src/app/out ./out
 ENV NODE_ENV=production
-CMD [ "node", "out/bin/main.js" ]
+CMD [ "node", "--max-old-space-size=4096", "out/bin/main.js" ]
