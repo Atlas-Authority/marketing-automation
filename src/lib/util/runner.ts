@@ -11,15 +11,22 @@ export default function run(console: ConsoleLogger, loopConfig: RunLoopConfig, {
   failed: (errors: Error[]) => Promise<void>,
 }) {
   console.printInfo('Runner', 'Starting with options:', loopConfig);
-  const normalInterval = loopConfig.runInterval;
-  const errorInterval = loopConfig.retryInterval;
+  const normalInterval = parseTimeToMs(loopConfig.runInterval);
+  const errorInterval = parseTimeToMs(loopConfig.retryInterval);
   const errorTries = loopConfig.retryTimes;
 
   console.printInfo('Runner', 'Running loop');
   const errors: Error[] = [];
-  void run();
 
-  async function run() {
+  let currentIntervalId: NodeJS.Timeout | null = null;
+  let isRunning = false;
+
+  void runOnce();
+
+  async function runOnce() {
+    if (isRunning) return;
+    isRunning = true;
+
     try {
       await work();
 
@@ -27,25 +34,35 @@ export default function run(console: ConsoleLogger, loopConfig: RunLoopConfig, {
         errors.length = 0;
       }
 
-      console.printInfo('Runner', `Finished successfully; waiting ${normalInterval} for next loop.`);
-      setTimeout(run, parseTimeToMs(normalInterval));
-    }
-    catch (e: any) {
+      console.printInfo('Runner', `Finished successfully; waiting ${loopConfig.runInterval} for next loop.`);
+      scheduleNext(normalInterval);
+
+    } catch (e: any) {
       console.printError('Runner', 'Error:', e);
       errors.push(e);
 
       const longTermFailure = (errors.length % errorTries === 0);
       const waitTime = longTermFailure ? normalInterval : errorInterval;
+      const waitTimeStr = longTermFailure ? loopConfig.runInterval : loopConfig.retryInterval;
 
-      console.printWarning('Runner', `Run canceled by error. Trying again in ${waitTime}.`);
-
-      setTimeout(run, parseTimeToMs(waitTime));
+      console.printWarning('Runner', `Run canceled by error. Trying again in ${waitTimeStr}.`);
 
       if (longTermFailure) {
         await failed(errors);
         errors.length = 0;
       }
+
+      scheduleNext(waitTime);
+    } finally {
+      isRunning = false;
     }
+  }
+
+  function scheduleNext(delay: number) {
+    if (currentIntervalId) {
+      clearTimeout(currentIntervalId);
+    }
+    currentIntervalId = setTimeout(() => void runOnce(), delay);
   }
 }
 
