@@ -125,10 +125,13 @@ export class Transaction extends MpacRecord<TransactionData> {
     if ((m = tier.match(/^(\d+) User$/))) {
       return +m[1];
     }
+    // Considering negative values as 0 users
+    if (tier === "-1 User") {
+      return 0;
+    }
 
     assert.fail(`Unknown transaction tier: ${tier}`);
   }
-
 }
 
 export function uniqueLegacyTransactionId(transactionId: string, licenseId: string) {
