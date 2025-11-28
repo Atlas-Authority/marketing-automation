@@ -27,7 +27,7 @@
     "cli-progress": "^3.9.1",
     "deep-object-diff": "^1.1.9",
     "del": "^6.0.0",
-    "dotenv": "^8.2.0",
+    "dotenv": "^16.4.7",
     "email-providers": "^1.0.3",
     "flat": "^5.0.2",
     "got": "^11.8.5",
