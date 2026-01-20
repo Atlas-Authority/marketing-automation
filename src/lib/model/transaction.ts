@@ -119,14 +119,12 @@ export class Transaction extends MpacRecord<TransactionData> {
     if ((m = tier.match(/^Per Unit Pricing \((\d+) users\)$/i))) {
       return +m[1];
     }
-    if ((m = tier.match(/^(\d+) Users$/))) {
-      return +m[1];
-    }
-    if ((m = tier.match(/^(\d+) User$/))) {
+    if ((m = tier.match(/^(\d+) Users?$/))) {
       return +m[1];
     }
     // Considering negative values as 0 users
-    if ((m = tier.match(/^-(\d+) User$/))) {
+    if (tier.match(/^-(\d+) User$/)) {
+    if (tier.match(/^-(\d+) Users?$/)) {
       return 0;
     }
 
