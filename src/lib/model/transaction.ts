@@ -126,7 +126,7 @@ export class Transaction extends MpacRecord<TransactionData> {
       return +m[1];
     }
     // Considering negative values as 0 users
-    if (tier === "-1 User") {
+    if ((m = tier.match(/^-(\d+) User$/))) {
       return 0;
     }
 
