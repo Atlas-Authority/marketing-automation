@@ -64,11 +64,15 @@ export class SlackNotifier {
     this.console.printInfo('Slack', title, content);
 
     if (this.errorChannelId) {
-      await this.client.files.upload({
-        channels: this.errorChannelId,
-        title: title,
-        content: content,
+      await this.client.filesUploadV2({
+        channel_id: this.errorChannelId,
+        file_uploads: [{
+          title: title,
+          filename: `${title}.txt`,
+          file: Buffer.from(content, 'utf8'),
+        }],
       });
+
     }
   }
 
