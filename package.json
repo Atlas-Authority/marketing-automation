@@ -17,7 +17,7 @@
     "test-watch": "jest --watch"
   },
   "dependencies": {
-    "@hubspot/api-client": "^3.2.6",
+    "@hubspot/api-client": "^13.4.0",
     "@slack/web-api": "^6.0.0",
     "ansi-regex": "^6.0.1",
     "burner-email-providers": "^1.0.42",
