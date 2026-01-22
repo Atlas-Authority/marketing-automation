@@ -1,49 +1,48 @@
-import assert from "assert";
-import { getContactInfo, getPartnerInfo, maybeGetContactInfo, RawTransaction } from "../marketplace/raw";
-import { License } from "./license";
-import { ContactInfo, MpacRecord, PartnerInfo } from "./record";
+import assert from 'assert';
+import { getContactInfo, getPartnerInfo, maybeGetContactInfo, RawTransaction } from '../marketplace/raw';
+import { License } from './license';
+import { ContactInfo, MpacRecord, PartnerInfo } from './record';
 
 export interface TransactionData {
-  addonLicenseId: string | null,
-  appEntitlementId: string | null,
-  appEntitlementNumber: string | null,
+  addonLicenseId: string | null;
+  appEntitlementId: string | null;
+  appEntitlementNumber: string | null;
 
-  licenseId: string | null,
-  addonKey: string,
-  addonName: string,
-  lastUpdated: string,
+  licenseId: string | null;
+  addonKey: string;
+  addonName: string;
+  lastUpdated: string;
 
-  technicalContact: ContactInfo,
-  billingContact: ContactInfo | null,
-  partnerDetails: PartnerInfo | null,
+  technicalContact: ContactInfo;
+  billingContact: ContactInfo | null;
+  partnerDetails: PartnerInfo | null;
 
-  company: string,
-  country: string,
-  region: string,
+  company: string;
+  country: string;
+  region: string;
 
-  tier: string,
-  licenseType: 'COMMERCIAL' | 'ACADEMIC' | 'COMMUNITY',
-  hosting: 'Server' | 'Cloud' | 'Data Center',
-  maintenanceStartDate: string,
-  maintenanceEndDate: string,
+  tier: string;
+  licenseType: 'COMMERCIAL' | 'ACADEMIC' | 'COMMUNITY';
+  hosting: 'Server' | 'Cloud' | 'Data Center';
+  maintenanceStartDate: string;
+  maintenanceEndDate: string;
 
-  transactionId: string,
-  transactionLineItemId: string,
-  saleDate: string,
-  saleType: 'Renewal' | 'Upgrade' | 'New' | 'Refund',
+  transactionId: string;
+  transactionLineItemId: string;
+  saleDate: string;
+  saleType: 'Renewal' | 'Upgrade' | 'New' | 'Refund';
 
-  billingPeriod: string,
+  billingPeriod: string;
 
-  purchasePrice: number,
-  vendorAmount: number,
+  purchasePrice: number;
+  vendorAmount: number;
 }
 
 export function isTransaction(value: Transaction | License): value is Transaction {
-  return value instanceof Transaction
+  return value instanceof Transaction;
 }
 
 export class Transaction extends MpacRecord<TransactionData> {
-
   /** Unique ID for this Transaction. */
   declare id;
   public ids = new Set<string>();
@@ -93,7 +92,10 @@ export class Transaction extends MpacRecord<TransactionData> {
     super(data);
 
     const maybeAdd = (prefix: string, id: string | null) => {
-      if (id) this.ids.add(uniqueTransactionLineId(this.data.transactionId, this.data.transactionLineItemId, `${prefix}-${id}`));
+      if (id)
+        this.ids.add(
+          uniqueTransactionLineId(this.data.transactionId, this.data.transactionLineItemId, `${prefix}-${id}`)
+        );
     };
 
     maybeAdd('ALI', this.data.addonLicenseId);
@@ -119,25 +121,24 @@ export class Transaction extends MpacRecord<TransactionData> {
     if ((m = tier.match(/^Per Unit Pricing \((\d+) users\)$/i))) {
       return +m[1];
     }
-    if ((m = tier.match(/^(\d+) Users$/))) {
+    if ((m = tier.match(/^(\d+) Users?$/))) {
       return +m[1];
     }
-    if ((m = tier.match(/^(\d+) User$/))) {
-      return +m[1];
+    // Considering negative values as 0 users
+    if (tier.match(/^-(\d+) Users?$/)) {
+      return 0;
     }
 
     assert.fail(`Unknown transaction tier: ${tier}`);
   }
-
 }
 
 export function uniqueLegacyTransactionId(transactionId: string, licenseId: string) {
   if (!transactionId.startsWith('AT')) transactionId = `(AT)${transactionId}`;
-  return `${transactionId}[${licenseId}]`
+  return `${transactionId}[${licenseId}]`;
 }
-
 
 export function uniqueTransactionLineId(transactionId: string, transactionLineId: string, licenseId: string) {
   if (!transactionId.startsWith('AT')) transactionId = `(AT)${transactionId}`;
-  return `${transactionId}/${transactionLineId}[${licenseId}]`
+  return `${transactionId}/${transactionLineId}[${licenseId}]`;
 }

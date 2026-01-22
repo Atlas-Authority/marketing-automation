@@ -92,7 +92,16 @@ export function assertRequiredLicenseFields(license: License) {
   validateField(license, license => license.data.maintenanceStartDate);
   //validateField(license, license => license.data.maintenanceEndDate);
   validateField(license, license => license.data.status);
-  validateField(license, license => license.data.partnerDetails?.billingContact, o => !o || typeof o.email === 'string');
+  validateField(
+      license,
+      license => {
+        if (license.data.partnerDetails?.billingContact && Object.keys(license.data.partnerDetails?.billingContact).length > 0) {
+          return license.data.partnerDetails.billingContact;
+        }
+        return null;
+      },
+      o => !o || Object.keys(o).length === 0 || typeof o.email === 'string'
+  );
 }
 
 export function assertRequiredTransactionFields(transaction: Transaction) {
@@ -116,7 +125,16 @@ export function assertRequiredTransactionFields(transaction: Transaction) {
   validateField(transaction, transaction => transaction.data.saleType);
   validateField(transaction, transaction => transaction.data.maintenanceStartDate);
   validateField(transaction, transaction => transaction.data.maintenanceEndDate);
-  validateField(transaction, transaction => transaction.data.partnerDetails?.billingContact, o => !o || typeof o.email === 'string');
+  validateField(
+      transaction,
+      transaction => {
+        if (transaction.data.partnerDetails?.billingContact && Object.keys(transaction.data.partnerDetails?.billingContact).length > 0) {
+          return transaction.data.partnerDetails.billingContact;
+        }
+        return null;
+      },
+      o => !o || Object.keys(o).length === 0 || typeof o.email === 'string'
+  );
 }
 
 function validateField<T extends Transaction | License, V>(o: T, accessor: (o: T) => V, validator: (o: V) => boolean = o => !!o) {
