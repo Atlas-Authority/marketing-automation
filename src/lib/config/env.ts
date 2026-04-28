@@ -18,6 +18,10 @@ export function deleteBlockingDeals() {
   return optional('DELETE_BLOCKING_DEALS')?.toLowerCase() === 'yes';
 }
 
+export function createContactsAsNonMarketing() {
+  return optional('HUBSPOT_CREATE_CONTACTS_AS_NON_MARKETING')?.toLowerCase() === 'true';
+}
+
 export function hubspotCredsFromENV(): HubspotCreds {
   return {
     accessToken: required('HUBSPOT_ACCESS_TOKEN'),
