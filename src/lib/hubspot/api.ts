@@ -36,7 +36,9 @@ export default class HubspotAPI {
       const entities = await this.apiFor(entityAdapter.kind).getAll(undefined, undefined, apiProperties, associations);
       const normalizedEntities = entities.map(({ id, properties, associations }) => ({
         id,
-        properties,
+        properties: Object.fromEntries(
+          Object.entries(properties).filter((entry): entry is [string, string] => entry[1] !== null)
+        ),
         associations: Object.entries(associations || {})
           .flatMap(([, { results }]) => (
             results.map(item =>
@@ -82,7 +84,7 @@ export default class HubspotAPI {
     const created: ExistingEntity[] = [];
     await this.batchUpsert(kind, entities, async (batch) => await this.apiFor(kind).batchApi.create({inputs: batch})
         .then(
-            ({body}) => created.push(...body.results),
+            (response) => created.push(...response.results.map(toExistingEntity)),
             (err) => {
               this.console?.printError('HubSpot API', 'Error creating entities in batch', {kind, batch});
               this.console?.printError('HubSpot API', 'Error', err.response?.body?.message ?? err);
@@ -95,7 +97,7 @@ export default class HubspotAPI {
     const updated: ExistingEntity[] = [];
     await this.batchUpsert(kind, entities, async (batch) => this.apiFor(kind).batchApi.update({inputs: batch})
         .then(
-            ({body}) => updated.push(...body.results),
+            (response) => updated.push(...response.results.map(toExistingEntity)),
             (err) => {
               this.console?.printError('HubSpot API', 'Error updating entities in batch', {kind, batch});
               this.console?.printError('HubSpot API', 'Error', err.response?.body?.message ?? err);
@@ -161,9 +163,18 @@ export default class HubspotAPI {
 
 }
 
+function toExistingEntity({ id, properties }: { id: string, properties: { [key: string]: string | null } }): ExistingEntity {
+  return {
+    id,
+    properties: Object.fromEntries(
+      Object.entries(properties).filter((entry): entry is [string, string] => entry[1] !== null)
+    ),
+  };
+}
+
 function mapAssociationInput(fromKind: EntityKind, input: Association) {
   return {
-    from: { id: input.fromId },
+    _from: { id: input.fromId },
     to: { id: input.toId },
     type: `${fromKind}_to_${input.toType}`,
   };
