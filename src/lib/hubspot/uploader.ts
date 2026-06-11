@@ -5,7 +5,7 @@ import { Hubspot } from './hubspot';
 import {EntityKind} from './interfaces';
 import { EntityManager, typedEntries } from "./manager";
 import {DealManager} from '../model/deal'
-import {deleteBlockingDeals} from '../config/env'
+import {createContactsAsNonMarketing, deleteBlockingDeals} from '../config/env'
 
 export class HubspotUploader {
 
@@ -44,10 +44,14 @@ export class HubspotUploader {
     const toUpdate = toSync.filter(({ e }) => e.id !== null);
 
     if (toCreate.length > 0) {
+      const nonMarketingProps: Record<string, string> = (manager.entityAdapter.kind === 'contact' && createContactsAsNonMarketing())
+        ? { hs_marketable_status: 'false' }
+        : {};
+
       const created = await this.api.createEntities(
         manager.entityAdapter.kind,
         toCreate.map(({ changes }) => ({
-          properties: changes as Record<string, string>,
+          properties: { ...nonMarketingProps, ...changes as Record<string, string> },
         }))
       );
 
