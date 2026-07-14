@@ -56,7 +56,7 @@
     "set-value": "^4.1.0",
     "tmpl": "^1.0.5",
     "typescript": "^5.9.3",
-    "ws": ">=7.4.6"
+    "ws": ">=8.21.1"
   },
   "keywords": [],
   "author": "",
